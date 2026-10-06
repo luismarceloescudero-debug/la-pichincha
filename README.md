@@ -1,9 +1,11 @@
-# Comparativa RAM DDR4 16GB
+# La Pichincha
 
-Relevamiento de precios de memorias DDR4 16GB 3200 MHz, webcams y tiendas en
-Argentina. Datos tomados el 6 de octubre de 2026.
+> Hardware en Argentina. No lo más barato: lo que más rinde.
 
-**Sitio:** https://luismarceloescudero-debug.github.io/comparativa-ram-ddr4/
+Comparador de hardware en Argentina. No compara solo precios: cruza latencia,
+garantia real, stock y el costo puesto en tu casa con el envio adentro.
+
+**Sitio:** https://luismarceloescudero-debug.github.io/la-pichincha/
 
 ## Que contiene
 

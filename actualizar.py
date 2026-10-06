@@ -286,7 +286,7 @@ def construir(datos):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{titulo}</title>
-<meta name="description" content="Comparativa de memorias DDR4 16GB 3200, tiendas y webcams en Argentina. Actualizado el {datos['actualizado']}.">
+<meta name="description" content="Comparador de hardware en Argentina: memorias, webcams y tiendas, con el costo real puesto en tu casa. Actualizado el {datos['actualizado']}.">
 <style>:root{{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
 body{{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
 {cabeza}</head>
