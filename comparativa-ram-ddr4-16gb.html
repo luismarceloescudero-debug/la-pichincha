@@ -1140,9 +1140,9 @@ document.addEventListener("click", async ev => {
     const previo = b.innerHTML;
     b.innerHTML = `${icono("tabla")} armando…`;
     try {
-      await cargarXLSX();
+      await cargarExcel();
       b.innerHTML = previo;
-      await bajarArchivo(`${base}.xlsx`, aXLSX(m.filas, m.titulo),
+      await bajarArchivo(`${base}.xlsx`, await aXLSX(m.filas, m.titulo),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", b);
     } catch (e) {                      // sin CDN no hay libro, pero el CSV sirve igual
       b.innerHTML = previo;
@@ -1155,62 +1155,89 @@ document.addEventListener("click", async ev => {
 });
 
 /* --- Libro de Excel nativo -------------------------------------------
-   SheetJS pesa 79 KB comprimido, asi que se baja recien cuando pedis el
+   ExcelJS pesa 257 KB comprimido, asi que se baja recien cuando pedis el
    archivo, no en cada visita. Si el CDN no responde, cae en CSV. */
-const XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.mini.min.js";
-let xlsxPromesa = null;
+const EXCEL_URL = "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+let excelPromesa = null;
 
-function cargarXLSX() {
-  if (window.XLSX) return Promise.resolve(window.XLSX);
-  if (!xlsxPromesa) {
-    xlsxPromesa = new Promise((listo, falla) => {
+function cargarExcel() {
+  if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  if (!excelPromesa) {
+    excelPromesa = new Promise((listo, falla) => {
       const et = document.createElement("script");
-      et.src = XLSX_URL;
-      et.onload = () => (window.XLSX ? listo(window.XLSX) : falla(new Error("sin XLSX")));
-      et.onerror = () => { xlsxPromesa = null; falla(new Error("no cargo")); };
+      et.src = EXCEL_URL;
+      et.onload = () => (window.ExcelJS ? listo(window.ExcelJS) : falla(new Error("sin ExcelJS")));
+      et.onerror = () => { excelPromesa = null; falla(new Error("no cargo")); };
       document.head.appendChild(et);
     });
   }
-  return xlsxPromesa;
+  return excelPromesa;
 }
 
-function aXLSX(filas, titulo) {
-  const X = window.XLSX;
-  const datos = filas.map(f => {
+const TINTA = "FF14181F", BORDE = "FFD9DFE8", CEBRA = "FFF4F6F9",
+      GANA = "FFDFF3E8", GANA_TINTA = "FF117A4A", ENLACE = "FF0B4FD8";
+
+async function aXLSX(filas, titulo) {
+  const libro = new window.ExcelJS.Workbook();
+  libro.creator = "La Pichincha";
+  libro.created = new Date();
+
+  const hoja = libro.addWorksheet("Ofertas", {
+    views: [{ state: "frozen", ySplit: 1 }],          // la cabecera queda fija al scrollear
+    pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+  });
+  hoja.columns = [
+    { header: "Producto", key: "p", width: 62 },
+    { header: "Precio", key: "v", width: 14, style: { numFmt: '"$"#,##0' } },
+    { header: "Fuente", key: "f", width: 16 },
+    { header: "Comercio", key: "c", width: 20 },
+    { header: "Enlace", key: "u", width: 56 },
+  ];
+
+  const cab = hoja.getRow(1);
+  cab.height = 24;
+  cab.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
+  cab.alignment = { vertical: "middle" };
+  cab.eachCell(c => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TINTA } }; });
+
+  filas.forEach((f, i) => {
     const t = (IDX && IDX.tiendas[f[3]]) || T[f[3]] || { nombre: f[3] };
-    return [f[0], f[1], t.nombre, f[4] || "", f[2]];
+    const fila = hoja.addRow({ p: f[0], v: f[1], f: t.nombre, c: f[4] || "", u: null });
+    fila.getCell("u").value = { text: f[2], hyperlink: f[2] };
+    fila.getCell("u").font = { color: { argb: ENLACE }, underline: true };
+    fila.getCell("p").alignment = { wrapText: true, vertical: "top" };
+    fila.getCell("v").alignment = { horizontal: "right" };
+    fila.eachCell(c => { c.border = { bottom: { style: "thin", color: { argb: BORDE } } }; });
+    if (i === 0) {                                    // el mas barato, resaltado
+      fila.font = { bold: true, color: { argb: GANA_TINTA } };
+      fila.getCell("u").font = { color: { argb: ENLACE }, underline: true, bold: true };
+      fila.eachCell(c => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: GANA } }; });
+    } else if (i % 2 === 1) {
+      fila.eachCell(c => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CEBRA } }; });
+    }
   });
-  const hoja = X.utils.aoa_to_sheet([["Producto", "Precio", "Fuente", "Comercio", "Enlace"], ...datos]);
-  hoja["!cols"] = [{ wch: 62 }, { wch: 13 }, { wch: 14 }, { wch: 18 }, { wch: 58 }];
-  hoja["!autofilter"] = { ref: X.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: datos.length, c: 4 } }) };
-  datos.forEach((fila, i) => {
-    const r = i + 1;
-    const precio = hoja[X.utils.encode_cell({ r, c: 1 })];
-    if (precio) { precio.t = "n"; precio.z = '"$"#,##0'; }   // numero de verdad, no texto
-    const enlace = hoja[X.utils.encode_cell({ r, c: 4 })];
-    if (enlace && fila[4]) enlace.l = { Target: fila[4], Tooltip: "Abrir en la tienda" };
+  hoja.autoFilter = { from: { row: 1, column: 1 }, to: { row: filas.length + 1, column: 5 } };
+
+  const info = libro.addWorksheet("Info");
+  info.columns = [{ width: 16 }, { width: 64 }];
+  const titulo1 = info.addRow(["La Pichincha"]);
+  titulo1.font = { bold: true, size: 16, color: { argb: TINTA } };
+  const sub = info.addRow(["Hardware en Argentina. No lo más barato: lo que más rinde."]);
+  sub.font = { italic: true, color: { argb: "FF4E5767" } };
+  info.addRow([]);
+  [["Exportado", new Date().toLocaleString("es-AR")],
+   ["Selección", titulo],
+   ["Productos", filas.length],
+   ["Precios de", DATOS.actualizado],
+   ["Sitio", location.origin + location.pathname]].forEach(([k, v]) => {
+    const r = info.addRow([k, v]);
+    r.getCell(1).font = { bold: true };
   });
+  info.addRow([]);
+  info.addRow(["", "Son los precios de transferencia o depósito de cada tienda, con IVA y sin envío."]);
+  info.addRow(["", "Verificá en la web antes de pagar: el hardware se mueve rápido."]);
 
-  const info = X.utils.aoa_to_sheet([
-    ["La Pichincha"],
-    ["Hardware en Argentina. No lo más barato: lo que más rinde."],
-    [],
-    ["Exportado", new Date().toLocaleString("es-AR")],
-    ["Selección", titulo],
-    ["Productos", filas.length],
-    ["Precios de", DATOS.actualizado],
-    [],
-    ["Son los precios de transferencia o depósito de cada tienda, con IVA y sin envío."],
-    ["Verificá siempre en la web antes de pagar: el hardware se mueve rápido."],
-    [],
-    ["Sitio", location.origin + location.pathname],
-  ]);
-  info["!cols"] = [{ wch: 14 }, { wch: 62 }];
-
-  const libro = X.utils.book_new();
-  X.utils.book_append_sheet(libro, hoja, "Ofertas");
-  X.utils.book_append_sheet(libro, info, "Info");
-  return X.write(libro, { bookType: "xlsx", type: "array" });
+  return libro.xlsx.writeBuffer();
 }
 
 /* --- Ruteo --- */

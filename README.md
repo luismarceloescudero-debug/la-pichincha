@@ -142,12 +142,19 @@ asi que ahi la barra muestra solo Compartir y Copiar, que si funcionan.
 
 ### Sobre el .xlsx
 
-Lo arma SheetJS, que se baja recien cuando pedis el archivo: son 79 KB
-comprimidos que no tiene sentido cargar en cada visita. El libro trae la hoja
-**Ofertas**, con el precio como numero de verdad (se puede ordenar y sumar),
-formato de pesos, anchos de columna, autofiltro y el enlace clicable; y la hoja
-**Info**, con la fecha de los precios y de que se trata la seleccion.
+Lo arma ExcelJS, que se baja recien cuando pedis el archivo: son 257 KB
+comprimidos que no tiene sentido cargar en cada visita. El libro trae:
 
-La edicion comunitaria de SheetJS no escribe estilos de celda, asi que la
-cabecera no va en negrita. Formato de numero, anchos, filtros e hipervinculos
-si, que es lo que hace util a la planilla.
+**Hoja Ofertas** — cabecera en negrita sobre fondo oscuro y fijada al scrollear,
+precio como numero con formato de pesos y alineado a la derecha, fila del mas
+barato resaltada en verde, cebra en las filas pares, enlaces clicables en azul,
+autofiltro y anchos de columna calibrados. Sale en horizontal y ajustada al
+ancho de la hoja si la imprimis.
+
+**Hoja Info** — fecha de los precios, que seleccion se exporto, cuantos
+productos y las aclaraciones de IVA y envio.
+
+Se eligio ExcelJS sobre SheetJS porque la edicion comunitaria de SheetJS no
+escribe estilos de celda. ExcelJS pesa mas (257 KB contra 79 KB) pero como se
+carga bajo demanda lo paga solo quien exporta, y el archivo que genera termina
+siendo mas chico: 14 KB contra 55 KB para la misma tabla.
