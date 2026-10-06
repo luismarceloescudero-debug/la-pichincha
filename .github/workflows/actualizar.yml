@@ -18,6 +18,9 @@ on:
         default: true
   push:
     branches: [main]
+    paths-ignore:
+      - "README.md"
+      - "**/*.md"
 
 permissions:
   contents: write
@@ -59,8 +62,13 @@ jobs:
           key: indice-${{ github.run_id }}
           restore-keys: indice-
 
+      # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
+      # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
       - name: Armar el indice de busqueda
-        if: github.event_name != 'workflow_dispatch' || inputs.indexar
+        if: |
+          (github.event_name == 'schedule') ||
+          (github.event_name == 'workflow_dispatch' && inputs.indexar) ||
+          (github.event_name == 'push' && hashFiles('indice.json') == '')
         run: python indexar.py --max-paginas ${{ inputs.paginas || 12 }}
         continue-on-error: true
 

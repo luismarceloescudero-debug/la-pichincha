@@ -939,7 +939,9 @@ function vistaBuscar() {
     if (IDX || cargandoIdx) { pintarResultados($("#q") ? $("#q").value : ""); return; }
     cargandoIdx = true;
     try {
-      IDX = await (await fetch("indice.json")).json();
+      // no-cache revalida contra el servidor: si no cambio devuelve 304 y no
+      // baja nada, pero evita quedarse con un indice viejo tras una publicacion.
+      IDX = await (await fetch("indice.json", { cache: "no-cache" })).json();
       const n = $('.tab[data-ir="buscar"] .n');
       if (n) n.textContent = IDX.productos.length;
       else { const b = $('.tab[data-ir="buscar"]'); if (b) b.insertAdjacentHTML("beforeend", ` <span class="n">${IDX.productos.length}</span>`); }
