@@ -6,3 +6,5 @@ desktop.ini
 __pycache__/
 *.pyc
 indexado.log
+indice.json
+_sitio/

@@ -1,0 +1,91 @@
+name: Actualizar precios y publicar
+
+# El indice de busqueda no vive en el repo: se arma aca y viaja directo al
+# despliegue. Lo unico que se versiona es datos.json, que es chico y cuyo
+# historial de precios si vale la pena guardar.
+
+on:
+  schedule:
+    - cron: "0 12 * * *"        # 09:00 en Argentina
+  workflow_dispatch:
+    inputs:
+      paginas:
+        description: "Paginas por categoria al indexar"
+        default: "12"
+      indexar:
+        description: "Rearmar el indice de busqueda"
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Relevar precios de los productos seguidos
+        run: python actualizar.py
+
+      - name: Guardar los cambios de precio
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos.json index.html comparativa-ram-ddr4-16gb.html
+          git diff --cached --quiet || git commit -m "Actualizacion automatica de precios [skip ci]"
+          git push
+
+      # Si una tienda se cae o bloquea la IP del runner, el indice anterior
+      # sigue sirviendo en lugar de publicar el sitio sin buscador.
+      - name: Recuperar el indice anterior
+        uses: actions/cache@v4
+        with:
+          path: indice.json
+          key: indice-${{ github.run_id }}
+          restore-keys: indice-
+
+      - name: Armar el indice de busqueda
+        if: github.event_name != 'workflow_dispatch' || inputs.indexar
+        run: python indexar.py --max-paginas ${{ inputs.paginas || 12 }}
+        continue-on-error: true
+
+      - name: Preparar el sitio
+        run: |
+          mkdir -p _sitio
+          cp index.html _sitio/
+          cp -r img _sitio/
+          if [ -f indice.json ]; then
+            cp indice.json _sitio/
+            echo "indice: $(du -h indice.json | cut -f1)"
+          else
+            echo "::warning::Sin indice.json: el buscador va a quedar vacio en esta publicacion"
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _sitio
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.desplegar.outputs.page_url }}
+    steps:
+      - id: desplegar
+        uses: actions/deploy-pages@v4

@@ -67,6 +67,13 @@ python indexar.py --solo mexx      # una sola
 python indexar.py --probar URL     # diagnostica una fuente nueva
 ```
 
+`indice.json` **no esta en el repo**: pesa casi 2 MB y versionarlo haria crecer
+el historial de git en 2 MB por relevamiento. Lo arma GitHub Actions en cada
+publicacion y viaja directo al sitio, sin pasar por un commit. Lo que si se
+versiona es `datos.json`, que es chico y cuyo historial de precios vale la pena.
+
+Si lo generas a mano, queda en tu carpeta y el sitio local lo usa igual.
+
 ### Sumar o sacar una tienda
 
 Las fuentes viven en `tiendas.json`, no en el codigo. Para sumar una, corre
@@ -91,3 +98,24 @@ y mantiene los datos anteriores en lugar de vaciar el indice.
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
 (Mercado Libre, Fravega, OnCity, Carrefour). Entra como segunda opinion y cada
 resultado aclara de que comercio sale.
+
+## Como se publica
+
+`.github/workflows/actualizar.yml` corre todos los dias a las 09:00 de Argentina
+y en cada push a main:
+
+1. `actualizar.py` releva los precios de los productos seguidos y, si cambio
+   alguno, commitea `datos.json` con el historial.
+2. `indexar.py` arma el indice de busqueda.
+3. El sitio se sube como artefacto de Pages, sin tocar el repo.
+
+Si una tienda se cae o bloquea la IP del runner, el paso de indexado no voltea
+la publicacion: se recupera el indice de la corrida anterior desde la cache.
+
+Tambien se puede disparar a mano desde la pestana Actions, eligiendo cuantas
+paginas por categoria relevar o salteando el indexado.
+
+No hace falta backend. El relevamiento es trabajo de **construccion**, no de
+**consulta**: corre una vez por dia en el runner y el navegador despues filtra
+un archivo estatico. Un backend recien haria falta para precios en vivo por
+consulta, alertas por usuario o historiales largos.
