@@ -14,6 +14,7 @@ catalogo (json, api y listados) y cualquier tienda nueva cae en alguna.
 """
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -75,7 +76,9 @@ def absoluta(base, ruta):
 
 
 def limpio(t):
-    return re.sub(r"\s+", " ", t).strip()
+    # Varias tiendas dejan entidades HTML en el alt o el title del producto
+    # ('2.5&quot;', 'Memoria &amp; Disco'). Sin esto se veian crudas en la web.
+    return re.sub(r"\s+", " ", html.unescape(t)).strip()
 
 
 # --- Enumeracion de listados ------------------------------------------------
