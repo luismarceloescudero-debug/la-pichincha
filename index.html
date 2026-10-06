@@ -1048,7 +1048,27 @@ async function copiar(texto, boton) {
   }
 }
 
-function bajarArchivo(nombre, contenido, tipo) {
+/* En la web se baja con un enlace. Dentro del visor de Claude eso esta
+   bloqueado, pero la pagina puede pedir la descarga por la capacidad
+   downloads, que le muestra al visitante una confirmacion. */
+let DESCARGAS = null;
+(async () => {
+  try { DESCARGAS = (await window.claude?.use?.("downloads")) || null; } catch (e) { DESCARGAS = null; }
+  document.querySelectorAll('[data-acc="excel"]').forEach(b => { b.hidden = !(SUELTA || DESCARGAS); });
+})();
+
+async function bajarArchivo(nombre, contenido, tipo, boton) {
+  if (DESCARGAS) {
+    try {
+      await DESCARGAS.save({ filename: nombre, data: new Blob([contenido], { type: tipo }) });
+      return avisar(boton, "descargado");
+    } catch (e) {
+      if (e && e.code === "declined") return;
+      if (e && e.code === "rate_limited") return avisar(boton, "probá de nuevo");
+      if (!SUELTA) return avisar(boton, "no disponible acá");
+    }
+  }
+  if (!SUELTA) return avisar(boton, "no disponible acá");
   const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
   const a = document.createElement("a");
   a.href = url; a.download = nombre;
@@ -1089,10 +1109,8 @@ async function compartir(titulo, texto, boton) {
 function barraAcciones(id) {
   const b = [`<button class="acc" data-acc="compartir" data-de="${id}">${icono("compartir")} Compartir</button>`,
              `<button class="acc" data-acc="copiar" data-de="${id}">${icono("copiar")} Copiar</button>`];
-  if (SUELTA) {
-    b.push(`<button class="acc" data-acc="excel" data-de="${id}">${icono("tabla")} Excel</button>`);
-    b.push(`<button class="acc" data-acc="imprimir" data-de="${id}">${icono("imprimir")} Imprimir o PDF</button>`);
-  }
+  b.push(`<button class="acc" data-acc="excel" data-de="${id}"${SUELTA || DESCARGAS ? "" : " hidden"}>${icono("tabla")} Excel</button>`);
+  if (SUELTA) b.push(`<button class="acc" data-acc="imprimir" data-de="${id}">${icono("imprimir")} Imprimir o PDF</button>`);
   return `<div class="acciones">${b.join("")}</div>`;
 }
 
@@ -1127,7 +1145,7 @@ document.addEventListener("click", ev => {
   const m = materia(b.dataset.de);
   if (!m.filas.length) return avisar(b, "nada para exportar");
   const hoy = new Date().toISOString().slice(0, 10);
-  if (b.dataset.acc === "excel") bajarArchivo(`la-pichincha-${m.archivo}-${hoy}.csv`, aCSV(m.filas), "text/csv;charset=utf-8");
+  if (b.dataset.acc === "excel") bajarArchivo(`la-pichincha-${m.archivo}-${hoy}.csv`, aCSV(m.filas), "text/csv;charset=utf-8", b);
   else if (b.dataset.acc === "imprimir") window.print();
   else if (b.dataset.acc === "copiar") copiar(aTexto(m.filas, m.titulo), b);
   else compartir(m.titulo, aTexto(m.filas, m.titulo), b);
