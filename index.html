@@ -107,9 +107,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   padding:7px 12px;border-bottom-left-radius:11px;display:flex;align-items:center;gap:5px;z-index:2}
 :root[data-theme="dark"] .cinta{color:#0e1117}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cinta{color:#0e1117}}
-.card .foto{height:150px;background:#fff;display:grid;place-items:center;padding:14px;flex:none;
+.card .foto{height:150px;background:#fff;padding:14px;flex:none;overflow:hidden;
   border-bottom:1px solid var(--line)}
-.card .foto img{max-height:100%;width:auto;object-fit:contain;transition:transform .35s var(--curva)}
+.card .foto img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .35s var(--curva)}
 .card:hover .foto img{transform:scale(1.07)}
 .card .cuerpo{padding:16px 20px 0;display:flex;flex-direction:column;gap:9px;flex:1}
 .rank{position:absolute;top:19px;left:14px;font-family:var(--font-mono);font-size:.92rem;font-weight:700;
@@ -144,8 +144,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   background:var(--surface);border:1px solid var(--c);border-radius:16px;padding:20px 24px;
   box-shadow:var(--shadow);margin-bottom:18px}
 .dfoto{width:92px;height:92px;background:#fff;border-radius:12px;border:1px solid var(--line);
-  display:grid;place-items:center;padding:8px;flex:none}
-.dfoto img{max-height:100%;width:auto;object-fit:contain}
+  padding:8px;flex:none;overflow:hidden}
+.dfoto img{width:100%;height:100%;object-fit:contain;display:block}
 .dsku{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);margin:4px 0 8px}
 .dprecio{text-align:right;white-space:nowrap}
 .dprecio .v{font-family:var(--font-mono);font-size:1.75rem;font-weight:700;letter-spacing:-.035em;
@@ -181,8 +181,8 @@ td.mejor{color:var(--good);font-weight:700}
   text-decoration:none;color:inherit;font-size:.88rem;transition:background .18s,padding-left .18s}
 .wins a:hover{background:var(--c-soft);padding-left:16px}
 .wins .mini{width:40px;height:40px;border-radius:8px;background:#fff;border:1px solid var(--line);
-  display:grid;place-items:center;padding:3px;flex:none}
-.wins .mini img{max-height:100%;width:auto;object-fit:contain}
+  padding:3px;flex:none;overflow:hidden}
+.wins .mini img{width:100%;height:100%;object-fit:contain;display:block}
 .wins .txt{flex:1;color:var(--ink-2);min-width:0}
 .wins b{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--good);font-weight:700}
 .flaco{margin:14px 0 0;font-size:.87rem;color:var(--ink-2);padding:11px 13px;background:var(--surface-2);
