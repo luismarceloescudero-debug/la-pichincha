@@ -54,3 +54,40 @@ el veredicto a mano.
 `datos.json` es la unica fuente de verdad: el script actualiza precios, stock e
 historial, y reinyecta todo en los dos HTML. El contenido editorial (specs,
 pros, contras, veredicto) se edita ahi y no lo toca el script.
+
+## El buscador
+
+`indice.json` es un indice prearmado de los catalogos, porque GitHub Pages no
+corre backend: la pagina lo baja recien cuando abris la pestana Buscar y filtra
+del lado del cliente.
+
+```
+python indexar.py                  # releva las 5 fuentes y arma indice.json
+python indexar.py --solo mexx      # una sola
+python indexar.py --probar URL     # diagnostica una fuente nueva
+```
+
+### Sumar o sacar una tienda
+
+Las fuentes viven en `tiendas.json`, no en el codigo. Para sumar una, corre
+`--probar` con la URL de cualquiera de sus productos: te dice cual de los cinco
+extractores genericos le funciona (Open Graph, schema.org, JSON-LD, meta
+product:price o catalogo JSON) y que poner en la configuracion. Para jubilar
+una, `"activa": false`, y el indice conserva lo que ya tenia de ella.
+
+Si una fuente se cae o cambia su plantilla, el indexador la marca en el resumen
+y mantiene los datos anteriores en lugar de vaciar el indice.
+
+### Fuentes
+
+| Fuente | Como se enumera | Como se lee el precio |
+| --- | --- | --- |
+| CompraGamer | catalogo JSON completo | el mismo JSON |
+| Gaming City | 122 categorias del sitemap | `meta product:price` |
+| Mexx | rubros paginados | microdatos schema.org |
+| FullH4rd | busquedas por termino | Open Graph |
+| ComparaYa | API publica por categoria | la misma API |
+
+ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
+(Mercado Libre, Fravega, OnCity, Carrefour). Entra como segunda opinion y cada
+resultado aclara de que comercio sale.

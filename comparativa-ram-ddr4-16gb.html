@@ -14,6 +14,7 @@
   --gc:#0b7f80; --gc-soft:#d8f2f2;
   --mx:#a85a07; --mx-soft:#fbeeda;
   --fh:#4e5767; --fh-soft:#e7eaf0;
+  --cy:#b0265f; --cy-soft:#fbe4ee;
   --font-sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -12px rgba(20,24,31,.18);
@@ -27,6 +28,7 @@
     --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
+    --cy:#f9a8d4; --cy-soft:#3a1024;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
     color-scheme:dark;
@@ -38,6 +40,7 @@
   --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
+  --cy:#f9a8d4; --cy-soft:#3a1024;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
   color-scheme:dark;
@@ -46,6 +49,7 @@
 .c-gc{--c:var(--gc);--c-soft:var(--gc-soft)}
 .c-mx{--c:var(--mx);--c-soft:var(--mx-soft)}
 .c-fh{--c:var(--fh);--c-soft:var(--fh-soft)}
+.c-cy{--c:var(--cy);--c-soft:var(--cy-soft)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);line-height:1.55;margin:0}
@@ -197,6 +201,43 @@ td.mejor{color:var(--good);font-weight:700}
 .ver-item p{margin:0;color:var(--ink-2);font-size:.92rem}
 .nota{margin-top:30px;font-size:.81rem;color:var(--ink-3);max-width:74ch}
 .nota code{font-family:var(--font-mono);font-size:.95em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+
+/* ---- Buscador ---- */
+.buscador{position:relative;margin-bottom:18px}
+.buscador input{width:100%;font:500 1.05rem var(--font-sans);padding:15px 18px 15px 50px;
+  border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s}
+.buscador input:focus{outline:none;border-color:var(--accent);box-shadow:var(--shadow-up)}
+.buscador .ico{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:var(--ink-3)}
+.sugeridas{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.sug{all:unset;cursor:pointer;font:500 .82rem var(--font-sans);padding:6px 13px;border-radius:999px;
+  background:var(--surface-2);color:var(--ink-2);transition:background .18s,color .18s}
+.sug:hover{background:var(--accent-soft);color:var(--accent)}
+.estado{color:var(--ink-3);font-size:.9rem;margin:0 0 14px;font-family:var(--font-mono)}
+.res{display:flex;flex-direction:column;gap:8px}
+.fila{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-left:4px solid var(--c);border-radius:12px;padding:13px 16px;text-decoration:none;color:inherit;
+  animation:entra .3s var(--curva) both;animation-delay:calc(var(--i,0)*18ms);
+  transition:transform .18s var(--curva),box-shadow .18s,border-color .18s}
+.fila:hover{transform:translateX(4px);box-shadow:var(--shadow);border-color:var(--c);border-left-color:var(--c)}
+.fila.top{border-color:var(--good);border-left-color:var(--good);background:var(--good-soft)}
+.fila .nom{flex:1;min-width:0;font-size:.92rem;line-height:1.35}
+.fila .tie{font:600 .72rem/1 var(--font-mono);color:var(--c);background:var(--c-soft);
+  padding:5px 10px;border-radius:999px;white-space:nowrap}
+.fila .via{color:var(--ink-3);font-weight:500}
+.fila .via::before{content:"\203A ";opacity:.7}
+.fila .pre{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+.fila.top .pre{color:var(--good)}
+.fila .marca{background:var(--good);color:#fff;font:600 .64rem/1 var(--font-mono);letter-spacing:.07em;
+  text-transform:uppercase;padding:5px 9px;border-radius:6px;white-space:nowrap}
+:root[data-theme="dark"] .fila .marca{color:#0e1117}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fila .marca{color:#0e1117}}
+@media (max-width:620px){
+  .fila{flex-wrap:wrap;gap:9px}
+  .fila .nom{flex:1 1 100%;order:1}
+  .fila .tie{order:2}.fila .marca{order:3}.fila .pre{order:4;margin-left:auto}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
   .dcab{grid-template-columns:auto 1fr;gap:14px;padding:18px}
@@ -217,6 +258,7 @@ td.mejor{color:var(--good);font-weight:700}
   <symbol id="i-der" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
+  <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
   <symbol id="i-camion" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
 </svg>
 
@@ -693,6 +735,7 @@ const VISTAS = [
   { id: "memorias", eti: "Memorias", ico: "chip", n: () => rams.length },
   { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
   { id: "webcams", eti: "Webcams", ico: "cam", n: () => cams.length },
+  { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
   { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
 ];
 
@@ -832,6 +875,89 @@ function vistaVeredicto() {
       <b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
 }
 
+/* --- Buscador: el indice se baja recien cuando abris la pestana --- */
+let IDX = null, cargandoIdx = false;
+const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "fuente 650w", "webcam logitech"];
+const normal = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function buscar(q, tope = 60) {
+  const toc = normal(q).split(/\s+/).filter(Boolean);
+  if (!IDX || !toc.length) return [];
+  // Un token puramente numerico tiene que ser palabra entera: si no, "27" entra
+  // dentro de "Vp227hf" y un monitor de 22" se cuela en la busqueda de 27".
+  const pruebas = toc.map(t => /^\d+$/.test(t)
+    ? (n => new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)").test(n))
+    : (n => n.includes(t)));
+  const halla = [];
+  for (const f of IDX.productos) {
+    const n = normal(f[0]);
+    if (pruebas.every(p => p(n))) halla.push(f);
+  }
+  return halla.sort((a, b) => a[1] - b[1]).slice(0, tope);
+}
+
+function pintarResultados(q) {
+  const caja = $("#res"), est = $("#estado");
+  if (!IDX) return;
+  if (!q.trim()) {
+    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} tiendas · actualizado ${IDX.generado}`;
+    caja.innerHTML = "";
+    return;
+  }
+  const r = buscar(q);
+  if (!r.length) {
+    est.textContent = `sin resultados para "${q}"`;
+    caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
+    return;
+  }
+  const tiendas = new Set(r.map(f => f[3]));
+  est.textContent = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${tiendas.size} tienda${tiendas.size > 1 ? "s" : ""} · el más barato primero`;
+  caja.innerHTML = r.map((f, i) => {
+    const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
+    // f[4] aparece cuando el resultado llega por un comparador: es el comercio real.
+    const sello = f[4] ? `${esc(t.nombre)} <span class="via">${esc(f[4])}</span>` : esc(t.nombre);
+    return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
+      <span class="nom">${esc(f[0])}</span>
+      ${i === 0 ? '<span class="marca">más barato</span>' : ""}
+      <span class="tie">${sello}</span>
+      <span class="pre">${pesos(f[1])}</span>
+    </a>`;
+  }).join("");
+}
+
+function vistaBuscar() {
+  setTimeout(async () => {
+    const campo = $("#q");
+    if (campo) {
+      let t;
+      campo.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => pintarResultados(campo.value), 160); });
+      campo.focus();
+    }
+    document.querySelectorAll(".sug").forEach(b => b.addEventListener("click", () => {
+      $("#q").value = b.textContent; pintarResultados(b.textContent);
+    }));
+    if (IDX || cargandoIdx) { pintarResultados($("#q") ? $("#q").value : ""); return; }
+    cargandoIdx = true;
+    try {
+      IDX = await (await fetch("indice.json")).json();
+      const n = $('.tab[data-ir="buscar"] .n');
+      if (n) n.textContent = IDX.productos.length;
+      else { const b = $('.tab[data-ir="buscar"]'); if (b) b.insertAdjacentHTML("beforeend", ` <span class="n">${IDX.productos.length}</span>`); }
+      pintarResultados($("#q") ? $("#q").value : "");
+    } catch (e) {
+      $("#estado").textContent = "no pude cargar el índice";
+      $("#res").innerHTML = `<p class="sub">Falta <code>indice.json</code>. Generalo con <code>python indexar.py</code>.</p>`;
+    } finally { cargandoIdx = false; }
+  }, 0);
+
+  return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 4 tiendas</h2>
+    <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen del más barato al más caro, sin importar de dónde vengan.</p></div>
+    <div class="buscador">${icono("lupa")}<input type="search" id="q" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
+    <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
+    <p class="estado" id="estado">cargando índice…</p>
+    <div class="res" id="res"></div></div>`;
+}
+
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
@@ -840,6 +966,7 @@ function pintar(id) {
   else if (id === "webcams") v.innerHTML = vistaGrilla(cams, "Las 3 mejores webcams",
     "Las que valen la pena de las trece relevadas en las mismas tiendas.");
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
+  else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
   else if (porId[id]) { v.innerHTML = detalle(porId[id]); return; }
   document.querySelectorAll(".tab").forEach(b =>

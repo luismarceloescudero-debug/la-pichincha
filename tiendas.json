@@ -1,0 +1,162 @@
+{
+  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false.",
+  "compragamer": {
+    "nombre": "CompraGamer",
+    "color": "cg",
+    "activa": true,
+    "base": "https://compragamer.com",
+    "catalogo": {
+      "tipo": "json",
+      "url": "https://static.compragamer.com/productos",
+      "campos": {
+        "id": "id_producto",
+        "nombre": "nombre",
+        "precio": "precioEspecial",
+        "lista": "precioLista",
+        "stock": "stock"
+      },
+      "ruta": "producto/{slug}_{id}"
+    },
+    "extractor": "compragamer"
+  },
+  "gamingcity": {
+    "nombre": "Gaming City",
+    "color": "gc",
+    "activa": true,
+    "base": "https://www.gamingcity.com.ar",
+    "catalogo": {
+      "tipo": "listados",
+      "origen": {
+        "tipo": "sitemap",
+        "url": "https://www.gamingcity.com.ar/sitemap.xml",
+        "contiene": "--prod--"
+      },
+      "pagina": "{listado}--view--grilla--ord--cArtCod-desc-{n}",
+      "desde": 0,
+      "tarjeta": "<div class=\"product\">",
+      "re": {
+        "url": "href=\"([a-z0-9-]+--det--\\d+)\"",
+        "nombre": "alt=\"([^\"]+)\"",
+        "precio": [
+          "class=\"price-sales\">\\$\\s*([\\d.]+)",
+          "class=\"price\"><span>\\$\\s*([\\d.]+)",
+          "class=\"price\">[\\s\\S]{0,120}?\\$\\s*([\\d.]+)"
+        ],
+        "lista": [
+          "class=\"price-standard\">\\$\\s*([\\d.]+)"
+        ]
+      }
+    },
+    "extractor": "meta"
+  },
+  "mexx": {
+    "nombre": "Mexx",
+    "color": "mx",
+    "activa": true,
+    "base": "https://www.mexx.com.ar",
+    "catalogo": {
+      "tipo": "listados",
+      "origen": {
+        "tipo": "enlaces",
+        "url": "https://www.mexx.com.ar/",
+        "re": "href=\"(https://www\\.mexx\\.com\\.ar/productos-rubro/[a-z0-9-]+/)\""
+      },
+      "pagina": "{listado}?pagina={n}",
+      "desde": 1,
+      "tarjeta": "<div class=\"productos ",
+      "re": {
+        "url": "href=\"(https://www\\.mexx\\.com\\.ar/productos-rubro/[^\"]+\\.html)\"",
+        "nombre": "\\.html\">([^<]{6,160})</a>",
+        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>"
+      }
+    },
+    "extractor": "itemprop"
+  },
+  "fullh4rd": {
+    "nombre": "FullH4rd",
+    "color": "fh",
+    "activa": true,
+    "base": "https://fullh4rd.com.ar",
+    "catalogo": {
+      "tipo": "listados",
+      "origen": {
+        "tipo": "terminos",
+        "plantilla": "https://fullh4rd.com.ar/buscar?q={termino}",
+        "terminos": [
+          "memoria",
+          "procesador",
+          "placa de video",
+          "motherboard",
+          "ssd",
+          "disco rigido",
+          "fuente",
+          "gabinete",
+          "monitor",
+          "teclado",
+          "mouse",
+          "auriculares",
+          "webcam",
+          "notebook",
+          "cooler",
+          "impresora",
+          "silla",
+          "parlante",
+          "microfono",
+          "cable",
+          "placa de sonido",
+          "capturadora",
+          "router",
+          "pendrive",
+          "joystick",
+          "ups"
+        ]
+      },
+      "pagina": "{listado}&pag={n}",
+      "desde": 1,
+      "tarjeta": "<article class=\"results-card\">",
+      "re": {
+        "url": "href=\"(/prod/\\d+/[a-z0-9-]+)\"",
+        "nombre": "results-card__title\"[^>]*>\\s*<a[^>]*>([^<]{4,160})",
+        "precio": "results-card__price-current\"[^>]*>\\s*\\$([\\d.]+)",
+        "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)"
+      }
+    },
+    "extractor": "og"
+  },
+  "comparaya": {
+    "nombre": "ComparaYa",
+    "color": "cy",
+    "activa": true,
+    "segunda_opinion": true,
+    "_nota": "No es una tienda: es un comparador que agrega 65 comercios. Cada resultado dice de que comercio sale.",
+    "base": "https://comparaya.net",
+    "catalogo": {
+      "tipo": "api",
+      "plantilla": "https://api.comparaya.net/api/products/category/{categoria}?page={n}&limit=100",
+      "categorias": [
+        "monitores",
+        "placas-de-video",
+        "notebooks",
+        "celulares",
+        "televisores",
+        "consolas",
+        "impresoras",
+        "auriculares",
+        "tablets",
+        "aspiradoras",
+        "heladeras",
+        "lavarropas",
+        "aires-acondicionados"
+      ],
+      "lista": "data",
+      "campos": {
+        "nombre": "title",
+        "precio": "price",
+        "lista": "original_price",
+        "url": "url",
+        "via": "store_name"
+      }
+    },
+    "extractor": null
+  }
+}
