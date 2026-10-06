@@ -1,0 +1,438 @@
+{
+  "actualizado": "2026-10-06",
+  "envio": {
+    "cp": "5501",
+    "zona": "Mendoza",
+    "domicilio": 11658,
+    "punto": 6639
+  },
+  "tiendas": {
+    "compragamer": {
+      "nombre": "CompraGamer",
+      "color": "cg",
+      "rol": "la mejor para marca premium",
+      "promo": "10% OFF por depósito o transferencia",
+      "entrega": "envío a todo el país",
+      "web": "https://compragamer.com"
+    },
+    "gamingcity": {
+      "nombre": "Gaming City",
+      "color": "gc",
+      "rol": "picos altos, catálogo irregular",
+      "promo": "precio especial con transferencia",
+      "entrega": "retiro gratis en sucursal Mendoza",
+      "web": "https://www.gamingcity.com.ar"
+    },
+    "mexx": {
+      "nombre": "Mexx",
+      "color": "mx",
+      "rol": "el piso de precio",
+      "promo": "11% OFF más 3 cuotas sin interés",
+      "entrega": "envío desde Buenos Aires",
+      "web": "https://www.mexx.com.ar"
+    },
+    "fullh4rd": {
+      "nombre": "FullH4rd",
+      "color": "fh",
+      "rol": "imbatible solo en Hiksemi",
+      "promo": "precio con débito, transferencia o efectivo",
+      "entrega": "envío desde CABA",
+      "web": "https://fullh4rd.com.ar"
+    }
+  },
+  "productos": [
+    {
+      "id": "adata-d35",
+      "tipo": "ram",
+      "podio": 1,
+      "destacado": true,
+      "nombre": "ADATA XPG Gammix D35 Black CL16",
+      "corto": "ADATA XPG D35",
+      "sku": "AX4U320016G16A-SBKD35",
+      "tienda": "compragamer",
+      "fuente": {
+        "tipo": "compragamer",
+        "id_producto": 17151
+      },
+      "url": "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
+      "img": "img/adata-d35.jpg",
+      "precio": 221450,
+      "precio_lista": 246056,
+      "sin_impuestos": 200407,
+      "stock": "en stock",
+      "titular": "El mejor equilibrio de marca, latencia y garantía",
+      "specs": {
+        "Timings": "16-20-20",
+        "Latencia real": "10,0 ns",
+        "Voltaje del perfil": "1,35 V XMP",
+        "Rangos": "simple",
+        "Disipador": "sí, 33 mm",
+        "Garantía local": "36 meses",
+        "Garantía de fábrica": "de por vida",
+        "Retiro en Mendoza": "no"
+      },
+      "chips": [
+        "CL16 · 10,0 ns",
+        "1,35 V XMP",
+        "perfil bajo 33 mm",
+        "36 meses",
+        "en stock"
+      ],
+      "pros": [
+        "Timings 16-20-20: 10,0 ns de latencia real contra 13,75 ns del Kingston, un 37% menos.",
+        "36 meses de garantía local, el triple que el Kingston. De fábrica ADATA la da de por vida.",
+        "ADATA fabrica sus propios módulos y hace binning de los chips; XPG es su línea de rendimiento.",
+        "Perfil bajo de 33 mm: entra debajo de cualquier cooler de torre."
+      ],
+      "contras": [
+        "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
+      ]
+    },
+    {
+      "id": "kingston-kvr",
+      "tipo": "ram",
+      "podio": 2,
+      "nombre": "Kingston ValueRAM KVR32N22D8/16",
+      "corto": "Kingston KVR",
+      "sku": "KVR32N22D8/16 · densidad 8 Gbit",
+      "tienda": "gamingcity",
+      "fuente": {
+        "tipo": "meta",
+        "clave": "product:price:amount"
+      },
+      "url": "https://www.gamingcity.com.ar/ddr4-kingston-ddr4-16gb-memoria-ram-3200mhz-cl22--det--17256",
+      "img": "img/kingston-kvr.jpg",
+      "precio": 236550,
+      "precio_lista": 249000,
+      "sin_impuestos": 214072,
+      "stock": "en stock",
+      "titular": "El único que retirás en Mendoza, gratis y hoy",
+      "specs": {
+        "Timings": "22-22-22",
+        "Latencia real": "13,75 ns",
+        "Voltaje del perfil": "1,2 V JEDEC",
+        "Rangos": "doble (D8)",
+        "Disipador": "no",
+        "Garantía local": "12 meses",
+        "Garantía de fábrica": "de por vida",
+        "Retiro en Mendoza": "sí, gratis"
+      },
+      "chips": [
+        "CL22 · 13,75 ns",
+        "1,2 V · sin XMP",
+        "doble rango",
+        "sin disipador",
+        "retiro en Mendoza"
+      ],
+      "pros": [
+        "Es el único de los tres que podés retirar en Mendoza, gratis y el mismo día.",
+        "Kingston publica listas de compatibilidad por modelo de motherboard; si tu placa es rara, esto importa.",
+        "Corre a 3200 nativo sin tocar la BIOS, a 1,2 V y más frío que los otros dos.",
+        "El sufijo D8 es doble rango: recupera un 2 a 4% por intercalado y achica la brecha con los CL16."
+      ],
+      "contras": [
+        "13,75 ns de latencia contra 10,0 ns de los otros dos. Es la línea ValueRAM, sin selección de chips.",
+        "Ojo con la foto del aviso: Gaming City publica una imagen equivocada, muestra un cooler Corsair. El código y la descripción sí son los correctos."
+      ]
+    },
+    {
+      "id": "corsair-lpx",
+      "tipo": "ram",
+      "podio": 3,
+      "nombre": "Corsair Vengeance LPX Black CL16",
+      "corto": "Corsair LPX",
+      "sku": "CMK16GX4M1E3200C16",
+      "tienda": "compragamer",
+      "fuente": {
+        "tipo": "compragamer",
+        "id_producto": 15560
+      },
+      "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
+      "img": "img/corsair-lpx.jpg",
+      "precio": 251600,
+      "precio_lista": 279556,
+      "sin_impuestos": 227692,
+      "stock": "en stock",
+      "titular": "La marca más probada, por treinta mil pesos más",
+      "specs": {
+        "Timings": "16-20-20-38",
+        "Latencia real": "10,0 ns",
+        "Voltaje del perfil": "1,35 V XMP",
+        "Rangos": "simple",
+        "Disipador": "sí, 34 mm",
+        "Garantía local": "24 meses",
+        "Garantía de fábrica": "de por vida",
+        "Retiro en Mendoza": "no"
+      },
+      "chips": [
+        "CL16 · 10,0 ns",
+        "1,35 V XMP",
+        "perfil bajo 34 mm",
+        "24 meses",
+        "en stock"
+      ],
+      "pros": [
+        "Corsair es la marca con más recorrido de las tres y la Vengeance LPX es su módulo más probado.",
+        "Timings 16-20-20-38, los mismos 10,0 ns que el Gammix. LPX significa perfil bajo: 34 mm."
+      ],
+      "contras": [
+        "Más caro que el Gammix por specs prácticamente idénticas y un año menos de garantía local.",
+        "En FullH4rd la misma línea sale $287.590: comprarla en el lugar equivocado te cuesta $35.990 de más."
+      ]
+    },
+    {
+      "id": "hiksemi-armor",
+      "tipo": "ram-ref",
+      "nombre": "Hiksemi Armor CL18",
+      "corto": "Hiksemi Armor",
+      "sku": "HSC416U32Z2-16G",
+      "tienda": "mexx",
+      "fuente": {
+        "tipo": "itemprop"
+      },
+      "url": "https://www.mexx.com.ar/productos-rubro/memorias-ram/51488-memoria-ram-ddr4-16gb-3200-mhz-hiksemi-armor.html",
+      "img": "img/hiksemi-armor.jpg",
+      "precio": 214989,
+      "precio_lista": 241561,
+      "sin_impuestos": 194560,
+      "stock": "en stock"
+    },
+    {
+      "id": "hiksemi-hiker",
+      "tipo": "ram-ref",
+      "nombre": "Hiksemi Hiker CL22",
+      "corto": "Hiksemi Hiker",
+      "sku": "MEM1826",
+      "tienda": "fullh4rd",
+      "fuente": {
+        "tipo": "og"
+      },
+      "url": "https://fullh4rd.com.ar/prod/27343/memoria-16gb-ddr4-3200-hiksemi-hiker",
+      "img": "img/kingston-kvr.jpg",
+      "precio": 214755,
+      "precio_lista": 236231,
+      "sin_impuestos": 194348,
+      "stock": "stock alto"
+    },
+    {
+      "id": "c920s",
+      "tipo": "webcam",
+      "podio": 1,
+      "destacado": true,
+      "nombre": "Logitech C920S Pro",
+      "corto": "C920S Pro",
+      "sku": "1080p / 30 fps",
+      "tienda": "gamingcity",
+      "fuente": {
+        "tipo": "meta",
+        "clave": "product:price:amount"
+      },
+      "url": "https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164",
+      "img": "img/c920s.jpg",
+      "precio": 137749,
+      "precio_lista": 144999,
+      "sin_impuestos": 113842,
+      "stock": "en stock",
+      "titular": "La que compraría",
+      "specs": {
+        "Resolución": "1080p / 30 fps",
+        "Lente": "vidrio, 5 elementos",
+        "Enfoque": "automático",
+        "Micrófono": "estéreo dual",
+        "Privacidad": "tapa incorporada",
+        "Garantía": "12 meses",
+        "Entrega": "retiro Mendoza"
+      },
+      "chips": [
+        "1080p30",
+        "autofoco",
+        "tapa de privacidad",
+        "retiro en Mendoza"
+      ],
+      "pros": [
+        "Lente de vidrio de cinco elementos y autofoco: es el estándar contra el que se comparan todas las demás.",
+        "Tapa de privacidad incorporada y micrófonos estéreo a los lados.",
+        "La retirás gratis en Mendoza el mismo día."
+      ],
+      "contras": [
+        "En Mexx la misma cámara sale $157.519, un 14% más."
+      ]
+    },
+    {
+      "id": "brio100",
+      "tipo": "webcam",
+      "podio": 2,
+      "nombre": "Logitech Brio 100 FHD",
+      "corto": "Brio 100",
+      "sku": "1080p",
+      "tienda": "mexx",
+      "fuente": {
+        "tipo": "itemprop"
+      },
+      "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html",
+      "img": "img/brio100.jpg",
+      "precio": 56999,
+      "precio_lista": 64044,
+      "sin_impuestos": null,
+      "stock": "en stock",
+      "titular": "Si querés gastar poco",
+      "specs": {
+        "Resolución": "1080p",
+        "Lente": "fijo",
+        "Enfoque": "fijo",
+        "Micrófono": "mono con reducción de ruido",
+        "Privacidad": "tapa integrada",
+        "Garantía": "12 meses",
+        "Entrega": "envío desde Buenos Aires"
+      },
+      "chips": [
+        "1080p",
+        "Logitech",
+        "11% OFF",
+        "en stock"
+      ],
+      "pros": [
+        "Full HD de Logitech por menos de la mitad de lo que sale la C920S.",
+        "Para reuniones de trabajo alcanza y sobra."
+      ],
+      "contras": [
+        "Resigna el autofoco y la calidad de lente de la C920S.",
+        "No bajes de acá: la C270 y la Genius son 720p y ya se ven viejas en cualquier pantalla moderna."
+      ]
+    },
+    {
+      "id": "brio4k",
+      "tipo": "webcam",
+      "podio": 3,
+      "evitar": true,
+      "nombre": "Logitech Brio 4K UHD",
+      "corto": "Brio 4K",
+      "sku": "4K / 1080p 60 fps",
+      "tienda": "compragamer",
+      "fuente": {
+        "tipo": "compragamer",
+        "id_producto": 20150
+      },
+      "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
+      "img": "img/brio4k.jpg",
+      "precio": 259400,
+      "precio_lista": 288222,
+      "sin_impuestos": 214380,
+      "stock": "en stock",
+      "titular": "Lo que no compraría",
+      "specs": {
+        "Resolución": "4K / 1080p 60 fps",
+        "Lente": "vidrio con HDR",
+        "Enfoque": "automático",
+        "Micrófono": "estéreo dual",
+        "Privacidad": "tapa incluida",
+        "Garantía": "24 meses",
+        "Entrega": "envío a todo el país"
+      },
+      "chips": [
+        "4K UHD",
+        "HDR",
+        "USB-C",
+        "la más cara"
+      ],
+      "pros": [
+        "Si grabás material para editar después, el 4K real sirve."
+      ],
+      "contras": [
+        "Zoom, Meet y Teams topean en 1080p: el 4K no viaja por la videollamada.",
+        "La MX Brio en Gaming City sale todavía más, $346.749."
+      ]
+    },
+    {
+      "id": "c922",
+      "tipo": "webcam-ref",
+      "nombre": "Logitech C922 Pro",
+      "corto": "C922 Pro",
+      "tienda": "mexx",
+      "fuente": {
+        "tipo": "itemprop"
+      },
+      "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/34580-c%C3%A1mara-web-logitech-c922-pro-full-hd.html",
+      "img": "img/c922.jpg",
+      "precio": 148529,
+      "precio_lista": null,
+      "stock": "en stock"
+    },
+    {
+      "id": "gw911",
+      "tipo": "webcam-ref",
+      "nombre": "Redragon GW911 4K",
+      "corto": "GW911 4K",
+      "tienda": "mexx",
+      "fuente": {
+        "tipo": "itemprop"
+      },
+      "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/51101-c%C3%A1mara-web-redragon-gw911-4k-full-hd.html",
+      "img": "img/gw911.jpg",
+      "precio": 88489,
+      "precio_lista": null,
+      "stock": "en stock"
+    },
+    {
+      "id": "brio505",
+      "tipo": "webcam-ref",
+      "nombre": "Logitech Brio 505 FHD",
+      "corto": "Brio 505",
+      "tienda": "compragamer",
+      "fuente": {
+        "tipo": "compragamer",
+        "id_producto": 20149
+      },
+      "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_20149",
+      "img": "img/brio505.jpg",
+      "precio": 185100,
+      "precio_lista": 205667,
+      "stock": "en stock",
+      "sin_impuestos": 152975
+    },
+    {
+      "id": "genius1000x",
+      "tipo": "webcam-ref",
+      "nombre": "Genius Facecam 1000X 720p",
+      "corto": "Genius 1000X",
+      "tienda": "gamingcity",
+      "fuente": {
+        "tipo": "meta",
+        "clave": "product:price:amount"
+      },
+      "url": "https://www.gamingcity.com.ar/webcam-camara-web-genius-facecam-1000x-hd-720p-gamingcity--det--8217",
+      "img": "img/genius1000x.jpg",
+      "precio": 29924,
+      "precio_lista": null,
+      "stock": "en stock"
+    }
+  ],
+  "historial": [],
+  "veredicto": [
+    {
+      "t": "Comprá el ADATA XPG Gammix D35 en CompraGamer.",
+      "d": "Es el que mejor combina marca, latencia y garantía por lo que sale, y con el envío adentro sigue siendo el más barato de los tres. Elegí depósito o transferencia para que entre el 10%, y acordate de activar XMP en la BIOS o te queda en CL22."
+    },
+    {
+      "t": "El Kingston ya no tiene argumento de precio.",
+      "d": "Con retiro gratis en Mendoza sale apenas más que el ADATA puesto en tu puerta, con CL22 en vez de CL16 y 12 meses de garantía en vez de 36. Solo conviene si necesitás la memoria hoy mismo o si tu motherboard es rara y querés el respaldo del QVL de Kingston."
+    },
+    {
+      "t": "Lo que descartaría.",
+      "d": "Cualquier cosa con RGB o línea Fury. Son entre $150.000 y $270.000 más por luces, y en oficina o gaming común la diferencia real de rendimiento es de un dígito porcentual."
+    },
+    {
+      "t": "Si vas por la RAM y la webcam juntas.",
+      "d": "Comprar todo en Gaming City Mendoza es una sola operación, retirada gratis el mismo día. Partir la compra entre CompraGamer y Gaming City sale menos y además la RAM pasa de CL22 con 12 meses a CL16 con 36. Por esa diferencia vale la pena hacer dos compras."
+    }
+  ],
+  "calculado": {
+    "adata_punto": 228089,
+    "adata_domicilio": 233108,
+    "kingston_retiro": 236550,
+    "combo_gc": 374299,
+    "combo_partido": 365838,
+    "ram_mas_barata": "hiksemi-hiker",
+    "webcam_mas_barata": "genius1000x"
+  }
+}

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Comparativa RAM DDR4 16GB</title>
-<meta name="description" content="Comparativa de memorias DDR4 16GB 3200, tiendas y webcams en Argentina. Precios verificados el 6 de octubre de 2026.">
+<meta name="description" content="Comparativa de memorias DDR4 16GB 3200, tiendas y webcams en Argentina. Actualizado el 2026-10-06.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:100%}[hidden]{display:none!important}</style>
 
@@ -12,13 +12,13 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: fichas grandes con miniatura y riel de color por tienda, tablas enlazadas, bloques de veredicto. */
+/* Layout: barra de pestanas fija, grilla de tarjetas verticales por vista, y
+   una vista de analisis que entra por encima al tocar una tarjeta. */
 :root{
   --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eceff4;
   --ink:#14181f; --ink-2:#4e5767; --ink-3:#78839a; --line:#d9dfe8;
   --accent:#0b4fd8; --accent-soft:#e3ecff;
-  --good:#117a4a; --good-soft:#dff3e8;
-  --bad:#a52020;
+  --good:#117a4a; --good-soft:#dff3e8; --bad:#a52020;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0b7f80; --gc-soft:#d8f2f2;
   --mx:#a85a07; --mx-soft:#fbeeda;
@@ -26,19 +26,18 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   --font-sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -12px rgba(20,24,31,.18);
-  --shadow-up:0 2px 4px rgba(20,24,31,.06), 0 18px 40px -16px rgba(20,24,31,.28);
+  --shadow-up:0 2px 4px rgba(20,24,31,.06), 0 20px 44px -16px rgba(20,24,31,.3);
+  --curva:cubic-bezier(.2,.75,.3,1);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
     --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
     --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
-    --cg:#a78bfa; --cg-soft:#241c3d;
-    --gc:#5eead4; --gc-soft:#0f2d2c;
-    --mx:#fbbf24; --mx-soft:#2e2311;
-    --fh:#aab3c2; --fh-soft:#232a35;
+    --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
+    --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
-    --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 18px 40px -16px rgba(0,0,0,.75);
+    --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
     color-scheme:dark;
   }
 }
@@ -46,185 +45,173 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
   --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
   --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
-  --cg:#a78bfa; --cg-soft:#241c3d;
-  --gc:#5eead4; --gc-soft:#0f2d2c;
-  --mx:#fbbf24; --mx-soft:#2e2311;
-  --fh:#aab3c2; --fh-soft:#232a35;
+  --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
+  --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
-  --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 18px 40px -16px rgba(0,0,0,.75);
+  --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
   color-scheme:dark;
 }
-.s-cg{--c:var(--cg);--c-soft:var(--cg-soft)}
-.s-gc{--c:var(--gc);--c-soft:var(--gc-soft)}
-.s-mx{--c:var(--mx);--c-soft:var(--mx-soft)}
-.s-fh{--c:var(--fh);--c-soft:var(--fh-soft)}
+.c-cg{--c:var(--cg);--c-soft:var(--cg-soft)}
+.c-gc{--c:var(--gc);--c-soft:var(--gc-soft)}
+.c-mx{--c:var(--mx);--c-soft:var(--mx-soft)}
+.c-fh{--c:var(--fh);--c-soft:var(--fh-soft)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);line-height:1.55;margin:0}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:30px 80px}
-h1{font-size:clamp(1.8rem,5vw,2.7rem);line-height:1.08;margin:0 0 10px;letter-spacing:-.03em;text-wrap:balance}
-h2{font-size:1.3rem;margin:0 0 5px;letter-spacing:-.02em;text-wrap:balance;display:flex;align-items:center;gap:9px}
-h3{margin:0;font-size:1.18rem;letter-spacing:-.015em;text-wrap:balance}
-.sub{color:var(--ink-2);margin:0;max-width:66ch}
-.meta{font-family:var(--font-mono);font-size:.73rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 14px}
-section{margin-top:52px}
-.section-head{margin-bottom:20px}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:26px 64px}
+h1{font-size:clamp(1.55rem,4vw,2.1rem);line-height:1.1;margin:0 0 6px;letter-spacing:-.03em;text-wrap:balance}
+h2{font-size:1.2rem;margin:0 0 4px;letter-spacing:-.02em;text-wrap:balance}
+h3{margin:0;font-size:1.02rem;letter-spacing:-.015em;text-wrap:balance}
+.sub{color:var(--ink-2);margin:0;max-width:66ch;font-size:.94rem}
+.meta{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 10px}
 .ico{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 img{max-width:100%}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
-@keyframes rise{from{opacity:.45;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes railgrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes entra{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes entraPanel{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes entraDetalle{from{opacity:0;transform:translateY(22px) scale(.99)}to{opacity:1;transform:none}}
 
-/* ---- Miniaturas ---- */
-.thumb{display:block;border-radius:12px;background:#fff;overflow:hidden;flex:none;border:1px solid var(--line);
-  transition:transform .25s cubic-bezier(.2,.7,.3,1),border-color .25s,box-shadow .25s}
-.thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:7px;background:#fff}
-.thumb.lg{width:116px;height:116px}
-.thumb.sm{width:46px;height:46px;border-radius:9px}
-.thumb.sm img{padding:3px}
-.thumb.xs{width:38px;height:38px;border-radius:8px}
-.thumb.xs img{padding:2px}
-.thumb.pk{width:104px;height:104px;margin-bottom:14px}
-.card:hover .thumb.lg,.pick:hover .thumb.pk{transform:scale(1.05);box-shadow:var(--shadow)}
-a.thumb:hover,a.thumb:focus-visible{border-color:var(--c,var(--accent))}
+/* ---- Pestanas ---- */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);
+  padding-block:12px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+.tablist{display:flex;gap:4px;position:relative;overflow-x:auto;scrollbar-width:none;
+  background:var(--surface-2);border-radius:12px;padding:4px}
+.tablist::-webkit-scrollbar{display:none}
+.tab{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;
+  padding:9px 16px;border-radius:9px;font-size:.9rem;font-weight:500;color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:color .22s var(--curva),background .22s var(--curva)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.tab .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);
+  background:var(--bg);border-radius:5px;padding:0 5px}
+.tab[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
 
-/* ---- Fichas de producto ---- */
-.cards{display:flex;flex-direction:column;gap:20px}
+.panel{animation:entraPanel .32s var(--curva) both}
+.panel-head{margin-bottom:18px}
+
+/* ---- Grilla de tarjetas verticales ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:18px;align-items:start}
 .card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
-  padding:26px 28px 26px 32px;display:grid;grid-template-columns:auto auto 1fr auto;gap:20px;align-items:start;
-  box-shadow:var(--shadow);overflow:hidden;
-  animation:rise .55s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i,0)*90ms);
-  transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s,border-color .25s}
-.card::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--c);
-  transform-origin:top;animation:railgrow .6s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i,0)*90ms + 120ms)}
-.card:hover,.card:focus-within{transform:translateY(-4px);box-shadow:var(--shadow-up);border-color:var(--c)}
-.card.top{border-color:var(--good)}
-.badge{position:absolute;top:0;right:0;background:var(--good);color:#fff;font:600 .68rem/1 var(--font-mono);
-  letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-bottom-left-radius:12px;
-  display:flex;align-items:center;gap:6px;z-index:1}
-:root[data-theme="dark"] .badge{color:#0e1117}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .badge{color:#0e1117}}
-.rank{font-family:var(--font-mono);font-size:1.9rem;font-weight:700;line-height:1;color:var(--c);
-  background:var(--c-soft);border-radius:12px;width:58px;height:58px;display:grid;place-items:center}
-.head{min-width:0}
-.sku{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);margin:5px 0 0}
-.where{font-size:.9rem;color:var(--ink-2);margin:7px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.store-tag{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c);
-  background:var(--c-soft);border-radius:999px;padding:3px 11px;font-size:.84rem}
-a.go{display:inline-flex;align-items:center;gap:4px;color:var(--accent);text-decoration:none;font-weight:500;
-  border-bottom:1px solid transparent;transition:border-color .18s,gap .18s}
-a.go:hover,a.go:focus-visible{border-bottom-color:var(--accent);gap:7px}
-.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-.chip{display:inline-flex;align-items:center;gap:5px;font:500 .76rem/1.7 var(--font-mono);letter-spacing:.02em;
-  padding:2px 10px;border-radius:7px;background:var(--surface-2);color:var(--ink-2)}
+  padding:0 0 20px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;text-align:left;
+  display:flex;flex-direction:column;
+  animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*80ms);
+  transition:transform .28s var(--curva),box-shadow .28s,border-color .28s}
+.card:hover,.card:focus-visible{transform:translateY(-6px);box-shadow:var(--shadow-up);border-color:var(--c)}
+.card.dest{border-color:var(--good)}
+.card .barra{height:5px;background:var(--c);flex:none}
+.card.dest .barra{background:var(--good)}
+.cinta{position:absolute;top:5px;right:0;background:var(--good);color:#fff;
+  font:600 .65rem/1 var(--font-mono);letter-spacing:.09em;text-transform:uppercase;
+  padding:7px 12px;border-bottom-left-radius:11px;display:flex;align-items:center;gap:5px;z-index:2}
+:root[data-theme="dark"] .cinta{color:#0e1117}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cinta{color:#0e1117}}
+.card .foto{height:150px;background:#fff;display:grid;place-items:center;padding:14px;flex:none;
+  border-bottom:1px solid var(--line)}
+.card .foto img{max-height:100%;width:auto;object-fit:contain;transition:transform .35s var(--curva)}
+.card:hover .foto img{transform:scale(1.07)}
+.card .cuerpo{padding:16px 20px 0;display:flex;flex-direction:column;gap:9px;flex:1}
+.rank{position:absolute;top:19px;left:14px;font-family:var(--font-mono);font-size:.92rem;font-weight:700;
+  color:var(--c);background:var(--c-soft);border-radius:8px;width:30px;height:30px;
+  display:grid;place-items:center;z-index:2}
+.card.dest .rank{color:var(--good);background:var(--good-soft)}
+.tienda{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c);
+  background:var(--c-soft);border-radius:999px;padding:3px 11px;font-size:.78rem;width:max-content}
+.titular{color:var(--ink-2);font-size:.89rem;margin:0}
+.precio{font-family:var(--font-mono);font-size:1.62rem;font-weight:700;letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums;color:var(--c);line-height:1.1}
+.card.dest .precio{color:var(--good)}
+.antes{font-family:var(--font-mono);font-size:.78rem;color:var(--ink-3);text-decoration:line-through;margin-left:7px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font:500 .71rem/1.7 var(--font-mono);padding:1px 8px;border-radius:6px;
+  background:var(--surface-2);color:var(--ink-2)}
 .chip.ok{background:var(--good-soft);color:var(--good)}
-.chip.no{background:var(--surface-2);color:var(--ink-3)}
-.pros{margin:16px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:.92rem}
-.pros li{color:var(--ink-2);padding-left:24px;position:relative}
-.pros li::before{position:absolute;left:0;top:0;font-family:var(--font-mono);font-weight:700;font-size:1.05em}
-.pros li.p::before{content:"\2191";color:var(--good)}
-.pros li.m::before{content:"\2193";color:var(--bad)}
-.money{text-align:right;white-space:nowrap}
-.money .big{font-family:var(--font-mono);font-size:1.95rem;font-weight:700;font-variant-numeric:tabular-nums;
-  letter-spacing:-.035em;display:block;color:var(--c)}
-.money .was{font-family:var(--font-mono);font-size:.84rem;color:var(--ink-3);text-decoration:line-through;display:block}
-.money .pay{font-size:.78rem;color:var(--ink-3);display:block;margin-top:7px;max-width:18ch;white-space:normal;margin-left:auto}
-.card.top .money .big{color:var(--good)}
+.pie{margin-top:auto;padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ver{font-size:.84rem;font-weight:600;color:var(--c);display:inline-flex;align-items:center;gap:5px;
+  transition:gap .2s var(--curva)}
+.card:hover .ver{gap:9px}
+.ir{font-size:.78rem;color:var(--ink-3);display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.ir:hover{color:var(--accent)}
 
-/* ---- Fichas de tienda ---- */
-.stores{display:flex;flex-direction:column;gap:20px}
-.st{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
-  padding:26px 28px 24px 32px;box-shadow:var(--shadow);overflow:hidden;
-  animation:rise .55s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i,0)*90ms);
-  transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s,border-color .25s}
-.st::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--c);
-  transform-origin:top;animation:railgrow .6s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i,0)*90ms + 120ms)}
-.st:hover,.st:focus-within{transform:translateY(-4px);box-shadow:var(--shadow-up);border-color:var(--c)}
-.st-head{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;margin-bottom:14px}
-.st-head .rank{width:50px;height:50px;font-size:1.6rem}
-.st-head h3{display:flex;align-items:center;gap:9px;color:var(--c)}
-.role{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);margin:3px 0 0;letter-spacing:.02em}
-.wins{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+/* ---- Vista de analisis ---- */
+.detalle{animation:entraDetalle .36s var(--curva) both}
+.volver{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:.88rem;
+  font-weight:600;color:var(--accent);margin-bottom:16px;padding:7px 13px;border-radius:9px;
+  background:var(--accent-soft);transition:gap .2s var(--curva)}
+.volver:hover{gap:11px}
+.dcab{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;
+  background:var(--surface);border:1px solid var(--c);border-radius:16px;padding:20px 24px;
+  box-shadow:var(--shadow);margin-bottom:18px}
+.dfoto{width:92px;height:92px;background:#fff;border-radius:12px;border:1px solid var(--line);
+  display:grid;place-items:center;padding:8px;flex:none}
+.dfoto img{max-height:100%;width:auto;object-fit:contain}
+.dsku{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);margin:4px 0 8px}
+.dprecio{text-align:right;white-space:nowrap}
+.dprecio .v{font-family:var(--font-mono);font-size:1.75rem;font-weight:700;letter-spacing:-.035em;
+  color:var(--c);display:block;font-variant-numeric:tabular-nums}
+.dprecio .l{font-size:.76rem;color:var(--ink-3);display:block;margin-top:3px}
+.dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px;margin-bottom:18px}
+.bloque{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+  box-shadow:var(--shadow);min-width:0}
+.bloque h3{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lista{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.9rem}
+.lista li{color:var(--ink-2);padding-left:23px;position:relative}
+.lista li::before{position:absolute;left:0;top:0;font-family:var(--font-mono);font-weight:700}
+.lista li.p::before{content:"\2191";color:var(--good)}
+.lista li.m::before{content:"\2193";color:var(--bad)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.88rem}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+thead th{background:var(--surface-2);font-size:.71rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap}
+thead th.foco{color:var(--c)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+tbody th{font-weight:500;color:var(--ink-2);font-size:.84rem;white-space:nowrap}
+td{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:.84rem;color:var(--ink-2)}
+td.foco{color:var(--ink);font-weight:700;background:var(--c-soft)}
+td.mejor{color:var(--good);font-weight:700}
+
+/* ---- Tiendas ---- */
+.wins{margin:12px 0 0;padding:0;list-style:none}
 .wins li{border-top:1px dashed var(--line)}
 .wins li:first-child{border-top:0}
-.wins a,.wins .row{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;
-  padding:9px 10px 9px 12px;margin-inline:-10px -10px;border-radius:10px;text-decoration:none;color:inherit;
-  font-size:.92rem;transition:background .18s,padding-left .18s}
-.wins a:hover,.wins a:focus-visible{background:var(--c-soft);padding-left:18px}
-.wins span{color:var(--ink-2);min-width:0;flex:1 1 180px}
-.wins a:hover span,.wins a:focus-visible span{color:var(--ink)}
-.wins b{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--good);font-weight:700;
-  white-space:nowrap;font-size:1rem}
-.wins b.flat{color:var(--c)}
-.wins .row{padding-left:58px}
-.weak{margin:16px 0 0;font-size:.9rem;color:var(--ink-2);padding:12px 14px;background:var(--surface-2);
-  border-radius:10px;display:flex;gap:10px;align-items:flex-start}
-.weak .ico{color:var(--bad);margin-top:3px;font-size:1.05rem}
+.wins a{display:flex;align-items:center;gap:12px;padding:9px 10px;margin-inline:-10px;border-radius:10px;
+  text-decoration:none;color:inherit;font-size:.88rem;transition:background .18s,padding-left .18s}
+.wins a:hover{background:var(--c-soft);padding-left:16px}
+.wins .mini{width:40px;height:40px;border-radius:8px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;padding:3px;flex:none}
+.wins .mini img{max-height:100%;width:auto;object-fit:contain}
+.wins .txt{flex:1;color:var(--ink-2);min-width:0}
+.wins b{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--good);font-weight:700}
+.flaco{margin:14px 0 0;font-size:.87rem;color:var(--ink-2);padding:11px 13px;background:var(--surface-2);
+  border-radius:10px;display:flex;gap:9px;align-items:flex-start}
+.flaco .ico{color:var(--bad);margin-top:3px}
 
-/* ---- Tablas ---- */
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
-table{border-collapse:collapse;width:100%;min-width:660px;font-size:.9rem}
-th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
-thead th{background:var(--surface-2);font-size:.73rem;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink-3);white-space:nowrap}
-thead th.h-cg{color:var(--cg)}thead th.h-gc{color:var(--gc)}thead th.h-mx{color:var(--mx)}
-tbody tr{transition:background .16s}
-tbody tr:hover{background:var(--surface-2)}
-tbody tr:last-child td{border-bottom:0}
-tbody th{font-weight:500;color:var(--ink-2);font-size:.86rem}
-tbody th.m{display:flex;align-items:center;gap:11px}
-td{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:.86rem}
-td.best{color:var(--good);font-weight:700}
-td.na{color:var(--ink-3)}
-td a{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;padding-bottom:1px;
-  transition:border-bottom-style .15s}
-td a:hover,td a:focus-visible{border-bottom-style:solid}
-td.win a{color:var(--good);font-weight:700}
-
-/* ---- Bloques destacados ---- */
-.flag{background:var(--accent-soft);border:1px solid var(--accent);border-radius:16px;padding:22px 26px;margin-top:22px;
-  box-shadow:var(--shadow)}
-.flag h2{color:var(--accent)}
-.flag p{margin:8px 0 0;color:var(--ink-2);max-width:70ch}
-.flag strong{color:var(--ink)}
-.flag a{color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid transparent}
-.flag a:hover,.flag a:focus-visible{border-bottom-color:var(--accent)}
-.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(286px,1fr));gap:18px;margin-top:20px}
-.pick{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
-  min-width:0;box-shadow:var(--shadow);overflow:hidden;
-  animation:rise .55s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i,0)*90ms);
-  transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s,border-color .25s}
-.pick::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--c)}
-.pick:hover,.pick:focus-within{transform:translateY(-4px);box-shadow:var(--shadow-up);border-color:var(--c)}
-.pick h3{font-size:1.05rem;display:flex;align-items:center;gap:8px;color:var(--c);margin-bottom:14px}
-.pick .lead{display:block;font-family:var(--font-mono);font-size:1.7rem;font-weight:700;letter-spacing:-.035em;
-  color:var(--ink);font-variant-numeric:tabular-nums;text-decoration:none;transition:color .18s}
-a.lead:hover,a.lead:focus-visible{color:var(--c)}
-.pick .leadname{display:block;font-size:.9rem;color:var(--ink-2);margin:2px 0 14px}
-.pick dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:7px 12px;font-size:.87rem}
-.pick dt{color:var(--ink-3)}
-.pick dd{margin:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
-.pick p{margin:14px 0 0;font-size:.89rem;color:var(--ink-2)}
-.verdict{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-top:20px;
-  box-shadow:var(--shadow)}
-.verdict p{margin:0 0 14px;color:var(--ink-2)}
-.verdict p:last-child{margin-bottom:0}
-.verdict b{color:var(--ink)}
-.foot{margin-top:40px;font-size:.82rem;color:var(--ink-3);max-width:72ch}
-a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
-@media (max-width:760px){
-  .card{grid-template-columns:auto auto 1fr;gap:16px;padding:24px 20px 24px 26px}
-  .money{grid-column:1/-1;text-align:left;border-top:1px solid var(--line);padding-top:16px}
-  .money .pay{margin-left:0}
-}
-@media (max-width:560px){
-  .card{grid-template-columns:auto 1fr}
-  .thumb.lg{width:84px;height:84px}
-  .st{padding:24px 20px 22px 26px}
-  .badge{position:static;border-radius:0 0 12px 0;width:max-content;margin:-24px 0 14px -26px;grid-column:1/-1}
-  .wins .row{padding-left:12px}
-  .wrap{padding-block:22px 60px}
+/* ---- Veredicto ---- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:14px;margin-bottom:20px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
+  box-shadow:var(--shadow);animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*70ms)}
+.tile.ok{border-color:var(--good);background:var(--good-soft)}
+.tile .k{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;letter-spacing:-.03em;margin:3px 0 1px;
+  font-variant-numeric:tabular-nums}
+.tile.ok .v{color:var(--good)}
+.tile .d{font-size:.82rem;color:var(--ink-2)}
+.ver-item{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+  margin-bottom:12px;box-shadow:var(--shadow);
+  animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*70ms)}
+.ver-item b{display:block;margin-bottom:5px}
+.ver-item p{margin:0;color:var(--ink-2);font-size:.92rem}
+.nota{margin-top:30px;font-size:.81rem;color:var(--ink-3);max-width:74ch}
+.nota code{font-family:var(--font-mono);font-size:.95em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:620px){
+  .dcab{grid-template-columns:auto 1fr;gap:14px;padding:18px}
+  .dprecio{grid-column:1/-1;text-align:left;border-top:1px solid var(--line);padding-top:14px}
+  .tab{padding:9px 12px;font-size:.85rem}
+  .wrap{padding-block:18px 52px}
 }
 </style>
 
@@ -232,320 +219,689 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   <symbol id="i-chip" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M4 9h3M4 12h3M4 15h3M17 9h3M17 12h3M17 15h3M9 4v3M12 4v3M15 4v3M9 17v3M12 17v3M15 17v3"/></symbol>
   <symbol id="i-cam" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7"/><circle cx="12" cy="11" r="3"/><path d="M5 20h14"/></symbol>
   <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M3 9l1.5-5h15L21 9"/><path d="M9 20v-6h6v6"/></symbol>
-  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5v2a3 3 0 0 0 3 3M16 5h3v2a3 3 0 0 1-3 3"/><path d="M10 13h4v3h-4zM8 20h8"/><path d="M12 16v4"/></symbol>
-  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></symbol>
-  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8.2-8 9-4.8-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
-  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
-  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
-  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
-  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
-  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c3 4 6 5.5 6 9a6 6 0 0 1-12 0c0-2 1-3.5 2.5-5 .3 1.2 1 2 2 2.3C10 7.5 10.5 5 12 3z"/></symbol>
-  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></symbol>
-  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M6.5 6.5l11 11"/></symbol>
+  <symbol id="i-trofeo" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5v2a3 3 0 0 0 3 3M16 5h3v2a3 3 0 0 1-3 3"/><path d="M10 13h4v3h-4zM8 20h8"/><path d="M12 16v4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8.2-8 9-4.8-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-aviso" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-fuera" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-der" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
+  <symbol id="i-camion" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
 </svg>
 
 </head>
 <body>
 <div class="wrap">
-  <p class="meta">Precios verificados en cada sitio &middot; 6 oct 2026 &middot; RAM, tiendas y webcams</p>
-  <h1>Las 3 mejores por marca/precio</h1>
-  <p class="sub">De las 52 cotizaciones relevadas más el cruce con CompraGamer, estos tres módulos de 16GB DDR4 3200 dan la mejor marca por peso gastado. Más abajo, cuáles son las tres tiendas que mejor pagan la calidad y cómo quedan las webcams en esas mismas webs. Cada foto, cada nombre y cada precio llevan a su producto.</p>
+  <p class="meta" id="sello">Precios verificados en cada sitio</p>
+  <h1>Comparativa RAM DDR4 16GB</h1>
+  <p class="sub">Memorias, tiendas y webcams en Argentina. Tocá cualquier tarjeta para abrir el análisis detallado; los precios llevan al producto en la web de cada tienda.</p>
 
-  <section style="margin-top:34px">
-    <div class="cards">
-
-      <article class="card top s-cg" style="--i:0">
-        <div class="badge"><svg class="ico"><use href="#i-trophy"/></svg> mejor compra</div>
-        <div class="rank">1</div>
-        <a class="thumb lg" href="https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151" target="_blank" rel="noopener"><img src="img/adata-d35.jpg" alt="ADATA XPG Gammix D35 Black" loading="lazy"></a>
-        <div class="head">
-          <h3>ADATA XPG Gammix D35 Black CL16</h3>
-          <p class="sku">AX4U320016G16A-SBKD35</p>
-          <p class="where">
-            <span class="store-tag"><svg class="ico"><use href="#i-store"/></svg> CompraGamer</span>
-            <a class="go" href="https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151" target="_blank" rel="noopener">ver producto <svg class="ico"><use href="#i-out"/></svg></a>
-          </p>
-          <div class="chips">
-            <span class="chip ok"><svg class="ico"><use href="#i-bolt"/></svg> CL16 &middot; 10,0 ns</span>
-            <span class="chip">1,35 V XMP</span>
-            <span class="chip ok">perfil bajo 33 mm</span>
-            <span class="chip ok"><svg class="ico"><use href="#i-shield"/></svg> 36 meses</span>
-            <span class="chip ok">en stock</span>
-          </div>
-          <ul class="pros">
-            <li class="p">Timings 16-20-20: 10,0 ns de latencia real contra 13,75 ns del Kingston, un 37% menos.</li>
-            <li class="p">36 meses de garantía local, el triple que el Kingston. De fábrica ADATA la da de por vida.</li>
-            <li class="p">ADATA fabrica sus propios módulos y hace binning de los chips; XPG es su línea de rendimiento.</li>
-            <li class="p">Perfil bajo de 33 mm: entra debajo de cualquier cooler de torre.</li>
-            <li class="m">El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22.</li>
-          </ul>
-        </div>
-        <div class="money">
-          <span class="big">$221.450</span>
-          <span class="was">$246.056</span>
-          <span class="pay">10% OFF por depósito o transferencia</span>
-        </div>
-      </article>
-
-      <article class="card s-gc" style="--i:1">
-        <div class="rank">2</div>
-        <a class="thumb lg" href="https://www.gamingcity.com.ar/ddr4-kingston-ddr4-16gb-memoria-ram-3200mhz-cl22--det--17256" target="_blank" rel="noopener"><img src="img/kingston-kvr.jpg" alt="Kingston ValueRAM KVR32N22D8/16" loading="lazy"></a>
-        <div class="head">
-          <h3>Kingston ValueRAM KVR32N22D8/16</h3>
-          <p class="sku">KVR32N22D8/16 &middot; densidad 8 Gbit</p>
-          <p class="where">
-            <span class="store-tag"><svg class="ico"><use href="#i-store"/></svg> Gaming City</span>
-            <a class="go" href="https://www.gamingcity.com.ar/ddr4-kingston-ddr4-16gb-memoria-ram-3200mhz-cl22--det--17256" target="_blank" rel="noopener">ver producto <svg class="ico"><use href="#i-out"/></svg></a>
-          </p>
-          <div class="chips">
-            <span class="chip"><svg class="ico"><use href="#i-bolt"/></svg> CL22 &middot; 13,75 ns</span>
-            <span class="chip ok">1,2 V &middot; sin XMP</span>
-            <span class="chip ok">doble rango</span>
-            <span class="chip no">sin disipador</span>
-            <span class="chip ok"><svg class="ico"><use href="#i-pin"/></svg> retiro en Mendoza</span>
-          </div>
-          <ul class="pros">
-            <li class="p">Es el único de los tres que podés retirar en Mendoza, gratis y el mismo día.</li>
-            <li class="p">Kingston publica listas de compatibilidad por modelo de motherboard; si tu placa es rara, esto importa.</li>
-            <li class="p">Corre a 3200 nativo sin tocar la BIOS, a 1,2 V y más frío que los otros dos.</li>
-            <li class="p">El sufijo D8 es doble rango: recupera un 2 a 4% por intercalado y achica la brecha con los CL16.</li>
-            <li class="m">13,75 ns de latencia contra 10,0 ns de los otros dos. Es la línea ValueRAM, sin selección de chips.</li>
-            <li class="m">Ojo con la foto del aviso: Gaming City publica una imagen equivocada, muestra un cooler Corsair. El código y la descripción sí son los correctos.</li>
-          </ul>
-        </div>
-        <div class="money">
-          <span class="big">$236.550</span>
-          <span class="was">$249.000</span>
-          <span class="pay">precio con transferencia</span>
-        </div>
-      </article>
-
-      <article class="card s-cg" style="--i:2">
-        <div class="rank">3</div>
-        <a class="thumb lg" href="https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560" target="_blank" rel="noopener"><img src="img/corsair-lpx.jpg" alt="Corsair Vengeance LPX Black" loading="lazy"></a>
-        <div class="head">
-          <h3>Corsair Vengeance LPX Black CL16</h3>
-          <p class="sku">CMK16GX4M1E3200C16</p>
-          <p class="where">
-            <span class="store-tag"><svg class="ico"><use href="#i-store"/></svg> CompraGamer</span>
-            <a class="go" href="https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560" target="_blank" rel="noopener">ver producto <svg class="ico"><use href="#i-out"/></svg></a>
-          </p>
-          <div class="chips">
-            <span class="chip ok"><svg class="ico"><use href="#i-bolt"/></svg> CL16 &middot; 10,0 ns</span>
-            <span class="chip">1,35 V XMP</span>
-            <span class="chip ok">perfil bajo 34 mm</span>
-            <span class="chip ok"><svg class="ico"><use href="#i-shield"/></svg> 24 meses</span>
-            <span class="chip ok">en stock</span>
-          </div>
-          <ul class="pros">
-            <li class="p">Corsair es la marca con más recorrido de las tres y la Vengeance LPX es su módulo más probado.</li>
-            <li class="p">Timings 16-20-20-38, los mismos 10,0 ns que el Gammix. LPX significa perfil bajo: 34 mm.</li>
-            <li class="m">$30.150 más caro que el Gammix por specs prácticamente idénticas y un año menos de garantía local.</li>
-            <li class="m">En FullH4rd la misma línea sale $287.590: comprarla en el lugar equivocado te cuesta $35.990 de más.</li>
-          </ul>
-        </div>
-        <div class="money">
-          <span class="big">$251.600</span>
-          <span class="was">$279.556</span>
-          <span class="pay">10% OFF por depósito o transferencia</span>
-        </div>
-      </article>
-
-    </div>
-  </section>
-
-  <div class="flag">
-    <h2><svg class="ico"><use href="#i-truck"/></svg> Puesto en Mendoza, con el envío adentro</h2>
-    <p>Cotizado en el checkout de CompraGamer para el <strong>CP 5501</strong>: OCA a domicilio <strong>$11.658</strong>, o retiro en punto OCA <strong>$6.639</strong>. Con eso el Gammix llega a <strong>$233.108 a tu puerta</strong> o <strong>$228.089 retirándolo de un punto</strong>. Las dos cifras siguen por debajo de los <strong>$236.550</strong> del Kingston que retirás gratis acá. El ADATA te sale más barato aun pagando el envío, y encima es CL16 con 36 meses de garantía.</p>
+  <div class="tabs">
+    <div class="tablist" role="tablist" id="tablist"></div>
   </div>
 
-  <div class="flag">
-    <h2><svg class="ico"><use href="#i-coin"/></svg> Por qué los Hiksemi quedaron afuera</h2>
-    <p>El piso de precio lo siguen marcando ellos: <a href="https://www.mexx.com.ar/productos-rubro/memorias-ram/51488-memoria-ram-ddr4-16gb-3200-mhz-hiksemi-armor.html" target="_blank" rel="noopener">Armor CL18 en Mexx a $214.989</a> y <a href="https://fullh4rd.com.ar/prod/27343/memoria-16gb-ddr4-3200-hiksemi-hiker" target="_blank" rel="noopener">Hiker en FullH4rd a $214.755</a>. Pero por <strong>$6.461 más</strong> que el Armor, el Gammix te da <strong>CL16 en vez de CL18</strong>, <strong>36 meses de garantía en vez de 12</strong> y una marca que fabrica sus propios módulos. Esa diferencia es un 3% del precio.</p>
-  </div>
+  <div id="vista"></div>
 
-  <section>
-    <div class="section-head">
-      <h2><svg class="ico"><use href="#i-chip"/></svg> Lo que cambia entre las tres</h2>
-      <p class="sub">Mismos 16GB y mismos 3200 MHz en los tres casos. La diferencia real está en latencia, garantía y dónde lo retirás.</p>
-    </div>
-    <div class="scroll">
-      <table>
-        <thead><tr>
-          <th>&nbsp;</th>
-          <th class="h-cg">ADATA XPG D35</th>
-          <th class="h-gc">Kingston KVR</th>
-          <th class="h-cg">Corsair LPX</th>
-        </tr></thead>
-        <tbody>
-          <tr><th>Precio transferencia</th><td class="best">$221.450</td><td>$236.550</td><td>$251.600</td></tr>
-          <tr><th>Puesto en Mendoza, domicilio</th><td class="best">$233.108</td><td>$236.550</td><td>$263.258</td></tr>
-          <tr><th>Puesto en Mendoza, punto de retiro</th><td class="best">$228.089</td><td>$236.550</td><td>$258.239</td></tr>
-          <tr><th>Otros medios de pago</th><td class="best">$246.056</td><td>$249.000</td><td>$279.556</td></tr>
-          <tr><th>Precio sin imp. nac.</th><td class="best">$200.407</td><td>$214.072</td><td>$227.692</td></tr>
-          <tr><th>Timings</th><td class="best">16-20-20</td><td>22-22-22</td><td class="best">16-20-20-38</td></tr>
-          <tr><th>Latencia real</th><td class="best">10,0 ns</td><td>13,75 ns</td><td class="best">10,0 ns</td></tr>
-          <tr><th>Voltaje del perfil</th><td>1,35 V XMP</td><td class="best">1,2 V JEDEC</td><td>1,35 V XMP</td></tr>
-          <tr><th>Rangos</th><td>simple</td><td class="best">doble (D8)</td><td>simple</td></tr>
-          <tr><th>Disipador</th><td class="best">sí, 33 mm</td><td>no</td><td class="best">sí, 34 mm</td></tr>
-          <tr><th>Garantía local</th><td class="best">36 meses</td><td>12 meses</td><td>24 meses</td></tr>
-          <tr><th>Garantía de fábrica</th><td>de por vida</td><td>de por vida</td><td>de por vida</td></tr>
-          <tr><th>Retiro en Mendoza</th><td>no</td><td class="best">sí, gratis</td><td>no</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <noscript><p class="sub" style="margin-top:20px">Esta página arma las vistas con JavaScript. Activalo para ver la comparativa.</p></noscript>
 
-  <section>
-    <div class="section-head">
-      <h2><svg class="ico"><use href="#i-store"/></svg> Las 3 webs que mejor pagan la calidad</h2>
-      <p class="sub">Ninguna gana en todo. Cruzando el mismo producto entre tiendas aparece un patrón bastante nítido de en qué es fuerte cada una. Cada línea lleva al producto.</p>
-    </div>
-    <div class="stores">
-
-      <article class="st s-cg" style="--i:0">
-        <div class="st-head">
-          <div class="rank">1</div>
-          <div>
-            <h3><svg class="ico"><use href="#i-trophy"/></svg> CompraGamer</h3>
-            <p class="role">la mejor para marca premium</p>
-          </div>
-        </div>
-        <ul class="wins">
-          <li><a href="https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/corsair-lpx.jpg" alt="" loading="lazy"></span><span>Corsair Vengeance LPX, contra $287.590 de FullH4rd</span><b>$251.600</b></a></li>
-          <li><a href="https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/brio4k.jpg" alt="" loading="lazy"></span><span>Logitech Brio 4K, contra $317.899 de Mexx</span><b>$259.400</b></a></li>
-          <li><a href="https://compragamer.com/producto/Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_20149" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/brio505.jpg" alt="" loading="lazy"></span><span>Logitech Brio 505 FHD</span><b>$185.100</b></a></li>
-          <li><a href="https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/adata-d35.jpg" alt="" loading="lazy"></span><span>ADATA XPG Gammix D35 CL16</span><b>$221.450</b></a></li>
-          <li><div class="row"><span>10% OFF por depósito o transferencia en todo el sitio</span><b class="flat">&minus;10%</b></div></li>
-        </ul>
-        <p class="weak"><svg class="ico"><use href="#i-warn"/></svg> Catálogo chico: cuatro webcams en total y no vende módulos Kingston ValueRAM sueltos. Es la tienda a la que vas sabiendo qué querés, no a explorar.</p>
-      </article>
-
-      <article class="st s-gc" style="--i:1">
-        <div class="st-head">
-          <div class="rank">2</div>
-          <div>
-            <h3><svg class="ico"><use href="#i-pin"/></svg> Gaming City</h3>
-            <p class="role">picos altos, catálogo irregular</p>
-          </div>
-        </div>
-        <ul class="wins">
-          <li><a href="https://www.gamingcity.com.ar/ddr4-kingston-ddr4-16gb-memoria-ram-3200mhz-cl22--det--17256" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/kingston-kvr.jpg" alt="" loading="lazy"></span><span>Kingston KVR32N22D8/16, contra $327.540 de FullH4rd</span><b>$236.550</b></a></li>
-          <li><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/c920s.jpg" alt="" loading="lazy"></span><span>Logitech C920S Pro, contra $157.519 de Mexx</span><b>$137.749</b></a></li>
-          <li><a href="https://www.gamingcity.com.ar/webcam-camara-web-genius-facecam-1000x-hd-720p-gamingcity--det--8217" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/genius1000x.jpg" alt="" loading="lazy"></span><span>Genius Facecam 1000X 720p, la más barata del relevamiento</span><b>$29.924</b></a></li>
-          <li><a href="https://www.gamingcity.com.ar/busqueda_avanzada.php?buscar=1&amp;palabra=webcam" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/trust-teza.jpg" alt="" loading="lazy"></span><span>17 webcams, el catálogo más amplio de las tres</span><b class="flat">ver todas</b></a></li>
-          <li><div class="row"><span>Sucursal en Mendoza con retiro gratis</span><b class="flat">sin envío</b></div></li>
-        </ul>
-        <p class="weak"><svg class="ico"><use href="#i-warn"/></svg> Cuando pierde, pierde feo: la Fury Beast CL16 RGB a $508.250 y la MX Brio 4K a $346.749 son los peores precios de todo el relevamiento. Hay que ir producto por producto.</p>
-      </article>
-
-      <article class="st s-mx" style="--i:2">
-        <div class="st-head">
-          <div class="rank">3</div>
-          <div>
-            <h3><svg class="ico"><use href="#i-coin"/></svg> Mexx</h3>
-            <p class="role">el piso de precio</p>
-          </div>
-        </div>
-        <ul class="wins">
-          <li><a href="https://www.mexx.com.ar/productos-rubro/memorias-ram/51488-memoria-ram-ddr4-16gb-3200-mhz-hiksemi-armor.html" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/hiksemi-armor.jpg" alt="" loading="lazy"></span><span>Hiksemi Armor CL18, el 16GB de marca más barato</span><b>$214.989</b></a></li>
-          <li><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/34580-c%C3%A1mara-web-logitech-c922-pro-full-hd.html" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/c922.jpg" alt="" loading="lazy"></span><span>Logitech C922 Pro, contra $161.499 de Gaming City</span><b>$148.529</b></a></li>
-          <li><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/brio100.jpg" alt="" loading="lazy"></span><span>Logitech Brio 100 FHD</span><b>$56.999</b></a></li>
-          <li><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/51101-c%C3%A1mara-web-redragon-gw911-4k-full-hd.html" target="_blank" rel="noopener"><span class="thumb sm"><img src="img/gw911.jpg" alt="" loading="lazy"></span><span>Redragon GW911 4K</span><b>$88.489</b></a></li>
-          <li><div class="row"><span>11% OFF más 3 cuotas sin interés VISA y Master</span><b class="flat">&minus;11%</b></div></li>
-        </ul>
-        <p class="weak"><svg class="ico"><use href="#i-warn"/></svg> El catálogo tira a segunda línea (Raptor, X-Micro, Value Tech, Lexar) y en gama alta se dispara: la Fury Beast RGB a $486.839 es un 28% más que en Gaming City.</p>
-      </article>
-
-    </div>
-
-    <div class="flag">
-      <h2><svg class="ico"><use href="#i-fire"/></svg> La cuarta, que conviene tener a mano</h2>
-      <p><strong>FullH4rd</strong> queda afuera del podio pero es imbatible en Hiksemi: el <a href="https://fullh4rd.com.ar/prod/27343/memoria-16gb-ddr4-3200-hiksemi-hiker" target="_blank" rel="noopener">Hiker a $214.755</a>, y es la única que publica stock de web y de local por separado, así que sabés si te lo pueden entregar en el día. El problema es la primera línea: el Kingston KVR le sale <strong>38% más</strong> que en Gaming City y la Corsair LPX <strong>14% más</strong> que en CompraGamer. Úsala para Hiksemi y nada más.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-head">
-      <h2><svg class="ico"><use href="#i-cam"/></svg> Webcams en las mismas tres tiendas</h2>
-      <p class="sub">Todos los precios son con transferencia o depósito, que es como los publica cada sitio. En verde, la más barata de cada modelo. Cada precio lleva a su producto.</p>
-    </div>
-    <div class="scroll">
-      <table>
-        <thead><tr>
-          <th>Modelo</th><th class="h-cg">CompraGamer</th><th class="h-gc">Gaming City</th><th class="h-mx">Mexx</th>
-        </tr></thead>
-        <tbody>
-          <tr><th class="m"><span class="thumb xs"><img src="img/genius1000x.jpg" alt="" loading="lazy"></span>Genius Facecam 1000X 720p</th><td class="na">&mdash;</td><td class="win"><a href="https://www.gamingcity.com.ar/webcam-camara-web-genius-facecam-1000x-hd-720p-gamingcity--det--8217" target="_blank" rel="noopener">$29.924</a></td><td class="na">&mdash;</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/c270.jpg" alt="" loading="lazy"></span>Logitech C270 HD 720p</th><td class="win"><a href="https://compragamer.com/producto/WebCam_Logitech_C270_HD_720p_USB_4140" target="_blank" rel="noopener">$34.750</a></td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c270-black-hd--det--1280" target="_blank" rel="noopener">$37.049</a></td><td>$35.369</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/genius2010.jpg" alt="" loading="lazy"></span>Genius Facecam 2010 FHD</th><td class="na">&mdash;</td><td class="win"><a href="https://www.gamingcity.com.ar/webcam-webcam-genius-facecam-2010-fhd-1080p-gamingcity--det--19366" target="_blank" rel="noopener">$44.174</a></td><td class="na">&mdash;</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/brio100.jpg" alt="" loading="lazy"></span>Logitech Brio 100 FHD</th><td class="na">&mdash;</td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-brio-100-full-hd-white--det--14779" target="_blank" rel="noopener">$59.849</a></td><td class="win"><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html" target="_blank" rel="noopener">$56.999</a></td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/gw911.jpg" alt="" loading="lazy"></span>Redragon GW911 4K</th><td><a href="https://compragamer.com/producto/Webcam_Redragon_Cyberlens_GW911_4K_Ultra_HD_Dual_Noice_Cancelling_USB_20139" target="_blank" rel="noopener">$89.550</a></td><td class="na">&mdash;</td><td class="win"><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/51101-c%C3%A1mara-web-redragon-gw911-4k-full-hd.html" target="_blank" rel="noopener">$88.489</a></td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/brio300.jpg" alt="" loading="lazy"></span>Logitech Brio 300 FHD</th><td class="na">&mdash;</td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-brio-300-full-hd-white--det--11780" target="_blank" rel="noopener">$94.999</a></td><td class="win"><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/45351-c%C3%A1mara-web-logitech-brio-300-full-hd-streaming-negro.html" target="_blank" rel="noopener">$91.199</a></td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/trust-taxon.jpg" alt="" loading="lazy"></span>Trust Taxon QHD 1440p</th><td class="na">&mdash;</td><td class="win"><a href="https://www.gamingcity.com.ar/webcam-webcam-trust-taxon-qhd-1440p-eco-usb-con-microfono-gamingcity--det--18259" target="_blank" rel="noopener">$94.050</a></td><td class="na">&mdash;</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/c920s.jpg" alt="" loading="lazy"></span>Logitech C920S Pro FHD</th><td class="na">&mdash;</td><td class="win"><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164" target="_blank" rel="noopener">$137.749</a></td><td><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/30133-c%C3%A1mara-web-logitech-c920s-pro-full-hd.html" target="_blank" rel="noopener">$157.519</a></td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/c922.jpg" alt="" loading="lazy"></span>Logitech C922 Pro FHD</th><td class="na">&mdash;</td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c922-pro-hd-stream-1080p--det--4996" target="_blank" rel="noopener">$161.499</a></td><td class="win"><a href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/34580-c%C3%A1mara-web-logitech-c922-pro-full-hd.html" target="_blank" rel="noopener">$148.529</a></td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/brio505.jpg" alt="" loading="lazy"></span>Logitech Brio 500 / 505 FHD</th><td class="win"><a href="https://compragamer.com/producto/Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_20149" target="_blank" rel="noopener">$185.100</a></td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-brio-500-full-hd-rose--det--12093" target="_blank" rel="noopener">$199.499</a></td><td>$204.999</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/trust-teza.jpg" alt="" loading="lazy"></span>Trust Teza 4K UHD</th><td class="na">&mdash;</td><td class="win"><a href="https://www.gamingcity.com.ar/webcam-webcam-trust-teza-4k-uhd-60fps-con-microfono-dual-gamingcity--det--18252" target="_blank" rel="noopener">$208.050</a></td><td class="na">&mdash;</td></tr>
-          <tr><th class="m"><span class="thumb xs"><img src="img/brio4k.jpg" alt="" loading="lazy"></span>Logitech Brio 4K / MX Brio</th><td class="win"><a href="https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150" target="_blank" rel="noopener">$259.400</a></td><td><a href="https://www.gamingcity.com.ar/webcam-webcam-logitech-mx-brio-ultra-hd-4k-black--det--14397" target="_blank" rel="noopener">$346.749</a></td><td>$317.899</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="picks">
-      <div class="pick s-gc" style="--i:0">
-        <h3><svg class="ico"><use href="#i-trophy"/></svg> La que compraría</h3>
-        <a class="thumb pk" href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164" target="_blank" rel="noopener"><img src="img/c920s.jpg" alt="Logitech C920S Pro" loading="lazy"></a>
-        <a class="lead" href="https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164" target="_blank" rel="noopener">$137.749</a>
-        <span class="leadname">Logitech C920S Pro &middot; Gaming City</span>
-        <dl>
-          <dt>Un pago con tarjeta</dt><dd>$144.999</dd>
-          <dt>Resolución</dt><dd>1080p / 30 fps</dd>
-          <dt>Garantía</dt><dd>12 meses</dd>
-          <dt>Entrega</dt><dd>retiro Mendoza</dd>
-        </dl>
-        <p>Lente de vidrio de cinco elementos, autofoco, micrófonos estéreo duales y tapa de privacidad. Es el estándar contra el que se comparan todas las demás desde hace años.</p>
-      </div>
-
-      <div class="pick s-mx" style="--i:1">
-        <h3><svg class="ico"><use href="#i-coin"/></svg> Si querés gastar poco</h3>
-        <a class="thumb pk" href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html" target="_blank" rel="noopener"><img src="img/brio100.jpg" alt="Logitech Brio 100" loading="lazy"></a>
-        <a class="lead" href="https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html" target="_blank" rel="noopener">$56.999</a>
-        <span class="leadname">Logitech Brio 100 FHD &middot; Mexx</span>
-        <dl>
-          <dt>Resolución</dt><dd>1080p</dd>
-          <dt>Contra la C920S</dt><dd>&minus;59%</dd>
-          <dt>Promo</dt><dd>11% OFF</dd>
-        </dl>
-        <p>Full HD de Logitech por menos de la mitad. Resigna el autofoco y la calidad de lente, pero para reuniones alcanza y sobra. Evitá bajar a 720p: la C270 y la Genius ya se ven viejas en cualquier pantalla moderna.</p>
-      </div>
-
-      <div class="pick s-cg" style="--i:2">
-        <h3><svg class="ico"><use href="#i-ban"/></svg> Lo que no compraría</h3>
-        <a class="thumb pk" href="https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150" target="_blank" rel="noopener"><img src="img/brio4k.jpg" alt="Logitech Brio 4K" loading="lazy"></a>
-        <a class="lead" href="https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150" target="_blank" rel="noopener">$259.400</a>
-        <span class="leadname">Logitech Brio 4K &middot; CompraGamer</span>
-        <dl>
-          <dt>MX Brio en Gaming City</dt><dd>$346.749</dd>
-          <dt>Contra la C920S</dt><dd>+88% a +152%</dd>
-        </dl>
-        <p>Zoom, Meet y Teams topean en 1080p: el 4K no viaja por la videollamada. Solo se justifica si grabás material para editar después.</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2><svg class="ico"><use href="#i-trophy"/></svg> Veredicto</h2>
-    <div class="verdict">
-      <p><b>Comprá el <a class="go" href="https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151" target="_blank" rel="noopener">ADATA XPG Gammix D35 en CompraGamer</a>.</b> $221.450 por transferencia, $228.089 puesto en un punto de retiro de Mendoza o $233.108 en tu casa. Es el que mejor combina marca, latencia y garantía por lo que sale, y con el envío adentro sigue siendo el más barato de los tres. Elegí depósito o transferencia para que entre el 10%, y acordate de activar XMP en la BIOS o te queda en CL22.</p>
-      <p><b>El Kingston ya no tiene argumento de precio.</b> A $236.550 con retiro gratis en Mendoza sale $3.442 más que el ADATA puesto en tu puerta, con CL22 en vez de CL16 y 12 meses de garantía en vez de 36. Solo conviene si necesitás la memoria hoy mismo o si tu motherboard es rara y querés el respaldo del QVL de Kingston. Contra los $354.950 que te cotizó Todo Computación por ese mismo código, igual seguís ahorrando $118.400.</p>
-      <p><b>Si querés la marca más probada:</b> Corsair Vengeance LPX a $251.600. Son $30.150 arriba del Gammix por specs equivalentes; se justifica solo si ya tenés preferencia por Corsair.</p>
-      <p><b>Lo que descartaría:</b> cualquier cosa con RGB o línea Fury. Son entre $150.000 y $270.000 más por luces, y en oficina o gaming común la diferencia real de rendimiento es de un dígito porcentual.</p>
-      <p><b>Y si vas por la RAM y la webcam juntas:</b> comprar todo en Gaming City Mendoza te sale <b>$374.299</b> (Kingston KVR $236.550 + C920S $137.749), retirado gratis el mismo día, en una sola operación. Partir la compra te sale <b>$365.838</b>: el Gammix en CompraGamer con envío a punto de retiro ($228.089) más la C920S en Gaming City Mendoza ($137.749). Son <b>$8.461 menos</b> y además la RAM pasa de CL22 con 12 meses a CL16 con 36. Por esa diferencia, vale la pena hacer dos compras.</p>
-    </div>
-  </section>
-
-  <p class="foot">Precios con IVA, tomados de CompraGamer, Gaming City, Mexx y FullH4rd el 6 de octubre de 2026. No incluyen envío salvo donde se aclara. Las miniaturas son las fotos oficiales de cada producto, guardadas en la carpeta <code>img/</code> junto a este archivo, así la página funciona también sin conexión y en GitHub Pages. Las specs técnicas están tomadas de las webs de ADATA, Corsair y Kingston, no de las fichas de las tiendas: CompraGamer publica 1,2 V y «disipador alto» para el Gammix y la LPX, pero 1,2 V es el valor SPD y el perfil XMP de ambos corre a 1,35 V, y los dos módulos son de perfil bajo. ComparaYa quedó afuera del cruce: su catálogo cubre celulares, notebooks, televisores, monitores y placas de video, pero no indexa memorias RAM. El stock y los precios de hardware se mueven rápido: confirmá antes de pagar.</p>
+  <p class="nota" id="nota"></p>
 </div>
+
+<script>
+/* === DATOS: generado por actualizar.py, no editar a mano === */
+const DATOS = {
+ "actualizado": "2026-10-06",
+ "envio": {
+  "cp": "5501",
+  "zona": "Mendoza",
+  "domicilio": 11658,
+  "punto": 6639
+ },
+ "tiendas": {
+  "compragamer": {
+   "nombre": "CompraGamer",
+   "color": "cg",
+   "rol": "la mejor para marca premium",
+   "promo": "10% OFF por depósito o transferencia",
+   "entrega": "envío a todo el país",
+   "web": "https://compragamer.com"
+  },
+  "gamingcity": {
+   "nombre": "Gaming City",
+   "color": "gc",
+   "rol": "picos altos, catálogo irregular",
+   "promo": "precio especial con transferencia",
+   "entrega": "retiro gratis en sucursal Mendoza",
+   "web": "https://www.gamingcity.com.ar"
+  },
+  "mexx": {
+   "nombre": "Mexx",
+   "color": "mx",
+   "rol": "el piso de precio",
+   "promo": "11% OFF más 3 cuotas sin interés",
+   "entrega": "envío desde Buenos Aires",
+   "web": "https://www.mexx.com.ar"
+  },
+  "fullh4rd": {
+   "nombre": "FullH4rd",
+   "color": "fh",
+   "rol": "imbatible solo en Hiksemi",
+   "promo": "precio con débito, transferencia o efectivo",
+   "entrega": "envío desde CABA",
+   "web": "https://fullh4rd.com.ar"
+  }
+ },
+ "productos": [
+  {
+   "id": "adata-d35",
+   "tipo": "ram",
+   "podio": 1,
+   "destacado": true,
+   "nombre": "ADATA XPG Gammix D35 Black CL16",
+   "corto": "ADATA XPG D35",
+   "sku": "AX4U320016G16A-SBKD35",
+   "tienda": "compragamer",
+   "fuente": {
+    "tipo": "compragamer",
+    "id_producto": 17151
+   },
+   "url": "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
+   "img": "img/adata-d35.jpg",
+   "precio": 221450,
+   "precio_lista": 246056,
+   "sin_impuestos": 200407,
+   "stock": "en stock",
+   "titular": "El mejor equilibrio de marca, latencia y garantía",
+   "specs": {
+    "Timings": "16-20-20",
+    "Latencia real": "10,0 ns",
+    "Voltaje del perfil": "1,35 V XMP",
+    "Rangos": "simple",
+    "Disipador": "sí, 33 mm",
+    "Garantía local": "36 meses",
+    "Garantía de fábrica": "de por vida",
+    "Retiro en Mendoza": "no"
+   },
+   "chips": [
+    "CL16 · 10,0 ns",
+    "1,35 V XMP",
+    "perfil bajo 33 mm",
+    "36 meses",
+    "en stock"
+   ],
+   "pros": [
+    "Timings 16-20-20: 10,0 ns de latencia real contra 13,75 ns del Kingston, un 37% menos.",
+    "36 meses de garantía local, el triple que el Kingston. De fábrica ADATA la da de por vida.",
+    "ADATA fabrica sus propios módulos y hace binning de los chips; XPG es su línea de rendimiento.",
+    "Perfil bajo de 33 mm: entra debajo de cualquier cooler de torre."
+   ],
+   "contras": [
+    "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
+   ]
+  },
+  {
+   "id": "kingston-kvr",
+   "tipo": "ram",
+   "podio": 2,
+   "nombre": "Kingston ValueRAM KVR32N22D8/16",
+   "corto": "Kingston KVR",
+   "sku": "KVR32N22D8/16 · densidad 8 Gbit",
+   "tienda": "gamingcity",
+   "fuente": {
+    "tipo": "meta",
+    "clave": "product:price:amount"
+   },
+   "url": "https://www.gamingcity.com.ar/ddr4-kingston-ddr4-16gb-memoria-ram-3200mhz-cl22--det--17256",
+   "img": "img/kingston-kvr.jpg",
+   "precio": 236550,
+   "precio_lista": 249000,
+   "sin_impuestos": 214072,
+   "stock": "en stock",
+   "titular": "El único que retirás en Mendoza, gratis y hoy",
+   "specs": {
+    "Timings": "22-22-22",
+    "Latencia real": "13,75 ns",
+    "Voltaje del perfil": "1,2 V JEDEC",
+    "Rangos": "doble (D8)",
+    "Disipador": "no",
+    "Garantía local": "12 meses",
+    "Garantía de fábrica": "de por vida",
+    "Retiro en Mendoza": "sí, gratis"
+   },
+   "chips": [
+    "CL22 · 13,75 ns",
+    "1,2 V · sin XMP",
+    "doble rango",
+    "sin disipador",
+    "retiro en Mendoza"
+   ],
+   "pros": [
+    "Es el único de los tres que podés retirar en Mendoza, gratis y el mismo día.",
+    "Kingston publica listas de compatibilidad por modelo de motherboard; si tu placa es rara, esto importa.",
+    "Corre a 3200 nativo sin tocar la BIOS, a 1,2 V y más frío que los otros dos.",
+    "El sufijo D8 es doble rango: recupera un 2 a 4% por intercalado y achica la brecha con los CL16."
+   ],
+   "contras": [
+    "13,75 ns de latencia contra 10,0 ns de los otros dos. Es la línea ValueRAM, sin selección de chips.",
+    "Ojo con la foto del aviso: Gaming City publica una imagen equivocada, muestra un cooler Corsair. El código y la descripción sí son los correctos."
+   ]
+  },
+  {
+   "id": "corsair-lpx",
+   "tipo": "ram",
+   "podio": 3,
+   "nombre": "Corsair Vengeance LPX Black CL16",
+   "corto": "Corsair LPX",
+   "sku": "CMK16GX4M1E3200C16",
+   "tienda": "compragamer",
+   "fuente": {
+    "tipo": "compragamer",
+    "id_producto": 15560
+   },
+   "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
+   "img": "img/corsair-lpx.jpg",
+   "precio": 251600,
+   "precio_lista": 279556,
+   "sin_impuestos": 227692,
+   "stock": "en stock",
+   "titular": "La marca más probada, por treinta mil pesos más",
+   "specs": {
+    "Timings": "16-20-20-38",
+    "Latencia real": "10,0 ns",
+    "Voltaje del perfil": "1,35 V XMP",
+    "Rangos": "simple",
+    "Disipador": "sí, 34 mm",
+    "Garantía local": "24 meses",
+    "Garantía de fábrica": "de por vida",
+    "Retiro en Mendoza": "no"
+   },
+   "chips": [
+    "CL16 · 10,0 ns",
+    "1,35 V XMP",
+    "perfil bajo 34 mm",
+    "24 meses",
+    "en stock"
+   ],
+   "pros": [
+    "Corsair es la marca con más recorrido de las tres y la Vengeance LPX es su módulo más probado.",
+    "Timings 16-20-20-38, los mismos 10,0 ns que el Gammix. LPX significa perfil bajo: 34 mm."
+   ],
+   "contras": [
+    "Más caro que el Gammix por specs prácticamente idénticas y un año menos de garantía local.",
+    "En FullH4rd la misma línea sale $287.590: comprarla en el lugar equivocado te cuesta $35.990 de más."
+   ]
+  },
+  {
+   "id": "hiksemi-armor",
+   "tipo": "ram-ref",
+   "nombre": "Hiksemi Armor CL18",
+   "corto": "Hiksemi Armor",
+   "sku": "HSC416U32Z2-16G",
+   "tienda": "mexx",
+   "fuente": {
+    "tipo": "itemprop"
+   },
+   "url": "https://www.mexx.com.ar/productos-rubro/memorias-ram/51488-memoria-ram-ddr4-16gb-3200-mhz-hiksemi-armor.html",
+   "img": "img/hiksemi-armor.jpg",
+   "precio": 214989,
+   "precio_lista": 241561,
+   "sin_impuestos": 194560,
+   "stock": "en stock"
+  },
+  {
+   "id": "hiksemi-hiker",
+   "tipo": "ram-ref",
+   "nombre": "Hiksemi Hiker CL22",
+   "corto": "Hiksemi Hiker",
+   "sku": "MEM1826",
+   "tienda": "fullh4rd",
+   "fuente": {
+    "tipo": "og"
+   },
+   "url": "https://fullh4rd.com.ar/prod/27343/memoria-16gb-ddr4-3200-hiksemi-hiker",
+   "img": "img/kingston-kvr.jpg",
+   "precio": 214755,
+   "precio_lista": 236231,
+   "sin_impuestos": 194348,
+   "stock": "stock alto"
+  },
+  {
+   "id": "c920s",
+   "tipo": "webcam",
+   "podio": 1,
+   "destacado": true,
+   "nombre": "Logitech C920S Pro",
+   "corto": "C920S Pro",
+   "sku": "1080p / 30 fps",
+   "tienda": "gamingcity",
+   "fuente": {
+    "tipo": "meta",
+    "clave": "product:price:amount"
+   },
+   "url": "https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164",
+   "img": "img/c920s.jpg",
+   "precio": 137749,
+   "precio_lista": 144999,
+   "sin_impuestos": 113842,
+   "stock": "en stock",
+   "titular": "La que compraría",
+   "specs": {
+    "Resolución": "1080p / 30 fps",
+    "Lente": "vidrio, 5 elementos",
+    "Enfoque": "automático",
+    "Micrófono": "estéreo dual",
+    "Privacidad": "tapa incorporada",
+    "Garantía": "12 meses",
+    "Entrega": "retiro Mendoza"
+   },
+   "chips": [
+    "1080p30",
+    "autofoco",
+    "tapa de privacidad",
+    "retiro en Mendoza"
+   ],
+   "pros": [
+    "Lente de vidrio de cinco elementos y autofoco: es el estándar contra el que se comparan todas las demás.",
+    "Tapa de privacidad incorporada y micrófonos estéreo a los lados.",
+    "La retirás gratis en Mendoza el mismo día."
+   ],
+   "contras": [
+    "En Mexx la misma cámara sale $157.519, un 14% más."
+   ]
+  },
+  {
+   "id": "brio100",
+   "tipo": "webcam",
+   "podio": 2,
+   "nombre": "Logitech Brio 100 FHD",
+   "corto": "Brio 100",
+   "sku": "1080p",
+   "tienda": "mexx",
+   "fuente": {
+    "tipo": "itemprop"
+   },
+   "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/52590-c%C3%A1mara-web-logitech-brio-100-blanca.html",
+   "img": "img/brio100.jpg",
+   "precio": 56999,
+   "precio_lista": 64044,
+   "sin_impuestos": null,
+   "stock": "en stock",
+   "titular": "Si querés gastar poco",
+   "specs": {
+    "Resolución": "1080p",
+    "Lente": "fijo",
+    "Enfoque": "fijo",
+    "Micrófono": "mono con reducción de ruido",
+    "Privacidad": "tapa integrada",
+    "Garantía": "12 meses",
+    "Entrega": "envío desde Buenos Aires"
+   },
+   "chips": [
+    "1080p",
+    "Logitech",
+    "11% OFF",
+    "en stock"
+   ],
+   "pros": [
+    "Full HD de Logitech por menos de la mitad de lo que sale la C920S.",
+    "Para reuniones de trabajo alcanza y sobra."
+   ],
+   "contras": [
+    "Resigna el autofoco y la calidad de lente de la C920S.",
+    "No bajes de acá: la C270 y la Genius son 720p y ya se ven viejas en cualquier pantalla moderna."
+   ]
+  },
+  {
+   "id": "brio4k",
+   "tipo": "webcam",
+   "podio": 3,
+   "evitar": true,
+   "nombre": "Logitech Brio 4K UHD",
+   "corto": "Brio 4K",
+   "sku": "4K / 1080p 60 fps",
+   "tienda": "compragamer",
+   "fuente": {
+    "tipo": "compragamer",
+    "id_producto": 20150
+   },
+   "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
+   "img": "img/brio4k.jpg",
+   "precio": 259400,
+   "precio_lista": 288222,
+   "sin_impuestos": 214380,
+   "stock": "en stock",
+   "titular": "Lo que no compraría",
+   "specs": {
+    "Resolución": "4K / 1080p 60 fps",
+    "Lente": "vidrio con HDR",
+    "Enfoque": "automático",
+    "Micrófono": "estéreo dual",
+    "Privacidad": "tapa incluida",
+    "Garantía": "24 meses",
+    "Entrega": "envío a todo el país"
+   },
+   "chips": [
+    "4K UHD",
+    "HDR",
+    "USB-C",
+    "la más cara"
+   ],
+   "pros": [
+    "Si grabás material para editar después, el 4K real sirve."
+   ],
+   "contras": [
+    "Zoom, Meet y Teams topean en 1080p: el 4K no viaja por la videollamada.",
+    "La MX Brio en Gaming City sale todavía más, $346.749."
+   ]
+  },
+  {
+   "id": "c922",
+   "tipo": "webcam-ref",
+   "nombre": "Logitech C922 Pro",
+   "corto": "C922 Pro",
+   "tienda": "mexx",
+   "fuente": {
+    "tipo": "itemprop"
+   },
+   "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/34580-c%C3%A1mara-web-logitech-c922-pro-full-hd.html",
+   "img": "img/c922.jpg",
+   "precio": 148529,
+   "precio_lista": null,
+   "stock": "en stock"
+  },
+  {
+   "id": "gw911",
+   "tipo": "webcam-ref",
+   "nombre": "Redragon GW911 4K",
+   "corto": "GW911 4K",
+   "tienda": "mexx",
+   "fuente": {
+    "tipo": "itemprop"
+   },
+   "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/51101-c%C3%A1mara-web-redragon-gw911-4k-full-hd.html",
+   "img": "img/gw911.jpg",
+   "precio": 88489,
+   "precio_lista": null,
+   "stock": "en stock"
+  },
+  {
+   "id": "brio505",
+   "tipo": "webcam-ref",
+   "nombre": "Logitech Brio 505 FHD",
+   "corto": "Brio 505",
+   "tienda": "compragamer",
+   "fuente": {
+    "tipo": "compragamer",
+    "id_producto": 20149
+   },
+   "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_20149",
+   "img": "img/brio505.jpg",
+   "precio": 185100,
+   "precio_lista": 205667,
+   "stock": "en stock",
+   "sin_impuestos": 152975
+  },
+  {
+   "id": "genius1000x",
+   "tipo": "webcam-ref",
+   "nombre": "Genius Facecam 1000X 720p",
+   "corto": "Genius 1000X",
+   "tienda": "gamingcity",
+   "fuente": {
+    "tipo": "meta",
+    "clave": "product:price:amount"
+   },
+   "url": "https://www.gamingcity.com.ar/webcam-camara-web-genius-facecam-1000x-hd-720p-gamingcity--det--8217",
+   "img": "img/genius1000x.jpg",
+   "precio": 29924,
+   "precio_lista": null,
+   "stock": "en stock"
+  }
+ ],
+ "historial": [],
+ "veredicto": [
+  {
+   "t": "Comprá el ADATA XPG Gammix D35 en CompraGamer.",
+   "d": "Es el que mejor combina marca, latencia y garantía por lo que sale, y con el envío adentro sigue siendo el más barato de los tres. Elegí depósito o transferencia para que entre el 10%, y acordate de activar XMP en la BIOS o te queda en CL22."
+  },
+  {
+   "t": "El Kingston ya no tiene argumento de precio.",
+   "d": "Con retiro gratis en Mendoza sale apenas más que el ADATA puesto en tu puerta, con CL22 en vez de CL16 y 12 meses de garantía en vez de 36. Solo conviene si necesitás la memoria hoy mismo o si tu motherboard es rara y querés el respaldo del QVL de Kingston."
+  },
+  {
+   "t": "Lo que descartaría.",
+   "d": "Cualquier cosa con RGB o línea Fury. Son entre $150.000 y $270.000 más por luces, y en oficina o gaming común la diferencia real de rendimiento es de un dígito porcentual."
+  },
+  {
+   "t": "Si vas por la RAM y la webcam juntas.",
+   "d": "Comprar todo en Gaming City Mendoza es una sola operación, retirada gratis el mismo día. Partir la compra entre CompraGamer y Gaming City sale menos y además la RAM pasa de CL22 con 12 meses a CL16 con 36. Por esa diferencia vale la pena hacer dos compras."
+  }
+ ],
+ "calculado": {
+  "adata_punto": 228089,
+  "adata_domicilio": 233108,
+  "kingston_retiro": 236550,
+  "combo_gc": 374299,
+  "combo_partido": 365838,
+  "ram_mas_barata": "hiksemi-hiker",
+  "webcam_mas_barata": "genius1000x"
+ }
+};
+/* === FIN DATOS === */
+
+const $ = (s, r = document) => r.querySelector(s);
+const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const icono = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
+
+const P = DATOS.productos || [];
+const T = DATOS.tiendas || {};
+const porId = Object.fromEntries(P.map(p => [p.id, p]));
+const de = tipo => P.filter(p => p.tipo === tipo).sort((a, b) => a.podio - b.podio);
+const rams = de("ram"), cams = de("webcam");
+
+const VISTAS = [
+  { id: "memorias", eti: "Memorias", ico: "chip", n: () => rams.length },
+  { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
+  { id: "webcams", eti: "Webcams", ico: "cam", n: () => cams.length },
+  { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
+];
+
+/* --- Tarjeta --- */
+function tarjeta(p, i) {
+  const t = T[p.tienda] || {};
+  return `<button class="card c-${t.color || "fh"}${p.destacado ? " dest" : ""}" style="--i:${i}"
+      data-abrir="${p.id}" aria-label="Ver análisis de ${esc(p.nombre)}">
+    <div class="barra"></div>
+    ${p.destacado ? `<span class="cinta">${icono("trofeo")} mejor</span>` : ""}
+    <span class="rank">${p.podio}</span>
+    <div class="foto"><img src="${p.img}" alt="${esc(p.nombre)}" loading="lazy"></div>
+    <div class="cuerpo">
+      <h3>${esc(p.nombre)}</h3>
+      <span class="tienda">${icono("store")} ${esc(t.nombre || "")}</span>
+      <div><span class="precio">${pesos(p.precio)}</span>${p.precio_lista ? `<span class="antes">${pesos(p.precio_lista)}</span>` : ""}</div>
+      <p class="titular">${esc(p.titular || "")}</p>
+      <div class="chips">${(p.chips || []).map(c => `<span class="chip${/ns|retiro|stock|OFF/.test(c) ? " ok" : ""}">${esc(c)}</span>`).join("")}</div>
+      <div class="pie">
+        <span class="ver">Ver análisis ${icono("der")}</span>
+        <span class="ir">${icono("fuera")} ${esc(t.nombre || "")}</span>
+      </div>
+    </div>
+  </button>`;
+}
+
+/* --- Tabla comparativa, resaltando el producto abierto --- */
+function comparativa(grupo, foco) {
+  const filas = Object.keys(grupo[0].specs || {});
+  const color = T[foco.tienda].color;
+  const mejor = {
+    "Latencia real": v => v === "10,0 ns", "Disipador": v => v.startsWith("sí"),
+    "Garantía local": v => parseInt(v) >= 36, "Retiro en Mendoza": v => v.startsWith("sí"),
+    "Voltaje del perfil": v => v.includes("1,2"), "Rangos": v => v.startsWith("doble")
+  };
+  return `<div class="scroll"><table>
+    <thead><tr><th>&nbsp;</th>${grupo.map(p =>
+      `<th class="${p.id === foco.id ? "foco" : ""}">${esc(p.corto)}</th>`).join("")}</tr></thead>
+    <tbody>
+      <tr><th>Precio</th>${grupo.map(p => celda(pesos(p.precio), p, foco, p.precio === Math.min(...grupo.map(x => x.precio)))).join("")}</tr>
+      ${filas.map(f => `<tr><th>${esc(f)}</th>${grupo.map(p =>
+        celda(p.specs[f], p, foco, mejor[f] ? mejor[f](p.specs[f]) : false)).join("")}</tr>`).join("")}
+    </tbody></table></div>`.replace(/class="scroll"/, `class="scroll c-${color}"`);
+}
+const celda = (v, p, foco, destacar) =>
+  `<td class="${p.id === foco.id ? "foco" : ""}${destacar ? " mejor" : ""}">${esc(v)}</td>`;
+
+/* --- Vista de analisis --- */
+function detalle(p) {
+  const t = T[p.tienda], grupo = p.tipo === "ram" ? rams : cams;
+  return `<div class="detalle c-${t.color}">
+    <button class="volver" data-volver>${icono("izq")} Volver a ${p.tipo === "ram" ? "memorias" : "webcams"}</button>
+    <div class="dcab">
+      <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
+      <div>
+        <h2>${esc(p.nombre)}</h2>
+        <p class="dsku">${esc(p.sku || "")}</p>
+        <span class="tienda">${icono("store")} ${esc(t.nombre)} · ${esc(t.entrega)}</span>
+      </div>
+      <div class="dprecio">
+        <a class="v" href="${p.url}" target="_blank" rel="noopener">${pesos(p.precio)}</a>
+        <span class="l">${p.precio_lista ? "lista " + pesos(p.precio_lista) + " · " : ""}${esc(t.promo)}</span>
+        <span class="l"><a class="ir" href="${p.url}" target="_blank" rel="noopener">${icono("fuera")} abrir en ${esc(t.nombre)}</a></span>
+      </div>
+    </div>
+    <div class="dos">
+      <div class="bloque"><h3>${icono("check")} A favor</h3>
+        <ul class="lista">${(p.pros || []).map(x => `<li class="p">${esc(x)}</li>`).join("")}</ul></div>
+      <div class="bloque"><h3>${icono("aviso")} En contra</h3>
+        <ul class="lista">${(p.contras || []).map(x => `<li class="m">${esc(x)}</li>`).join("")}</ul></div>
+    </div>
+    <div class="panel-head"><h2>${icono("balanza")} Lo que cambia entre las tres</h2>
+      <p class="sub">La columna resaltada es la que estás mirando. En verde, el mejor valor de cada fila.</p></div>
+    ${comparativa(grupo, p)}
+  </div>`;
+}
+
+/* --- Vistas --- */
+function vistaGrilla(lista, titulo, bajada) {
+  return `<div class="panel"><div class="panel-head"><h2>${titulo}</h2><p class="sub">${bajada}</p></div>
+    <div class="grid">${lista.map(tarjeta).join("")}</div></div>`;
+}
+
+function vistaTiendas() {
+  const ganadores = {
+    compragamer: ["corsair-lpx", "brio4k", "brio505", "adata-d35"],
+    gamingcity: ["kingston-kvr", "c920s", "genius1000x"],
+    mexx: ["hiksemi-armor", "c922", "brio100", "gw911"]
+  };
+  const flaco = {
+    compragamer: "Catálogo chico: cuatro webcams en total y no vende módulos Kingston ValueRAM sueltos.",
+    gamingcity: "Cuando pierde, pierde feo: la Fury Beast RGB y la MX Brio son los peores precios del relevamiento.",
+    mexx: "El catálogo tira a segunda línea y en gama alta se dispara."
+  };
+  const cards = Object.keys(ganadores).map((k, i) => {
+    const t = T[k];
+    return `<div class="card c-${t.color}" style="--i:${i};cursor:default">
+      <div class="barra"></div>
+      <span class="rank">${i + 1}</span>
+      <div class="cuerpo" style="padding-top:20px">
+        <h3 style="color:var(--c)">${icono("store")} ${esc(t.nombre)}</h3>
+        <p class="titular" style="font-family:var(--font-mono);font-size:.8rem">${esc(t.rol)}</p>
+        <ul class="wins">${ganadores[k].map(id => {
+          const p = porId[id]; if (!p) return "";
+          return `<li><a href="${p.url}" target="_blank" rel="noopener">
+            <span class="mini"><img src="${p.img}" alt="" loading="lazy"></span>
+            <span class="txt">${esc(p.nombre)}</span><b>${pesos(p.precio)}</b></a></li>`;
+        }).join("")}</ul>
+        <p class="flaco">${icono("aviso")} ${esc(flaco[k])}</p>
+      </div></div>`;
+  }).join("");
+  return `<div class="panel"><div class="panel-head"><h2>Las 3 webs que mejor pagan la calidad</h2>
+    <p class="sub">Ninguna gana en todo. Esto es lo que cada una tiene más barato que las demás; cada línea abre el producto.</p></div>
+    <div class="grid">${cards}</div>
+    <p class="flaco" style="margin-top:18px">${icono("aviso")} <span><b>FullH4rd</b> queda afuera del podio pero es imbatible en Hiksemi:
+    <a href="${porId["hiksemi-hiker"].url}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>.
+    En primera línea se dispara: el Kingston le sale 38% más que en Gaming City.</span></p></div>`;
+}
+
+function vistaVeredicto() {
+  const c = DATOS.calculado || {}, e = DATOS.envio || {};
+  const tiles = [
+    { k: "Mejor compra", v: pesos(porId["adata-d35"].precio), d: "ADATA XPG D35 · CompraGamer", ok: true },
+    { k: `Puesto en ${e.zona}, punto`, v: pesos(c.adata_punto), d: `envío OCA ${pesos(e.punto)}`, ok: true },
+    { k: `Puesto en ${e.zona}, domicilio`, v: pesos(c.adata_domicilio), d: `envío OCA ${pesos(e.domicilio)}` },
+    { k: "Kingston, retiro gratis", v: pesos(c.kingston_retiro), d: `${pesos(c.kingston_retiro - c.adata_domicilio)} más caro` }
+  ];
+  return `<div class="panel"><div class="panel-head"><h2>Veredicto</h2>
+    <p class="sub">Todo recalculado con los precios de hoy, envío a CP ${esc(e.cp)} incluido.</p></div>
+    <div class="tiles">${tiles.map((t, i) => `<div class="tile${t.ok ? " ok" : ""}" style="--i:${i}">
+      <div class="k">${esc(t.k)}</div><div class="v">${t.v}</div><div class="d">${esc(t.d)}</div></div>`).join("")}</div>
+    <div class="tiles"><div class="tile" style="--i:0"><div class="k">${icono("camion")} Combo RAM + webcam, todo en Gaming City</div>
+      <div class="v">${pesos(c.combo_gc)}</div><div class="d">una sola compra, retiro gratis</div></div>
+      <div class="tile ok" style="--i:1"><div class="k">${icono("camion")} Combo partido entre dos tiendas</div>
+      <div class="v">${pesos(c.combo_partido)}</div><div class="d">${pesos(c.combo_gc - c.combo_partido)} menos, y la RAM mejora</div></div></div>
+    ${(DATOS.veredicto || []).map((v, i) => `<div class="ver-item" style="--i:${i}">
+      <b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
+}
+
+/* --- Ruteo --- */
+function pintar(id) {
+  const v = $("#vista");
+  if (id === "memorias") v.innerHTML = vistaGrilla(rams, "Las 3 mejores memorias por marca/precio",
+    "Módulo único de 16GB DDR4 3200 para escritorio. El detalle de specs está dentro de cada tarjeta.");
+  else if (id === "webcams") v.innerHTML = vistaGrilla(cams, "Las 3 mejores webcams",
+    "Las que valen la pena de las trece relevadas en las mismas tiendas.");
+  else if (id === "tiendas") v.innerHTML = vistaTiendas();
+  else if (id === "veredicto") v.innerHTML = vistaVeredicto();
+  else if (porId[id]) { v.innerHTML = detalle(porId[id]); return; }
+  document.querySelectorAll(".tab").forEach(b =>
+    b.setAttribute("aria-selected", String(b.dataset.ir === id)));
+}
+
+/* El hash es la unica fuente de verdad: asi andan el boton Atras del
+   navegador, los enlaces directos a una tarjeta y recargar la pagina. */
+let subirAlPintar = false;
+
+function aplicar(id) {
+  pintar(VISTAS.some(v => v.id === id) || porId[id] ? id : "memorias");
+  if (subirAlPintar) $(".tabs").scrollIntoView({ behavior: "smooth", block: "start" });
+  subirAlPintar = false;
+}
+
+function ir(id, scroll) {
+  subirAlPintar = !!scroll;
+  if (location.hash.slice(1) === id) aplicar(id);
+  else location.hash = id;
+}
+
+window.addEventListener("hashchange", () => aplicar(location.hash.slice(1)));
+
+function arrancar() {
+  if (!P.length) { $("#vista").innerHTML = '<p class="sub">No hay datos cargados todavía. Corré <code>python actualizar.py --build</code>.</p>'; return; }
+  $("#tablist").innerHTML = VISTAS.map(v => {
+    const n = v.n();
+    return `<button class="tab" role="tab" data-ir="${v.id}" aria-selected="false">
+      ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
+  }).join("");
+  $("#sello").textContent = `Precios verificados en cada sitio · actualizado ${DATOS.actualizado} · ${P.length} productos seguidos`;
+  $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx y FullH4rd, con el precio de
+    transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
+    de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
+    mueven rápido: confirmá antes de pagar.`;
+
+  document.addEventListener("click", ev => {
+    const tab = ev.target.closest(".tab");
+    if (tab) return ir(tab.dataset.ir, false);
+    const abrir = ev.target.closest("[data-abrir]");
+    if (abrir) return ir(abrir.dataset.abrir, true);
+    if (ev.target.closest("[data-volver]")) {
+      const p = porId[location.hash.slice(1)];
+      return ir(p && p.tipo === "webcam" ? "webcams" : "memorias", true);
+    }
+  });
+
+  aplicar(location.hash.slice(1));
+}
+arrancar();
+</script>
 </body>
 </html>

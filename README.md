@@ -32,3 +32,23 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
 referencia de producto en una comparativa de precios.
+
+## Actualizar los precios
+
+```
+python actualizar.py              # releva las 4 tiendas, recalcula y reconstruye el sitio
+python actualizar.py --dry-run    # solo muestra el informe, no escribe
+python actualizar.py --solo mexx  # una sola tienda
+python actualizar.py --build      # reconstruye el HTML sin salir a la web
+```
+
+El script lee los precios de un metadato estable en cada tienda, asi que no
+necesita navegador: CompraGamer publica su catalogo como JSON, y Gaming City,
+Mexx y FullH4rd lo dejan en una etiqueta `meta` o en microdatos schema.org.
+Avisa cuando un producto cambia de precio, cuando se queda sin stock y cuando
+el cambio da vuelta el podio, que es el unico caso en el que hay que reescribir
+el veredicto a mano.
+
+`datos.json` es la unica fuente de verdad: el script actualiza precios, stock e
+historial, y reinyecta todo en los dos HTML. El contenido editorial (specs,
+pros, contras, veredicto) se edita ahi y no lo toca el script.
