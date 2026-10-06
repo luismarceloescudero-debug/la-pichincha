@@ -247,8 +247,50 @@ td.mejor{color:var(--good);font-weight:700}
   .fila .nom{flex:1 1 100%;order:1}
   .fila .tie{order:2}.fila .marca{order:3}.fila .pre{order:4;margin-left:auto}
 }
+
+/* ---- Barra de exportacion ---- */
+.acciones{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.acc{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  font:600 .83rem var(--font-sans);padding:9px 14px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-2);box-shadow:var(--shadow);
+  transition:transform .18s var(--curva),border-color .18s,color .18s,background .18s}
+.acc:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.acc[data-ok="1"]{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+.acc .ico{font-size:1.05rem}
+
+/* ---- Indicio de que las pestanas se deslizan ---- */
+.tabs{position:relative}
+.tabs::after{content:"";position:absolute;right:0;top:12px;bottom:13px;width:34px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--bg));opacity:0;transition:opacity .2s}
+.tabs[data-desborda="1"]::after{opacity:1}
+
+/* ---- Impresion: queda solo el contenido ---- */
+@media print{
+  .tabs,.acciones,.buscador,.sugeridas,.volver,noscript,.nota{display:none!important}
+  body{background:#fff;color:#000}
+  .wrap{max-width:none;padding:0}
+  .fila,.card,.st,.bloque,.tile,.ver-item,.scroll{break-inside:avoid;box-shadow:none;
+    border:1px solid #bbb!important;background:#fff!important;color:#000!important;animation:none!important}
+  .fila{border-left-width:4px!important}
+  .fila .nom,.fila .pre,.precio,h1,h2,h3,td,th,.lista li,.titular{color:#000!important}
+  .fila .tie,.chip,.tienda{background:#f0f0f0!important;color:#333!important}
+  a{text-decoration:none;color:#000!important}
+  .fila .pre::after{content:""}
+  .pie-impresion{display:block!important}
+}
+.pie-impresion{display:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
+  .largo{display:none}
+  /* En telefono el buscador queda a mano y el intro no empuja los resultados. */
+  .buscador{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);z-index:15;
+    background:var(--bg);padding-block:8px;margin-bottom:10px}
+  .buscador .ico{top:calc(50% + 4px)}
+  #vista .panel-head .sub{display:none}
+  .sugeridas{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+  .sugeridas::-webkit-scrollbar{display:none}
+  .sug{flex:none}
+  .acc{padding:8px 12px;font-size:.78rem}
   .dcab{grid-template-columns:auto 1fr;gap:14px;padding:18px}
   .dprecio{grid-column:1/-1;text-align:left;border-top:1px solid var(--line);padding-top:14px}
   .tab{padding:9px 12px;font-size:.85rem}
@@ -268,6 +310,10 @@ td.mejor{color:var(--good);font-weight:700}
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
   <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
+  <symbol id="i-compartir" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+  <symbol id="i-imprimir" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><path d="M4 9h16v8h-3M7 17H4V9"/><rect x="7" y="14" width="10" height="7" rx="1"/></symbol>
+  <symbol id="i-tabla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
   <symbol id="i-camion" viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
 </svg>
 
@@ -276,7 +322,7 @@ td.mejor{color:var(--good);font-weight:700}
 <div class="wrap">
   <p class="meta" id="sello">Precios verificados en cada sitio</p>
   <h1>La Pichincha</h1>
-  <p class="sub"><strong>Hardware en Argentina. No lo más barato: lo que más rinde.</strong> Memorias, tiendas y webcams comparadas en serio: tocá cualquier tarjeta para abrir el análisis detallado, y cada precio te lleva al producto en la web de la tienda.</p>
+  <p class="sub"><strong>Hardware en Argentina. No lo más barato: lo que más rinde.</strong><span class="largo"> Memorias, tiendas y webcams comparadas en serio: tocá cualquier tarjeta para abrir el análisis detallado, y cada precio te lleva al producto en la web de la tienda.</span></p>
 
   <div class="tabs">
     <div class="tablist" role="tablist" id="tablist"></div>
@@ -286,6 +332,7 @@ td.mejor{color:var(--good);font-weight:700}
 
   <noscript><p class="sub" style="margin-top:20px">Esta página arma las vistas con JavaScript. Activalo para ver la comparativa.</p></noscript>
 
+  <p class="pie-impresion" id="pie-impresion"></p>
   <p class="nota" id="nota"></p>
 </div>
 
@@ -799,6 +846,7 @@ function detalle(p) {
   const t = T[p.tienda], grupo = p.tipo === "ram" ? rams : cams;
   return `<div class="detalle c-${t.color}">
     <button class="volver" data-volver>${icono("izq")} Volver a ${p.tipo === "ram" ? "memorias" : "webcams"}</button>
+    ${barraAcciones(p.id)}
     <div class="dcab">
       <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
       <div>
@@ -825,8 +873,9 @@ function detalle(p) {
 }
 
 /* --- Vistas --- */
-function vistaGrilla(lista, titulo, bajada) {
+function vistaGrilla(lista, titulo, bajada, id) {
   return `<div class="panel"><div class="panel-head"><h2>${titulo}</h2><p class="sub">${bajada}</p></div>
+    ${barraAcciones(id)}
     <div class="grid">${lista.map(tarjeta).join("")}</div></div>`;
 }
 
@@ -916,6 +965,7 @@ function pintarResultados(q) {
     return;
   }
   const r = buscar(q);
+  ULTIMA_BUSQUEDA = r;
   if (!r.length) {
     est.textContent = `sin resultados para "${q}"`;
     caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
@@ -963,21 +1013,133 @@ function vistaBuscar() {
     } finally { cargandoIdx = false; }
   }, 0);
 
-  return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 4 tiendas</h2>
+  return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 5 fuentes</h2>
     <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen del más barato al más caro, sin importar de dónde vengan.</p></div>
     <div class="buscador">${icono("lupa")}<input type="search" id="q" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
     <p class="estado" id="estado">cargando índice…</p>
+    ${barraAcciones('buscar')}
     <div class="res" id="res"></div></div>`;
 }
+
+/* --- Exportar y compartir ---------------------------------------------
+   En la web funciona todo. Dentro de un visor embebido el navegador bloquea
+   la impresion y las descargas, asi que ahi solo se ofrece lo que si anda. */
+const SUELTA = (() => { try { return window.self === window.top; } catch (e) { return false; } })();
+
+function avisar(boton, texto) {
+  const previo = boton.innerHTML;
+  boton.innerHTML = `${icono("check")} ${texto}`;
+  boton.dataset.ok = "1";
+  setTimeout(() => { boton.innerHTML = previo; delete boton.dataset.ok; }, 1800);
+}
+
+async function copiar(texto, boton) {
+  try {
+    await navigator.clipboard.writeText(texto);
+    avisar(boton, "copiado");
+  } catch (e) {                      // sin permiso de portapapeles: lo dejo seleccionable
+    const ta = document.createElement("textarea");
+    ta.value = texto; ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); avisar(boton, "copiado"); }
+    catch (_) { avisar(boton, "copiá a mano"); }
+    ta.remove();
+  }
+}
+
+function bajarArchivo(nombre, contenido, tipo) {
+  const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+const csvCampo = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+
+function aCSV(filas) {
+  // Punto y coma y BOM: asi Excel en español lo abre en columnas sin preguntar nada.
+  const cab = ["Producto", "Precio", "Fuente", "Comercio", "Enlace"];
+  const cuerpo = filas.map(f => {
+    const t = (IDX && IDX.tiendas[f[3]]) || { nombre: f[3] };
+    return [f[0], f[1], t.nombre, f[4] || "", f[2]].map(csvCampo).join(";");
+  });
+  return "\uFEFF" + [cab.map(csvCampo).join(";"), ...cuerpo].join("\r\n");
+}
+
+function aTexto(filas, titulo) {
+  const lineas = filas.slice(0, 20).map((f, i) => {
+    const t = (IDX && IDX.tiendas[f[3]]) || { nombre: f[3] };
+    return `${i + 1}. ${f[0]} — ${pesos(f[1])} · ${t.nombre}${f[4] ? " (" + f[4] + ")" : ""}\n   ${f[2]}`;
+  });
+  return `${titulo}\n${"—".repeat(Math.min(titulo.length, 40))}\n\n${lineas.join("\n")}` +
+    (filas.length > 20 ? `\n\n…y ${filas.length - 20} más` : "") +
+    `\n\nLa Pichincha · ${location.origin}${location.pathname}`;
+}
+
+async function compartir(titulo, texto, boton) {
+  if (navigator.share) {
+    try { await navigator.share({ title: titulo, text: texto }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  copiar(texto, boton);
+}
+
+function barraAcciones(id) {
+  const b = [`<button class="acc" data-acc="compartir" data-de="${id}">${icono("compartir")} Compartir</button>`,
+             `<button class="acc" data-acc="copiar" data-de="${id}">${icono("copiar")} Copiar</button>`];
+  if (SUELTA) {
+    b.push(`<button class="acc" data-acc="excel" data-de="${id}">${icono("tabla")} Excel</button>`);
+    b.push(`<button class="acc" data-acc="imprimir" data-de="${id}">${icono("imprimir")} Imprimir o PDF</button>`);
+  }
+  return `<div class="acciones">${b.join("")}</div>`;
+}
+
+/* Que se exporta segun la vista en la que estes. */
+function materia(de) {
+  if (de === "buscar") {
+    const q = ($("#q") || {}).value || "";
+    return { filas: ULTIMA_BUSQUEDA, titulo: q ? `Búsqueda: ${q}` : "La Pichincha", archivo: "busqueda" };
+  }
+  const p = porId[de];
+  if (p) {
+    const t = T[p.tienda];
+    return {
+      filas: [[p.nombre, p.precio, p.url, p.tienda]],
+      titulo: `${p.nombre} — ${pesos(p.precio)} en ${t.nombre}`,
+      archivo: p.id,
+    };
+  }
+  const lista = (de === "webcams" ? cams : rams);
+  return {
+    filas: lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),
+    titulo: de === "webcams" ? "Las 3 mejores webcams" : "Las 3 mejores memorias",
+    archivo: de,
+  };
+}
+
+let ULTIMA_BUSQUEDA = [];
+
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("[data-acc]");
+  if (!b) return;
+  const m = materia(b.dataset.de);
+  if (!m.filas.length) return avisar(b, "nada para exportar");
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (b.dataset.acc === "excel") bajarArchivo(`la-pichincha-${m.archivo}-${hoy}.csv`, aCSV(m.filas), "text/csv;charset=utf-8");
+  else if (b.dataset.acc === "imprimir") window.print();
+  else if (b.dataset.acc === "copiar") copiar(aTexto(m.filas, m.titulo), b);
+  else compartir(m.titulo, aTexto(m.filas, m.titulo), b);
+});
 
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
   if (id === "memorias") v.innerHTML = vistaGrilla(rams, "Las 3 mejores memorias por marca/precio",
-    "Módulo único de 16GB DDR4 3200 para escritorio. El detalle de specs está dentro de cada tarjeta.");
+    "Módulo único de 16GB DDR4 3200 para escritorio. El detalle de specs está dentro de cada tarjeta.", "memorias");
   else if (id === "webcams") v.innerHTML = vistaGrilla(cams, "Las 3 mejores webcams",
-    "Las que valen la pena de las trece relevadas en las mismas tiendas.");
+    "Las que valen la pena de las trece relevadas en las mismas tiendas.", "webcams");
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
@@ -1027,6 +1189,15 @@ function arrancar() {
       return ir(p && p.tipo === "webcam" ? "webcams" : "memorias", true);
     }
   });
+
+  const marcarDesborde = () => {
+    const l = $(".tablist");
+    $(".tabs").dataset.desborda = l.scrollWidth > l.clientWidth + 2 ? "1" : "0";
+  };
+  marcarDesborde();
+  addEventListener("resize", marcarDesborde);
+  $("#pie-impresion").textContent =
+    `La Pichincha · ${location.origin}${location.pathname} · precios de ${DATOS.actualizado}, con IVA, sin envío.`;
 
   aplicar(location.hash.slice(1));
 }

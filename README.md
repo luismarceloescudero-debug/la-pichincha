@@ -119,3 +119,23 @@ No hace falta backend. El relevamiento es trabajo de **construccion**, no de
 **consulta**: corre una vez por dia en el runner y el navegador despues filtra
 un archivo estatico. Un backend recien haria falta para precios en vivo por
 consulta, alertas por usuario o historiales largos.
+
+## Exportar y compartir
+
+Cada vista trae una barra de acciones que exporta lo que estas mirando: los
+resultados de una busqueda, las tres memorias, las tres webcams o una oferta
+suelta desde su analisis.
+
+| Accion | Que hace |
+| --- | --- |
+| Compartir | Usa el menu nativo del sistema si existe; si no, copia el texto |
+| Copiar | Deja la lista en el portapapeles, lista para pegar en WhatsApp |
+| Excel | Baja un CSV con punto y coma y BOM, que Excel en español abre en columnas |
+| Imprimir o PDF | Abre el dialogo de impresion con una hoja de estilos propia |
+
+La hoja de impresion saca pestañas, buscador y botones, pasa todo a blanco y
+negro con bordes, evita cortar tarjetas al medio y agrega un pie con la URL y
+la fecha de los precios.
+
+Dentro de un visor embebido el navegador bloquea la impresion y las descargas,
+asi que ahi la barra muestra solo Compartir y Copiar, que si funcionan.
