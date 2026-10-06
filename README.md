@@ -130,7 +130,7 @@ suelta desde su analisis.
 | --- | --- |
 | Compartir | Usa el menu nativo del sistema si existe; si no, copia el texto |
 | Copiar | Deja la lista en el portapapeles, lista para pegar en WhatsApp |
-| Excel | Baja un CSV con punto y coma y BOM, que Excel en español abre en columnas |
+| Excel | Baja un .xlsx nativo con dos hojas, precios como numero, anchos de columna, filtro y enlaces clicables. Si el CDN no responde, cae en CSV |
 | Imprimir o PDF | Abre el dialogo de impresion con una hoja de estilos propia |
 
 La hoja de impresion saca pestañas, buscador y botones, pasa todo a blanco y
@@ -139,3 +139,15 @@ la fecha de los precios.
 
 Dentro de un visor embebido el navegador bloquea la impresion y las descargas,
 asi que ahi la barra muestra solo Compartir y Copiar, que si funcionan.
+
+### Sobre el .xlsx
+
+Lo arma SheetJS, que se baja recien cuando pedis el archivo: son 79 KB
+comprimidos que no tiene sentido cargar en cada visita. El libro trae la hoja
+**Ofertas**, con el precio como numero de verdad (se puede ordenar y sumar),
+formato de pesos, anchos de columna, autofiltro y el enlace clicable; y la hoja
+**Info**, con la fecha de los precios y de que se trata la seleccion.
+
+La edicion comunitaria de SheetJS no escribe estilos de celda, asi que la
+cabecera no va en negrita. Formato de numero, anchos, filtros e hipervinculos
+si, que es lo que hace util a la planilla.
