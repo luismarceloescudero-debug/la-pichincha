@@ -227,3 +227,45 @@ rango de precios. Con solo el nombre no alcanza: la prueba junto 145 pendrives
 distintos bajo la clave "128gb" y metio una notebook entre los SSD de 480GB.
 Haria falta un identificador comun (EAN, part number) que ninguna de las cinco
 fuentes publica.
+
+## La busqueda gobierna las pestanas
+
+Antes la busqueda era una lista y las otras pestañas mostraban siempre el mismo
+contenido curado. Ahora lo que buscas arma tres vistas propias, marcadas con un
+punto azul en la barra:
+
+- **Comparativa**: de todos los avisos que coinciden se sacan los que no son
+  comparables y quedan las opciones que valen la pena: la mejor compra, la mas
+  barata, una de otra marca, la que mas bajo, o un escalon mas arriba y la gama
+  alta cuando no hay otra marca para contrastar. Trae una tabla con las
+  especificaciones y una franja que muestra donde cae cada una en el rango de
+  precios.
+- **Tiendas**: ranking de comercios con lo que vende cada uno de esa busqueda.
+  Cada comercio de ComparaYa cuenta por separado.
+- **Veredicto**: escrito a partir de los resultados, con los precios de hoy.
+
+Sin una busqueda activa, o al tocar "Ver el analisis curado", vuelve el
+contenido de siempre.
+
+### Que se deja afuera
+
+El indice mezcla cosas que mencionan el componente sin serlo. Se excluyen, y el
+cartel de arriba dice cuantos y por que:
+
+- Formato de notebook (SODIMM), salvo que la busqueda lo pida.
+- Usados, outlet y reacondicionados, salvo que la busqueda los pida.
+- Equipos completos: avisos que EMPIEZAN con Notebook, PC, Combo o Kit. Esta
+  anclado al inicio a proposito, porque "SSD para notebook" si es un SSD.
+- Sin marca reconocida y por debajo del 45% de la mediana.
+- Mas de tres veces la mediana, que suele ser un equipo completo.
+
+La mejor compra no es el minimo de la marca buena: por debajo del 35% de la
+mediana se considera piso de gama, normalmente un modelo viejo o de entrada, y
+se ofrece como "mas barata" con la advertencia en vez de recomendarse.
+
+### Lo que no sabe
+
+Todo sale del nombre y el precio de cada aviso. Las especificaciones se leen del
+texto con expresiones regulares, asi que pueden faltar o ser incompletas. No hay
+garantia, reseñas ni fichas tecnicas, que solo existen en la Comparativa curada.
+Sirve para decidir a quien mirar primero, no para cerrar la compra.

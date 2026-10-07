@@ -362,6 +362,61 @@ td.mejor{color:var(--good);font-weight:700}
 .puente span{flex:1;min-width:0}
 .puente b{color:var(--ink)}
 .puente .acc{background:var(--surface);white-space:nowrap}
+
+/* ---- La busqueda gobierna las pestañas ---- */
+.tabs[data-consulta="1"] .tab[data-dina="1"]::after{content:"";width:7px;height:7px;border-radius:50%;
+  background:var(--accent);flex:none}
+.consulta-activa{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);
+  border:1px solid var(--accent);border-radius:12px;padding:12px 16px;margin-bottom:18px;
+  font-size:.88rem;color:var(--ink-2)}
+.consulta-activa .txt{flex:1 1 260px;min-width:0}
+.consulta-activa b{color:var(--ink)}
+.consulta-activa .acc{background:var(--surface)}
+.puente{align-items:center}
+.puente .p-txt{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:3px}
+.puente .p-txt span{flex:none}
+.puente .p-tit{font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px}
+.puente .botones{display:flex;gap:8px;flex-wrap:wrap}
+.puente.suave{background:var(--surface);border-color:var(--line);margin-top:-8px;padding-block:9px;font-size:.84rem}
+
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:18px;align-items:stretch}
+.dcard{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--surface);
+  border:1px solid var(--line);border-radius:16px;padding:24px 22px 20px;box-shadow:var(--shadow);
+  text-decoration:none;color:inherit;overflow:hidden;min-width:0;
+  animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*80ms);
+  transition:transform .28s var(--curva),box-shadow .28s,border-color .28s}
+.dcard::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--c)}
+.dcard.mejor{border-color:var(--good)}
+.dcard.mejor::before{background:var(--good)}
+.dcard:hover,.dcard:focus-visible{transform:translateY(-5px);box-shadow:var(--shadow-up);border-color:var(--c)}
+.dcard h3{font-size:1rem;line-height:1.3}
+.dcard .rol{font:700 .68rem/1 var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--c);
+  display:flex;align-items:center;gap:7px}
+.dcard.mejor .rol{color:var(--good)}
+.dcard .letra{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;
+  background:var(--c-soft);color:var(--c);font-size:.78rem;letter-spacing:0}
+.dcard.mejor .letra{background:var(--good-soft);color:var(--good)}
+.dcard.mejor .precio{color:var(--good)}
+.dcard .razon{font-size:.87rem;color:var(--ink-2);margin:0}
+.dcard .ver{margin-top:auto;padding-top:6px}
+.dcard dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:.83rem}
+.dcard dt{color:var(--ink-3)}
+.dcard dd{margin:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+
+.franja{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:18px 22px 14px;box-shadow:var(--shadow);margin:20px 0 0}
+.franja h3{font-size:.95rem}
+.franja .pista{position:relative;height:6px;border-radius:3px;margin:30px 0 24px;
+  background:linear-gradient(90deg,var(--good-soft),var(--surface-2) 55%,var(--bad-soft))}
+.franja .mk{position:absolute;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;
+  background:var(--c);color:var(--bg);display:grid;place-items:center;font:700 .72rem var(--font-mono);
+  border:2px solid var(--surface);box-shadow:var(--shadow);z-index:2}
+.franja .med{position:absolute;top:-10px;bottom:-10px;width:2px;background:var(--ink-3);z-index:1}
+.franja .med::after{content:"mediana";position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+  font:500 .66rem var(--font-mono);color:var(--ink-3);white-space:nowrap}
+.franja .extremos{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font:500 .74rem var(--font-mono);color:var(--ink-3)}
+.tenue{opacity:.6}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
   .largo{display:none}
@@ -393,6 +448,7 @@ td.mejor{color:var(--good);font-weight:700}
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
   <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
+  <symbol id="i-subir" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
   <symbol id="i-flechaAbajo" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 3c3 4 6 5.5 6 9a6 6 0 0 1-12 0c0-2 1-3.5 2.5-5 .3 1.2 1 2 2 2.3C10 7.5 10.5 5 12 3z"/></symbol>
   <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
@@ -1278,9 +1334,15 @@ const reMarca = lista => lista.length
   ? new RegExp("\\b(" + lista.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b")
   : /$^/;
 const RE_PRIMERA = reMarca(MARCAS.primera || []), RE_CONOCIDA = reMarca(MARCAS.conocida || []);
+const _niv = new Map();
 const nivelMarca = nombre => {
-  const n = normal(nombre);
-  return RE_PRIMERA.test(n) ? 2 : RE_CONOCIDA.test(n) ? 1 : 0;
+  let v = _niv.get(nombre);
+  if (v === undefined) {
+    const n = normal(nombre);
+    v = RE_PRIMERA.test(n) ? 2 : RE_CONOCIDA.test(n) ? 1 : 0;
+    _niv.set(nombre, v);
+  }
+  return v;
 };
 
 const ORDENES = [
@@ -1299,6 +1361,10 @@ function mediana(nums) {
 /* Ordena el resultado segun el criterio elegido. "Recomendado" pone primero la
    marca mas confiable al menor precio, y manda al fondo lo que esta tan por
    debajo del resto que probablemente no sea comparable. */
+/* El piso de una marca buena casi nunca es la mejor compra: suele ser un modelo
+   viejo o de entrada. Sin marca reconocida el umbral es mas exigente. */
+const pisoDeGama = (precio, niv, med) => precio < med * (niv === 0 ? 0.45 : 0.35);
+
 function ordenar(filas, med) {
   const copia = [...filas];
   if (ORDEN === "precio") return copia.sort((a, b) => a[1] - b[1]);
@@ -1306,12 +1372,12 @@ function ordenar(filas, med) {
     nivelMarca(b[0]) - nivelMarca(a[0]) || a[1] - b[1]);
   return copia.sort((a, b) => {
     const na = nivelMarca(a[0]), nb = nivelMarca(b[0]);
-    const sa = na === 0 && a[1] < med * 0.45, sb = nb === 0 && b[1] < med * 0.45;
+    const sa = pisoDeGama(a[1], na, med), sb = pisoDeGama(b[1], nb, med);
     return (sa - sb) || (nb - na) || (a[1] - b[1]);
   });
 }
 
-function buscar(q, tope = 60) {
+function buscarTodo(q) {
   const toc = normal(q).split(/\s+/).filter(Boolean);
   if (!IDX || !toc.length) return [];
   // Un token puramente numerico tiene que ser palabra entera: si no, "27" entra
@@ -1319,19 +1385,21 @@ function buscar(q, tope = 60) {
   const pruebas = toc.map(t => /^\d+$/.test(t)
     ? (n => new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)").test(n))
     : (n => n.includes(t)));
+  // Los nombres normalizados se calculan una sola vez por indice cargado.
+  const N = IDX._n || (IDX._n = IDX.productos.map(f => normal(f[0])));
   const halla = [];
-  for (const f of IDX.productos) {
-    const n = normal(f[0]);
-    if (pruebas.every(p => p(n))) halla.push(f);
-  }
-  return halla.slice(0, tope * 3);   // el orden lo decide ordenar()
+  IDX.productos.forEach((f, i) => { if (pruebas.every(p => p(N[i]))) halla.push(f); });
+  return halla;
 }
+
+function buscar(q, tope = 60) { return buscarTodo(q).slice(0, tope * 3); }
 
 let ULTIMA_BUSQUEDA = [];
 
 function pintarResultados(q) {
   const caja = $("#res"), est = $("#estado");
   if (!IDX || !caja) return;
+  limpiarConsulta();          // si no hay resultados, no queda una consulta vieja gobernando las pestañas
   if (!q.trim()) {
     est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${IDX.generado}`;
     caja.innerHTML = "";
@@ -1339,7 +1407,7 @@ function pintarResultados(q) {
     ULTIMA_BUSQUEDA = [];
     return;
   }
-  const crudo = buscar(q);
+  const crudo = buscarTodo(q);   // se ordena sobre TODO el catalogo, no sobre los primeros 180
   if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
     caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
@@ -1347,21 +1415,38 @@ function pintarResultados(q) {
     ULTIMA_BUSQUEDA = [];
     return;
   }
-  const med = mediana(crudo.map(f => f[1]));
-  const r = ordenar(crudo, med).slice(0, 60);
+  // La busqueda arma la comparativa, el ranking de comercios y el veredicto, y la
+  // lista usa el mismo conjunto: sin equipos completos ni avisos que no son
+  // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
+  fijarConsulta(q);
+  const A = ANALISIS;
+  const conjunto = A ? A.base.map(m => m.f) : crudo;
+  const med = A ? A.med : mediana(crudo.map(f => f[1]));
+  const r = ordenar(conjunto, med).slice(0, 60);
   ULTIMA_BUSQUEDA = r;
 
   const fuentes = new Set(r.map(f => f[3]));
   const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
-  est.innerHTML = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
-    + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`;
-
-  // Si la consulta cae en una categoria que analizamos a fondo, lo decimos.
+  const afuera = A ? A.total - A.base.length : 0;
+  est.innerHTML = (conjunto.length > r.length ? `Mostrando ${r.length} de ${conjunto.length}` : `${r.length} resultado${r.length > 1 ? "s" : ""}`)
+    + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
+    + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
+    + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "");
   const cat = CATEGORIAS.find(c => (c.claves || []).some(k => normal(q).includes(normal(k))));
-  $("#puente").innerHTML = !cat ? "" :
-    `<div class="puente"><span>${icono("balanza")} Analizamos <b>${esc(cat.eti)}</b> a fondo:
-      specs de fábrica, garantía real y precio puesto en tu casa.</span>
-      <button class="acc" data-ir-cat="${cat.id}">Ver la comparativa ${icono("der")}</button></div>`;
+  $("#puente").innerHTML = !A ? "" :
+    `<div class="puente">
+      <div class="p-txt">
+        <span class="p-tit">${icono("balanza")} Armamos la comparación para «${esc(q.trim())}»</span>
+        <span>Mejor compra: <b>${esc(A.picks[0].m.f[0].slice(0, 64))}</b> · ${pesos(A.picks[0].m.f[1])} · ${esc(comercioDe(A.picks[0].m.f))}</span>
+      </div>
+      <div class="botones">
+        <button class="acc" data-ir-vista="comparativa">${icono("balanza")} Comparativa</button>
+        <button class="acc" data-ir-vista="tiendas">${icono("store")} Tiendas</button>
+        <button class="acc" data-ir-vista="veredicto">${icono("trofeo")} Veredicto</button>
+      </div>
+    </div>` + (!cat ? "" :
+    `<div class="puente suave"><span>Esta categoría también tiene análisis a fondo: specs de fábrica y garantía real.</span>
+      <button class="acc" data-ir-cat="${cat.id}">Ver el análisis curado de ${esc(cat.eti)}</button></div>`);
 
   const barato = Math.min(...r.map(f => f[1]));
   caja.innerHTML = r.map((f, i) => {
@@ -1370,7 +1455,7 @@ function pintarResultados(q) {
     const niv = nivelMarca(f[0]);
     const bajo = f[6] && f[6] > f[1] ? Math.round((1 - f[1] / f[6]) * 100) : 0;
     const off = f[5] && f[5] > f[1] ? Math.round((1 - f[1] / f[5]) * 100) : 0;
-    const sospechoso = niv === 0 && f[1] < med * 0.45;
+    const sospechoso = pisoDeGama(f[1], niv, med);
     const marcas = [];
     if (niv === 2) marcas.push('<span class="sello primera">primera línea</span>');
     else if (niv === 1) marcas.push('<span class="sello conocida">marca conocida</span>');
@@ -1414,8 +1499,8 @@ function vistaBuscar() {
   }, 0);
 
   return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 5 fuentes</h2>
-    <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen del más barato al más caro, sin importar de dónde vengan.</p></div>
-    <div class="buscador">${icono("lupa")}<input type="search" id="q" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
+    <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen ordenados por conveniencia, y con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
+    <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
     <div class="segmentos chico">${ORDENES.map(o =>
@@ -1520,6 +1605,9 @@ function barraAcciones(id) {
 
 /* Que se exporta segun la vista en la que estes. */
 function materia(de) {
+  if (CONSULTA && ANALISIS && DINAMICAS.includes(de))
+    return { filas: ANALISIS.picks.map(p => p.m.f), titulo: `«${CONSULTA}»: mejor compra y alternativas`,
+             archivo: "comparativa-" + normal(CONSULTA).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") };
   if (de === "buscar") {
     const q = ($("#q") || {}).value || "";
     return { filas: ULTIMA_BUSQUEDA, titulo: q ? `Búsqueda: ${q}` : "La Pichincha", archivo: "busqueda" };
@@ -1655,10 +1743,328 @@ async function aXLSX(filas, titulo) {
   return libro.xlsx.writeBuffer();
 }
 
+/* --- Una busqueda arma su propia comparativa, ranking y veredicto -------
+   Antes la busqueda era una lista y las otras pestañas mostraban siempre lo
+   mismo. Ahora lo que buscas gobierna las tres: la comparativa sale de los
+   resultados, el ranking de comercios sale de los resultados y el veredicto
+   lo escribe la propia busqueda. Sin consulta vuelve el contenido curado. */
+let CONSULTA = "", ANALISIS = null;
+const DINAMICAS = ["comparativa", "tiendas", "veredicto"];
+const LETRAS = ["A", "B", "C", "D"];
+const ALIAS_MARCA = { xpg: "adata", gskill: "g.skill", tplink: "tp-link", "western digital": "wd" };
+const MARCAS_RE = [...(MARCAS.primera || []), ...(MARCAS.conocida || [])].map(m =>
+  [m, new RegExp("\\b" + m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b")]);
+
+const comercioDe = f => f[4] || (IDX.tiendas[f[3]] || {}).nombre || f[3];
+const colorDe = f => (IDX.tiendas[f[3]] || {}).color || "fh";
+
+/* La marca es la que aparece primero en el nombre: "Notebook HP Intel Core" es HP. */
+function marcaDe(nombre) {
+  const n = normal(nombre);
+  let mejor = "", pos = 1e9;
+  for (const [m, re] of MARCAS_RE) {
+    const x = n.search(re);
+    if (x >= 0 && x < pos) { pos = x; mejor = m; }
+  }
+  return ALIAS_MARCA[mejor] || mejor;
+}
+
+/* Lee del nombre del aviso lo que se pueda: el indice no tiene fichas tecnicas. */
+function specsDe(nombre) {
+  const n = nombre.replace(/(\d),(\d)/g, "$1.$2");
+  const s = {};
+  let m;
+  if ((m = n.match(/\bddr([345])\b/i))) s["Tipo"] = "DDR" + m[1];
+  const caps = [...n.matchAll(/\b(\d{1,4})\s?(gb|tb)\b/gi)].map(x => x[1] + x[2].toUpperCase());
+  if (caps.length) s["Capacidad"] = [...new Set(caps)].slice(0, 2).join(" + ");
+  if ((m = n.match(/\b(\d{3,5})\s?mhz\b/i))) s["Velocidad"] = m[1] + " MHz";
+  if ((m = n.match(/\bcl\s?(\d{2})\b/i))) s["Latencia"] = "CL" + m[1];
+  if ((m = n.match(/\b(\d{3,4})\s?w\b/i))) s["Potencia"] = m[1] + " W";
+  if ((m = n.match(/\b(\d{2}(?:\.\d)?)\s?(?:"|”|″|pulgadas|pulg\b)/i))) s["Pantalla"] = m[1] + '"';
+  if ((m = n.match(/\b(\d{2,3})\s?hz\b/i))) s["Refresco"] = m[1] + " Hz";
+  if ((m = n.match(/\b(4k|uhd|wqhd|qhd|2k|fhd|full\s?hd|1080p|1440p|720p)\b/i)))
+    s["Resolución"] = /full/i.test(m[1]) ? "FHD" : m[1].toUpperCase();
+  if ((m = n.match(/\b(\d{1,2})\s?(?:nucleos|núcleos|cores)\b/i))) s["Núcleos"] = m[1];
+  if (/so-?dimm/i.test(n)) s["Formato"] = "SODIMM";
+  else if (/nvme|\bm\.?2\b/i.test(n)) s["Formato"] = "M.2 NVMe";
+  else if (/sata/i.test(n)) s["Formato"] = "SATA";
+  if (/\bargb\b|\brgb\b/i.test(n)) s["Luces"] = "RGB";
+  return s;
+}
+
+/* Avisos que no son comparables con el resto aunque coincidan con la busqueda,
+   salvo que la propia busqueda los pida. */
+const REGLAS_EXCLUSION = [
+  { id: "formato", re: /so-?dimm/, pide: /so-?dimm|notebook|laptop/ },
+  // Un aviso que EMPIEZA con "Notebook", "PC" o "Combo" es un equipo completo: el
+  // componente que buscas solo aparece de pasada. Anclado al inicio a proposito,
+  // porque "SSD para notebook" si es un SSD.
+  { id: "equipos", re: /^(notebook|laptop|netbook|pc\b|computadora|all in one|mini pc|combo|kit\b|equipo)/,
+    pide: /notebook|laptop|netbook|\bpc\b|computadora|all in one|combo|armad|equipo|kit/ },
+  { id: "usados", re: /outlet|usado|reacondicionad|refurb|open box|exhibicion/,
+    pide: /outlet|usado|reacondicionad|refurb|open box|exhibicion/ },
+];
+
+function analizarConsulta(q) {
+  const crudo = buscarTodo(q);
+  if (!crudo.length) return null;
+  const nq = normal(q);
+  const excl = { formato: 0, usados: 0, equipos: 0, raros: 0, caros: 0 };
+  const meta = crudo.map(f => ({ f, n: normal(f[0]), niv: nivelMarca(f[0]) }));
+
+  const utiles = meta.filter(m => {
+    for (const r of REGLAS_EXCLUSION)
+      if (r.re.test(m.n) && !r.pide.test(nq)) { excl[r.id]++; return false; }
+    return true;
+  });
+  if (!utiles.length) return null;
+
+  // Lo que cuesta menos del 45% de la mediana y no tiene marca reconocida casi
+  // nunca es el mismo tipo de producto. Si quedan pocos, no filtro mas.
+  // Tambien lo que cuesta mas de 3 veces la mediana: buscando "ddr4 16gb" entran
+  // notebooks y PCs completas que mencionan esa memoria en el nombre.
+  const med1 = mediana(utiles.map(m => m.f[1]));
+  const muyBarato = m => m.niv === 0 && m.f[1] < med1 * 0.45;
+  const muyCaro = m => m.f[1] > med1 * 3;
+  const sinExtremos = utiles.filter(m => !muyBarato(m) && !muyCaro(m));
+  const base = sinExtremos.length >= 3 ? sinExtremos : utiles;
+  excl.raros = base === sinExtremos ? utiles.filter(muyBarato).length : 0;
+  excl.caros = base === sinExtremos ? utiles.filter(muyCaro).length : 0;
+  const med = mediana(base.map(m => m.f[1]));
+
+  const piso = m => pisoDeGama(m.f[1], m.niv, med);
+  const rec = [...base].sort((a, b) => (piso(a) - piso(b)) || (b.niv - a.niv) || (a.f[1] - b.f[1]));
+  const porPrecio = [...base].sort((a, b) => a.f[1] - b.f[1]);
+  const mejor = rec[0];
+  const barato = porPrecio[0] === mejor ? null : porPrecio[0];
+  const marcaMejor = marcaDe(mejor.f[0]);
+  const alt = rec.find(m => {
+    if (m === mejor || m === barato || m.f[1] > mejor.f[1] * 1.6) return false;
+    const ma = marcaDe(m.f[0]);
+    return ma && ma !== marcaMejor;
+  }) || null;
+  const baja = base
+    .filter(m => m.f[6] > m.f[1] && m !== mejor && m !== barato && m !== alt)
+    .sort((a, b) => (1 - b.f[1] / b.f[6]) - (1 - a.f[1] / a.f[6]))[0] || null;
+
+  const bajoMed = m => Math.round((1 - m.f[1] / med) * 100);
+  const textoMed = m => { const x = bajoMed(m);
+    return x === 0 ? "justo en la mediana" : `${Math.abs(x)}% ${x > 0 ? "por debajo" : "por encima"} de la mediana`; };
+
+  const picks = [];
+  picks.push({ clave: "mejor", ico: "trofeo", m: mejor,
+    rol: barato ? "Mejor compra" : "Mejor compra y más barata", rolCorto: "Mejor compra",
+    razon: `${mejor.niv === 2 ? "La marca más confiable" : mejor.niv === 1 ? "La marca más conocida" : "La mejor ubicada"} entre las opciones, al menor precio dentro de ese nivel: ${textoMed(mejor)} (mediana ${pesos(med)}).`
+      + (barato ? "" : " Además es la más barata de todas.") });
+  if (barato) picks.push({ clave: "barato", ico: "flechaAbajo", m: barato, rol: "Más barata", rolCorto: "Más barata",
+    razon: `La más barata de las comparables: ${pesos(mejor.f[1] - barato.f[1])} menos (${Math.round((1 - barato.f[1] / mejor.f[1]) * 100)}%) que la mejor compra.`
+      + (barato.niv === 0 ? " No reconocemos la marca: mirá garantía y reseñas antes de pagar." : "")
+      + (piso(barato) ? " Está muy por debajo de lo habitual: puede ser un modelo viejo o de entrada." : "") });
+  if (alt) { const dp = Math.round((alt.f[1] / mejor.f[1] - 1) * 100);
+    picks.push({ clave: "alt", ico: "balanza", m: alt, rol: "Alternativa de otra marca", rolCorto: "Otra marca",
+      razon: `Otra marca (${marcaDe(alt.f[0])}) para no depender de una sola: ${Math.abs(dp)}% ${dp >= 0 ? "más cara" : "más barata"} que la mejor compra.` }); }
+  if (baja) picks.push({ clave: "baja", ico: "fuego", m: baja, rol: "Bajó de precio", rolCorto: "Bajó de precio",
+    razon: `Bajó ${Math.round((1 - baja.f[1] / baja.f[6]) * 100)}% desde el relevamiento anterior: antes ${pesos(baja.f[6])}.` });
+
+  // Si la busqueda tiene una sola marca no hay "otra marca" que contrastar. En
+  // vez de dejar una tarjeta sola, muestro un escalon arriba y la gama alta.
+  const en = new Set(picks.map(p => p.m));
+  const pctSobre = m => Math.round((m.f[1] / mejor.f[1] - 1) * 100);
+  if (picks.length < 3) {
+    const escalon = rec.find(m => !en.has(m) && !piso(m) && m.niv >= 1 && m.f[1] >= mejor.f[1] * 1.3);
+    if (escalon) { en.add(escalon); picks.push({ clave: "escalon", ico: "subir", m: escalon,
+      rol: "Un escalón más arriba", rolCorto: "Un escalón arriba",
+      razon: `${pctSobre(escalon)}% más cara que la mejor compra. Fijate qué trae de más en las especificaciones antes de pagar la diferencia.` }); }
+  }
+  if (picks.length < 3) {
+    const alta = [...base].filter(m => !en.has(m) && m.niv === 2).sort((a, b) => b.f[1] - a.f[1])[0];
+    if (alta && alta.f[1] > mejor.f[1] * 1.3) { en.add(alta); picks.push({ clave: "alta", ico: "subir", m: alta,
+      rol: "Gama alta", rolCorto: "Gama alta",
+      razon: `La más cara de primera línea: ${pctSobre(alta)}% sobre la mejor compra. Solo si necesitás esas prestaciones.` }); }
+  }
+
+  // Ranking de comercios: cada comercio de ComparaYa cuenta por separado.
+  const mapa = new Map();
+  for (const m of base) {
+    const nom = comercioDe(m.f);
+    let c = mapa.get(nom);
+    if (!c) mapa.set(nom, c = { nom, color: colorDe(m.f), items: [] });
+    c.items.push(m);
+  }
+  const comercios = [...mapa.values()].map(c => {
+    const primeras = c.items.filter(m => m.niv === 2);
+    const mejorItem = [...(primeras.length ? primeras : c.items)].sort((a, b) => a.f[1] - b.f[1])[0];
+    return { ...c, n: c.items.length, med: mediana(c.items.map(m => m.f[1])),
+      conPrimera: primeras.length > 0, pctPrimera: primeras.length / c.items.length, mejorItem,
+      bajas: c.items.filter(m => m.f[6] > m.f[1]).length };
+  }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
+
+  return { q, total: crudo.length, base, med, picks, comercios, excl,
+           primeras: base.filter(m => m.niv === 2) };
+}
+
+function fijarConsulta(q) {
+  const t = q.trim();
+  if (t.length < 2) return limpiarConsulta();
+  CONSULTA = t;
+  ANALISIS = analizarConsulta(t);
+  if (!ANALISIS) CONSULTA = "";
+  marcarConsulta();
+}
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; marcarConsulta(); }
+function marcarConsulta() { const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0"; }
+
+/* ---- Vistas ---- */
+function bannerConsulta() {
+  const A = ANALISIS, ex = A.excl, partes = [];
+  if (ex.formato) partes.push(`${ex.formato} de notebook`);
+  if (ex.equipos) partes.push(`${ex.equipos} equipos completos (notebooks, PCs, combos)`);
+  if (ex.usados) partes.push(`${ex.usados} usados u outlet`);
+  if (ex.raros) partes.push(`${ex.raros} muy por debajo del resto y sin marca conocida`);
+  if (ex.caros) partes.push(`${ex.caros} que cuestan más del triple (suelen ser equipos completos)`);
+  return `<div class="consulta-activa"><span class="txt">${icono("lupa")} Armado para tu búsqueda <b>«${esc(CONSULTA)}»</b>:
+    ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}</span>
+    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button>
+    <button class="acc" data-quitar-consulta>Ver el análisis curado</button></div>`;
+}
+
+function cardPick(p, i) {
+  const f = p.m.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
+  const specs = Object.values(specsDe(f[0])).slice(0, 5);
+  const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
+  const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
+  return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
+    <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
+    <h3>${esc(f[0])}</h3>
+    <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
+    <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
+    <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span></div>
+    <p class="razon">${esc(p.razon)}</p>
+    <span class="ver">Abrir en ${esc(comercioDe(f))} ${icono("fuera")}</span>
+  </a>`;
+}
+
+function franja(picks) {
+  const ps = ANALISIS.base.map(m => m.f[1]).sort((a, b) => a - b);
+  const lo = ps[0], hi = ps[Math.floor(0.95 * (ps.length - 1))], span = Math.max(1, hi - lo);
+  const x = v => Math.min(97, Math.max(3, (v - lo) / span * 100)).toFixed(1);
+  const marcas = picks.map((p, i) => `<span class="mk c-${colorDe(p.m.f)}" style="left:${x(p.m.f[1])}%"
+    title="${esc(p.rol)}: ${pesos(p.m.f[1])}">${LETRAS[i]}</span>`).join("");
+  return `<div class="franja"><h3>Dónde cae cada opción en el rango de precios</h3>
+    <div class="pista"><span class="med" style="left:${x(ANALISIS.med)}%"></span>${marcas}</div>
+    <div class="extremos"><span>${pesos(lo)} · el más barato</span><span>${pesos(hi)} · hasta acá llega el 95%</span></div></div>`;
+}
+
+function tablaPicks(picks) {
+  const A = ANALISIS, med = A.med;
+  const specs = picks.map(p => specsDe(p.m.f[0]));
+  const claves = [...new Set(specs.flatMap(s => Object.keys(s)))];
+  const precios = picks.map(p => p.m.f[1]), minP = Math.min(...precios);
+  const maxNiv = Math.max(...picks.map(p => p.m.niv));
+  const bajo = picks.map(p => Math.round((1 - p.m.f[1] / med) * 100)), maxBajo = Math.max(...bajo);
+  const fila = (nombre, vals, mejor) => `<tr><th>${esc(nombre)}</th>${vals.map((v, i) =>
+    `<td class="${mejor && mejor[i] ? "mejor" : ""}">${v}</td>`).join("")}</tr>`;
+  let h = `<div class="scroll"><table><thead><tr><th>&nbsp;</th>${picks.map((p, i) =>
+    `<th>${LETRAS[i]} · ${esc(p.rolCorto)}</th>`).join("")}</tr></thead><tbody>`;
+  h += fila("Precio", picks.map(p => pesos(p.m.f[1])), precios.map(v => v === minP));
+  h += fila("Comercio", picks.map(p => esc(comercioDe(p.m.f))));
+  h += fila("Marca", picks.map(p => `${esc(marcaDe(p.m.f[0]) || "—")} <span class="tenue">(${["sin reconocer", "conocida", "primera línea"][p.m.niv]})</span>`),
+    picks.map(p => p.m.niv === maxNiv && maxNiv > 0));
+  h += fila("Contra la mediana", bajo.map(x => x === 0 ? "igual" : `${Math.abs(x)}% ${x > 0 ? "menos" : "más"}`), bajo.map(x => x === maxBajo));
+  h += fila("Movimiento", picks.map(p => {
+    const f = p.m.f;
+    return f[6] > f[1] ? `bajó ${Math.round((1 - f[1] / f[6]) * 100)}%`
+         : f[5] > f[1] ? `${Math.round((1 - f[1] / f[5]) * 100)}% OFF publicado` : "—";
+  }));
+  claves.forEach(k => { h += fila(k, specs.map(s => esc(s[k] || "—"))); });
+  return h + "</tbody></table></div>";
+}
+
+function vistaComparativaDin() {
+  const A = ANALISIS;
+  return `<div class="panel">${bannerConsulta()}
+    <div class="panel-head"><h2>${icono("balanza")} Comparativa: ${esc(CONSULTA)}</h2>
+      <p class="sub">De ${A.total} avisos que coinciden, ${A.base.length} son comparables entre sí. Estas son las opciones que valen la pena y en qué se diferencian.</p></div>
+    ${barraAcciones("comparativa")}
+    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    ${franja(A.picks)}
+    <div class="panel-head" style="margin-top:26px"><h2>${icono("chip")} En qué se diferencian</h2>
+      <p class="sub">Las especificaciones se leen del texto del aviso, así que algunas pueden faltar: abrí la ficha para confirmarlas.</p></div>
+    ${tablaPicks(A.picks)}</div>`;
+}
+
+function vistaTiendasDin() {
+  const A = ANALISIS, top = A.comercios.slice(0, 6), resto = A.comercios.length - top.length;
+  const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${c.mejorItem.f[2]}" target="_blank" rel="noopener">
+    <span class="rol"><b class="letra">${i + 1}</b> ${icono("store")} ${i === 0 ? "Más barata en primera línea" : "Comercio"}</span>
+    <h3>${esc(c.nom)}</h3>
+    <div><span class="precio">${pesos(c.mejorItem.f[1])}</span></div>
+    <p class="razon">${c.conPrimera ? "Su opción de primera línea más barata" : "Sin marca de primera línea acá: su opción más barata"}: ${esc(c.mejorItem.f[0].slice(0, 80))}</p>
+    <dl><dt>Avisos comparables</dt><dd>${c.n}</dd><dt>Precio típico</dt><dd>${pesos(c.med)}</dd>
+      <dt>De primera línea</dt><dd>${Math.round(c.pctPrimera * 100)}%</dd><dt>Bajaron de precio</dt><dd>${c.bajas}</dd></dl>
+    <span class="ver">Abrir ${icono("fuera")}</span></a>`).join("");
+  return `<div class="panel">${bannerConsulta()}
+    <div class="panel-head"><h2>${icono("store")} Dónde conviene comprar: ${esc(CONSULTA)}</h2>
+      <p class="sub">Ranking de comercios con lo que realmente vende cada uno de esta búsqueda. Gana quien tiene la marca más confiable al menor precio; el precio típico y la cantidad de avisos muestran cuánto margen de elección da.${resto > 0 ? ` Hay ${resto} comercio${resto > 1 ? "s" : ""} más con menos opciones.` : ""}</p></div>
+    ${barraAcciones("tiendas")}
+    <div class="dgrid">${cards}</div></div>`;
+}
+
+function vistaVeredictoDin() {
+  const A = ANALISIS, mejor = A.picks[0], f = mejor.m.f;
+  const barato = A.picks.find(p => p.clave === "barato"), alt = A.picks.find(p => p.clave === "alt");
+  const x = Math.round((1 - f[1] / A.med) * 100);
+  const c0 = A.comercios[0], c1 = A.comercios[1];
+  const items = [];
+
+  items.push({ t: `Comprá ${f[0].slice(0, 72)}.`,
+    d: `${mejor.razon} Sale ${pesos(f[1])} en ${comercioDe(f)}.` + (f[6] > f[1] ? ` Además bajó ${Math.round((1 - f[1] / f[6]) * 100)}% desde el relevamiento anterior.` : "") });
+  if (barato) items.push({ t: "Si el precio es lo único que importa.",
+    d: `${barato.m.f[0].slice(0, 72)} a ${pesos(barato.m.f[1])}. ${barato.razon}` });
+  if (alt) items.push({ t: "Una alternativa de otra marca.",
+    d: `${alt.m.f[0].slice(0, 72)} a ${pesos(alt.m.f[1])}. ${alt.razon}` });
+  items.push({ t: "Dónde conviene comprar.",
+    d: `${c0.nom} tiene la opción ${c0.conPrimera ? "de primera línea" : "de menor precio"} más barata: ${pesos(c0.mejorItem.f[1])}.`
+      + (c1 ? ` Le sigue ${c1.nom} con ${pesos(c1.mejorItem.f[1])}, ${Math.round((c1.mejorItem.f[1] / c0.mejorItem.f[1] - 1) * 100)}% más.` : "")
+      + ` Hay ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""} con opciones comparables.` });
+
+  const descartar = [];
+  if (A.excl.raros) descartar.push(`${A.excl.raros} avisos cuestan menos del 45% de lo habitual y no son de una marca que reconozcamos: suelen ser otro producto, un accesorio o una variante inferior.`);
+  if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: casi siempre son equipos completos que solo mencionan el componente en el nombre.`);
+  const caras = A.primeras.map(m => m.f[1]);
+  if (caras.length > 1) {
+    const sobre = Math.round((Math.max(...caras) / f[1] - 1) * 100);
+    if (sobre >= 25) descartar.push(`Entre las marcas de primera línea, la más cara cuesta ${sobre}% más que la mejor compra: antes de pagar esa diferencia, fijate si trae mejores especificaciones.`);
+  }
+  if (descartar.length) items.push({ t: "Lo que descartaría.", d: descartar.join(" ") });
+  items.push({ t: "Lo que esta lectura no sabe.",
+    d: "Sale del nombre y el precio de cada aviso. No ve garantía, reseñas ni especificaciones finas, y las especificaciones las lee del texto. Sirve para decidir a quién mirar primero, no para cerrar la compra sin abrir la ficha." });
+
+  const tiles = [
+    { k: "Mejor compra", v: pesos(f[1]), d: comercioDe(f), ok: true },
+    { k: "Mediana de la búsqueda", v: pesos(A.med), d: `${A.base.length} avisos comparables` },
+    { k: "Contra la mediana", v: `${x >= 0 ? "−" : "+"}${Math.abs(x)}%`, d: "la mejor compra frente a lo típico", ok: x > 0 },
+    { k: "Comercios", v: String(A.comercios.length), d: "con opciones comparables" },
+  ];
+  return `<div class="panel">${bannerConsulta()}
+    <div class="panel-head"><h2>${icono("trofeo")} Veredicto: ${esc(CONSULTA)}</h2>
+      <p class="sub">Escrito a partir de los resultados de tu búsqueda, con los precios de hoy.</p></div>
+    ${barraAcciones("veredicto")}
+    <div class="tiles">${tiles.map((t, i) => `<div class="tile${t.ok ? " ok" : ""}" style="--i:${i}">
+      <div class="k">${esc(t.k)}</div><div class="v">${t.v}</div><div class="d">${esc(t.d)}</div></div>`).join("")}</div>
+    ${items.map((v, i) => `<div class="ver-item" style="--i:${i}"><b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
+}
+
+function vistaDinamica(id) {
+  return id === "comparativa" ? vistaComparativaDin()
+       : id === "tiendas" ? vistaTiendasDin() : vistaVeredictoDin();
+}
+
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
-  if (id === "comparativa") v.innerHTML = vistaComparativa();
+  if (CONSULTA && ANALISIS && DINAMICAS.includes(id)) v.innerHTML = vistaDinamica(id);
+  else if (id === "comparativa") v.innerHTML = vistaComparativa();
   else if (id === "ofertas") v.innerHTML = vistaOfertas();
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
@@ -1700,7 +2106,7 @@ function arrancar() {
   if (!P.length) { $("#vista").innerHTML = '<p class="sub">No hay datos cargados todavía. Corré <code>python actualizar.py --build</code>.</p>'; return; }
   $("#tablist").innerHTML = VISTAS.map(v => {
     const n = v.n();
-    return `<button class="tab" role="tab" data-ir="${v.id}" aria-selected="false">
+    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${["comparativa", "tiendas", "veredicto"].includes(v.id) ? 1 : 0}" aria-selected="false">
       ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
   }).join("");
   $("#sello").textContent = `Precios verificados en cada sitio · actualizado ${DATOS.actualizado} · ${P.length} productos seguidos`;
@@ -1735,7 +2141,17 @@ function arrancar() {
     }
 
     const irCat = ev.target.closest("[data-ir-cat]");
-    if (irCat) { elegirCategoria(irCat.dataset.irCat); return ir("comparativa", true); }
+    if (irCat) { limpiarConsulta(); elegirCategoria(irCat.dataset.irCat); return ir("comparativa", true); }
+
+    const irVista = ev.target.closest("[data-ir-vista]");
+    if (irVista) return ir(irVista.dataset.irVista, true);
+
+    if (ev.target.closest("[data-cambiar-consulta]")) return ir("buscar", true);
+
+    if (ev.target.closest("[data-quitar-consulta]")) {
+      limpiarConsulta();
+      return aplicar(location.hash.slice(1));
+    }
 
     const sugerida = ev.target.closest(".sug");
     if (sugerida) return consultar(sugerida.textContent.trim());
