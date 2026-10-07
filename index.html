@@ -308,6 +308,13 @@ td.mejor{color:var(--good);font-weight:700}
 .oferta .ahora{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;color:var(--ink);display:block}
 .oferta .antes{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);text-decoration:line-through}
+.grupo{display:flex;align-items:center;gap:9px;font-size:1.05rem;letter-spacing:-.01em;margin:26px 0 2px}
+.grupo:first-child{margin-top:0}
+.cuenta{font:600 .72rem/1 var(--font-mono);color:var(--ink-3);background:var(--surface-2);
+  padding:4px 8px;border-radius:6px}
+.sub.chico{font-size:.86rem;margin-bottom:12px}
+#resOf .res{margin-bottom:4px}
+.off.propia{background:var(--accent)}
 .off{background:var(--good);color:#fff;font:700 .72rem/1 var(--font-mono);padding:6px 9px;
   border-radius:7px;white-space:nowrap}
 :root[data-theme="dark"] .off{color:#0e1117}
@@ -362,6 +369,7 @@ td.mejor{color:var(--good);font-weight:700}
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
   <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
+  <symbol id="i-flechaAbajo" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 3c3 4 6 5.5 6 9a6 6 0 0 1-12 0c0-2 1-3.5 2.5-5 .3 1.2 1 2 2 2.3C10 7.5 10.5 5 12 3z"/></symbol>
   <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
   <symbol id="i-refrescar" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></symbol>
@@ -861,7 +869,8 @@ if (!CATEGORIAS.some(c => c.id === CAT)) CAT = "ram";
 const VISTAS = [
   { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => CATEGORIAS.length },
   { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
-  { id: "ofertas", eti: "Ofertas", ico: "fuego", n: () => OFERTAS ? OFERTAS.length : null },
+  { id: "ofertas", eti: "Ofertas", ico: "fuego",
+    n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
   { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
 ];
@@ -1026,74 +1035,99 @@ function asegurarIndice(forzar) {
       IDX = j;
       OFERTAS = calcularOfertas(j);
       document.querySelectorAll(".tab[data-ir='buscar'] .n").forEach(n => { n.textContent = j.productos.length; });
-      document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.length; });
+      document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length; });
       return j;
     })
     .finally(() => { pidiendo = null; });
   return pidiendo;
 }
 
-/* --- Ofertas: rebajas de verdad, no diferencias por medio de pago ------
-   Solo Gaming City y ComparaYa publican un tachado que es una rebaja real;
-   en las demas ese numero es el precio sin transferencia. El indexador ya
-   guarda un cero cuando no corresponde. */
+/* --- Ofertas: dos señales distintas --------------------------------------
+   1. Bajas propias: lo que valia en el relevamiento anterior contra lo que
+      vale hoy. No depende de lo que publique la tienda, asi que sirve para
+      las cinco fuentes y no se puede inflar.
+   2. Rebajas publicadas: el precio tachado del comercio. Solo Gaming City y
+      ComparaYa lo usan como rebaja real; en las demas es el precio sin
+      transferencia. Se acota entre 15% y 60% porque arriba de ahi el precio
+      anterior suele estar inventado. */
 const PISO_OFERTA = 15000, DESCUENTO_MIN = 0.15, DESCUENTO_MAX = 0.6;
+const BAJA_MIN_PCT = 0.03, BAJA_MIN_PESOS = 1000;
 
 function calcularOfertas(idx) {
-  const hallazgos = [];
+  const propias = [], publicadas = [];
   for (const f of idx.productos) {
+    const ayer = f[6] || 0;
+    if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer >= BAJA_MIN_PCT) {
+      propias.push(f);
+      continue;                       // una baja propia ya es noticia: no la repito abajo
+    }
     const lista = f[5] || 0;
     if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
     const off = 1 - f[1] / lista;
-    // Arriba del techo el "precio anterior" casi siempre esta inflado para
-    // mostrar un descuento grande: un 90% OFF no es una oferta, es marketing.
-    if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) hallazgos.push(f);
+    if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) publicadas.push(f);
   }
-  return hallazgos.sort((a, b) => (1 - b[1] / b[5]) - (1 - a[1] / a[5])).slice(0, 40);
+  const porDescuento = (ref) => (a, b) => (1 - b[1] / b[ref]) - (1 - a[1] / a[ref]);
+  propias.sort(porDescuento(6));
+  publicadas.sort(porDescuento(5));
+  return { propias: propias.slice(0, 40), publicadas: publicadas.slice(0, 40) };
+}
+
+function filaOferta(f, i, ref, etiqueta) {
+  const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
+  const off = Math.round((1 - f[1] / f[ref]) * 100);
+  return `<div class="oferta c-${t.color}" style="--i:${i}">
+    <a class="nom" href="${f[2]}" target="_blank" rel="noopener">${esc(f[0])}</a>
+    <span class="tie">${esc(t.nombre)}${f[4] ? ` <span class="via">${esc(f[4])}</span>` : ""}</span>
+    <span class="off${ref === 6 ? " propia" : ""}">${etiqueta}${off}%</span>
+    <span class="precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[ref])}</span></span>
+    <button class="lupita" data-similar="${esc(f[0])}" title="Buscar similares" aria-label="Buscar similares">${icono("lupa")}</button>
+  </div>`;
 }
 
 function vistaOfertas() {
   setTimeout(async () => {
     try { await asegurarIndice(); pintarOfertas(); }
-    catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el indice"; }
+    catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el índice"; }
   }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
-    <p class="sub">Rebajas de verdad: productos cuyo precio bajó respecto del que la tienda misma publicaba antes.
-    No entran las diferencias por pagar con transferencia, que no son una oferta sino otro medio de pago,
-    ni los descuentos de más del 60%, donde el precio anterior suele estar inflado. Aun así, el precio tachado
-    es el que publica el comercio: tomalo como referencia, no como verdad revelada.</p></div>
+    <p class="sub">Dos señales distintas. La primera es propia: comparo lo que valía cada producto en el
+    relevamiento anterior contra lo que vale hoy, así que no depende de lo que publique la tienda. La segunda
+    es el precio tachado del comercio, que tomamos como referencia y no como verdad.</p></div>
     <p class="estado" id="estadoOf">buscando rebajas…</p>
     ${barraAcciones("ofertas")}
-    <div class="res" id="resOf"></div></div>`;
+    <div id="resOf"></div></div>`;
 }
 
 function pintarOfertas() {
   const caja = $("#resOf"), est = $("#estadoOf");
-  if (!caja) return;
-  if (!OFERTAS || !OFERTAS.length) {
-    // Un indice viejo no trae el precio tachado: conviene decirlo en vez de
-    // hacer creer que no hay ninguna rebaja en el mercado.
-    const sinCampo = IDX && !(IDX.campos || []).includes("lista");
-    est.textContent = sinCampo ? "el índice todavía no registra precios tachados"
-                               : "no hay rebajas que superen el 15% en este relevamiento";
+  if (!caja || !IDX) return;
+  const sinCampo = !(IDX.campos || []).includes("antes");
+  const p = (OFERTAS && OFERTAS.propias) || [], q = (OFERTAS && OFERTAS.publicadas) || [];
+
+  if (!p.length && !q.length) {
+    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores"
+                               : "no hay rebajas en este relevamiento";
     caja.innerHTML = sinCampo
-      ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code> para que se registren los precios anteriores de cada producto.</p>`
+      ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
       : `<p class="sub">Volvé mañana: el índice se rearma todos los días a las 09:00.</p>`;
     return;
   }
-  const fuentes = new Set(OFERTAS.map(f => f[3]));
-  est.textContent = `${OFERTAS.length} rebajas de más del 15% en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""} · la más grande primero`;
-  caja.innerHTML = OFERTAS.map((f, i) => {
-    const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
-    const off = Math.round((1 - f[1] / f[5]) * 100);
-    return `<div class="oferta c-${t.color}" style="--i:${i}">
-      <a class="nom" href="${f[2]}" target="_blank" rel="noopener">${esc(f[0])}</a>
-      <span class="tie">${esc(t.nombre)}${f[4] ? ` <span class="via">${esc(f[4])}</span>` : ""}</span>
-      <span class="off">${off}% OFF</span>
-      <span class="precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[5])}</span></span>
-      <button class="lupita" data-similar="${esc(f[0])}" title="Buscar similares" aria-label="Buscar similares">${icono("lupa")}</button>
-    </div>`;
-  }).join("");
+  est.textContent = `${p.length} bajaron de precio · ${q.length} rebajas publicadas`;
+
+  const bloque = (titulo, aclara, filas, ref, etiqueta, vacio) =>
+    `<h3 class="grupo">${titulo} <span class="cuenta">${filas.length}</span></h3>
+     <p class="sub chico">${aclara}</p>
+     <div class="res">${filas.length ? filas.map((f, i) => filaOferta(f, i, ref, etiqueta)).join("")
+        : `<p class="sub">${vacio}</p>`}</div>`;
+
+  caja.innerHTML =
+    bloque(`${icono("flechaAbajo")} Bajaron de precio`,
+      `Respecto del relevamiento anterior. Es la señal más confiable: la calcula la app, no la tienda.`,
+      p, 6, "bajó ",
+      "Ninguno bajó desde el último relevamiento. Se compara una vez por día.") +
+    bloque(`${icono("fuego")} Rebajas publicadas por el comercio`,
+      `El precio tachado que muestra la tienda, entre 15% y 60%. Arriba de ese techo suele estar inflado.`,
+      q, 5, "", "Sin rebajas publicadas en este relevamiento.");
 }
 
 /* --- Historial de busquedas: vive solo en este navegador -------------- */
@@ -1315,7 +1349,8 @@ function materia(de) {
       archivo: p.id,
     };
   }
-  if (de === "ofertas") return { filas: OFERTAS || [], titulo: "Ofertas imperdibles", archivo: "ofertas" };
+  if (de === "ofertas") return { filas: [...((OFERTAS || {}).propias || []), ...((OFERTAS || {}).publicadas || [])],
+                                titulo: "Ofertas imperdibles", archivo: "ofertas" };
   const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
   return {
     filas: c.lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),

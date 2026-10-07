@@ -162,8 +162,19 @@ siendo mas chico: 14 KB contra 55 KB para la misma tabla.
 
 ## Ofertas
 
-La pestana Ofertas muestra productos cuyo precio bajo respecto del que la
-tienda misma publicaba. No todas las fuentes sirven para esto: en CompraGamer,
+La pestana Ofertas trabaja con dos señales distintas.
+
+**Bajaron de precio** es la señal propia y la mas confiable: `precios.json`
+guarda lo que valia cada producto en el relevamiento anterior, y el indexador
+compara contra eso. No depende de lo que publique la tienda, no se puede
+inflar, y sirve para las cinco fuentes por igual. Se cuentan las bajas de al
+menos 3% y mil pesos, para no mostrar ruido de redondeo.
+
+Esa foto vive en su propia cache de GitHub Actions con clave estable, aparte de
+la del indice: asi el historial no se pierde cuando cambia el formato del
+indice o se toca el indexador.
+
+**Rebajas publicadas** es el precio tachado del comercio. No todas las fuentes sirven para esto: en CompraGamer,
 Mexx y FullH4rd el "precio de lista" es apenas el precio sin transferencia, y
 da exactamente el mismo porcentaje en todo el catalogo. Por eso `tiendas.json`
 marca con `lista_es_oferta` las dos fuentes donde el tachado es una rebaja de

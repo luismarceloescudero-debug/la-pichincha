@@ -65,6 +65,16 @@ jobs:
           key: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-${{ github.run_id }}
           restore-keys: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-
 
+      # La foto de precios va en su propia cache, con clave estable: es el
+      # historial con el que se detectan las bajas, y no debe perderse cuando
+      # cambia el formato del indice o se toca el indexador.
+      - name: Recuperar la foto de precios anterior
+        uses: actions/cache@v4
+        with:
+          path: precios.json
+          key: precios-${{ github.run_id }}
+          restore-keys: precios-
+
       # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
       # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
       - name: Armar el indice de busqueda

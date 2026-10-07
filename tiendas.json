@@ -37,7 +37,10 @@
       "tarjeta": "<div class=\"product\">",
       "re": {
         "url": "href=\"([a-z0-9-]+--det--\\d+)\"",
-        "nombre": "alt=\"([^\"]+)\"",
+        "nombre": [
+          "class=\"titprod\"[^>]*>([^<]{4,160})",
+          "alt=\"([^\"]+)\""
+        ],
         "precio": [
           "class=\"price-sales\">\\$\\s*([\\d.]+)",
           "class=\"price\"><span>\\$\\s*([\\d.]+)",
