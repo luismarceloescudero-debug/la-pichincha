@@ -9,14 +9,13 @@ garantia real, stock y el costo puesto en tu casa con el envio adentro.
 
 ## Que contiene
 
-- **Comparativa**: la categoria analizada a fondo. Hoy son los 3 mejores
-  modulos de 16GB DDR4 3200 por relacion marca/precio, con specs de fabrica
-  (timings, voltaje, rangos, altura, garantia) y precio puesto en Mendoza con
-  el envio incluido. La app nacio buscando memoria RAM, pero el alcance es el
-  hardware en general: el resto entra por el buscador.
+- **Comparativa**: las categorias analizadas a fondo, con un selector arriba.
+  Hoy son memorias DDR4 16GB y webcams, con specs de fabrica y precio puesto en
+  Mendoza con el envio incluido. Sumar una categoria es agregar una entrada en
+  la lista CATEGORIAS del HTML y sus productos en datos.json.
+- **Ofertas**: rebajas reales detectadas en el indice.
 - Las 3 tiendas que mejor pagan la calidad, cruzando el mismo producto entre
   CompraGamer, Gaming City, Mexx y FullH4rd.
-- Comparativa de webcams en esas mismas tiendas.
 
 Cada foto, nombre y precio enlaza al producto en la web de la tienda.
 
@@ -160,3 +159,27 @@ Se eligio ExcelJS sobre SheetJS porque la edicion comunitaria de SheetJS no
 escribe estilos de celda. ExcelJS pesa mas (257 KB contra 79 KB) pero como se
 carga bajo demanda lo paga solo quien exporta, y el archivo que genera termina
 siendo mas chico: 14 KB contra 55 KB para la misma tabla.
+
+## Ofertas
+
+La pestana Ofertas muestra productos cuyo precio bajo respecto del que la
+tienda misma publicaba. No todas las fuentes sirven para esto: en CompraGamer,
+Mexx y FullH4rd el "precio de lista" es apenas el precio sin transferencia, y
+da exactamente el mismo porcentaje en todo el catalogo. Por eso `tiendas.json`
+marca con `lista_es_oferta` las dos fuentes donde el tachado es una rebaja de
+verdad, Gaming City y ComparaYa, y el indexador guarda un cero en las demas.
+
+Se muestran las rebajas entre 15% y 60%. El techo esta puesto porque arriba de
+ahi el precio anterior casi siempre esta inflado: un 90% OFF no es una oferta,
+es marketing.
+
+Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
+del producto, sin el codigo de modelo, para que traiga competencia en vez de
+ese producto solo.
+
+## Historial de busquedas
+
+Las ultimas ocho busquedas quedan guardadas en el navegador de cada visitante,
+con un boton para repetirlas y otro para actualizar precios, que vuelve a bajar
+el indice ignorando la cache. No viaja a ningun lado ni se comparte entre
+dispositivos.

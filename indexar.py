@@ -262,6 +262,7 @@ def main():
     previo = {}
     if INDICE.exists():
         for fila in json.loads(INDICE.read_text(encoding="utf-8")).get("productos", []):
+            fila = (list(fila) + ["", 0])[:6]        # filas viejas de 4 o 5 campos
             previo.setdefault(fila[3], []).append(fila)
 
     salida, resumen = [], {}
@@ -289,11 +290,15 @@ def main():
             else:
                 resumen[clave] = (0, "fallo")
             continue
+        rebaja_real = bool(fuente.get("lista_es_oferta"))
         for it in items:
-            fila = [it["nombre"], it["precio"], it["url"], clave]
-            if it.get("via"):
-                fila.append(it["via"])               # de que comercio sale, via el comparador
-            salida.append(fila)
+            lista = it.get("lista") or 0
+            # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
+            # el "precio de lista" es apenas el precio sin transferencia.
+            if not rebaja_real or not lista or lista <= it["precio"]:
+                lista = 0
+            salida.append([it["nombre"], it["precio"], it["url"], clave,
+                           it.get("via") or "", lista])
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
@@ -301,7 +306,7 @@ def main():
         "generado": date.today().isoformat(),
         "tiendas": {k: {"nombre": v["nombre"], "color": v["color"],
                         "segunda": bool(v.get("segunda_opinion"))} for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista"],
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

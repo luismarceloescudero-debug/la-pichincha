@@ -1,5 +1,5 @@
 {
-  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false.",
+  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas.",
   "compragamer": {
     "nombre": "CompraGamer",
     "color": "cg",
@@ -17,7 +17,8 @@
       },
       "ruta": "producto/{slug}_{id}"
     },
-    "extractor": "compragamer"
+    "extractor": "compragamer",
+    "lista_es_oferta": false
   },
   "gamingcity": {
     "nombre": "Gaming City",
@@ -47,7 +48,8 @@
         ]
       }
     },
-    "extractor": "meta"
+    "extractor": "meta",
+    "lista_es_oferta": true
   },
   "mexx": {
     "nombre": "Mexx",
@@ -70,7 +72,8 @@
         "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>"
       }
     },
-    "extractor": "itemprop"
+    "extractor": "itemprop",
+    "lista_es_oferta": false
   },
   "fullh4rd": {
     "nombre": "FullH4rd",
@@ -121,7 +124,8 @@
         "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)"
       }
     },
-    "extractor": "og"
+    "extractor": "og",
+    "lista_es_oferta": false
   },
   "comparaya": {
     "nombre": "ComparaYa",
@@ -142,11 +146,7 @@
         "consolas",
         "impresoras",
         "auriculares",
-        "tablets",
-        "aspiradoras",
-        "heladeras",
-        "lavarropas",
-        "aires-acondicionados"
+        "tablets"
       ],
       "lista": "data",
       "campos": {
@@ -157,6 +157,7 @@
         "via": "store_name"
       }
     },
-    "extractor": null
+    "extractor": null,
+    "lista_es_oferta": true
   }
 }

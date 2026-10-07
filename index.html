@@ -279,6 +279,58 @@ td.mejor{color:var(--good);font-weight:700}
   .pie-impresion{display:block!important}
 }
 .pie-impresion{display:none}
+
+/* ---- Selector de categoria dentro de Comparativa ---- */
+.segmentos{display:flex;gap:4px;background:var(--surface-2);border-radius:12px;padding:4px;
+  margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
+.segmentos::-webkit-scrollbar{display:none}
+.seg{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;padding:9px 16px;
+  border-radius:9px;font:500 .88rem var(--font-sans);color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:all .22s var(--curva)}
+.seg:hover{color:var(--ink)}
+.seg[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.seg .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);background:var(--bg);
+  border-radius:5px;padding:0 5px}
+.seg[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
+
+/* ---- Ofertas ---- */
+.oferta{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-left:4px solid var(--c);border-radius:12px;padding:13px 16px;text-decoration:none;color:inherit;
+  animation:entra .3s var(--curva) both;animation-delay:calc(var(--i,0)*22ms);
+  transition:transform .18s var(--curva),box-shadow .18s,border-color .18s}
+.oferta:hover{transform:translateX(4px);box-shadow:var(--shadow);border-color:var(--c)}
+.oferta .nom{flex:1;min-width:0;font-size:.92rem;line-height:1.35}
+.oferta .tie{font:600 .72rem/1 var(--font-mono);color:var(--c);background:var(--c-soft);
+  padding:5px 10px;border-radius:999px;white-space:nowrap}
+.oferta .via{color:var(--ink-3);font-weight:500}
+.oferta .via::before{content:"A ";opacity:.7}
+.oferta .precios{text-align:right;white-space:nowrap}
+.oferta .ahora{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;color:var(--ink);display:block}
+.oferta .antes{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);text-decoration:line-through}
+.off{background:var(--good);color:#fff;font:700 .72rem/1 var(--font-mono);padding:6px 9px;
+  border-radius:7px;white-space:nowrap}
+:root[data-theme="dark"] .off{color:#0e1117}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .off{color:#0e1117}}
+.lupita{all:unset;cursor:pointer;color:var(--ink-3);padding:6px;border-radius:8px;display:inline-flex;
+  transition:color .18s,background .18s}
+.lupita:hover{color:var(--accent);background:var(--accent-soft)}
+
+/* ---- Historial de busquedas ---- */
+.historial{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:-6px 0 16px}
+.historial .et{font:500 .76rem var(--font-mono);color:var(--ink-3);display:inline-flex;align-items:center;gap:5px}
+.hist{all:unset;cursor:pointer;font:500 .82rem var(--font-sans);padding:5px 11px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;gap:7px;
+  transition:filter .18s}
+.hist:hover{filter:brightness(.95)}
+.hist .x{color:var(--ink-3);font-weight:700;padding:0 2px}
+.hist .x:hover{color:var(--bad)}
+@media (max-width:620px){
+  .oferta{flex-wrap:wrap;gap:9px}
+  .oferta .nom{flex:1 1 100%;order:1}
+  .oferta .tie{order:2}.off{order:3}.oferta .precios{order:4;margin-left:auto}
+  .seg{padding:9px 12px;font-size:.82rem}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
   .largo{display:none}
@@ -310,6 +362,9 @@ td.mejor{color:var(--good);font-weight:700}
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
   <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
+  <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 3c3 4 6 5.5 6 9a6 6 0 0 1-12 0c0-2 1-3.5 2.5-5 .3 1.2 1 2 2 2.3C10 7.5 10.5 5 12 3z"/></symbol>
+  <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-refrescar" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></symbol>
   <symbol id="i-compartir" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
   <symbol id="i-imprimir" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><path d="M4 9h16v8h-3M7 17H4V9"/><rect x="7" y="14" width="10" height="7" rx="1"/></symbol>
   <symbol id="i-tabla" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></symbol>
@@ -789,10 +844,24 @@ const porId = Object.fromEntries(P.map(p => [p.id, p]));
 const de = tipo => P.filter(p => p.tipo === tipo).sort((a, b) => a.podio - b.podio);
 const rams = de("ram"), cams = de("webcam");
 
+/* Comparativa agrupa las categorias analizadas a fondo. Sumar una es agregar
+   una entrada aca y los productos correspondientes en datos.json. */
+const CATEGORIAS = [
+  { id: "ram", eti: "Memorias DDR4 16GB", lista: rams, ico: "chip",
+    titulo: "Memorias DDR4 16GB: las 3 mejores por marca/precio",
+    sub: "Módulo único de 16GB a 3200 MHz para escritorio. El detalle de specs está dentro de cada tarjeta." },
+  { id: "webcam", eti: "Webcams", lista: cams, ico: "cam",
+    titulo: "Webcams: las 3 que valen la pena",
+    sub: "De las trece relevadas en las mismas tiendas, estas tres son las que justifican lo que cuestan." },
+];
+const catDe = p => (p && p.tipo === "webcam" ? "webcam" : "ram");
+let CAT = (() => { try { return localStorage.getItem("cat") || "ram"; } catch (e) { return "ram"; } })();
+if (!CATEGORIAS.some(c => c.id === CAT)) CAT = "ram";
+
 const VISTAS = [
-  { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => rams.length },
+  { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => CATEGORIAS.length },
   { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
-  { id: "webcams", eti: "Webcams", ico: "cam", n: () => cams.length },
+  { id: "ofertas", eti: "Ofertas", ico: "fuego", n: () => OFERTAS ? OFERTAS.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
   { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
 ];
@@ -845,7 +914,7 @@ const celda = (v, p, foco, destacar) =>
 function detalle(p) {
   const t = T[p.tienda], grupo = p.tipo === "ram" ? rams : cams;
   return `<div class="detalle c-${t.color}">
-    <button class="volver" data-volver>${icono("izq")} Volver a ${p.tipo === "ram" ? "la comparativa" : "webcams"}</button>
+    <button class="volver" data-volver>${icono("izq")} Volver a la comparativa</button>
     ${barraAcciones(p.id)}
     <div class="dcab">
       <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
@@ -873,10 +942,16 @@ function detalle(p) {
 }
 
 /* --- Vistas --- */
-function vistaGrilla(lista, titulo, bajada, id) {
-  return `<div class="panel"><div class="panel-head"><h2>${titulo}</h2><p class="sub">${bajada}</p></div>
-    ${barraAcciones(id)}
-    <div class="grid">${lista.map(tarjeta).join("")}</div></div>`;
+function vistaComparativa() {
+  const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
+  const selector = CATEGORIAS.length < 2 ? "" :
+    `<div class="segmentos" role="tablist">${CATEGORIAS.map(x =>
+      `<button class="seg" data-cat="${x.id}" role="tab" aria-selected="${x.id === c.id}">
+        ${icono(x.ico)} ${esc(x.eti)} <span class="n">${x.lista.length}</span></button>`).join("")}</div>`;
+  return `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
+    ${selector}
+    ${barraAcciones("comparativa")}
+    <div class="grid">${c.lista.map(tarjeta).join("")}</div></div>`;
 }
 
 function vistaTiendas() {
@@ -935,10 +1010,118 @@ function vistaVeredicto() {
       <b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
 }
 
-/* --- Buscador: el indice se baja recien cuando abris la pestana --- */
-let IDX = null, cargandoIdx = false;
+/* --- Indice compartido: lo usan Buscar y Ofertas ---------------------
+   Se baja una sola vez, recien cuando abris alguna de las dos. */
+let IDX = null, pidiendo = null, OFERTAS = null;
 const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "fuente 650w", "webcam logitech"];
 const normal = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function asegurarIndice(forzar) {
+  if (IDX && !forzar) return Promise.resolve(IDX);
+  if (pidiendo && !forzar) return pidiendo;
+  // no-cache revalida; reload ignora la copia local y trae la del servidor.
+  pidiendo = fetch("indice.json", { cache: forzar ? "reload" : "no-cache" })
+    .then(r => r.json())
+    .then(j => {
+      IDX = j;
+      OFERTAS = calcularOfertas(j);
+      document.querySelectorAll(".tab[data-ir='buscar'] .n").forEach(n => { n.textContent = j.productos.length; });
+      document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.length; });
+      return j;
+    })
+    .finally(() => { pidiendo = null; });
+  return pidiendo;
+}
+
+/* --- Ofertas: rebajas de verdad, no diferencias por medio de pago ------
+   Solo Gaming City y ComparaYa publican un tachado que es una rebaja real;
+   en las demas ese numero es el precio sin transferencia. El indexador ya
+   guarda un cero cuando no corresponde. */
+const PISO_OFERTA = 15000, DESCUENTO_MIN = 0.15, DESCUENTO_MAX = 0.6;
+
+function calcularOfertas(idx) {
+  const hallazgos = [];
+  for (const f of idx.productos) {
+    const lista = f[5] || 0;
+    if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
+    const off = 1 - f[1] / lista;
+    // Arriba del techo el "precio anterior" casi siempre esta inflado para
+    // mostrar un descuento grande: un 90% OFF no es una oferta, es marketing.
+    if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) hallazgos.push(f);
+  }
+  return hallazgos.sort((a, b) => (1 - b[1] / b[5]) - (1 - a[1] / a[5])).slice(0, 40);
+}
+
+function vistaOfertas() {
+  setTimeout(async () => {
+    try { await asegurarIndice(); pintarOfertas(); }
+    catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el indice"; }
+  }, 0);
+  return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
+    <p class="sub">Rebajas de verdad: productos cuyo precio bajó respecto del que la tienda misma publicaba antes.
+    No entran las diferencias por pagar con transferencia, que no son una oferta sino otro medio de pago,
+    ni los descuentos de más del 60%, donde el precio anterior suele estar inflado. Aun así, el precio tachado
+    es el que publica el comercio: tomalo como referencia, no como verdad revelada.</p></div>
+    <p class="estado" id="estadoOf">buscando rebajas…</p>
+    ${barraAcciones("ofertas")}
+    <div class="res" id="resOf"></div></div>`;
+}
+
+function pintarOfertas() {
+  const caja = $("#resOf"), est = $("#estadoOf");
+  if (!caja) return;
+  if (!OFERTAS || !OFERTAS.length) {
+    // Un indice viejo no trae el precio tachado: conviene decirlo en vez de
+    // hacer creer que no hay ninguna rebaja en el mercado.
+    const sinCampo = IDX && !(IDX.campos || []).includes("lista");
+    est.textContent = sinCampo ? "el índice todavía no registra precios tachados"
+                               : "no hay rebajas que superen el 15% en este relevamiento";
+    caja.innerHTML = sinCampo
+      ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code> para que se registren los precios anteriores de cada producto.</p>`
+      : `<p class="sub">Volvé mañana: el índice se rearma todos los días a las 09:00.</p>`;
+    return;
+  }
+  const fuentes = new Set(OFERTAS.map(f => f[3]));
+  est.textContent = `${OFERTAS.length} rebajas de más del 15% en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""} · la más grande primero`;
+  caja.innerHTML = OFERTAS.map((f, i) => {
+    const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
+    const off = Math.round((1 - f[1] / f[5]) * 100);
+    return `<div class="oferta c-${t.color}" style="--i:${i}">
+      <a class="nom" href="${f[2]}" target="_blank" rel="noopener">${esc(f[0])}</a>
+      <span class="tie">${esc(t.nombre)}${f[4] ? ` <span class="via">${esc(f[4])}</span>` : ""}</span>
+      <span class="off">${off}% OFF</span>
+      <span class="precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[5])}</span></span>
+      <button class="lupita" data-similar="${esc(f[0])}" title="Buscar similares" aria-label="Buscar similares">${icono("lupa")}</button>
+    </div>`;
+  }).join("");
+}
+
+/* --- Historial de busquedas: vive solo en este navegador -------------- */
+const TOPE_HIST = 8;
+const leerHist = () => {
+  try { return JSON.parse(localStorage.getItem("hist") || "[]").filter(x => typeof x === "string"); }
+  catch (e) { return []; }
+};
+function guardarHist(q) {
+  q = (q || "").trim();
+  if (q.length < 2) return;
+  const h = [q, ...leerHist().filter(x => x !== q)].slice(0, TOPE_HIST);
+  try { localStorage.setItem("hist", JSON.stringify(h)); } catch (e) { /* sin storage no persiste */ }
+  pintarHist();
+}
+function olvidar(q) {
+  try { localStorage.setItem("hist", JSON.stringify(leerHist().filter(x => x !== q))); } catch (e) {}
+  pintarHist();
+}
+function pintarHist() {
+  const caja = $("#hist");
+  if (!caja) return;
+  const h = leerHist();
+  caja.innerHTML = !h.length ? "" :
+    `<span class="et">${icono("reloj")} tus búsquedas</span>` + h.map(q =>
+      `<button class="hist" data-rep="${esc(q)}">${esc(q)}<span class="x" data-olvidar="${esc(q)}" title="Quitar">×</span></button>`).join("") +
+    `<button class="hist" data-refrescar="1">${icono("refrescar")} actualizar precios</button>`;
+}
 
 function buscar(q, tope = 60) {
   const toc = normal(q).split(/\s+/).filter(Boolean);
@@ -956,12 +1139,15 @@ function buscar(q, tope = 60) {
   return halla.sort((a, b) => a[1] - b[1]).slice(0, tope);
 }
 
+let ULTIMA_BUSQUEDA = [];
+
 function pintarResultados(q) {
   const caja = $("#res"), est = $("#estado");
-  if (!IDX) return;
+  if (!IDX || !caja) return;
   if (!q.trim()) {
-    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} tiendas · actualizado ${IDX.generado}`;
+    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${IDX.generado}`;
     caja.innerHTML = "";
+    ULTIMA_BUSQUEDA = [];
     return;
   }
   const r = buscar(q);
@@ -971,11 +1157,10 @@ function pintarResultados(q) {
     caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
     return;
   }
-  const tiendas = new Set(r.map(f => f[3]));
-  est.textContent = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${tiendas.size} tienda${tiendas.size > 1 ? "s" : ""} · el más barato primero`;
+  const fuentes = new Set(r.map(f => f[3]));
+  est.textContent = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""} · el más barato primero`;
   caja.innerHTML = r.map((f, i) => {
     const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
-    // f[4] aparece cuando el resultado llega por un comparador: es el comercio real.
     const sello = f[4] ? `${esc(t.nombre)} <span class="via">${esc(f[4])}</span>` : esc(t.nombre);
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
       <span class="nom">${esc(f[0])}</span>
@@ -986,39 +1171,40 @@ function pintarResultados(q) {
   }).join("");
 }
 
+let guardarLuego = null;
+function consultar(q) {
+  const campo = $("#q");
+  if (campo && campo.value !== q) campo.value = q;
+  pintarResultados(q);
+  clearTimeout(guardarLuego);
+  guardarLuego = setTimeout(() => guardarHist(q), 1200);   // recien cuando dejas de tipear
+}
+
 function vistaBuscar() {
   setTimeout(async () => {
     const campo = $("#q");
     if (campo) {
       let t;
-      campo.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => pintarResultados(campo.value), 160); });
+      campo.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => consultar(campo.value), 160); });
       campo.focus();
     }
-    document.querySelectorAll(".sug").forEach(b => b.addEventListener("click", () => {
-      $("#q").value = b.textContent; pintarResultados(b.textContent);
-    }));
-    if (IDX || cargandoIdx) { pintarResultados($("#q") ? $("#q").value : ""); return; }
-    cargandoIdx = true;
+    pintarHist();
     try {
-      // no-cache revalida contra el servidor: si no cambio devuelve 304 y no
-      // baja nada, pero evita quedarse con un indice viejo tras una publicacion.
-      IDX = await (await fetch("indice.json", { cache: "no-cache" })).json();
-      const n = $('.tab[data-ir="buscar"] .n');
-      if (n) n.textContent = IDX.productos.length;
-      else { const b = $('.tab[data-ir="buscar"]'); if (b) b.insertAdjacentHTML("beforeend", ` <span class="n">${IDX.productos.length}</span>`); }
-      pintarResultados($("#q") ? $("#q").value : "");
+      await asegurarIndice();
+      pintarResultados(campo ? campo.value : "");
     } catch (e) {
       $("#estado").textContent = "no pude cargar el índice";
       $("#res").innerHTML = `<p class="sub">Falta <code>indice.json</code>. Generalo con <code>python indexar.py</code>.</p>`;
-    } finally { cargandoIdx = false; }
+    }
   }, 0);
 
   return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 5 fuentes</h2>
     <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen del más barato al más caro, sin importar de dónde vengan.</p></div>
     <div class="buscador">${icono("lupa")}<input type="search" id="q" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
+    <div class="historial" id="hist"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
     <p class="estado" id="estado">cargando índice…</p>
-    ${barraAcciones('buscar')}
+    ${barraAcciones("buscar")}
     <div class="res" id="res"></div></div>`;
 }
 
@@ -1129,15 +1315,14 @@ function materia(de) {
       archivo: p.id,
     };
   }
-  const lista = (de === "webcams" ? cams : rams);
+  if (de === "ofertas") return { filas: OFERTAS || [], titulo: "Ofertas imperdibles", archivo: "ofertas" };
+  const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
   return {
-    filas: lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),
-    titulo: de === "webcams" ? "Las 3 mejores webcams" : "Memorias DDR4 16GB: las 3 mejores",
-    archivo: de,
+    filas: c.lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),
+    titulo: c.titulo,
+    archivo: c.id,
   };
 }
-
-let ULTIMA_BUSQUEDA = [];
 
 document.addEventListener("click", async ev => {
   const b = ev.target.closest("[data-acc]");
@@ -1254,10 +1439,8 @@ async function aXLSX(filas, titulo) {
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
-  if (id === "comparativa") v.innerHTML = vistaGrilla(rams, "Memorias DDR4 16GB: las 3 mejores por marca/precio",
-    "La categoría analizada a fondo hasta ahora. El resto del hardware entra por el buscador, que cubre 9848 productos.", "comparativa");
-  else if (id === "webcams") v.innerHTML = vistaGrilla(cams, "Las 3 mejores webcams",
-    "Las que valen la pena de las trece relevadas en las mismas tiendas.", "webcams");
+  if (id === "comparativa") v.innerHTML = vistaComparativa();
+  else if (id === "ofertas") v.innerHTML = vistaOfertas();
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
@@ -1270,9 +1453,16 @@ function pintar(id) {
    navegador, los enlaces directos a una tarjeta y recargar la pagina. */
 let subirAlPintar = false;
 
-const ALIAS = { memorias: "comparativa" };   // enlaces viejos que siguen andando
+const ALIAS = { memorias: "comparativa", webcams: "comparativa" };  // enlaces viejos que siguen andando
+
+function elegirCategoria(cat) {
+  CAT = cat;
+  try { localStorage.setItem("cat", cat); } catch (e) { /* sin storage, se pierde al recargar */ }
+}
 
 function aplicar(id) {
+  if (id === "webcams") elegirCategoria("webcam");
+  if (porId[id]) elegirCategoria(catDe(porId[id]));
   id = ALIAS[id] || id;
   pintar(VISTAS.some(v => v.id === id) || porId[id] ? id : "comparativa");
   if (subirAlPintar) $(".tabs").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1305,9 +1495,39 @@ function arrancar() {
     if (tab) return ir(tab.dataset.ir, false);
     const abrir = ev.target.closest("[data-abrir]");
     if (abrir) return ir(abrir.dataset.abrir, true);
-    if (ev.target.closest("[data-volver]")) {
-      const p = porId[location.hash.slice(1)];
-      return ir(p && p.tipo === "webcam" ? "webcams" : "comparativa", true);
+    const seg = ev.target.closest("[data-cat]");
+    if (seg) { elegirCategoria(seg.dataset.cat); return ir("comparativa", false); }
+    if (ev.target.closest("[data-volver]")) return ir("comparativa", true);
+
+    // quitar del historial: se maneja antes que repetir, porque la x vive adentro
+    const quitar = ev.target.closest("[data-olvidar]");
+    if (quitar) { ev.stopPropagation(); return olvidar(quitar.dataset.olvidar); }
+
+    const repetir = ev.target.closest("[data-rep]");
+    if (repetir) return consultar(repetir.dataset.rep);
+
+    const sugerida = ev.target.closest(".sug");
+    if (sugerida) return consultar(sugerida.textContent.trim());
+
+    // desde una oferta, saltar al buscador con las palabras distintivas
+    const similar = ev.target.closest("[data-similar]");
+    if (similar) {
+      // Para buscar similares sirven categoria y marca, no el codigo de modelo:
+      // "Notebook HP Intel" trae competencia, "15-fd2350la" trae ese producto solo.
+      const clave = similar.dataset.similar.split(/\s+/)
+        .filter(w => w.length >= 2 && !/\d/.test(w)).slice(0, 3).join(" ");
+      ir("buscar", true);
+      return setTimeout(() => consultar(clave), 60);
+    }
+
+    const refrescar = ev.target.closest("[data-refrescar]");
+    if (refrescar) {
+      const previo = refrescar.innerHTML;
+      refrescar.innerHTML = `${icono("refrescar")} actualizando…`;
+      return asegurarIndice(true)
+        .then(() => { pintarResultados(($("#q") || {}).value || ""); pintarOfertas(); })
+        .catch(() => {})
+        .finally(() => { refrescar.innerHTML = previo; });
     }
   });
 
