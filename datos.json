@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-06",
+  "actualizado": "2026-10-07",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -369,7 +369,7 @@
       },
       "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/51101-c%C3%A1mara-web-redragon-gw911-4k-full-hd.html",
       "img": "img/gw911.jpg",
-      "precio": 88489,
+      "precio": 87399,
       "precio_lista": null,
       "stock": "en stock"
     },
@@ -407,7 +407,18 @@
       "stock": "en stock"
     }
   ],
-  "historial": [],
+  "historial": [
+    {
+      "fecha": "2026-10-07",
+      "cambios": [
+        {
+          "id": "gw911",
+          "antes": 88489,
+          "ahora": 87399
+        }
+      ]
+    }
+  ],
   "veredicto": [
     {
       "t": "Comprá el ADATA XPG Gammix D35 en CompraGamer.",
