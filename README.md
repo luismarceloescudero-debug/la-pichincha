@@ -9,9 +9,11 @@ garantia real, stock y el costo puesto en tu casa con el envio adentro.
 
 ## Que contiene
 
-- Los 3 mejores modulos de 16GB DDR4 3200 por relacion marca/precio, con specs
-  de fabrica (timings, voltaje, rangos, altura, garantia) y precio puesto en
-  Mendoza con el envio incluido.
+- **Comparativa**: la categoria analizada a fondo. Hoy son los 3 mejores
+  modulos de 16GB DDR4 3200 por relacion marca/precio, con specs de fabrica
+  (timings, voltaje, rangos, altura, garantia) y precio puesto en Mendoza con
+  el envio incluido. La app nacio buscando memoria RAM, pero el alcance es el
+  hardware en general: el resto entra por el buscador.
 - Las 3 tiendas que mejor pagan la calidad, cruzando el mismo producto entre
   CompraGamer, Gaming City, Mexx y FullH4rd.
 - Comparativa de webcams en esas mismas tiendas.

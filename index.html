@@ -258,8 +258,8 @@ td.mejor{color:var(--good);font-weight:700}
 .acc[data-ok="1"]{border-color:var(--good);color:var(--good);background:var(--good-soft)}
 .acc .ico{font-size:1.05rem}
 
-/* ---- Indicio de que las pestanas se deslizan ---- */
-.tabs{position:relative}
+/* ---- Indicio de que las pestanas se deslizan ----
+   Ojo: no poner position aca, pisaria el sticky de la barra. */
 .tabs::after{content:"";position:absolute;right:0;top:12px;bottom:13px;width:34px;pointer-events:none;
   background:linear-gradient(90deg,transparent,var(--bg));opacity:0;transition:opacity .2s}
 .tabs[data-desborda="1"]::after{opacity:1}
@@ -790,7 +790,7 @@ const de = tipo => P.filter(p => p.tipo === tipo).sort((a, b) => a.podio - b.pod
 const rams = de("ram"), cams = de("webcam");
 
 const VISTAS = [
-  { id: "memorias", eti: "Memorias", ico: "chip", n: () => rams.length },
+  { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => rams.length },
   { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
   { id: "webcams", eti: "Webcams", ico: "cam", n: () => cams.length },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
@@ -845,7 +845,7 @@ const celda = (v, p, foco, destacar) =>
 function detalle(p) {
   const t = T[p.tienda], grupo = p.tipo === "ram" ? rams : cams;
   return `<div class="detalle c-${t.color}">
-    <button class="volver" data-volver>${icono("izq")} Volver a ${p.tipo === "ram" ? "memorias" : "webcams"}</button>
+    <button class="volver" data-volver>${icono("izq")} Volver a ${p.tipo === "ram" ? "la comparativa" : "webcams"}</button>
     ${barraAcciones(p.id)}
     <div class="dcab">
       <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
@@ -1132,7 +1132,7 @@ function materia(de) {
   const lista = (de === "webcams" ? cams : rams);
   return {
     filas: lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),
-    titulo: de === "webcams" ? "Las 3 mejores webcams" : "Las 3 mejores memorias",
+    titulo: de === "webcams" ? "Las 3 mejores webcams" : "Memorias DDR4 16GB: las 3 mejores",
     archivo: de,
   };
 }
@@ -1254,8 +1254,8 @@ async function aXLSX(filas, titulo) {
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
-  if (id === "memorias") v.innerHTML = vistaGrilla(rams, "Las 3 mejores memorias por marca/precio",
-    "Módulo único de 16GB DDR4 3200 para escritorio. El detalle de specs está dentro de cada tarjeta.", "memorias");
+  if (id === "comparativa") v.innerHTML = vistaGrilla(rams, "Memorias DDR4 16GB: las 3 mejores por marca/precio",
+    "La categoría analizada a fondo hasta ahora. El resto del hardware entra por el buscador, que cubre 9848 productos.", "comparativa");
   else if (id === "webcams") v.innerHTML = vistaGrilla(cams, "Las 3 mejores webcams",
     "Las que valen la pena de las trece relevadas en las mismas tiendas.", "webcams");
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
@@ -1270,8 +1270,11 @@ function pintar(id) {
    navegador, los enlaces directos a una tarjeta y recargar la pagina. */
 let subirAlPintar = false;
 
+const ALIAS = { memorias: "comparativa" };   // enlaces viejos que siguen andando
+
 function aplicar(id) {
-  pintar(VISTAS.some(v => v.id === id) || porId[id] ? id : "memorias");
+  id = ALIAS[id] || id;
+  pintar(VISTAS.some(v => v.id === id) || porId[id] ? id : "comparativa");
   if (subirAlPintar) $(".tabs").scrollIntoView({ behavior: "smooth", block: "start" });
   subirAlPintar = false;
 }
@@ -1304,7 +1307,7 @@ function arrancar() {
     if (abrir) return ir(abrir.dataset.abrir, true);
     if (ev.target.closest("[data-volver]")) {
       const p = porId[location.hash.slice(1)];
-      return ir(p && p.tipo === "webcam" ? "webcams" : "memorias", true);
+      return ir(p && p.tipo === "webcam" ? "webcams" : "comparativa", true);
     }
   });
 
