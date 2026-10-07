@@ -55,12 +55,15 @@ jobs:
 
       # Si una tienda se cae o bloquea la IP del runner, el indice anterior
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
+      # La clave incluye el hash del indexador y de la configuracion de fuentes:
+      # si cambia el formato del indice o se suma una tienda, no hay cache que
+      # reusar y el paso siguiente rearma el indice solo.
       - name: Recuperar el indice anterior
         uses: actions/cache@v4
         with:
           path: indice.json
-          key: indice-${{ github.run_id }}
-          restore-keys: indice-
+          key: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-${{ github.run_id }}
+          restore-keys: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-
 
       # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
       # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
