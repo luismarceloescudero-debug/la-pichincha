@@ -152,6 +152,26 @@ def indexar_listados(tienda, max_paginas):
     return items
 
 
+def imagen(fila, cfg):
+    """URL de la primera foto del producto, o "" si la fuente no publica fotos.
+
+    Las APIs suelen dar solo el nombre del archivo ([{"nombre": ..., "orden": 1}]):
+    'imagen_url' de la fuente dice como convertirlo en una URL que se pueda mostrar.
+    """
+    campo = cfg["campos"].get("imagen")
+    fotos = fila.get(campo) if campo else None
+    if not fotos:
+        return ""
+    if isinstance(fotos, list):
+        fotos = sorted(fotos, key=lambda x: x.get("orden", 0) if isinstance(x, dict) else 0)
+        fotos = fotos[0]
+    nombre = fotos.get("nombre") if isinstance(fotos, dict) else fotos
+    if not nombre:
+        return ""
+    plantilla = cfg.get("imagen_url")
+    return plantilla.format(nombre=nombre) if plantilla else str(nombre)
+
+
 def indexar_api(tienda, max_paginas):
     """Catalogo servido por una API JSON paginada, categoria por categoria."""
     cfg = tienda["catalogo"]
@@ -174,14 +194,9 @@ def indexar_api(tienda, max_paginas):
                 if not f.get(c["precio"]) or not f.get(c["nombre"]):
                     continue
                 vistos.add(f[c["url"]])
-                img = ""
-                if c.get("imagen") and f.get(c.get("imagen")):
-                    imgs = f[c["imagen"]]
-                    if isinstance(imgs, list) and imgs:
-                        img = imgs[0].get("nombre") if isinstance(imgs[0], dict) else str(imgs[0])
                 items.append({"nombre": limpio(f[c["nombre"]]), "precio": int(f[c["precio"]]),
                               "lista": f.get(c.get("lista")), "url": f[c["url"]],
-                              "via": f.get(c.get("via")), "imagen": img})
+                              "via": f.get(c.get("via")), "imagen": imagen(f, cfg)})
             n += 1
             time.sleep(PAUSA)
         print("    " + str(i) + "/" + str(len(cats)) + " categorias " + PUNTO
@@ -200,15 +215,10 @@ def indexar_json(tienda):
         if not precio or not nombre:
             continue
         slug = re.sub(r"[^A-Za-z0-9]+", "_", nombre).strip("_")
-        img = ""
-                if c.get("imagen") and fila.get(c.get("imagen")):
-                    imgs = fila[c["imagen"]]
-                    if isinstance(imgs, list) and imgs:
-                        img = imgs[0].get("nombre") if isinstance(imgs[0], dict) else str(imgs[0])
-                items.append({"nombre": limpio(nombre), "precio": int(precio),
+        items.append({"nombre": limpio(nombre), "precio": int(precio),
                       "lista": fila.get(c["lista"]),
                       "url": absoluta(tienda["base"], cfg["ruta"].format(slug=slug, id=fila[c["id"]])),
-                      "imagen": img})
+                      "imagen": imagen(fila, cfg)})
     return items
 
 

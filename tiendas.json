@@ -16,7 +16,8 @@
         "stock": "stock",
         "imagen": "imagenes"
       },
-      "ruta": "producto/{slug}_{id}"
+      "ruta": "producto/{slug}_{id}",
+      "imagen_url": "https://imagenes.compragamer.com/productos/compragamer_Imganen_general_{nombre}-grn.jpg"
     },
     "extractor": "compragamer",
     "lista_es_oferta": false
@@ -49,8 +50,7 @@
         ],
         "lista": [
           "class=\"price-standard\">\\$\\s*([\\d.]+)"
-        ],
-        "imagen": "src=\"([^\"]*)\""
+        ]
       }
     },
     "extractor": "meta",
@@ -74,8 +74,7 @@
       "re": {
         "url": "href=\"(https://www\\.mexx\\.com\\.ar/productos-rubro/[^\"]+\\.html)\"",
         "nombre": "\\.html\">([^<]{6,160})</a>",
-        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>",
-        "imagen": "src=\"([^\"]*)\""
+        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>"
       }
     },
     "extractor": "itemprop",
@@ -127,8 +126,7 @@
         "url": "href=\"(/prod/\\d+/[a-z0-9-]+)\"",
         "nombre": "results-card__title\"[^>]*>\\s*<a[^>]*>([^<]{4,160})",
         "precio": "results-card__price-current\"[^>]*>\\s*\\$([\\d.]+)",
-        "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)",
-        "imagen": "src=\"([^\"]*)\""
+        "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)"
       }
     },
     "extractor": "og",
