@@ -194,3 +194,36 @@ Las ultimas ocho busquedas quedan guardadas en el navegador de cada visitante,
 con un boton para repetirlas y otro para actualizar precios, que vuelve a bajar
 el indice ignorando la cache. No viaja a ningun lado ni se comparte entre
 dispositivos.
+
+## Como ordena el buscador
+
+El indice no tiene specs, garantias ni reviews: solo nombre, precio, tienda y
+los precios anterior y tachado. Con eso no se puede calcular "calidad/precio"
+de 8500 productos. Lo que si se puede, y es lo que hace:
+
+- **Recomendado** (por defecto): primero la marca mas confiable al menor precio.
+  Manda al fondo lo que esta por debajo del 45% de la mediana sin marca
+  reconocida, porque casi nunca es comparable con el resto.
+- **Mas barato**: el orden clasico, por si lo unico que importa es el numero.
+- **Mejor marca**: por nivel de marca, y dentro de cada nivel por precio.
+
+El nivel de marca sale de la lista curada en `datos.json`, no de las tiendas:
+`primera` son fabricantes con red de garantia y trayectoria, `conocida` son
+marcas reales de segunda linea. Lo que no esta en ninguna lista no se castiga,
+solo no se destaca. Cubre el 67% del indice.
+
+Cada resultado puede traer sellos: marca de primera linea, marca conocida, bajo
+N%, N% OFF, y "muy por debajo del resto" cuando el precio no cierra. Arriba va
+la mediana del resultado, para que se vea contra que se compara.
+
+Cuando la consulta cae en una categoria analizada a fondo, aparece un acceso
+directo a la Comparativa, que es donde estan las specs de fabrica y la garantia
+real.
+
+### Lo que se probo y no funciono
+
+Agrupar el mismo producto entre tiendas, para mostrar un solo renglon con el
+rango de precios. Con solo el nombre no alcanza: la prueba junto 145 pendrives
+distintos bajo la clave "128gb" y metio una notebook entre los SSD de 480GB.
+Haria falta un identificador comun (EAN, part number) que ninguna de las cinco
+fuentes publica.

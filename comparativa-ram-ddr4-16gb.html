@@ -329,6 +329,30 @@ td.mejor{color:var(--good);font-weight:700}
   .oferta .tie{order:2}.off{order:3}.oferta .precios{order:4;margin-left:auto}
   .seg{padding:9px 12px;font-size:.82rem}
 }
+
+/* ---- Sellos de calidad en los resultados ---- */
+.sellos{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.sello{font:600 .67rem/1.5 var(--font-mono);letter-spacing:.03em;padding:2px 7px;border-radius:5px;
+  background:var(--surface-2);color:var(--ink-3)}
+.sello.primera{background:var(--accent-soft);color:var(--accent)}
+.sello.conocida{background:var(--surface-2);color:var(--ink-2)}
+.sello.baja{background:var(--accent);color:#fff}
+.sello.off2{background:var(--good-soft);color:var(--good)}
+.sello.barato{background:var(--good);color:#fff}
+.sello.ojo{background:var(--warn-soft);color:var(--warn)}
+:root[data-theme="dark"] .sello.baja,:root[data-theme="dark"] .sello.barato{color:#0e1117}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sello.baja,
+  :root:not([data-theme="light"]) .sello.barato{color:#0e1117}}
+.segmentos.chico{margin-bottom:14px}
+.segmentos.chico .seg{padding:7px 14px;font-size:.83rem}
+
+/* ---- Puente a la comparativa ---- */
+.puente{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--accent-soft);
+  border:1px solid var(--accent);border-radius:12px;padding:13px 16px;margin-bottom:16px;
+  font-size:.89rem;color:var(--ink-2);animation:entra .35s var(--curva) both}
+.puente span{flex:1;min-width:0}
+.puente b{color:var(--ink)}
+.puente .acc{background:var(--surface);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
   .largo{display:none}
@@ -826,6 +850,93 @@ const DATOS = {
   "combo_partido": 365838,
   "ram_mas_barata": "hiksemi-hiker",
   "webcam_mas_barata": "genius1000x"
+ },
+ "marcas": {
+  "_nota": "Juicio editorial, no dato de las tiendas. 'primera' son fabricantes con red de garantia y trayectoria larga; 'conocida' son marcas reales pero de segunda linea. Lo que no esta en ninguna de las dos no se castiga: solo no se destaca.",
+  "primera": [
+   "kingston",
+   "corsair",
+   "adata",
+   "xpg",
+   "logitech",
+   "samsung",
+   "seagate",
+   "crucial",
+   "g.skill",
+   "gskill",
+   "patriot",
+   "gigabyte",
+   "asus",
+   "msi",
+   "intel",
+   "amd",
+   "nvidia",
+   "lg",
+   "acer",
+   "hp",
+   "dell",
+   "lenovo",
+   "philips",
+   "aoc",
+   "sony",
+   "jbl",
+   "bose",
+   "western digital",
+   "sandisk",
+   "hyperx",
+   "razer",
+   "lexar",
+   "thermaltake",
+   "cooler master",
+   "noctua",
+   "be quiet",
+   "xiaomi",
+   "motorola",
+   "tp-link",
+   "tplink",
+   "pny",
+   "zotac",
+   "sapphire",
+   "powercolor",
+   "evga",
+   "edifier",
+   "micron",
+   "teamgroup",
+   "viewsonic",
+   "epson",
+   "brother",
+   "canon",
+   "apple",
+   "huawei",
+   "benq"
+  ],
+  "conocida": [
+   "redragon",
+   "genius",
+   "trust",
+   "antec",
+   "gamemax",
+   "aerocool",
+   "cougar",
+   "deepcool",
+   "netac",
+   "nzxt",
+   "arctic",
+   "hiksemi",
+   "kolke",
+   "noga",
+   "nexxt",
+   "tenda",
+   "mercusys",
+   "aiwa",
+   "bgh",
+   "noblex",
+   "hisense",
+   "tcl",
+   "rise mode",
+   "lian li",
+   "montech"
+  ]
  }
 };
 /* === FIN DATOS === */
@@ -845,9 +956,11 @@ const rams = de("ram"), cams = de("webcam");
    una entrada aca y los productos correspondientes en datos.json. */
 const CATEGORIAS = [
   { id: "ram", eti: "Memorias DDR4 16GB", lista: rams, ico: "chip",
+    claves: ["ddr4", "ddr5", "memoria ram", "memoria ddr", "dimm", "16gb 3200", "ram 16gb"],
     titulo: "Memorias DDR4 16GB: las 3 mejores por marca/precio",
     sub: "Módulo único de 16GB a 3200 MHz para escritorio. El detalle de specs está dentro de cada tarjeta." },
   { id: "webcam", eti: "Webcams", lista: cams, ico: "cam",
+    claves: ["webcam", "camara web", "cam web"],
     titulo: "Webcams: las 3 que valen la pena",
     sub: "De las trece relevadas en las mismas tiendas, estas tres son las que justifican lo que cuestan." },
 ];
@@ -1146,6 +1259,47 @@ function pintarHist() {
     `<button class="hist" data-refrescar="1">${icono("refrescar")} actualizar precios</button>`;
 }
 
+/* --- Que tan reconocida es la marca ------------------------------------
+   Es juicio editorial y esta en datos.json, no en el indice: ninguna tienda
+   publica esto. Lo que no esta en la lista no se castiga, solo no se destaca. */
+const MARCAS = DATOS.marcas || { primera: [], conocida: [] };
+const reMarca = lista => lista.length
+  ? new RegExp("\\b(" + lista.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b")
+  : /$^/;
+const RE_PRIMERA = reMarca(MARCAS.primera || []), RE_CONOCIDA = reMarca(MARCAS.conocida || []);
+const nivelMarca = nombre => {
+  const n = normal(nombre);
+  return RE_PRIMERA.test(n) ? 2 : RE_CONOCIDA.test(n) ? 1 : 0;
+};
+
+const ORDENES = [
+  { id: "recomendado", eti: "Recomendado" },
+  { id: "precio", eti: "Más barato" },
+  { id: "marca", eti: "Mejor marca" },
+];
+let ORDEN = (() => { try { return localStorage.getItem("orden") || "recomendado"; } catch (e) { return "recomendado"; } })();
+
+function mediana(nums) {
+  if (!nums.length) return 0;
+  const o = [...nums].sort((a, b) => a - b), m = o.length >> 1;
+  return o.length % 2 ? o[m] : (o[m - 1] + o[m]) / 2;
+}
+
+/* Ordena el resultado segun el criterio elegido. "Recomendado" pone primero la
+   marca mas confiable al menor precio, y manda al fondo lo que esta tan por
+   debajo del resto que probablemente no sea comparable. */
+function ordenar(filas, med) {
+  const copia = [...filas];
+  if (ORDEN === "precio") return copia.sort((a, b) => a[1] - b[1]);
+  if (ORDEN === "marca") return copia.sort((a, b) =>
+    nivelMarca(b[0]) - nivelMarca(a[0]) || a[1] - b[1]);
+  return copia.sort((a, b) => {
+    const na = nivelMarca(a[0]), nb = nivelMarca(b[0]);
+    const sa = na === 0 && a[1] < med * 0.45, sb = nb === 0 && b[1] < med * 0.45;
+    return (sa - sb) || (nb - na) || (a[1] - b[1]);
+  });
+}
+
 function buscar(q, tope = 60) {
   const toc = normal(q).split(/\s+/).filter(Boolean);
   if (!IDX || !toc.length) return [];
@@ -1159,7 +1313,7 @@ function buscar(q, tope = 60) {
     const n = normal(f[0]);
     if (pruebas.every(p => p(n))) halla.push(f);
   }
-  return halla.sort((a, b) => a[1] - b[1]).slice(0, tope);
+  return halla.slice(0, tope * 3);   // el orden lo decide ordenar()
 }
 
 let ULTIMA_BUSQUEDA = [];
@@ -1170,24 +1324,51 @@ function pintarResultados(q) {
   if (!q.trim()) {
     est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${IDX.generado}`;
     caja.innerHTML = "";
+    $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
     return;
   }
-  const r = buscar(q);
-  ULTIMA_BUSQUEDA = r;
-  if (!r.length) {
+  const crudo = buscar(q);
+  if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
     caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
+    $("#puente").innerHTML = "";
+    ULTIMA_BUSQUEDA = [];
     return;
   }
+  const med = mediana(crudo.map(f => f[1]));
+  const r = ordenar(crudo, med).slice(0, 60);
+  ULTIMA_BUSQUEDA = r;
+
   const fuentes = new Set(r.map(f => f[3]));
-  est.textContent = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""} · el más barato primero`;
+  const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
+  est.innerHTML = `${r.length} resultado${r.length > 1 ? "s" : ""} en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
+    + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`;
+
+  // Si la consulta cae en una categoria que analizamos a fondo, lo decimos.
+  const cat = CATEGORIAS.find(c => (c.claves || []).some(k => normal(q).includes(normal(k))));
+  $("#puente").innerHTML = !cat ? "" :
+    `<div class="puente"><span>${icono("balanza")} Analizamos <b>${esc(cat.eti)}</b> a fondo:
+      specs de fábrica, garantía real y precio puesto en tu casa.</span>
+      <button class="acc" data-ir-cat="${cat.id}">Ver la comparativa ${icono("der")}</button></div>`;
+
+  const barato = Math.min(...r.map(f => f[1]));
   caja.innerHTML = r.map((f, i) => {
     const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
     const sello = f[4] ? `${esc(t.nombre)} <span class="via">${esc(f[4])}</span>` : esc(t.nombre);
+    const niv = nivelMarca(f[0]);
+    const bajo = f[6] && f[6] > f[1] ? Math.round((1 - f[1] / f[6]) * 100) : 0;
+    const off = f[5] && f[5] > f[1] ? Math.round((1 - f[1] / f[5]) * 100) : 0;
+    const sospechoso = niv === 0 && f[1] < med * 0.45;
+    const marcas = [];
+    if (niv === 2) marcas.push('<span class="sello primera">primera línea</span>');
+    else if (niv === 1) marcas.push('<span class="sello conocida">marca conocida</span>');
+    if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
+    else if (off) marcas.push(`<span class="sello off2">${off}% OFF</span>`);
+    if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
+    if (f[1] === barato && ORDEN === "precio") marcas.push('<span class="sello barato">más barato</span>');
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
-      <span class="nom">${esc(f[0])}</span>
-      ${i === 0 ? '<span class="marca">más barato</span>' : ""}
+      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
     </a>`;
@@ -1226,6 +1407,9 @@ function vistaBuscar() {
     <div class="buscador">${icono("lupa")}<input type="search" id="q" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
+    <div class="segmentos chico">${ORDENES.map(o =>
+      `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}">${esc(o.eti)}</button>`).join("")}</div>
+    <div id="puente"></div>
     <p class="estado" id="estado">cargando índice…</p>
     ${barraAcciones("buscar")}
     <div class="res" id="res"></div></div>`;
@@ -1529,6 +1713,18 @@ function arrancar() {
 
     const repetir = ev.target.closest("[data-rep]");
     if (repetir) return consultar(repetir.dataset.rep);
+
+    const orden = ev.target.closest("[data-orden]");
+    if (orden) {
+      ORDEN = orden.dataset.orden;
+      try { localStorage.setItem("orden", ORDEN); } catch (e) {}
+      document.querySelectorAll("[data-orden]").forEach(b =>
+        b.setAttribute("aria-selected", String(b.dataset.orden === ORDEN)));
+      return pintarResultados(($("#q") || {}).value || "");
+    }
+
+    const irCat = ev.target.closest("[data-ir-cat]");
+    if (irCat) { elegirCategoria(irCat.dataset.irCat); return ir("comparativa", true); }
 
     const sugerida = ev.target.closest(".sug");
     if (sugerida) return consultar(sugerida.textContent.trim());
