@@ -174,9 +174,14 @@ def indexar_api(tienda, max_paginas):
                 if not f.get(c["precio"]) or not f.get(c["nombre"]):
                     continue
                 vistos.add(f[c["url"]])
+                img = ""
+                if c.get("imagen") and f.get(c.get("imagen")):
+                    imgs = f[c["imagen"]]
+                    if isinstance(imgs, list) and imgs:
+                        img = imgs[0].get("nombre") if isinstance(imgs[0], dict) else str(imgs[0])
                 items.append({"nombre": limpio(f[c["nombre"]]), "precio": int(f[c["precio"]]),
                               "lista": f.get(c.get("lista")), "url": f[c["url"]],
-                              "via": f.get(c.get("via"))})
+                              "via": f.get(c.get("via")), "imagen": img})
             n += 1
             time.sleep(PAUSA)
         print("    " + str(i) + "/" + str(len(cats)) + " categorias " + PUNTO
@@ -195,9 +200,15 @@ def indexar_json(tienda):
         if not precio or not nombre:
             continue
         slug = re.sub(r"[^A-Za-z0-9]+", "_", nombre).strip("_")
-        items.append({"nombre": limpio(nombre), "precio": int(precio),
+        img = ""
+                if c.get("imagen") and fila.get(c.get("imagen")):
+                    imgs = fila[c["imagen"]]
+                    if isinstance(imgs, list) and imgs:
+                        img = imgs[0].get("nombre") if isinstance(imgs[0], dict) else str(imgs[0])
+                items.append({"nombre": limpio(nombre), "precio": int(precio),
                       "lista": fila.get(c["lista"]),
-                      "url": absoluta(tienda["base"], cfg["ruta"].format(slug=slug, id=fila[c["id"]]))})
+                      "url": absoluta(tienda["base"], cfg["ruta"].format(slug=slug, id=fila[c["id"]])),
+                      "imagen": img})
     return items
 
 
@@ -316,7 +327,7 @@ def main():
             if propia:
                 bajaron += 1
             salida.append([it["nombre"], it["precio"], it["url"], clave,
-                           it.get("via") or "", lista, propia])
+                           it.get("via") or "", lista, propia, it.get("imagen") or ""])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
@@ -326,7 +337,7 @@ def main():
         "generado": date.today().isoformat(),
         "tiendas": {k: {"nombre": v["nombre"], "color": v["color"],
                         "segunda": bool(v.get("segunda_opinion"))} for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen"],
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

@@ -13,7 +13,8 @@
         "nombre": "nombre",
         "precio": "precioEspecial",
         "lista": "precioLista",
-        "stock": "stock"
+        "stock": "stock",
+        "imagen": "imagenes"
       },
       "ruta": "producto/{slug}_{id}"
     },
@@ -48,7 +49,8 @@
         ],
         "lista": [
           "class=\"price-standard\">\\$\\s*([\\d.]+)"
-        ]
+        ],
+        "imagen": "src=\"([^\"]*)\""
       }
     },
     "extractor": "meta",
@@ -72,7 +74,8 @@
       "re": {
         "url": "href=\"(https://www\\.mexx\\.com\\.ar/productos-rubro/[^\"]+\\.html)\"",
         "nombre": "\\.html\">([^<]{6,160})</a>",
-        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>"
+        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>",
+        "imagen": "src=\"([^\"]*)\""
       }
     },
     "extractor": "itemprop",
@@ -124,7 +127,8 @@
         "url": "href=\"(/prod/\\d+/[a-z0-9-]+)\"",
         "nombre": "results-card__title\"[^>]*>\\s*<a[^>]*>([^<]{4,160})",
         "precio": "results-card__price-current\"[^>]*>\\s*\\$([\\d.]+)",
-        "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)"
+        "lista": "results-card__price-list\"[^>]*>\\s*\\$([\\d.]+)",
+        "imagen": "src=\"([^\"]*)\""
       }
     },
     "extractor": "og",
