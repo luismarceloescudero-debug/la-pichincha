@@ -256,6 +256,12 @@ cartel de arriba dice cuantos y por que:
 - Usados, outlet y reacondicionados, salvo que la busqueda los pida.
 - Equipos completos: avisos que EMPIEZAN con Notebook, PC, Combo o Kit. Esta
   anclado al inicio a proposito, porque "SSD para notebook" si es un SSD.
+- "Similares": si lo que buscaste aparece justo despues de "simil" o "similar",
+  el aviso dice que NO es eso. "HD SSD 960GB ... SIMIL 1TB" no es un 1TB. Solo
+  se aplica a lo que buscaste: "silla simil cuero" sigue siendo una silla.
+- Accesorios: avisos que empiezan con Cable, Adaptador, Soporte, Funda, etc.,
+  salvo que la busqueda los nombre.
+- Otro tipo: si buscas SSD no entra un disco rigido, y al reves.
 - Sin marca reconocida y por debajo del 45% de la mediana.
 - Mas de tres veces la mediana, que suele ser un equipo completo.
 
@@ -269,3 +275,26 @@ Todo sale del nombre y el precio de cada aviso. Las especificaciones se leen del
 texto con expresiones regulares, asi que pueden faltar o ser incompletas. No hay
 garantia, reseñas ni fichas tecnicas, que solo existen en la Comparativa curada.
 Sirve para decidir a quien mirar primero, no para cerrar la compra.
+
+### Medidas como palabra entera
+
+Un numero, o un numero con su unidad (27, 1tb, 3200mhz), tiene que ser palabra
+entera: "2tb" ya no encuentra "12tb" ni "27" encuentra "Vp227hf". Ademas "1 TB"
+y "1TB" se tratan igual, porque varias tiendas escriben la unidad con espacio.
+
+## Tus ultimas comparaciones
+
+La pestana Comparativa tiene arriba una tira con las comparaciones curadas y
+tus ultimas busquedas. Cada busqueda guarda su mejor compra del momento, asi
+que al volver se ve el precio de hoy y cuanto se movio ("5% desde que lo
+viste"). Un clic reabre esa comparativa sin pasar por el buscador. Vive en el
+navegador de cada visitante: no se comparte entre dispositivos.
+
+## Ofertas en tarjetas
+
+Cada oferta es una tarjeta con anillo de descuento, comercio, precio, tachado y
+ahorro en pesos. Se filtran por tipo (bajaron de precio o rebaja publicada),
+comercio, rubro, solo primera linea y marcadas; se ordenan por descuento,
+ahorro o precio; y se paginan de a 24. Tocar una tarjeta la abre con el detalle
+y de donde sale el precio anterior. La estrella marca ofertas para seguirlas, y
+"Comparar" abre la comparativa de ese producto con sus competidores.

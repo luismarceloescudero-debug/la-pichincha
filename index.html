@@ -417,6 +417,84 @@ td.mejor{color:var(--good);font-weight:700}
 .franja .extremos{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   font:500 .74rem var(--font-mono);color:var(--ink-3)}
 .tenue{opacity:.6}
+
+/* ---- Tira de comparaciones (curadas y ultimas busquedas) ---- */
+.ultimas{margin-bottom:18px}
+.ult-cab{font:500 .76rem var(--font-mono);color:var(--ink-3);display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.ult-fila{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.ult{all:unset;box-sizing:border-box;cursor:pointer;flex:none;scroll-snap-align:start;min-width:150px;max-width:236px;
+  position:relative;display:flex;flex-direction:column;gap:3px;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:11px 28px 11px 13px;box-shadow:var(--shadow);
+  transition:transform .2s var(--curva),border-color .2s,box-shadow .2s,background .2s}
+.ult:hover,.ult:focus-visible{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow-up)}
+.ult.activa{border-color:var(--accent);background:var(--accent-soft)}
+.ult.curada{border-style:dashed}
+.ult-q{font:600 .84rem var(--font-sans);color:var(--ink);display:flex;align-items:center;gap:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ult-p{font:700 .98rem var(--font-mono);letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.ult-sub{font-size:.72rem;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ult-d{font:700 .68rem var(--font-mono)}
+.ult-d.baja{color:var(--good)}
+.ult-d.sube{color:var(--bad)}
+.ult-x{position:absolute;top:6px;right:7px;color:var(--ink-3);font-weight:700;padding:1px 5px;border-radius:5px}
+.ult-x:hover{color:var(--bad);background:var(--surface-2)}
+
+/* ---- Ofertas en tarjetas ---- */
+.of-ctrl{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+.of-fila{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.of-et{font:600 .68rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);min-width:70px}
+.of-chip{all:unset;box-sizing:border-box;cursor:pointer;font:500 .8rem var(--font-sans);padding:6px 12px;
+  border-radius:999px;background:var(--surface-2);color:var(--ink-2);display:inline-flex;gap:6px;align-items:center;
+  transition:background .18s,color .18s,transform .18s var(--curva)}
+.of-chip:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-1px)}
+.of-chip[aria-pressed="true"]{background:var(--accent);color:#fff}
+:root[data-theme="dark"] .of-chip[aria-pressed="true"]{color:#0e1117}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .of-chip[aria-pressed="true"]{color:#0e1117}}
+.of-chip .n{font:600 .68rem var(--font-mono);opacity:.75}
+
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:16px;align-items:start}
+.ocard{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--surface);
+  border:1px solid var(--line);border-radius:16px;padding:20px 18px 16px;box-shadow:var(--shadow);
+  overflow:hidden;cursor:pointer;min-width:0;
+  animation:entra .4s var(--curva) both;animation-delay:calc(var(--i,0)*35ms);
+  transition:transform .25s var(--curva),box-shadow .25s,border-color .25s}
+.ocard.quieta{animation:none}
+.ocard::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--c)}
+.ocard.propia::before{background:var(--accent)}
+.ocard:hover,.ocard:focus-visible,.ocard.abierta{transform:translateY(-5px);box-shadow:var(--shadow-up);border-color:var(--c)}
+.ocard.propia:hover,.ocard.propia:focus-visible,.ocard.propia.abierta{border-color:var(--accent)}
+.o-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.o-cinta{font:700 .64rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--c);
+  display:flex;align-items:center;gap:5px}
+.ocard.propia .o-cinta{color:var(--accent)}
+.o-star{all:unset;cursor:pointer;font-size:1.2rem;line-height:1;color:var(--ink-3);padding:3px 6px;border-radius:8px;
+  transition:color .15s,transform .2s var(--curva),background .15s}
+.o-star:hover{color:var(--warn);transform:scale(1.2);background:var(--surface-2)}
+.o-star.on{color:var(--warn)}
+.o-main{display:flex;gap:13px;align-items:flex-start}
+.o-off{--p:50;position:relative;flex:none;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--good) calc(var(--p)*1%),var(--surface-2) 0);transition:transform .3s var(--curva)}
+.ocard.propia .o-off{background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--surface-2) 0)}
+.o-off::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--surface)}
+.o-off b{position:relative;font:700 .95rem var(--font-mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.ocard:hover .o-off{transform:rotate(-6deg) scale(1.06)}
+.o-nom{font-size:.92rem;line-height:1.32;font-weight:600;display:-webkit-box;-webkit-line-clamp:3;
+  -webkit-box-orient:vertical;overflow:hidden;min-width:0}
+.ocard.abierta .o-nom{-webkit-line-clamp:unset}
+.o-precios{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.o-precios .ahora{font:700 1.45rem var(--font-mono);letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--good)}
+.ocard.propia .o-precios .ahora{color:var(--accent)}
+.o-precios .antes{font:500 .8rem var(--font-mono);color:var(--ink-3);text-decoration:line-through}
+.o-ahorro{font-size:.85rem;color:var(--ink-2)}
+.o-ahorro b{font-family:var(--font-mono);color:var(--ink)}
+.o-detalle{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--curva)}
+.o-detalle>.o-in{overflow:hidden;min-height:0}
+.ocard.abierta .o-detalle{grid-template-rows:1fr}
+.o-detalle p{margin:9px 0 0;font-size:.82rem;color:var(--ink-3)}
+.o-acciones{display:flex;gap:8px;margin-top:2px}
+.o-acciones .acc{flex:1;justify-content:center;padding:8px 10px}
+.mas{display:flex;justify-content:center;margin-top:20px}
+@media (max-width:620px){.ogrid{grid-template-columns:1fr}.of-et{min-width:100%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:620px){
   .largo{display:none}
@@ -1122,12 +1200,10 @@ function detalle(p) {
 /* --- Vistas --- */
 function vistaComparativa() {
   const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
-  const selector = CATEGORIAS.length < 2 ? "" :
-    `<div class="segmentos" role="tablist">${CATEGORIAS.map(x =>
-      `<button class="seg" data-cat="${x.id}" role="tab" aria-selected="${x.id === c.id}">
-        ${icono(x.ico)} ${esc(x.eti)} <span class="n">${x.lista.length}</span></button>`).join("")}</div>`;
+  // Los precios de la tira necesitan el indice; solo se baja si hay busquedas guardadas.
+  setTimeout(() => { if (leerHistCompleto().length) asegurarIndice().then(pintarTira).catch(() => {}); }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
-    ${selector}
+    <div class="ultimas" id="ultimas">${tiraHtml(false)}</div>
     ${barraAcciones("comparativa")}
     <div class="grid">${c.lista.map(tarjeta).join("")}</div></div>`;
 }
@@ -1211,16 +1287,23 @@ function asegurarIndice(forzar) {
   return pidiendo;
 }
 
-/* --- Ofertas: dos señales distintas --------------------------------------
-   1. Bajas propias: lo que valia en el relevamiento anterior contra lo que
-      vale hoy. No depende de lo que publique la tienda, asi que sirve para
-      las cinco fuentes y no se puede inflar.
+/* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
+   Dos señales distintas:
+   1. Bajas propias: lo que valia en el relevamiento anterior contra lo que vale
+      hoy. No depende de lo que publique la tienda y no se puede inflar.
    2. Rebajas publicadas: el precio tachado del comercio. Solo Gaming City y
-      ComparaYa lo usan como rebaja real; en las demas es el precio sin
-      transferencia. Se acota entre 15% y 60% porque arriba de ahi el precio
-      anterior suele estar inventado. */
+      ComparaYa lo usan como rebaja real, y se acota entre 15% y 60% porque
+      arriba de ahi el precio anterior suele estar inventado. */
 const PISO_OFERTA = 15000, DESCUENTO_MIN = 0.15, DESCUENTO_MAX = 0.6;
 const BAJA_MIN_PCT = 0.03, BAJA_MIN_PESOS = 1000;
+const POR_PAGINA = 24;
+const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, marcadas: false, pagina: 1 };
+let OF_ACTUAL = [];
+
+const leerEstrellas = () => {
+  try { return new Set(JSON.parse(localStorage.getItem("estrellas") || "[]")); } catch (e) { return new Set(); }
+};
+let ESTRELLAS = leerEstrellas();
 
 function calcularOfertas(idx) {
   const propias = [], publicadas = [];
@@ -1235,22 +1318,109 @@ function calcularOfertas(idx) {
     const off = 1 - f[1] / lista;
     if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) publicadas.push(f);
   }
-  const porDescuento = (ref) => (a, b) => (1 - b[1] / b[ref]) - (1 - a[1] / a[ref]);
-  propias.sort(porDescuento(6));
-  publicadas.sort(porDescuento(5));
-  return { propias: propias.slice(0, 40), publicadas: publicadas.slice(0, 40) };
+  return { propias, publicadas };     // sin recortar: la vista filtra y pagina
 }
 
-function filaOferta(f, i, ref, etiqueta) {
-  const t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
-  const off = Math.round((1 - f[1] / f[ref]) * 100);
-  return `<div class="oferta c-${t.color}" style="--i:${i}">
-    <a class="nom" href="${f[2]}" target="_blank" rel="noopener">${esc(f[0])}</a>
-    <span class="tie">${esc(t.nombre)}${f[4] ? ` <span class="via">${esc(f[4])}</span>` : ""}</span>
-    <span class="off${ref === 6 ? " propia" : ""}">${etiqueta}${off}%</span>
-    <span class="precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[ref])}</span></span>
-    <button class="lupita" data-similar="${esc(f[0])}" title="Buscar similares" aria-label="Buscar similares">${icono("lupa")}</button>
-  </div>`;
+/* "Auriculares Samsung..." -> "auricular": el rubro es la primera palabra, en singular. */
+function categoriaDe(nombre) {
+  let w = normal(nombre).split(/\s+/)[0].replace(/[^a-z]/g, "");
+  if (/(ores|ares|eres)$/.test(w)) w = w.slice(0, -2);
+  else if (w.length > 4 && w.endsWith("s")) w = w.slice(0, -1);
+  return w;
+}
+
+function listaOfertas() {
+  if (!OFERTAS) return [];
+  if (OFERTAS._lista) return OFERTAS._lista;
+  const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
+    niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
+  return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
+                            ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
+}
+
+function ofertasFiltradas() {
+  let l = listaOfertas();
+  if (OF.tipo !== "todas") l = l.filter(o => o.tipo === OF.tipo);
+  if (OF.com) l = l.filter(o => o.com === OF.com);
+  if (OF.cat) l = l.filter(o => o.cat === OF.cat);
+  if (OF.primera) l = l.filter(o => o.niv === 2);
+  if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
+  const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
+                precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
+  // Cuando se ven todas, las bajas propias van primero: son la señal mas confiable.
+  return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? (a.tipo === "propia" ? -1 : 1) : por(a, b));
+}
+
+function controlesOfertas(todas) {
+  const n = { todas: todas.length, propia: todas.filter(o => o.tipo === "propia").length };
+  n.publicada = n.todas - n.propia;
+  const seg = (k, v, txt, cnt) => `<button class="seg" data-of="${k}:${v}" aria-selected="${OF[k] === v}">${txt}${cnt != null ? ` <span class="n">${cnt}</span>` : ""}</button>`;
+  const cuenta = key => {
+    const m = new Map();
+    todas.forEach(o => m.set(o[key], (m.get(o[key]) || 0) + 1));
+    return [...m].sort((a, b) => b[1] - a[1]);
+  };
+  const coms = cuenta("com").slice(0, 6);
+  // "Outlet" o "Combo" son condiciones del aviso, no rubros.
+  const NO_RUBRO = ["outlet", "combo", "kit", "nuevo", "oferta", "usado"];
+  const cats = cuenta("cat").filter(([c, k]) => k >= 5 && c.length > 2 && !NO_RUBRO.includes(c)).slice(0, 8);
+  const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
+  return `<div class="of-ctrl">
+    <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}</div>
+    <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
+    <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
+    <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, c[0].toUpperCase() + c.slice(1), k, OF.cat === c)).join("")}</div>
+    <div class="of-fila">
+      <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
+      <button class="of-chip" data-of="marcadas:1" aria-pressed="${OF.marcadas}">★ Marcadas <span class="n">${ESTRELLAS.size}</span></button>
+    </div></div>`;
+}
+
+function cardOferta(o, i, desde) {
+  const f = o.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
+  const pct = Math.round(o.off * 100);
+  const anillo = Math.min(100, Math.round(o.off / DESCUENTO_MAX * 100));
+  const specs = Object.values(specsDe(f[0])).slice(0, 5);
+  const marcada = ESTRELLAS.has(f[2]);
+  const nivTxt = ["sin marca reconocida", "marca conocida", "primera línea"][o.niv];
+  const origen = o.tipo === "propia"
+    ? "El precio anterior es lo que valía en nuestro relevamiento previo: lo calculamos nosotros."
+    : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
+  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" tabindex="0" aria-label="${esc(f[0])}">
+    <div class="o-top">
+      <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : icono("fuego") + " rebaja publicada"}</span>
+      <button class="o-star${marcada ? " on" : ""}" data-estrella="${esc(f[2])}" title="Marcar esta oferta" aria-label="Marcar esta oferta">${marcada ? "★" : "☆"}</button>
+    </div>
+    <div class="o-main">
+      <div class="o-off" style="--p:${anillo}"><b data-n="${pct}">${pct}%</b></div>
+      <h3 class="o-nom">${esc(f[0])}</h3>
+    </div>
+    <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
+    <div class="o-precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[o.ref])}</span></div>
+    <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
+    <div class="o-detalle"><div class="o-in">
+      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span></div>
+      <p>${origen}</p></div></div>
+    <div class="o-acciones">
+      <a class="acc" href="${f[2]}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
+      <button class="acc" data-comparar-oferta="${i}">${icono("balanza")} Comparar</button>
+    </div>
+  </article>`;
+}
+
+function animarCuentas() {
+  const reducir = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll(".ocard:not(.quieta) .o-off b[data-n]").forEach(b => {
+    const n = +b.dataset.n;
+    if (reducir) return;
+    const t0 = performance.now();
+    const paso = t => {
+      const k = Math.min(1, (t - t0) / 650);
+      b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))) + "%";
+      if (k < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  });
 }
 
 function vistaOfertas() {
@@ -1259,62 +1429,110 @@ function vistaOfertas() {
     catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el índice"; }
   }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
-    <p class="sub">Dos señales distintas. La primera es propia: comparo lo que valía cada producto en el
-    relevamiento anterior contra lo que vale hoy, así que no depende de lo que publique la tienda. La segunda
-    es el precio tachado del comercio, que tomamos como referencia y no como verdad.</p></div>
+    <p class="sub">Dos señales distintas. Las que <b>bajaron de precio</b> las detecta la propia app comparando contra el relevamiento anterior,
+    así que no dependen de lo que publique la tienda. Las <b>rebajas publicadas</b> son el precio tachado del comercio: una referencia, no una verdad.
+    Tocá una tarjeta para ver el detalle.</p></div>
     <p class="estado" id="estadoOf">buscando rebajas…</p>
     ${barraAcciones("ofertas")}
     <div id="resOf"></div></div>`;
 }
 
-function pintarOfertas() {
+function pintarOfertas(append) {
   const caja = $("#resOf"), est = $("#estadoOf");
   if (!caja || !IDX) return;
-  const sinCampo = !(IDX.campos || []).includes("antes");
-  const p = (OFERTAS && OFERTAS.propias) || [], q = (OFERTAS && OFERTAS.publicadas) || [];
-
-  if (!p.length && !q.length) {
-    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores"
-                               : "no hay rebajas en este relevamiento";
-    caja.innerHTML = sinCampo
-      ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
-      : `<p class="sub">Volvé mañana: el índice se rearma todos los días a las 09:00.</p>`;
+  const todas = listaOfertas();
+  if (!todas.length) {
+    const sinCampo = !(IDX.campos || []).includes("antes");
+    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento";
+    caja.innerHTML = sinCampo ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
+                              : `<p class="sub">Volvé mañana: el índice se rearma todos los días a las 09:00.</p>`;
     return;
   }
-  est.textContent = `${p.length} bajaron de precio · ${q.length} rebajas publicadas`;
-
-  const bloque = (titulo, aclara, filas, ref, etiqueta, vacio) =>
-    `<h3 class="grupo">${titulo} <span class="cuenta">${filas.length}</span></h3>
-     <p class="sub chico">${aclara}</p>
-     <div class="res">${filas.length ? filas.map((f, i) => filaOferta(f, i, ref, etiqueta)).join("")
-        : `<p class="sub">${vacio}</p>`}</div>`;
-
-  caja.innerHTML =
-    bloque(`${icono("flechaAbajo")} Bajaron de precio`,
-      `Respecto del relevamiento anterior. Es la señal más confiable: la calcula la app, no la tienda.`,
-      p, 6, "bajó ",
-      "Ninguno bajó desde el último relevamiento. Se compara una vez por día.") +
-    bloque(`${icono("fuego")} Rebajas publicadas por el comercio`,
-      `El precio tachado que muestra la tienda, entre 15% y 60%. Arriba de ese techo suele estar inflado.`,
-      q, 5, "", "Sin rebajas publicadas en este relevamiento.");
+  OF_ACTUAL = ofertasFiltradas();
+  const visibles = OF_ACTUAL.slice(0, OF.pagina * POR_PAGINA);
+  const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
+  const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
+  est.textContent = `${OF_ACTUAL.length} ofertas`
+    + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "");
+  const resto = OF_ACTUAL.length - visibles.length;
+  caja.innerHTML = controlesOfertas(todas)
+    + (visibles.length
+      ? `<div class="ogrid">${visibles.map((o, i) => cardOferta(o, i, desde)).join("")}</div>`
+        + (resto > 0 ? `<div class="mas"><button class="acc" data-of="mas:1">Ver ${Math.min(POR_PAGINA, resto)} más · quedan ${resto}</button></div>` : "")
+      : `<p class="sub">Ninguna oferta coincide con esos filtros. Probá sacando alguno.</p>`);
+  animarCuentas();
 }
 
-/* --- Historial de busquedas: vive solo en este navegador -------------- */
+function ofertasAccion(el) {
+  const raw = el.dataset.of, i = raw.indexOf(":");
+  const k = raw.slice(0, i), v = raw.slice(i + 1);
+  if (k === "mas") { OF.pagina++; return pintarOfertas(true); }
+  if (k === "tipo" || k === "orden") OF[k] = v;
+  else if (k === "com" || k === "cat") OF[k] = OF[k] === v ? "" : v;
+  else if (k === "primera") OF.primera = !OF.primera;
+  else if (k === "marcadas") OF.marcadas = !OF.marcadas;
+  OF.pagina = 1;
+  pintarOfertas();
+}
+
+function marcarEstrella(btn) {
+  const u = btn.dataset.estrella;
+  if (ESTRELLAS.has(u)) ESTRELLAS.delete(u); else ESTRELLAS.add(u);
+  try { localStorage.setItem("estrellas", JSON.stringify([...ESTRELLAS].slice(-200))); } catch (e) { /* sin storage no persiste */ }
+  if (OF.marcadas) return pintarOfertas();
+  btn.classList.toggle("on", ESTRELLAS.has(u));
+  btn.textContent = ESTRELLAS.has(u) ? "★" : "☆";
+  const n = document.querySelector("[data-of='marcadas:1'] .n");
+  if (n) n.textContent = ESTRELLAS.size;
+}
+
+/* "Comparar" desde una oferta: busca la categoria y la marca, sin el codigo de modelo,
+   y abre la comparativa de esos resultados. */
+function compararOferta(i) {
+  const o = OF_ACTUAL[i];
+  if (!o) return;
+  const palabras = o.f[0].split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
+  compararConsulta((palabras.slice(0, 3).join(" ") || o.f[0].split(/\s+/).slice(0, 2).join(" ")));
+}
+
+document.addEventListener("keydown", ev => {
+  if ((ev.key === "Enter" || ev.key === " ") && ev.target.classList && ev.target.classList.contains("ocard")) {
+    ev.preventDefault();
+    ev.target.classList.toggle("abierta");
+  }
+});
+
+/* --- Historial de busquedas: vive solo en este navegador --------------
+   Cada entrada guarda, ademas del texto, la mejor compra de ese momento. Asi,
+   cuando volves, se ve si el precio se movio desde la ultima vez. */
 const TOPE_HIST = 8;
-const leerHist = () => {
-  try { return JSON.parse(localStorage.getItem("hist") || "[]").filter(x => typeof x === "string"); }
-  catch (e) { return []; }
-};
+function leerHistCompleto() {
+  try {
+    const nuevo = JSON.parse(localStorage.getItem("hist2") || "null");
+    if (Array.isArray(nuevo)) return nuevo.filter(x => x && typeof x.q === "string");
+    const viejo = JSON.parse(localStorage.getItem("hist") || "[]");   // formato anterior: solo textos
+    return viejo.filter(x => typeof x === "string").map(q => ({ q }));
+  } catch (e) { return []; }
+}
+const leerHist = () => leerHistCompleto().map(h => h.q);
+function escribirHist(h) { try { localStorage.setItem("hist2", JSON.stringify(h)); } catch (e) { /* sin storage no persiste */ } }
+
 function guardarHist(q) {
   q = (q || "").trim();
   if (q.length < 2) return;
-  const h = [q, ...leerHist().filter(x => x !== q)].slice(0, TOPE_HIST);
-  try { localStorage.setItem("hist", JSON.stringify(h)); } catch (e) { /* sin storage no persiste */ }
+  const previo = leerHistCompleto();
+  const ya = previo.find(x => x.q === q);
+  const mejor = ANALISIS && CONSULTA === q ? ANALISIS.picks[0].m.f : null;
+  const entrada = { ...(ya || {}), q, t: Date.now() };
+  if (mejor) { entrada.p = mejor[1]; entrada.n = mejor[0].slice(0, 90); entrada.c = comercioDe(mejor); }
+  escribirHist([entrada, ...previo.filter(x => x.q !== q)].slice(0, TOPE_HIST));
   pintarHist();
+  pintarTira();
 }
 function olvidar(q) {
-  try { localStorage.setItem("hist", JSON.stringify(leerHist().filter(x => x !== q))); } catch (e) {}
+  escribirHist(leerHistCompleto().filter(x => x.q !== q));
   pintarHist();
+  pintarTira();
 }
 function pintarHist() {
   const caja = $("#hist");
@@ -1324,6 +1542,53 @@ function pintarHist() {
     `<span class="et">${icono("reloj")} tus búsquedas</span>` + h.map(q =>
       `<button class="hist" data-rep="${esc(q)}">${esc(q)}<span class="x" data-olvidar="${esc(q)}" title="Quitar">×</span></button>`).join("") +
     `<button class="hist" data-refrescar="1">${icono("refrescar")} actualizar precios</button>`;
+}
+
+/* Precio de hoy de la mejor compra de una busqueda guardada. */
+function fotoVivaDe(q) {
+  if (!IDX) return null;
+  if (CONSULTA === q && ANALISIS) { const f = ANALISIS.picks[0].m.f; return { p: f[1], n: f[0], c: comercioDe(f) }; }
+  IDX._h = IDX._h || {};
+  if (!(q in IDX._h)) {
+    const A = analizarConsulta(q);
+    IDX._h[q] = A ? { p: A.picks[0].m.f[1], n: A.picks[0].m.f[0], c: comercioDe(A.picks[0].m.f) } : null;
+  }
+  return IDX._h[q];
+}
+
+/* La tira de la pestaña Comparativa: las curadas y tus ultimas busquedas. */
+function tiraHtml(conPrecios) {
+  const hist = leerHistCompleto();
+  const curadas = CATEGORIAS.map(c =>
+    `<button class="ult curada${!CONSULTA && c.id === CAT ? " activa" : ""}" data-cat="${c.id}">
+      <span class="ult-q">${icono(c.ico)} ${esc(c.eti)}</span><span class="ult-sub">análisis a fondo</span></button>`).join("");
+  const buscadas = hist.map(h => {
+    const vivo = conPrecios ? fotoVivaDe(h.q) : null;
+    let delta = "";
+    if (vivo && h.p && Math.abs(vivo.p / h.p - 1) >= 0.01) {
+      const x = Math.round((vivo.p / h.p - 1) * 100);
+      delta = `<span class="ult-d ${x < 0 ? "baja" : "sube"}">${x < 0 ? "▼" : "▲"} ${Math.abs(x)}% desde que lo viste</span>`;
+    }
+    const precio = vivo ? `<span class="ult-p">${pesos(vivo.p)}</span>` : h.p ? `<span class="ult-p tenue">${pesos(h.p)}</span>` : "";
+    return `<button class="ult${CONSULTA === h.q ? " activa" : ""}" data-comparar="${esc(h.q)}">
+      <span class="ult-q">${icono("lupa")} ${esc(h.q)}</span>${precio}${delta}
+      <span class="ult-sub">${esc(((vivo && vivo.n) || h.n || "").slice(0, 38))}</span>
+      <span class="ult-x" data-olvidar="${esc(h.q)}" title="Quitar">×</span></button>`;
+  }).join("");
+  return `<div class="ult-cab">${icono("reloj")} ${hist.length ? "Comparaciones: curadas y tus últimas búsquedas" : "Comparaciones curadas. Tus búsquedas van a aparecer acá"}</div>
+    <div class="ult-fila">${curadas}${buscadas}</div>`;
+}
+function pintarTira() {
+  const c = $("#ultimas");
+  if (c) c.innerHTML = tiraHtml(true);
+}
+/* Abre la comparativa de una busqueda guardada sin pasar por el buscador. */
+async function compararConsulta(q) {
+  try { await asegurarIndice(); } catch (e) { return; }
+  fijarConsulta(q);
+  if (!ANALISIS) return;
+  guardarHist(q);
+  ir("comparativa", true);
 }
 
 /* --- Que tan reconocida es la marca ------------------------------------
@@ -1377,16 +1642,21 @@ function ordenar(filas, med) {
   });
 }
 
+/* "1 TB" y "1TB" son lo mismo: se pegan la cifra y la unidad antes de comparar. */
+const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2");
+const normalBusq = t => pegarUnidades(normal(t));
+const esMedida = t => /^\d+(?:gb|tb|mb|mhz|ghz|hz|w|v)?$/.test(t);
+
 function buscarTodo(q) {
-  const toc = normal(q).split(/\s+/).filter(Boolean);
+  const toc = normalBusq(q).split(/\s+/).filter(Boolean);
   if (!IDX || !toc.length) return [];
-  // Un token puramente numerico tiene que ser palabra entera: si no, "27" entra
-  // dentro de "Vp227hf" y un monitor de 22" se cuela en la busqueda de 27".
-  const pruebas = toc.map(t => /^\d+$/.test(t)
+  // Un numero, o un numero con su unidad (27, 1tb, 3200mhz), tiene que ser palabra
+  // entera: si no, "27" entra en "Vp227hf" y "2tb" en "12tb", y se cuelan otros productos.
+  const pruebas = toc.map(t => esMedida(t)
     ? (n => new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)").test(n))
     : (n => n.includes(t)));
   // Los nombres normalizados se calculan una sola vez por indice cargado.
-  const N = IDX._n || (IDX._n = IDX.productos.map(f => normal(f[0])));
+  const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
   const halla = [];
   IDX.productos.forEach((f, i) => { if (pruebas.every(p => p(N[i]))) halla.push(f); });
   return halla;
@@ -1621,8 +1891,7 @@ function materia(de) {
       archivo: p.id,
     };
   }
-  if (de === "ofertas") return { filas: [...((OFERTAS || {}).propias || []), ...((OFERTAS || {}).publicadas || [])],
-                                titulo: "Ofertas imperdibles", archivo: "ofertas" };
+  if (de === "ofertas") return { filas: ofertasFiltradas().map(o => o.f), titulo: "Ofertas imperdibles", archivo: "ofertas" };
   const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
   return {
     filas: c.lista.map(x => [x.nombre, x.precio, x.url, x.tienda]),
@@ -1805,16 +2074,37 @@ const REGLAS_EXCLUSION = [
     pide: /outlet|usado|reacondicionad|refurb|open box|exhibicion/ },
 ];
 
+/* Lo que pediste tiene que ser lo que ves. "SIMIL 1TB" no es 1TB, "Cable para SSD"
+   no es un SSD y un disco rigido no es un SSD. */
+const ACCESORIOS_INICIO = /^(carcasa|gabinete|caddy|adaptador|cable|dock|docking|funda|bolso|mochila|soporte|base|bracket)\b/;
+const ES_HDD = /^(hdd|hd\b(?!\s*(?:ssd|solido))|disco (?:rigido|duro|mecanico)|hard ?disk)/;
+const ES_SSD = /^(ssd|hd\s*ssd|disco solido|unidad solida)/;
+
+function motivoExclusion(n, nq, toks) {
+  for (const r of REGLAS_EXCLUSION) if (r.re.test(n) && !r.pide.test(nq)) return r.id;
+  // Si lo que buscas aparece justo despues de "simil", ese aviso dice que NO es eso.
+  for (const t of toks) {
+    const lit = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp("\\bsimil(?:ar|es)?\\s+(?:a\\s+|al\\s+|de\\s+)?" + lit).test(n)) return "similares";
+  }
+  const a = n.match(ACCESORIOS_INICIO);
+  if (a && !nq.includes(a[1])) return "accesorios";
+  if (/\bssd\b|solido|nvme/.test(nq) && !/\bhdd\b|rigido|duro/.test(nq) && ES_HDD.test(n)) return "tipo";
+  if (/\bhdd\b|rigido|disco duro|hard ?disk/.test(nq) && !/\bssd\b|solido/.test(nq) && ES_SSD.test(n)) return "tipo";
+  return null;
+}
+
 function analizarConsulta(q) {
   const crudo = buscarTodo(q);
   if (!crudo.length) return null;
-  const nq = normal(q);
-  const excl = { formato: 0, usados: 0, equipos: 0, raros: 0, caros: 0 };
-  const meta = crudo.map(f => ({ f, n: normal(f[0]), niv: nivelMarca(f[0]) }));
+  const nq = normalBusq(q);
+  const toks = nq.split(/\s+/).filter(Boolean);
+  const excl = { formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0 };
+  const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
   const utiles = meta.filter(m => {
-    for (const r of REGLAS_EXCLUSION)
-      if (r.re.test(m.n) && !r.pide.test(nq)) { excl[r.id]++; return false; }
+    const motivo = motivoExclusion(m.n, nq, toks);
+    if (motivo) { excl[motivo]++; return false; }
     return true;
   });
   if (!utiles.length) return null;
@@ -1919,6 +2209,9 @@ function bannerConsulta() {
   const A = ANALISIS, ex = A.excl, partes = [];
   if (ex.formato) partes.push(`${ex.formato} de notebook`);
   if (ex.equipos) partes.push(`${ex.equipos} equipos completos (notebooks, PCs, combos)`);
+  if (ex.similares) partes.push(`${ex.similares} que dicen «simil» y no son lo que buscás`);
+  if (ex.accesorios) partes.push(`${ex.accesorios} accesorios (cables, adaptadores, soportes)`);
+  if (ex.tipo) partes.push(`${ex.tipo} de otro tipo de producto`);
   if (ex.usados) partes.push(`${ex.usados} usados u outlet`);
   if (ex.raros) partes.push(`${ex.raros} muy por debajo del resto y sin marca conocida`);
   if (ex.caros) partes.push(`${ex.caros} que cuestan más del triple (suelen ser equipos completos)`);
@@ -1982,7 +2275,8 @@ function tablaPicks(picks) {
 
 function vistaComparativaDin() {
   const A = ANALISIS;
-  return `<div class="panel">${bannerConsulta()}
+  setTimeout(pintarTira, 0);
+  return `<div class="panel"><div class="ultimas" id="ultimas">${tiraHtml(true)}</div>${bannerConsulta()}
     <div class="panel-head"><h2>${icono("balanza")} Comparativa: ${esc(CONSULTA)}</h2>
       <p class="sub">De ${A.total} avisos que coinciden, ${A.base.length} son comparables entre sí. Estas son las opciones que valen la pena y en qué se diferencian.</p></div>
     ${barraAcciones("comparativa")}
@@ -2031,6 +2325,7 @@ function vistaVeredictoDin() {
   const descartar = [];
   if (A.excl.raros) descartar.push(`${A.excl.raros} avisos cuestan menos del 45% de lo habitual y no son de una marca que reconozcamos: suelen ser otro producto, un accesorio o una variante inferior.`);
   if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: casi siempre son equipos completos que solo mencionan el componente en el nombre.`);
+  if (A.excl.similares) descartar.push(`${A.excl.similares} avisos dicen «simil» o «similar»: no son lo que buscaste, por más parecido que sea.`);
   const caras = A.primeras.map(m => m.f[1]);
   if (caras.length > 1) {
     const sobre = Math.round((Math.max(...caras) / f[1] - 1) * 100);
@@ -2121,12 +2416,25 @@ function arrancar() {
     const abrir = ev.target.closest("[data-abrir]");
     if (abrir) return ir(abrir.dataset.abrir, true);
     const seg = ev.target.closest("[data-cat]");
-    if (seg) { elegirCategoria(seg.dataset.cat); return ir("comparativa", false); }
+    if (seg) { limpiarConsulta(); elegirCategoria(seg.dataset.cat); return ir("comparativa", false); }
     if (ev.target.closest("[data-volver]")) return ir("comparativa", true);
 
     // quitar del historial: se maneja antes que repetir, porque la x vive adentro
     const quitar = ev.target.closest("[data-olvidar]");
     if (quitar) { ev.stopPropagation(); return olvidar(quitar.dataset.olvidar); }
+
+    const comparar = ev.target.closest("[data-comparar]");
+    if (comparar) return compararConsulta(comparar.dataset.comparar);
+
+    // ---- Ofertas ----
+    const ofe = ev.target.closest("[data-of]");
+    if (ofe) return ofertasAccion(ofe);
+    const estrella = ev.target.closest("[data-estrella]");
+    if (estrella) return marcarEstrella(estrella);
+    const comparaOf = ev.target.closest("[data-comparar-oferta]");
+    if (comparaOf) return compararOferta(+comparaOf.dataset.compararOferta);
+    const tarjetaOf = ev.target.closest(".ocard");
+    if (tarjetaOf && !ev.target.closest("a,button")) return tarjetaOf.classList.toggle("abierta");
 
     const repetir = ev.target.closest("[data-rep]");
     if (repetir) return consultar(repetir.dataset.rep);
