@@ -124,7 +124,8 @@ def tarjetas(html, cfg):
         if not campos.get("url") or not campos.get("nombre") or precio is None:
             continue
         salida.append({"url": campos["url"], "nombre": limpio(campos["nombre"]),
-                       "precio": precio, "lista": numero(campos.get("lista"))})
+                       "precio": precio, "lista": numero(campos.get("lista")),
+                       "imagen": limpio(campos.get("imagen") or "")})
     return salida
 
 
@@ -147,6 +148,8 @@ def indexar_listados(tienda, max_paginas):
             for t in nuevos:
                 vistos.add(t["url"])
                 t["url"] = absoluta(tienda["base"], t["url"])
+                if t["imagen"]:
+                    t["imagen"] = absoluta(tienda["base"], t["imagen"])
                 items.append(t)
             n += 1
             paginas += 1
@@ -291,7 +294,7 @@ def main(argv=None):
     previo = {}
     if INDICE.exists():
         for fila in json.loads(INDICE.read_text(encoding="utf-8")).get("productos", []):
-            fila = (list(fila) + ["", 0, 0])[:7]     # filas viejas de 4, 5 o 6 campos
+            fila = (list(fila) + ["", 0, 0, ""])[:8]  # filas viejas de 4 a 7 campos; la 8 es la foto
             previo.setdefault(fila[3], []).append(fila)
 
     # El historial vive en su propia rama y no en la cache de Actions. La clave
