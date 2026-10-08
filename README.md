@@ -29,9 +29,14 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 
 | Archivo | Que es |
 | --- | --- |
-| `index.html` | La pagina que sirve GitHub Pages |
-| `comparativa-ram-ddr4-16gb.html` | Mismo contenido sin el `<head>`, fuente del artifact |
-| `img/` | Fotos oficiales de producto, optimizadas |
+| `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
+| `js/` | Funciones puras del buscador (`buscador.js`) y de la pagina (`pagina.js`), con tests |
+| `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
+| `historial.py` | Historial de precios del indice, en la rama `historial` |
+| `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
+| `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
+| `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
+| `docs/og-imagen.html` | Fuente de `img/og.png` |
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
 referencia de producto en una comparativa de precios.
@@ -42,7 +47,7 @@ referencia de producto en una comparativa de precios.
 python actualizar.py              # releva las 4 tiendas, recalcula y reconstruye el sitio
 python actualizar.py --dry-run    # solo muestra el informe, no escribe
 python actualizar.py --solo mexx  # una sola tienda
-python actualizar.py --build      # reconstruye el HTML sin salir a la web
+python actualizar.py --build      # reinyecta datos.json en index.html y arma la copia del artifact
 ```
 
 El script lee los precios de un metadato estable en cada tienda, asi que no
@@ -53,7 +58,7 @@ el cambio da vuelta el podio, que es el unico caso en el que hay que reescribir
 el veredicto a mano.
 
 `datos.json` es la unica fuente de verdad: el script actualiza precios, stock e
-historial, y reinyecta todo en los dos HTML. El contenido editorial (specs,
+historial, reinyecta todo en `index.html` y arma la copia del artifact. El contenido editorial (specs,
 pros, contras, veredicto) se edita ahi y no lo toca el script.
 
 ## El buscador
@@ -105,10 +110,16 @@ resultado aclara de que comercio sale.
 `.github/workflows/actualizar.yml` corre todos los dias a las 09:00 de Argentina
 y en cada push a main:
 
-1. `actualizar.py` releva los precios de los productos seguidos y, si cambio
-   alguno, commitea `datos.json` con el historial.
-2. `indexar.py` arma el indice de busqueda.
-3. El sitio se sube como artefacto de Pages, sin tocar el repo.
+1. Corren los tests. Si alguno falla, no se commitea ni se publica nada.
+2. `actualizar.py` releva los precios de los productos seguidos y, si cambio
+   alguno, commitea `datos.json` e `index.html`. La hora del relevamiento va
+   estampada en el sitio publicado.
+3. `indexar.py` arma el indice de busqueda, compara contra el historial y
+   commitea los cambios de precio en la rama `historial`.
+4. En la corrida programada, `salud.py` abre un issue (etiqueta `salud-fuente`)
+   por cada fuente que trajo menos del 70% de lo que tenia, o comenta el que ya
+   estaba abierto.
+5. El sitio se sube como artefacto de Pages, sin tocar el repo.
 
 Si una tienda se cae o bloquea la IP del runner, el paso de indexado no voltea
 la publicacion: se recupera el indice de la corrida anterior desde la cache.
@@ -141,6 +152,10 @@ la fecha de los precios.
 Dentro de un visor embebido el navegador bloquea la impresion y las descargas,
 asi que ahi la barra muestra solo Compartir y Copiar, que si funcionan.
 
+La busqueda va en la URL: `?q=ssd+1tb#comparativa` abre directo la comparativa
+de esa busqueda, y Compartir y Copiar mandan ese link. Al pegarlo en WhatsApp
+sale la tarjeta con titulo, descripcion e imagen (`img/og.png`).
+
 ### Sobre el .xlsx
 
 Lo arma ExcelJS, que se baja recien cuando pedis el archivo: son 257 KB
@@ -164,15 +179,21 @@ siendo mas chico: 14 KB contra 55 KB para la misma tabla.
 
 La pestana Ofertas trabaja con dos señales distintas.
 
-**Bajaron de precio** es la señal propia y la mas confiable: `precios.json`
-guarda lo que valia cada producto en el relevamiento anterior, y el indexador
-compara contra eso. No depende de lo que publique la tienda, no se puede
-inflar, y sirve para las cinco fuentes por igual. Se cuentan las bajas de al
-menos 3% y mil pesos, para no mostrar ruido de redondeo.
+**Bajaron de precio** es la señal propia y la mas confiable: el indexador
+compara cada producto contra el ultimo precio que tiene en el historial. No
+depende de lo que publique la tienda, no se puede inflar, y sirve para las
+cinco fuentes por igual. Se cuentan las bajas de al menos 3% y mil pesos, para
+no mostrar ruido de redondeo.
 
-Esa foto vive en su propia cache de GitHub Actions con clave estable, aparte de
-la del indice: asi el historial no se pierde cuando cambia el formato del
-indice o se toca el indexador.
+El historial vive en la rama huerfana `historial`: un CSV por mes
+(`2026-10.csv`) con columnas `fecha,tienda,id,precio`, donde `id` es la URL del
+producto. Solo se escriben los cambios: cuando un producto aparece, cuando
+cambia de precio y, con el precio vacio, cuando deja de publicarse. No depende
+de la cache de Actions, asi que no se pierde si GitHub la borra, y no ensucia
+`main`. Para tenerlo en tu maquina: `git worktree add historial historial`.
+
+Una fuente que trae menos del 70% de lo que tenia no registra bajas ese dia:
+asi una tienda que bloquea a medias no borra su catalogo del historial.
 
 **Rebajas publicadas** es el precio tachado del comercio. No todas las fuentes sirven para esto: en CompraGamer,
 Mexx y FullH4rd el "precio de lista" es apenas el precio sin transferencia, y
@@ -298,3 +319,34 @@ comercio, rubro, solo primera linea y marcadas; se ordenan por descuento,
 ahorro o precio; y se paginan de a 24. Tocar una tarjeta la abre con el detalle
 y de donde sale el precio anterior. La estrella marca ofertas para seguirlas, y
 "Comparar" abre la comparativa de ese producto con sus competidores.
+
+## Tests
+
+    python -m unittest discover -s tests -t . -v
+    node --test "tests/js/*.test.js"
+
+Corren en cada PR y antes de cada publicacion. Los de los extractores usan HTML
+guardado de cada tienda en `tests/fixtures/` y no salen a la red. Cuando una
+tienda cambia su plantilla (llega el issue de `salud-fuente`):
+
+    python tests/capturar.py mexx      # baja el HTML nuevo
+    python -m unittest tests.test_indexar tests.test_actualizar
+
+El test que falla dice que regex de `tiendas.json` hay que corregir. FullH4rd
+todavia no tiene HTML guardado: el 2026-10-08 respondia con un desafio de
+Cloudflare y se cubre con HTML escrito a mano.
+
+## Analitica
+
+GoatCounter, sin cookies ni banner: https://mescudero.goatcounter.com. Ademas de
+las visitas mide estos eventos:
+
+| Evento | Ejemplo | Cuando |
+| --- | --- | --- |
+| `busqueda` | `busqueda/ssd 1tb` | una busqueda con resultados, cuando dejas de tipear |
+| `busqueda_vacia` | `busqueda_vacia/xyz` | una busqueda sin resultados: lo que falta en el indice |
+| `clic_saliente` | `clic_saliente/mexx.com.ar/memoria` | un clic hacia una tienda: la metrica norte |
+| `compartir` | `compartir/copiar/comparativa` | Compartir o Copiar |
+| `exportar` | `exportar/excel/buscar` | Excel, CSV o Imprimir |
+
+Desde `localhost` no cuenta nada.
