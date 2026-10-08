@@ -39,6 +39,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   --ink:#14181f; --ink-2:#4e5767; --ink-3:#78839a; --line:#d9dfe8;
   --accent:#0b4fd8; --accent-soft:#e3ecff;
   --good:#117a4a; --good-soft:#dff3e8; --bad:#a52020;
+  --warn:#a85a07; --warn-soft:#fbeeda;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0b7f80; --gc-soft:#d8f2f2;
   --mx:#a85a07; --mx-soft:#fbeeda;
@@ -54,7 +55,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   :root:not([data-theme="light"]){
     --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
     --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
-    --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
+    --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080; --warn:#fbbf24; --warn-soft:#2e2311;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -66,7 +67,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 :root[data-theme="dark"]{
   --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
   --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
-  --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080;
+  --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080; --warn:#fbbf24; --warn-soft:#2e2311;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -151,6 +152,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .chip{font:500 .71rem/1.7 var(--font-mono);padding:1px 8px;border-radius:6px;
   background:var(--surface-2);color:var(--ink-2)}
 .chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.ojo{background:var(--warn-soft);color:var(--warn)}
 .pie{margin-top:auto;padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ver{font-size:.84rem;font-weight:600;color:var(--c);display:inline-flex;align-items:center;gap:5px;
   transition:gap .2s var(--curva)}
@@ -1128,7 +1130,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;",
 const icono = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
 
 /* Funciones puras del buscador: viven en js/buscador.js, con sus tests. */
-const { normal, normalBusq, mediana, pisoDeGama, specsDe, motivoExclusion, categoriaDe } = Buscador;
+const { normal, normalBusq, mediana, pisoDeGama, specsDe, motivoExclusion, sellosDe, categoriaDe } = Buscador;
 
 const P = DATOS.productos || [];
 const T = DATOS.tiendas || {};
@@ -1692,18 +1694,20 @@ function pintarResultados(q) {
   // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
   fijarConsulta(q);
   const A = ANALISIS;
-  const conjunto = A ? A.base.map(m => m.f) : crudo;
+  const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   const r = ordenar(conjunto, med).slice(0, 60);
   ULTIMA_BUSQUEDA = r;
 
   const fuentes = new Set(r.map(f => f[3]));
   const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
-  const afuera = A ? A.total - A.base.length : 0;
+  const afuera = A ? A.total - A.base.length - A.internacionales.length : 0;
+  const nInt = A ? A.internacionales.length : 0;
   est.innerHTML = (conjunto.length > r.length ? `Mostrando ${r.length} de ${conjunto.length}` : `${r.length} resultado${r.length > 1 ? "s" : ""}`)
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
     + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
-    + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "");
+    + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "")
+    + (nInt ? ` · ${nInt} compra${nInt > 1 ? "s" : ""} internacional${nInt > 1 ? "es" : ""}, marcada${nInt > 1 ? "s" : ""} y fuera de la comparativa` : "");
   const cat = CATEGORIAS.find(c => (c.claves || []).some(k => normal(q).includes(normal(k))));
   $("#puente").innerHTML = !A ? "" :
     `<div class="puente">
@@ -1734,6 +1738,7 @@ function pintarResultados(q) {
     if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
     else if (off) marcas.push(`<span class="sello off2">${off}% OFF</span>`);
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
+    for (const [clase, texto] of sellosDe(f[8])) marcas.push(`<span class="sello ${clase}">${texto}</span>`);
     if (f[1] === barato && ORDEN === "precio") marcas.push('<span class="sello barato">más barato</span>');
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
       <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}</span>
@@ -2037,12 +2042,15 @@ function analizarConsulta(q) {
   if (!crudo.length) return null;
   const nq = normalBusq(q);
   const toks = nq.split(/\s+/).filter(Boolean);
-  const excl = { formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0 };
+  const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0 };
   const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
+  // Las compras internacionales no compiten en la comparativa, pero siguen en la
+  // lista de Buscar con su sello: son otra forma de comprar, no otro producto.
+  const internacionales = [];
   const utiles = meta.filter(m => {
-    const motivo = motivoExclusion(m.n, nq, toks);
-    if (motivo) { excl[motivo]++; return false; }
+    const motivo = motivoExclusion(m.n, nq, toks, m.f[8]);
+    if (motivo) { excl[motivo]++; if (motivo === "internacionales") internacionales.push(m); return false; }
     return true;
   });
   if (!utiles.length) return null;
@@ -2127,7 +2135,7 @@ function analizarConsulta(q) {
       bajas: c.items.filter(m => m.f[6] > m.f[1]).length };
   }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
 
-  return { q, total: crudo.length, base, med, picks, comercios, excl,
+  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales,
            primeras: base.filter(m => m.niv === 2) };
 }
 
@@ -2148,6 +2156,7 @@ function marcarConsulta() {
 /* ---- Vistas ---- */
 function bannerConsulta() {
   const A = ANALISIS, ex = A.excl, partes = [];
+  if (ex.internacionales) partes.push(`${ex.internacionales} compra${ex.internacionales > 1 ? "s" : ""} internacional${ex.internacionales > 1 ? "es" : ""} (envío desde el exterior)`);
   if (ex.formato) partes.push(`${ex.formato} de notebook`);
   if (ex.equipos) partes.push(`${ex.equipos} equipos completos (notebooks, PCs, combos)`);
   if (ex.similares) partes.push(`${ex.similares} que dicen «simil» y no son lo que buscás`);
@@ -2172,7 +2181,8 @@ function cardPick(p, i) {
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
-    <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span></div>
+    <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).map(([clase, texto]) =>
+      `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
     <p class="razon">${esc(p.razon)}</p>
     <span class="ver">Abrir en ${esc(comercioDe(f))} ${icono("fuera")}</span>
   </a>`;

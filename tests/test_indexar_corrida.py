@@ -121,20 +121,33 @@ class Corrida(unittest.TestCase):
         self.assertEqual(sorted(f[1] for f in indice["productos"] if f[3] == "uno"), [1000, 2000])
         self.assertEqual(len(self.filas()), antes)
 
-    def test_las_filas_reusadas_conservan_la_foto(self):
+    def test_las_filas_reusadas_conservan_la_foto_y_los_sellos(self):
         cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
         cfg["uno"]["catalogo"]["campos"]["imagen"] = "foto"
+        cfg["uno"]["catalogo"]["sellos"] = {"i": "afuera"}
         (self.dir / "tiendas.json").write_text(json.dumps(cfg), encoding="utf-8")
         self.catalogos = {"https://uno.test/cat": [{"id": 1, "nombre": "Producto 1", "precio": 1000,
-                                                    "foto": "https://img.test/1.jpg"}],
+                                                    "foto": "https://img.test/1.jpg", "afuera": True}],
                           "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
         with redirect_stdout(io.StringIO()):
             indexar.main(["--historial", str(self.hist)])
             self.catalogos.pop("https://uno.test/cat")            # al dia siguiente uno se cae
             indexar.main(["--historial", str(self.hist)])
         indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
-        self.assertEqual(self.fila(indice, "uno", 1)[7], "https://img.test/1.jpg")
-        self.assertTrue(all(len(f) == 8 for f in indice["productos"]))
+        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i"])
+        self.assertEqual(self.fila(indice, "dos", 101)[8], "")
+        self.assertTrue(all(len(f) == 9 for f in indice["productos"]))
+        self.assertEqual(indice["campos"][-1], "sellos")
+
+    def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
+        # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
+        # tiene que quedar con su valor por defecto, no corrido de lugar.
+        viejo = {"productos": [["Producto 1", 1000, url(1), "uno", "", 0, 900],
+                               ["Producto 2", 2000, url(2), "uno", "", 0]]}
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+        indice, _ = self.correr(None, [(101, 500)])              # uno se cae y se reusa lo viejo
+        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", ""])
+        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", ""])
 
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
