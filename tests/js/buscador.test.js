@@ -24,6 +24,29 @@ test("una medida tiene que ser palabra entera", () => {
   assert.equal(B.filtroDe("   "), null);
 });
 
+test("una palabra no se encuentra adentro de otra", () => {
+  const n = B.normalBusq;
+  assert.equal(B.filtroDe("ipad")(n("Memoria Ram 16Gb DDR4 Con Disipador")), false);
+  assert.equal(B.filtroDe("ipad")(n("Apple iPad 10.9 64GB")), true);
+});
+
+test("una palabra encuentra las que empiezan con ella", () => {
+  const n = B.normalBusq;
+  assert.equal(B.filtroDe("notebook")(n("Notebooks Lenovo IdeaPad")), true);
+  assert.equal(B.filtroDe("rtx")(n("Placa de Video RTX3060 12GB")), true);
+});
+
+test("una palabra pegada a una cifra cuenta como palabra aparte", () => {
+  const n = B.normalBusq;
+  assert.equal(B.filtroDe("ssd")(n("Notebook Lenovo V15 8gb 512ssd")), true);
+});
+
+test("una palabra pegada a una capacidad cuenta como palabra aparte", () => {
+  const n = B.normalBusq;
+  assert.equal(B.filtroDe("ssd")(n("Notebook Acer 32gb 1tbssd 14''")), true);
+  assert.equal(B.filtroDe("rtx")(n("Notebook MSI Cyborg 15 8GB DDR4 512GBRTX 5050")), true);
+});
+
 test("pisoDeGama es mas exigente sin marca reconocida", () => {
   assert.equal(B.pisoDeGama(400, 0, 1000), true);
   assert.equal(B.pisoDeGama(400, 2, 1000), false);
