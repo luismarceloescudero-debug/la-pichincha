@@ -14,11 +14,18 @@
   /* Que tiene que tener un nombre (ya pasado por normalBusq) para coincidir.
      Un numero, o un numero con su unidad (27, 1tb, 3200mhz), tiene que ser
      palabra entera: si no, "27" entra en "Vp227hf" y "2tb" en "12tb".
+     Una palabra tiene que empezar donde no hay otra letra antes: si no, "ipad"
+     entra en "disipador". Una cifra o una capacidad pegada adelante si vale:
+     "512ssd" y "1tbssd" son SSD.
      Devuelve null si la consulta no tiene palabras. */
   function filtroDe(q) {
     const toc = normalBusq(q).split(/\s+/).filter(Boolean);
     if (!toc.length) return null;
     const pruebas = toc.map(t => {
+      if (/^[a-z]/.test(t)) {
+        const re = new RegExp("(^|[^a-z]|\\d(?:gb|tb))" + escaparRe(t));
+        return n => re.test(n);
+      }
       if (!esMedida(t)) return n => n.includes(t);
       const re = new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)");
       return n => re.test(n);
