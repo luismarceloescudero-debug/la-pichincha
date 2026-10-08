@@ -1,0 +1,491 @@
+[
+ {
+  "id_producto": 15560,
+  "coins": 0,
+  "coins_forzada": null,
+  "coins_sale": null,
+  "destacado": 0,
+  "nombre": "Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Black CL16",
+  "id_categoria": 5,
+  "id_subcategoria": 15,
+  "id_marca": 14,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 251600,
+  "precio_sin_impuestos": 227692,
+  "precio_lista_sin_impuestos": 252991,
+  "precioLista": 279556,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "39409_Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_2579456b",
+    "id_producto_imagen": 15560,
+    "orden": 1
+   },
+   {
+    "nombre": "39410_Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_d6795136",
+    "id_producto_imagen": 15560,
+    "orden": 2
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: CMK16GX4M1E3200C16"
+  ],
+  "garantia": 24,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 10.5,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 17151,
+  "coins": 0,
+  "coins_forzada": null,
+  "coins_sale": null,
+  "destacado": 0,
+  "nombre": "Memoria Adata DDR4 16GB 3200MHz XPG Gammix D35 Black CL16",
+  "id_categoria": 5,
+  "id_subcategoria": 15,
+  "id_marca": 92,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 221450,
+  "precio_sin_impuestos": 200407,
+  "precio_lista_sin_impuestos": 222675,
+  "precioLista": 246056,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "44486_Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_c41a1740",
+    "id_producto_imagen": 17151,
+    "orden": 1
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: AX4U320016G16A-SBKD35"
+  ],
+  "garantia": 36,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 10.5,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 20149,
+  "coins": 0,
+  "coins_forzada": null,
+  "coins_sale": null,
+  "destacado": 0,
+  "nombre": "Webcam Logitech Brio 505 Black FHD Rightlight1080p/30fps 720/60fps",
+  "id_categoria": 5,
+  "id_subcategoria": 13,
+  "id_marca": 17,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 185100,
+  "precio_sin_impuestos": 152975,
+  "precio_lista_sin_impuestos": 169972,
+  "precioLista": 205667,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "52959_Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_ae6fa842",
+    "id_producto_imagen": 20149,
+    "orden": 1
+   },
+   {
+    "nombre": "52960_Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_6bb3f2f9",
+    "id_producto_imagen": 20149,
+    "orden": 2
+   },
+   {
+    "nombre": "52961_Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_7f1be81a",
+    "id_producto_imagen": 20149,
+    "orden": 3
+   }
+  ],
+  "vendible": 1,
+  "stock": 2,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: 960-001515"
+  ],
+  "garantia": 24,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 20150,
+  "coins": 0,
+  "coins_forzada": null,
+  "coins_sale": null,
+  "destacado": 0,
+  "nombre": "Webcam Logitech Brio 4K UHD RightLight 3 HDR 1080p/60FPS 720/90FPS USB-C",
+  "id_categoria": 5,
+  "id_subcategoria": 13,
+  "id_marca": 17,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 259400,
+  "precio_sin_impuestos": 214380,
+  "precio_lista_sin_impuestos": 238200,
+  "precioLista": 288222,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "52956_Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB-C_883226e0",
+    "id_producto_imagen": 20150,
+    "orden": 1
+   },
+   {
+    "nombre": "52957_Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB-C_697f262e",
+    "id_producto_imagen": 20150,
+    "orden": 2
+   },
+   {
+    "nombre": "52958_Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB-C_80a7ab6f",
+    "id_producto_imagen": 20150,
+    "orden": 3
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: 960-001723"
+  ],
+  "garantia": 24,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 1674,
+  "coins": 0.0,
+  "coins_forzada": 0.0,
+  "coins_sale": 0.0,
+  "destacado": 0,
+  "nombre": "Estabilizador Desktop TCA-1200N LYONN AV",
+  "id_categoria": 5,
+  "id_subcategoria": 31,
+  "id_marca": 63,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 43200,
+  "precio_sin_impuestos": 35702,
+  "precio_lista_sin_impuestos": 39669,
+  "precioLista": 48000,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "1226_Estabilizador_Desktop_TCA-1200N_LYONN_AV_63a535eb",
+    "id_producto_imagen": 1674,
+    "orden": 1
+   },
+   {
+    "nombre": "1228_Estabilizador_Desktop_TCA-1200N_LYONN_AV_240ffe5a",
+    "id_producto_imagen": 1674,
+    "orden": 2
+   },
+   {
+    "nombre": "1227_Estabilizador_Desktop_TCA-1200N_LYONN_AV_ffb2770e",
+    "id_producto_imagen": 1674,
+    "orden": 3
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: TCA-1200NV"
+  ],
+  "garantia": 6,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 1705,
+  "coins": 0.0,
+  "coins_forzada": 0.0,
+  "coins_sale": 0.0,
+  "destacado": 0,
+  "nombre": "Cable Alimentacion Power Interlock Fuente PC 0,75mm 1,5mts 100% Cobre Certificado IRAM",
+  "id_categoria": 5,
+  "id_subcategoria": 21,
+  "id_marca": 220,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 4480,
+  "precio_sin_impuestos": 3702,
+  "precio_lista_sin_impuestos": 4114,
+  "precioLista": 4978,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "1542_Cable_Alimentacion_Power_Interlock_Fuente_PC_0_75mm_1_5mts_100__Cobre_Certificado_IRAM_67eb4525",
+    "id_producto_imagen": 1705,
+    "orden": 1
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: CABLE_POWER_220V"
+  ],
+  "garantia": 6,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 3278,
+  "coins": 0.0,
+  "coins_forzada": 0.0,
+  "coins_sale": 0.0,
+  "destacado": 0,
+  "nombre": "Estabilizador Desktop TCA-2000N LYONN AVR",
+  "id_categoria": 5,
+  "id_subcategoria": 31,
+  "id_marca": 63,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 66950,
+  "precio_sin_impuestos": 55331,
+  "precio_lista_sin_impuestos": 61478,
+  "precioLista": 74389,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "1229_Estabilizador_Desktop_TCA-2000N_LYONN_AVR_63a535eb",
+    "id_producto_imagen": 3278,
+    "orden": 1
+   },
+   {
+    "nombre": "1230_Estabilizador_Desktop_TCA-2000N_LYONN_AVR_240ffe5a",
+    "id_producto_imagen": 3278,
+    "orden": 2
+   },
+   {
+    "nombre": "1231_Estabilizador_Desktop_TCA-2000N_LYONN_AVR_ffb2770e",
+    "id_producto_imagen": 3278,
+    "orden": 3
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: TCA-2000N"
+  ],
+  "garantia": 6,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 4140,
+  "coins": 0.0,
+  "coins_forzada": 0.0,
+  "coins_sale": 0.0,
+  "destacado": 0,
+  "nombre": "WebCam Logitech C270 HD 720p USB",
+  "id_categoria": 5,
+  "id_subcategoria": 13,
+  "id_marca": 17,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 34750,
+  "precio_sin_impuestos": 28719,
+  "precio_lista_sin_impuestos": 31910,
+  "precioLista": 38611,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "2299_WebCam_Logitech_C270_HD_720p_USB_76daea4a",
+    "id_producto_imagen": 4140,
+    "orden": 1
+   },
+   {
+    "nombre": "2300_WebCam_Logitech_C270_HD_720p_USB_208cb6c8",
+    "id_producto_imagen": 4140,
+    "orden": 2
+   },
+   {
+    "nombre": "2301_WebCam_Logitech_C270_HD_720p_USB_48f170f5",
+    "id_producto_imagen": 4140,
+    "orden": 3
+   },
+   {
+    "nombre": "2302_WebCam_Logitech_C270_HD_720p_USB_dd7a379d",
+    "id_producto_imagen": 4140,
+    "orden": 4
+   }
+  ],
+  "vendible": 1,
+  "stock": 2,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: 960-000694"
+  ],
+  "garantia": 24,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 21.0,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ },
+ {
+  "id_producto": 4167,
+  "coins": 0.0,
+  "coins_forzada": 0.0,
+  "coins_sale": 0.0,
+  "destacado": 0,
+  "nombre": "Combo Logitech Teclado + Mouse MK270 Wireless",
+  "id_categoria": 5,
+  "id_subcategoria": 72,
+  "id_marca": 17,
+  "coeficiente_precio_lista": 1.11111111,
+  "precioEspecial": 33690,
+  "precio_sin_impuestos": 30489,
+  "precio_lista_sin_impuestos": 33876,
+  "precioLista": 37433,
+  "precioListaAnterior": null,
+  "precioEspecialAnterior": null,
+  "imagenes": [
+   {
+    "nombre": "9655_Combo_Logitech_Teclado___Mouse_MK270_Wireless_2a0de5c4",
+    "id_producto_imagen": 4167,
+    "orden": 0
+   },
+   {
+    "nombre": "881_Combo_Logitech_Teclado___Mouse_MK270_Wireless_036cac56",
+    "id_producto_imagen": 4167,
+    "orden": 2
+   },
+   {
+    "nombre": "882_Combo_Logitech_Teclado___Mouse_MK270_Wireless_19f4d25d",
+    "id_producto_imagen": 4167,
+    "orden": 3
+   },
+   {
+    "nombre": "6263_Combo_Logitech_Teclado___Mouse_MK270_Wireless_c78db9ac",
+    "id_producto_imagen": 4167,
+    "orden": 5
+   }
+  ],
+  "vendible": 1,
+  "stock": 10,
+  "codigo": "disponible",
+  "sale": false,
+  "codigo_principal": [
+   "SKU: 920-004432"
+  ],
+  "garantia": 24,
+  "garantia_oficial": 0,
+  "busca_en_ml": "busca_en_ml",
+  "iva": 10.5,
+  "impuesto_interno_importacion": 0.0,
+  "precioEspecialCombo": null,
+  "precioListaCombo": null,
+  "id_nivel_falla": null,
+  "descripcion_falla": null,
+  "tipo_falla": null,
+  "promocion": [],
+  "es_outlet": false,
+  "visible_solo_en_ATPC": false,
+  "visible_solo_en_combo": false
+ }
+]
