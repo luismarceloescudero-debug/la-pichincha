@@ -5,7 +5,7 @@ Uso:
     python actualizar.py              # releva, actualiza datos.json y reconstruye el HTML
     python actualizar.py --dry-run    # solo releva y muestra el informe, no escribe nada
     python actualizar.py --solo mexx  # releva una sola tienda
-    python actualizar.py --build      # reconstruye el HTML sin salir a la web
+    python actualizar.py --build      # reinyecta datos.json en index.html y arma la copia del artifact
 
 Cada tienda expone el precio en un metadato estable, asi que no hace falta
 navegador. CompraGamer publica el catalogo entero como JSON; las otras tres lo
@@ -18,14 +18,15 @@ import re
 import sys
 import urllib.error
 import urllib.request
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 DATOS = RAIZ / "datos.json"
-FUENTE = RAIZ / "comparativa-ram-ddr4-16gb.html"
+COPIA = RAIZ / "comparativa-ram-ddr4-16gb.html"   # la genera construir(), no se versiona
 INDICE = RAIZ / "index.html"
 CATALOGO_CG = "https://static.compragamer.com/productos"
+AR = timezone(timedelta(hours=-3))   # Argentina no tiene horario de verano
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 
@@ -261,40 +262,43 @@ INICIO = "/* === DATOS: generado por actualizar.py, no editar a mano === */"
 FINAL = "/* === FIN DATOS === */"
 
 
-def construir(datos):
-    """Inyecta datos.json en el HTML fuente y regenera index.html."""
-    if not FUENTE.exists():
-        print(f"{ROJO}No encuentro {FUENTE.name}{FIN}")
+SOLO_WEB = re.compile(r"[ \t]*<!-- solo-web -->.*?<!-- /solo-web -->[ \t]*\n?", re.S)
+ESQUELETO = re.compile(r"^[ \t]*(?:<!doctype html>|</?(?:html|head|body)\b[^>]*>)[ \t]*\n?", re.I | re.M)
+JS_SRC = re.compile(r'<script src="(js/[\w.-]+\.js)"></script>')
+
+
+def armar_artifact(html, leer):
+    """La copia para el artifact: sin el esqueleto ni lo que solo sirve en la web
+    (analitica, Open Graph), y con los scripts de js/ adentro, porque el artifact
+    es un solo archivo y el visor le pone su propio <head>."""
+    html = SOLO_WEB.sub("", html)
+    html = ESQUELETO.sub("", html)
+    html = JS_SRC.sub(lambda m: "<script>\n" + leer(m.group(1)).rstrip("\n") + "\n</script>", html)
+    return html.lstrip()
+
+
+def construir(datos, pagina=INDICE, copia=COPIA, verificado=None):
+    """Inyecta datos.json en index.html y arma la copia del artifact.
+
+    index.html es el unico HTML que se edita a mano. `verificado` es la hora del
+    relevamiento: va al sitio publicado pero no a datos.json, asi el bot no
+    commitea todos los dias aunque no cambie ningun precio."""
+    if not pagina.exists():
+        print(f"{ROJO}No encuentro {pagina.name}{FIN}")
         return False
 
-    fuente = FUENTE.read_text(encoding="utf-8")
-    bloque = f"{INICIO}\nconst DATOS = {json.dumps(datos, ensure_ascii=False, indent=1)};\n{FINAL}"
+    html = pagina.read_text(encoding="utf-8")
+    publicados = dict(datos, verificado=verificado) if verificado else datos
+    bloque = f"{INICIO}\nconst DATOS = {json.dumps(publicados, ensure_ascii=False, indent=1)};\n{FINAL}"
     patron = re.compile(re.escape(INICIO) + r".*?" + re.escape(FINAL), re.S)
-    if not patron.search(fuente):
-        print(f"{ROJO}No encuentro el bloque de datos en {FUENTE.name}{FIN}")
+    if not patron.search(html):
+        print(f"{ROJO}No encuentro el bloque de datos en {pagina.name}{FIN}")
         return False
-    fuente = patron.sub(lambda _: bloque, fuente)
-    FUENTE.write_text(fuente, encoding="utf-8")
-
-    # index.html = la misma pagina con el esqueleto que el artifact agrega solo.
-    titulo = re.search(r"<title>(.*?)</title>", fuente, re.S).group(1)
-    cabeza = fuente[fuente.index("</title>") + 8:fuente.index('<div class="wrap">')]
-    cuerpo = fuente[fuente.index('<div class="wrap">'):]
-    INDICE.write_text(f"""<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{titulo}</title>
-<meta name="description" content="Comparador de hardware en Argentina: memorias, webcams y tiendas, con el costo real puesto en tu casa. Actualizado el {datos['actualizado']}.">
-<style>:root{{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
-body{{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
-{cabeza}</head>
-<body>
-{cuerpo}</body>
-</html>
-""", encoding="utf-8")
-    print(f"\n  {VERDE}{OK}{FIN} {FUENTE.name} y {INDICE.name} reconstruidos")
+    html = patron.sub(lambda _: bloque, html)
+    pagina.write_text(html, encoding="utf-8")
+    copia.write_text(armar_artifact(html, lambda ruta: (pagina.parent / ruta).read_text(encoding="utf-8")),
+                     encoding="utf-8")
+    print(f"\n  {VERDE}{OK}{FIN} {pagina.name} y {copia.name} reconstruidos")
     return True
 
 
@@ -349,7 +353,7 @@ def main():
 
     DATOS.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"\n  {VERDE}{OK}{FIN} datos.json actualizado")
-    construir(datos)
+    construir(datos, verificado=datetime.now(AR).isoformat(timespec="minutes"))
 
     if cambios:
         print(f"\n{GRIS}Para publicar:{FIN}")
