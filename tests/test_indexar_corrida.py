@@ -149,6 +149,48 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", ""])
         self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", ""])
 
+    def previo(self, tiendas, generado="2026-10-07T15:25-03:00"):
+        """Un indice anterior con un producto de uno, como lo dejo otra corrida."""
+        viejo = {"generado": generado, "tiendas": tiendas,
+                 "productos": [["Producto 1", 1000, url(1), "uno", "", 0, 0, "", ""]]}
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+
+    def test_cada_fuente_lleva_la_hora_de_su_ultimo_relevamiento(self):
+        indice, _ = self.correr([(1, 1000)], [(101, 500)])
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], indice["generado"])
+        self.assertEqual(indice["tiendas"]["dos"]["relevado"], indice["generado"])
+
+    def test_fuente_que_falla_conserva_la_hora_de_su_ultimo_relevamiento(self):
+        # Lo reusado no puede salir con la hora de hoy: es un precio viejo.
+        self.previo({"uno": {"nombre": "Uno", "color": "cg", "relevado": "2026-10-06T09:10-03:00"}})
+        indice, _ = self.correr(None, [(101, 500)])
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], "2026-10-06T09:10-03:00")
+        self.assertEqual(indice["tiendas"]["dos"]["relevado"], indice["generado"])
+
+    def test_fuente_que_trae_cero_conserva_la_hora_de_su_ultimo_relevamiento(self):
+        self.previo({"uno": {"nombre": "Uno", "color": "cg", "relevado": "2026-10-06T09:10-03:00"}})
+        indice, _ = self.correr([], [(101, 500)])
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], "2026-10-06T09:10-03:00")
+
+    def test_indice_anterior_sin_relevado_usa_su_fecha_de_generado(self):
+        self.previo({"uno": {"nombre": "Uno", "color": "cg"}})
+        indice, _ = self.correr(None, [(101, 500)])
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], "2026-10-07T15:25-03:00")
+
+    def test_fuente_inactiva_conserva_la_hora_de_su_ultimo_relevamiento(self):
+        cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        cfg["uno"]["activa"] = False
+        (self.dir / "tiendas.json").write_text(json.dumps(cfg), encoding="utf-8")
+        self.previo({"uno": {"nombre": "Uno", "color": "cg", "relevado": "2026-10-06T09:10-03:00"}})
+        indice, _ = self.correr([(1, 900)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[1], 1000)
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], "2026-10-06T09:10-03:00")
+
+    def test_fuente_que_falla_sin_indice_anterior_no_lleva_relevado(self):
+        indice, _ = self.correr(None, [(101, 500)])
+        self.assertNotIn("relevado", indice["tiendas"]["uno"])
+        self.assertEqual(indice["tiendas"]["dos"]["relevado"], indice["generado"])
+
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
         indice, _ = self.correr([(1, 900)], [(1, 1200)])

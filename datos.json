@@ -212,7 +212,8 @@
       "precio": 214755,
       "precio_lista": 236231,
       "sin_impuestos": 194348,
-      "stock": "stock alto"
+      "stock": "stock alto",
+      "falla_desde": "2026-10-08"
     },
     {
       "id": "c920s",

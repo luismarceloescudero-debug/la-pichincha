@@ -37,6 +37,31 @@
     return dias === 0 ? `hoy ${hora}` : dias === 1 ? `ayer ${hora}` : `${+a.day}/${+a.month} ${hora}`;
   }
 
+  /* El dia argentino de una fecha ISO, con o sin hora, o null si no se entiende. */
+  function diaAr(iso) {
+    const solo = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    if (solo) return { n: Date.UTC(+solo[1], +solo[2] - 1, +solo[3]), dia: +solo[3], mes: +solo[2] };
+    const d = new Date(iso || "");
+    if (!iso || isNaN(d)) return null;
+    const p = partes(d);
+    return { n: diaDe(p), dia: +p.day, mes: +p.month };
+  }
+
+  /* Una fuente que no se pudo relevar sigue publicando su ultimo precio, pero no
+     como si fuera de hoy: "precio del 7/10". Mismo dia que el indice: nada. */
+  function precioDel(relevado, referencia) {
+    const a = diaAr(relevado), r = diaAr(referencia);
+    return a && r && a.n < r.n ? `precio del ${a.dia}/${a.mes}` : "";
+  }
+
+  /* La comparativa curada guarda desde cuando falla cada producto (ver
+     actualizar.relevar): "sin verificar hoy" o "sin verificar desde el 8/10". */
+  function sinVerificar(desde, referencia) {
+    const a = diaAr(desde), r = diaAr(referencia);
+    if (!a) return "";
+    return r && a.n >= r.n ? "sin verificar hoy" : `sin verificar desde el ${a.dia}/${a.mes}`;
+  }
+
   /* El comercio es el dominio: articulo.mercadolibre.com.ar -> mercadolibre.com.ar */
   function comercioDeUrl(href) {
     let host = "";
@@ -68,7 +93,7 @@
     return a ? { path: `${a[0]}/${a[1]}/${vista || "pagina"}`, title: vista || "", event: true } : null;
   }
 
-  const api = { leerUrl, armarUrl, cuando, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { leerUrl, armarUrl, cuando, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);
