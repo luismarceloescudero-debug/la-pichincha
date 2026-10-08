@@ -22,13 +22,18 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+import historial
+import salud
 
 RAIZ = Path(__file__).resolve().parent
 TIENDAS = RAIZ / "tiendas.json"
 INDICE = RAIZ / "indice.json"
-PRECIOS = RAIZ / "precios.json"   # la foto del relevamiento anterior
+HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los cambios
+SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
+AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -264,12 +269,14 @@ def probar(url):
 
 # --- Principal --------------------------------------------------------------
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="Arma el indice de busqueda.")
     ap.add_argument("--solo", metavar="FUENTE")
     ap.add_argument("--max-paginas", type=int, default=TOPE_PAGINAS)
     ap.add_argument("--probar", metavar="URL", help="diagnostica una fuente nueva")
-    args = ap.parse_args()
+    ap.add_argument("--historial", metavar="DIR", default=str(HISTORIAL),
+                    help="carpeta del historial de precios")
+    args = ap.parse_args(argv)
 
     if args.probar:
         return probar(args.probar)
@@ -287,17 +294,14 @@ def main():
             fila = (list(fila) + ["", 0, 0])[:7]     # filas viejas de 4, 5 o 6 campos
             previo.setdefault(fila[3], []).append(fila)
 
-    # La foto de precios vive aparte del indice a proposito: asi sobrevive a los
-    # cambios de formato del indice y el historial no se pierde cada vez que se
-    # toca el indexador.
-    antes = {}
-    if PRECIOS.exists():
-        try:
-            antes = json.loads(PRECIOS.read_text(encoding="utf-8")).get("precios", {})
-        except ValueError:
-            antes = {}
+    # El historial vive en su propia rama y no en la cache de Actions. La clave
+    # es (tienda, url): CompraGamer y ComparaYa publican las mismas URLs con
+    # precios distintos, y con la URL sola una pisaba a la otra.
+    carpeta = Path(args.historial)
+    estado = historial.leer(carpeta)
+    vivos = historial.vivos_por_tienda(estado)
 
-    salida, resumen = [], {}
+    salida, resumen, relevados, actuales = [], {}, {}, {}
     for clave, fuente in fuentes.items():
         if not fuente.get("activa", True) or (args.solo and clave != args.solo):
             if clave in previo:                      # conservo lo que ya tenia indexado
@@ -321,8 +325,10 @@ def main():
                 resumen[clave] = (len(previo[clave]), "fallo, uso el anterior")
             else:
                 resumen[clave] = (0, "fallo")
+            relevados[clave] = 0
             continue
         rebaja_real = bool(fuente.get("lista_es_oferta"))
+        relevados[clave] = len(items)
         bajaron = 0
         for it in items:
             lista = it.get("lista") or 0
@@ -330,12 +336,13 @@ def main():
             # el "precio de lista" es apenas el precio sin transferencia.
             if not rebaja_real or not lista or lista <= it["precio"]:
                 lista = 0
-            # Baja propia: lo que valia en el relevamiento anterior. Este dato no
-            # depende de lo que publique la tienda, asi que vale para las cinco.
-            ayer = antes.get(it["url"]) or 0
+            # Baja propia: lo que valia segun el historial. Este dato no depende
+            # de lo que publique la tienda, asi que vale para las cinco.
+            ayer = estado.get((clave, it["url"])) or 0
             propia = ayer if ayer > it["precio"] else 0
             if propia:
                 bajaron += 1
+            actuales[(clave, it["url"])] = it["precio"]
             salida.append([it["nombre"], it["precio"], it["url"], clave,
                            it.get("via") or "", lista, propia, it.get("imagen") or ""])
         if bajaron:
@@ -343,19 +350,21 @@ def main():
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
+    generado = datetime.now(AR).isoformat(timespec="minutes")
+    informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado)
+    sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
+    filas = historial.cambios(estado, actuales, sanas, generado[:10])
+    ruta_csv = historial.escribir(carpeta, generado[:10], filas)
+    SALUD.write_text(json.dumps(informe, ensure_ascii=False, indent=1), encoding="utf-8")
+
     datos = {
-        "generado": date.today().isoformat(),
+        "generado": generado,
         "tiendas": {k: {"nombre": v["nombre"], "color": v["color"],
                         "segunda": bool(v.get("segunda_opinion"))} for k, v in fuentes.items()},
         "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen"],
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-
-    # La foto para la proxima corrida: que valia cada cosa hoy.
-    PRECIOS.write_text(json.dumps(
-        {"fecha": datos["generado"], "precios": {f[2]: f[1] for f in salida}},
-        ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     print("\n" + NEG + "Resumen" + FIN)
     for clave, (n, nota) in resumen.items():
@@ -365,12 +374,18 @@ def main():
     bajaron = sum(1 for f in salida if len(f) > 6 and f[6])
     print("\n  " + VERDE + OK + FIN + " indice.json " + PUNTO + " " + str(len(salida))
           + " productos " + PUNTO + " " + format(kb, ".0f") + " KB")
-    if antes:
-        print("  " + VERDE + OK + FIN + " " + str(bajaron) + " bajaron de precio desde el "
-              + json.loads(PRECIOS.read_text(encoding="utf-8")).get("fecha", "?"))
+    if estado:
+        print("  " + VERDE + OK + FIN + " " + str(bajaron) + " bajaron de precio segun el historial")
     else:
-        print("  " + GRIS + "sin foto anterior: las bajas propias empiezan a contar "
+        print("  " + GRIS + "historial vacio: las bajas propias empiezan a contar "
               "desde la proxima corrida" + FIN)
+    if ruta_csv:
+        print("  " + VERDE + OK + FIN + " historial " + PUNTO + " " + str(len(filas))
+              + " filas nuevas en " + ruta_csv.name)
+    for clave, f in informe["fuentes"].items():
+        if f["estado"] != "ok":
+            print("  " + AMAR + "! " + f["nombre"] + ": " + str(f["ahora"]) + " productos contra "
+                  + str(f["previo"]) + " (" + f["estado"] + ")" + FIN)
     return 0
 
 
