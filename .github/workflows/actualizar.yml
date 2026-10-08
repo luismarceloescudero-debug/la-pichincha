@@ -1,12 +1,12 @@
 name: Actualizar precios y publicar
 
 # El indice de busqueda no vive en el repo: se arma aca y viaja directo al
-# despliegue. Lo unico que se versiona es datos.json, que es chico y cuyo
-# historial de precios si vale la pena guardar.
+# despliegue. En main se versiona datos.json; el historial de precios del
+# indice vive en la rama huerfana `historial`, un CSV por mes.
 
 on:
   schedule:
-    - cron: "0 12 * * *"        # 09:00 en Argentina
+    - cron: "0 12 * * *"        # 09:00 en Argentina (GitHub suele atrasarlo)
   workflow_dispatch:
     inputs:
       paginas:
@@ -26,16 +26,29 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   construir:
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # El historial vive en su propia rama y no en la cache de Actions, que
+      # GitHub puede desalojar.
+      - name: Traer el historial de precios
+        uses: actions/checkout@v4
+        with:
+          ref: historial
+          path: historial
 
       - uses: actions/setup-python@v5
         with:
@@ -44,14 +57,20 @@ jobs:
       - name: Relevar precios de los productos seguidos
         run: python actualizar.py
 
+      # Se commitea solo si cambio algun precio: la hora de verificacion va
+      # estampada en el sitio publicado, no en el repo.
       - name: Guardar los cambios de precio
         if: github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add datos.json index.html comparativa-ram-ddr4-16gb.html
-          git diff --cached --quiet || git commit -m "Actualizacion automatica de precios [skip ci]"
-          git push
+          if git diff --quiet datos.json; then
+            echo "sin cambios de precio"
+          else
+            git add datos.json index.html
+            git commit -m "Actualizacion automatica de precios [skip ci]"
+            git push
+          fi
 
       # Si una tienda se cae o bloquea la IP del runner, el indice anterior
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
@@ -65,31 +84,44 @@ jobs:
           key: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-${{ github.run_id }}
           restore-keys: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-
 
-      # La foto de precios va en su propia cache, con clave estable: es el
-      # historial con el que se detectan las bajas, y no debe perderse cuando
-      # cambia el formato del indice o se toca el indexador.
-      - name: Recuperar la foto de precios anterior
-        uses: actions/cache@v4
-        with:
-          path: precios.json
-          key: precios-${{ github.run_id }}
-          restore-keys: precios-
-
       # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
       # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
       - name: Armar el indice de busqueda
+        id: indexar
         if: |
           (github.event_name == 'schedule') ||
           (github.event_name == 'workflow_dispatch' && inputs.indexar) ||
           (github.event_name == 'push' && hashFiles('indice.json') == '')
-        run: python indexar.py --max-paginas ${{ inputs.paginas || 12 }}
+        run: python indexar.py --max-paginas ${{ inputs.paginas || 12 }} --historial historial
         continue-on-error: true
+
+      # Una corrida manual con menos paginas no escribe historia: veria como
+      # bajas los productos que no llego a recorrer.
+      - name: Guardar el historial de precios
+        if: steps.indexar.outcome == 'success' && (inputs.paginas || '12') == '12'
+        working-directory: historial
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "sin cambios en el historial"
+          else
+            git commit -m "Precios del $(TZ=America/Argentina/Buenos_Aires date +%F)"
+            git push
+          fi
+
+      - name: Avisar si una fuente se cayo
+        if: github.event_name == 'schedule' && steps.indexar.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python salud.py salud.json
 
       - name: Preparar el sitio
         run: |
           mkdir -p _sitio
           cp index.html _sitio/
-          cp -r img _sitio/
+          cp -r img js _sitio/
           if [ -f indice.json ]; then
             cp indice.json _sitio/
             echo "indice: $(du -h indice.json | cut -f1)"
