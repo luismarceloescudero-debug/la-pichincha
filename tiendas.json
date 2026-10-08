@@ -50,6 +50,10 @@
         ],
         "lista": [
           "class=\"price-standard\">\\$\\s*([\\d.]+)"
+        ],
+        "imagen": [
+          "data-src=\"(https://www\\.gamingcity\\.com\\.ar/thumb/[^\"]+)\"",
+          " src=\"(https://www\\.gamingcity\\.com\\.ar/thumb/[^\"]+)\""
         ]
       }
     },
@@ -74,7 +78,8 @@
       "re": {
         "url": "href=\"(https://www\\.mexx\\.com\\.ar/productos-rubro/[^\"]+\\.html)\"",
         "nombre": "\\.html\">([^<]{6,160})</a>",
-        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>"
+        "precio": "class=\"price\"[\\s\\S]{0,400}?<b>\\$([\\d.]+)</b>",
+        "imagen": "src=\"(https://mexx-img-2019\\.s3\\.amazonaws\\.com/[^\"]+)\""
       }
     },
     "extractor": "itemprop",
@@ -159,7 +164,8 @@
         "precio": "price",
         "lista": "original_price",
         "url": "url",
-        "via": "store_name"
+        "via": "store_name",
+        "imagen": "image"
       }
     },
     "extractor": null,

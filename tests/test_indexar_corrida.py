@@ -121,6 +121,21 @@ class Corrida(unittest.TestCase):
         self.assertEqual(sorted(f[1] for f in indice["productos"] if f[3] == "uno"), [1000, 2000])
         self.assertEqual(len(self.filas()), antes)
 
+    def test_las_filas_reusadas_conservan_la_foto(self):
+        cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        cfg["uno"]["catalogo"]["campos"]["imagen"] = "foto"
+        (self.dir / "tiendas.json").write_text(json.dumps(cfg), encoding="utf-8")
+        self.catalogos = {"https://uno.test/cat": [{"id": 1, "nombre": "Producto 1", "precio": 1000,
+                                                    "foto": "https://img.test/1.jpg"}],
+                          "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
+        with redirect_stdout(io.StringIO()):
+            indexar.main(["--historial", str(self.hist)])
+            self.catalogos.pop("https://uno.test/cat")            # al dia siguiente uno se cae
+            indexar.main(["--historial", str(self.hist)])
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual(self.fila(indice, "uno", 1)[7], "https://img.test/1.jpg")
+        self.assertTrue(all(len(f) == 8 for f in indice["productos"]))
+
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
