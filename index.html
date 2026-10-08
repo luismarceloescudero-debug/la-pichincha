@@ -8,6 +8,8 @@
 <title>La Pichincha</title>
 <!-- solo-web -->
 <meta name="description" content="Comparador de hardware en Argentina: busca en 5 fuentes, arma la comparativa y te dice qué conviene comprar, no solo qué es más barato.">
+<link rel="canonical" href="https://luismarceloescudero-debug.github.io/la-pichincha/">
+<script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:100%}[hidden]{display:none!important}</style>
 <!-- /solo-web -->
@@ -1604,6 +1606,7 @@ async function compararConsulta(q) {
   fijarConsulta(q);
   if (!ANALISIS) return;
   guardarHist(q);
+  registrarBusqueda(q);
   ir("comparativa", true);
 }
 
@@ -1732,7 +1735,7 @@ function consultar(q) {
   if (campo && campo.value !== q) campo.value = q;
   pintarResultados(q);
   clearTimeout(guardarLuego);
-  guardarLuego = setTimeout(() => guardarHist(q), 1200);   // recien cuando dejas de tipear
+  guardarLuego = setTimeout(() => { guardarHist(q); registrarBusqueda(q); }, 1200);   // recien cuando dejas de tipear
 }
 
 function vistaBuscar() {
@@ -1901,14 +1904,16 @@ document.addEventListener("click", async ev => {
       b.innerHTML = previo;
       await bajarArchivo(`${base}.xlsx`, await aXLSX(m.filas, m.titulo),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", b);
+      medir(Pagina.eventoAccion("excel", b.dataset.de));
     } catch (e) {                      // sin CDN no hay libro, pero el CSV sirve igual
       b.innerHTML = previo;
       await bajarArchivo(`${base}.csv`, aCSV(m.filas), "text/csv;charset=utf-8", b);
+      medir(Pagina.eventoAccion("csv", b.dataset.de));
     }
   }
-  else if (b.dataset.acc === "imprimir") window.print();
-  else if (b.dataset.acc === "copiar") copiar(aTexto(m.filas, m.titulo), b);
-  else compartir(m.titulo, aTexto(m.filas, m.titulo), b);
+  else if (b.dataset.acc === "imprimir") { medir(Pagina.eventoAccion("imprimir", b.dataset.de)); window.print(); }
+  else if (b.dataset.acc === "copiar") { medir(Pagina.eventoAccion("copiar", b.dataset.de)); copiar(aTexto(m.filas, m.titulo), b); }
+  else { medir(Pagina.eventoAccion("compartir", b.dataset.de)); compartir(m.titulo, aTexto(m.filas, m.titulo), b); }
 });
 
 /* --- Libro de Excel nativo -------------------------------------------
@@ -2292,7 +2297,47 @@ function enlaceActual() {
   return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1));
 }
 
-function registrarBusqueda(q) {}   // la completa la analitica (F0.1)
+/* --- Analitica: GoatCounter, sin cookies ni banner ------------------------
+   El script es async: lo que se mide antes de que cargue espera en una cola.
+   Si un bloqueador lo frena, los eventos se pierden sin romper nada. */
+const COLA_GC = [];
+function vaciarCola() {
+  const gc = window.goatcounter;
+  if (!gc || typeof gc.count !== "function") return;
+  while (COLA_GC.length) { try { gc.count(COLA_GC.shift()); } catch (e) { /* no frena la pagina */ } }
+}
+function medir(ev) { if (ev) { COLA_GC.push(ev); vaciarCola(); } }
+(() => { const s = document.getElementById("gc"); if (s) s.addEventListener("load", vaciarCola); })();
+
+/* Una busqueda cuenta cuando se asienta, no por cada tecla. */
+let ULTIMO_MEDIDO = "";
+function registrarBusqueda(q) {
+  const t = normalBusq(q || "").replace(/\s+/g, " ").trim();
+  if (t.length < 2 || t === ULTIMO_MEDIDO || !IDX) return;
+  ULTIMO_MEDIDO = t;
+  medir(Pagina.eventoBusqueda(t, buscarTodo(q).length));
+}
+
+/* Clic hacia una tienda: el comercio sale del dominio y el rubro del producto,
+   buscado por URL en el indice o en los curados. */
+let RUBROS = null;
+function rubroDeUrl(url) {
+  if (!RUBROS || RUBROS.idx !== IDX) {
+    const m = new Map();
+    P.forEach(p => m.set(p.url, /^ram/.test(p.tipo) ? "memoria" : /^webcam/.test(p.tipo) ? "webcam" : "otro"));
+    if (IDX) IDX.productos.forEach(f => { if (!m.has(f[2])) m.set(f[2], categoriaDe(f[0]) || "otro"); });
+    RUBROS = { idx: IDX, m };
+  }
+  return RUBROS.m.get(url) || "otro";
+}
+function alClicSaliente(ev) {
+  if (ev.type === "auxclick" && ev.button !== 1) return;
+  const a = ev.target.closest && ev.target.closest("a[href]");
+  if (!a || !/^https?:$/.test(a.protocol) || a.host === location.host) return;
+  medir(Pagina.eventoClic(a.href, rubroDeUrl(a.getAttribute("href"))));
+}
+document.addEventListener("click", alClicSaliente, true);
+document.addEventListener("auxclick", alClicSaliente, true);
 
 /* Abrir un link con ?q=: se baja el indice, se arma la consulta y se muestra
    la pestaña del link. Sin resultados va al buscador con el termino escrito. */
