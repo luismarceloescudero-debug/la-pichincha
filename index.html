@@ -1839,7 +1839,7 @@ function aTexto(filas, titulo) {
   });
   return `${titulo}\n${"—".repeat(Math.min(titulo.length, 40))}\n\n${lineas.join("\n")}` +
     (filas.length > 20 ? `\n\n…y ${filas.length - 20} más` : "") +
-    `\n\nLa Pichincha · ${location.origin}${location.pathname}`;
+    `\n\nLa Pichincha · ${enlaceActual()}`;
 }
 
 async function compartir(titulo, texto, boton) {
@@ -2121,7 +2121,10 @@ function fijarConsulta(q) {
   marcarConsulta();
 }
 function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; marcarConsulta(); }
-function marcarConsulta() { const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0"; }
+function marcarConsulta() {
+  const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
+  sincronizarUrl();
+}
 
 /* ---- Vistas ---- */
 function bannerConsulta() {
@@ -2274,6 +2277,56 @@ function vistaDinamica(id) {
        : id === "tiendas" ? vistaTiendasDin() : vistaVeredictoDin();
 }
 
+/* --- La busqueda va a la URL ---------------------------------------------
+   ?q= guarda la consulta activa y el hash la pestaña: un link copiado
+   reproduce la vista. replaceState para no llenar el historial al tipear. */
+function sincronizarUrl() {
+  const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1));
+  if (destino === location.pathname + location.search + location.hash) return;
+  try { history.replaceState(history.state, "", destino); } catch (e) { /* Safari limita las llamadas */ }
+}
+
+/* El link de lo que estas mirando: en Buscar vale lo que esta escrito. */
+function enlaceActual() {
+  const q = CONSULTA || ($("#q") || {}).value || "";
+  return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1));
+}
+
+function registrarBusqueda(q) {}   // la completa la analitica (F0.1)
+
+/* Abrir un link con ?q=: se baja el indice, se arma la consulta y se muestra
+   la pestaña del link. Sin resultados va al buscador con el termino escrito. */
+async function abrirConsultaDeUrl(q, vista) {
+  $("#vista").innerHTML = `<p class="sub">Armando la comparación de «${esc(q)}»…</p>`;
+  try { await asegurarIndice(); } catch (e) { return aplicar(vista); }
+  fijarConsulta(q);
+  registrarBusqueda(q);
+  // Se pinta ya y se reemplaza la entrada del historial en lugar de sumar una:
+  // Atras vuelve a donde estaba la persona antes de abrir el link.
+  const destino = ANALISIS ? (vista || "comparativa") : "buscar";
+  try { history.replaceState(history.state, "", Pagina.armarUrl(location.pathname, CONSULTA, destino)); } catch (e) {}
+  aplicar(destino);
+  if (ANALISIS) guardarHist(q);
+  else consultar(q);              // sin resultados: el buscador lo dice, con el termino escrito
+}
+
+/* Atras y Adelante pueden cambiar la consulta, no solo la pestaña. popstate y
+   hashchange llegan juntos: se atiende una vez. */
+let navegando = false;
+function alNavegar() {
+  if (navegando) return;
+  navegando = true;
+  setTimeout(async () => {
+    navegando = false;
+    const { q, vista } = Pagina.leerUrl(location.search, location.hash);
+    if (q !== CONSULTA) {
+      if (!q) limpiarConsulta();
+      else { try { await asegurarIndice(); fijarConsulta(q); } catch (e) { /* queda el curado */ } }
+    }
+    aplicar(vista);
+  }, 0);
+}
+
 /* --- Ruteo --- */
 function pintar(id) {
   const v = $("#vista");
@@ -2314,7 +2367,8 @@ function ir(id, scroll) {
   else location.hash = id;
 }
 
-window.addEventListener("hashchange", () => aplicar(location.hash.slice(1)));
+window.addEventListener("hashchange", alNavegar);
+window.addEventListener("popstate", alNavegar);
 
 function arrancar() {
   if (!P.length) { $("#vista").innerHTML = '<p class="sub">No hay datos cargados todavía. Corré <code>python actualizar.py --build</code>.</p>'; return; }
@@ -2414,7 +2468,9 @@ function arrancar() {
   $("#pie-impresion").textContent =
     `La Pichincha · ${location.origin}${location.pathname} · precios de ${DATOS.actualizado}, con IVA, sin envío.`;
 
-  aplicar(location.hash.slice(1));
+  const inicio = Pagina.leerUrl(location.search, location.hash);
+  if (inicio.q) abrirConsultaDeUrl(inicio.q, inicio.vista);
+  else aplicar(inicio.vista);
 }
 arrancar();
 </script>
