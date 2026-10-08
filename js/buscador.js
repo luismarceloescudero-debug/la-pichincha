@@ -44,10 +44,12 @@
     if (orden === "precio") return copia.sort((a, b) => a[1] - b[1]);
     if (orden === "marca") return copia.sort((a, b) =>
       nivelMarca(b[0]) - nivelMarca(a[0]) || a[1] - b[1]);
+    // Las compras internacionales no compiten con lo que se compra aca: van al final.
+    const intl = f => typeof f[8] === "string" && f[8].includes("i") ? 1 : 0;
     return copia.sort((a, b) => {
       const na = nivelMarca(a[0]), nb = nivelMarca(b[0]);
       const sa = pisoDeGama(a[1], na, med), sb = pisoDeGama(b[1], nb, med);
-      return (sa - sb) || (nb - na) || (a[1] - b[1]);
+      return (intl(a) - intl(b)) || (sa - sb) || (nb - na) || (a[1] - b[1]);
     });
   }
 
@@ -107,7 +109,12 @@
   const ES_HDD = /^(hdd|hd\b(?!\s*(?:ssd|solido))|disco (?:rigido|duro|mecanico)|hard ?disk)/;
   const ES_SSD = /^(ssd|hd\s*ssd|disco solido|unidad solida)/;
 
-  function motivoExclusion(n, nq, toks) {
+  /* Una compra internacional viene del exterior: tarda semanas y puede pagar
+     impuestos al llegar, asi que no compite con lo que se compra aca. */
+  const PIDE_INTERNACIONAL = /importad|internacional|exterior/;
+
+  function motivoExclusion(n, nq, toks, sellos = "") {
+    if (typeof sellos === "string" && sellos.includes("i") && !PIDE_INTERNACIONAL.test(nq)) return "internacionales";
     for (const r of REGLAS_EXCLUSION) if (r.re.test(n) && !r.pide.test(nq)) return r.id;
     // Si lo que buscas aparece justo despues de "simil", ese aviso dice que NO es eso.
     for (const t of toks) {
@@ -120,6 +127,12 @@
     return null;
   }
 
+  /* Las letras que guarda el indice ("ioe") como [clase, texto] de cada sello. */
+  const SELLOS = [["i", "ojo", "compra internacional"], ["o", "conocida", "tienda oficial"],
+                  ["e", "off2", "envío gratis"]];
+  const sellosDe = s => typeof s !== "string" ? []
+    : SELLOS.filter(([l]) => s.includes(l)).map(([, clase, texto]) => [clase, texto]);
+
   /* "Auriculares Samsung..." -> "auricular": el rubro es la primera palabra, en singular. */
   function categoriaDe(nombre) {
     let w = normal(nombre).split(/\s+/)[0].replace(/[^a-z]/g, "");
@@ -129,7 +142,7 @@
   }
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, armarMarcasRe, marcaDe, specsDe, motivoExclusion, categoriaDe };
+                ALIAS_MARCA, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
 })(this);

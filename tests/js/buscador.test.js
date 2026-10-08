@@ -41,6 +41,16 @@ test("ordenar por precio, por marca y recomendado", () => {
   assert.equal(filas[0][0], "Generica 16GB");
 });
 
+test("en recomendado las compras internacionales van despues de las comparables", () => {
+  const nivel = n => (/kingston/i.test(n) ? 2 : 0);
+  const filas = [["Kingston A", 800, "", "", "", 0, 0, "", "ie"], ["Kingston B", 900, "", "", "", 0, 0, "", "e"],
+                 ["Otra C", 950, "", "", "", 0, 0, "", ""], ["Vieja D", 990, "", "", "", 0, 0]];
+  const nombres = r => r.map(f => f[0]);
+  assert.deepEqual(nombres(B.ordenar(filas, 900, "recomendado", nivel)), ["Kingston B", "Otra C", "Vieja D", "Kingston A"]);
+  // Por precio manda el numero: la internacional mas barata queda primera, con su sello.
+  assert.deepEqual(nombres(B.ordenar(filas, 900, "precio", nivel)), ["Kingston A", "Kingston B", "Otra C", "Vieja D"]);
+});
+
 test("la marca es la primera que aparece, con alias", () => {
   const re = B.armarMarcasRe(["intel", "hp", "kingston", "xpg", "western digital"]);
   assert.equal(B.marcaDe("Notebook HP Intel Core i5", re), "hp");
@@ -74,6 +84,31 @@ test("motivoExclusion respeta lo que pide la busqueda", () => {
   assert.equal(m("Memoria Kingston 16GB SODIMM", "memoria 16gb"), "formato");
   assert.equal(m("Memoria Kingston 16GB SODIMM", "memoria sodimm 16gb"), null);
   assert.equal(m("Placa de video RTX 3060 outlet", "rtx 3060"), "usados");
+});
+
+test("las compras internacionales quedan afuera salvo que se pidan", () => {
+  const m = (nombre, q, sellos) => {
+    const nq = B.normalBusq(q);
+    return B.motivoExclusion(B.normalBusq(nombre), nq, nq.split(/\s+/).filter(Boolean), sellos);
+  };
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060", "ie"), "internacionales");
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060", "oe"), null);
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060"), null);
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060 importada", "i"), null);
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060 internacional", "i"), null);
+  assert.equal(m("Notebook Lenovo 16GB", "ssd 512gb", "i"), "internacionales");
+  // Filas de un indice viejo pueden traer otra cosa en el lugar de los sellos.
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060", 0), null);
+  assert.equal(m("Placa de video RTX 4060 8GB", "rtx 4060", null), null);
+});
+
+test("sellosDe traduce las letras a sellos, en orden fijo", () => {
+  assert.deepEqual(B.sellosDe("eoi"), [["ojo", "compra internacional"], ["conocida", "tienda oficial"],
+    ["off2", "envío gratis"]]);
+  assert.deepEqual(B.sellosDe("e"), [["off2", "envío gratis"]]);
+  assert.deepEqual(B.sellosDe(""), []);
+  assert.deepEqual(B.sellosDe(undefined), []);
+  assert.deepEqual(B.sellosDe("xz"), []);
 });
 
 test("categoriaDe es la primera palabra en singular", () => {

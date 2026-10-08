@@ -34,6 +34,9 @@ INDICE = RAIZ / "indice.json"
 HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los cambios
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
+# Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
+# url, tienda, via, lista, antes, imagen, sellos. Completa filas de indices viejos.
+FILA_VACIA = ["", 0, "", "", "", 0, 0, "", ""]
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -180,6 +183,20 @@ def imagen(fila, cfg):
     return plantilla.format(nombre=nombre) if plantilla else str(nombre)
 
 
+def sellos(fila, cfg):
+    """Letras de las senales que publica la fuente: i internacional, o tienda
+    oficial, e envio gratis. 'sellos' en tiendas.json dice donde esta cada una,
+    con puntos para entrar en objetos ("specifications.is_international")."""
+    salida = ""
+    for letra, ruta in (cfg.get("sellos") or {}).items():
+        valor = fila
+        for parte in ruta.split("."):
+            valor = valor.get(parte) if isinstance(valor, dict) else None
+        if valor and str(valor).lower() not in ("false", "no", "0"):
+            salida += letra
+    return salida
+
+
 def indexar_api(tienda, max_paginas):
     """Catalogo servido por una API JSON paginada, categoria por categoria."""
     cfg = tienda["catalogo"]
@@ -204,7 +221,8 @@ def indexar_api(tienda, max_paginas):
                 vistos.add(f[c["url"]])
                 items.append({"nombre": limpio(f[c["nombre"]]), "precio": int(f[c["precio"]]),
                               "lista": f.get(c.get("lista")), "url": f[c["url"]],
-                              "via": f.get(c.get("via")), "imagen": imagen(f, cfg)})
+                              "via": f.get(c.get("via")), "imagen": imagen(f, cfg),
+                              "sellos": sellos(f, cfg)})
             n += 1
             time.sleep(PAUSA)
         print("    " + str(i) + "/" + str(len(cats)) + " categorias " + PUNTO
@@ -226,7 +244,7 @@ def indexar_json(tienda):
         items.append({"nombre": limpio(nombre), "precio": int(precio),
                       "lista": fila.get(c["lista"]),
                       "url": absoluta(tienda["base"], cfg["ruta"].format(slug=slug, id=fila[c["id"]])),
-                      "imagen": imagen(fila, cfg)})
+                      "imagen": imagen(fila, cfg), "sellos": sellos(fila, cfg)})
     return items
 
 
@@ -294,7 +312,7 @@ def main(argv=None):
     previo = {}
     if INDICE.exists():
         for fila in json.loads(INDICE.read_text(encoding="utf-8")).get("productos", []):
-            fila = (list(fila) + ["", 0, 0, ""])[:8]  # filas viejas de 4 a 7 campos; la 8 es la foto
+            fila = list(fila)[:9] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
             previo.setdefault(fila[3], []).append(fila)
 
     # El historial vive en su propia rama y no en la cache de Actions. La clave
@@ -358,7 +376,8 @@ def main(argv=None):
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
             salida.append([it["nombre"], it["precio"], it["url"], clave,
-                           it.get("via") or "", lista, propia, it.get("imagen") or ""])
+                           it.get("via") or "", lista, propia, it.get("imagen") or "",
+                           it.get("sellos") or ""])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
@@ -375,7 +394,7 @@ def main(argv=None):
         "generado": generado,
         "tiendas": {k: {"nombre": v["nombre"], "color": v["color"],
                         "segunda": bool(v.get("segunda_opinion"))} for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos"],
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

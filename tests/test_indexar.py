@@ -35,6 +35,16 @@ class Utilidades(unittest.TestCase):
     def test_limpio_decodifica_entidades(self):
         self.assertEqual(indexar.limpio('SSD 2.5&quot;  Kingston\n &amp; más'), 'SSD 2.5" Kingston & más')
 
+    def test_sellos_lee_las_senales_declaradas(self):
+        cfg = {"sellos": {"i": "specifications.is_international", "o": "specifications.Tienda oficial",
+                          "e": "specifications.Envío gratis"}}
+        fila = {"specifications": {"is_international": True, "Envío gratis": True, "Tienda oficial": None}}
+        self.assertEqual(indexar.sellos(fila, cfg), "ie")
+        self.assertEqual(indexar.sellos({"specifications": {"is_international": "false"}}, cfg), "")
+        self.assertEqual(indexar.sellos({"specifications": None}, cfg), "")
+        self.assertEqual(indexar.sellos({}, cfg), "")
+        self.assertEqual(indexar.sellos(fila, {}), "")
+
     def test_imagen_toma_la_de_menor_orden(self):
         cfg = {"campos": {"imagen": "imagenes"}, "imagen_url": "https://img.test/{nombre}"}
         fila = {"imagenes": [{"nombre": "b.jpg", "orden": 2}, {"nombre": "a.jpg", "orden": 1}]}
@@ -153,6 +163,8 @@ class Catalogos(unittest.TestCase):
             self.assertEqual((it["url"], it["precio"], it["via"]), (f["url"], int(f["price"]), f.get("store_name")))
             self.assertEqual(it["imagen"], f["image"])
         self.assertTrue(all(it["imagen"].startswith("https://") for it in items))
+        # La quinta fila (Mercado Libre) es de tienda oficial y con envio gratis.
+        self.assertEqual([it["sellos"] for it in items], ["", "", "", "", "oe"])
 
     def test_listados_completan_la_foto_relativa(self):
         cfg = json.loads(json.dumps(TIENDAS["gamingcity"]))

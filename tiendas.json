@@ -166,6 +166,11 @@
         "url": "url",
         "via": "store_name",
         "imagen": "image"
+      },
+      "sellos": {
+        "i": "specifications.is_international",
+        "o": "specifications.Tienda oficial",
+        "e": "specifications.Envío gratis"
       }
     },
     "extractor": null,

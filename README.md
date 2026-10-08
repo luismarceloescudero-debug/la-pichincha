@@ -237,6 +237,12 @@ Cada resultado puede traer sellos: marca de primera linea, marca conocida, bajo
 N%, N% OFF, y "muy por debajo del resto" cuando el precio no cierra. Arriba va
 la mediana del resultado, para que se vea contra que se compara.
 
+Los avisos de ComparaYa suman tres sellos mas, que salen de su API (`sellos` en
+`tiendas.json`): **compra internacional** (se envia desde el exterior), **tienda
+oficial** y **envio gratis**. En el indice viajan como letras (`i`, `o`, `e`) en
+el campo `sellos`. Las compras internacionales siguen en la lista, marcadas, pero
+en el orden Recomendado van despues de las comparables.
+
 Cuando la consulta cae en una categoria analizada a fondo, aparece un acceso
 directo a la Comparativa, que es donde estan las specs de fabrica y la garantia
 real.
@@ -273,6 +279,9 @@ contenido de siempre.
 El indice mezcla cosas que mencionan el componente sin serlo. Se excluyen, y el
 cartel de arriba dice cuantos y por que:
 
+- Compras internacionales: tardan semanas y pueden pagar impuestos al llegar,
+  asi que no compiten por la mejor compra, salvo que la busqueda diga
+  "importado", "internacional" o "exterior". Siguen visibles en Buscar.
 - Formato de notebook (SODIMM), salvo que la busqueda lo pida.
 - Usados, outlet y reacondicionados, salvo que la busqueda los pida.
 - Equipos completos: avisos que EMPIEZAN con Notebook, PC, Combo o Kit. Esta
