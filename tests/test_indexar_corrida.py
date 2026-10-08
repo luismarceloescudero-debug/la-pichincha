@@ -111,6 +111,16 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 1)[1], 1000)   # publica lo que ya tenia
         self.assertEqual(len(self.filas()), antes)
 
+    def test_fuente_que_trae_cero_sin_excepcion_conserva_el_indice_anterior(self):
+        # Asi se ve un bloqueo en los listados: cada pagina falla y se corta sin
+        # excepcion. Sin esto la fuente desaparecia del sitio publicado.
+        self.correr([(1, 1000), (2, 2000)], [(101, 500)])
+        antes = len(self.filas())
+        indice, salud = self.correr([], [(101, 500)])
+        self.assertEqual(salud["fuentes"]["uno"]["estado"], "fallo")
+        self.assertEqual(sorted(f[1] for f in indice["productos"] if f[3] == "uno"), [1000, 2000])
+        self.assertEqual(len(self.filas()), antes)
+
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
