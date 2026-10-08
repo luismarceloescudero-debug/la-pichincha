@@ -1,0 +1,135 @@
+/* Funciones puras del buscador: no tocan el DOM ni variables de la pagina.
+   index.html las carga como script comun (quedan en window.Buscador) y los
+   tests las cargan con require() desde Node: node --test "tests/js/*.test.js". */
+(function (raiz) {
+  "use strict";
+
+  const normal = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  /* "1 TB" y "1TB" son lo mismo: se pegan la cifra y la unidad antes de comparar. */
+  const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2");
+  const normalBusq = t => pegarUnidades(normal(t));
+  const esMedida = t => /^\d+(?:gb|tb|mb|mhz|ghz|hz|w|v)?$/.test(t);
+  const escaparRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  /* Que tiene que tener un nombre (ya pasado por normalBusq) para coincidir.
+     Un numero, o un numero con su unidad (27, 1tb, 3200mhz), tiene que ser
+     palabra entera: si no, "27" entra en "Vp227hf" y "2tb" en "12tb".
+     Devuelve null si la consulta no tiene palabras. */
+  function filtroDe(q) {
+    const toc = normalBusq(q).split(/\s+/).filter(Boolean);
+    if (!toc.length) return null;
+    const pruebas = toc.map(t => {
+      if (!esMedida(t)) return n => n.includes(t);
+      const re = new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)");
+      return n => re.test(n);
+    });
+    return n => pruebas.every(p => p(n));
+  }
+
+  function mediana(nums) {
+    if (!nums.length) return 0;
+    const o = [...nums].sort((a, b) => a - b), m = o.length >> 1;
+    return o.length % 2 ? o[m] : (o[m - 1] + o[m]) / 2;
+  }
+
+  /* El piso de una marca buena casi nunca es la mejor compra: suele ser un modelo
+     viejo o de entrada. Sin marca reconocida el umbral es mas exigente. */
+  const pisoDeGama = (precio, niv, med) => precio < med * (niv === 0 ? 0.45 : 0.35);
+
+  /* Ordena el resultado segun el criterio elegido. "recomendado" pone primero la
+     marca mas confiable al menor precio, y manda al fondo lo que esta tan por
+     debajo del resto que probablemente no sea comparable. */
+  function ordenar(filas, med, orden, nivelMarca) {
+    const copia = [...filas];
+    if (orden === "precio") return copia.sort((a, b) => a[1] - b[1]);
+    if (orden === "marca") return copia.sort((a, b) =>
+      nivelMarca(b[0]) - nivelMarca(a[0]) || a[1] - b[1]);
+    return copia.sort((a, b) => {
+      const na = nivelMarca(a[0]), nb = nivelMarca(b[0]);
+      const sa = pisoDeGama(a[1], na, med), sb = pisoDeGama(b[1], nb, med);
+      return (sa - sb) || (nb - na) || (a[1] - b[1]);
+    });
+  }
+
+  const ALIAS_MARCA = { xpg: "adata", gskill: "g.skill", tplink: "tp-link", "western digital": "wd" };
+  const armarMarcasRe = lista => lista.map(m => [m, new RegExp("\\b" + escaparRe(m) + "\\b")]);
+
+  /* La marca es la que aparece primero en el nombre: "Notebook HP Intel Core" es HP. */
+  function marcaDe(nombre, marcasRe, alias = ALIAS_MARCA) {
+    const n = normal(nombre);
+    let mejor = "", pos = 1e9;
+    for (const [m, re] of marcasRe) {
+      const x = n.search(re);
+      if (x >= 0 && x < pos) { pos = x; mejor = m; }
+    }
+    return alias[mejor] || mejor;
+  }
+
+  /* Lee del nombre del aviso lo que se pueda: el indice no tiene fichas tecnicas. */
+  function specsDe(nombre) {
+    const n = nombre.replace(/(\d),(\d)/g, "$1.$2");
+    const s = {};
+    let m;
+    if ((m = n.match(/\bddr([345])\b/i))) s["Tipo"] = "DDR" + m[1];
+    const caps = [...n.matchAll(/\b(\d{1,4})\s?(gb|tb)\b/gi)].map(x => x[1] + x[2].toUpperCase());
+    if (caps.length) s["Capacidad"] = [...new Set(caps)].slice(0, 2).join(" + ");
+    if ((m = n.match(/\b(\d{3,5})\s?mhz\b/i))) s["Velocidad"] = m[1] + " MHz";
+    if ((m = n.match(/\bcl\s?(\d{2})\b/i))) s["Latencia"] = "CL" + m[1];
+    if ((m = n.match(/\b(\d{3,4})\s?w\b/i))) s["Potencia"] = m[1] + " W";
+    if ((m = n.match(/\b(\d{2}(?:\.\d)?)\s?(?:"|”|″|pulgadas|pulg\b)/i))) s["Pantalla"] = m[1] + '"';
+    if ((m = n.match(/\b(\d{2,3})\s?hz\b/i))) s["Refresco"] = m[1] + " Hz";
+    if ((m = n.match(/\b(4k|uhd|wqhd|qhd|2k|fhd|full\s?hd|1080p|1440p|720p)\b/i)))
+      s["Resolución"] = /full/i.test(m[1]) ? "FHD" : m[1].toUpperCase();
+    if ((m = n.match(/\b(\d{1,2})\s?(?:nucleos|núcleos|cores)\b/i))) s["Núcleos"] = m[1];
+    if (/so-?dimm/i.test(n)) s["Formato"] = "SODIMM";
+    else if (/nvme|\bm\.?2\b/i.test(n)) s["Formato"] = "M.2 NVMe";
+    else if (/sata/i.test(n)) s["Formato"] = "SATA";
+    if (/\bargb\b|\brgb\b/i.test(n)) s["Luces"] = "RGB";
+    return s;
+  }
+
+  /* Avisos que no son comparables con el resto aunque coincidan con la busqueda,
+     salvo que la propia busqueda los pida. */
+  const REGLAS_EXCLUSION = [
+    { id: "formato", re: /so-?dimm/, pide: /so-?dimm|notebook|laptop/ },
+    // Un aviso que EMPIEZA con "Notebook", "PC" o "Combo" es un equipo completo: el
+    // componente que buscas solo aparece de pasada. Anclado al inicio a proposito,
+    // porque "SSD para notebook" si es un SSD.
+    { id: "equipos", re: /^(notebook|laptop|netbook|pc\b|computadora|all in one|mini pc|combo|kit\b|equipo)/,
+      pide: /notebook|laptop|netbook|\bpc\b|computadora|all in one|combo|armad|equipo|kit/ },
+    { id: "usados", re: /outlet|usado|reacondicionad|refurb|open box|exhibicion/,
+      pide: /outlet|usado|reacondicionad|refurb|open box|exhibicion/ },
+  ];
+
+  /* Lo que pediste tiene que ser lo que ves. "SIMIL 1TB" no es 1TB, "Cable para SSD"
+     no es un SSD y un disco rigido no es un SSD. */
+  const ACCESORIOS_INICIO = /^(carcasa|gabinete|caddy|adaptador|cable|dock|docking|funda|bolso|mochila|soporte|base|bracket)\b/;
+  const ES_HDD = /^(hdd|hd\b(?!\s*(?:ssd|solido))|disco (?:rigido|duro|mecanico)|hard ?disk)/;
+  const ES_SSD = /^(ssd|hd\s*ssd|disco solido|unidad solida)/;
+
+  function motivoExclusion(n, nq, toks) {
+    for (const r of REGLAS_EXCLUSION) if (r.re.test(n) && !r.pide.test(nq)) return r.id;
+    // Si lo que buscas aparece justo despues de "simil", ese aviso dice que NO es eso.
+    for (const t of toks) {
+      if (new RegExp("\\bsimil(?:ar|es)?\\s+(?:a\\s+|al\\s+|de\\s+)?" + escaparRe(t)).test(n)) return "similares";
+    }
+    const a = n.match(ACCESORIOS_INICIO);
+    if (a && !nq.includes(a[1])) return "accesorios";
+    if (/\bssd\b|solido|nvme/.test(nq) && !/\bhdd\b|rigido|duro/.test(nq) && ES_HDD.test(n)) return "tipo";
+    if (/\bhdd\b|rigido|disco duro|hard ?disk/.test(nq) && !/\bssd\b|solido/.test(nq) && ES_SSD.test(n)) return "tipo";
+    return null;
+  }
+
+  /* "Auriculares Samsung..." -> "auricular": el rubro es la primera palabra, en singular. */
+  function categoriaDe(nombre) {
+    let w = normal(nombre).split(/\s+/)[0].replace(/[^a-z]/g, "");
+    if (/(ores|ares|eres)$/.test(w)) w = w.slice(0, -2);
+    else if (w.length > 4 && w.endsWith("s")) w = w.slice(0, -1);
+    return w;
+  }
+
+  const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
+                ALIAS_MARCA, armarMarcasRe, marcaDe, specsDe, motivoExclusion, categoriaDe };
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else raiz.Buscador = api;
+})(this);
