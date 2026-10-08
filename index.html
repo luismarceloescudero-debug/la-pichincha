@@ -1463,7 +1463,7 @@ function pintarOfertas(append) {
     const sinCampo = !(IDX.campos || []).includes("antes");
     est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento";
     caja.innerHTML = sinCampo ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
-                              : `<p class="sub">Volvé mañana: el índice se rearma todos los días a las 09:00.</p>`;
+                              : `<p class="sub">Volvé mañana: el índice se rearma una vez por día. El último relevamiento fue ${Pagina.cuando(IDX.generado)}.</p>`;
     return;
   }
   OF_ACTUAL = ofertasFiltradas();
@@ -1659,7 +1659,7 @@ function pintarResultados(q) {
   if (!IDX || !caja) return;
   limpiarConsulta();          // si no hay resultados, no queda una consulta vieja gobernando las pestañas
   if (!q.trim()) {
-    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${IDX.generado}`;
+    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${Pagina.cuando(IDX.generado)}`;
     caja.innerHTML = "";
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
@@ -2422,7 +2422,9 @@ function arrancar() {
     return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${["comparativa", "tiendas", "veredicto"].includes(v.id) ? 1 : 0}" aria-selected="false">
       ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
   }).join("");
-  $("#sello").textContent = `Precios verificados en cada sitio · actualizado ${DATOS.actualizado} · ${P.length} productos seguidos`;
+  $("#sello").textContent = (DATOS.verificado
+    ? `Precios verificados en cada sitio ${Pagina.cuando(DATOS.verificado)}`
+    : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`;
   $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx y FullH4rd, con el precio de
     transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
     de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
