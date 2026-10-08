@@ -57,6 +57,12 @@ Avisa cuando un producto cambia de precio, cuando se queda sin stock y cuando
 el cambio da vuelta el podio, que es el unico caso en el que hay que reescribir
 el veredicto a mano.
 
+Si un producto no se puede verificar (la tienda bloquea, cambia la ficha o no
+publica precio) conserva el ultimo precio y queda marcado con `falla_desde`, y la
+pagina lo muestra como "sin verificar desde el 8/10". La marca se borra sola
+cuando vuelve a andar. Se guarda desde cuando falla y no cuando se verifico, asi
+`datos.json` cambia solo cuando algo cambia y el bot no commitea todos los dias.
+
 `datos.json` es la unica fuente de verdad: el script actualiza precios, stock e
 historial, reinyecta todo en `index.html` y arma la copia del artifact. El contenido editorial (specs,
 pros, contras, veredicto) se edita ahi y no lo toca el script.
@@ -89,7 +95,11 @@ product:price o catalogo JSON) y que poner en la configuracion. Para jubilar
 una, `"activa": false`, y el indice conserva lo que ya tenia de ella.
 
 Si una fuente se cae o cambia su plantilla, el indexador la marca en el resumen
-y mantiene los datos anteriores en lugar de vaciar el indice.
+y mantiene los datos anteriores en lugar de vaciar el indice. Esos datos no
+salen como de hoy: cada fuente guarda en `indice.json` la hora de su ultimo
+relevamiento bueno (`tiendas.<clave>.relevado`) y la pagina pone "precio del 7/10"
+en cada producto, en el texto compartido y en los exportes. Pasa lo mismo con
+una fuente dada de baja con `"activa": false`.
 
 ### Fuentes
 

@@ -69,3 +69,32 @@ test("eventoClic y eventoAccion", () => {
   assert.equal(P.eventoAccion("compartir", "veredicto").path, "compartir/nativo/veredicto");
   assert.equal(P.eventoAccion("otra", "x"), null);
 });
+
+test("precioDel avisa solo si el relevamiento es de otro dia argentino", () => {
+  const ref = "2026-10-08T15:25-03:00";
+  assert.equal(P.precioDel("2026-10-08T15:25-03:00", ref), "");
+  assert.equal(P.precioDel("2026-10-08T09:00-03:00", ref), "");            // otra corrida del mismo dia
+  assert.equal(P.precioDel("2026-10-07T15:25-03:00", ref), "precio del 7/10");
+  // 23:30 del 7 en Argentina ya es el 8 en UTC: sigue siendo del 7.
+  assert.equal(P.precioDel("2026-10-07T23:30-03:00", "2026-10-08T00:10-03:00"), "precio del 7/10");
+  assert.equal(P.precioDel("2026-10-07", ref), "precio del 7/10");         // indice viejo sin hora
+  assert.equal(P.precioDel("2026-09-30T10:00-03:00", ref), "precio del 30/9");
+});
+
+test("precioDel sin datos no inventa un aviso", () => {
+  const ref = "2026-10-08T15:25-03:00";
+  assert.equal(P.precioDel("", ref), "");
+  assert.equal(P.precioDel(undefined, ref), "");
+  assert.equal(P.precioDel("basura", ref), "");
+  assert.equal(P.precioDel("2026-10-07T15:25-03:00", ""), "");
+});
+
+test("sinVerificar dice desde cuando falla un producto curado", () => {
+  const ref = "2026-10-09T15:25-03:00";
+  assert.equal(P.sinVerificar("", ref), "");
+  assert.equal(P.sinVerificar(undefined, ref), "");
+  assert.equal(P.sinVerificar("2026-10-09", ref), "sin verificar hoy");
+  assert.equal(P.sinVerificar("2026-10-08", ref), "sin verificar desde el 8/10");
+  assert.equal(P.sinVerificar("2026-10-08", ""), "sin verificar desde el 8/10"); // --build no estampa hora
+  assert.equal(P.sinVerificar("basura", ref), "");
+});

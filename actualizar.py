@@ -144,7 +144,12 @@ EXTRACTORES = {
 
 # --- Relevamiento -----------------------------------------------------------
 
-def relevar(datos, solo=None):
+def relevar(datos, solo=None, hoy=None):
+    """Releva cada producto seguido. Si uno no se puede verificar conserva su
+    precio y queda marcado con `falla_desde`; se desmarca cuando vuelve a andar.
+    Se guarda desde cuando falla y no cuando se verifico, asi datos.json cambia
+    solo cuando algo cambia y el bot no commitea todos los dias."""
+    hoy = hoy or datetime.now(AR).date().isoformat()
     cambios, errores = [], []
     productos = [p for p in datos["productos"]
                  if solo is None or p["tienda"] == solo]
@@ -158,13 +163,16 @@ def relevar(datos, solo=None):
         except (urllib.error.URLError, LookupError, ValueError, KeyError) as e:
             errores.append((etiqueta, str(e)[:70]))
             print(f"  {ROJO}{FALLA}{FIN} {etiqueta:<42} {ROJO}{str(e)[:46]}{FIN}")
+            prod.setdefault("falla_desde", hoy)
             continue
 
         antes, ahora = prod.get("precio"), nuevo["precio"]
         if ahora is None:
             errores.append((etiqueta, "precio vacio"))
             print(f"  {ROJO}{FALLA}{FIN} {etiqueta:<42} {ROJO}precio vacio{FIN}")
+            prod.setdefault("falla_desde", hoy)
             continue
+        prod.pop("falla_desde", None)
 
         if antes != ahora:
             delta = ahora - antes
