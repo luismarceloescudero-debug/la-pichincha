@@ -1,5 +1,7 @@
+import io
 import json
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -130,7 +132,8 @@ class Catalogos(unittest.TestCase):
         def bajar(u):
             return json.dumps(cuerpo if "page=1&" in u else {"data": []})
 
-        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"):
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()):
             items = indexar.indexar_api(TIENDAS["comparaya"], 3)
         esperadas = [f for f in cuerpo["data"] if f.get("url") and f.get("price") and f.get("title")]
         self.assertGreaterEqual(len(esperadas), 3)
