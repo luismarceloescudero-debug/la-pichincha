@@ -327,6 +327,17 @@ def main(argv=None):
                 resumen[clave] = (0, "fallo")
             relevados[clave] = 0
             continue
+        if not items:
+            # Un bloqueo en los listados no tira excepcion: cada pagina falla y se
+            # corta. Cero productos es una fuente caida, no un catalogo vacio.
+            print("  " + ROJO + FALLA + " no trajo ningun producto" + FIN)
+            if clave in previo:
+                salida.extend(previo[clave])
+                resumen[clave] = (len(previo[clave]), "sin productos, uso el anterior")
+            else:
+                resumen[clave] = (0, "sin productos")
+            relevados[clave] = 0
+            continue
         rebaja_real = bool(fuente.get("lista_es_oferta"))
         relevados[clave] = len(items)
         bajaron = 0
