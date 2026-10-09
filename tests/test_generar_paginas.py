@@ -22,6 +22,45 @@ class Slug(unittest.TestCase):
             generar_paginas.slug("¿¿??")
 
 
+class Generar(unittest.TestCase):
+    """generar_paginas.main() entero, con Node de verdad y un indice minimo."""
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dir)
+        productos = [[f"Memoria Kingston {i} DDR4 16GB", 1000 + i, f"https://t.test/{i}", "cg", "", 0, 0, "", ""]
+                     for i in range(6)]
+        indice = {"generado": "2026-10-09T08:12-03:00", "productos": productos,
+                  "tiendas": {"cg": {"nombre": "CompraGamer", "color": "cg", "relevado": "2026-10-09T08:12-03:00"}}}
+        self.indice = self.dir / "indice.json"
+        self.indice.write_text(json.dumps(indice), encoding="utf-8")
+        self.consultas = self.dir / "consultas.json"
+        self.consultas.write_text(json.dumps([{"q": "ddr4 16gb"}, {"q": "placa inexistente"}]), encoding="utf-8")
+        self.salida = self.dir / "_sitio"
+
+    def correr(self, indice=None):
+        return generar_paginas.main(["--indice", str(indice or self.indice), "--consultas", str(self.consultas),
+                                     "--salida", str(self.salida)])
+
+    def test_crea_una_pagina_por_consulta(self):
+        self.assertEqual(self.correr(), 0)
+        buena = (self.salida / "precios" / "ddr4-16gb" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("<h1>ddr4 16gb", buena)
+        self.assertNotIn("noindex", buena)
+        fina = (self.salida / "precios" / "placa-inexistente" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("noindex", fina)
+
+    def test_sin_indice_no_hay_paginas_y_no_falla(self):
+        self.assertEqual(self.correr(self.dir / "no-esta.json"), 0)
+        self.assertFalse((self.salida / "precios").exists())
+
+    def test_una_lista_invalida_corta_la_publicacion(self):
+        self.consultas.write_text(json.dumps([{"q": "ssd 1tb"}, {"q": "SSD 1TB"}]), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            self.correr()
+        self.assertFalse((self.salida / "precios").exists())
+
+
 class CargarConsultas(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
