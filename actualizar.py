@@ -285,6 +285,7 @@ FINAL = "/* === FIN DATOS === */"
 SOLO_WEB = re.compile(r"[ \t]*<!-- solo-web -->.*?<!-- /solo-web -->[ \t]*\n?", re.S)
 ESQUELETO = re.compile(r"^[ \t]*(?:<!doctype html>|</?(?:html|head|body)\b[^>]*>)[ \t]*\n?", re.I | re.M)
 JS_SRC = re.compile(r'<script src="(js/[\w.-]+\.js)"></script>')
+CSS_LINK = re.compile(r'<link rel="stylesheet" href="(css/[\w.-]+\.css)">')
 
 
 def armar_artifact(html, leer):
@@ -293,6 +294,7 @@ def armar_artifact(html, leer):
     es un solo archivo y el visor le pone su propio <head>."""
     html = SOLO_WEB.sub("", html)
     html = ESQUELETO.sub("", html)
+    html = CSS_LINK.sub(lambda m: "<style>\n" + leer(m.group(1)).rstrip("\n") + "\n</style>", html)
     html = JS_SRC.sub(lambda m: "<script>\n" + leer(m.group(1)).rstrip("\n") + "\n</script>", html)
     return html.lstrip()
 

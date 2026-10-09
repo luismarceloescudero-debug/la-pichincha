@@ -1,0 +1,594 @@
+{
+ "ssd 1tb": {
+  "total": 167,
+  "comparables": 28,
+  "mediana": 293109,
+  "picks": [
+   [
+    "mejor",
+    "https://compragamer.com/producto/Disco_Solido_SSD_ADATA_1TB_SU650SS_520MB_s_17144",
+    236550
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/disco-ssd-ssd-wicgtyp-s900-1tb-sata-iii-2-5-gamingcity--det--18815",
+    204250
+   ],
+   [
+    "alt",
+    "https://www.gamingcity.com.ar/disco-ssd-disco-ssd-1tb-patriot-p210-2-5-sata3--det--14030",
+    237499
+   ]
+  ],
+  "excl": {
+   "internacionales": 2,
+   "formato": 0,
+   "usados": 0,
+   "equipos": 134,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 3
+  },
+  "comercios": [
+   [
+    "CompraGamer",
+    13
+   ],
+   [
+    "Gaming City",
+    5
+   ],
+   [
+    "Mexx",
+    8
+   ],
+   [
+    "Mercado Libre",
+    2
+   ]
+  ],
+  "internacionales": 2
+ },
+ "rtx 4060": {
+  "total": 22,
+  "comparables": 9,
+  "mediana": 2235419,
+  "picks": [
+   [
+    "mejor",
+    "https://www.mercadolibre.com.ar/placa-de-video-pny-geforce-rtx-4060-8gb-xlr8-dual-fan-oc/up/MLAU317762155",
+    1694509
+   ],
+   [
+    "barato",
+    "https://www.venex.com.ar/componentes-de-pc/placas-de-video/placa-de-video-gigabyte-nvidia-geforce-rtx-4060-aero-oc-8gb-gddr6.html",
+    633789
+   ],
+   [
+    "alt",
+    "https://www.mercadolibre.com.ar/placa-de-video-gigabyte-rtx-4060-windforce-oc-8gb-gddr6/p/MLA28671631",
+    1739000
+   ]
+  ],
+  "excl": {
+   "internacionales": 7,
+   "formato": 0,
+   "usados": 0,
+   "equipos": 5,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 1
+  },
+  "comercios": [
+   [
+    "Venex",
+    1
+   ],
+   [
+    "Mercado Libre",
+    8
+   ]
+  ],
+  "internacionales": 7
+ },
+ "ryzen 5": {
+  "total": 309,
+  "comparables": 107,
+  "mediana": 620950,
+  "picks": [
+   [
+    "mejor",
+    "https://www.gamingcity.com.ar/micro-amd-procesador-amd-ryzen-5-5600-6c-12t-sin-video--det--8427",
+    233700
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/micro-amd-procesador-amd-ryzen-5-3500x-6-nucleos-am4-gamingcity--det--19137",
+    94905
+   ],
+   [
+    "escalon",
+    "https://www.gamingcity.com.ar/micro-amd-procesador-amd-ryzen-5-5600gt-am4-6-nucleos-12-hilos-con-vega-7--det--13548",
+    304000
+   ]
+  ],
+  "excl": {
+   "internacionales": 5,
+   "formato": 0,
+   "usados": 5,
+   "equipos": 189,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 3
+  },
+  "comercios": [
+   [
+    "Gaming City",
+    22
+   ],
+   [
+    "Mexx",
+    20
+   ],
+   [
+    "CompraGamer",
+    62
+   ],
+   [
+    "Mercado Libre",
+    3
+   ]
+  ],
+  "internacionales": 5
+ },
+ "monitor 27": {
+  "total": 308,
+  "comparables": 211,
+  "mediana": 350939,
+  "picks": [
+   [
+    "mejor",
+    "https://katech.com.ar/producto/monitor-philips-27-272v8la-55-full-hd/",
+    173420
+   ],
+   [
+    "alt",
+    "https://www.venex.com.ar/monitores/27-a-32-pulgadas/monitor-27-samsung-s3-s30gd-fhd-ips-100hz.html",
+    193999
+   ],
+   [
+    "baja",
+    "https://www.mercadolibre.com.ar/monitor-gamer-benq-zowie-xl2731k-con-pantalla-de-27-panel-tn-165hz-dyac/p/MLA43956915",
+    327259
+   ]
+  ],
+  "excl": {
+   "internacionales": 31,
+   "formato": 0,
+   "usados": 29,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 1,
+   "tipo": 0,
+   "raros": 1,
+   "caros": 35
+  },
+  "comercios": [
+   [
+    "Katech",
+    7
+   ],
+   [
+    "Venex",
+    13
+   ],
+   [
+    "Mexx",
+    29
+   ],
+   [
+    "HardCore Computación",
+    4
+   ],
+   [
+    "CompraGamer",
+    38
+   ],
+   [
+    "Mercado Libre",
+    27
+   ],
+   [
+    "Gaming City",
+    3
+   ],
+   [
+    "The Gamer Shop",
+    5
+   ],
+   [
+    "Gezatek",
+    3
+   ],
+   [
+    "Maximus Gaming",
+    4
+   ],
+   [
+    "SCP Hardstore",
+    15
+   ],
+   [
+    "GoldenTech Store",
+    2
+   ],
+   [
+    "Acuario Insumos",
+    2
+   ],
+   [
+    "Click Gaming",
+    2
+   ],
+   [
+    "Hyper Gaming",
+    3
+   ],
+   [
+    "Noxie Store",
+    1
+   ],
+   [
+    "Dinobyte",
+    4
+   ],
+   [
+    "Carrefour",
+    1
+   ],
+   [
+    "Naldo",
+    3
+   ],
+   [
+    "Cetrogar",
+    1
+   ],
+   [
+    "Fravega",
+    25
+   ],
+   [
+    "ShopGamer",
+    2
+   ],
+   [
+    "OnCity",
+    6
+   ],
+   [
+    "Beings",
+    2
+   ],
+   [
+    "Megatone",
+    2
+   ],
+   [
+    "Slot One",
+    2
+   ],
+   [
+    "Megasoft",
+    1
+   ],
+   [
+    "Authogar",
+    1
+   ],
+   [
+    "Max Tecno",
+    1
+   ],
+   [
+    "Integrados Argentinos",
+    1
+   ],
+   [
+    "Samsung Shop",
+    1
+   ]
+  ],
+  "internacionales": 31
+ },
+ "ddr4 16gb": {
+  "total": 54,
+  "comparables": 35,
+  "mediana": 260219,
+  "picks": [
+   [
+    "mejor",
+    "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
+    221450
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/ddr4-memoria-ram-ddr4-16gb-2666mhz-wicgtyp-con-disipador-gamingcity--det--18821",
+    179550
+   ],
+   [
+    "alt",
+    "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
+    251600
+   ]
+  ],
+  "excl": {
+   "internacionales": 0,
+   "formato": 4,
+   "usados": 0,
+   "equipos": 15,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 0
+  },
+  "comercios": [
+   [
+    "CompraGamer",
+    12
+   ],
+   [
+    "Mexx",
+    13
+   ],
+   [
+    "Gaming City",
+    10
+   ]
+  ],
+  "internacionales": 0
+ },
+ "fuente 650w": {
+  "total": 20,
+  "comparables": 19,
+  "mediana": 89400,
+  "picks": [
+   [
+    "mejor",
+    "https://www.mexx.com.ar/productos-rubro/fuentes-de-poder/51326-fuente-gigabyte-650w-80-plus-silver-plus-blanca.html",
+    79929
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/fuentes-fuente-650w-lnz-zx-650-gz-c-cables-mallados-red-fan--det--15380",
+    47499
+   ],
+   [
+    "alt",
+    "https://compragamer.com/producto/Fuente_ADATA_XPG_650W_80_Plus_Bronze_PYLON_11735",
+    88753
+   ]
+  ],
+  "excl": {
+   "internacionales": 0,
+   "formato": 0,
+   "usados": 0,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 1,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 0
+  },
+  "comercios": [
+   [
+    "Mexx",
+    9
+   ],
+   [
+    "CompraGamer",
+    6
+   ],
+   [
+    "Gaming City",
+    4
+   ]
+  ],
+  "internacionales": 0
+ },
+ "ipad": {
+  "total": 46,
+  "comparables": 19,
+  "mediana": 1332800,
+  "picks": [
+   [
+    "mejor",
+    "https://www.fravega.com/p/apple-ipad-mini-5th-gen-wi-fi-64gb-22724765/",
+    556426
+   ],
+   [
+    "barato",
+    "https://www.fravega.com/p/tableta-apple-ipad-9-7-pulgadas-wifi-32-gb-gris-espacial-20-22816755/",
+    323112
+   ],
+   [
+    "baja",
+    "https://www.megatone.net/producto/apple-ipad-air-de-5a-generacion-109-pulgadas-renovado-a-principios-de-2022_MKT0JICNOC/",
+    827405
+   ]
+  ],
+  "excl": {
+   "internacionales": 13,
+   "formato": 0,
+   "usados": 10,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 2,
+   "caros": 2
+  },
+  "comercios": [
+   [
+    "Fravega",
+    8
+   ],
+   [
+    "Mercado Libre",
+    10
+   ],
+   [
+    "Megatone",
+    1
+   ]
+  ],
+  "internacionales": 13
+ },
+ "mouse inalambrico": {
+  "total": 22,
+  "comparables": 20,
+  "mediana": 42999,
+  "picks": [
+   [
+    "mejor",
+    "https://compragamer.com/producto/Mouse_Logitech_M196_inal_mbrico_Bluetooth_Negro_17135",
+    15250
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/mouse-mouse-inalambrico-logitech-m170-rojo-2-4ghz-1000-dpi-gamingcity--det--5524",
+    12824
+   ],
+   [
+    "escalon",
+    "https://www.gamingcity.com.ar/mouse-mouse-logitech-m317c-inalambrico-negro-1000-dpi-gamingcity--det--6077",
+    25934
+   ]
+  ],
+  "excl": {
+   "internacionales": 0,
+   "formato": 0,
+   "usados": 1,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 1
+  },
+  "comercios": [
+   [
+    "Gaming City",
+    18
+   ],
+   [
+    "CompraGamer",
+    1
+   ],
+   [
+    "Fravega",
+    1
+   ]
+  ],
+  "internacionales": 0
+ },
+ "webcam": {
+  "total": 24,
+  "comparables": 21,
+  "mediana": 161499,
+  "picks": [
+   [
+    "mejor",
+    "https://www.gamingcity.com.ar/webcam-webcam-logitech-brio-100-full-hd-white--det--14779",
+    59849
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/webcam-camara-web-genius-facecam-1000x-hd-720p-gamingcity--det--8217",
+    29924
+   ],
+   [
+    "alt",
+    "https://compragamer.com/producto/Webcam_Redragon_Cyberlens_GW911_4K_Ultra_HD_Dual_Noice_Cancelling_USB_20139",
+    89550
+   ]
+  ],
+  "excl": {
+   "internacionales": 0,
+   "formato": 0,
+   "usados": 1,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 0,
+   "caros": 2
+  },
+  "comercios": [
+   [
+    "Gaming City",
+    12
+   ],
+   [
+    "CompraGamer",
+    9
+   ]
+  ],
+  "internacionales": 0
+ },
+ "silla gamer": {
+  "total": 42,
+  "comparables": 40,
+  "mediana": 454520.5,
+  "picks": [
+   [
+    "mejor",
+    "https://compragamer.com/producto/Silla_Gamer_ADATA_XPG_Nexus_Tela_Impermeable_Black_2D_Peso_MAX_125kg_21501",
+    319990
+   ],
+   [
+    "barato",
+    "https://www.gamingcity.com.ar/sillas-silla-gamer-havit-gc933-negra-reclinable-130---det--17750",
+    217549
+   ],
+   [
+    "alt",
+    "https://compragamer.com/producto/Silla_Gamer_Corsair_TC100_Relaxed_Tela_Negro_2D_Peso_MAX_120kg_15283",
+    472050
+   ]
+  ],
+  "excl": {
+   "internacionales": 0,
+   "formato": 0,
+   "usados": 1,
+   "equipos": 0,
+   "similares": 0,
+   "accesorios": 0,
+   "tipo": 0,
+   "raros": 1,
+   "caros": 0
+  },
+  "comercios": [
+   [
+    "CompraGamer",
+    15
+   ],
+   [
+    "Mexx",
+    12
+   ],
+   [
+    "Gaming City",
+    13
+   ]
+  ],
+  "internacionales": 0
+ }
+}

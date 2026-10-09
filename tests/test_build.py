@@ -28,6 +28,19 @@ class ArmarArtifact(unittest.TestCase):
             self.assertIn(queda, copia)
 
 
+class ArmarArtifactConCss(unittest.TestCase):
+    def test_los_link_a_css_se_meten_adentro_como_style(self):
+        html = ('<title>T</title>\n<link rel="stylesheet" href="css/sitio.css">\n'
+                '<div class="wrap">hola</div>\n')
+        copia = actualizar.armar_artifact(html, {"css/sitio.css": "body{margin:0}\n"}.__getitem__)
+        self.assertIn("<style>\nbody{margin:0}\n</style>", copia)
+        self.assertNotIn("<link", copia)
+
+    def test_no_toca_los_link_a_otros_sitios(self):
+        html = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=X">\n'
+        self.assertEqual(actualizar.armar_artifact(html, {}.__getitem__).strip(), html.strip())
+
+
 class Construir(unittest.TestCase):
     """construir() sobre una copia del index.html real."""
 
@@ -36,7 +49,7 @@ class Construir(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.dir)
         real = (RAIZ / "index.html").read_text(encoding="utf-8")
         (self.dir / "index.html").write_text(real, encoding="utf-8")
-        for ruta in actualizar.JS_SRC.findall(real):
+        for ruta in actualizar.JS_SRC.findall(real) + actualizar.CSS_LINK.findall(real):
             destino = self.dir / ruta
             destino.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(RAIZ / ruta, destino)
