@@ -54,6 +54,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Relevar precios de los productos seguidos
         run: python actualizar.py
 
@@ -127,6 +131,15 @@ jobs:
             echo "indice: $(du -h indice.json | cut -f1)"
           else
             echo "::warning::Sin indice.json: el buscador va a quedar vacio en esta publicacion"
+          fi
+
+      # Si las paginas por busqueda fallan, el sitio y los precios se publican igual.
+      - name: Generar las paginas por busqueda
+        run: |
+          if [ -f indice.json ]; then
+            python generar_paginas.py --indice indice.json --salida _sitio || echo "::warning::No se generaron las paginas por busqueda"
+          else
+            python generar_paginas.py --indice indice.json --salida _sitio
           fi
 
       - uses: actions/upload-pages-artifact@v3

@@ -185,7 +185,13 @@ test("el JSON-LD escapa lo que podria cerrar el script", () => {
 
 test("titulo, descripcion, canonica y social son propios de la pagina", () => {
   const { html } = paginaDe(IDX);
-  assert.match(html, /<title>ddr4 16gb: precios en Argentina, desde \$900 \| La Pichincha<\/title>/);
+  assert.match(html, /<title>ddr4 16gb: precios desde \$900 \| La Pichincha<\/title>/);
+  // Un titulo muy largo se corta en Google: aun con una consulta larga y un precio de siete cifras entra.
+  const larga = { ...IDX, productos: IDX.productos.map(f => [f[0], f[1] * 100000, ...f.slice(2)]) };
+  const largo = paginaDe(larga, "memoria ddr4 16gb 3200mhz");
+  assert.match(largo.html, /<tr data-op/, "la consulta larga tiene que dar una pagina completa");
+  const titulo = (largo.html.match(/<title>(.*?)<\/title>/) || [])[1] || "";
+  assert.ok(titulo.length <= 70, titulo.length + ": " + titulo);
   assert.match(html, /<meta name="description" content="5 opciones de ddr4 16gb en 2 comercios: desde \$900, mediana \$1\.000\./);
   assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/">/);
   assert.match(html, /<meta property="og:image" content="https:\/\/ejemplo\.test\/la-pichincha\/img\/og\.png">/);
