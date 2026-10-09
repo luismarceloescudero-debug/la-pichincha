@@ -26,6 +26,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import historial
+import modelo
 import salud
 
 RAIZ = Path(__file__).resolve().parent
@@ -35,8 +36,8 @@ HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los 
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 # Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
-# url, tienda, via, lista, antes, imagen, sellos. Completa filas de indices viejos.
-FILA_VACIA = ["", 0, "", "", "", 0, 0, "", ""]
+# url, tienda, via, lista, antes, imagen, sellos, modelo. Completa filas de indices viejos.
+FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", ""]
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -313,7 +314,8 @@ def main(argv=None):
     if INDICE.exists():
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
-            fila = list(fila)[:9] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            fila = list(fila)[:10] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            fila[9] = modelo.modelo_de(fila[0])           # las reglas pueden haber cambiado desde ayer
             previo.setdefault(fila[3], []).append(fila)
         # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
         # fuente caida conserva esa hora: no es un precio de hoy. Un indice
@@ -385,7 +387,7 @@ def main(argv=None):
             actuales[(clave, it["url"])] = it["precio"]
             salida.append([it["nombre"], it["precio"], it["url"], clave,
                            it.get("via") or "", lista, propia, it.get("imagen") or "",
-                           it.get("sellos") or ""])
+                           it.get("sellos") or "", modelo.modelo_de(it["nombre"])])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
@@ -405,7 +407,7 @@ def main(argv=None):
                              "segunda": bool(v.get("segunda_opinion"))},
                             **({"relevado": relevado[k]} if relevado.get(k) else {}))
                     for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo"],
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
