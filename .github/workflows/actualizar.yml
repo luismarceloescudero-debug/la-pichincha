@@ -40,21 +40,21 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # El historial vive en su propia rama y no en la cache de Actions, que
       # GitHub puede desalojar.
       - name: Traer el historial de precios
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: historial
           path: historial
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
 
@@ -82,7 +82,7 @@ jobs:
       # si cambia el formato del indice o se suma una tienda, no hay cache que
       # reusar y el paso siguiente rearma el indice solo.
       - name: Recuperar el indice anterior
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: indice.json
           key: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-${{ github.run_id }}
@@ -147,7 +147,7 @@ jobs:
       - name: Dejar lista la app instalable
         run: python publicar_app.py --salida _sitio --indice indice.json || echo "::warning::No se armo la app instalable"
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _sitio
 
@@ -159,4 +159,4 @@ jobs:
       url: ${{ steps.desplegar.outputs.page_url }}
     steps:
       - id: desplegar
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
