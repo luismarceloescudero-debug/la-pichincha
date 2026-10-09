@@ -30,7 +30,9 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | Funciones puras del buscador (`buscador.js`) y de la pagina (`pagina.js`), con tests |
+| `js/` | Funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis de una consulta (`analisis.js`, compartido con las paginas por busqueda), con tests |
+| `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
+| `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular, el indice `/precios/`, `sitemap.xml` y `robots.txt` |
 | `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
@@ -338,6 +340,40 @@ comercio, rubro, solo primera linea y marcadas; se ordenan por descuento,
 ahorro o precio; y se paginan de a 24. Tocar una tarjeta la abre con el detalle
 y de donde sale el precio anterior. La estrella marca ofertas para seguirlas, y
 "Comparar" abre la comparativa de ese producto con sus competidores.
+
+## Paginas por busqueda
+
+Para que Google encuentre el sitio, cada publicacion genera una pagina estatica por busqueda
+popular: `/precios/ssd-1tb/`, `/precios/rtx-5060/`, etc., mas un indice en `/precios/`, un
+`sitemap.xml` y un `robots.txt`. Cada pagina trae, sin necesitar JavaScript: la mejor compra
+con su razon, la mediana, una tabla de hasta 20 opciones, lo que quedo afuera y por que, y
+datos estructurados (`ItemList`, `AggregateOffer` en pesos y migas). El boton "Ver la
+comparativa completa" abre la Comparativa con esa busqueda ya armada.
+
+**Una sola logica.** Las paginas y la Comparativa usan el mismo modulo, `js/analisis.js`, asi que
+dan siempre la misma mejor compra y la misma mediana. `generar_paginas.js` (Node, sin
+dependencias) las escribe y `generar_paginas.py` orquesta, valida la lista y arma el mapa del
+sitio. Una fuente que no se relevo ese dia muestra "precio del D/M", igual que el sitio.
+
+**Agregar una busqueda:** sumar una entrada a `consultas.json` y publicar:
+
+    { "q": "rtx 4070", "nota": "Placas de video: 19 avisos, 9 comparables en 3 comercios" }
+
+`q` mide entre 2 y 60 caracteres; lo que va antes de los dos puntos en `nota` es el grupo en
+el que sale en `/precios/`. Si dos busquedas dan la misma URL, la publicacion se corta y dice
+cuales. Con menos de 5 opciones comparables la pagina dice "hoy no hay opciones suficientes",
+lleva `noindex` y no entra al mapa del sitio.
+
+**Elegir cuales agregar:** en https://mescudero.goatcounter.com, los eventos `busqueda/...` son
+lo que la gente busca y `busqueda_vacia/...` lo que busca y no encuentra (eso, ademas, dice que
+fuente o rubro falta). Las mas buscadas con 8 o mas opciones comparables y 2 o mas comercios
+son las candidatas.
+
+**Dominio:** la base de las URL esta en un solo lugar, `BASE_URL` en `generar_paginas.py`. Con el
+dominio propio se cambia ahi.
+
+**Alta en buscadores** (la hace el dueño con su cuenta): en Google Search Console y en Bing
+Webmaster Tools, agregar el sitio y enviar `<BASE_URL>/sitemap.xml`.
 
 ## Tests
 
