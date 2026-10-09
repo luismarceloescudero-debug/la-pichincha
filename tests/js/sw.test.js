@@ -133,3 +133,16 @@ test("fuera de las navegaciones la URL completa cuenta: indice.json?v=1 no pisa 
   assert.equal(tienda[url("indice.json")].cuerpo, "el indice");
   assert.equal(tienda[url("indice.json?v=1")].cuerpo, "otro");
 });
+
+test("si no se puede guardar una respuesta (por ejemplo una parcial 206) no hay rechazos sin atajar y la persona la recibe igual", async () => {
+  const rechazos = [];
+  const alRechazar = e => rechazos.push(e);
+  process.on("unhandledRejection", alRechazar);
+  const { env } = entorno(() => respuesta("parcial", 206));
+  env.caches.open = async () => ({ match: async () => undefined, put: async () => { throw new TypeError("Partial response (status code 206) is unsupported"); } });
+  const r = await SW.responder(pedido("video.mp4"), env);
+  await new Promise(x => setTimeout(x, 20));
+  process.off("unhandledRejection", alRechazar);
+  assert.equal(r.cuerpo, "parcial");
+  assert.deepEqual(rechazos, []);
+});

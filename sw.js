@@ -37,7 +37,8 @@
     try {
       const enCurso = fetch(pedido);
       // La copia se hace apenas llega, aunque la persona ya haya recibido lo guardado por la demora.
-      enCurso.then(r => { if (r && r.ok) almacen.put(clave, r.clone()); }).catch(() => {});
+      // put falla con respuestas parciales (206) y otras: no se guarda y la persona la recibe igual.
+      enCurso.then(r => { if (r && r.ok) return almacen.put(clave, r.clone()); }).catch(() => {});
       const r = await conLimite(enCurso, limiteMs);
       if (r.status >= 500) return (await guardada()) || r;       // el servidor fallo: no es "red buena"
       return r;                                                  // incluso un 404: no resucita paginas borradas

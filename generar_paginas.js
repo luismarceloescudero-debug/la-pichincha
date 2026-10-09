@@ -69,7 +69,7 @@ const jsonLd = obj => JSON.stringify(obj).replace(/</g, "\\u003c");
    Si el script de GoatCounter no cargo, el clic sigue su camino sin avisar. */
 /* Inicia js/app.js: service worker y aviso de sin conexion con la fecha de los precios de la pagina. */
 const scriptApp = (generado, rel) =>
-  `App.iniciar(window, document, { sw: "${rel}sw.js", sonda: "${rel}manifest.webmanifest", generado: () => ${JSON.stringify(generado)} });`;
+  `App.iniciar(window, document, { sw: "${rel}sw.js", sonda: "${rel}manifest.webmanifest", generado: () => ${jsonLd(generado)} });`;
 
 const SCRIPT_MEDICION = `(function () {
   function alClic(ev) {
