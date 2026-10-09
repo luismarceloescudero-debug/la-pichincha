@@ -284,3 +284,10 @@ test("las fuentes de Google no bloquean los scripts de la pagina ni del indice",
     assert.match(h, /<noscript><link[^>]*fonts\.googleapis\.com\/css2[^>]*><\/noscript>/);
   }
 });
+
+test("la fecha que va dentro del script inline sale escapada, como el JSON-LD", () => {
+  const raro = { ...IDX, generado: "2026-10-09T08:12</script><script>alert(1)//" };
+  const { html } = paginaDe(raro);
+  assert.ok(!html.includes("</script><script>alert(1)"), "el texto crudo cerraria el script y abriria otro");
+  assert.ok(html.includes("alert(1)"), "el texto sigue estando, escapado");
+});
