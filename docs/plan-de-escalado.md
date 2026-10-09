@@ -95,7 +95,7 @@ llegan las primeras 500 visitas organicas por mes.
 
 ## Fase 2: datos que nadie mas tiene (mes 2)
 
-- **F2.1 Identidad de producto por codigo de modelo**: extraer el part number
+- **F2.1 Identidad de producto por codigo de modelo** (hecho, spec 003): extraer el part number
   del nombre con expresiones por rubro (`KF432C16BB/16`, `CT1000P3SSD8`) y
   agrupar el mismo producto entre tiendas **solo** cuando el codigo coincide
   exacto. Agrupar por nombre ya se probo y fallo (README). Medir la cobertura

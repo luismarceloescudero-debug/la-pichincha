@@ -119,6 +119,9 @@ no se sabe si la regla de cada rubro sirve ni donde invertir despues.
 
 - **FR-001**: El sistema DEBE extraer, del nombre de cada aviso de RAM, SSD y placas de video, un codigo
   de modelo cuando el nombre lo trae, con reglas propias de cada rubro.
+- **FR-001a**: Cuando el catalogo de una tienda publica el part number del producto (CompraGamer:
+  `codigo_principal`), ese codigo manda sobre el del nombre, y se le asigna a los avisos de otras tiendas
+  cuyo nombre nombra ese codigo EXACTO (un token entero igual).
 - **FR-002**: El sistema DEBE agrupar avisos de tiendas distintas solo cuando su codigo de modelo coincide
   exacto, despues de normalizar mayusculas, espacios y separadores.
 - **FR-003**: El sistema NO DEBE agrupar por parecido de nombre, de marca, de capacidad ni de codigo
@@ -169,6 +172,9 @@ no se sabe si la regla de cada rubro sirve ni donde invertir despues.
 
 ## Assumptions
 
+- Medido sobre el indice del 2026-10-09: con solo el nombre, 2 a 5% de los avisos de cada rubro tiene codigo y
+  hay 2 grupos; sumando el SKU del catalogo de CompraGamer sube a 13-27% con codigo y 4 grupos. El objetivo
+  de SC-002 (40%) depende de que mas tiendas publiquen su part number.
 - Los nombres de varias tiendas no traen codigo de modelo; para esos avisos la feature no cambia nada. La
   cobertura real puede quedar lejos del objetivo y se publica igual; ampliar la cobertura (por ejemplo con
   una tabla curada de equivalencias) queda para despues y no es parte de esta feature.

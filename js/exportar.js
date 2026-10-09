@@ -97,7 +97,8 @@ function materia(de) {
              archivo: "comparativa-" + normal(CONSULTA).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") };
   if (de === "buscar") {
     const q = ($("#q") || {}).value || "";
-    return { filas: ULTIMA_BUSQUEDA, titulo: q ? `Búsqueda: ${q}` : "La Pichincha", archivo: "busqueda" };
+    // cada aviso va en la descarga, tambien los de las otras tiendas del mismo modelo
+    return { filas: ULTIMA_BUSQUEDA.flatMap(f => [f, ...(OTRAS.get(f) || [])]), titulo: q ? `Búsqueda: ${q}` : "La Pichincha", archivo: "busqueda" };
   }
   const p = porId[de];
   if (p) {

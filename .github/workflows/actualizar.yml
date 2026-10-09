@@ -147,6 +147,11 @@ jobs:
       - name: Dejar lista la app instalable
         run: python publicar_app.py --salida _sitio --indice indice.json || echo "::warning::No se armo la app instalable"
 
+      # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
+      - name: Medir la cobertura por codigo de modelo
+        run: |
+          python cobertura.py indice.json --salida _sitio/cobertura.json --previa https://luismarceloescudero-debug.github.io/la-pichincha/cobertura.json --resumen "$GITHUB_STEP_SUMMARY" || echo "::warning::No se midio la cobertura por modelo"
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _sitio

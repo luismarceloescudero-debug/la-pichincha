@@ -28,10 +28,18 @@ const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR
 /* Lo que Analisis necesita de la "pagina": la busqueda sobre el indice, comercios y marcas. */
 function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {} } = {}) {
   const nombres = idx.productos.map(f => B.normalBusq(f[0]));
+  const otras = new Map();     // fila mas barata de un producto -> las demas tiendas con el mismo codigo
   const marcasRe = B.armarMarcasRe([...(marcas.primera || []), ...(marcas.conocida || [])]);
   return {
     idx, baseUrl, ahora,
-    buscarTodo: q => { const c = B.filtroDe(q); return c ? idx.productos.filter((f, i) => c(nombres[i])) : []; },
+    otras,
+    buscarTodo: q => {
+      const c = B.filtroDe(q);
+      if (!c) return [];
+      const g = B.agruparPorModelo(idx.productos.filter((f, i) => c(nombres[i])));
+      for (const [f, resto] of g.otras) otras.set(f, resto);
+      return g.filas;
+    },
     comercioDe: f => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3],
     colorDe: f => (idx.tiendas[f[3]] || {}).color || "fh",
     marcaDe: nombre => B.marcaDe(nombre, marcasRe),
@@ -54,10 +62,21 @@ function sellosHtml(f, ctx) {
   return s.map(([clase, texto]) => `<span class="sello ${clase}">${esc(texto)}</span>`).join(" ");
 }
 
+/* Las otras tiendas que venden el MISMO modelo (mismo codigo exacto), con su precio y enlace. */
+function tambienEn(f, ctx) {
+  const resto = (ctx.otras && ctx.otras.get(f)) || [];
+  if (!resto.length) return "";
+  const links = resto.map(o => {
+    const txt = `${esc(ctx.comercioDe(o))} ${pesos(o[1])}`;
+    return esUrl(o[2]) ? `<a href="${esc(o[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(o[0]) || "otro")}">${txt}</a>` : txt;
+  });
+  return `<span class="mismo">También en ${links.join(" · ")}</span>`;
+}
+
 function filaHtml(f, ctx) {
-  const nombre = esUrl(f[2])
+  const nombre = (esUrl(f[2])
     ? `<a href="${esc(f[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a>`
-    : esc(f[0]);
+    : esc(f[0])) + tambienEn(f, ctx);
   return `<tr data-op><td>${nombre}</td>` +
     `<td>${esc(ctx.comercioDe(f))}</td><td class="num">${pesos(f[1])}</td><td>${sellosHtml(f, ctx)}</td></tr>`;
 }
@@ -145,6 +164,7 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 .wrap td.num{text-align:right;font-family:var(--font-mono);white-space:nowrap}
 .wrap th:nth-child(3){text-align:right}
 .wrap .nota{margin-top:34px;color:var(--ink-3);font-size:.82rem}
+.wrap .mismo{display:block;margin-top:4px;font-size:.78rem;color:var(--ink-3)}
 </style>
 </head>`;
 }
@@ -195,8 +215,11 @@ function renderPagina(consulta, analisis, ctx) {
   const afuera = A.partesExclusion(analisis.excl);
   const intl = analisis.internacionales.map(m => m.f).sort((a, b) => a[1] - b[1]).slice(0, MAX_INTERNACIONALES);
 
+  const avisos = filas.length + filas.reduce((n, f) => n + ((ctx.otras && ctx.otras.get(f)) || []).length, 0);
+  const conteo = avisos > filas.length ? `${filas.length} productos en ${avisos} avisos` : `${filas.length} opciones`;
+
   const titulo = `${q}: precios desde ${pesos(desde)} | La Pichincha`;
-  const descripcion = `${filas.length} opciones de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
+  const descripcion = `${conteo} de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
     `mediana ${pesos(analisis.med)}. Mejor compra y precios de ${cuando}.`;
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
@@ -206,7 +229,7 @@ function renderPagina(consulta, analisis, ctx) {
 <div class="wrap">
   <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
   <h1>${esc(q)}: precios y qué conviene comprar</h1>
-  <p class="sub">Comparamos ${filas.length} opciones de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
+  <p class="sub">Comparamos ${conteo} de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
 
   <section class="panel">
     <h2>Mejor compra</h2>
