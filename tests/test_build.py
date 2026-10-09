@@ -12,6 +12,14 @@ import actualizar
 RAIZ = Path(__file__).resolve().parent.parent
 
 
+class VerificacionDeGoogle(unittest.TestCase):
+    """El dueño verifico la propiedad en Search Console con esta etiqueta: si se borra, se pierde."""
+
+    def test_index_conserva_la_meta_de_verificacion_exacta(self):
+        html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(html.count('<meta name="google-site-verification" content="V8UemQwZ_agyRNp3aKrHeSCxcCjpsE9nTIMLrNGMVcQ">'), 1)
+
+
 class ArmarArtifact(unittest.TestCase):
     def test_saca_lo_que_solo_va_en_la_web_y_mete_los_scripts(self):
         html = ('<!doctype html>\n<html lang="es">\n<head>\n<!-- solo-web -->\n<meta charset="utf-8">\n'
