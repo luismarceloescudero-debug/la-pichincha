@@ -147,6 +147,23 @@ jobs:
       - name: Dejar lista la app instalable
         run: python publicar_app.py --salida _sitio --indice indice.json || echo "::warning::No se armo la app instalable"
 
+      # El feed RSS de ofertas y la lista para Telegram. Si falla, el sitio sale igual.
+      - name: Armar el feed de ofertas
+        run: |
+          if [ -f indice.json ]; then
+            node generar_feed.js --indice indice.json --salida _sitio || echo "::warning::No se armo el feed de ofertas"
+          fi
+
+      # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Solo la corrida
+      # programada publica, para no repetir mensajes en cada push.
+      - name: Publicar las pichinchas del dia en Telegram
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python publicar_telegram.py _sitio/ofertas.json
+
       # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
       - name: Medir la cobertura por codigo de modelo
         run: |

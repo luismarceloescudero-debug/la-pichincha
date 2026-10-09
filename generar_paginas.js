@@ -132,6 +132,7 @@ function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, rel = 
 <title>${esc(titulo)}</title>
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${esc(canonica)}">
+<link rel="alternate" type="application/rss+xml" title="Ofertas de La Pichincha" href="${esc(baseUrl)}/ofertas.xml">
 ${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta property="og:type" content="website">
 <meta property="og:site_name" content="La Pichincha">
 <meta property="og:locale" content="es_AR">

@@ -331,3 +331,9 @@ test("sin codigos repetidos la pagina queda como siempre", () => {
   assert.ok(!html.includes("También en"));
   assert.ok(!/productos en \d+ avisos/.test(html));
 });
+
+test("las paginas por busqueda anuncian el feed de ofertas con una URL absoluta", () => {
+  const { ctx, analisis } = armar(IDX, "ddr4 16gb");
+  const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  assert.match(html, /<link rel="alternate" type="application\/rss\+xml" title="Ofertas de La Pichincha" href="https:\/\/ejemplo\.test\/la-pichincha\/ofertas\.xml">/);
+});

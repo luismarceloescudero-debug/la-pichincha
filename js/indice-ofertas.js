@@ -21,14 +21,9 @@ function asegurarIndice(forzar) {
 }
 
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
-   Dos señales distintas:
-   1. Bajas propias: lo que valia en el relevamiento anterior contra lo que vale
-      hoy. No depende de lo que publique la tienda y no se puede inflar.
-   2. Rebajas publicadas: el precio tachado del comercio. Solo Gaming City y
-      ComparaYa lo usan como rebaja real, y se acota entre 15% y 60% porque
-      arriba de ahi el precio anterior suele estar inventado. */
-const PISO_OFERTA = 15000, DESCUENTO_MIN = 0.15, DESCUENTO_MAX = 0.6;
-const BAJA_MIN_PCT = 0.03, BAJA_MIN_PESOS = 1000;
+   Que es una oferta (bajas propias y rebajas publicadas) vive en js/ofertas.js, compartido con el
+   feed RSS y el canal de Telegram. */
+const { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
 const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, marcadas: false, pagina: 1 };
 let OF_ACTUAL = [];
@@ -37,22 +32,6 @@ const leerEstrellas = () => {
   try { return new Set(JSON.parse(localStorage.getItem("estrellas") || "[]")); } catch (e) { return new Set(); }
 };
 let ESTRELLAS = leerEstrellas();
-
-function calcularOfertas(idx) {
-  const propias = [], publicadas = [];
-  for (const f of idx.productos) {
-    const ayer = f[6] || 0;
-    if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer >= BAJA_MIN_PCT) {
-      propias.push(f);
-      continue;                       // una baja propia ya es noticia: no la repito abajo
-    }
-    const lista = f[5] || 0;
-    if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
-    const off = 1 - f[1] / lista;
-    if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) publicadas.push(f);
-  }
-  return { propias, publicadas };     // sin recortar: la vista filtra y pagina
-}
 
 function listaOfertas() {
   if (!OFERTAS) return [];
