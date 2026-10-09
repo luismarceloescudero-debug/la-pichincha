@@ -121,7 +121,7 @@ jobs:
         run: |
           mkdir -p _sitio
           cp index.html _sitio/
-          cp -r img js _sitio/
+          cp -r img js css _sitio/
           if [ -f indice.json ]; then
             cp indice.json _sitio/
             echo "indice: $(du -h indice.json | cut -f1)"
