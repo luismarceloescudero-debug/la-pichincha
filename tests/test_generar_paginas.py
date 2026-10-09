@@ -120,6 +120,17 @@ class Generar(unittest.TestCase):
         self.assertFalse((self.salida / "precios").exists())
 
 
+class ListaReal(unittest.TestCase):
+    """La consultas.json que se publica: si alguien la rompe, falla CI y no la publicacion."""
+
+    def test_es_valida_tiene_slugs_unicos_y_grupo_en_cada_nota(self):
+        lista = generar_paginas.cargar_consultas()
+        self.assertGreaterEqual(len(lista), 40)
+        self.assertEqual(len({c["slug"] for c in lista}), len(lista))
+        for c in lista:
+            self.assertRegex(c["nota"], r"^[^:]+: ", c["q"])
+
+
 class CargarConsultas(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())

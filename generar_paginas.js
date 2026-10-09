@@ -174,7 +174,7 @@ function renderPagina(consulta, analisis, ctx) {
   const afuera = A.partesExclusion(analisis.excl);
   const intl = analisis.internacionales.map(m => m.f).sort((a, b) => a[1] - b[1]).slice(0, MAX_INTERNACIONALES);
 
-  const titulo = `${q}: precios en Argentina, desde ${pesos(desde)} | La Pichincha`;
+  const titulo = `${q}: precios desde ${pesos(desde)} | La Pichincha`;
   const descripcion = `${filas.length} opciones de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
     `mediana ${pesos(analisis.med)}. Mejor compra y precios de ${cuando}.`;
 

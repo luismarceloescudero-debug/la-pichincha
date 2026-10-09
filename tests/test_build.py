@@ -1,5 +1,6 @@
 import io
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -39,6 +40,14 @@ class ArmarArtifactConCss(unittest.TestCase):
     def test_no_toca_los_link_a_otros_sitios(self):
         html = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=X">\n'
         self.assertEqual(actualizar.armar_artifact(html, {}.__getitem__).strip(), html.strip())
+
+
+class PaginaPrincipal(unittest.TestCase):
+    def test_enlaza_al_indice_de_precios_sin_depender_de_scripts(self):
+        html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        # Fuera de los <script>: un buscador que no ejecuta JavaScript tiene que verlo.
+        sin_scripts = re.sub(r"<script.*?</script>", "", html, flags=re.S)
+        self.assertIn('<a href="precios/">', sin_scripts)
 
 
 class Construir(unittest.TestCase):
