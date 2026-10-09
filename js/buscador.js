@@ -60,6 +60,24 @@
     });
   }
 
+  /* Que tan reconocida es la marca: 2 primera linea, 1 conocida, 0 sin reconocer. Es juicio
+     editorial (la lista esta en datos.json): lo que no esta en ninguna lista no se castiga,
+     solo no se destaca. Devuelve una funcion con memoria. */
+  function crearNivelMarca(marcas) {
+    const re = lista => lista && lista.length ? new RegExp("\\b(" + lista.map(escaparRe).join("|") + ")\\b") : /$^/;
+    const primera = re((marcas || {}).primera), conocida = re((marcas || {}).conocida);
+    const memo = new Map();
+    return nombre => {
+      let v = memo.get(nombre);
+      if (v === undefined) {
+        const n = normal(nombre);
+        v = primera.test(n) ? 2 : conocida.test(n) ? 1 : 0;
+        memo.set(nombre, v);
+      }
+      return v;
+    };
+  }
+
   const ALIAS_MARCA = { xpg: "adata", gskill: "g.skill", tplink: "tp-link", "western digital": "wd" };
   const armarMarcasRe = lista => lista.map(m => [m, new RegExp("\\b" + escaparRe(m) + "\\b")]);
 
@@ -149,7 +167,7 @@
   }
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe };
+                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
 })(this);

@@ -9,14 +9,20 @@ El analisis de cada consulta lo hace js/analisis.js, el mismo modulo que usa la 
 del sitio, asi que pagina y comparativa dan siempre lo mismo.
 """
 
+import argparse
 import json
 import re
+import subprocess
+import sys
+import tempfile
 import unicodedata
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 CONSULTAS = RAIZ / "consultas.json"
 LARGO_MIN, LARGO_MAX = 2, 60
+# Unico lugar con el dominio: con el .com.ar (F1.4) se cambia aca y se reenvia el sitemap.
+BASE_URL = "https://luismarceloescudero-debug.github.io/la-pichincha"
 
 
 def slug(consulta):
@@ -46,3 +52,34 @@ def cargar_consultas(ruta=CONSULTAS):
         vistos[s] = q
         salida.append({"q": q, "nota": e.get("nota", ""), "slug": s})
     return salida
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Genera las paginas por busqueda popular.")
+    ap.add_argument("--indice", default=str(RAIZ / "indice.json"))
+    ap.add_argument("--consultas", default=str(CONSULTAS))
+    ap.add_argument("--salida", default=str(RAIZ / "_sitio"))
+    ap.add_argument("--base-url", default=BASE_URL)
+    args = ap.parse_args(argv)
+
+    consultas = cargar_consultas(args.consultas)      # una lista invalida corta antes de generar nada
+    with tempfile.TemporaryDirectory() as tmp:
+        validadas = Path(tmp) / "consultas-validadas.json"
+        validadas.write_text(json.dumps(consultas, ensure_ascii=False), encoding="utf-8")
+        hecho = subprocess.run(
+            ["node", str(RAIZ / "generar_paginas.js"), "--indice", args.indice, "--consultas", str(validadas),
+             "--salida", args.salida, "--base-url", args.base_url, "--datos", str(RAIZ / "datos.json")],
+            capture_output=True, text=True, encoding="utf-8")
+    sys.stdout.write(hecho.stdout)
+    if hecho.returncode:
+        sys.stderr.write(hecho.stderr)
+        return hecho.returncode
+    if Path(args.indice).exists():
+        faltan = [c["slug"] for c in consultas if not (Path(args.salida) / "precios" / c["slug"] / "index.html").exists()]
+        if faltan:
+            raise RuntimeError("no se generaron las paginas de: " + ", ".join(faltan))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

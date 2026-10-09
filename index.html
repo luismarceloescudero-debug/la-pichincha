@@ -1122,20 +1122,7 @@ async function compararConsulta(q) {
    Es juicio editorial y esta en datos.json, no en el indice: ninguna tienda
    publica esto. Lo que no esta en la lista no se castiga, solo no se destaca. */
 const MARCAS = DATOS.marcas || { primera: [], conocida: [] };
-const reMarca = lista => lista.length
-  ? new RegExp("\\b(" + lista.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\b")
-  : /$^/;
-const RE_PRIMERA = reMarca(MARCAS.primera || []), RE_CONOCIDA = reMarca(MARCAS.conocida || []);
-const _niv = new Map();
-const nivelMarca = nombre => {
-  let v = _niv.get(nombre);
-  if (v === undefined) {
-    const n = normal(nombre);
-    v = RE_PRIMERA.test(n) ? 2 : RE_CONOCIDA.test(n) ? 1 : 0;
-    _niv.set(nombre, v);
-  }
-  return v;
-};
+const nivelMarca = Buscador.crearNivelMarca(MARCAS);
 
 const ORDENES = [
   { id: "recomendado", eti: "Recomendado" },
@@ -1560,16 +1547,7 @@ function marcarConsulta() {
 
 /* ---- Vistas ---- */
 function bannerConsulta() {
-  const A = ANALISIS, ex = A.excl, partes = [];
-  if (ex.internacionales) partes.push(`${ex.internacionales} compra${ex.internacionales > 1 ? "s" : ""} internacional${ex.internacionales > 1 ? "es" : ""} (envío desde el exterior)`);
-  if (ex.formato) partes.push(`${ex.formato} de notebook`);
-  if (ex.equipos) partes.push(`${ex.equipos} equipos completos (notebooks, PCs, combos)`);
-  if (ex.similares) partes.push(`${ex.similares} que dicen «simil» y no son lo que buscás`);
-  if (ex.accesorios) partes.push(`${ex.accesorios} accesorios (cables, adaptadores, soportes)`);
-  if (ex.tipo) partes.push(`${ex.tipo} de otro tipo de producto`);
-  if (ex.usados) partes.push(`${ex.usados} usados u outlet`);
-  if (ex.raros) partes.push(`${ex.raros} muy por debajo del resto y sin marca conocida`);
-  if (ex.caros) partes.push(`${ex.caros} que cuestan más del triple (suelen ser equipos completos)`);
+  const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
   return `<div class="consulta-activa"><span class="txt">${icono("lupa")} Armado para tu búsqueda <b>«${esc(CONSULTA)}»</b>:
     ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}</span>
     <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button>

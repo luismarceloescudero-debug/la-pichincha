@@ -56,6 +56,17 @@ test("el ranking de comercios cuenta cada comercio por separado", () => {
   assert.deepEqual(r.comercios.map(c => [c.nom, c.n]).sort(), [["CompraGamer", 2], ["Gaming City", 1], ["Mexx", 2]]);
 });
 
+test("partesExclusion dice en español que quedo afuera, en orden y en singular o plural", () => {
+  const excl = { internacionales: 1, formato: 0, equipos: 135, similares: 4, accesorios: 0, tipo: 0, usados: 0, raros: 0, caros: 4 };
+  assert.deepEqual(A.partesExclusion(excl), [
+    "1 compra internacional (envío desde el exterior)",
+    "135 equipos completos (notebooks, PCs, combos)",
+    "4 que dicen «simil» y no son lo que buscás",
+    "4 que cuestan más del triple (suelen ser equipos completos)"]);
+  assert.match(A.partesExclusion({ internacionales: 8 })[0], /^8 compras internacionales/);
+  assert.deepEqual(A.partesExclusion({}), []);
+});
+
 test("sin resultados devuelve null", () => {
   assert.equal(A.analizarConsulta("zzzxxy", ctx), null);
 });

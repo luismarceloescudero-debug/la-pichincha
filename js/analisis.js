@@ -112,7 +112,24 @@
            primeras: base.filter(m => m.niv === 2) };
 }
 
-  const api = { analizarConsulta };
+  /* Que quedo afuera de la comparativa, en palabras. Lo usan el cartel de la Comparativa
+     y las paginas por busqueda: el mismo texto en los dos lados. */
+  function partesExclusion(ex) {
+    const n = (k, uno, varios) => ex[k] ? `${ex[k]} ${ex[k] > 1 ? varios : uno}` : null;
+    return [
+      n("internacionales", "compra internacional (envío desde el exterior)", "compras internacionales (envío desde el exterior)"),
+      ex.formato ? `${ex.formato} de notebook` : null,
+      ex.equipos ? `${ex.equipos} equipos completos (notebooks, PCs, combos)` : null,
+      ex.similares ? `${ex.similares} que dicen «simil» y no son lo que buscás` : null,
+      ex.accesorios ? `${ex.accesorios} accesorios (cables, adaptadores, soportes)` : null,
+      ex.tipo ? `${ex.tipo} de otro tipo de producto` : null,
+      ex.usados ? `${ex.usados} usados u outlet` : null,
+      ex.raros ? `${ex.raros} muy por debajo del resto y sin marca conocida` : null,
+      ex.caros ? `${ex.caros} que cuestan más del triple (suelen ser equipos completos)` : null,
+    ].filter(Boolean);
+  }
+
+  const api = { analizarConsulta, partesExclusion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Analisis = api;
 })(this);

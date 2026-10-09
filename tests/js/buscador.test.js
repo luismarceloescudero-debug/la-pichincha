@@ -74,6 +74,15 @@ test("en recomendado las compras internacionales van despues de las comparables"
   assert.deepEqual(nombres(B.ordenar(filas, 900, "precio", nivel)), ["Kingston A", "Kingston B", "Otra C", "Vieja D"]);
 });
 
+test("crearNivelMarca: 2 primera linea, 1 conocida, 0 sin reconocer, con palabra entera", () => {
+  const nivel = B.crearNivelMarca({ primera: ["kingston", "xpg"], conocida: ["hiksemi"] });
+  assert.equal(nivel("Memoria KINGSTON Fury 16GB"), 2);
+  assert.equal(nivel("Memoria Hiksemi Hiker"), 1);
+  assert.equal(nivel("Memoria generica"), 0);
+  assert.equal(nivel("Memoria Kingstonxyz"), 0);
+  assert.equal(B.crearNivelMarca({})("Kingston"), 0);
+});
+
 test("la marca es la primera que aparece, con alias", () => {
   const re = B.armarMarcasRe(["intel", "hp", "kingston", "xpg", "western digital"]);
   assert.equal(B.marcaDe("Notebook HP Intel Core i5", re), "hp");
