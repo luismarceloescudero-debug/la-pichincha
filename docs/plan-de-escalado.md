@@ -114,7 +114,7 @@ esta agrupado por codigo y hay 30 dias de serie.
 
 ## Fase 3: volver y cobrar (mes 3)
 
-- **F3.1 Canal de Telegram automatico** "Pichinchas del dia", publicado por la
+- **F3.1 Canal de Telegram automatico** (RSS hecho; Telegram listo e inactivo hasta que el dueño cree el bot, spec 006) "Pichinchas del dia", publicado por la
   misma Action con la API de bots, y un RSS de ofertas como archivo estatico.
   Ninguno de los dos necesita backend.
 - **F3.2 Monetizacion**: links de afiliado de Mercado Libre (programa lanzado

@@ -31,6 +31,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
 | `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
 | `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular, el indice `/precios/`, `sitemap.xml` y `robots.txt` |
@@ -268,6 +269,27 @@ Agrupar el mismo producto entre tiendas por el nombre. Con solo el nombre no
 alcanza: la prueba junto 145 pendrives distintos bajo la clave "128gb" y metio
 una notebook entre los SSD de 480GB. Lo que si funciona es el codigo de modelo
 exacto (ver abajo).
+
+## Canal de ofertas: RSS y Telegram
+
+Las ofertas del dia salen por dos canales, sin backend:
+
+- **`ofertas.xml`** (RSS 2.0, archivo estatico): hasta 20 entradas, primero las bajas
+  propias (del historial) y despues las rebajas publicadas, cada grupo por descuento. Cada
+  entrada dice el precio, cuanto bajo, el comercio, el enlace a la tienda y la hora de los
+  precios. Las compras internacionales y los enlaces que no son `http(s)` no entran. El
+  sitio lo anuncia en el `<head>` con `rel="alternate"`. Lo arma `generar_feed.js`, que
+  tambien escribe `ofertas.json` (las 10 mejores) para Telegram.
+- **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
+  las 10 mejores y el enlace al sitio. **Esta apagado hasta que se configure**: hay que
+  crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
+  `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el repo (Settings > Secrets and variables >
+  Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
+  (no en cada push), y si Telegram falla el sitio sale igual. El token nunca se imprime.
+
+Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el feed y el
+canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
+rotulan.
 
 ## Serie de precios
 

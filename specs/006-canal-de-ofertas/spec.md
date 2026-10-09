@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-09
 
-**Status**: Draft
+**Status**: Implemented (Telegram inactivo hasta cargar los secretos)
 
 **Input**: Fase 3, F3.1 de docs/plan-de-escalado.md: "Canal de Telegram automatico 'Pichinchas del dia', publicado por la misma Action con la API de bots, y un RSS de ofertas como archivo estatico. Ninguno de los dos necesita backend." Regla fija (F3.2): el orden nunca depende de comisiones; todo se rotula.
 
