@@ -20,6 +20,8 @@ const MIN_COMPARABLES = 5;     // debajo de esto la pagina es fina: no se indexa
 const MAX_FILAS = 20;
 const MAX_INTERNACIONALES = 5;
 
+// Las URL de los avisos vienen de terceros: solo se enlaza http(s), nunca javascript: ni data:.
+const esUrl = u => /^https?:\/\//i.test(String(u));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR");
 
@@ -53,7 +55,10 @@ function sellosHtml(f, ctx) {
 }
 
 function filaHtml(f, ctx) {
-  return `<tr data-op><td><a href="${esc(f[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a></td>` +
+  const nombre = esUrl(f[2])
+    ? `<a href="${esc(f[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a>`
+    : esc(f[0]);
+  return `<tr data-op><td>${nombre}</td>` +
     `<td>${esc(ctx.comercioDe(f))}</td><td class="num">${pesos(f[1])}</td><td>${sellosHtml(f, ctx)}</td></tr>`;
 }
 
@@ -77,10 +82,12 @@ const SCRIPT_MEDICION = `(function () {
 function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
   const base = ctx.baseUrl;
   const canonica = `${base}/precios/${consulta.slug}/`;
-  const oferta = f => ({ "@type": "Offer", price: f[1], priceCurrency: "ARS", url: f[2] });
+  // Un precio que no se pudo verificar hoy lo dice tambien aca, no solo en la pagina (FR-017).
+  const oferta = f => ({ "@type": "Offer", price: f[1], priceCurrency: "ARS", url: f[2],
+    ...(viejoDe(f, ctx) ? { description: viejoDe(f, ctx) } : {}) });
   return { "@context": "https://schema.org", "@graph": [
-    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: filas.length,
-      itemListElement: filas.slice(0, MAX_FILAS).map((f, i) => ({ "@type": "ListItem", position: i + 1,
+    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: Math.min(filas.filter(f => esUrl(f[2])).length, MAX_FILAS),
+      itemListElement: filas.filter(f => esUrl(f[2])).slice(0, MAX_FILAS).map((f, i) => ({ "@type": "ListItem", position: i + 1,
         item: { "@type": "Product", name: f[0], url: f[2], offers: oferta(f) } })) },
     { "@type": "Product", name: consulta.q, image: `${base}/img/og.png`, url: canonica,
       offers: { "@type": "AggregateOffer", lowPrice: desde, highPrice: hasta, offerCount: filas.length, priceCurrency: "ARS" } },
@@ -188,7 +195,7 @@ function renderPagina(consulta, analisis, ctx) {
 
   <section class="panel">
     <h2>Mejor compra</h2>
-    <p><a href="${esc(mejor[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(mejor[0]) || "otro")}"><b>${esc(mejor[0])}</b></a> · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
+    <p>${esUrl(mejor[2]) ? `<a href="${esc(mejor[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(mejor[0]) || "otro")}"><b>${esc(mejor[0])}</b></a>` : `<b>${esc(mejor[0])}</b>`} · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
     <p class="sub">${esc(analisis.picks[0].razon)}</p>
   </section>
 
