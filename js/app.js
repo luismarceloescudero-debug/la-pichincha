@@ -44,9 +44,10 @@
       let reloj;
       const limite = new Promise((_, rechazar) => { reloj = ventana.setTimeout(() => rechazar(new Error("sin respuesta")), LIMITE_SONDA_MS); });
       try {
-        await Promise.race([ventana.fetch(opc.sonda, { method: "HEAD", cache: "no-store" }), limite]);
+        const r = await Promise.race([ventana.fetch(opc.sonda, { method: "HEAD", cache: "no-store" }), limite]);
         ventana.clearTimeout(reloj);
-        ocultarAviso();
+        if (r && r.ok === false) mostrarAviso();    // un 503 de un proxy o de un portal no prueba que haya internet
+        else ocultarAviso();
       } catch (e) {
         mostrarAviso();
       }
@@ -68,10 +69,19 @@
       medir("abierta");
     }
 
+    /* El aviso no espera al evento load: este aguarda a TODOS los recursos, incluidas las fuentes y la
+       analitica de terceros, y sin conexion eso demora. Con la pagina ya leida alcanza para probar la red;
+       y si el navegador ya sabe que no hay conexion, el aviso sale al instante. */
+    function alLeerLaPagina() {
+      if (ventana.navigator && ventana.navigator.onLine === false) mostrarAviso();
+      comprobar();
+    }
+    if (documento.readyState === "loading") documento.addEventListener("DOMContentLoaded", alLeerLaPagina);
+    else alLeerLaPagina();
+
     ventana.addEventListener("load", () => {
       const sw = ventana.navigator && ventana.navigator.serviceWorker;
       if (sw) Promise.resolve(sw.register(opc.sw)).catch(() => {});
-      comprobar();
       if (enModoApp()) medirApertura();
     });
     ventana.addEventListener("offline", mostrarAviso);

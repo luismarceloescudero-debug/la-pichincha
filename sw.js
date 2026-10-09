@@ -18,6 +18,8 @@
   const CASCARA = ["./", "index.html", "css/sitio.css", "js/buscador.js", "js/pagina.js", "js/analisis.js", "js/app.js",
     "manifest.webmanifest", "sin-red.html", "img/icono-192.png", "img/icono-512.png", "img/apple-touch-icon.png", "indice.json"];
 
+  const sinBusqueda = u => { const x = new URL(u); x.search = ""; x.hash = ""; return x.href; };
+
   const conLimite = (promesa, ms) => new Promise((resolver, rechazar) => {
     const t = setTimeout(() => rechazar(new Error("la red no respondio en " + ms + " ms")), ms);
     promesa.then(r => { clearTimeout(t); resolver(r); }, e => { clearTimeout(t); rechazar(e); });
@@ -28,11 +30,14 @@
     const { caches, fetch, origen, base, cache = CACHE, limiteMs = LIMITE_MS } = env;
     if (pedido.method !== "GET" || new URL(pedido.url).origin !== origen) return null;
     const almacen = await caches.open(cache);
-    const guardada = () => almacen.match(pedido);
+    // Una navegacion se guarda sin su "?q=...": la busqueda la lee el navegador de la URL, asi un link
+    // compartido abre sin red la misma pagina, y las busquedas distintas no llenan la cache de copias.
+    const clave = pedido.mode === "navigate" ? sinBusqueda(pedido.url) : pedido;
+    const guardada = () => almacen.match(clave);
     try {
       const enCurso = fetch(pedido);
       // La copia se hace apenas llega, aunque la persona ya haya recibido lo guardado por la demora.
-      enCurso.then(r => { if (r && r.ok) almacen.put(pedido, r.clone()); }).catch(() => {});
+      enCurso.then(r => { if (r && r.ok) almacen.put(clave, r.clone()); }).catch(() => {});
       const r = await conLimite(enCurso, limiteMs);
       if (r.status >= 500) return (await guardada()) || r;       // el servidor fallo: no es "red buena"
       return r;                                                  // incluso un 404: no resucita paginas borradas
@@ -68,10 +73,11 @@
   const api = { responder, precargar, limpiar, CASCARA, VERSION, CACHE, LIMITE_MS };
   if (typeof module === "object" && module.exports) { module.exports = api; return; }
 
-  // En el navegador: el service worker de verdad.
+  // En el navegador: el service worker de verdad. Al instalar se pide a la red saltando la cache HTTP: lo
+  // que se guarda es de esta version, no una copia de hace diez minutos.
   const sw = raiz;
   sw.addEventListener("install", ev => {
-    ev.waitUntil(sw.caches.open(CACHE).then(c => precargar(c, f => fetch(f), sw.registration.scope)).then(() => sw.skipWaiting()));
+    ev.waitUntil(sw.caches.open(CACHE).then(c => precargar(c, f => fetch(f, { cache: "reload" }), sw.registration.scope)).then(() => sw.skipWaiting()));
   });
   sw.addEventListener("activate", ev => {
     ev.waitUntil(limpiar(sw.caches, CACHE).then(() => sw.clients.claim()));

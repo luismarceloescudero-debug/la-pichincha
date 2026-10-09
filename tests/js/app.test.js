@@ -38,17 +38,18 @@ test("un indice viejo que trae solo la fecha tambien se entiende", () => {
 
 // ---- El entorno simulado: ventana, documento y red ----
 
-function entorno({ serviceWorker = true, sonda = "ok", standalone = false, goatcounter = true, generado = "2026-10-09T08:12-03:00" } = {}) {
-  const escuchas = {}, temporizadores = [], registros = [], eventos = [];
+function entorno({ serviceWorker = true, sonda = "ok", standalone = false, goatcounter = true, generado = "2026-10-09T08:12-03:00", onLine = true, listo = "loading" } = {}) {
+  const escuchas = {}, escuchasDoc = {}, temporizadores = [], registros = [], eventos = [];
   const aviso = { hidden: true, textContent: "", dataset: {} };
   const ventana = {
-    navigator: serviceWorker ? { serviceWorker: { register: async (ruta) => { registros.push(ruta); } } } : {},
+    navigator: serviceWorker ? { onLine, serviceWorker: { register: async (ruta) => { registros.push(ruta); } } } : { onLine },
     addEventListener: (tipo, fn) => { escuchas[tipo] = fn; },
     matchMedia: () => ({ matches: standalone }),
     fetch: async (url, opciones) => {
       ventana.pedidos.push({ url, ...opciones });
       if (sonda === "falla") throw new TypeError("sin red");
       if (sonda === "cuelga") return new Promise(() => {});
+      if (sonda === "503") return { ok: false, status: 503 };
       return { ok: true };
     },
     pedidos: [],
@@ -57,9 +58,10 @@ function entorno({ serviceWorker = true, sonda = "ok", standalone = false, goatc
     sessionStorage: (() => { const m = {}; return { getItem: k => m[k] ?? null, setItem: (k, v) => { m[k] = v; } }; })(),
     goatcounter: goatcounter ? { count: e => eventos.push(e.path) } : undefined,
   };
-  const documento = { getElementById: id => id === "sin-red" ? aviso : null };
+  const documento = { readyState: listo, getElementById: id => id === "sin-red" ? aviso : null,
+    addEventListener: (tipo, fn) => { escuchasDoc[tipo] = fn; } };
   const app = App.iniciar(ventana, documento, { sw: "sw.js", sonda: "manifest.webmanifest", generado: () => generado, ahora: () => AHORA });
-  return { ventana, documento, aviso, escuchas, temporizadores, registros, eventos, app };
+  return { ventana, documento, aviso, escuchas, escuchasDoc, temporizadores, registros, eventos, app };
 }
 const esperar = () => new Promise(r => setImmediate(r));
 
@@ -83,8 +85,8 @@ test("sin soporte de service worker no hay errores ni aviso", async () => {
 // ---- El aviso se muestra solo cuando de verdad no hay conexion ----
 
 test("con conexion el aviso no aparece", async () => {
-  const { escuchas, aviso, ventana } = entorno({ sonda: "ok" });
-  escuchas.load();
+  const { escuchasDoc, aviso, ventana } = entorno({ sonda: "ok" });
+  escuchasDoc.DOMContentLoaded();
   await esperar(); await esperar();
   assert.equal(aviso.hidden, true);
   assert.equal(ventana.pedidos[0].method, "HEAD", "el HEAD llega a la red: el service worker no lo atiende");
@@ -92,16 +94,16 @@ test("con conexion el aviso no aparece", async () => {
 });
 
 test("si el pedido de prueba falla, aparece el aviso con la fecha de los precios", async () => {
-  const { escuchas, aviso } = entorno({ sonda: "falla" });
-  escuchas.load();
+  const { escuchasDoc, aviso } = entorno({ sonda: "falla" });
+  escuchasDoc.DOMContentLoaded();
   await esperar(); await esperar();
   assert.equal(aviso.hidden, false);
   assert.match(aviso.textContent, /Sin conexión.*hoy 08:12/);
 });
 
 test("si el pedido de prueba no responde en 5 segundos tambien aparece", async () => {
-  const { escuchas, aviso, temporizadores } = entorno({ sonda: "cuelga" });
-  escuchas.load();
+  const { escuchasDoc, aviso, temporizadores } = entorno({ sonda: "cuelga" });
+  escuchasDoc.DOMContentLoaded();
   await esperar();
   const limite = temporizadores.find(t => t.ms === 5000);
   assert.ok(limite, "hay un limite de 5 s");
@@ -166,4 +168,34 @@ test("sin GoatCounter no hay errores al medir", async () => {
 test("nunca pide permisos ni escucha beforeinstallprompt", () => {
   const { escuchas } = entorno();
   assert.equal(escuchas.beforeinstallprompt, undefined);
+});
+
+// ---- Que el aviso salga rapido ----
+
+test("la sonda no espera al load: corre apenas se lee la pagina, antes de que terminen las fuentes y la analitica", async () => {
+  const { escuchas, escuchasDoc, aviso } = entorno({ sonda: "falla" });
+  assert.equal(escuchas.load !== undefined, true, "el load sigue sirviendo para registrar el service worker");
+  escuchasDoc.DOMContentLoaded();            // sin disparar load
+  await esperar(); await esperar();
+  assert.equal(aviso.hidden, false);
+});
+
+test("si la pagina ya se leyo cuando arranca la app, la sonda corre de inmediato", async () => {
+  const { aviso } = entorno({ sonda: "falla", listo: "interactive" });
+  await esperar(); await esperar();
+  assert.equal(aviso.hidden, false);
+});
+
+test("si el navegador ya sabe que no hay conexion, el aviso sale al instante, sin esperar la sonda", () => {
+  const { aviso, escuchasDoc } = entorno({ sonda: "cuelga", onLine: false });
+  escuchasDoc.DOMContentLoaded();
+  assert.equal(aviso.hidden, false, "visible sin que haya terminado ningun pedido");
+  assert.match(aviso.textContent, /Sin conexión/);
+});
+
+test("una respuesta que no es OK (por ejemplo un 503) no prueba que haya conexion: muestra el aviso", async () => {
+  const { escuchasDoc, aviso } = entorno({ sonda: "503" });
+  escuchasDoc.DOMContentLoaded();
+  await esperar(); await esperar();
+  assert.equal(aviso.hidden, false);
 });

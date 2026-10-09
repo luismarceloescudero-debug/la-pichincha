@@ -159,3 +159,19 @@ class AvisoDeSinConexionEnElSitio(unittest.TestCase):
         css = (RAIZ / "css" / "sitio.css").read_text(encoding="utf-8")
         self.assertIn(".sin-red{", css)
         self.assertIn('.sin-red[data-viejo="1"]', css)
+
+
+class FuentesSinBloquear(unittest.TestCase):
+    """Una hoja de estilos externa bloquea los scripts que le siguen: si las fuentes de Google tardan, el
+    aviso de sin conexion tarda con ellas. Se cargan sin bloquear (media=print y onload)."""
+
+    def comprobar(self, html):
+        import re
+        enlaces = re.findall(r'<link[^>]*fonts\.googleapis\.com/css2[^>]*>', html)
+        self.assertEqual(len(enlaces), 2, 'uno que no bloquea y su version noscript')
+        self.assertIn('media="print"', enlaces[0])
+        self.assertIn("onload=\"this.media='all'\"", enlaces[0])
+        self.assertRegex(html, r"<noscript><link[^>]*fonts\.googleapis\.com/css2[^>]*></noscript>")   # sin JS, como antes
+
+    def test_index(self):
+        self.comprobar((RAIZ / "index.html").read_text(encoding="utf-8"))

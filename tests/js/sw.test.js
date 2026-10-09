@@ -11,7 +11,7 @@ function entorno(red, guardado = {}, extra = {}) {
   const tienda = { ...guardado };
   const cache = {
     match: async p => tienda[typeof p === "string" ? p : p.url],
-    put: async (p, r) => { tienda[p.url] = r; },
+    put: async (p, r) => { tienda[typeof p === "string" ? p : p.url] = r; },
   };
   return { tienda, env: {
     caches: { open: async () => cache, keys: async () => ["pichincha-vieja", "otra-cosa", "pichincha-v1"],
@@ -110,4 +110,26 @@ test("al instalar guarda lo que puede y no se cae si algo falta", async () => {
   const ok = await SW.precargar(cache, fetchFalso, BASE);
   assert.ok(ok > 0 && ok < SW.CASCARA.length, "guardo todo menos lo que fallo");
   assert.ok(!guardadas.some(p => String(p).endsWith(falla)));
+});
+
+test("un link con ?q= abre sin red la misma pagina guardada, porque la busqueda se lee en el navegador", async () => {
+  const { env } = entorno(() => { throw new TypeError("sin red"); }, { [url("./")]: respuesta("la principal") });
+  const r = await SW.responder(pedido("./?q=ssd+1tb", { mode: "navigate" }), env);
+  assert.equal(r.cuerpo, "la principal");
+});
+
+test("las busquedas distintas no llenan la cache: una navegacion se guarda sin su ?q=", async () => {
+  const { env, tienda } = entorno(() => respuesta("la principal"));
+  for (const q of ["ssd", "rtx", "ryzen 5", "monitor 27"]) await SW.responder(pedido("./?q=" + q, { mode: "navigate" }), env);
+  await new Promise(x => setImmediate(x));
+  assert.deepEqual(Object.keys(tienda), [url("./")], "una sola copia de la pagina");
+});
+
+test("fuera de las navegaciones la URL completa cuenta: indice.json?v=1 no pisa a indice.json", async () => {
+  const { env, tienda } = entorno(p => respuesta(p.url.includes("v=1") ? "otro" : "el indice"));
+  await SW.responder(pedido("indice.json"), env);
+  await SW.responder(pedido("indice.json?v=1"), env);
+  await new Promise(x => setImmediate(x));
+  assert.equal(tienda[url("indice.json")].cuerpo, "el indice");
+  assert.equal(tienda[url("indice.json?v=1")].cuerpo, "otro");
 });

@@ -128,7 +128,8 @@ ${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta propert
 <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="${rel}css/sitio.css">
 <script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
