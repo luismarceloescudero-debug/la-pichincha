@@ -15,6 +15,11 @@ let ORDEN = (() => { try { return localStorage.getItem("orden") || "recomendado"
    fondo el piso de gama. La logica vive en js/buscador.js. */
 function ordenar(filas, med) { return Buscador.ordenar(filas, med, ORDEN, nivelMarca); }
 
+/* El mismo modelo (mismo codigo exacto) en varias tiendas es UN producto: queda su fila mas barata y
+   OTRAS dice, por fila, las demas tiendas. Asi la mediana y el conteo cuentan cada producto una vez. */
+let OTRAS = new Map();
+const avisosDe = filas => filas.reduce((n, f) => n + 1 + (OTRAS.get(f) || []).length, 0);
+
 function buscarTodo(q) {
   const coincide = Buscador.filtroDe(q);
   if (!IDX || !coincide) return [];
@@ -22,7 +27,9 @@ function buscarTodo(q) {
   const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
   const halla = [];
   IDX.productos.forEach((f, i) => { if (coincide(N[i])) halla.push(f); });
-  return halla;
+  const g = Buscador.agruparPorModelo(halla);
+  OTRAS = g.otras;
+  return g.filas;
 }
 
 function buscar(q, tope = 60) { return buscarTodo(q).slice(0, tope * 3); }
@@ -64,7 +71,7 @@ function pintarResultados(q) {
   const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
   const afuera = A ? A.total - A.base.length - A.internacionales.length : 0;
   const nInt = A ? A.internacionales.length : 0;
-  est.innerHTML = (conjunto.length > r.length ? `Mostrando ${r.length} de ${conjunto.length}` : `${r.length} resultado${r.length > 1 ? "s" : ""}`)
+  est.innerHTML = (conjunto.length > r.length ? `Mostrando ${r.length} de ${conjunto.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
     + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
     + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "")
@@ -102,11 +109,14 @@ function pintarResultados(q) {
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
     for (const [clase, texto] of sellosDe(f[8])) marcas.push(`<span class="sello ${clase}">${texto}</span>`);
     if (f[1] === barato && ORDEN === "precio") marcas.push('<span class="sello barato">más barato</span>');
+    const otras = OTRAS.get(f) || [];
+    if (otras.length) marcas.push(`<span class="sello conocida">mismo modelo en ${otras.length + 1} tiendas</span>`);
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
       <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
-    </a>`;
+    </a>` + (otras.length ? `<div class="mismo"><span>También en</span>${otras.map(o =>
+      `<a href="${esc(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "");
   }).join("");
 }
 

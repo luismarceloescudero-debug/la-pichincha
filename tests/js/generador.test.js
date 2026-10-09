@@ -304,3 +304,30 @@ test("el unico precio que declara la pagina es el rango de la comparacion, con i
   assert.match(productos[0].image, /^https:\/\/.*\.png$/, "Product siempre con image");
   assert.equal(grafo.flatMap(n => JSON.stringify(n).match(/"@type":"Offer"/g) || []).length, 0);
 });
+
+test("un producto que dos tiendas venden con el mismo codigo sale una vez, con la otra tienda al lado", () => {
+  const COD = "KF432C16BB1/16";
+  const conCodigo = (nombre, precio, tienda) => [...fila(nombre, precio, tienda), COD];
+  const idx = { ...IDX, productos: [
+    ...IDX.productos.filter(f => !f[0].includes("Fury")),
+    conCodigo("Memoria Kingston Fury DDR4 16GB 3200MHz KF432C16BB1/16", 1000, "cg"),
+    conCodigo("MEMORIA 16GB DDR4 3200 KINGSTON KF432C16BB1/16", 950, "mx"),
+  ] };
+  const { ctx, analisis } = armar(idx, "ddr4 16gb");
+  const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  const filas = html.match(/<tr data-op/g) || [];
+  assert.equal(filas.length, 5, "5 productos, aunque son 6 avisos comparables");
+  assert.match(html, /También en[^<]*(<a[^>]*>[^<]*Mexx|<a[^>]*>[^<]*CompraGamer)/);
+  assert.match(html, /5 productos en 6 avisos/);
+  assert.ok(!html.includes("Memoria Kingston Fury DDR4 16GB 3200MHz KF432C16BB1/16"), "el aviso de la otra tienda no se repite como fila");
+  const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  const lista = ld["@graph"].find(x => x["@type"] === "ItemList");
+  assert.equal(lista.numberOfItems, 5);
+});
+
+test("sin codigos repetidos la pagina queda como siempre", () => {
+  const { ctx, analisis } = armar(IDX, "ddr4 16gb");
+  const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  assert.ok(!html.includes("También en"));
+  assert.ok(!/productos en \d+ avisos/.test(html));
+});

@@ -30,7 +30,8 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | Funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis de una consulta (`analisis.js`, compartido con las paginas por busqueda), con tests |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `arranque`). `index.html` solo trae la estructura y los datos |
+| `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
 | `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular, el indice `/precios/`, `sitemap.xml` y `robots.txt` |
 | `manifest.webmanifest`, `sw.js`, `sin-red.html`, `js/app.js`, `publicar_app.py` | La app instalable: manifiesto, service worker (red primero), pagina de sin conexion, aviso y medicion, y el script que estampa la version al publicar |
@@ -262,11 +263,35 @@ real.
 
 ### Lo que se probo y no funciono
 
-Agrupar el mismo producto entre tiendas, para mostrar un solo renglon con el
-rango de precios. Con solo el nombre no alcanza: la prueba junto 145 pendrives
-distintos bajo la clave "128gb" y metio una notebook entre los SSD de 480GB.
-Haria falta un identificador comun (EAN, part number) que ninguna de las cinco
-fuentes publica.
+Agrupar el mismo producto entre tiendas por el nombre. Con solo el nombre no
+alcanza: la prueba junto 145 pendrives distintos bajo la clave "128gb" y metio
+una notebook entre los SSD de 480GB. Lo que si funciona es el codigo de modelo
+exacto (ver abajo).
+
+## Identidad por codigo de modelo
+
+El mismo producto en varias tiendas se agrupa **solo** cuando comparte el
+codigo de modelo (part number) EXACTO. Nunca por parecido. Sin codigo, o con
+duda, el aviso queda suelto como siempre.
+
+- `modelo.py` saca el codigo en tres rubros (RAM, SSD y placas de video): en
+  CompraGamer viene del campo `codigo_principal` de su catalogo (dato del
+  fabricante); en las demas tiendas, solo si el nombre nombra EXACTO un codigo
+  ya conocido o trae uno con la forma de un part number de ese rubro
+  (`KF432C16BB1/16`, `SEDC600M/480G`, `GV-N506TEAGLE`). Una velocidad, una
+  capacidad o un chipset nunca cuenta. Usado, reacondicionado, bulk y OEM no
+  se agrupan con lo nuevo.
+- El codigo va en la ultima columna del indice (`modelo`). `js/buscador.js`
+  (`agruparPorModelo`) junta lo que tiene el mismo codigo y capacidades
+  compatibles; el resultado muestra la fila mas barata y debajo "Tambien en"
+  las otras tiendas. La mediana y el conteo cuentan cada producto una vez
+  ("41 productos en 58 avisos").
+- Para sumar una regla: un nombre real a `tests/test_modelo.py`, la forma a
+  `_FORMAS` en `modelo.py`. Precision antes que cobertura.
+- `cobertura.py` publica `cobertura.json` en cada corrida y avisa en el resumen
+  de la Action si la cobertura de un rubro cae mas de 10 puntos. Con los nombres
+  de hoy los codigos son escasos: el numero real queda a la vista, y crece si
+  otras tiendas publican su part number.
 
 ## La busqueda gobierna las pestanas
 
