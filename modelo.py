@@ -77,6 +77,43 @@ def codigo_de_modelo(nombre, rubro):
     return candidatos.pop() if len(candidatos) == 1 else None
 
 
-def modelo_de(nombre):
-    """Lo que va a la columna `modelo` del indice: el codigo, o "" si el aviso queda suelto."""
-    return codigo_de_modelo(nombre, rubro_de(nombre)) or ""
+def modelo_de(nombre, sku=None):
+    """Lo que va a la columna `modelo` del indice: el codigo, o "" si el aviso queda suelto.
+    Si el catalogo de la tienda publica el part number (`sku`), manda ese, con las mismas guardas."""
+    if rubro_de(nombre) is None or bloqueado_para_agrupar(nombre):
+        return ""
+    return sku or codigo_de_modelo(nombre, rubro_de(nombre)) or ""
+
+
+_SKU = re.compile(r"SKU:\s*([^'\",\]\[]+)", re.I)
+_FORMA_SKU = re.compile(r"^(?=.*[A-Z])(?=.*[0-9])[A-Z0-9][A-Z0-9/\-\.]{3,}[A-Z0-9]$")
+
+
+def sku_de(valor):
+    """El part number que publica un catalogo (CompraGamer: codigo_principal), o None si falta, hay
+    varios distintos o no tiene forma de codigo. Es un dato del fabricante: no hace falta adivinarlo."""
+    if isinstance(valor, (list, tuple)):
+        valor = " ".join(str(v) for v in valor)
+    if not isinstance(valor, str):
+        return None
+    candidatos = {c.strip().upper() for c in _SKU.findall(valor)}
+    if len(candidatos) != 1:
+        return None
+    codigo = candidatos.pop()
+    return codigo if _FORMA_SKU.match(codigo) else None
+
+
+def completar_con_conocidos(filas):
+    """A los avisos sin codigo les pone el de otro aviso cuando su nombre lo nombra EXACTO (un token
+    entero igual a un codigo ya conocido). Dos codigos conocidos en un nombre, o un nombre bloqueado
+    o que no es del rubro, quedan sueltos. Deja las filas como estaban si no hay nada que completar."""
+    conocidos = {f[9] for f in filas if f[9]}
+    if not conocidos:
+        return filas
+    for f in filas:
+        if f[9] or rubro_de(f[0]) is None or bloqueado_para_agrupar(f[0]):
+            continue
+        halladas = {t.upper().rstrip(".") for t in _TOKEN.findall(f[0])} & conocidos
+        if len(halladas) == 1:
+            f[9] = halladas.pop()
+    return filas

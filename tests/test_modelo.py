@@ -101,5 +101,44 @@ class CodigoDeModelo(unittest.TestCase):
         self.assertEqual(modelo.modelo_de("Disco Ssd 480Gb Kingston Sedc600M/480G BULK"), "")
 
 
+class SkuDelCatalogo(unittest.TestCase):
+    """CompraGamer publica el part number en su catalogo: es un dato del fabricante, no una adivinanza."""
+
+    def test_un_unico_sku_es_el_codigo(self):
+        self.assertEqual(modelo.sku_de(["SKU: SA400S37/480G"]), "SA400S37/480G")
+        self.assertEqual(modelo.sku_de("['SKU: sa400s37/480g']"), "SA400S37/480G")
+
+    def test_sin_sku_o_con_varios_o_dudoso_no_hay_codigo(self):
+        for valor in (None, [], "", "None", ["SKU: AAA111", "SKU: BBB222"], ["SKU: N/A"], ["SKU: 123"],
+                      ["SKU: con espacios 12"], ["EAN: 7412345678901"], 42):
+            self.assertIsNone(modelo.sku_de(valor), valor)
+
+    def fila(self, nombre, modelo_="", tienda="uno"):
+        return [nombre, 1000, "https://x.test/" + nombre, tienda, "", 0, 0, "", "", modelo_]
+
+    def test_el_codigo_conocido_se_asigna_a_otro_aviso_que_lo_nombra_exacto(self):
+        filas = [self.fila("Disco Solido SSD Kingston 480GB A400 SATA 500MB/s", "SA400S37/480G", "cg"),
+                 self.fila("HD SSD 480GB KINGSTON A400 SATA III 2.5\" SA400S37/480G", "", "fh"),
+                 self.fila("HD SSD 480GB KINGSTON A400 SATA III 2.5\" SA400S37/480", "", "mx")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["SA400S37/480G", "SA400S37/480G", ""])
+
+    def test_dos_codigos_conocidos_en_un_nombre_o_un_nombre_bloqueado_quedan_sueltos(self):
+        filas = [self.fila("Disco Ssd Kingston AAA111X", "AAA111X", "cg"), self.fila("Disco Ssd Kingston BBB222X", "BBB222X", "gc"),
+                 self.fila("Disco Ssd Kingston AAA111X BBB222X", "", "fh"),
+                 self.fila("Disco Ssd Kingston AAA111X BULK", "", "mx"),
+                 self.fila("Notebook con SSD Kingston AAA111X", "", "pc")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["AAA111X", "BBB222X", "", "", ""])
+
+    def test_no_cambia_lo_que_ya_tiene_codigo_ni_depende_del_orden(self):
+        a = self.fila("Disco Ssd Kingston AAA111X", "AAA111X", "cg")
+        b = self.fila("HD SSD KINGSTON AAA111X", "", "fh")
+        uno, dos = [a[:], b[:]], [b[:], a[:]]
+        modelo.completar_con_conocidos(uno)
+        modelo.completar_con_conocidos(dos)
+        self.assertEqual(sorted(f[9] for f in uno), sorted(f[9] for f in dos))
+
+
 if __name__ == "__main__":
     unittest.main()

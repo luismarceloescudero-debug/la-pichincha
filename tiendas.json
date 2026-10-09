@@ -14,7 +14,8 @@
         "precio": "precioEspecial",
         "lista": "precioLista",
         "stock": "stock",
-        "imagen": "imagenes"
+        "imagen": "imagenes",
+        "sku": "codigo_principal"
       },
       "ruta": "producto/{slug}_{id}",
       "imagen_url": "https://imagenes.compragamer.com/productos/compragamer_Imganen_general_{nombre}-grn.jpg"

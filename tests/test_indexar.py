@@ -135,6 +135,14 @@ class Catalogos(unittest.TestCase):
         self.assertEqual([i["precio"] for i in items], [21350, 5000])
         self.assertTrue(items[0]["imagen"].endswith("_a-grn.jpg"))
 
+    def test_compragamer_trae_el_part_number_de_su_catalogo(self):
+        filas = [{"id_producto": 7411, "nombre": "Disco Solido SSD Kingston 480GB A400 SATA 500MB/s",
+                  "precioEspecial": 136300, "precioLista": 151444, "codigo_principal": ["SKU: SA400S37/480G"]},
+                 {"id_producto": 7412, "nombre": "Mouse", "precioEspecial": 100, "codigo_principal": None}]
+        with mock.patch.object(indexar, "bajar", return_value=json.dumps(filas)):
+            items = indexar.indexar_json(TIENDAS["compragamer"])
+        self.assertEqual([i.get("sku") for i in items], ["SA400S37/480G", None])
+
     def test_compragamer_guardado(self):
         filas = json.loads(leer("compragamer", "catalogo.json"))
         with mock.patch.object(indexar, "bajar", return_value=json.dumps(filas)):

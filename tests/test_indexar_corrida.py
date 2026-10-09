@@ -152,6 +152,21 @@ class Corrida(unittest.TestCase):
         modelos = {f[0]: f[9] for f in indice["productos"] if f[3] == "uno"}
         self.assertEqual(modelos, {nombre: "SEDC600M/480G", "Producto 2": ""})
 
+    def test_el_sku_del_catalogo_agrupa_con_otra_tienda_que_lo_nombra(self):
+        cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        cfg["uno"]["catalogo"]["campos"]["sku"] = "codigo_principal"
+        (self.dir / "tiendas.json").write_text(json.dumps(cfg), encoding="utf-8")
+        self.catalogos = {
+            "https://uno.test/cat": [{"id": 1, "nombre": "Disco Solido SSD Kingston 480GB A400 SATA", "precio": 1000,
+                                      "codigo_principal": ["SKU: SA400S37/480G"]}],
+            "https://dos.test/cat": [{"id": 101, "nombre": "HD SSD 480GB KINGSTON A400 SA400S37/480G", "precio": 900},
+                                     {"id": 102, "nombre": "HD SSD 480GB KINGSTON A400 SA400S37/240G", "precio": 800}]}
+        with redirect_stdout(io.StringIO()):
+            indexar.main(["--historial", str(self.hist)])
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual({f[3] + str(f[1]): f[9] for f in indice["productos"]},
+                         {"uno1000": "SA400S37/480G", "dos900": "SA400S37/480G", "dos800": "SA400S37/240G"})
+
     def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
         # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
         # tiene que quedar con su valor por defecto, no corrido de lugar.

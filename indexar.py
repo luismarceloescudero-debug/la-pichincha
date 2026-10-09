@@ -245,7 +245,8 @@ def indexar_json(tienda):
         items.append({"nombre": limpio(nombre), "precio": int(precio),
                       "lista": fila.get(c["lista"]),
                       "url": absoluta(tienda["base"], cfg["ruta"].format(slug=slug, id=fila[c["id"]])),
-                      "imagen": imagen(fila, cfg), "sellos": sellos(fila, cfg)})
+                      "imagen": imagen(fila, cfg), "sellos": sellos(fila, cfg),
+                      "sku": modelo.sku_de(fila.get(c["sku"])) if c.get("sku") else None})
     return items
 
 
@@ -315,7 +316,7 @@ def main(argv=None):
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
             fila = list(fila)[:10] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
-            fila[9] = modelo.modelo_de(fila[0])           # las reglas pueden haber cambiado desde ayer
+            fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
             previo.setdefault(fila[3], []).append(fila)
         # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
         # fuente caida conserva esa hora: no es un precio de hoy. Un indice
@@ -387,12 +388,13 @@ def main(argv=None):
             actuales[(clave, it["url"])] = it["precio"]
             salida.append([it["nombre"], it["precio"], it["url"], clave,
                            it.get("via") or "", lista, propia, it.get("imagen") or "",
-                           it.get("sellos") or "", modelo.modelo_de(it["nombre"])])
+                           it.get("sellos") or "", modelo.modelo_de(it["nombre"], it.get("sku"))])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
+    modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
     generado = datetime.now(AR).isoformat(timespec="minutes")
     relevado.update(dict.fromkeys(frescas, generado))
     informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado)
