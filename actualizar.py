@@ -189,9 +189,13 @@ def relevar(datos, solo=None, hoy=None):
         if nuevo.get("stock") and nuevo["stock"] != prod.get("stock"):
             print(f"    {AMAR}stock: {prod.get('stock')} {FLECHA} {nuevo['stock']}{FIN}")
 
+        # Un campo que el extractor informa vacio ya no lo publica la tienda: el
+        # valor guardado esta vencido. Uno que el extractor no maneja se conserva.
         for campo in ("precio", "precio_lista", "sin_impuestos", "stock"):
             if nuevo.get(campo) is not None:
                 prod[campo] = nuevo[campo]
+            elif campo in nuevo:
+                prod.pop(campo, None)
 
     return cambios, errores
 
@@ -204,10 +208,14 @@ def analizar(datos):
     envio = datos["envio"]
     avisos = []
 
-    rams = sorted([p for p in datos["productos"] if p["tipo"] in ("ram", "ram-ref")],
-                  key=lambda p: p["precio"])
-    cams = sorted([p for p in datos["productos"] if p["tipo"] in ("webcam", "webcam-ref")],
-                  key=lambda p: p["precio"])
+    # Un precio sin verificar no puede ser "el mas barato": se elige entre los
+    # verificados, y solo si no queda ninguno se usa lo que haya.
+    def por_precio(tipos):
+        todos = [p for p in datos["productos"] if p["tipo"] in tipos]
+        return sorted([p for p in todos if not p.get("falla_desde")] or todos, key=lambda p: p["precio"])
+
+    rams = por_precio(("ram", "ram-ref"))
+    cams = por_precio(("webcam", "webcam-ref"))
 
     print(f"\n{NEGRITA}Analisis{FIN}\n")
     print(f"  Memoria mas barata   {rams[0]['corto']} {PUNTO} {pesos(rams[0]['precio'])}")
@@ -220,6 +228,10 @@ def analizar(datos):
         return p["precio"] + envio[modo]
 
     adata, kingston = por_id["adata-d35"], por_id["kingston-kvr"]
+    for p in (adata, kingston):
+        if p.get("falla_desde"):
+            avisos.append(f"El chequeo del podio usa el precio sin verificar de {p['corto']} "
+                          f"(falla desde {p['falla_desde']}): no lo des por bueno.")
     a_punto, a_casa = puesto(adata, "punto"), puesto(adata, "domicilio")
     k = kingston["precio"]
     print(f"\n  Puesto en {envio['zona']} (CP {envio['cp']}):")
