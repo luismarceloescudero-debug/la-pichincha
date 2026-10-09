@@ -222,3 +222,23 @@ test("el indice sin paginas no inventa enlaces", () => {
   assert.doesNotMatch(html, /<li>/);
   assert.match(html, /todav[ií]a no hay/i);
 });
+
+test("el JSON-LD lleva la fecha de los precios que no se pudieron verificar (FR-017)", () => {
+  const { html } = paginaDe(IDX);
+  const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement.map(e => e.item);
+  const mexx = items.filter(i => /Hiksemi|Otra Marca/.test(i.name));
+  assert.equal(mexx.length, 2);
+  for (const i of mexx) assert.equal(i.offers.description, "precio del 8/10");
+  const cg = items.filter(i => /Kingston|Adata|Crucial/.test(i.name));
+  for (const i of cg) assert.equal(i.offers.description, undefined, "los de hoy no llevan aviso");
+});
+
+test("un aviso con una URL que no es http(s) no se enlaza ni va al JSON-LD", () => {
+  const malo = { ...IDX, productos: IDX.productos.map(f => [...f]) };
+  malo.productos[4][2] = "javascript:alert(1)";
+  const { html } = paginaDe(malo);
+  assert.doesNotMatch(html, /javascript:/);
+  assert.equal((html.match(/<tr data-op/g) || []).length, 5, "el aviso sigue en la tabla, sin enlace");
+  const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement;
+  assert.ok(items.every(e => /^https?:\/\//.test(e.item.url)));
+});
