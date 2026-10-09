@@ -86,13 +86,15 @@ const SCRIPT_MEDICION = `(function () {
 function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
   const base = ctx.baseUrl;
   const canonica = `${base}/precios/${consulta.slug}/`;
+  // La Pichincha no vende: un Product con Offer por tienda es, para Google, una "ficha de comerciante"
+  // (exige imagen, envio y devoluciones, que no tenemos). Cada item es un ListItem con nombre y enlace,
+  // que es lo que pide el carrusel; el unico precio que se declara es el rango de la comparacion.
   // Un precio que no se pudo verificar hoy lo dice tambien aca, no solo en la pagina (FR-017).
-  const oferta = f => ({ "@type": "Offer", price: f[1], priceCurrency: "ARS", url: f[2],
-    ...(viejoDe(f, ctx) ? { description: viejoDe(f, ctx) } : {}) });
+  const listados = filas.filter(f => esUrl(f[2])).slice(0, MAX_FILAS);
   return { "@context": "https://schema.org", "@graph": [
-    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: Math.min(filas.filter(f => esUrl(f[2])).length, MAX_FILAS),
-      itemListElement: filas.filter(f => esUrl(f[2])).slice(0, MAX_FILAS).map((f, i) => ({ "@type": "ListItem", position: i + 1,
-        item: { "@type": "Product", name: f[0], url: f[2], offers: oferta(f) } })) },
+    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: listados.length,
+      itemListElement: listados.map((f, i) => ({ "@type": "ListItem", position: i + 1, name: f[0], url: f[2],
+        ...(viejoDe(f, ctx) ? { description: viejoDe(f, ctx) } : {}) })) },
     { "@type": "Product", name: consulta.q, image: `${base}/img/og.png`, url: canonica,
       offers: { "@type": "AggregateOffer", lowPrice: desde, highPrice: hasta, offerCount: filas.length, priceCurrency: "ARS" } },
     { "@type": "BreadcrumbList", itemListElement: [

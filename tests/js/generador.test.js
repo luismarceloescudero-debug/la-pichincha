@@ -161,11 +161,14 @@ test("el JSON-LD trae ItemList, el rango de precios en ARS y las migas", () => {
   assert.equal(lista.itemListElement.length, 5);
   const primero = lista.itemListElement[0];
   assert.equal(primero.position, 1);
-  assert.equal(primero.item["@type"], "Product");
-  assert.equal(primero.item.offers["@type"], "Offer");
-  assert.equal(primero.item.offers.priceCurrency, "ARS");
-  assert.equal(typeof primero.item.offers.price, "number");
-  assert.equal(primero.item.offers.url, primero.item.url);
+  // La Pichincha no vende: un Product con Offer por tienda es una "ficha de comerciante" para Google
+  // (pide imagen, envio y devoluciones). Cada item es solo un ListItem con nombre y enlace.
+  assert.equal(primero["@type"], "ListItem");
+  assert.equal(typeof primero.name, "string");
+  assert.match(primero.url, /^https?:\/\//);
+  assert.equal(primero.item, undefined, "sin Product anidado");
+  assert.ok(!JSON.stringify(lista).includes('"Offer"'), "ninguna Offer individual");
+  assert.ok(!JSON.stringify(lista).includes('"Product"'), "ningun Product individual");
   const producto = tipo("Product");
   const oferta = producto.offers;
   assert.equal(oferta["@type"], "AggregateOffer");
@@ -225,12 +228,12 @@ test("el indice sin paginas no inventa enlaces", () => {
 
 test("el JSON-LD lleva la fecha de los precios que no se pudieron verificar (FR-017)", () => {
   const { html } = paginaDe(IDX);
-  const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement.map(e => e.item);
+  const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement;
   const mexx = items.filter(i => /Hiksemi|Otra Marca/.test(i.name));
   assert.equal(mexx.length, 2);
-  for (const i of mexx) assert.equal(i.offers.description, "precio del 8/10");
+  for (const i of mexx) assert.equal(i.description, "precio del 8/10");
   const cg = items.filter(i => /Kingston|Adata|Crucial/.test(i.name));
-  for (const i of cg) assert.equal(i.offers.description, undefined, "los de hoy no llevan aviso");
+  for (const i of cg) assert.equal(i.description, undefined, "los de hoy no llevan aviso");
 });
 
 test("un aviso con una URL que no es http(s) no se enlaza ni va al JSON-LD", () => {
@@ -240,7 +243,7 @@ test("un aviso con una URL que no es http(s) no se enlaza ni va al JSON-LD", () 
   assert.doesNotMatch(html, /javascript:/);
   assert.equal((html.match(/<tr data-op/g) || []).length, 5, "el aviso sigue en la tabla, sin enlace");
   const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement;
-  assert.ok(items.every(e => /^https?:\/\//.test(e.item.url)));
+  assert.ok(items.every(e => /^https?:\/\//.test(e.url)));
 });
 
 // ---- App instalable: las paginas por busqueda tambien son parte de la app ----
@@ -290,4 +293,14 @@ test("la fecha que va dentro del script inline sale escapada, como el JSON-LD", 
   const { html } = paginaDe(raro);
   assert.ok(!html.includes("</script><script>alert(1)"), "el texto crudo cerraria el script y abriria otro");
   assert.ok(html.includes("alert(1)"), "el texto sigue estando, escapado");
+});
+
+test("el unico precio que declara la pagina es el rango de la comparacion, con imagen", () => {
+  const { html } = paginaDe(IDX);
+  const grafo = jsonld(html)["@graph"];
+  const productos = grafo.filter(n => n["@type"] === "Product");
+  assert.equal(productos.length, 1, "un solo Product: la consulta, no cada tienda");
+  assert.equal(productos[0].offers["@type"], "AggregateOffer");
+  assert.match(productos[0].image, /^https:\/\/.*\.png$/, "Product siempre con image");
+  assert.equal(grafo.flatMap(n => JSON.stringify(n).match(/"@type":"Offer"/g) || []).length, 0);
 });
