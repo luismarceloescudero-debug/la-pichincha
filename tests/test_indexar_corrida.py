@@ -134,10 +134,23 @@ class Corrida(unittest.TestCase):
             self.catalogos.pop("https://uno.test/cat")            # al dia siguiente uno se cae
             indexar.main(["--historial", str(self.hist)])
         indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
-        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i"])
+        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", ""])
         self.assertEqual(self.fila(indice, "dos", 101)[8], "")
-        self.assertTrue(all(len(f) == 9 for f in indice["productos"]))
-        self.assertEqual(indice["campos"][-1], "sellos")
+        self.assertTrue(all(len(f) == 10 for f in indice["productos"]))
+        self.assertEqual(indice["campos"][-2:], ["sellos", "modelo"])
+
+    def test_el_codigo_de_modelo_se_guarda_en_la_ultima_columna_tambien_en_filas_reusadas(self):
+        nombre = "Disco Ssd 480Gb Kingston Sedc600M/480G"
+        self.catalogos = {"https://uno.test/cat": [{"id": 1, "nombre": nombre, "precio": 1000},
+                                                   {"id": 2, "nombre": "Producto 2", "precio": 1}],
+                          "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
+        with redirect_stdout(io.StringIO()):
+            indexar.main(["--historial", str(self.hist)])
+            self.catalogos.pop("https://uno.test/cat")            # uno se cae: sus filas se reusan
+            indexar.main(["--historial", str(self.hist)])
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        modelos = {f[0]: f[9] for f in indice["productos"] if f[3] == "uno"}
+        self.assertEqual(modelos, {nombre: "SEDC600M/480G", "Producto 2": ""})
 
     def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
         # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
@@ -146,8 +159,8 @@ class Corrida(unittest.TestCase):
                                ["Producto 2", 2000, url(2), "uno", "", 0]]}
         (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
         indice, _ = self.correr(None, [(101, 500)])              # uno se cae y se reusa lo viejo
-        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", ""])
-        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", ""])
 
     def previo(self, tiendas, generado="2026-10-07T15:25-03:00"):
         """Un indice anterior con un producto de uno, como lo dejo otra corrida."""
