@@ -150,15 +150,43 @@ class AvisoDeSinConexionEnElSitio(unittest.TestCase):
 
     def test_carga_app_js_y_la_inicia_solo_si_la_pagina_esta_suelta(self):
         self.assertIn('<script src="js/app.js"></script>', self.html)
-        self.assertRegex(self.html, r"SUELTA \? App\.iniciar\(window, document,")   # no dentro del visor del artifact
+        arranque = (RAIZ / "js" / "arranque.js").read_text(encoding="utf-8")
+        self.assertRegex(arranque, r"SUELTA \? App\.iniciar\(window, document,")   # no dentro del visor del artifact
 
     def test_la_fecha_del_aviso_sale_del_indice_y_si_no_de_los_datos(self):
-        self.assertRegex(self.html, r"generado: \(\) => \(IDX && IDX\.generado\)")
+        arranque = (RAIZ / "js" / "arranque.js").read_text(encoding="utf-8")
+        self.assertRegex(arranque, r"generado: \(\) => \(IDX && IDX\.generado\)")
 
     def test_el_aviso_tiene_estilo_y_el_viejo_se_distingue(self):
         css = (RAIZ / "css" / "sitio.css").read_text(encoding="utf-8")
         self.assertIn(".sin-red{", css)
         self.assertIn('.sin-red[data-viejo="1"]', css)
+
+
+class IndexPartido(unittest.TestCase):
+    """index.html es solo la estructura y los datos: la logica vive en js/ y css/ (F1.1)."""
+
+    def setUp(self):
+        import re
+        self.html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        self.scripts = re.findall(r'<script src="(js/[\w.-]+\.js)"></script>', self.html)
+
+    def test_el_unico_script_inline_son_los_datos(self):
+        import re
+        inline = [s for s in re.findall(r"<script>(.*?)</script>", self.html, flags=re.S)]
+        self.assertEqual(len(inline), 1)
+        self.assertIn("const DATOS = ", inline[0])
+        self.assertLess(len(inline[0].split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
+
+    def test_los_datos_van_antes_que_los_modulos_que_los_usan(self):
+        self.assertLess(self.html.index("const DATOS = "), self.html.index('<script src="js/base.js">'))
+
+    def test_cada_modulo_existe_y_el_service_worker_lo_guarda(self):
+        sw = (RAIZ / "sw.js").read_text(encoding="utf-8")
+        self.assertGreaterEqual(len(self.scripts), 10)
+        for ruta in self.scripts:
+            self.assertTrue((RAIZ / ruta).exists(), ruta)
+            self.assertIn(f'"{ruta}"', sw, f"{ruta} falta en la cascara del service worker")
 
 
 class FuentesSinBloquear(unittest.TestCase):
