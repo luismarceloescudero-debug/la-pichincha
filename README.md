@@ -33,6 +33,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `js/` | Funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis de una consulta (`analisis.js`, compartido con las paginas por busqueda), con tests |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
 | `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular, el indice `/precios/`, `sitemap.xml` y `robots.txt` |
+| `manifest.webmanifest`, `sw.js`, `sin-red.html`, `js/app.js`, `publicar_app.py` | La app instalable: manifiesto, service worker (red primero), pagina de sin conexion, aviso y medicion, y el script que estampa la version al publicar |
 | `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
@@ -374,6 +375,33 @@ dominio propio se cambia ahi.
 
 **Alta en buscadores** (la hace el dueño con su cuenta): en Google Search Console y en Bing
 Webmaster Tools, agregar el sitio y enviar `<BASE_URL>/sitemap.xml`.
+
+## App instalable
+
+La Pichincha se puede instalar en el telefono y en la computadora (la opcion que ofrece el
+navegador: "Instalar app" o "Agregar a la pantalla de inicio"; el sitio no muestra ningun cartel
+propio) y, despues de la primera visita, abre sin conexion.
+
+- **Red primero.** `sw.js` es un service worker con una sola regla: con conexion manda siempre el
+  dato nuevo, y lo guardado solo responde si la red falla o tarda mas de 4 segundos. Nunca se usa
+  un precio guardado cuando la red funciona.
+- **El aviso.** Sin conexion, `js/app.js` muestra arriba "Sin conexion: estas viendo los ultimos
+  precios que bajaste (hoy 08:12)"; pasados 7 dias agrega que pueden estar viejos. La sonda es un
+  `HEAD` al manifiesto sin cache (el service worker solo atiende `GET`, asi que llega a la red de
+  verdad) y corre al leer la pagina, sin esperar a las fuentes ni a la analitica.
+- **Que se guarda:** la cascara (principal, estilos, scripts, iconos, manifiesto), la pagina de
+  "no disponible sin conexion" y el ultimo indice: unos 250 KB mas el indice. Tambien las paginas
+  de `/precios/` que se visitan, y una navegacion se guarda sin su `?q=`, asi un link compartido
+  abre sin red y las busquedas distintas no llenan la cache. Las fotos, las fuentes, la analitica
+  y las tiendas no se guardan nunca.
+- **Versiones.** `publicar_app.py` estampa `<fecha del indice>-<commit>` en `sw.js`: cada
+  publicacion tiene su propia cache y al activarse se borran las anteriores. La app instalada toma la
+  version nueva en la apertura siguiente, sin que la persona haga nada.
+- **Medicion.** El evento `app/instalada` (una vez por instalacion) y `app/abierta` (una vez por
+  sesion, solo cuando corre como app) van al mismo GoatCounter, sin cookies.
+- **Iconos.** Se dibujan en `docs/iconos.html` (instrucciones para regenerarlos en el propio archivo).
+- **Probar a mano:** `python publicar_app.py --salida _sitio --indice _sitio/indice.json`, servir
+  `_sitio/`, abrir, apagar el servidor y recargar.
 
 ## Tests
 
