@@ -87,11 +87,13 @@ class FallaDesde(unittest.TestCase):
         p.start()
         self.addCleanup(p.stop)
 
+    extraer_lista = False      # si el extractor informa precio_lista (vacio) como Gaming City
+
     def extraer(self, prod):
         r = self.respuestas[prod["id"]]
         if isinstance(r, Exception):
             raise r
-        return {"precio": r}
+        return dict({"precio": r}, **({"precio_lista": None} if self.extraer_lista else {}))
 
     def relevar(self):
         with redirect_stdout(io.StringIO()):
@@ -122,9 +124,65 @@ class FallaDesde(unittest.TestCase):
         self.relevar()
         self.assertEqual(self.prod("x")["falla_desde"], "2026-10-09")
 
+    def test_lista_que_la_tienda_deja_de_publicar_se_borra(self):
+        # El extractor informa el campo y viene vacio: el valor guardado esta vencido.
+        self.datos["productos"][0]["precio_lista"] = 900
+        self.respuestas = {"x": 1000, "y": 2000}
+        self.extraer_lista = True
+        self.relevar()
+        self.assertNotIn("precio_lista", self.prod("x"))
+
+    def test_lista_que_el_extractor_no_maneja_se_conserva(self):
+        self.datos["productos"][0]["precio_lista"] = 1200
+        self.respuestas = {"x": 1000, "y": 2000}
+        self.relevar()
+        self.assertEqual(self.prod("x")["precio_lista"], 1200)
+
     def test_sin_fallas_no_cambia_nada(self):
         self.respuestas = {"x": 1000, "y": 2000}
         self.datos["productos"][1].pop("falla_desde")
         antes = json.dumps(self.datos, sort_keys=True)
         self.relevar()
         self.assertEqual(json.dumps(self.datos, sort_keys=True), antes)
+
+
+class AnalizarSinVerificar(unittest.TestCase):
+    """analizar() no puede apoyar sus conclusiones en un precio que no se verifico."""
+
+    def setUp(self):
+        self.datos = {
+            "envio": {"zona": "Mendoza", "cp": "5501", "punto": 6639, "domicilio": 11658},
+            "tiendas": {"cg": {"nombre": "CG"}, "gc": {"nombre": "GC"}, "fh": {"nombre": "FH"}, "mx": {"nombre": "MX"}},
+            "productos": [
+                {"id": "adata-d35", "tipo": "ram", "tienda": "cg", "corto": "ADATA", "precio": 221450},
+                {"id": "kingston-kvr", "tipo": "ram", "tienda": "gc", "corto": "Kingston", "precio": 299249},
+                {"id": "hiker", "tipo": "ram-ref", "tienda": "fh", "corto": "Hiker", "precio": 200000,
+                 "falla_desde": "2026-10-08"},
+                {"id": "armor", "tipo": "ram-ref", "tienda": "mx", "corto": "Armor", "precio": 214989},
+                {"id": "c920s", "tipo": "webcam", "tienda": "gc", "corto": "C920S", "precio": 137749},
+            ]}
+
+    def analizar(self):
+        with redirect_stdout(io.StringIO()):
+            return actualizar.analizar(self.datos)
+
+    def prod(self, i):
+        return next(p for p in self.datos["productos"] if p["id"] == i)
+
+    def test_la_mas_barata_no_sale_de_un_precio_sin_verificar(self):
+        self.analizar()
+        self.assertEqual(self.datos["calculado"]["ram_mas_barata"], "armor")
+
+    def test_si_ninguna_esta_verificada_elige_igual(self):
+        for p in self.datos["productos"]:
+            p["falla_desde"] = "2026-10-08"
+        self.analizar()
+        self.assertEqual(self.datos["calculado"]["ram_mas_barata"], "hiker")
+
+    def test_el_podio_apoyado_en_un_precio_sin_verificar_avisa(self):
+        self.prod("kingston-kvr")["falla_desde"] = "2026-10-09"
+        avisos = self.analizar()
+        self.assertTrue(any("sin verificar" in a and "Kingston" in a for a in avisos), avisos)
+
+    def test_con_todo_verificado_no_avisa(self):
+        self.assertEqual(self.analizar(), [])
