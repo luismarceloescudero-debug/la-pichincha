@@ -242,3 +242,16 @@ test("un aviso con una URL que no es http(s) no se enlaza ni va al JSON-LD", () 
   const items = jsonld(html)["@graph"].find(n => n["@type"] === "ItemList").itemListElement;
   assert.ok(items.every(e => /^https?:\/\//.test(e.item.url)));
 });
+
+// ---- App instalable: las paginas por busqueda tambien son parte de la app ----
+
+test("las paginas y el indice enlazan el manifiesto, los colores y el icono con su ruta relativa", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<link rel="manifest" href="\.\.\/\.\.\/manifest\.webmanifest">/);
+  assert.match(html, /<link rel="apple-touch-icon" href="\.\.\/\.\.\/img\/apple-touch-icon\.png">/);
+  assert.match(html, /<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: dark\)">/);
+  const { ctx } = armar(IDX, "ddr4 16gb");
+  const hub = G.renderIndice([], ctx);
+  assert.match(hub, /<link rel="manifest" href="\.\.\/manifest\.webmanifest">/);
+  assert.doesNotMatch(html + hub, /beforeinstallprompt/);
+});
