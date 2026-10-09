@@ -81,6 +81,17 @@ ${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta propert
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../../css/sitio.css">
+<style>
+/* Solo de estas paginas: todo sale de las variables del sitio, asi sigue el tema claro u oscuro. */
+.wrap a{color:var(--accent)}
+.wrap a.acc{color:var(--ink)}
+.wrap h2{font-size:1.1rem;margin:30px 0 12px;letter-spacing:-.01em}
+.wrap section.panel{margin:22px 0}
+.wrap section.panel h2{margin-top:0}
+.wrap td.num{text-align:right;font-family:var(--font-mono);white-space:nowrap}
+.wrap th:nth-child(3){text-align:right}
+.wrap .nota{margin-top:34px;color:var(--ink-3);font-size:.82rem}
+</style>
 </head>`;
 }
 

@@ -71,8 +71,9 @@ test("las compras internacionales van aparte, marcadas, y no son la mejor compra
   const { ctx, analisis } = armar(IDX, "ddr4 16gb");
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.match(html, /compra internacional/);
-  const mejor = html.split("Mejor compra")[1].split("</section>")[0];
+  const mejor = html.split("<h2>Mejor compra</h2>")[1].split("</section>")[0];
   assert.doesNotMatch(mejor, /importada/);
+  assert.ok(mejor.includes(`href="${analisis.picks[0].m.f[2]}"`), "la seccion tiene el aviso elegido");
   assert.equal((html.match(/<tr data-op/g) || []).length, 5, "no entran a la tabla de comparables");
 });
 
