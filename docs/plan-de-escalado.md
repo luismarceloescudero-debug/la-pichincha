@@ -100,7 +100,7 @@ llegan las primeras 500 visitas organicas por mes.
   agrupar el mismo producto entre tiendas **solo** cuando el codigo coincide
   exacto. Agrupar por nombre ya se probo y fallo (README). Medir la cobertura
   por rubro y arrancar por RAM, SSD y placas de video.
-- **F2.2 Serie de precios por producto**: "minimo de 30 y 90 dias", un
+- **F2.2 Serie de precios por producto** (sellos hechos, spec 004; el grafico queda para despues de medir): "minimo de 30 y 90 dias", un
   grafiquito, y el sello "subio antes de la oferta" para las rebajas infladas.
   Esto es el foso: nadie en Argentina lo muestra para hardware en 5 tiendas.
 - **F2.3 Mas fuentes**: Mercado Libre directo (cobertura y afiliados) y tiendas

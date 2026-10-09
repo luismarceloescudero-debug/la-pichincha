@@ -28,6 +28,7 @@ from pathlib import Path
 import historial
 import modelo
 import salud
+import serie
 
 RAIZ = Path(__file__).resolve().parent
 TIENDAS = RAIZ / "tiendas.json"
@@ -330,6 +331,8 @@ def main(argv=None):
     # precios distintos, y con la URL sola una pisaba a la otra.
     carpeta = Path(args.historial)
     estado = historial.leer(carpeta)
+    series = serie.cargar(carpeta)               # para los sellos de minimo y de rebaja inflada
+    hoy = datetime.now(AR).date()
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
@@ -388,7 +391,9 @@ def main(argv=None):
             actuales[(clave, it["url"])] = it["precio"]
             salida.append([it["nombre"], it["precio"], it["url"], clave,
                            it.get("via") or "", lista, propia, it.get("imagen") or "",
-                           it.get("sellos") or "", modelo.modelo_de(it["nombre"], it.get("sku"))])
+                           (it.get("sellos") or "")
+                           + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
+                           modelo.modelo_de(it["nombre"], it.get("sku"))])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")

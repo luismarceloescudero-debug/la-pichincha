@@ -11,11 +11,14 @@ Nunca hace fallar la corrida por la comparacion.
 """
 
 import argparse
+import csv
 import json
 import urllib.request
+from datetime import date
 from collections import defaultdict
 from pathlib import Path
 
+import historial
 import modelo
 
 CAIDA_MAXIMA = 10  # puntos de cobertura
@@ -51,6 +54,24 @@ def informe(filas):
     return {"rubros": rubros}
 
 
+def sellos_de_serie(filas):
+    """Cuantos avisos llevan cada sello de la serie de precios (letras m, h, x de la columna sellos)."""
+    sellos = [f[8] for f in filas if len(f) > 8 and isinstance(f[8], str)]
+    return {"minimo30": sum("m" in s for s in sellos), "minimo90": sum("h" in s for s in sellos),
+            "subio_antes": sum("x" in s for s in sellos)}
+
+
+def dias_de_historia(carpeta, generado):
+    """Dias entre el primer cambio registrado en el historial y la fecha del indice (0 sin historial)."""
+    primeras = []
+    for ruta in historial.archivos(carpeta):
+        with Path(ruta).open(encoding="utf-8", newline="") as f:
+            primeras += [fila["fecha"] for fila in csv.DictReader(f)]
+    if not primeras or len(generado) < 10:
+        return 0
+    return (date.fromisoformat(generado[:10]) - date.fromisoformat(min(primeras))).days
+
+
 def porcentaje(r):
     return 100.0 * r["con_codigo"] / r["avisos"] if r["avisos"] else 0.0
 
@@ -83,6 +104,10 @@ def resumen_md(datos, alertas):
     for rubro, r in datos["rubros"].items():
         lineas.append(f"| {rubro} | {r['avisos']} | {r['con_codigo']} ({porcentaje(r):.0f}%) "
                       f"| {r['agrupados']} | {r['grupos']} |")
+    s = datos.get("serie")
+    if s:
+        lineas += ["", f"Serie de precios: {s['dias_de_historia']} días de historia · avisos con mínimo de 30 días: "
+                       f"{s['minimo30']} · de 90 días: {s['minimo90']} · subió antes de la oferta: {s['subio_antes']}"]
     for rubro, antes, ahora in alertas:
         lineas += ["", f"**{rubro}**: la cobertura bajo de {antes:.0f}% a {ahora:.0f}%: "
                        f"revisar nombres de tiendas."]
@@ -95,10 +120,14 @@ def main(argv=None):
     ap.add_argument("--salida", required=True)
     ap.add_argument("--previa")
     ap.add_argument("--resumen")
+    ap.add_argument("--historial", help="carpeta del historial, para contar los dias de historia")
     args = ap.parse_args(argv)
 
     idx = json.loads(Path(args.indice).read_text(encoding="utf-8"))
-    datos = dict(generado=idx.get("generado", ""), **informe(idx.get("productos", [])))
+    filas = idx.get("productos", [])
+    datos = dict(generado=idx.get("generado", ""), **informe(filas))
+    datos["serie"] = dict(dias_de_historia=dias_de_historia(args.historial, idx.get("generado", "")) if args.historial else 0,
+                          **sellos_de_serie(filas))
     Path(args.salida).write_text(json.dumps(datos, ensure_ascii=False, indent=1), encoding="utf-8")
 
     alertas = caidas(datos, leer_previa(args.previa) if args.previa else None)

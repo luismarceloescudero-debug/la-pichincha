@@ -140,7 +140,15 @@ test("sellosDe traduce las letras a sellos, en orden fijo", () => {
   assert.deepEqual(B.sellosDe("e"), [["off2", "envío gratis"]]);
   assert.deepEqual(B.sellosDe(""), []);
   assert.deepEqual(B.sellosDe(undefined), []);
-  assert.deepEqual(B.sellosDe("xz"), []);
+  assert.deepEqual(B.sellosDe("kz"), []);
+});
+
+test("sellosDe: los sellos de la serie de precios (m, h, x)", () => {
+  assert.deepEqual(B.sellosDe("m"), [["baja", "mínimo de 30 días"]]);
+  assert.deepEqual(B.sellosDe("h"), [["baja", "mínimo de 90 días"]]);
+  assert.deepEqual(B.sellosDe("x"), [["ojo", "subió antes de la oferta"]]);
+  assert.deepEqual(B.sellosDe("mxe"), [["off2", "envío gratis"], ["baja", "mínimo de 30 días"],
+    ["ojo", "subió antes de la oferta"]]);
 });
 
 test("categoriaDe es la primera palabra en singular", () => {

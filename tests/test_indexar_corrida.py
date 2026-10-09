@@ -167,6 +167,23 @@ class Corrida(unittest.TestCase):
         self.assertEqual({f[3] + str(f[1]): f[9] for f in indice["productos"]},
                          {"uno1000": "SA400S37/480G", "dos900": "SA400S37/480G", "dos800": "SA400S37/240G"})
 
+    def test_la_serie_de_precios_suma_sus_sellos_a_los_del_catalogo(self):
+        from datetime import timedelta
+        hoy = indexar.datetime.now(indexar.AR).date()
+        self.hist.mkdir(parents=True, exist_ok=True)
+        filas = [("uno", url(1), 1200, hoy - timedelta(days=45)), ("uno", url(1), 1000, hoy - timedelta(days=20)),
+                 ("uno", url(2), 500, hoy - timedelta(days=5))]
+        por_mes = {}
+        for tienda, u, precio, dia in filas:
+            por_mes.setdefault(dia.strftime("%Y-%m"), []).append(f"{dia.isoformat()},{tienda},{u},{precio}")
+        for mes, lineas in por_mes.items():
+            cuerpo = chr(10).join(["fecha,tienda,id,precio"] + lineas) + chr(10)
+            (self.hist / f"{mes}.csv").write_text(cuerpo, encoding="utf-8")
+        indice, _ = self.correr([(1, 950), (2, 500)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[8], "m")      # 45 dias de historia y hoy es su piso
+        self.assertEqual(self.fila(indice, "uno", 2)[8], "")       # 5 dias de historia: no afirma nada
+        self.assertEqual(self.fila(indice, "dos", 101)[8], "")     # sin historia
+
     def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
         # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
         # tiene que quedar con su valor por defecto, no corrido de lugar.

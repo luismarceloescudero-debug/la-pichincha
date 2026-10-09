@@ -268,6 +268,24 @@ alcanza: la prueba junto 145 pendrives distintos bajo la clave "128gb" y metio
 una notebook entre los SSD de 480GB. Lo que si funciona es el codigo de modelo
 exacto (ver abajo).
 
+## Serie de precios
+
+Con el historial (rama `historial`) cada aviso puede llevar tres sellos, que
+`serie.py` calcula al indexar y viajan como letras en la columna `sellos`:
+
+| Letra | Sello | Cuando |
+| --- | --- | --- |
+| `m` | minimo de 30 dias | hoy es el precio mas bajo de los ultimos 30 dias, con al menos 30 dias de historia |
+| `h` | minimo de 90 dias | lo mismo con 90 (reemplaza a `m`) |
+| `x` | subio antes de la oferta | la ultima baja es de los ultimos 30 dias y el producto habia estado 10% o mas por debajo de su precio previo, sin que la baja pase 3% por debajo de ese piso; pide 14 dias de historia |
+
+Sin historia suficiente no se afirma nada. El historial empezo el 2026-10-07,
+asi que el sello de 30 dias recien aparece desde el 2026-11-06 y el de 90 desde
+el 2027-01-05; hasta entonces la funcion esta lista y no muestra nada, a
+proposito. `cobertura.json` dice cuantos avisos llevan cada sello y cuantos dias
+de historia hay. No hay grafico: seria una vista nueva y primero se mide si los
+sellos se usan.
+
 ## Identidad por codigo de modelo
 
 El mismo producto en varias tiendas se agrupa **solo** cuando comparte el

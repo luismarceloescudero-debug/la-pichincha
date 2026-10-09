@@ -154,7 +154,10 @@
 
   /* Las letras que guarda el indice ("ioe") como [clase, texto] de cada sello. */
   const SELLOS = [["i", "ojo", "compra internacional"], ["o", "conocida", "tienda oficial"],
-                  ["e", "off2", "envío gratis"]];
+                  ["e", "off2", "envío gratis"],
+                  // de la serie de precios (serie.py): solo salen con historial suficiente
+                  ["m", "baja", "mínimo de 30 días"], ["h", "baja", "mínimo de 90 días"],
+                  ["x", "ojo", "subió antes de la oferta"]];
   const sellosDe = s => typeof s !== "string" ? []
     : SELLOS.filter(([l]) => s.includes(l)).map(([, clase, texto]) => [clase, texto]);
 
