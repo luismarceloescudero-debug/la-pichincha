@@ -170,7 +170,7 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 }
 
 function pie(ctx) {
-  return `<p class="nota">Precios con IVA y sin envío, tomados de CompraGamer, Gaming City, Mexx, FullH4rd y ComparaYa. ` +
+  return `<p class="nota">Precios con IVA y sin envío, tomados de CompraGamer, Gaming City, Mexx, FullH4rd, Venex y ComparaYa. ` +
     `El stock y los precios de hardware se mueven rápido: confirmá antes de pagar. ` +
     `<a href="../../">Volver a La Pichincha</a>.</p>`;
 }

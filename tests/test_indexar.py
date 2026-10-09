@@ -82,6 +82,28 @@ class TarjetasSinteticas(unittest.TestCase):
              "nombre": "Memoria Kingston 16GB", "precio": 45000, "lista": None,
              "imagen": "https://mexx-img-2019.s3.amazonaws.com/tumb_1_2.jpeg"}])
 
+    def test_venex(self):
+        html = ('<div class="product-box" style=""><div class="product-box-media"><a href="https://www.venex.com.ar/x/y/mem.html">'
+                '<img src="products_images/thumb/178_mem_4png" class="img-contained" alt="Memoria"></a></div>'
+                '<h3 class="product-box-title"><a href="https://www.venex.com.ar/x/y/mem.html" onclick="enhancedClick(1)" >'
+                'Memoria RAM Kingston DDR4 16GB 3200MHz</a></h3>'
+                '<a class="product-box-price clearfix" href="https://www.venex.com.ar/x/y/mem.html"><span class="current-price" '
+                'style="width:100%">$ 45.990</span></a></div>')
+        self.assertEqual(indexar.tarjetas(html, TIENDAS["venex"]["catalogo"]), [
+            {"url": "https://www.venex.com.ar/x/y/mem.html", "nombre": "Memoria RAM Kingston DDR4 16GB 3200MHz",
+             "precio": 45990, "lista": None, "imagen": "products_images/thumb/178_mem_4png"}])
+
+    def test_listados_del_sitemap_con_excluye_y_hojas(self):
+        sitemap = ("<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in (
+            "https://t.test", "https://t.test/comp", "https://t.test/comp/ram", "https://t.test/comp/ram/desktop",
+            "https://t.test/comp/ram/desktop/kingston-16gb.html", "https://t.test/comp/ssd",
+            "https://t.test/monitores", "https://t.test/quienes-somos.htm")) + "</urlset>")
+        tienda = {"catalogo": {"origen": {"tipo": "sitemap", "url": "https://t.test/sitemap.xml",
+                                          "contiene": "https://t.test/", "excluye": [".html", ".htm"], "hojas": True}}}
+        with mock.patch.object(indexar, "bajar", return_value=sitemap):
+            self.assertEqual(sorted(indexar.listados(tienda)),
+                             ["https://t.test/comp/ram/desktop", "https://t.test/comp/ssd", "https://t.test/monitores"])
+
     def test_fullh4rd(self):
         html = ('<article class="results-card"><h3 class="results-card__title">'
                 '<a href="/prod/123/ssd-kingston-1tb">SSD Kingston 1TB</a></h3>'
@@ -100,10 +122,12 @@ class TarjetasReales(unittest.TestCase):
     Cuando `python tests/capturar.py fullh4rd` funcione, se suma aca."""
 
     PATRONES = {"gamingcity": r"^[a-z0-9-]+--det--\d+$",
-                "mexx": r"^https://www\.mexx\.com\.ar/productos-rubro/.+\.html$"}
+                "mexx": r"^https://www\.mexx\.com\.ar/productos-rubro/.+\.html$",
+                "venex": r"^https://www\.venex\.com\.ar/.+\.html$"}
     # Vacia cuando la tienda no tiene foto: Gaming City muestra img-no-disponible.jpg.
     FOTOS = {"gamingcity": r"^(https://www\.gamingcity\.com\.ar/thumb/imagen_\d+_\d+x\d+\.jpg)?$",
-             "mexx": r"^(https://mexx-img-2019\.s3\.amazonaws\.com/tumb_\d+_\d+\.\w+(\?\w+)?)?$"}
+             "mexx": r"^(https://mexx-img-2019\.s3\.amazonaws\.com/tumb_\d+_\d+\.\w+(\?\w+)?)?$",
+             "venex": r"^(products_images/thumb/[\w.]+)?$"}
 
     def test_listados_guardados(self):
         for clave, patron in self.PATRONES.items():
