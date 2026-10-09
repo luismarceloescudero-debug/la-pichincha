@@ -175,3 +175,28 @@ class FuentesSinBloquear(unittest.TestCase):
 
     def test_index(self):
         self.comprobar((RAIZ / "index.html").read_text(encoding="utf-8"))
+
+
+class EnLaAction(unittest.TestCase):
+    def setUp(self):
+        self.yml = (RAIZ / ".github" / "workflows" / "actualizar.yml").read_text(encoding="utf-8")
+
+    def test_la_action_deja_lista_la_app_despues_de_generar_las_paginas(self):
+        self.assertIn("python publicar_app.py --salida _sitio --indice indice.json", self.yml)
+        self.assertLess(self.yml.index("generar_paginas.py"), self.yml.index("publicar_app.py"))
+        self.assertLess(self.yml.index("publicar_app.py"), self.yml.index("upload-pages-artifact"))
+
+    def test_si_falla_la_app_el_sitio_se_publica_igual(self):
+        linea = [l for l in self.yml.splitlines() if "publicar_app.py" in l and "python" in l][0]
+        self.assertIn("|| echo", linea)
+
+    def test_el_sitio_copia_lo_que_necesita_la_cascara(self):
+        # Todo lo que el service worker guarda tiene que existir en lo publicado.
+        import re
+        sw = (RAIZ / "sw.js").read_text(encoding="utf-8")
+        cascara = re.findall(r'"([^"]+)"', re.search(r"const CASCARA = \[(.*?)\];", sw, re.S).group(1))
+        copiados_por_publicar = {"manifest.webmanifest", "sin-red.html", "img/icono-192.png", "img/icono-512.png", "img/apple-touch-icon.png"}
+        for ruta in cascara:
+            en_la_raiz = ruta in ("./", "index.html", "indice.json")
+            en_carpeta_copiada = ruta.split("/")[0] in ("css", "js", "img") and "cp -r img js css _sitio/" in self.yml
+            self.assertTrue(en_la_raiz or en_carpeta_copiada or ruta in copiados_por_publicar, ruta)

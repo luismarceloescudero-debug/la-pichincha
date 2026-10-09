@@ -142,6 +142,11 @@ jobs:
             python generar_paginas.py --indice indice.json --salida _sitio
           fi
 
+      # La app instalable: estampa la version en sw.js (una cache nueva por publicacion, la anterior se
+      # descarta) y copia el manifiesto, la pagina de sin conexion y los iconos. Si falla, el sitio sale igual.
+      - name: Dejar lista la app instalable
+        run: python publicar_app.py --salida _sitio --indice indice.json || echo "::warning::No se armo la app instalable"
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _sitio
