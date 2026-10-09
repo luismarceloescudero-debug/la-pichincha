@@ -166,8 +166,53 @@
     return w;
   }
 
+
+  /* --- Identidad por codigo de modelo (columna 9 del indice) ---------------
+     El mismo producto en varias tiendas es el que comparte el MISMO codigo de modelo, exacto. Nunca por
+     parecido de nombre. Si los nombres dicen capacidades distintas, tampoco se juntan. */
+  const capacidadGB = nombre => {
+    const caps = [...String(nombre).replace(/(\d),(\d)/g, "$1.$2").matchAll(/(\d+(?:\.\d+)?)\s?(gb|tb)\b/gi)]
+      .map(m => Math.round(parseFloat(m[1]) * (m[2].toLowerCase() === "tb" ? 1000 : 1)));
+    return caps.length ? Math.max(...caps) : 0;
+  };
+  const compatibles = (x, y) => { const a = capacidadGB(x[0]), b = capacidadGB(y[0]); return !a || !b || a === b; };
+  const antes = (x, y) => x[1] - y[1] || (x[3] < y[3] ? -1 : x[3] > y[3] ? 1 : 0) || (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0)
+    || (x[2] < y[2] ? -1 : x[2] > y[2] ? 1 : 0);
+
+  /* Devuelve { filas, otras }: cada grupo (2 o mas tiendas) queda como su fila mas barata, y `otras` dice,
+     por esa fila, las demas tiendas de menor a mayor precio. Todo lo demas queda igual y en su lugar. */
+  function agruparPorModelo(filas) {
+    const porModelo = new Map();
+    for (const f of filas) if (f[9]) (porModelo.get(f[9]) || porModelo.set(f[9], []).get(f[9])).push(f);
+    const representante = new Map(), otras = new Map(), colapsadas = new Set();
+    for (const lote of porModelo.values()) {
+      let resto = [...lote].sort(antes);
+      while (resto.length) {
+        const cabeza = resto[0];
+        const mios = resto.filter(x => compatibles(cabeza, x));
+        resto = resto.filter(x => !mios.includes(x));
+        const porTienda = new Map();
+        for (const x of mios) if (!porTienda.has(x[3])) porTienda.set(x[3], x);
+        if (porTienda.size < 2) continue;
+        const miembros = [...porTienda.values()];
+        otras.set(cabeza, miembros.slice(1));
+        for (const m of miembros) { representante.set(m, cabeza); colapsadas.add(m); }
+      }
+    }
+    const salida = [], puestos = new Set();
+    for (const f of filas) {
+      const rep = representante.get(f);
+      if (!rep) { salida.push(f); continue; }
+      if (!puestos.has(rep)) { puestos.add(rep); salida.push(rep); }
+    }
+    return { filas: salida, otras };
+  }
+
+  const textoConteo = (productos, avisos) => productos === avisos
+    ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
+
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe };
+                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
 })(this);
