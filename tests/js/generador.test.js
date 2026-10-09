@@ -61,9 +61,9 @@ test("la tabla se corta en 20 opciones y dice cuantas mas hay", () => {
 test("una fuente que no se releva hoy muestra la fecha de su precio", () => {
   const { ctx, analisis } = armar(IDX, "ddr4 16gb");
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
-  const filaMexx = html.split("<tr data-op").find(t => t.includes("Hiksemi"));
+  const filaMexx = html.split("<tr data-op").slice(1).find(t => t.includes("Hiksemi"));
   assert.match(filaMexx, /precio del 8\/10/);
-  const filaCg = html.split("<tr data-op").find(t => t.includes("Crucial"));
+  const filaCg = html.split("<tr data-op").slice(1).find(t => t.includes("Crucial"));
   assert.doesNotMatch(filaCg, /precio del/);
 });
 
@@ -100,4 +100,119 @@ test("una consulta sin resultados tambien es una pagina no indexable", () => {
   assert.match(html, /hoy no hay opciones suficientes/i);
   assert.match(html, /noindex/);
   assert.equal(G.esIndexable(null), false);
+});
+
+// ---- US2: seguir a la comparativa interactiva y medir los clics ----
+
+function paginaDe(idx, q = "ddr4 16gb") {
+  const { ctx, analisis } = armar(idx, q);
+  return { ctx, analisis, html: G.renderPagina({ q, slug: G.slugDe ? G.slugDe(q) : q.replace(/ /g, "-") }, analisis, ctx) };
+}
+
+test("el boton lleva a la comparativa interactiva de la misma consulta", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<a class="acc" href="\.\.\/\.\.\/\?q=ddr4\+16gb#comparativa">Ver la comparativa completa<\/a>/);
+});
+
+test("las paginas cargan GoatCounter y cada enlace a una tienda lleva su rubro", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<script id="gc" data-goatcounter="https:\/\/mescudero\.goatcounter\.com\/count" async src="https:\/\/gc\.zgo\.at\/count\.js"><\/script>/);
+  assert.match(html, /<script src="\.\.\/\.\.\/js\/pagina\.js"><\/script>/);
+  const enlaces = html.match(/<a href="https:\/\/t\.test[^>]*>/g) || [];
+  assert.ok(enlaces.length >= 5);
+  assert.ok(enlaces.every(a => /data-rubro="memoria"/.test(a)), enlaces[0]);
+});
+
+test("el clic en una tienda se mide como clic_saliente con su comercio y rubro", () => {
+  const vm = require("node:vm");
+  const llamadas = [];
+  let escuchar = null;
+  const ventana = { goatcounter: { count: e => llamadas.push(e) }, Pagina: require("../../js/pagina.js") };
+  const documento = { addEventListener: (tipo, fn) => { if (tipo === "click") escuchar = fn; } };
+  vm.runInNewContext(G.SCRIPT_MEDICION, { window: ventana, document: documento, Pagina: ventana.Pagina });
+  const enlace = { href: "https://www.mexx.com.ar/p.html", dataset: { rubro: "memoria" } };
+  escuchar({ target: { closest: sel => sel === "a[data-rubro]" ? enlace : null } });
+  escuchar({ target: { closest: () => null } });                       // un clic que no es en una tienda
+  assert.deepEqual(llamadas, [{ path: "clic_saliente/mexx.com.ar/memoria", title: "mexx.com.ar", event: true }]);
+});
+
+test("sin GoatCounter cargado el clic no rompe nada", () => {
+  const vm = require("node:vm");
+  let escuchar = null;
+  vm.runInNewContext(G.SCRIPT_MEDICION, { window: { Pagina: require("../../js/pagina.js") },
+    document: { addEventListener: (t, fn) => { escuchar = fn; } }, Pagina: require("../../js/pagina.js") });
+  assert.doesNotThrow(() => escuchar({ target: { closest: () => ({ href: "https://a.com.ar/x", dataset: { rubro: "x" } }) } }));
+});
+
+// ---- US3: que los buscadores entiendan la pagina ----
+
+function jsonld(html) {
+  const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(m, "falta el JSON-LD");
+  return JSON.parse(m[1]);
+}
+
+test("el JSON-LD trae ItemList, el rango de precios en ARS y las migas", () => {
+  const { html, analisis } = paginaDe(IDX);
+  const grafo = jsonld(html)["@graph"];
+  const tipo = t => grafo.find(n => n["@type"] === t);
+  const lista = tipo("ItemList");
+  assert.equal(lista.numberOfItems, 5);
+  assert.equal(lista.itemListElement.length, 5);
+  const primero = lista.itemListElement[0];
+  assert.equal(primero.position, 1);
+  assert.equal(primero.item["@type"], "Product");
+  assert.equal(primero.item.offers["@type"], "Offer");
+  assert.equal(primero.item.offers.priceCurrency, "ARS");
+  assert.equal(typeof primero.item.offers.price, "number");
+  assert.equal(primero.item.offers.url, primero.item.url);
+  const producto = tipo("Product");
+  const oferta = producto.offers;
+  assert.equal(oferta["@type"], "AggregateOffer");
+  assert.deepEqual([oferta.lowPrice, oferta.highPrice, oferta.offerCount, oferta.priceCurrency], [900, 1100, 5, "ARS"]);
+  const migas = tipo("BreadcrumbList").itemListElement.map(e => e.name);
+  assert.deepEqual(migas, ["La Pichincha", "Precios", "ddr4 16gb"]);
+});
+
+test("el JSON-LD escapa lo que podria cerrar el script", () => {
+  const raro = { ...IDX, productos: IDX.productos.map(f => [...f]) };
+  raro.productos[4][0] = "Memoria </script><script>alert(1)</script> DDR4 16GB 3200MHz";
+  const { html } = paginaDe(raro);
+  const crudo = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
+  assert.ok(!crudo.includes("</script"));
+  assert.ok(JSON.stringify(JSON.parse(crudo)).includes("alert(1)"), "el texto sigue estando, escapado");
+});
+
+test("titulo, descripcion, canonica y social son propios de la pagina", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<title>ddr4 16gb: precios en Argentina, desde \$900 \| La Pichincha<\/title>/);
+  assert.match(html, /<meta name="description" content="5 opciones de ddr4 16gb en 2 comercios: desde \$900, mediana \$1\.000\./);
+  assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/">/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/ejemplo\.test\/la-pichincha\/img\/og\.png">/);
+});
+
+// ---- US4: el indice /precios/ enlaza todas las paginas indexables ----
+
+test("el indice de consultas enlaza cada pagina, agrupada, con su precio desde", () => {
+  const { ctx } = armar(IDX, "ddr4 16gb");
+  const html = G.renderIndice([
+    { q: "ssd 1tb", slug: "ssd-1tb", grupo: "Almacenamiento", desde: 204250, comparables: 28 },
+    { q: "ddr4 16gb", slug: "ddr4-16gb", grupo: "Memorias", desde: 900, comparables: 5 },
+    { q: "ssd 2tb", slug: "ssd-2tb", grupo: "Almacenamiento", desde: 400000, comparables: 16 },
+  ], ctx);
+  assert.match(html, /<h1>Precios de hardware en Argentina<\/h1>/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/">/);
+  assert.match(html, /<link rel="stylesheet" href="\.\.\/css\/sitio\.css">/);
+  assert.match(html, /<a href="ssd-1tb\/">ssd 1tb<\/a>[^<]*<span[^>]*>desde \$204\.250/);
+  assert.ok(html.indexOf("Almacenamiento") < html.indexOf("ssd-1tb/") && html.indexOf("ssd-2tb/") < html.indexOf("Memorias"),
+    "las del mismo grupo van juntas");
+  assert.doesNotMatch(html, /noindex/);
+  assert.match(html, /<a href="\.\.\/">/, "vuelve a la pagina principal");
+});
+
+test("el indice sin paginas no inventa enlaces", () => {
+  const { ctx } = armar(IDX, "ddr4 16gb");
+  const html = G.renderIndice([], ctx);
+  assert.doesNotMatch(html, /<li>/);
+  assert.match(html, /todav[ií]a no hay/i);
 });

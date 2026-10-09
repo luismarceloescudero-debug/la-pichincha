@@ -53,11 +53,45 @@ function sellosHtml(f, ctx) {
 }
 
 function filaHtml(f, ctx) {
-  return `<tr data-op><td><a href="${esc(f[2])}" target="_blank" rel="noopener">${esc(f[0])}</a></td>` +
+  return `<tr data-op><td><a href="${esc(f[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a></td>` +
     `<td>${esc(ctx.comercioDe(f))}</td><td class="num">${pesos(f[1])}</td><td>${sellosHtml(f, ctx)}</td></tr>`;
 }
 
-function cabeza({ titulo, descripcion, canonica, noindex, baseUrl }) {
+/* JSON para meter en un <script>: el "<" va escapado para que ningun texto cierre la etiqueta. */
+const jsonLd = obj => JSON.stringify(obj).replace(/</g, "\\u003c");
+
+/* Mide el clic hacia una tienda con la misma analitica que el sitio (GoatCounter, sin cookies).
+   Si el script de GoatCounter no cargo, el clic sigue su camino sin avisar. */
+const SCRIPT_MEDICION = `(function () {
+  function alClic(ev) {
+    var a = ev.target.closest("a[data-rubro]");
+    if (!a) return;
+    var e = Pagina.eventoClic(a.href, a.dataset.rubro);
+    var gc = window.goatcounter;
+    if (e && gc && typeof gc.count === "function") { try { gc.count(e); } catch (_) {} }
+  }
+  document.addEventListener("click", alClic, true);
+  document.addEventListener("auxclick", alClic, true);
+})();`;
+
+function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
+  const base = ctx.baseUrl;
+  const canonica = `${base}/precios/${consulta.slug}/`;
+  const oferta = f => ({ "@type": "Offer", price: f[1], priceCurrency: "ARS", url: f[2] });
+  return { "@context": "https://schema.org", "@graph": [
+    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: filas.length,
+      itemListElement: filas.slice(0, MAX_FILAS).map((f, i) => ({ "@type": "ListItem", position: i + 1,
+        item: { "@type": "Product", name: f[0], url: f[2], offers: oferta(f) } })) },
+    { "@type": "Product", name: consulta.q, image: `${base}/img/og.png`, url: canonica,
+      offers: { "@type": "AggregateOffer", lowPrice: desde, highPrice: hasta, offerCount: filas.length, priceCurrency: "ARS" } },
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "La Pichincha", item: `${base}/` },
+      { "@type": "ListItem", position: 2, name: "Precios", item: `${base}/precios/` },
+      { "@type": "ListItem", position: 3, name: consulta.q, item: canonica } ] },
+  ] };
+}
+
+function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, rel = "../../" }) {
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -80,8 +114,10 @@ ${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta propert
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="../../css/sitio.css">
-<style>
+<link rel="stylesheet" href="${rel}css/sitio.css">
+<script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
+` : ""}<style>
 /* Solo de estas paginas: todo sale de las variables del sitio, asi sigue el tema claro u oscuro. */
 .wrap a{color:var(--accent)}
 .wrap a.acc{color:var(--ink)}
@@ -121,6 +157,8 @@ function renderPagina(consulta, analisis, ctx) {
   <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(q)}» en La Pichincha</a></p>
   ${pie(ctx)}
 </div>
+<script src="../../js/pagina.js"></script>
+<script>${SCRIPT_MEDICION}</script>
 </body>
 </html>
 `;
@@ -140,7 +178,8 @@ function renderPagina(consulta, analisis, ctx) {
   const descripcion = `${filas.length} opciones de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
     `mediana ${pesos(analisis.med)}. Mejor compra y precios de ${cuando}.`;
 
-  return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl }) + `
+  return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
+    grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div class="wrap">
   <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
@@ -149,7 +188,7 @@ function renderPagina(consulta, analisis, ctx) {
 
   <section class="panel">
     <h2>Mejor compra</h2>
-    <p><a href="${esc(mejor[2])}" target="_blank" rel="noopener"><b>${esc(mejor[0])}</b></a> · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
+    <p><a href="${esc(mejor[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(mejor[0]) || "otro")}"><b>${esc(mejor[0])}</b></a> · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
     <p class="sub">${esc(analisis.picks[0].razon)}</p>
   </section>
 
@@ -181,6 +220,46 @@ ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).joi
   <p><a class="acc" href="${esc(interactiva)}">Ver la comparativa completa</a></p>
   ${pie(ctx)}
 </div>
+<script src="../../js/pagina.js"></script>
+<script>${SCRIPT_MEDICION}</script>
+</body>
+</html>
+`;
+}
+
+/* /precios/: el hub que enlaza cada pagina indexable, agrupada por rubro. entradas = [{ q, slug,
+   grupo, desde, comparables }] y solo trae las indexables: las finas no se enlazan. */
+function renderIndice(entradas, ctx) {
+  const canonica = `${ctx.baseUrl}/precios/`;
+  const grupos = new Map();
+  for (const e of entradas) {
+    if (!grupos.has(e.grupo)) grupos.set(e.grupo, []);
+    grupos.get(e.grupo).push(e);
+  }
+  const cuando = P.cuando(ctx.idx.generado, ctx.ahora);
+  const grafo = { "@context": "https://schema.org", "@graph": [
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "La Pichincha", item: `${ctx.baseUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Precios", item: canonica } ] },
+  ] };
+  const cuerpo = entradas.length ? [...grupos].map(([grupo, lista]) => `  <section>
+    <h2>${esc(grupo)}</h2>
+    <ul>
+${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span class="sub">desde ${pesos(e.desde)} · ${e.comparables} opciones</span></li>`).join("\n")}
+    </ul>
+  </section>`).join("\n")
+    : `  <p class="sub">Todavía no hay páginas de precios con opciones suficientes. Probá el <a href="../">buscador</a>.</p>`;
+  return cabeza({ titulo: "Precios de hardware en Argentina | La Pichincha",
+    descripcion: `Precios de hardware en Argentina comparados en varias tiendas: placas de video, monitores, memorias, SSD y más. Precios de ${cuando}.`,
+    canonica, noindex: false, baseUrl: ctx.baseUrl, grafo, rel: "../" }) + `
+<body>
+<div class="wrap">
+  <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
+  <h1>Precios de hardware en Argentina</h1>
+  <p class="sub">Lo que se busca más, con el precio de hoy en varias tiendas, la mediana y qué conviene comprar. Cada página sale del mismo análisis que la comparativa de <a href="../">La Pichincha</a>.</p>
+${cuerpo}
+  <p class="nota">Precios con IVA y sin envío. <a href="../">Volver a La Pichincha</a>.</p>
+</div>
 </body>
 </html>
 `;
@@ -204,17 +283,24 @@ function main(argv) {
   const consultas = JSON.parse(fs.readFileSync(consultasPath, "utf8"));
   const ctx = crearContexto(idx, { baseUrl, marcas: datos.marcas || {} });
 
-  let indexables = 0;
+  const paginas = [], entradas = [];
   for (const c of consultas) {
     const analisis = A.analizarConsulta(c.q, ctx);
     const dir = path.join(salida, "precios", c.slug);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "index.html"), renderPagina(c, analisis, ctx), "utf8");
-    if (esIndexable(analisis)) indexables++;
+    const indexable = esIndexable(analisis);
+    paginas.push({ slug: c.slug, q: c.q, indexable });
+    if (indexable) entradas.push({ q: c.q, slug: c.slug, grupo: (c.nota || "").split(":")[0] || "Otros",
+      desde: Math.min(...analisis.base.map(m => m.f[1])), comparables: analisis.base.length });
   }
-  console.log(`${consultas.length} paginas generadas, ${indexables} indexables`);
+  fs.mkdirSync(path.join(salida, "precios"), { recursive: true });
+  fs.writeFileSync(path.join(salida, "precios", "index.html"), renderIndice(entradas, ctx), "utf8");
+  const manifiesto = arg("manifiesto");                  // lo lee generar_paginas.py para el mapa del sitio
+  if (manifiesto) fs.writeFileSync(manifiesto, JSON.stringify({ generado: idx.generado, paginas }), "utf8");
+  console.log(`${consultas.length} paginas generadas, ${entradas.length} indexables`);
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, esIndexable, esc, pesos, BASE_URL, MIN_COMPARABLES };
+module.exports = { crearContexto, renderPagina, renderIndice, esIndexable, esc, pesos, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

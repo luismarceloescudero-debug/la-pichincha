@@ -17,6 +17,7 @@ import sys
 import tempfile
 import unicodedata
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 RAIZ = Path(__file__).resolve().parent
 CONSULTAS = RAIZ / "consultas.json"
@@ -54,6 +55,23 @@ def cargar_consultas(ruta=CONSULTAS):
     return salida
 
 
+def sitemap(paginas, generado, base_url=BASE_URL):
+    """sitemap.xml: la principal, el indice /precios/ y solo las paginas indexables.
+    lastmod es la fecha de los precios; sin indice no hay fecha ni paginas (FR-016)."""
+    fecha = (generado or "")[:10]
+    urls = [base_url + "/"]
+    if paginas or generado:
+        urls.append(base_url + "/precios/")
+        urls += [f"{base_url}/precios/{p['slug']}/" for p in paginas if p["indexable"]]
+    filas = [f"  <url><loc>{escape(u)}</loc>" + (f"<lastmod>{fecha}</lastmod>" if fecha else "") + "</url>" for u in urls]
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(filas) + "\n</urlset>\n")
+
+
+def robots(base_url=BASE_URL):
+    return f"User-agent: *\nAllow: /\n\nSitemap: {base_url}/sitemap.xml\n"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Genera las paginas por busqueda popular.")
     ap.add_argument("--indice", default=str(RAIZ / "indice.json"))
@@ -63,13 +81,18 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     consultas = cargar_consultas(args.consultas)      # una lista invalida corta antes de generar nada
+    manifiesto = {"generado": None, "paginas": []}
     with tempfile.TemporaryDirectory() as tmp:
         validadas = Path(tmp) / "consultas-validadas.json"
         validadas.write_text(json.dumps(consultas, ensure_ascii=False), encoding="utf-8")
+        salida_manifiesto = Path(tmp) / "manifiesto.json"
         hecho = subprocess.run(
             ["node", str(RAIZ / "generar_paginas.js"), "--indice", args.indice, "--consultas", str(validadas),
-             "--salida", args.salida, "--base-url", args.base_url, "--datos", str(RAIZ / "datos.json")],
+             "--salida", args.salida, "--base-url", args.base_url, "--datos", str(RAIZ / "datos.json"),
+             "--manifiesto", str(salida_manifiesto)],
             capture_output=True, text=True, encoding="utf-8")
+        if salida_manifiesto.exists():
+            manifiesto = json.loads(salida_manifiesto.read_text(encoding="utf-8"))
     sys.stdout.write(hecho.stdout)
     if hecho.returncode:
         sys.stderr.write(hecho.stderr)
@@ -78,6 +101,12 @@ def main(argv=None):
         faltan = [c["slug"] for c in consultas if not (Path(args.salida) / "precios" / c["slug"] / "index.html").exists()]
         if faltan:
             raise RuntimeError("no se generaron las paginas de: " + ", ".join(faltan))
+    else:
+        print("aviso: sin indice de precios, el mapa del sitio lista solo la pagina principal")
+    salida = Path(args.salida)
+    salida.mkdir(parents=True, exist_ok=True)
+    (salida / "sitemap.xml").write_text(sitemap(manifiesto["paginas"], manifiesto["generado"], args.base_url), encoding="utf-8")
+    (salida / "robots.txt").write_text(robots(args.base_url), encoding="utf-8")
     return 0
 
 
