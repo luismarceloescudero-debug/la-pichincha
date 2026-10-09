@@ -35,7 +35,13 @@ const ctx = {
   buscarTodo: q => { const c = B.filtroDe(q); return c ? IDX.productos.filter((f, k) => c(N[k])) : []; },
 };
 vm.createContext(ctx);
-vm.runInContext(codigo + "\nthis.analizarConsulta = analizarConsulta;", ctx);
+if (html.includes("Analisis.analizarConsulta")) {
+  // index.html ya delega en el modulo compartido: se mide el modulo.
+  const A = require(raiz + "/js/analisis.js");
+  ctx.analizarConsulta = q => A.analizarConsulta(q, ctx);
+} else {
+  vm.runInContext(codigo + "\nthis.analizarConsulta = analizarConsulta;", ctx);
+}
 
 const consultas = ["ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "ddr4 16gb", "fuente 650w", "ipad",
   "mouse inalambrico", "webcam", "silla gamer"];
