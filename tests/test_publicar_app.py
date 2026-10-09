@@ -116,3 +116,24 @@ class Publicar(unittest.TestCase):
         import publicar_app
         total = sum((RAIZ / r).stat().st_size for r in publicar_app.ARCHIVOS_DE_LA_CASCARA if (RAIZ / r).exists())
         self.assertLess(total, 10 * 1024 * 1024)
+
+
+class CabezaDelSitio(unittest.TestCase):
+    def setUp(self):
+        self.html = (RAIZ / "index.html").read_text(encoding="utf-8")
+
+    def test_enlaza_el_manifiesto_los_colores_y_el_icono_de_apple(self):
+        self.assertIn('<link rel="manifest" href="manifest.webmanifest">', self.html)
+        self.assertIn('<link rel="apple-touch-icon" href="img/apple-touch-icon.png">', self.html)
+        self.assertRegex(self.html, r'<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: light\)">')
+        self.assertRegex(self.html, r'<meta name="theme-color" content="#[0-9a-f]{6}" media="\(prefers-color-scheme: dark\)">')
+
+    def test_esta_dentro_de_solo_web_asi_no_va_a_la_copia_del_artifact(self):
+        import re
+        bloques = re.findall(r"<!-- solo-web -->.*?<!-- /solo-web -->", self.html, re.S)
+        self.assertTrue(any('rel="manifest"' in b for b in bloques))
+
+    def test_no_arma_un_cartel_propio_de_instalar(self):
+        sin_comentarios = self.html
+        self.assertNotIn("beforeinstallprompt", sin_comentarios)
+        self.assertNotRegex(sin_comentarios.lower(), r">\s*instalar (la )?app")
