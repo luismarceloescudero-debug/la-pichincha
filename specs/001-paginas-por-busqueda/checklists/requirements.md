@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -37,3 +37,4 @@
   se le preguntan al dueño antes de `/speckit-clarify` o `/speckit-plan`.
 - Las rutas `/precios/<slug>/` e `img/og.png` se mantienen porque son parte del comportamiento
   visible (URL publicas), no detalle interno.
+- Iteracion 2: el dueño respondio P1 (lista armada desde el indice y revisada) y P2 (GitHub Pages ya); se agrego FR-017 por el PR #7 (precios sin verificar). Sin marcadores pendientes.

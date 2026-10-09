@@ -106,8 +106,8 @@ figura en el mapa del sitio.
 - Una consulta con menos de 5 opciones comparables: pagina de "hoy no hay opciones suficientes",
   marcada para no indexar y fuera del mapa del sitio. La URL sigue existiendo, para no romper
   enlaces ya indexados.
-- Una tienda caida o bloqueada (como FullH4rd hoy): la pagina usa lo publicado en el indice del
-  dia y dice cuantas fuentes aportaron.
+- Una tienda caida o bloqueada (como FullH4rd hoy): la pagina usa lo publicado en el indice, marca
+  esos productos con la fecha de su ultimo precio verificado y dice cuantas fuentes aportaron.
 - Compras internacionales: se listan marcadas pero no compiten por la mejor compra, igual que en
   el buscador.
 - Consultas con acentos, comillas o simbolos ("monitor 27\"", "placa de video"): el slug es
@@ -151,12 +151,15 @@ figura en el mapa del sitio.
   un telefono.
 - **FR-013**: Las visitas a estas paginas y los clics hacia tiendas MUST medirse con la misma
   analitica sin cookies del sitio.
-- **FR-014**: La lista de consultas MUST poder editarse sin tocar codigo y arrancar con unas 50
-  consultas elegidas segun [NEEDS CLARIFICATION: ¿la lista inicial la armo yo a partir del indice
-  y la revisas, la escribis vos, o se arma sola con las busquedas mas frecuentes?].
-- **FR-015**: Las URL absolutas (canonica, mapa del sitio, datos para compartir) MUST usar
-  [NEEDS CLARIFICATION: ¿el dominio actual de GitHub Pages ya, o esperar el dominio .com.ar de
-  F1.4 antes de dar de alta en Search Console?].
+- **FR-014**: La lista de consultas MUST poder editarse sin tocar codigo. La lista inicial (~50
+  consultas) la arma el equipo desde el indice, eligiendo rubros con muchos avisos y varias
+  tiendas, y el dueño la revisa (saca o agrega) antes de publicarla.
+- **FR-015**: Las URL absolutas (canonica, mapa del sitio, datos para compartir) MUST usar el
+  dominio actual de GitHub Pages y salir ya; al llegar el dominio propio (F1.4) la base de las URL
+  se cambia en un solo lugar y se reenvia el mapa del sitio.
+- **FR-017**: Un producto cuya fuente no se pudo relevar el dia de los precios MUST mostrar la fecha
+  de su ultimo precio verificado (por ejemplo "precio del 7/10") con el mismo criterio que el sitio
+  principal, y esa fecha MUST figurar tambien en los datos estructurados cuando corresponda.
 - **FR-016**: Si la publicacion no tiene indice de precios, MUST omitir las paginas de consulta,
   dejar un aviso en la corrida y publicar el mapa del sitio solo con la pagina principal.
 
