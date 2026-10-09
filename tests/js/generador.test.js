@@ -273,3 +273,14 @@ test("la pagina sin opciones tambien se puede ver sin conexion con su aviso", ()
   assert.match(html, /<div id="sin-red"/);
   assert.match(html, /App\.iniciar\(/);
 });
+
+test("las fuentes de Google no bloquean los scripts de la pagina ni del indice", () => {
+  const { html } = paginaDe(IDX);
+  const { ctx } = armar(IDX, "ddr4 16gb");
+  for (const h of [html, G.renderIndice([], ctx)]) {
+    const enlaces = h.match(/<link[^>]*fonts\.googleapis\.com\/css2[^>]*>/g) || [];
+    assert.equal(enlaces.length, 2, "uno con media=print y su version noscript");
+    assert.match(enlaces[0], /media="print" onload="this\.media='all'"/);
+    assert.match(h, /<noscript><link[^>]*fonts\.googleapis\.com\/css2[^>]*><\/noscript>/);
+  }
+});
