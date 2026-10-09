@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Iconos de la app</title>
+<!-- Fuente de img/icono-192.png, icono-512.png, icono-maskable-512.png y apple-touch-icon.png.
+     Para regenerarlos, desde la raiz del repo (rutas absolutas), una vez por icono:
+       msedge --headless=new --hide-scrollbars --window-size=192,192 --force-device-scale-factor=1
+         --screenshot=<ruta>\img\icono-192.png "file:///<ruta>/docs/iconos.html"
+       (512,512 para icono-512 y, con ?maskable=1 en la URL, icono-maskable-512; 180,180 para apple-touch-icon)
+     ?maskable=1 achica el dibujo para que entre en la zona segura (el circulo central del 80%): el sistema
+     recorta los bordes. Mismo azul y mismas barras que img/og.png. -->
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #0b4fd8; }
+  .dibujo { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .barras { display: flex; align-items: flex-end; gap: 6.2vmin; height: 52vmin; }
+  .barras span { width: 8.4vmin; border-radius: 2.4vmin 2.4vmin .8vmin .8vmin; background: rgba(255,255,255,.38); }
+  .barras span.si { background: #fff; }
+  .maskable .barras { height: 38vmin; gap: 4.4vmin; }
+  .maskable .barras span { width: 6vmin; border-radius: 1.8vmin 1.8vmin .6vmin .6vmin; }
+</style></head>
+<body>
+<div class="dibujo" id="d"><div class="barras">
+  <span style="height:62%"></span><span style="height:88%"></span><span class="si" style="height:40%"></span><span style="height:74%"></span><span style="height:100%"></span>
+</div></div>
+<script>if (/[?&]maskable=1/.test(location.search)) document.getElementById("d").classList.add("maskable");</script>
+</body></html>
