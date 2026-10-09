@@ -73,8 +73,9 @@
     `/speckit-specify` -> `/speckit-clarify` -> `/speckit-plan` -> `/speckit-tasks`.
   - Superpowers define el como: TDD para implementar, `systematic-debugging` para bugs y
     `verification-before-completion` antes de dar algo por terminado.
-  - addyosmani/agent-skills y ECC quedan para auditorias puntuales (`/review`, `/webperf`,
+  - addyosmani/agent-skills queda para auditorias puntuales (`/review`, `/webperf`,
     `/ship`, revision de seguridad) antes de publicar.
+  - ECC no se instala: sus agentes, hooks y memoria se pisan con Superpowers y spec-kit.
 - Se anuncia el inicio y el fin de cada fase o tarea.
 
 ## Governance
@@ -86,4 +87,4 @@
   se amplia materialmente, PATCH si se aclara la redaccion.
 - La guia operativa del dia a dia esta en `README.md` y `docs/plan-de-escalado.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-08
+**Version**: 1.0.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
