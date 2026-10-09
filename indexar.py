@@ -309,11 +309,18 @@ def main(argv=None):
         print("Opciones: " + ", ".join(fuentes))
         return 1
 
-    previo = {}
+    previo, relevado = {}, {}
     if INDICE.exists():
-        for fila in json.loads(INDICE.read_text(encoding="utf-8")).get("productos", []):
+        anterior = json.loads(INDICE.read_text(encoding="utf-8"))
+        for fila in anterior.get("productos", []):
             fila = list(fila)[:9] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
             previo.setdefault(fila[3], []).append(fila)
+        # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
+        # fuente caida conserva esa hora: no es un precio de hoy. Un indice
+        # anterior a este campo usa la fecha en que se genero.
+        for clave in previo:
+            relevado[clave] = ((anterior.get("tiendas") or {}).get(clave, {}).get("relevado")
+                               or anterior.get("generado"))
 
     # El historial vive en su propia rama y no en la cache de Actions. La clave
     # es (tienda, url): CompraGamer y ComparaYa publican las mismas URLs con
@@ -322,7 +329,7 @@ def main(argv=None):
     estado = historial.leer(carpeta)
     vivos = historial.vivos_por_tienda(estado)
 
-    salida, resumen, relevados, actuales = [], {}, {}, {}
+    salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
     for clave, fuente in fuentes.items():
         if not fuente.get("activa", True) or (args.solo and clave != args.solo):
             if clave in previo:                      # conservo lo que ya tenia indexado
@@ -361,6 +368,7 @@ def main(argv=None):
             continue
         rebaja_real = bool(fuente.get("lista_es_oferta"))
         relevados[clave] = len(items)
+        frescas.add(clave)
         bajaron = 0
         for it in items:
             lista = it.get("lista") or 0
@@ -384,6 +392,7 @@ def main(argv=None):
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
     generado = datetime.now(AR).isoformat(timespec="minutes")
+    relevado.update(dict.fromkeys(frescas, generado))
     informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado)
     sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
     filas = historial.cambios(estado, actuales, sanas, generado[:10])
@@ -392,8 +401,10 @@ def main(argv=None):
 
     datos = {
         "generado": generado,
-        "tiendas": {k: {"nombre": v["nombre"], "color": v["color"],
-                        "segunda": bool(v.get("segunda_opinion"))} for k, v in fuentes.items()},
+        "tiendas": {k: dict({"nombre": v["nombre"], "color": v["color"],
+                             "segunda": bool(v.get("segunda_opinion"))},
+                            **({"relevado": relevado[k]} if relevado.get(k) else {}))
+                    for k, v in fuentes.items()},
         "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos"],
         "productos": salida,
     }

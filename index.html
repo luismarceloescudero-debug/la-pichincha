@@ -800,7 +800,8 @@ const DATOS = {
    "precio": 214755,
    "precio_lista": 236231,
    "sin_impuestos": 194348,
-   "stock": "stock alto"
+   "stock": "stock alto",
+   "falla_desde": "2026-10-08"
   },
   {
    "id": "c920s",
@@ -1177,7 +1178,7 @@ function tarjeta(p, i) {
       <span class="tienda">${icono("store")} ${esc(t.nombre || "")}</span>
       <div><span class="precio">${pesos(p.precio)}</span>${p.precio_lista ? `<span class="antes">${pesos(p.precio_lista)}</span>` : ""}</div>
       <p class="titular">${esc(p.titular || "")}</p>
-      <div class="chips">${(p.chips || []).map(c => `<span class="chip${/ns|retiro|stock|OFF/.test(c) ? " ok" : ""}">${esc(c)}</span>`).join("")}</div>
+      <div class="chips">${chipOjo(avisoDe(p))}${(p.chips || []).map(c => `<span class="chip${/ns|retiro|stock|OFF/.test(c) ? " ok" : ""}">${esc(c)}</span>`).join("")}</div>
       <div class="pie">
         <span class="ver">Ver análisis ${icono("der")}</span>
         <span class="ir">${icono("fuera")} ${esc(t.nombre || "")}</span>
@@ -1199,7 +1200,7 @@ function comparativa(grupo, foco) {
     <thead><tr><th>&nbsp;</th>${grupo.map(p =>
       `<th class="${p.id === foco.id ? "foco" : ""}">${esc(p.corto)}</th>`).join("")}</tr></thead>
     <tbody>
-      <tr><th>Precio</th>${grupo.map(p => celda(pesos(p.precio), p, foco, p.precio === Math.min(...grupo.map(x => x.precio)))).join("")}</tr>
+      <tr><th>Precio</th>${grupo.map(p => celda(pesos(p.precio) + (avisoDe(p) ? ` · ${avisoDe(p)}` : ""), p, foco, p.precio === Math.min(...grupo.map(x => x.precio)))).join("")}</tr>
       ${filas.map(f => `<tr><th>${esc(f)}</th>${grupo.map(p =>
         celda(p.specs[f], p, foco, mejor[f] ? mejor[f](p.specs[f]) : false)).join("")}</tr>`).join("")}
     </tbody></table></div>`.replace(/class="scroll"/, `class="scroll c-${color}"`);
@@ -1222,6 +1223,7 @@ function detalle(p) {
       </div>
       <div class="dprecio">
         <a class="v" href="${p.url}" target="_blank" rel="noopener">${pesos(p.precio)}</a>
+        ${avisoDe(p) ? `<span class="l">${selloOjo(avisoDe(p))}</span>` : ""}
         <span class="l">${p.precio_lista ? "lista " + pesos(p.precio_lista) + " · " : ""}${esc(t.promo)}</span>
         <span class="l"><a class="ir" href="${p.url}" target="_blank" rel="noopener">${icono("fuera")} abrir en ${esc(t.nombre)}</a></span>
       </div>
@@ -1272,7 +1274,7 @@ function vistaTiendas() {
           const p = porId[id]; if (!p) return "";
           return `<li><a href="${p.url}" target="_blank" rel="noopener">
             <span class="mini"><img src="${p.img}" alt="" loading="lazy"></span>
-            <span class="txt">${esc(p.nombre)}</span><b>${pesos(p.precio)}</b></a></li>`;
+            <span class="txt">${esc(p.nombre)}${avisoDe(p) ? ` ${selloOjo(avisoDe(p))}` : ""}</span><b>${pesos(p.precio)}</b></a></li>`;
         }).join("")}</ul>
         <p class="flaco">${icono("aviso")} ${esc(flaco[k])}</p>
       </div></div>`;
@@ -1281,14 +1283,14 @@ function vistaTiendas() {
     <p class="sub">Ninguna gana en todo. Esto es lo que cada una tiene más barato que las demás; cada línea abre el producto.</p></div>
     <div class="grid">${cards}</div>
     <p class="flaco" style="margin-top:18px">${icono("aviso")} <span><b>FullH4rd</b> queda afuera del podio pero es imbatible en Hiksemi:
-    <a href="${porId["hiksemi-hiker"].url}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>.
+    <a href="${porId["hiksemi-hiker"].url}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>${avisoDe(porId["hiksemi-hiker"]) ? ` ${selloOjo(avisoDe(porId["hiksemi-hiker"]))}` : ""}.
     En primera línea se dispara: el Kingston le sale 38% más que en Gaming City.</span></p></div>`;
 }
 
 function vistaVeredicto() {
   const c = DATOS.calculado || {}, e = DATOS.envio || {};
   const tiles = [
-    { k: "Mejor compra", v: pesos(porId["adata-d35"].precio), d: "ADATA XPG D35 · CompraGamer", ok: true },
+    { k: "Mejor compra", v: pesos(porId["adata-d35"].precio), d: "ADATA XPG D35 · CompraGamer" + (avisoDe(porId["adata-d35"]) ? ` · ${avisoDe(porId["adata-d35"])}` : ""), ok: true },
     { k: `Puesto en ${e.zona}, punto`, v: pesos(c.adata_punto), d: `envío OCA ${pesos(e.punto)}`, ok: true },
     { k: `Puesto en ${e.zona}, domicilio`, v: pesos(c.adata_domicilio), d: `envío OCA ${pesos(e.domicilio)}` },
     { k: "Kingston, retiro gratis", v: pesos(c.kingston_retiro), d: `${pesos(c.kingston_retiro - c.adata_domicilio)} más caro` }
@@ -1431,6 +1433,7 @@ function cardOferta(o, i, desde) {
     </div>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div class="o-precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[o.ref])}</span></div>
+    ${selloOjo(viejoDe(f))}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
     <div class="o-detalle"><div class="o-in">
       <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span></div>
@@ -1675,7 +1678,9 @@ function pintarResultados(q) {
   if (!IDX || !caja) return;
   limpiarConsulta();          // si no hay resultados, no queda una consulta vieja gobernando las pestañas
   if (!q.trim()) {
-    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${Pagina.cuando(IDX.generado)}`;
+    const viejas = Object.values(IDX.tiendas).filter(t => Pagina.precioDel(t.relevado, IDX.generado));
+    est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${Pagina.cuando(IDX.generado)}`
+      + (viejas.length ? ` · sin relevar hoy: ${viejas.map(t => `${t.nombre} (${Pagina.precioDel(t.relevado, IDX.generado)})`).join(", ")}` : "");
     caja.innerHTML = "";
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
@@ -1733,6 +1738,7 @@ function pintarResultados(q) {
     const off = f[5] && f[5] > f[1] ? Math.round((1 - f[1] / f[5]) * 100) : 0;
     const sospechoso = pisoDeGama(f[1], niv, med);
     const marcas = [];
+    if (viejoDe(f)) marcas.push(selloOjo(viejoDe(f)));
     if (niv === 2) marcas.push('<span class="sello primera">primera línea</span>');
     else if (niv === 1) marcas.push('<span class="sello conocida">marca conocida</span>');
     if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
@@ -1849,7 +1855,7 @@ function aCSV(filas) {
   const cab = ["Producto", "Precio", "Fuente", "Comercio", "Enlace"];
   const cuerpo = filas.map(f => {
     const t = (IDX && IDX.tiendas[f[3]]) || { nombre: f[3] };
-    return [f[0], f[1], t.nombre, f[4] || "", f[2]].map(csvCampo).join(";");
+    return [f[0], f[1], t.nombre + (viejoDe(f) ? ` (${viejoDe(f)})` : ""), f[4] || "", f[2]].map(csvCampo).join(";");
   });
   return "\uFEFF" + [cab.map(csvCampo).join(";"), ...cuerpo].join("\r\n");
 }
@@ -1857,7 +1863,7 @@ function aCSV(filas) {
 function aTexto(filas, titulo) {
   const lineas = filas.slice(0, 20).map((f, i) => {
     const t = (IDX && IDX.tiendas[f[3]]) || { nombre: f[3] };
-    return `${i + 1}. ${f[0]} — ${pesos(f[1])} · ${t.nombre}${f[4] ? " (" + f[4] + ")" : ""}\n   ${f[2]}`;
+    return `${i + 1}. ${f[0]} — ${pesos(f[1])} · ${t.nombre}${f[4] ? " (" + f[4] + ")" : ""}${viejoDe(f) ? " · " + viejoDe(f) : ""}\n   ${f[2]}`;
   });
   return `${titulo}\n${"—".repeat(Math.min(titulo.length, 40))}\n\n${lineas.join("\n")}` +
     (filas.length > 20 ? `\n\n…y ${filas.length - 20} más` : "") +
@@ -1983,7 +1989,7 @@ async function aXLSX(filas, titulo) {
 
   filas.forEach((f, i) => {
     const t = (IDX && IDX.tiendas[f[3]]) || T[f[3]] || { nombre: f[3] };
-    const fila = hoja.addRow({ p: f[0], v: f[1], f: t.nombre, c: f[4] || "", u: null });
+    const fila = hoja.addRow({ p: f[0], v: f[1], f: t.nombre + (viejoDe(f) ? ` (${viejoDe(f)})` : ""), c: f[4] || "", u: null });
     fila.getCell("u").value = { text: f[2], hyperlink: f[2] };
     fila.getCell("u").font = { color: { argb: ENLACE }, underline: true };
     fila.getCell("p").alignment = { wrapText: true, vertical: "top" };
@@ -2032,6 +2038,13 @@ const LETRAS = ["A", "B", "C", "D"];
 const MARCAS_RE = Buscador.armarMarcasRe([...(MARCAS.primera || []), ...(MARCAS.conocida || [])]);
 
 const comercioDe = f => f[4] || (IDX.tiendas[f[3]] || {}).nombre || f[3];
+/* Un precio que no se pudo verificar en el ultimo relevamiento lo dice, en vez de
+   pasar por uno de hoy: "precio del 7/10" en el indice, "sin verificar desde el
+   8/10" en la comparativa curada. */
+const viejoDe = f => IDX ? Pagina.precioDel((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "";
+const avisoDe = p => Pagina.sinVerificar(p.falla_desde, DATOS.verificado);
+const selloOjo = txt => txt ? `<span class="sello ojo">${esc(txt)}</span>` : "";
+const chipOjo = txt => txt ? `<span class="chip ojo">${esc(txt)}</span>` : "";
 const colorDe = f => (IDX.tiendas[f[3]] || {}).color || "fh";
 
 /* La marca es la que aparece primero en el nombre: "Notebook HP Intel Core" es HP. */
@@ -2181,7 +2194,7 @@ function cardPick(p, i) {
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
-    <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).map(([clase, texto]) =>
+    <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).map(([clase, texto]) =>
       `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
     <p class="razon">${esc(p.razon)}</p>
     <span class="ver">Abrir en ${esc(comercioDe(f))} ${icono("fuera")}</span>
@@ -2243,7 +2256,7 @@ function vistaTiendasDin() {
   const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${c.mejorItem.f[2]}" target="_blank" rel="noopener">
     <span class="rol"><b class="letra">${i + 1}</b> ${icono("store")} ${i === 0 ? "Más barata en primera línea" : "Comercio"}</span>
     <h3>${esc(c.nom)}</h3>
-    <div><span class="precio">${pesos(c.mejorItem.f[1])}</span></div>
+    <div><span class="precio">${pesos(c.mejorItem.f[1])}</span> ${selloOjo(viejoDe(c.mejorItem.f))}</div>
     <p class="razon">${c.conPrimera ? "Su opción de primera línea más barata" : "Sin marca de primera línea acá: su opción más barata"}: ${esc(c.mejorItem.f[0].slice(0, 80))}</p>
     <dl><dt>Avisos comparables</dt><dd>${c.n}</dd><dt>Precio típico</dt><dd>${pesos(c.med)}</dd>
       <dt>De primera línea</dt><dd>${Math.round(c.pctPrimera * 100)}%</dd><dt>Bajaron de precio</dt><dd>${c.bajas}</dd></dl>
@@ -2263,7 +2276,7 @@ function vistaVeredictoDin() {
   const items = [];
 
   items.push({ t: `Comprá ${f[0].slice(0, 72)}.`,
-    d: `${mejor.razon} Sale ${pesos(f[1])} en ${comercioDe(f)}.` + (f[6] > f[1] ? ` Además bajó ${Math.round((1 - f[1] / f[6]) * 100)}% desde el relevamiento anterior.` : "") });
+    d: `${mejor.razon} Sale ${pesos(f[1])} en ${comercioDe(f)}${viejoDe(f) ? `, ${viejoDe(f)}: hoy no lo pudimos verificar` : ""}.` + (f[6] > f[1] ? ` Además bajó ${Math.round((1 - f[1] / f[6]) * 100)}% desde el relevamiento anterior.` : "") });
   if (barato) items.push({ t: "Si el precio es lo único que importa.",
     d: `${barato.m.f[0].slice(0, 72)} a ${pesos(barato.m.f[1])}. ${barato.razon}` });
   if (alt) items.push({ t: "Una alternativa de otra marca.",
@@ -2287,7 +2300,7 @@ function vistaVeredictoDin() {
     d: "Sale del nombre y el precio de cada aviso. No ve garantía, reseñas ni especificaciones finas, y las especificaciones las lee del texto. Sirve para decidir a quién mirar primero, no para cerrar la compra sin abrir la ficha." });
 
   const tiles = [
-    { k: "Mejor compra", v: pesos(f[1]), d: comercioDe(f), ok: true },
+    { k: "Mejor compra", v: pesos(f[1]), d: comercioDe(f) + (viejoDe(f) ? ` · ${viejoDe(f)}` : ""), ok: true },
     { k: "Mediana de la búsqueda", v: pesos(A.med), d: `${A.base.length} avisos comparables` },
     { k: "Contra la mediana", v: `${x >= 0 ? "−" : "+"}${Math.abs(x)}%`, d: "la mejor compra frente a lo típico", ok: x > 0 },
     { k: "Comercios", v: String(A.comercios.length), d: "con opciones comparables" },
@@ -2448,7 +2461,8 @@ function arrancar() {
   }).join("");
   $("#sello").textContent = (DATOS.verificado
     ? `Precios verificados en cada sitio ${Pagina.cuando(DATOS.verificado)}`
-    : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`;
+    : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`
+    + (P.some(p => p.falla_desde) ? ` · ${P.filter(p => p.falla_desde).length} sin verificar` : "");
   $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx y FullH4rd, con el precio de
     transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
     de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
