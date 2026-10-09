@@ -138,6 +138,32 @@
     "extractor": "og",
     "lista_es_oferta": false
   },
+  "venex": {
+    "nombre": "Venex",
+    "color": "vx",
+    "activa": true,
+    "base": "https://www.venex.com.ar",
+    "catalogo": {
+      "tipo": "listados",
+      "origen": {
+        "tipo": "sitemap",
+        "url": "https://www.venex.com.ar/sitemap.xml",
+        "contiene": "https://www.venex.com.ar/",
+        "excluye": [".html", ".htm", ".php"],
+        "hojas": true
+      },
+      "pagina": "{listado}?page={n}",
+      "desde": 1,
+      "tarjeta": "<div class=\"product-box\"",
+      "re": {
+        "url": "class=\"product-box-title\">\\s*<a href=\"(https://www\\.venex\\.com\\.ar/[^\"]+\\.html)\"",
+        "nombre": "class=\"product-box-title\">\\s*<a [^>]*>([^<]{6,160})</a>",
+        "precio": "class=\"current-price\"[^>]*>\\$\\s*([\\d.]+)",
+        "imagen": "<img src=\"(products_images/thumb/[^\"]+)\""
+      }
+    },
+    "lista_es_oferta": false
+  },
   "comparaya": {
     "nombre": "ComparaYa",
     "color": "cy",

@@ -147,8 +147,8 @@ function vistaBuscar() {
     }
   }, 0);
 
-  return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 5 fuentes</h2>
-    <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx y FullH4rd, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen ordenados por conveniencia, y con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
+  return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las 6 fuentes</h2>
+    <p class="sub">Un solo cuadro sobre los catálogos de CompraGamer, Gaming City, Mexx, FullH4rd y Venex, más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen ordenados por conveniencia, y con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
     <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>

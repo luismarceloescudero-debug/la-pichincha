@@ -15,13 +15,13 @@ garantia real, stock y el costo puesto en tu casa con el envio adentro.
   la lista CATEGORIAS del HTML y sus productos en datos.json.
 - **Ofertas**: rebajas reales detectadas en el indice.
 - Las 3 tiendas que mejor pagan la calidad, cruzando el mismo producto entre
-  CompraGamer, Gaming City, Mexx y FullH4rd.
+  CompraGamer, Gaming City, Mexx, FullH4rd y Venex.
 
 Cada foto, nombre y precio enlaza al producto en la web de la tienda.
 
 ## Fuentes
 
-Precios: CompraGamer, Gaming City, Mexx y FullH4rd. Specs tecnicas: webs
+Precios: CompraGamer, Gaming City, Mexx, FullH4rd y Venex. Specs tecnicas: webs
 oficiales de ADATA, Corsair y Kingston, no las fichas de las tiendas (varias
 publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 
@@ -78,7 +78,7 @@ corre backend: la pagina lo baja recien cuando abris la pestana Buscar y filtra
 del lado del cliente.
 
 ```
-python indexar.py                  # releva las 5 fuentes y arma indice.json
+python indexar.py                  # releva las 6 fuentes y arma indice.json
 python indexar.py --solo mexx      # una sola
 python indexar.py --probar URL     # diagnostica una fuente nueva
 ```
@@ -113,6 +113,7 @@ una fuente dada de baja con `"activa": false`.
 | Gaming City | 122 categorias del sitemap | `meta product:price` |
 | Mexx | rubros paginados | microdatos schema.org |
 | FullH4rd | busquedas por termino | Open Graph |
+| Venex | categorias hoja del sitemap, paginadas con `?page=` | el precio de la tarjeta (contado efectivo) |
 | ComparaYa | API publica por categoria | la misma API |
 
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
@@ -196,7 +197,7 @@ La pestana Ofertas trabaja con dos señales distintas.
 **Bajaron de precio** es la señal propia y la mas confiable: el indexador
 compara cada producto contra el ultimo precio que tiene en el historial. No
 depende de lo que publique la tienda, no se puede inflar, y sirve para las
-cinco fuentes por igual. Se cuentan las bajas de al menos 3% y mil pesos, para
+seis fuentes por igual. Se cuentan las bajas de al menos 3% y mil pesos, para
 no mostrar ruido de redondeo.
 
 El historial vive en la rama huerfana `historial`: un CSV por mes

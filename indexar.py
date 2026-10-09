@@ -99,7 +99,11 @@ def listados(tienda):
     o = tienda["catalogo"]["origen"]
     if o["tipo"] == "sitemap":
         urls = re.findall(r"<loc>(.*?)</loc>", bajar(o["url"]))
-        return [u for u in urls if o["contiene"] in u]
+        urls = [u for u in urls if o["contiene"] in u and not any(x in u for x in o.get("excluye", []))]
+        if o.get("hojas"):
+            # Solo las categorias que no tienen subcategorias: la de arriba ya las lista a todas, repetidas.
+            urls = [u for u in urls if not any(v.startswith(u.rstrip("/") + "/") for v in urls)]
+        return urls
     if o["tipo"] == "enlaces":
         return sorted(set(re.findall(o["re"], bajar(o["url"]))))
     if o["tipo"] == "terminos":

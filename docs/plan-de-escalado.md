@@ -103,7 +103,7 @@ llegan las primeras 500 visitas organicas por mes.
 - **F2.2 Serie de precios por producto** (sellos hechos, spec 004; el grafico queda para despues de medir): "minimo de 30 y 90 dias", un
   grafiquito, y el sello "subio antes de la oferta" para las rebajas infladas.
   Esto es el foso: nadie en Argentina lo muestra para hardware en 5 tiendas.
-- **F2.3 Mas fuentes**: Mercado Libre directo (cobertura y afiliados) y tiendas
+- **F2.3 Mas fuentes** (Venex hecha, spec 005; Mercado Libre directo espera la cuenta del dueño): Mercado Libre directo (cobertura y afiliados) y tiendas
   de hardware a probar con `indexar.py --probar`. El orden lo da
   `busqueda_vacia`: primero lo que la gente busca y no encuentra.
 - **F2.4 Curadas de 2 a 8 rubros**, elegidos por volumen de busqueda real.

@@ -52,7 +52,7 @@ function arrancar() {
     ? `Precios verificados en cada sitio ${Pagina.cuando(DATOS.verificado)}`
     : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`
     + (P.some(p => p.falla_desde) ? ` · ${P.filter(p => p.falla_desde).length} sin verificar` : "");
-  $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx y FullH4rd, con el precio de
+  $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx, FullH4rd y Venex, con el precio de
     transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
     de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
     mueven rápido: confirmá antes de pagar.`;
