@@ -150,7 +150,7 @@ jobs:
       # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
       - name: Medir la cobertura por codigo de modelo
         run: |
-          python cobertura.py indice.json --salida _sitio/cobertura.json --previa https://luismarceloescudero-debug.github.io/la-pichincha/cobertura.json --resumen "$GITHUB_STEP_SUMMARY" || echo "::warning::No se midio la cobertura por modelo"
+          python cobertura.py indice.json --salida _sitio/cobertura.json --previa https://luismarceloescudero-debug.github.io/la-pichincha/cobertura.json --resumen "$GITHUB_STEP_SUMMARY" --historial historial || echo "::warning::No se midio la cobertura por modelo"
 
       - uses: actions/upload-pages-artifact@v5
         with:

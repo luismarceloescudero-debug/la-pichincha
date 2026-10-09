@@ -89,6 +89,36 @@ class Comando(unittest.TestCase):
         self.assertIn("revisar nombres de tiendas", resumen.read_text(encoding="utf-8"))
 
 
+class SerieDePrecios(unittest.TestCase):
+    def test_cuenta_los_avisos_con_cada_sello_de_serie(self):
+        filas = [fila("A", "uno", ""), fila("B", "uno", ""), fila("C", "dos", ""), fila("D", "dos", "")]
+        filas[0][8], filas[1][8], filas[2][8], filas[3][8] = "m", "mx", "eh", "i"
+        self.assertEqual(cobertura.sellos_de_serie(filas), {"minimo30": 2, "minimo90": 1, "subio_antes": 1})
+
+    def test_los_dias_de_historia_salen_del_primer_cambio_registrado(self):
+        carpeta = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, carpeta)
+        (carpeta / "2026-10.csv").write_text(chr(10).join(["fecha,tienda,id,precio", "2026-10-07,cg,u1,100",
+                                                             "2026-10-08,cg,u2,200"]) + chr(10), encoding="utf-8")
+        self.assertEqual(cobertura.dias_de_historia(carpeta, "2026-10-09T08:12-03:00"), 2)
+        self.assertEqual(cobertura.dias_de_historia(carpeta / "no-hay", "2026-10-09T08:12-03:00"), 0)
+
+    def test_el_informe_y_el_resumen_traen_la_serie(self):
+        carpeta = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, carpeta)
+        (carpeta / "2026-10.csv").write_text(chr(10).join(["fecha,tienda,id,precio", "2026-10-07,cg,u1,100"]) + chr(10),
+                                             encoding="utf-8")
+        f = fila(KF, "uno", "KF432C16BB1/16")
+        f[8] = "m"
+        indice = carpeta / "indice.json"
+        indice.write_text(json.dumps({"generado": "2026-10-09T08:12-03:00", "productos": [f]}), encoding="utf-8")
+        salida, resumen = carpeta / "c.json", carpeta / "r.md"
+        cobertura.main([str(indice), "--salida", str(salida), "--historial", str(carpeta), "--resumen", str(resumen)])
+        datos = json.loads(salida.read_text(encoding="utf-8"))
+        self.assertEqual(datos["serie"], {"dias_de_historia": 2, "minimo30": 1, "minimo90": 0, "subio_antes": 0})
+        self.assertIn("2 días de historia", resumen.read_text(encoding="utf-8"))
+
+
 class EnLaAction(unittest.TestCase):
     def test_la_action_publica_la_cobertura_y_la_compara_con_la_anterior(self):
         yml = (Path(__file__).resolve().parent.parent / ".github" / "workflows" / "actualizar.yml").read_text(encoding="utf-8")
