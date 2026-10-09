@@ -2,6 +2,7 @@ import json
 import shutil
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import generar_paginas
@@ -20,6 +21,36 @@ class Slug(unittest.TestCase):
     def test_sin_nada_que_usar_es_un_error(self):
         with self.assertRaises(ValueError):
             generar_paginas.slug("¿¿??")
+
+
+BASE = "https://ejemplo.test/la-pichincha"
+NS = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+
+
+class SitemapYRobots(unittest.TestCase):
+    PAGINAS = [{"slug": "ssd-1tb", "q": "ssd 1tb", "indexable": True},
+               {"slug": "rtx-4060", "q": "rtx 4060", "indexable": True},
+               {"slug": "fina", "q": "fina", "indexable": False}]
+
+    def locs(self, xml):
+        return {u.find("s:loc", NS).text: (u.find("s:lastmod", NS).text if u.find("s:lastmod", NS) is not None else None)
+                for u in ET.fromstring(xml).findall("s:url", NS)}
+
+    def test_lista_la_principal_el_indice_y_solo_las_indexables_con_su_fecha(self):
+        xml = generar_paginas.sitemap(self.PAGINAS, "2026-10-09T08:12-03:00", BASE)
+        self.assertEqual(self.locs(xml), {
+            BASE + "/": "2026-10-09", BASE + "/precios/": "2026-10-09",
+            BASE + "/precios/ssd-1tb/": "2026-10-09", BASE + "/precios/rtx-4060/": "2026-10-09"})
+
+    def test_sin_indice_solo_la_pagina_principal_y_sin_fecha(self):
+        self.assertEqual(self.locs(generar_paginas.sitemap([], None, BASE)), {BASE + "/": None})
+
+    def test_robots_deja_rastrear_todo_e_indica_el_mapa(self):
+        r = generar_paginas.robots(BASE)
+        self.assertIn("User-agent: *", r)
+        self.assertIn("Allow: /", r)
+        self.assertIn("Sitemap: " + BASE + "/sitemap.xml", r)
+        self.assertNotRegex(r, r"Disallow:\s*/\s*$")
 
 
 class Generar(unittest.TestCase):
@@ -53,6 +84,34 @@ class Generar(unittest.TestCase):
     def test_sin_indice_no_hay_paginas_y_no_falla(self):
         self.assertEqual(self.correr(self.dir / "no-esta.json"), 0)
         self.assertFalse((self.salida / "precios").exists())
+
+    def test_publica_sitemap_y_robots_con_solo_las_paginas_indexables(self):
+        self.assertEqual(self.correr(), 0)
+        mapa = (self.salida / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertIn("/precios/ddr4-16gb/", mapa)
+        self.assertNotIn("placa-inexistente", mapa)
+        self.assertIn("/precios/</loc>", mapa)
+        self.assertIn("Sitemap:", (self.salida / "robots.txt").read_text(encoding="utf-8"))
+
+    def test_el_indice_de_consultas_enlaza_solo_las_indexables(self):
+        self.correr()
+        hub = (self.salida / "precios" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="ddr4-16gb/"', hub)
+        self.assertNotIn("placa-inexistente", hub)
+
+    def test_agregar_una_consulta_crea_su_pagina_y_su_entrada(self):
+        self.correr()
+        self.consultas.write_text(json.dumps([{"q": "ddr4 16gb"}, {"q": "memoria kingston"}]), encoding="utf-8")
+        shutil.rmtree(self.salida)
+        self.correr()
+        self.assertTrue((self.salida / "precios" / "memoria-kingston" / "index.html").exists())
+        self.assertIn("/precios/memoria-kingston/", (self.salida / "sitemap.xml").read_text(encoding="utf-8"))
+
+    def test_sin_indice_el_sitemap_solo_tiene_la_principal(self):
+        self.correr(self.dir / "no-esta.json")
+        mapa = (self.salida / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertEqual(mapa.count("<url>"), 1)
+        self.assertTrue((self.salida / "robots.txt").exists())
 
     def test_una_lista_invalida_corta_la_publicacion(self):
         self.consultas.write_text(json.dumps([{"q": "ssd 1tb"}, {"q": "SSD 1TB"}]), encoding="utf-8")
