@@ -503,3 +503,8 @@ td.mejor{color:var(--good);font-weight:700}
   .tab{padding:9px 12px;font-size:.85rem}
   .wrap{padding-block:18px 52px}
 }
+
+/* Aviso de sin conexion (js/app.js): fijo arriba, con los colores del sitio en claro y oscuro. */
+.sin-red{position:sticky;top:0;z-index:60;padding:10px 20px;background:var(--warn-soft);color:var(--ink);
+  border-bottom:1px solid var(--warn);font-size:.86rem;line-height:1.4;text-align:center}
+.sin-red[data-viejo="1"]{border-bottom:3px solid var(--bad);font-weight:600}

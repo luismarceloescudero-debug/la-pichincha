@@ -64,6 +64,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 
 </head>
 <body>
+<div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
   <p class="meta" id="sello">Precios verificados en cada sitio</p>
   <h1>La Pichincha</h1>
@@ -85,6 +86,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 <script src="js/buscador.js"></script>
 <script src="js/pagina.js"></script>
 <script src="js/analisis.js"></script>
+<script src="js/app.js"></script>
 <script>
 /* === DATOS: generado por actualizar.py, no editar a mano === */
 const DATOS = {
@@ -1934,6 +1936,14 @@ function arrancar() {
   else aplicar(inicio.vista);
 }
 arrancar();
+
+/* App instalable (js/app.js): registra el service worker y avisa si no hay conexion, con la fecha
+   de los precios que se estan viendo. Solo con la pagina suelta: dentro del visor del artifact no
+   hay service worker y el aviso saldria siempre. */
+const APP = SUELTA ? App.iniciar(window, document, {
+  sw: "sw.js", sonda: "manifest.webmanifest",
+  generado: () => (IDX && IDX.generado) || DATOS.verificado || DATOS.actualizado,
+}) : null;
 </script>
 </body>
 </html>

@@ -67,6 +67,10 @@ const jsonLd = obj => JSON.stringify(obj).replace(/</g, "\\u003c");
 
 /* Mide el clic hacia una tienda con la misma analitica que el sitio (GoatCounter, sin cookies).
    Si el script de GoatCounter no cargo, el clic sigue su camino sin avisar. */
+/* Inicia js/app.js: service worker y aviso de sin conexion con la fecha de los precios de la pagina. */
+const scriptApp = (generado, rel) =>
+  `App.iniciar(window, document, { sw: "${rel}sw.js", sonda: "${rel}manifest.webmanifest", generado: () => ${JSON.stringify(generado)} });`;
+
 const SCRIPT_MEDICION = `(function () {
   function alClic(ev) {
     var a = ev.target.closest("a[data-rubro]");
@@ -161,6 +165,7 @@ function renderPagina(consulta, analisis, ctx) {
       descripcion: `Hoy no hay opciones suficientes de ${q} para comparar. Probá el buscador de La Pichincha.`,
       canonica, noindex: true, baseUrl: ctx.baseUrl }) + `
 <body>
+<div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
   <p class="meta">La Pichincha · ${esc(cuando)}</p>
   <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
@@ -169,6 +174,8 @@ function renderPagina(consulta, analisis, ctx) {
   ${pie(ctx)}
 </div>
 <script src="../../js/pagina.js"></script>
+<script src="../../js/app.js"></script>
+<script>${scriptApp(ctx.idx.generado, "../../")}</script>
 <script>${SCRIPT_MEDICION}</script>
 </body>
 </html>
@@ -192,6 +199,7 @@ function renderPagina(consulta, analisis, ctx) {
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
+<div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
   <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
   <h1>${esc(q)}: precios y qué conviene comprar</h1>
@@ -232,6 +240,8 @@ ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).joi
   ${pie(ctx)}
 </div>
 <script src="../../js/pagina.js"></script>
+<script src="../../js/app.js"></script>
+<script>${scriptApp(ctx.idx.generado, "../../")}</script>
 <script>${SCRIPT_MEDICION}</script>
 </body>
 </html>
@@ -264,6 +274,7 @@ ${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span clas
     descripcion: `Precios de hardware en Argentina comparados en varias tiendas: placas de video, monitores, memorias, SSD y más. Precios de ${cuando}.`,
     canonica, noindex: false, baseUrl: ctx.baseUrl, grafo, rel: "../" }) + `
 <body>
+<div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
   <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
   <h1>Precios de hardware en Argentina</h1>
@@ -271,6 +282,9 @@ ${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span clas
 ${cuerpo}
   <p class="nota">Precios con IVA y sin envío. <a href="../">Volver a La Pichincha</a>.</p>
 </div>
+<script src="../js/pagina.js"></script>
+<script src="../js/app.js"></script>
+<script>${scriptApp(ctx.idx.generado, "../")}</script>
 </body>
 </html>
 `;

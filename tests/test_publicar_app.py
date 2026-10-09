@@ -137,3 +137,25 @@ class CabezaDelSitio(unittest.TestCase):
         sin_comentarios = self.html
         self.assertNotIn("beforeinstallprompt", sin_comentarios)
         self.assertNotRegex(sin_comentarios.lower(), r">\s*instalar (la )?app")
+
+
+class AvisoDeSinConexionEnElSitio(unittest.TestCase):
+    def setUp(self):
+        import re
+        self.html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        self.sin_scripts = re.sub(r"<script\b.*?</script>", "", self.html, flags=re.S)
+
+    def test_el_contenedor_del_aviso_esta_oculto_y_avisa_a_lectores_de_pantalla(self):
+        self.assertIn('<div id="sin-red" class="sin-red" role="status" hidden></div>', self.sin_scripts)
+
+    def test_carga_app_js_y_la_inicia_solo_si_la_pagina_esta_suelta(self):
+        self.assertIn('<script src="js/app.js"></script>', self.html)
+        self.assertRegex(self.html, r"SUELTA \? App\.iniciar\(window, document,")   # no dentro del visor del artifact
+
+    def test_la_fecha_del_aviso_sale_del_indice_y_si_no_de_los_datos(self):
+        self.assertRegex(self.html, r"generado: \(\) => \(IDX && IDX\.generado\)")
+
+    def test_el_aviso_tiene_estilo_y_el_viejo_se_distingue(self):
+        css = (RAIZ / "css" / "sitio.css").read_text(encoding="utf-8")
+        self.assertIn(".sin-red{", css)
+        self.assertIn('.sin-red[data-viejo="1"]', css)

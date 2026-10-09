@@ -255,3 +255,21 @@ test("las paginas y el indice enlazan el manifiesto, los colores y el icono con 
   assert.match(hub, /<link rel="manifest" href="\.\.\/manifest\.webmanifest">/);
   assert.doesNotMatch(html + hub, /beforeinstallprompt/);
 });
+
+test("las paginas y el indice llevan el aviso de sin conexion con la fecha de sus precios", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<div id="sin-red" class="sin-red" role="status" hidden><\/div>/);
+  assert.match(html, /<script src="\.\.\/\.\.\/js\/app\.js"><\/script>/);
+  assert.match(html, /App\.iniciar\(window, document, \{ sw: "\.\.\/\.\.\/sw\.js", sonda: "\.\.\/\.\.\/manifest\.webmanifest", generado: \(\) => "2026-10-09T08:12-03:00" \}\)/);
+  const { ctx } = armar(IDX, "ddr4 16gb");
+  const hub = G.renderIndice([], ctx);
+  assert.match(hub, /<div id="sin-red" class="sin-red" role="status" hidden><\/div>/);
+  assert.match(hub, /App\.iniciar\(window, document, \{ sw: "\.\.\/sw\.js", sonda: "\.\.\/manifest\.webmanifest", generado: \(\) => "2026-10-09T08:12-03:00" \}\)/);
+});
+
+test("la pagina sin opciones tambien se puede ver sin conexion con su aviso", () => {
+  const { ctx } = armar(IDX, "zzzxxy");
+  const html = G.renderPagina({ q: "zzzxxy", slug: "zzzxxy" }, null, ctx);
+  assert.match(html, /<div id="sin-red"/);
+  assert.match(html, /App\.iniciar\(/);
+});
