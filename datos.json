@@ -192,7 +192,8 @@
       "precio": 214989,
       "precio_lista": 241561,
       "sin_impuestos": 194560,
-      "stock": "en stock"
+      "stock": "en stock",
+      "falla_desde": "2026-10-11"
     },
     {
       "id": "hiksemi-hiker",
@@ -296,7 +297,8 @@
       "contras": [
         "Resigna el autofoco y la calidad de lente de la C920S.",
         "No bajes de acá: la C270 y la Genius son 720p y ya se ven viejas en cualquier pantalla moderna."
-      ]
+      ],
+      "falla_desde": "2026-10-11"
     },
     {
       "id": "brio4k",
@@ -354,7 +356,8 @@
       "img": "img/c922.jpg",
       "precio": 148529,
       "precio_lista": null,
-      "stock": "en stock"
+      "stock": "en stock",
+      "falla_desde": "2026-10-11"
     },
     {
       "id": "gw911",
@@ -369,7 +372,8 @@
       "img": "img/gw911.jpg",
       "precio": 87399,
       "precio_lista": null,
-      "stock": "en stock"
+      "stock": "en stock",
+      "falla_desde": "2026-10-11"
     },
     {
       "id": "brio505",
@@ -440,7 +444,7 @@
     "kingston_retiro": 299249,
     "combo_gc": 436998,
     "combo_partido": 365838,
-    "ram_mas_barata": "hiksemi-armor",
+    "ram_mas_barata": "adata-d35",
     "webcam_mas_barata": "genius1000x"
   },
   "marcas": {
