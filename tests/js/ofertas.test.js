@@ -44,3 +44,15 @@ test("destacadas trae el descuento y el ahorro de cada una", () => {
   assert.equal(o.ahorro, 2500);
   assert.equal(o.ref, 6);
 });
+
+test("el mismo aviso que llega directo y por ComparaYa cuenta una sola vez, y gana la fila directa", () => {
+  const url = "https://t.test/monitor-acer";
+  const directa = fila("Monitor Acer", 216200, { antes: 292817, url });
+  const viaComparaya = ["Monitor Acer", 216200, url, "comparaya", "CompraGamer", 240222, 292817, "", "", ""];
+  for (const productos of [[directa, viaComparaya], [viaComparaya, directa]]) {
+    const { propias } = O.calcularOfertas({ productos });
+    assert.equal(propias.length, 1);
+    assert.equal(propias[0][3], "cg");                       // la de la tienda, no la del agregador
+    assert.equal(O.destacadas({ productos }).length, 1);
+  }
+});

@@ -13,9 +13,20 @@
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
 
+  /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL, mismo
+     precio. Uno por URL, y gana la fila de la tienda (sin "via") sobre la del agregador. */
+  function unaPorUrl(productos) {
+    const por = new Map();
+    for (const f of productos) {
+      const ya = por.get(f[2]);
+      if (!ya || (ya[4] && !f[4])) por.set(f[2], f);
+    }
+    return [...por.values()];
+  }
+
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
-    for (const f of idx.productos) {
+    for (const f of unaPorUrl(idx.productos)) {
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer >= BAJA_MIN_PCT) {
         propias.push(f);
