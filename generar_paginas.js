@@ -180,7 +180,7 @@ function pie(ctx) {
 function renderPagina(consulta, analisis, ctx) {
   const { q, slug } = consulta;
   const canonica = `${ctx.baseUrl}/precios/${slug}/`;
-  const cuando = P.cuando(ctx.idx.generado, ctx.ahora);
+  const cuando = P.fechaHora(ctx.idx.generado);   // fija: la pagina queda escrita
   const interactiva = P.armarUrl("../../", q, "comparativa");
 
   if (!esIndexable(analisis)) {
@@ -191,7 +191,7 @@ function renderPagina(consulta, analisis, ctx) {
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
-  <p class="meta">La Pichincha · ${esc(cuando)}</p>
+  <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
   <p class="sub">Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(q)}» en las tiendas que seguimos, así que todavía no armamos la comparación. Probá con el buscador, que mira todos los avisos.</p>
   <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(q)}» en La Pichincha</a></p>
@@ -221,14 +221,14 @@ function renderPagina(consulta, analisis, ctx) {
 
   const titulo = `${q}: precios desde ${pesos(desde)} | La Pichincha`;
   const descripcion = `${conteo} de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
-    `mediana ${pesos(analisis.med)}. Mejor compra y precios de ${cuando}.`;
+    `mediana ${pesos(analisis.med)}. Mejor compra y precios del ${cuando}.`;
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
-  <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
+  <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: precios y qué conviene comprar</h1>
   <p class="sub">Comparamos ${conteo} de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
 
@@ -284,7 +284,7 @@ function renderIndice(entradas, ctx) {
     if (!grupos.has(e.grupo)) grupos.set(e.grupo, []);
     grupos.get(e.grupo).push(e);
   }
-  const cuando = P.cuando(ctx.idx.generado, ctx.ahora);
+  const cuando = P.fechaHora(ctx.idx.generado);   // fija: la pagina queda escrita
   const grafo = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", itemListElement: [
       { "@type": "ListItem", position: 1, name: "La Pichincha", item: `${ctx.baseUrl}/` },
@@ -298,12 +298,12 @@ ${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span clas
   </section>`).join("\n")
     : `  <p class="sub">Todavía no hay páginas de precios con opciones suficientes. Probá el <a href="../">buscador</a>.</p>`;
   return cabeza({ titulo: "Precios de hardware en Argentina | La Pichincha",
-    descripcion: `Precios de hardware en Argentina comparados en varias tiendas: placas de video, monitores, memorias, SSD y más. Precios de ${cuando}.`,
+    descripcion: `Precios de hardware en Argentina comparados en varias tiendas: placas de video, monitores, memorias, SSD y más. Precios del ${cuando}.`,
     canonica, noindex: false, baseUrl: ctx.baseUrl, grafo, rel: "../" }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <div class="wrap">
-  <p class="meta">La Pichincha · precios de ${esc(cuando)}</p>
+  <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>Precios de hardware en Argentina</h1>
   <p class="sub">Lo que se busca más, con el precio de hoy en varias tiendas, la mediana y qué conviene comprar. Cada página sale del mismo análisis que la comparativa de <a href="../">La Pichincha</a>.</p>
 ${cuerpo}
@@ -354,5 +354,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, renderIndice, esIndexable, esc, pesos, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
+module.exports = { crearContexto, renderPagina, renderIndice, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

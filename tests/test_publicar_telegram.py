@@ -79,7 +79,10 @@ class Publicacion(unittest.TestCase):
         cuerpo = json.loads(pedido.data.decode("utf-8"))
         self.assertEqual(cuerpo["chat_id"], "@pichinchas")
         self.assertEqual(cuerpo["parse_mode"], "HTML")
-        self.assertTrue(cuerpo["disable_web_page_preview"])
+        # La miniatura: la vista previa grande de la pagina /hoy/ del sitio.
+        self.assertNotIn("disable_web_page_preview", cuerpo)
+        self.assertEqual(cuerpo["link_preview_options"]["url"], OFERTAS["sitio"] + "hoy/")
+        self.assertTrue(cuerpo["link_preview_options"]["prefer_large_media"])
         self.assertIn("SSD Kingston 1TB", cuerpo["text"])
 
     def test_si_telegram_falla_la_corrida_sigue_y_el_token_no_se_imprime(self):
