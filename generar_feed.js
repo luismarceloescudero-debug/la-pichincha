@@ -10,9 +10,13 @@
 const fs = require("fs");
 const path = require("path");
 const O = require("./js/ofertas.js");
+const P = require("./js/pagina.js");
+const G = require("./generar_paginas.js");
 
 const BASE_URL = "https://luismarceloescudero-debug.github.io/la-pichincha";
 const MAX_FEED = 20;
+const MAX_HOY = 10, EN_TARJETA = 5;
+const CANAL_TELEGRAM = "https://t.me/pichinchasdeldia";
 
 const xml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
 const pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
@@ -58,6 +62,65 @@ ${items.join("\n")}${items.length ? "\n" : ""}  </channel>
 `;
 }
 
+/* /hoy/: la pagina para historias de Instagram y para el link de la bio. Arriba, una tarjeta 9:16 con
+   las mejores del dia para sacarle captura (en Instagram el texto de una imagen no es un enlace); abajo,
+   todas con su enlace a la tienda, que es lo que abre el sticker de link. Mismas ofertas que el feed. */
+function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
+  const base = baseUrl.replace(/\/$/, "");
+  const esc = G.esc;
+  const fecha = P.fechaHora(idx.generado);
+  const dia = fecha.split(" ")[0];
+  const ofertas = O.destacadas(idx, max);
+  const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDe(o.f, idx))}`;
+  const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
+    `<span class="h-nom">${esc(o.f[0])}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
+  const lista = ofertas.map(o => `    <li><a class="oferta" data-rubro="ofertas" href="${esc(o.f[2])}" rel="noopener">${esc(o.f[0])}</a>` +
+    `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.f[o.ref]))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDe(o.f, idx))}</span></li>`).join("\n");
+  const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
+  const descripcion = ofertas.length
+    ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
+    : "Las mejores bajas de precio de hardware en Argentina, todos los días.";
+  return G.cabeza({ titulo, descripcion, canonica: `${base}/hoy/`, baseUrl: base, rel: "../" }) + `
+<style>
+.hoy .historia{width:min(100%,420px);aspect-ratio:9/16;margin:6px auto 24px;padding:26px 22px;border-radius:22px;
+  background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.hoy .h-cab{display:flex;justify-content:space-between;font:600 .8rem var(--font-mono);color:var(--accent)}
+.hoy .historia h1{font-size:2.3rem;line-height:1.02;margin:4px 0 2px;letter-spacing:-.02em}
+.hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;flex:1}
+.hoy .h-lista li{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:start}
+.hoy .h-pct{grid-row:span 2;font:700 1.05rem var(--font-mono);color:var(--good);background:var(--good-soft);border-radius:10px;padding:6px 8px}
+.hoy .h-nom{font-weight:600;font-size:.9rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hoy .h-pre{font:500 .8rem var(--font-mono);color:var(--ink-2)}
+.hoy .h-pie{margin:0;font-size:.78rem;color:var(--ink-3);overflow-wrap:anywhere}
+.hoy .h-pie b{color:var(--ink)}
+.hoy ol.todas{padding-left:1.2em}
+.hoy ol.todas li{margin:0 0 12px}
+.hoy .det{display:block;font:500 .82rem var(--font-mono);color:var(--ink-2)}
+.hoy .det s{color:var(--ink-3)}
+</style>
+<body>
+<div class="wrap hoy">
+  <section class="historia" aria-label="Tarjeta con las mejores ofertas de hoy">
+    <div class="h-cab"><span>La Pichincha</span><span>${esc(dia)}</span></div>
+    <h1>Pichinchas<br>del día</h1>
+    <ol class="h-lista">
+${tarjeta}
+    </ol>
+    <p class="h-pie">Todas con su link en<br><b>${esc(base.replace(/^https?:\/\//, ""))}/hoy</b></p>
+  </section>
+  <p class="meta">La Pichincha · precios del ${esc(fecha)}</p>
+  <h2>Todas las ofertas de hoy</h2>
+${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
+  <p><a class="acc" href="../">Buscar y comparar en La Pichincha</a> · <a href="${CANAL_TELEGRAM}" rel="noopener">Canal de Telegram</a></p>
+  <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones.</p>
+</div>
+<script src="../js/pagina.js"></script>
+<script>${G.SCRIPT_MEDICION}</script>
+</body>
+</html>
+`;
+}
+
 /* Lo justo para el canal: texto plano, sin nada de terceros sin escapar (lo escapa quien lo publica). */
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
@@ -77,9 +140,11 @@ function main(argv) {
   const lista = listaParaCanal(idx, 10);
   fs.writeFileSync(path.join(salida, "ofertas.json"),
     JSON.stringify({ generado: idx.generado, sitio: baseUrl.replace(/\/$/, "") + "/", ofertas: lista }), "utf8");
+  fs.mkdirSync(path.join(salida, "hoy"), { recursive: true });
+  fs.writeFileSync(path.join(salida, "hoy", "index.html"), renderHoy(idx, { baseUrl }), "utf8");
   console.log(`feed de ofertas: ${Math.min(O.destacadas(idx, MAX_FEED).length, MAX_FEED)} entradas`);
   return 0;
 }
 
-module.exports = { renderFeed, listaParaCanal, main, BASE_URL };
+module.exports = { renderFeed, renderHoy, listaParaCanal, main, BASE_URL };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

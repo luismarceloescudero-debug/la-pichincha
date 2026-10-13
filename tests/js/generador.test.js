@@ -36,7 +36,8 @@ test("la pagina trae todo el contenido en el HTML: titulo, hora, mejor compra, m
   const { ctx, analisis } = armar(IDX, "ddr4 16gb");
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.match(html, /<h1>[^<]*ddr4 16gb[^<]*<\/h1>/i);
-  assert.match(html, /hoy 09:12|hoy 08:12/);
+  assert.match(html, /\d{1,2}\/\d{1,2} \d{2}:\d{2}/);         // fecha fija: la pagina queda escrita
+  assert.doesNotMatch(html, /precios de (hoy|ayer)/);
   assert.ok(html.includes(analisis.picks[0].razon));
   assert.ok(html.includes("$1.000"), "la mediana va con formato de pesos");
   const filas = html.match(/<tr data-op/g) || [];

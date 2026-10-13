@@ -98,3 +98,11 @@ test("sinVerificar dice desde cuando falla un producto curado", () => {
   assert.equal(P.sinVerificar("2026-10-08", ""), "sin verificar desde el 8/10"); // --build no estampa hora
   assert.equal(P.sinVerificar("basura", ref), "");
 });
+
+test("fechaHora da la fecha fija, sin 'hoy' ni 'ayer', para texto que queda escrito", () => {
+  assert.equal(P.fechaHora("2026-10-12T18:05-03:00"), "12/10 18:05");
+  assert.equal(P.fechaHora("2026-10-07T23:30-03:00"), "7/10 23:30");
+  assert.equal(P.fechaHora("2026-10-07"), "7/10");
+  assert.equal(P.fechaHora(""), "");
+  assert.equal(P.fechaHora("basura"), "");
+});

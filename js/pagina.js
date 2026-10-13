@@ -25,6 +25,18 @@
 
   /* "hoy 15:25", "ayer 15:25" o "7/10 15:25", siempre en hora argentina. Un
      indice viejo trae solo la fecha ("2026-10-07"): ahi dice "el 7/10". */
+  /* "12/10 18:05": fecha y hora fijas en Argentina, para el texto que queda escrito (paginas generadas,
+     descripciones para buscadores). Un indice viejo trae solo la fecha: "7/10". */
+  function fechaHora(iso) {
+    if (!iso) return "";
+    const solo = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    if (solo) return `${+solo[3]}/${+solo[2]}`;
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    const a = partes(d);
+    return `${+a.day}/${+a.month} ${a.hour}:${a.minute}`;
+  }
+
   function cuando(iso, ahora = new Date()) {
     if (!iso) return "";
     const solo = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -93,7 +105,7 @@
     return a ? { path: `${a[0]}/${a[1]}/${vista || "pagina"}`, title: vista || "", event: true } : null;
   }
 
-  const api = { leerUrl, armarUrl, cuando, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);

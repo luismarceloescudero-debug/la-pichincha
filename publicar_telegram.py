@@ -65,8 +65,10 @@ def main(argv=None):
     if texto is None:
         print("Sin ofertas hoy: no se publica en Telegram")
         return 0
+    # La miniatura del mensaje es la de la pagina /hoy/ del sitio (su imagen de Open Graph), en grande.
+    vista = {"url": datos.get("sitio", "") + "hoy/", "prefer_large_media": True}
     cuerpo = json.dumps({"chat_id": canal, "text": texto, "parse_mode": "HTML",
-                         "disable_web_page_preview": True}).encode("utf-8")
+                         "link_preview_options": vista}).encode("utf-8")
     pedido = urllib.request.Request(f"https://api.telegram.org/bot{token}/sendMessage", data=cuerpo,
                                     headers={"Content-Type": "application/json"}, method="POST")
     try:

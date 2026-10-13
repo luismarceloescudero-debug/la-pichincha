@@ -98,3 +98,31 @@ test("si el indice solo trae la fecha, sin hora, el feed dice solo la fecha", ()
   assert.match(xml, /Precios del 07\/10\. Verificá/);
   assert.ok(!xml.includes("hora de Argentina"));
 });
+
+test("/hoy/ es una pagina para historias: tarjeta 9:16 con las mejores y la lista completa con enlaces", () => {
+  const html = F.renderHoy(IDX, { baseUrl: BASE });
+  assert.match(html, /<title>Pichinchas del día · 9\/10 \| La Pichincha<\/title>/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/hoy\/">/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/ejemplo\.test\/la-pichincha\/img\/og\.png">/);
+  assert.match(html, /class="historia"/);
+  assert.match(html, /precios del 9\/10 08:12/);
+  const enlaces = html.match(/<a class="oferta"[^>]*href="https:\/\/t\.test\/[^"]+"/g) || [];
+  assert.equal(enlaces.length, 2);                                  // una por oferta, a la tienda
+  assert.match(html, /data-rubro="ofertas"/);                        // el clic se mide como los demas
+  assert.match(html, /Memoria &lt;b&gt;Fury&lt;\/b&gt; &amp; &quot;Beast&quot; 16GB/);  // texto de terceros escapado
+  assert.doesNotMatch(html, /Sin oferta/);
+});
+
+test("/hoy/ sin ofertas sale igual, con un aviso y sin lista", () => {
+  const html = F.renderHoy({ ...IDX, productos: [] }, { baseUrl: BASE });
+  assert.match(html, /Hoy no hay bajas para destacar/);
+  assert.doesNotMatch(html, /<a class="oferta"/);
+});
+
+test("main escribe hoy/index.html", () => {
+  const os = require("os"), fs = require("fs"), path = require("path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hoy-")), indice = path.join(dir, "indice.json");
+  fs.writeFileSync(indice, JSON.stringify(IDX));
+  F.main(["--indice", indice, "--salida", dir, "--base-url", BASE]);
+  assert.match(fs.readFileSync(path.join(dir, "hoy", "index.html"), "utf8"), /class="historia"/);
+});
