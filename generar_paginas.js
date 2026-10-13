@@ -15,7 +15,7 @@ const B = require("./js/buscador.js");
 const A = require("./js/analisis.js");
 const P = require("./js/pagina.js");
 
-const BASE_URL = "https://luismarceloescudero-debug.github.io/la-pichincha";
+const BASE_URL = require("./sitio.json").base_url;   // la direccion publica vive en sitio.json
 const MIN_COMPARABLES = 5;     // debajo de esto la pagina es fina: no se indexa
 const MAX_FILAS = 20;
 const MAX_INTERNACIONALES = 5;
