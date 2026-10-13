@@ -90,6 +90,16 @@ class Publicacion(unittest.TestCase):
         self.assertIn("::warning::", texto)
         self.assertNotIn("123:ABC", texto)
 
+    def test_un_error_de_telegram_muestra_codigo_y_motivo_sin_el_token(self):
+        def falla(pedido, timeout=None):
+            cuerpo = io.BytesIO(b'{"ok":false,"error_code":403,"description":"Forbidden: bot is not a member of the channel chat 123:ABC"}')
+            raise urllib.error.HTTPError(pedido.full_url, 403, "Forbidden", {}, cuerpo)
+        codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, falla)
+        self.assertEqual(codigo, 0)
+        self.assertIn("403", texto)
+        self.assertIn("bot is not a member", texto)
+        self.assertNotIn("123:ABC", texto)
+
     def test_sin_ofertas_no_manda_nada(self):
         self.ruta.write_text(json.dumps({**OFERTAS, "ofertas": []}), encoding="utf-8")
         abrir = mock.Mock()
