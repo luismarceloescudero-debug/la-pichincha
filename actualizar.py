@@ -95,18 +95,21 @@ def precio_compragamer(prod):
 
 
 def precio_meta(prod):
-    """Gaming City: <meta name="product:price:amount" content="236550">."""
+    """Gaming City y Venex: <meta name|property="product:price:amount" content="236550">."""
     html = bajar(prod["url"])
-    m = re.search(r'name="product:price:amount"\s+content="([\d.]+)"', html)
+    m = re.search(r'(?:name|property)="product:price:amount"\s+content="([\d.]+)"', html)
     if not m:
         raise LookupError("no encontre product:price:amount")
     lista = re.search(r"Precio de lista\s*\$\s*([\d.]+)", html)
-    hay = re.search(r'name="product:availability"\s+content="([^"]+)"', html)
-    return {
+    hay = re.search(r'(?:name|property)="product:availability"\s+content="([^"]+)"', html)
+    nuevo = {
         "precio": int(float(m.group(1))),
         "precio_lista": int(lista.group(1).replace(".", "")) if lista else None,
-        "stock": "en stock" if (hay and "in stock" in hay.group(1)) else "sin stock",
     }
+    # Sin el metadato de disponibilidad no se afirma nada: queda el stock que habia.
+    if hay:
+        nuevo["stock"] = "en stock" if "in stock" in hay.group(1) else "sin stock"
+    return nuevo
 
 
 def precio_itemprop(prod):
@@ -251,8 +254,9 @@ def analizar(datos):
                       "puesto en Mendoza. Hay que reescribir el veredicto.")
 
     # Combo RAM + webcam.
-    c920s = por_id["c920s"]
-    combo_gc = k + c920s["precio"]
+    # Todo en Gaming City: la webcam que Gaming City vende (dejo de vender la C920s).
+    c920s, c922 = por_id["c920s"], por_id["c922"]
+    combo_gc = k + c922["precio"]
     combo_partido = a_punto + c920s["precio"]
     print(f"\n  Combo RAM + webcam:")
     print(f"    Todo en Gaming City   {pesos(combo_gc)}")

@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-09",
+  "actualizado": "2026-10-13",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -38,6 +38,14 @@
       "promo": "precio con débito, transferencia o efectivo",
       "entrega": "envío desde CABA",
       "web": "https://fullh4rd.com.ar"
+    },
+    "venex": {
+      "nombre": "Venex",
+      "color": "vx",
+      "rol": "donde sigue la C920s",
+      "promo": "precio de la web",
+      "entrega": "envío a domicilio (Andreani u OCA)",
+      "web": "https://www.venex.com.ar"
     }
   },
   "productos": [
@@ -221,15 +229,14 @@
       "nombre": "Logitech C920S Pro",
       "corto": "C920S Pro",
       "sku": "1080p / 30 fps",
-      "tienda": "gamingcity",
+      "tienda": "venex",
       "fuente": {
         "tipo": "meta",
         "clave": "product:price:amount"
       },
-      "url": "https://www.gamingcity.com.ar/webcam-webcam-logitech-c920s-pro-hd-1080p-30fps--det--5164",
+      "url": "https://www.venex.com.ar/perifericos/webcams/webcam-logitech-c920s-fhd-stereo-c-tapa.html",
       "img": "img/c920s.jpg",
-      "precio": 137749,
-      "sin_impuestos": 113842,
+      "precio": 135999,
       "stock": "en stock",
       "titular": "La que compraría",
       "specs": {
@@ -238,24 +245,22 @@
         "Enfoque": "automático",
         "Micrófono": "estéreo dual",
         "Privacidad": "tapa incorporada",
-        "Garantía": "12 meses",
-        "Entrega": "retiro Mendoza"
+        "Garantía": "sin dato de la tienda",
+        "Entrega": "envío a domicilio"
       },
       "chips": [
         "1080p30",
         "autofoco",
         "tapa de privacidad",
-        "retiro en Mendoza"
+        "envío a domicilio"
       ],
       "pros": [
         "Lente de vidrio de cinco elementos y autofoco: es el estándar contra el que se comparan todas las demás.",
-        "Tapa de privacidad incorporada y micrófonos estéreo a los lados.",
-        "La retirás gratis en Mendoza el mismo día."
+        "Tapa de privacidad incorporada y micrófonos estéreo a los lados."
       ],
       "contras": [
-        "En Mexx la misma cámara sale $157.519, un 14% más."
-      ],
-      "falla_desde": "2026-10-10"
+        "Gaming City dejó de venderla: ya no se retira en Mendoza, llega por envío desde Venex."
+      ]
     },
     {
       "id": "brio100",
@@ -348,16 +353,15 @@
       "tipo": "webcam-ref",
       "nombre": "Logitech C922 Pro",
       "corto": "C922 Pro",
-      "tienda": "mexx",
+      "tienda": "gamingcity",
       "fuente": {
-        "tipo": "itemprop"
+        "tipo": "meta",
+        "clave": "product:price:amount"
       },
-      "url": "https://www.mexx.com.ar/productos-rubro/camaras-web-e-ip/34580-c%C3%A1mara-web-logitech-c922-pro-full-hd.html",
+      "url": "https://www.gamingcity.com.ar/webcam-webcam-logitech-c922-pro-hd-stream-1080p--det--4996",
       "img": "img/c922.jpg",
-      "precio": 148529,
-      "precio_lista": null,
-      "stock": "en stock",
-      "falla_desde": "2026-10-11"
+      "precio": 161499,
+      "stock": "en stock"
     },
     {
       "id": "gw911",
@@ -435,15 +439,15 @@
     },
     {
       "t": "Si vas por la RAM y la webcam juntas.",
-      "d": "Comprar todo en Gaming City Mendoza es una sola operación, retirada gratis el mismo día. Partir la compra entre CompraGamer y Gaming City sale menos y además la RAM pasa de CL22 con 12 meses a CL16 con 36. Por esa diferencia vale la pena hacer dos compras."
+      "d": "Gaming City dejó de vender la C920s, así que comprar todo ahí es el Kingston con la C922: una sola operación, retirada gratis el mismo día. Partir la compra entre CompraGamer (la ADATA) y Venex (la C920s) sale menos y además la RAM pasa de CL22 con 12 meses a CL16 con 36. Por esa diferencia vale la pena hacer dos compras."
     }
   ],
   "calculado": {
     "adata_punto": 228089,
     "adata_domicilio": 233108,
     "kingston_retiro": 299249,
-    "combo_gc": 436998,
-    "combo_partido": 365838,
+    "combo_gc": 460748,
+    "combo_partido": 364088,
     "ram_mas_barata": "adata-d35",
     "webcam_mas_barata": "genius1000x"
   },
