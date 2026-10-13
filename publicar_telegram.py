@@ -71,6 +71,16 @@ def main(argv=None):
                                     headers={"Content-Type": "application/json"}, method="POST")
     try:
         urllib.request.urlopen(pedido, timeout=20)
+    except urllib.error.HTTPError as e:
+        # Telegram explica el rechazo ("chat not found", "bot is not a member..."): se muestra para
+        # poder arreglarlo, pero nunca el token, por si apareciera en algun texto.
+        try:
+            motivo = json.loads(e.read().decode("utf-8", "replace")).get("description", "")
+        except (OSError, ValueError, AttributeError):
+            motivo = ""
+        motivo = motivo.replace(token, "***")[:200]
+        print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
+        return 0
     except (urllib.error.URLError, OSError) as e:
         print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__})")
         return 0
