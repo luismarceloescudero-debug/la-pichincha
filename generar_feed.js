@@ -13,10 +13,11 @@ const O = require("./js/ofertas.js");
 const P = require("./js/pagina.js");
 const G = require("./generar_paginas.js");
 
-const BASE_URL = "https://luismarceloescudero-debug.github.io/la-pichincha";
+const SITIO = require("./sitio.json");
+const BASE_URL = SITIO.base_url;
 const MAX_FEED = 20;
 const MAX_HOY = 10, EN_TARJETA = 5;
-const CANAL_TELEGRAM = "https://t.me/pichinchasdeldia";
+const CANAL_TELEGRAM = SITIO.canal_telegram;
 
 const xml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
 const pesos = n => "$" + Math.round(n).toLocaleString("es-AR");

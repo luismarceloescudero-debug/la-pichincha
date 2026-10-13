@@ -123,7 +123,8 @@ class EnLaAction(unittest.TestCase):
     def test_la_action_publica_la_cobertura_y_la_compara_con_la_anterior(self):
         yml = (Path(__file__).resolve().parent.parent / ".github" / "workflows" / "actualizar.yml").read_text(encoding="utf-8")
         self.assertIn("python cobertura.py indice.json --salida _sitio/cobertura.json", yml)
-        self.assertIn("--previa https://luismarceloescudero-debug.github.io/la-pichincha/cobertura.json", yml)
+        self.assertIn('--previa "$(python -c', yml)                     # la direccion sale de sitio.json
+        self.assertIn("""["base_url"])')/cobertura.json\"""", yml)
         self.assertIn('--resumen "$GITHUB_STEP_SUMMARY"', yml)
         self.assertLess(yml.index("Generar las paginas por busqueda"), yml.index("cobertura.py"))
 

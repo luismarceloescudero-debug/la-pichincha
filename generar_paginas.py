@@ -22,8 +22,8 @@ from xml.sax.saxutils import escape
 RAIZ = Path(__file__).resolve().parent
 CONSULTAS = RAIZ / "consultas.json"
 LARGO_MIN, LARGO_MAX = 2, 60
-# Unico lugar con el dominio: con el .com.ar (F1.4) se cambia aca y se reenvia el sitemap.
-BASE_URL = "https://luismarceloescudero-debug.github.io/la-pichincha"
+# La direccion publica vive en sitio.json (unico lugar; ver tests/test_sitio.py).
+BASE_URL = json.loads((RAIZ / "sitio.json").read_text(encoding="utf-8"))["base_url"]
 
 
 def slug(consulta):

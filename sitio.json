@@ -1,0 +1,5 @@
+{
+  "_nota": "Unico lugar con la direccion publica del sitio. Al cambiar de dominio se cambia aca y en el <head> de index.html (un test exige que coincidan), y se reenvia el sitemap en Search Console.",
+  "base_url": "https://luismarceloescudero-debug.github.io/la-pichincha",
+  "canal_telegram": "https://t.me/pichinchasdeldia"
+}

@@ -499,3 +499,17 @@ las visitas mide estos eventos:
 | `exportar` | `exportar/excel/buscar` | Excel, CSV o Imprimir |
 
 Desde `localhost` no cuenta nada.
+
+## Cambiar de dominio
+
+La dirección pública del sitio vive en un solo lugar, `sitio.json` (`base_url`). Para pasar a un dominio
+propio (por ejemplo `https://lapichincha.com`):
+
+1. Cargar en el DNS del dominio los registros de GitHub Pages (A y AAAA del apex, CNAME de `www`) y
+   esperar a que resuelva.
+2. En el repo, Settings → Pages → Custom domain, poner el dominio y activar "Enforce HTTPS".
+3. Cambiar `base_url` en `sitio.json` y las cuatro direcciones del `<head>` de `index.html`
+   (`tests/test_sitio.py` falla si no coinciden).
+4. Agregar el dominio en Google Search Console y enviar `sitemap.xml`.
+
+Las direcciones viejas de `github.io` redirigen solas al dominio nuevo.
