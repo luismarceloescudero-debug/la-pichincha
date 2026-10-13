@@ -21,6 +21,13 @@ def con_html(extractor, html):
 
 
 class Sinteticos(unittest.TestCase):
+    def test_meta_de_venex_con_property_y_sin_disponibilidad(self):
+        # Venex usa property= en vez de name= y no publica product:availability:
+        # sin ese dato no se afirma "sin stock", se deja el que habia.
+        html = ('<meta property="product:price:amount" content="135999"/>'
+                '<meta property="product:sale_price:amount" content="0"/>')
+        self.assertEqual(con_html(actualizar.precio_meta, html), {"precio": 135999, "precio_lista": None})
+
     def test_meta_de_gaming_city(self):
         html = ('<meta name="product:price:amount" content="236550.00"> Precio de lista $ 260.000 '
                 '<meta name="product:availability" content="in stock">')
@@ -160,6 +167,7 @@ class AnalizarSinVerificar(unittest.TestCase):
                  "falla_desde": "2026-10-08"},
                 {"id": "armor", "tipo": "ram-ref", "tienda": "mx", "corto": "Armor", "precio": 214989},
                 {"id": "c920s", "tipo": "webcam", "tienda": "gc", "corto": "C920S", "precio": 137749},
+                {"id": "c922", "tipo": "webcam-ref", "tienda": "gc", "corto": "C922", "precio": 161499},
             ]}
 
     def analizar(self):
@@ -186,3 +194,22 @@ class AnalizarSinVerificar(unittest.TestCase):
 
     def test_con_todo_verificado_no_avisa(self):
         self.assertEqual(self.analizar(), [])
+
+
+class Combo(unittest.TestCase):
+    """El combo "todo en Gaming City" usa la webcam que Gaming City vende (la C922);
+    el partido, la ADATA en punto de retiro mas la C920s donde este."""
+
+    def test_combos(self):
+        datos = {"envio": {"zona": "Mendoza", "cp": "5501", "punto": 6639, "domicilio": 11658},
+                 "tiendas": {"cg": {"nombre": "CG"}, "gc": {"nombre": "GC"}, "vx": {"nombre": "VX"}},
+                 "productos": [
+                     {"id": "adata-d35", "tipo": "ram", "tienda": "cg", "corto": "ADATA", "precio": 221450},
+                     {"id": "kingston-kvr", "tipo": "ram", "tienda": "gc", "corto": "Kingston", "precio": 299249},
+                     {"id": "c920s", "tipo": "webcam", "tienda": "vx", "corto": "C920S", "precio": 135999},
+                     {"id": "c922", "tipo": "webcam-ref", "tienda": "gc", "corto": "C922", "precio": 161499}]}
+        with redirect_stdout(io.StringIO()):
+            actualizar.analizar(datos)
+        c = datos["calculado"]
+        self.assertEqual(c["combo_gc"], 299249 + 161499)
+        self.assertEqual(c["combo_partido"], 221450 + 6639 + 135999)

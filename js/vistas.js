@@ -88,8 +88,8 @@ function vistaComparativa() {
 function vistaTiendas() {
   const ganadores = {
     compragamer: ["corsair-lpx", "brio4k", "brio505", "adata-d35"],
-    gamingcity: ["kingston-kvr", "c920s", "genius1000x"],
-    mexx: ["hiksemi-armor", "c922", "brio100", "gw911"]
+    gamingcity: ["kingston-kvr", "c922", "genius1000x"],
+    mexx: ["hiksemi-armor", "brio100", "gw911"]
   };
   const flaco = {
     compragamer: "Catálogo chico: cuatro webcams en total y no vende módulos Kingston ValueRAM sueltos.",
