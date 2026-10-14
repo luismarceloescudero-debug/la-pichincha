@@ -43,12 +43,14 @@ function estadoFuentes(idx, salud) {
 }
 
 const ESTILO = `<style>
-.info table{width:100%;border-collapse:collapse}
+.info table{width:100%;min-width:0;border-collapse:collapse}
 .info th,.info td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-.info td.num{text-align:right}
+.info .num{text-align:right}
 .info .est{display:block;font-size:.82rem;color:var(--ink-2)}
 .info .est.mal{color:var(--bad)}
-.info .seg{font-size:.75rem;color:var(--ink-3)}
+.info td:first-child{font-family:var(--font-sans)}
+.info .agr{font-size:.75rem;color:var(--ink-3)}
+.info .cuando{display:block;font:500 .78rem var(--font-mono);color:var(--ink-3);margin-top:2px}
 .info section{margin:28px 0}
 .info section p,.info section li{line-height:1.55}
 </style>`;
@@ -60,9 +62,10 @@ const cabeza = opciones => G.cabeza(opciones).replace("</head>", ESTILO + "\n</h
 
 function renderEstado(idx, salud, { baseUrl = BASE_URL } = {}) {
   const base = baseUrl.replace(/\/$/, "");
-  const filas = estadoFuentes(idx, salud).map(f => `    <tr><td>${esc(f.nombre)}${f.segunda ? ' <span class="seg">(agregador)</span>' : ""}` +
-    `<span class="est${f.estado === "ok" ? "" : " mal"}">${esc(ETIQUETAS[f.estado] || f.estado)}</span></td>` +
-    `<td class="num">${f.avisos.toLocaleString("es-AR")}</td><td class="num">${esc(f.relevado ? P.fechaHora(f.relevado) : "—")}</td></tr>`).join("\n");
+  const filas = estadoFuentes(idx, salud).map(f => `    <tr><td>${esc(f.nombre)}${f.segunda ? ' <span class="agr">(agregador)</span>' : ""}` +
+    `<span class="est${f.estado === "ok" ? "" : " mal"}">${esc(ETIQUETAS[f.estado] || f.estado)}</span>` +
+    (f.relevado ? `<span class="cuando">Último dato: ${esc(P.fechaHora(f.relevado))}</span>` : "") +
+    `</td><td class="num">${f.avisos.toLocaleString("es-AR")}</td></tr>`).join("\n");
   return cabeza({ titulo: "Estado de las fuentes | La Pichincha",
     descripcion: "Cuándo se relevó por última vez cada tienda que compara La Pichincha y cuántos avisos trajo.",
     canonica: `${base}/estado/`, baseUrl: base, rel: "../" }) + `
@@ -71,7 +74,7 @@ function renderEstado(idx, salud, { baseUrl = BASE_URL } = {}) {
   <h1>Estado de las fuentes</h1>
   <p class="sub">Precios del ${esc(P.fechaHora(idx.generado))} (hora argentina). Cada tienda se releva una vez por día; si una no responde, se conservan sus precios anteriores y se muestran con su fecha, nunca como si fueran de hoy.</p>
   <table>
-    <thead><tr><th>Tienda</th><th>Avisos</th><th>Último relevamiento</th></tr></thead>
+    <thead><tr><th>Tienda</th><th class="num">Avisos</th></tr></thead>
     <tbody>
 ${filas}
     </tbody>
