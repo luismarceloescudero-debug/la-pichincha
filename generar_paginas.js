@@ -147,6 +147,7 @@ ${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta propert
 <meta name="twitter:description" content="${esc(descripcion)}">
 <meta name="twitter:image" content="${esc(baseUrl)}/img/og.png">
 <link rel="manifest" href="${rel}manifest.webmanifest">
+<link rel="icon" type="image/png" href="${rel}img/icono-192.png">
 <link rel="apple-touch-icon" href="${rel}img/apple-touch-icon.png">
 <meta name="theme-color" content="#0b4fd8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)">

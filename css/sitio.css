@@ -2,16 +2,16 @@
    una vista de analisis que entra por encima al tocar una tarjeta. */
 :root{
   --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eceff4;
-  --ink:#14181f; --ink-2:#4e5767; --ink-3:#78839a; --line:#d9dfe8;
+  --ink:#14181f; --ink-2:#4e5767; --ink-3:#626b7e; --line:#d9dfe8;
   --accent:#0b4fd8; --accent-soft:#e3ecff;
   --good:#117a4a; --good-soft:#dff3e8; --bad:#a52020;
-  --warn:#a85a07; --warn-soft:#fbeeda;
+  --warn:#a35707; --warn-soft:#fbeeda;
   --cg:#6534e8; --cg-soft:#efe9ff;
-  --gc:#0b7f80; --gc-soft:#d8f2f2;
-  --mx:#a85a07; --mx-soft:#fbeeda;
+  --gc:#0a7677; --gc-soft:#d8f2f2;
+  --mx:#a35707; --mx-soft:#fbeeda;
   --fh:#4e5767; --fh-soft:#e7eaf0;
   --cy:#b0265f; --cy-soft:#fbe4ee;
-  --vx:#0b73b8; --vx-soft:#e1f1fb;
+  --vx:#0b6eb1; --vx-soft:#e1f1fb;
   --font-sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -12px rgba(20,24,31,.18);
@@ -21,7 +21,7 @@
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
-    --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
+    --ink-3:#838d9e; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
     --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080; --warn:#fbbf24; --warn-soft:#2e2311;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
@@ -34,7 +34,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#0e1117; --surface:#161b23; --surface-2:#1e242e; --ink:#e9edf4; --ink-2:#aab3c2;
-  --ink-3:#7c8799; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
+  --ink-3:#838d9e; --line:#2b323d; --accent:#6c9bff; --accent-soft:#1a2740;
   --good:#4ec98b; --good-soft:#12301f; --bad:#ef8080; --warn:#fbbf24; --warn-soft:#2e2311;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
