@@ -32,3 +32,33 @@ class DireccionUnica(unittest.TestCase):
         for nombre in ("generar_paginas.py", "generar_paginas.js", "generar_feed.js", ".github/workflows/actualizar.yml"):
             texto = (RAIZ / nombre).read_text(encoding="utf-8")
             self.assertNotIn("github.io/la-pichincha", texto, nombre)
+
+
+class PoliticaDeContenido(unittest.TestCase):
+    """La CSP vive en sitio.json; index.html y las paginas generadas la llevan igual."""
+
+    def test_la_politica_cierra_lo_que_no_se_usa(self):
+        csp = SITIO["csp"]
+        for directiva in ("default-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'"):
+            self.assertIn(directiva, csp)
+        self.assertNotIn("unsafe-eval", csp)
+
+    def test_index_html_lleva_la_politica_de_sitio_json(self):
+        html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        metas = re.findall(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)">', html)
+        self.assertEqual(metas, [SITIO["csp"]])
+
+    def test_las_paginas_generadas_llevan_la_politica_de_sitio_json(self):
+        js = 'process.stdout.write(require("./generar_paginas.js").cabeza({titulo:"t",descripcion:"d",canonica:"c",baseUrl:"b"}))'
+        salida = subprocess.run(["node", "-e", js], cwd=RAIZ, capture_output=True, text=True, check=True, encoding="utf-8")
+        self.assertIn(f'<meta http-equiv="Content-Security-Policy" content="{SITIO["csp"]}">', salida.stdout)
+
+    def test_todo_origen_externo_del_sitio_esta_permitido(self):
+        """Si alguien suma un script o una fuente de otro dominio sin tocar la CSP, el navegador lo bloquea."""
+        csp = SITIO["csp"]
+        textos = [(RAIZ / "index.html").read_text(encoding="utf-8")] + \
+            [p.read_text(encoding="utf-8") for p in (RAIZ / "js").glob("*.js")]
+        for texto in textos:
+            for origen in re.findall(r'<script[^>]+src="(https://[^/"]+)', texto) + \
+                    re.findall(r'"(https://cdnjs\.cloudflare\.com)/', texto):
+                self.assertIn(origen, csp)

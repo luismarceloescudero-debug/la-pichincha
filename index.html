@@ -4,6 +4,7 @@
 <!-- solo-web -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://mescudero.goatcounter.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- /solo-web -->
 <title>La Pichincha</title>
 <!-- solo-web -->
@@ -84,6 +85,9 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   <p class="pie-impresion" id="pie-impresion"></p>
   <p class="nota" id="nota"></p>
   <p class="nota">Más comparaciones: <a href="precios/">precios de hardware por búsqueda</a>, con lo que más se busca y el precio de hoy.</p>
+  <!-- solo-web -->
+  <p class="nota"><a href="estado/">Estado de las fuentes</a> · <a href="legal/">Términos, privacidad y afiliados</a></p>
+  <!-- /solo-web -->
 </div>
 
 <script src="js/buscador.js"></script>
@@ -657,8 +661,7 @@ const DATOS = {
    "lian li",
    "montech"
   ]
- },
- "verificado": "2026-10-13T14:19-03:00"
+ }
 };
 /* === FIN DATOS === */
 </script>
