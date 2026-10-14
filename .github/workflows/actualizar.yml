@@ -154,6 +154,10 @@ jobs:
             node generar_feed.js --indice indice.json --salida _sitio || echo "::warning::No se armo el feed de ofertas"
           fi
 
+      # /estado/ (cuando se relevo cada tienda, de indice.json y salud.json) y /legal/. Si falla, el sitio sale igual.
+      - name: Armar las paginas de estado y legales
+        run: node generar_info.js --indice indice.json --salud salud.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
+
       # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Publica la
       # corrida programada y la que se lanza a mano (para probar el canal), nunca un push: asi no se
       # repiten mensajes en cada merge.

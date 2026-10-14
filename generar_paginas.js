@@ -15,7 +15,8 @@ const B = require("./js/buscador.js");
 const A = require("./js/analisis.js");
 const P = require("./js/pagina.js");
 
-const BASE_URL = require("./sitio.json").base_url;   // la direccion publica vive en sitio.json
+const SITIO = require("./sitio.json");
+const BASE_URL = SITIO.base_url;   // la direccion publica vive en sitio.json
 const MIN_COMPARABLES = 5;     // debajo de esto la pagina es fina: no se indexa
 const MAX_FILAS = 20;
 const MAX_INTERNACIONALES = 5;
@@ -129,6 +130,7 @@ function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, rel = 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="${SITIO.csp}">
 <title>${esc(titulo)}</title>
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${esc(canonica)}">
@@ -173,7 +175,7 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 function pie(ctx) {
   return `<p class="nota">Precios con IVA y sin envío, tomados de CompraGamer, Gaming City, Mexx, FullH4rd, Venex y ComparaYa. ` +
     `El stock y los precios de hardware se mueven rápido: confirmá antes de pagar. ` +
-    `<a href="../../">Volver a La Pichincha</a>.</p>`;
+    `<a href="../../">Volver a La Pichincha</a> · <a href="../../estado/">Estado de las fuentes</a> · <a href="../../legal/">Términos y privacidad</a>.</p>`;
 }
 
 /* Pagina de una consulta. consulta = { q, slug }; analisis = Analisis.analizarConsulta o null. */
