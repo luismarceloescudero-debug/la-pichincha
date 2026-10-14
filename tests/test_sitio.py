@@ -62,3 +62,14 @@ class PoliticaDeContenido(unittest.TestCase):
             for origen in re.findall(r'<script[^>]+src="(https://[^/"]+)', texto) + \
                     re.findall(r'"(https://cdnjs\.cloudflare\.com)/', texto):
                 self.assertIn(origen, csp)
+
+
+class Icono(unittest.TestCase):
+    """Sin <link rel="icon"> el navegador pide /favicon.ico, que no existe: un 404 en cada pagina."""
+
+    def test_index_y_las_paginas_generadas_declaran_el_icono(self):
+        self.assertIn('<link rel="icon" type="image/png" href="img/icono-192.png">',
+                      (RAIZ / "index.html").read_text(encoding="utf-8"))
+        js = 'process.stdout.write(require("./generar_paginas.js").cabeza({titulo:"t",descripcion:"d",canonica:"c",baseUrl:"b",rel:"../"}))'
+        salida = subprocess.run(["node", "-e", js], cwd=RAIZ, capture_output=True, text=True, check=True, encoding="utf-8")
+        self.assertIn('<link rel="icon" type="image/png" href="../img/icono-192.png">', salida.stdout)
