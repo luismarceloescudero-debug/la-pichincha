@@ -13,16 +13,17 @@ dueño. Subirlos cuando la medicion real los supera, si.
 | Contraste (WCAG AA) | >= 4,5:1 en todo texto, tema claro y oscuro | `tests/test_contraste.py` sobre las variables de `css/sitio.css` | si |
 | Enlaces internos | ninguno roto en el sitio armado | `tests/test_integracion.py` | si |
 | Politica de contenido (CSP) | en todas las paginas, sin `unsafe-eval`, con `object-src 'none'` | `tests/test_sitio.py`, `tests/test_integracion.py` | si |
-| Lighthouse movil: accesibilidad, buenas practicas, SEO | >= 90 | job `lighthouse` sobre /, /precios/, /hoy/, /estado/ y /legal/ | si |
-| Lighthouse movil: rendimiento | >= 90 | el mismo job | aviso, hasta partir el indice (A3) |
+| Lighthouse movil: rendimiento, accesibilidad, buenas practicas, SEO | >= 90 | job `lighthouse` sobre /, /precios/, /hoy/, /estado/ y /legal/ | si |
+| Portada sin saltos ni recambio de fuentes | `#sello` reserva sus lineas, fuentes con `display=optional`, primera foto sin `lazy` | `tests/test_rendimiento.py` | si |
 
 ## Por que asi
 
 - **Cobertura**: los umbrales estan apenas debajo de lo medido el 14/10/2026, no en el piso de 80% del
   plan: asi no hay margen para que la cobertura retroceda sin que se note.
-- **Rendimiento como aviso**: en el runner de GitHub el puntaje varia varios puntos entre corridas, y
-  la portada mide 92 con el indice entero de 2,9 MB. Cuando A3 parta el indice por rubro, pasa a
-  bloquear.
+- **Rendimiento bloquea desde A3**: la portada medía entre 81 y 92. Las causas no eran el indice (no se
+  baja al abrir, solo al buscar) sino el sello que crecia despues de pintar (CLS 0,19), la primera foto
+  pedida con `lazy` y la fuente que llegaba tarde y volvia a pintar el texto (LCP 3,4 s). Corregidas,
+  mide 99-100 en cinco corridas seguidas (LCP 1,4-1,7 s, CLS 0).
 - **CSP con `unsafe-inline` en scripts**: `index.html` lleva los datos del dia en un script en linea, asi
   que un hash fijo no sirve. Lo que si cierra: scripts solo de los dominios listados, conexiones solo al
   propio sitio y a GoatCounter, sin `object`, sin `base` y sin enviar formularios afuera. Va como

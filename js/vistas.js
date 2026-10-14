@@ -6,7 +6,7 @@ function tarjeta(p, i) {
     <div class="barra"></div>
     ${p.destacado ? `<span class="cinta">${icono("trofeo")} mejor</span>` : ""}
     <span class="rank">${p.podio}</span>
-    <div class="foto"><img src="${p.img}" alt="${esc(p.nombre)}" loading="lazy"></div>
+    <div class="foto"><img src="${p.img}" alt="${esc(p.nombre)}" loading="${i < 2 ? "eager" : "lazy"}"${i === 0 ? ' fetchpriority="high"' : ""}></div>
     <div class="cuerpo">
       <h3>${esc(p.nombre)}</h3>
       <span class="tienda">${icono("store")} ${esc(t.nombre || "")}</span>

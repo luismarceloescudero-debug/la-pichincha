@@ -60,14 +60,20 @@ la guia.
 - A2 **Auditoria de calidad** con umbrales escritos en `CONSTRAINTS.md` (`constraint-driven-development`):
   Lighthouse movil >= 90 en rendimiento, accesibilidad, buenas practicas y SEO; WCAG AA;
   cobertura de tests de la logica pura >= 80%.
-- A3 **Rendimiento** (`webperf`, `performance-optimization`): partir `indice.json` por rubro y bajar
-  solo el que se busca (gatillo de la F4 ya cerca: 2,9 MB crudo); imagenes en WebP con tamaño fijo.
+- A3 **Rendimiento** (`webperf`, `performance-optimization`): ~~partir `indice.json` por rubro~~.
+  **Hecho el 14/10 con otro diagnostico**: la portada no baja el indice (se pide al buscar, y publicado
+  pesa 597 KB gzip, lejos del gatillo de 1,5 MB). Lo que la frenaba era el sello que crecia despues de
+  pintar, la primera foto `lazy` y el recambio de fuentes; corregido, Lighthouse movil da 99-100. Partir
+  el indice vuelve cuando pase el gatillo o cuando la busqueda tarde en telefonos de gama baja. Las fotos
+  ya tienen alto fijo y pesan ~13 KB: WebP no se justifica hoy.
 - A4 **Seguridad y legal** (`security-and-hardening`, `security-review`): CSP estricta, revisar
   enlaces externos, pagina de terminos, privacidad (GoatCounter sin cookies) y aviso de afiliados.
 - A5 **Salud de fuentes visible**: pagina /estado/ con la hora del ultimo relevamiento de cada
   tienda (sale de `salud.json`), para que el usuario sepa que esta al dia.
 
-Sale cuando: dominio andando, Lighthouse >= 90, indice partido, CONSTRAINTS.md en CI.
+Sale cuando: dominio andando, Lighthouse >= 90 bloqueante en CI, CONSTRAINTS.md en CI.
+
+**Estado al 14/10/2026:** A2, A3, A4 y A5 hechas (PR #29 y el de A3). Falta solo A1, que depende del dueño.
 
 ### Fase B. Cobertura y busqueda al nivel de ComparaYa (semanas 2-6)
 

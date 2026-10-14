@@ -39,8 +39,8 @@ jobs:
           --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=85
           "tests/js/*.test.js"
 
-  # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md). Accesibilidad,
-  # buenas practicas y SEO cortan; rendimiento avisa hasta partir el indice (A3).
+  # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md): las cuatro
+  # categorias cortan si bajan de 90.
   lighthouse:
     runs-on: ubuntu-latest
     steps:
