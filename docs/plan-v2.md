@@ -63,7 +63,9 @@ la guia.
 - A3 **Rendimiento** (`webperf`, `performance-optimization`): ~~partir `indice.json` por rubro~~.
   **Hecho el 14/10 con otro diagnostico**: la portada no baja el indice (se pide al buscar, y publicado
   pesa 597 KB gzip, lejos del gatillo de 1,5 MB). Lo que la frenaba era el sello que crecia despues de
-  pintar, la primera foto `lazy` y el recambio de fuentes; corregido, Lighthouse movil da 99-100. Partir
+  pintar, la primera foto `lazy` y el recambio de fuentes; corregido, Lighthouse movil da 99-100 en una
+  maquina comun (en la CPU del runner la portada queda en 77-79 por el JS de arranque: pre-renderizarla
+  en el build es la tarea que sigue y, hasta entonces, su rendimiento solo avisa en la CI). Partir
   el indice vuelve cuando pase el gatillo o cuando la busqueda tarde en telefonos de gama baja. Las fotos
   ya tienen alto fijo y pesan ~13 KB: WebP no se justifica hoy.
 - A4 **Seguridad y legal** (`security-and-hardening`, `security-review`): CSP estricta, revisar

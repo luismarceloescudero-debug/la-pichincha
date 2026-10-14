@@ -41,5 +41,13 @@ class Fuentes(unittest.TestCase):
                 self.assertIn("display=optional", texto)
 
 
+class VistaReservada(unittest.TestCase):
+    """Con la CPU lenta del runner el navegador pinta antes de que el JS llene #vista, y el pie (p.nota)
+    salta hacia abajo (CLS 0,067). #vista ocupa una pantalla desde el principio: el pie nace fuera de vista."""
+
+    def test_la_vista_ocupa_una_pantalla_antes_de_que_la_llene_el_js(self):
+        self.assertRegex(CSS, r"#vista\{min-height:100vh\}")
+
+
 if __name__ == "__main__":
     unittest.main()
