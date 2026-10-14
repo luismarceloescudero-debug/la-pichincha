@@ -23,8 +23,61 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Tests de Python
-        run: python -m unittest discover -s tests -t . -v
+      # coverage es solo herramienta de la CI: el sitio sigue usando la biblioteca estandar (constitucion I).
+      - name: Instalar coverage
+        run: python -m pip install --quiet coverage==7.16.2
 
-      - name: Tests de JS
-        run: node --test "tests/js/*.test.js"
+      # Umbrales en CONSTRAINTS.md: no se bajan para que un PR pase.
+      - name: Tests de Python con cobertura
+        run: |
+          python -m coverage run --source=. --omit="tests/*" -m unittest discover -s tests -t . -v
+          python -m coverage report --fail-under=85
+
+      - name: Tests de JS con cobertura
+        run: >
+          node --test --experimental-test-coverage
+          --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=85
+          "tests/js/*.test.js"
+
+  # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md). Accesibilidad,
+  # buenas practicas y SEO cortan; rendimiento avisa hasta partir el indice (A3).
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Armar el sitio con el indice publicado
+        run: |
+          mkdir -p _sitio
+          cp index.html _sitio/
+          cp -r img js css _sitio/
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/indice.json" -o _sitio/indice.json || echo "::warning::No se pudo bajar el indice publicado"
+          python generar_paginas.py --indice _sitio/indice.json --salida _sitio
+          python publicar_app.py --salida _sitio --indice _sitio/indice.json
+          node generar_feed.js --indice _sitio/indice.json --salida _sitio
+          node generar_info.js --indice _sitio/indice.json --salud no-hay.json --salida _sitio
+
+      - name: Medir con Lighthouse
+        run: |
+          python -m http.server 8080 --directory _sitio >/dev/null 2>&1 &
+          sleep 2
+          for ruta in "" precios/ hoy/ estado/ legal/; do
+            nombre=$(echo "lh-${ruta:-portada}" | tr -d /)
+            npx --yes lighthouse@12.8.2 "http://localhost:8080/$ruta" --quiet --output=json \
+              --output-path="$nombre.json" --only-categories=performance,accessibility,best-practices,seo \
+              --chrome-flags="--headless=new --no-sandbox"
+          done
+          # Sin tubo: el codigo de salida del verificador es el que corta la corrida.
+          node .github/lighthouse.js lh-*.json > lighthouse.txt || falla=1
+          cat lighthouse.txt
+          { echo '### Lighthouse movil'; echo '```'; cat lighthouse.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit ${falla:-0}
