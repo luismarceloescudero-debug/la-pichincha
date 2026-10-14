@@ -3,14 +3,14 @@
 
    Uso: node .github/lighthouse.js informe1.json [informe2.json ...]
 
-   Accesibilidad, buenas practicas y SEO cortan la CI si bajan de 90. Rendimiento se informa como aviso
-   hasta que el indice este partido por rubro (A3): en el runner varia de una corrida a otra. */
+   Las cuatro categorias cortan la CI si bajan de 90. Rendimiento bloquea desde A3 (14/10/2026): sin el
+   salto del sello ni el recambio de fuentes, la portada mide 99-100 en corridas repetidas. */
 "use strict";
 
 const fs = require("fs");
 
-const BLOQUEANTES = { accessibility: 90, "best-practices": 90, seo: 90 };
-const AVISO = { performance: 90 };
+const BLOQUEANTES = { performance: 90, accessibility: 90, "best-practices": 90, seo: 90 };
+const AVISO = {};
 
 let fallas = 0;
 for (const ruta of process.argv.slice(2)) {
