@@ -99,7 +99,7 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   en la busqueda (panel plegable sobre la lista; acotan lo que se ve y no tocan la mediana ni el orden). **Cuotas sin interes y envio
   gratis quedan afuera por ahora**: las cinco tiendas directas no los publican por aviso (CompraGamer no los trae; en Gaming City y Mexx la
   cuota lleva recargo; Venex solo en la ficha y por JS) y solo ComparaYa los informa, en 19% y 42% de sus avisos: un filtro asi dejaria afuera
-  a las tiendas directas por no informar. Opcion abierta: ofrecerlos "solo donde la fuente lo informa" con el sello `s`. Las paginas
+  a las tiendas directas por no informar. Decidido: se muestran como **plus** (sello `s` y `e`) en lo que lidera la comparativa, sin filtrar ni cambiar el orden. Las paginas
   `/precios/<busqueda>/` muestran 20 opciones: enlazan a la busqueda para filtrar.
 - B5 **Rubros**: de hardware a tecnologia completa (notebooks, celulares, monitores, audio, gaming)
   sin perder el foco: cada rubro nuevo entra con sus reglas de "comparable".

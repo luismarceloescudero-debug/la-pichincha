@@ -159,12 +159,18 @@
 
   /* Las letras que guarda el indice ("ioe") como [clase, texto] de cada sello. */
   const SELLOS = [["i", "ojo", "compra internacional"], ["u", "ojo", "usado o caja abierta"], ["o", "conocida", "tienda oficial"],
-                  ["e", "off2", "envío gratis"],
+                  ["e", "off2", "envío gratis"], ["s", "off2", "cuotas sin interés"],
                   // de la serie de precios (serie.py): solo salen con historial suficiente
                   ["m", "baja", "mínimo de 30 días"], ["h", "baja", "mínimo de 90 días"],
                   ["x", "ojo", "subió antes de la oferta"]];
   const sellosDe = s => typeof s !== "string" ? []
     : SELLOS.filter(([l]) => s.includes(l)).map(([, clase, texto]) => [clase, texto]);
+
+  /* Lo que suma a favor de un aviso y se muestra como "plus" en lo que lidera la comparativa: envio gratis y cuotas sin
+     interes. Solo lo que la fuente informa: ComparaYa y sus comercios; las tiendas directas no lo publican por aviso, asi que
+     un aviso sin plus no quiere decir que no lo tenga. Nunca cambia el orden (principio II). */
+  const PLUS = ["e", "s"];
+  const plusDe = s => typeof s !== "string" ? [] : SELLOS.filter(([l]) => PLUS.includes(l) && s.includes(l)).map(([, , texto]) => texto);
 
   /* "Auriculares Samsung..." -> "auricular": el rubro es la primera palabra, en singular. */
   function categoriaDe(nombre) {
@@ -264,7 +270,7 @@
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
