@@ -192,7 +192,8 @@ def imagen(fila, cfg):
 def sellos(fila, cfg):
     """Letras de las senales que publica la fuente: i internacional, o tienda
     oficial, e envio gratis. 'sellos' en tiendas.json dice donde esta cada una,
-    con puntos para entrar en objetos ("specifications.is_international")."""
+    con puntos para entrar en objetos ("specifications.is_international"). 'usados' dice en que campo
+    viene la condicion y que valores cuentan como usado (u)."""
     salida = ""
     for letra, ruta in (cfg.get("sellos") or {}).items():
         valor = fila
@@ -200,6 +201,9 @@ def sellos(fila, cfg):
             valor = valor.get(parte) if isinstance(valor, dict) else None
         if valor and str(valor).lower() not in ("false", "no", "0"):
             salida += letra
+    usados = cfg.get("usados")        # la condicion que publica la fuente: u = usado, reacondicionado o caja abierta
+    if usados and fila.get(usados["campo"]) in usados["valores"]:
+        salida += "u"
     return salida
 
 

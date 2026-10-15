@@ -38,6 +38,19 @@ test("destacadas deja afuera compras internacionales y enlaces que no son http(s
   assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["ok"]);
 });
 
+test("lo usado o de caja abierta no es oferta: ni en la lista ni en las destacadas", () => {
+  const idx = { productos: [
+    fila("Smart Tv Samsung 85 Qled Qn800d (Nuevo con caja abierta)", 5999000, { lista: 8999000 }),
+    fila("Notebook Samsung Galaxy Book 3 512gb-caja Abierta", 1400000, { antes: 2000000 }),
+    fila("Playstation 5 Slim 1tb", 900000, { lista: 1300000, sellos: "eu" }),       // la fuente dice que es usada
+    fila("Iphone 14 Reacondicionado", 700000, { antes: 900000 }),
+    fila("Smart Tv Samsung 85 Qled Qn800d", 6999000, { lista: 9999000 })] };
+  const { propias, publicadas } = O.calcularOfertas(idx);
+  assert.deepEqual(publicadas.map(f => f[0]), ["Smart Tv Samsung 85 Qled Qn800d"]);
+  assert.deepEqual(propias, []);
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Smart Tv Samsung 85 Qled Qn800d"]);
+});
+
 test("destacadas trae el descuento y el ahorro de cada una", () => {
   const [o] = O.destacadas({ productos: [fila("A", 7500, { antes: 10000 })] });
   assert.equal(Math.round(o.off * 100), 25);

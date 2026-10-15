@@ -198,6 +198,10 @@
         "i": "specifications.is_international",
         "o": "specifications.Tienda oficial",
         "e": "specifications.Envío gratis"
+      },
+      "usados": {
+        "campo": "condition",
+        "valores": ["open_box", "used", "refurbished", "refurbished_international"]
       }
     },
     "extractor": null,

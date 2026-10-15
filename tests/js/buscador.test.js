@@ -118,6 +118,35 @@ test("motivoExclusion respeta lo que pide la busqueda", () => {
   assert.equal(m("Placa de video RTX 3060 outlet", "rtx 3060"), "usados");
 });
 
+test("lo usado, reacondicionado o de caja abierta queda afuera salvo que se pida", () => {
+  const m = (nombre, q, sellos) => {
+    const nq = B.normalBusq(q);
+    return B.motivoExclusion(B.normalBusq(nombre), nq, nq.split(/\s+/).filter(Boolean), sellos);
+  };
+  const tv = "Smart Tv Samsung 85 Qled Qn800d 8k (Nuevo con caja abierta)";
+  assert.equal(m(tv, "tv samsung 85"), "usados");
+  assert.equal(m("Notebook Samsung Galaxy Book 3 Pro 360 I7 512gb-caja Abierta", "notebook samsung"), "usados");
+  assert.equal(m("Monitor Viewsonic 22 (Nuevo con caja abierta)", "monitor 22", ""), "usados");
+  assert.equal(m(tv, "tv samsung 85 caja abierta"), null);
+  assert.equal(m("Smart Tv Samsung 85", "tv samsung 85", "u"), "usados");          // lo dice la fuente (condition)
+  assert.equal(m("Smart Tv Samsung 85", "tv samsung 85 usado", "u"), null);
+  assert.equal(m("Smart Tv Samsung 85", "tv samsung 85", "oe"), null);
+  assert.equal(m("Smart Tv Samsung 85", "tv samsung 85", 0), null);
+});
+
+test("esUsado mira el nombre y el sello u, y no confunde cajas con productos nuevos", () => {
+  const fila = (nombre, sellos = "") => [nombre, 1, "https://t.test", "cy", "", 0, 0, "", sellos, ""];
+  assert.equal(B.esUsado(fila("Laptop Dell Latitude 5440 (Nuevo con caja abierta)")), true);
+  assert.equal(B.esUsado(fila("Notebook Samsung Galaxy Book 3 512gb-caja Abierta")), true);
+  assert.equal(B.esUsado(fila("Iphone 14 Pro Max Reacondicionado")), true);
+  assert.equal(B.esUsado(fila("Placa de video RTX 3060 outlet")), true);
+  assert.equal(B.esUsado(fila("PlayStation 5 Slim Digital 1tb", "eu")), true);
+  assert.equal(B.esUsado(fila("PlayStation 5 Slim Digital 1tb", "e")), false);
+  assert.equal(B.esUsado(fila("Gabinete con caja de vidrio templado")), false);
+  assert.equal(B.esUsado(fila("Memoria Kingston Fury 16GB")), false);
+  assert.equal(B.esUsado([]), false);
+});
+
 test("las compras internacionales quedan afuera salvo que se pidan", () => {
   const m = (nombre, q, sellos) => {
     const nq = B.normalBusq(q);
@@ -141,6 +170,11 @@ test("sellosDe traduce las letras a sellos, en orden fijo", () => {
   assert.deepEqual(B.sellosDe(""), []);
   assert.deepEqual(B.sellosDe(undefined), []);
   assert.deepEqual(B.sellosDe("kz"), []);
+});
+
+test("sellosDe: el sello u avisa que es usado o de caja abierta", () => {
+  assert.deepEqual(B.sellosDe("u"), [["ojo", "usado o caja abierta"]]);
+  assert.deepEqual(B.sellosDe("ue"), [["ojo", "usado o caja abierta"], ["off2", "envío gratis"]]);
 });
 
 test("sellosDe: los sellos de la serie de precios (m, h, x)", () => {
