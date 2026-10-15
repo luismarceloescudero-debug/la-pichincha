@@ -26,9 +26,11 @@ exigiria un pedido por ficha, miles de avisos, para un dato que en tres de ellas
 sus avisos. Un filtro que oculte todo lo que no sea de ComparaYa no filtra: **deja afuera a las cinco tiendas directas por no informar**, y eso confundiria
 "no lo dice" con "no lo tiene" (principio II). Por eso **en esta entrega no se suman esos dos filtros ni campos al indice**: el indice no crece.
 
-**Opcion abierta**: ofrecerlos como "solo donde la fuente lo informa", sin sumar columnas: `e` (envio gratis) ya existe y alcanza con una letra nueva
-`s` (cuotas sin interes) en la columna `sellos`, con un aviso al lado del filtro ("lo informan ComparaYa y sus comercios"). Es poco codigo, pero el filtro
-quedaria vacio para las tiendas directas; se decide con el dueño. Cuando una fuente directa publique el dato en su listado o API, se suma ahi mismo.
+**Decidido el 15/10/2026: se muestran como "plus", no como filtro.** Envio gratis (sello `e`, que ya existia) y cuotas sin interes (sello `s`, nuevo:
+`specifications["Sin interes"]` verdadero, que en 900 avisos de nueve categorias de ComparaYa coincide siempre con el texto "N cuotas sin interes" de
+`Cuotas`; "6 cuotas" a secas no se afirma) aparecen como `＋ envio gratis · cuotas sin interes` en las opciones que lideran la comparativa y en la
+"Mejor compra" de la busqueda, y como fila "Plus" de la tabla de opciones, con la nota de que un guion no es que no lo tenga: la fuente no lo informa. No
+filtran ni cambian el orden (principio II). No suma columnas al indice: la letra `s` va en `sellos`.
 
 ## User Scenarios & Testing
 

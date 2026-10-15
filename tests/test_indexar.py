@@ -35,6 +35,17 @@ class Utilidades(unittest.TestCase):
     def test_limpio_decodifica_entidades(self):
         self.assertEqual(indexar.limpio('SSD 2.5&quot;  Kingston\n &amp; más'), 'SSD 2.5" Kingston & más')
 
+    def test_sellos_marca_con_s_las_cuotas_sin_interes_que_la_fuente_informa(self):
+        cfg = {"sellos": {"e": "specifications.Envío gratis", "s": "specifications.Sin interés"}}
+        self.assertEqual(indexar.sellos({"specifications": {"Sin interés": True}}, cfg), "s")
+        self.assertEqual(indexar.sellos({"specifications": {"Envío gratis": True, "Sin interés": True}}, cfg), "es")
+        self.assertEqual(indexar.sellos({"specifications": {"Sin interés": False, "Cuotas": "6 cuotas"}}, cfg), "")
+        self.assertEqual(indexar.sellos({"specifications": {"Cuotas": "6 cuotas"}}, cfg), "")    # con recargo o sin dato: no se afirma
+
+    def test_tiendas_json_declara_el_sello_s_en_comparaya(self):
+        cfg = json.loads((Path(__file__).resolve().parent.parent / "tiendas.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg["comparaya"]["catalogo"]["sellos"]["s"], "specifications.Sin interés")
+
     def test_sellos_marca_con_u_lo_que_la_fuente_dice_que_es_usado_o_de_caja_abierta(self):
         cfg = {"sellos": {"e": "specifications.Envio gratis"},
                "usados": {"campo": "condition", "valores": ["open_box", "used", "refurbished", "refurbished_international"]}}
@@ -206,8 +217,9 @@ class Catalogos(unittest.TestCase):
             self.assertEqual((it["url"], it["precio"], it["via"]), (f["url"], int(f["price"]), f.get("store_name")))
             self.assertEqual(it["imagen"], f["image"])
         self.assertTrue(all(it["imagen"].startswith("https://") for it in items))
-        # La quinta fila (Mercado Libre) es de tienda oficial y con envio gratis.
-        self.assertEqual([it["sellos"] for it in items], ["", "", "", "", "oe"])
+        # Samsung Shop, Naldo y Cetrogar informan "Sin interes" (s). La quinta fila (Mercado Libre) es de tienda oficial y con
+        # envio gratis; dice "6 cuotas" sin aclarar interes, y eso no se afirma.
+        self.assertEqual([it["sellos"] for it in items], ["", "s", "s", "s", "oe"])
 
     def test_listados_completan_la_foto_relativa(self):
         cfg = json.loads(json.dumps(TIENDAS["gamingcity"]))

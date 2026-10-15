@@ -199,7 +199,8 @@
       "sellos": {
         "i": "specifications.is_international",
         "o": "specifications.Tienda oficial",
-        "e": "specifications.Envío gratis"
+        "e": "specifications.Envío gratis",
+        "s": "specifications.Sin interés"
       },
       "usados": {
         "campo": "condition",

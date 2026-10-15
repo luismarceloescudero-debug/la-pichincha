@@ -172,6 +172,20 @@ test("sellosDe traduce las letras a sellos, en orden fijo", () => {
   assert.deepEqual(B.sellosDe("kz"), []);
 });
 
+test("sellosDe: el sello s avisa cuotas sin interes", () => {
+  assert.deepEqual(B.sellosDe("s"), [["off2", "cuotas sin interés"]]);
+  assert.deepEqual(B.sellosDe("es"), [["off2", "envío gratis"], ["off2", "cuotas sin interés"]]);
+});
+
+test("plusDe junta lo que suma a favor de un aviso: envio gratis y cuotas sin interes, en ese orden", () => {
+  assert.deepEqual(B.plusDe("se"), ["envío gratis", "cuotas sin interés"]);
+  assert.deepEqual(B.plusDe("e"), ["envío gratis"]);
+  assert.deepEqual(B.plusDe("ios"), ["cuotas sin interés"]);        // lo internacional o usado no es un plus
+  assert.deepEqual(B.plusDe(""), []);
+  assert.deepEqual(B.plusDe(undefined), []);
+  assert.deepEqual(B.plusDe(0), []);
+});
+
 test("sellosDe: el sello u avisa que es usado o de caja abierta", () => {
   assert.deepEqual(B.sellosDe("u"), [["ojo", "usado o caja abierta"]]);
   assert.deepEqual(B.sellosDe("ue"), [["ojo", "usado o caja abierta"], ["off2", "envío gratis"]]);

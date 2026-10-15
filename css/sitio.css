@@ -474,6 +474,9 @@ td.mejor{color:var(--good);font-weight:700}
 .f-campo input:focus,.f-texto:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 @media (max-width:640px){.f-campo input,.f-texto{font-size:16px}}   /* 16px: iOS no hace zoom al enfocar */
 
+/* ---- Plus: envio gratis y cuotas sin interes en lo que lidera la comparativa ---- */
+.dcard .plus{margin:2px 0 0;font:600 .78rem var(--font-sans);color:var(--good)}
+
 .ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:16px;align-items:start}
 .ocard{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--surface);
   border:1px solid var(--line);border-radius:16px;padding:20px 18px 16px;box-shadow:var(--shadow);

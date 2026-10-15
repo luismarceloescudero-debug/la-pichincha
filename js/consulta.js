@@ -54,14 +54,16 @@ function cardPick(p, i) {
   const specs = Object.values(specsDe(f[0])).slice(0, 5);
   const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
+  const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
   return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
     <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
-    <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).map(([clase, texto]) =>
+    <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
       `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
-    <p class="razon">${esc(p.razon)}</p>
+    <p class="razon">${esc(p.razon)}</p>${plus.length ? `
+    <p class="plus">＋ ${plus.join(" · ")}</p>` : ""}
     <span class="ver">Abrir en ${esc(comercioDe(f))} ${icono("fuera")}</span>
   </a>`;
 }
@@ -98,8 +100,11 @@ function tablaPicks(picks) {
     return f[6] > f[1] ? `bajó ${Math.round((1 - f[1] / f[6]) * 100)}%`
          : f[5] > f[1] ? `${Math.round((1 - f[1] / f[5]) * 100)}% OFF publicado` : "—";
   }));
+  const plus = picks.map(p => Buscador.plusDe(p.m.f[8])), maxPlus = Math.max(...plus.map(x => x.length));
+  if (maxPlus > 0) h += fila("Plus", plus.map(x => x.join(" · ") || "—"), plus.map(x => x.length === maxPlus));
   claves.forEach(k => { h += fila(k, specs.map(s => esc(s[k] || "—"))); });
-  return h + "</tbody></table></div>";
+  return h + "</tbody></table></div>" + (maxPlus > 0
+    ? `<p class="sub">«—» no es que no lo tenga: la fuente no lo informa (envío y cuotas por aviso solo los publican ComparaYa y sus comercios).</p>` : "");
 }
 
 function vistaComparativaDin() {
