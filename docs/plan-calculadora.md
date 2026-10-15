@@ -163,6 +163,8 @@ Sale cuando: cada regla del calculo tiene fuente oficial y fecha, o esta marcada
 
 Sale cuando: los casos oficiales dan al centavo y cambiar una regla no toca el codigo.
 
+**Hecha el 15/10/2026**: `js/costos.js` y `tests/js/costos.test.js` (24 tests): los 4 casos de referencia de la spec 010 dan al centavo, la franquicia, el cupo, el tope, las 3 unidades y los 50 kg, los pendientes quedan como «no incluido», el flete en la base como escenario, la percepcion aparte y el **rango segun el medio de pago** (`medioPago`); ningun numero de normativa esta en el codigo y un test lo exige. Se verifico con tres mutaciones del codigo y con una segunda revision de Claude por OmniRoute, que encontro un bug real en el rango (corregido con su test). Todavia no se carga en `index.html`: eso es K3.
+
 ### K2. Monedas en vivo (semana 2; en paralelo con K1)
 
 - `js/monedas.js`, `generar_cotizaciones.py` (copia del build) y el cambio de CSP.
