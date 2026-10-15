@@ -84,8 +84,15 @@ Sale cuando: dominio andando, Lighthouse >= 90 bloqueante en CI, CONSTRAINTS.md 
   bloqueos). Meta: 12 fuentes, 25 mil avisos.
 - B2 **Mercado Libre** como fuente directa con su API oficial y links de afiliado (dueño: cuenta de
   desarrollador y de afiliado).
-- B3 **Identidad por GTIN/EAN**: Venex publica `og:gtin`; sumarlo a `modelo.py` para agrupar el mismo
-  producto entre tiendas con dato duro. Meta: 40% agrupado en RAM, SSD y placas.
+- ~~B3 **Identidad por GTIN/EAN**~~ **Descartada el 15/10/2026** tras medirla
+  (`specs/007-identidad-por-gtin/viabilidad.md`): solo Venex y Mexx publican GTIN, y solo en la ficha; el
+  mismo producto coincide por GTIN en 4 de 14 pares, y en placas de video cada tienda publica el codigo de
+  barras de otra region. Ganancia estimada: ~3 puntos en RAM, ~4 en SSD y ~1 en placas (umbral: 5).
+- B3-bis **MPN de las fichas** (propuesta, a confirmar con una muestra mayor): las mismas fichas de Venex
+  ("MODELO:") y Mexx ("Modelo") traen el part number, que es lo que CompraGamer ya publica. En la muestra
+  coincidio con un codigo de CompraGamer en 2 de 6 fichas de RAM y 2 de 6 de SSD (0 de 7 en placas):
+  ~10 y ~15 puntos estimados. Mismo costo que el GTIN: un pedido por ficha, una sola vez, con cache por URL
+  y tope de fichas nuevas por corrida. Meta: 40% agrupado en RAM, SSD y placas.
 - B4 **Filtros** como ComparaYa: tienda, rango de precio, cuotas sin interes, envio gratis, solo
   primera linea, excluir palabras. Requiere capturar cuotas y envio por aviso (campos nuevos al
   final del indice, con su valor por defecto en `FILA_VACIA`).
@@ -160,7 +167,7 @@ Sale cuando: 1.000 alertas activas, grafico en vivo, carrito usado 100 veces por
 
 1. Fase A completa (base; la mayoria sin depender del dueño salvo el dominio).
 2. Fase B1, B3 y B4 en paralelo por sesiones separadas (archivos distintos).
-3. Fase C (el diferencial) apenas haya identidad por GTIN suficiente.
+3. Fase C (el diferencial) apenas haya identidad de producto suficiente (codigo de modelo o MPN).
 4. Fase D cuando el dueño apruebe el backend y haya 30 dias de historial.
 5. Fase E segun las metricas.
 
