@@ -168,6 +168,54 @@ test("el medio de pago solo puede ser uno de los dos conocidos", () => {
   assert.ok(r.avisos.some(a => /medio de pago/.test(a.texto)));
 });
 
+// ---- Hallazgos de la revision de cinco ejes (code-review-and-quality, 15/10/2026) ----
+
+test("un campo vacio de un formulario (undefined o null) vale cero y nunca produce NaN", () => {
+  for (const campos of [{ fleteUsd: undefined }, { seguroUsd: undefined }, { fleteUsd: null, seguroUsd: null },
+                        { fleteUsd: undefined, seguroUsd: undefined, honorariosUsd: undefined, impuestoInternoUsd: undefined }]) {
+    const r = calc({ fobUsd: 300, ...campos });
+    assert.equal(r.valido, true, JSON.stringify(campos));
+    assert.equal(r.totalUsd, 363, JSON.stringify(campos));
+    assert.equal(r.percepcionUsd, 90, JSON.stringify(campos));
+    assert.ok(Number.isFinite(r.rangoUsd.minUsd) && Number.isFinite(r.rangoUsd.maxUsd), JSON.stringify(campos));
+  }
+});
+
+test("pagando con dolares propios no hay percepcion: ni el monto ni el total con percepcion la cuentan", () => {
+  const r = calc({ fobUsd: 300, fleteUsd: 40, medioPago: "dolares_propios" });
+  assert.equal(r.percepcionAplica, false);
+  assert.equal(r.percepcionUsd, 0);
+  assert.equal(r.totalConPercepcionUsd, r.totalUsd);
+  const tarjeta = calc({ fobUsd: 300, fleteUsd: 40, medioPago: "tarjeta_pesos" });
+  assert.equal(tarjeta.percepcionAplica, true);
+  assert.equal(tarjeta.percepcionUsd, 102);
+  assert.equal(calc({ fobUsd: 300 }).percepcionAplica, null);       // no se sabe como paga: se informa como posibilidad
+});
+
+test("las unidades y los envios usados son numeros enteros", () => {
+  for (const entrada of [{ unidades: 2.5 }, { enviosUsadosEsteAnio: 4.5 }, { unidades: 0 }]) {
+    const r = calc({ fobUsd: 300, ...entrada });
+    assert.equal(r.valido, false, JSON.stringify(entrada));
+    assert.equal(r.totalUsd, null);
+  }
+});
+
+test("fleteEnValorAduana solo acepta si, no o ambos: un valor mal escrito no se toma como no", () => {
+  for (const valor of ["si ", "Si", "yes", true, 1]) {
+    const r = calc({ fobUsd: 300, fleteUsd: 50, fleteEnValorAduana: valor });
+    assert.equal(r.valido, false, String(valor));
+    assert.ok(r.avisos.some(a => /fleteEnValorAduana/.test(a.texto)));
+  }
+  for (const valor of ["si", "no", "ambos", undefined]) assert.equal(calc({ fobUsd: 300, fleteEnValorAduana: valor }).valido, true, String(valor));
+});
+
+test("el resultado tiene siempre la misma forma, sea valido, fuera de regimen o invalido", () => {
+  const claves = r => Object.keys(r).sort();
+  const valido = calc({ fobUsd: 300 });
+  assert.deepEqual(claves(calc({ fobUsd: 3500 })), claves(valido));
+  assert.deepEqual(claves(calc({ fobUsd: -1 })), claves(valido));
+});
+
 test("los montos se redondean al centavo", () => {
   assert.equal(renglon(calc({ fobUsd: 100.01 }), "iva").montoUsd, 21);
   assert.equal(renglon(calc({ fobUsd: 100.03 }), "iva").montoUsd, 21.01);

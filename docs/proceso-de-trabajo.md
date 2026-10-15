@@ -136,6 +136,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | --- | --- | --- |
 | 15/10/2026 | La revision externa de K1 con modelos chicos dio falsos positivos o nada; Claude por OmniRoute encontro el unico bug real | Reglas de 1.2: archivo completo, revisor Claude para lo riesgoso, hallazgos demostrables con una entrada numerica y un test por cada hallazgo valido |
 | 15/10/2026 | Los tests de K1 pasaron a la primera: se hicieron mutaciones al codigo para confirmar que los detectan | En alto riesgo, despues del verde se muta el codigo (cambiar una regla clave a proposito) y se mira que los tests fallen |
+| 15/10/2026 | La revision de cinco ejes de `code-review-and-quality` sobre K1 encontro 4 problemas reales que ni el TDD, ni las mutaciones ni los modelos externos habian visto: un campo vacio de formulario (`undefined`) daba `valido: true` con total `NaN`, la percepcion se informaba pagando con dolares propios, 2,5 unidades se aceptaban y un `fleteEnValorAduana` mal escrito se tomaba como «no». Se probaron con una entrada concreta antes de afirmarlos y se arreglaron con su test | La revision de cinco ejes es **obligatoria antes del PR** en todo codigo con plata o normativa, y se corre **con entradas reales** (`node -e`) para demostrar cada hallazgo. Los datos de un formulario se normalizan en el borde (vacio = no escrito) |
 
 ## 8. Verificaciones que quedan abiertas
 
