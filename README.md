@@ -41,6 +41,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
+| `generar_cotizaciones.py`, `js/monedas.js` | Las monedas de la calculadora: la copia de las cotizaciones que escribe el build (`cotizaciones.json`, de dolarapi.com, open.er-api.com y frankfurter.dev) y el modulo que convierte en vivo, con la copia de reserva y la hora de cada cotizacion (plan v3, K2) |
 | `importacion.json` | Reglas de importacion de la calculadora de costos (plan v3), cada una con su norma, fuente oficial, fecha de verificacion y nivel de confianza; lo que no se pudo confirmar va como pendiente y sin numero (`specs/010-costos/spec.md`) |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
