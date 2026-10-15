@@ -1,8 +1,8 @@
 /* --- Ruteo --- */
 function pintar(id) {
-  const v = $("#vista");
+  const v = $("#vista"), pre = usarPrerender();
   if (CONSULTA && ANALISIS && DINAMICAS.includes(id)) v.innerHTML = vistaDinamica(id);
-  else if (id === "comparativa") v.innerHTML = vistaComparativa();
+  else if (id === "comparativa") { if (!pre) v.innerHTML = vistaComparativa(); }
   else if (id === "ofertas") v.innerHTML = vistaOfertas();
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
@@ -10,6 +10,15 @@ function pintar(id) {
   else if (porId[id]) { v.innerHTML = detalle(porId[id]); return; }
   document.querySelectorAll(".tab").forEach(b =>
     b.setAttribute("aria-selected", String(b.dataset.ir === id)));
+}
+
+/* La primera vista puede venir escrita desde el build (generar_portada.js, data-pre): si es la que toca
+   se deja como esta, sin rearmarla. Sirve una sola vez, sea cual sea la primera vista; con busquedas guardadas o dentro de un marco
+   cambia la tira o la barra de acciones, y se arma como siempre. */
+function usarPrerender() {
+  const v = $("#vista"), pre = v.dataset.pre;
+  delete v.dataset.pre;
+  return pre === `comparativa:${CAT}` && SUELTA && !leerHistCompleto().length;
 }
 
 /* El hash es la unica fuente de verdad: asi andan el boton Atras del
@@ -43,15 +52,9 @@ window.addEventListener("popstate", alNavegar);
 
 function arrancar() {
   if (!P.length) { $("#vista").innerHTML = '<p class="sub">No hay datos cargados todavía. Corré <code>python actualizar.py --build</code>.</p>'; return; }
-  $("#tablist").innerHTML = VISTAS.map(v => {
-    const n = v.n();
-    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${["comparativa", "tiendas", "veredicto"].includes(v.id) ? 1 : 0}" aria-selected="false">
-      ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
-  }).join("");
-  $("#sello").textContent = (DATOS.verificado
-    ? `Precios verificados en cada sitio ${Pagina.cuando(DATOS.verificado)}`
-    : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`
-    + (P.some(p => p.falla_desde) ? ` · ${P.filter(p => p.falla_desde).length} sin verificar` : "");
+  // La portada publicada ya trae las pestañas y la comparativa, escritas por generar_portada.js.
+  if (!$("#tablist").children.length) $("#tablist").innerHTML = pestanasHtml("");
+  $("#sello").textContent = selloTexto();
   $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx, FullH4rd y Venex, con el precio de
     transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
     de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
@@ -143,7 +146,7 @@ function arrancar() {
     `La Pichincha · ${location.origin}${location.pathname} · precios de ${DATOS.actualizado}, con IVA, sin envío.`;
 
   const inicio = Pagina.leerUrl(location.search, location.hash);
-  if (inicio.q) abrirConsultaDeUrl(inicio.q, inicio.vista);
+  if (inicio.q) { usarPrerender(); abrirConsultaDeUrl(inicio.q, inicio.vista); }
   else aplicar(inicio.vista);
 }
 arrancar();

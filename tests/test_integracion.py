@@ -63,6 +63,7 @@ class SitioArmado(unittest.TestCase):
         correr(sys.executable, "publicar_app.py", "--salida", str(sitio), "--indice", str(indice))
         correr("node", "generar_feed.js", "--indice", str(indice), "--salida", str(sitio))
         correr("node", "generar_info.js", "--indice", str(indice), "--salud", str(salud), "--salida", str(sitio))
+        correr("node", "generar_portada.js", "--salida", str(sitio))
 
     @classmethod
     def tearDownClass(cls):
@@ -76,6 +77,15 @@ class SitioArmado(unittest.TestCase):
                      "legal/index.html", "sin-red.html", "sitemap.xml", "robots.txt", "ofertas.xml",
                      "manifest.webmanifest", "sw.js"):
             self.assertTrue((self.sitio / ruta).exists(), ruta)
+
+    def test_la_portada_publicada_trae_la_vista_inicial(self):
+        portada = (self.sitio / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<div id="vista" data-pre="comparativa:ram">', portada)
+        self.assertIn('class="card ', portada)
+        self.assertNotIn('id="tablist"></div>', portada)
+
+    def test_el_repo_y_la_copia_del_artifact_quedan_sin_pre_renderizar(self):
+        self.assertIn('<div id="vista"></div>', (RAIZ / "index.html").read_text(encoding="utf-8"))
 
     def test_cada_enlace_interno_lleva_a_un_archivo_que_existe(self):
         rotos = []

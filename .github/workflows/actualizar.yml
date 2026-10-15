@@ -133,6 +133,11 @@ jobs:
             echo "::warning::Sin indice.json: el buscador va a quedar vacio en esta publicacion"
           fi
 
+      # La portada sale con las pestañas, el sello y la Comparativa ya escritas, para que no espere al JS
+      # (A3, CONSTRAINTS.md). Si falla, sale como antes y el JS la arma al abrir.
+      - name: Pre-renderizar la portada
+        run: node generar_portada.js --salida _sitio || echo "::warning::No se pre-renderizo la portada"
+
       # Si las paginas por busqueda fallan, el sitio y los precios se publican igual.
       - name: Generar las paginas por busqueda
         run: |

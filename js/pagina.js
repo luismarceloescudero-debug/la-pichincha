@@ -3,7 +3,6 @@
 (function (raiz) {
   "use strict";
 
-  const ZONA = "America/Argentina/Buenos_Aires";
   const TOPE_Q = 100;          // un link no necesita mas para reproducir la busqueda
   const TOPE_TERMINO = 60;     // GoatCounter agrupa por path: mas largo no aporta
 
@@ -18,9 +17,14 @@
     return pathname + (t ? "?" + new URLSearchParams({ q: t }) : "") + (vista ? "#" + vista : "");
   }
 
-  const formato = new Intl.DateTimeFormat("es-AR", { timeZone: ZONA, year: "numeric", month: "numeric",
-    day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-  const partes = d => Object.fromEntries(formato.formatToParts(d).map(p => [p.type, p.value]));
+  /* Argentina no tiene horario de verano: UTC-3 fijo (constitucion). Sin Intl.DateTimeFormat con zona
+     horaria, que al abrir la portada cargaba los datos de ICU en una tarea larga. */
+  const dos = n => String(n).padStart(2, "0");
+  function partes(d) {
+    const a = new Date(d.getTime() - 3 * 36e5);
+    return { year: String(a.getUTCFullYear()), month: String(a.getUTCMonth() + 1), day: String(a.getUTCDate()),
+             hour: dos(a.getUTCHours()), minute: dos(a.getUTCMinutes()) };
+  }
   const diaDe = p => Date.UTC(+p.year, +p.month - 1, +p.day);
 
   /* "hoy 15:25", "ayer 15:25" o "7/10 15:25", siempre en hora argentina. Un

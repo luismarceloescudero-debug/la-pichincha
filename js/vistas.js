@@ -74,6 +74,22 @@ function detalle(p) {
   </div>`;
 }
 
+/* --- Pestañas y sello: los arma el JS al arrancar y, en la portada publicada, generar_portada.js --- */
+function pestanasHtml(activa) {
+  return VISTAS.map(v => {
+    const n = v.n();
+    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${["comparativa", "tiendas", "veredicto"].includes(v.id) ? 1 : 0}" aria-selected="${v.id === activa}">
+      ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
+  }).join("");
+}
+
+function selloTexto() {
+  return (DATOS.verificado
+    ? `Precios verificados en cada sitio ${Pagina.cuando(DATOS.verificado)}`
+    : `Precios verificados en cada sitio · actualizado ${DATOS.actualizado}`) + ` · ${P.length} productos seguidos`
+    + (P.some(p => p.falla_desde) ? ` · ${P.filter(p => p.falla_desde).length} sin verificar` : "");
+}
+
 /* --- Vistas --- */
 function vistaComparativa() {
   const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];

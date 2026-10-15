@@ -49,5 +49,39 @@ class VistaReservada(unittest.TestCase):
         self.assertRegex(CSS, r"#vista\{min-height:100vh\}")
 
 
+class PortadaPreRenderizada(unittest.TestCase):
+    """En la CPU del runner, armar la portada con JS al abrir costaba 560-800 ms de TBT y el LCP esperaba
+    al JS. El build la deja escrita (generar_portada.js) en el sitio que se publica y en el que mide
+    Lighthouse, despues de copiar index.html y js/ a _sitio."""
+
+    def test_la_vista_pre_renderizada_no_se_anima_al_entrar(self):
+        # En el runner, la animacion de entrada (opacidad 0 al empezar) llevaba el LCP a 3 s; sin ella, 1,7 s.
+        self.assertIn(".panel.quieta,.panel.quieta *{animation:none}", CSS)
+
+    def test_los_dos_workflows_pre_renderizan_la_portada(self):
+        for nombre, paso in (("actualizar.yml", "node generar_portada.js --salida _sitio"),
+                             ("tests.yml", "node generar_portada.js --salida _sitio")):
+            yml = (RAIZ / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre):
+                self.assertIn(paso, yml)
+                self.assertLess(yml.index("cp -r img js css _sitio/"), yml.index(paso))
+                if nombre == "actualizar.yml":
+                    self.assertLess(yml.index(paso), yml.index("upload-pages-artifact"))
+                else:
+                    self.assertLess(yml.index(paso), yml.index("npx --yes lighthouse"))
+
+
+class MedianaDeLighthouse(unittest.TestCase):
+    """La primera corrida del job sale con Chrome en frio: en el runner su primer pintado llego a tardar 1,2 s
+    mas que en las siguientes (portada 86-87 contra 99-100). Se corre tres veces cada pagina y
+    .github/lighthouse.js evalua la mediana, con los mismos umbrales."""
+
+    def test_el_job_corre_tres_veces_cada_pagina_y_evalua_todas(self):
+        yml = (RAIZ / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        self.assertIn("for i in 1 2 3; do", yml)
+        self.assertIn('nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d /)', yml)
+        self.assertIn("node .github/lighthouse.js lh-*.json", yml)
+
+
 if __name__ == "__main__":
     unittest.main()
