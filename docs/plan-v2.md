@@ -98,9 +98,10 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   y tope de fichas nuevas por corrida. Meta: 40% agrupado en RAM, SSD y placas.
 - ~~B4 **Filtros**~~ **Hecha el 15/10/2026** (`specs/008-filtros/spec.md`): tienda, rango de precio, solo primera linea y excluir palabras,
   en la busqueda (panel plegable sobre la lista; acotan lo que se ve y no tocan la mediana ni el orden). **Cuotas sin interes y envio
-  gratis se descartaron tras medirlos**: ninguna fuente los publica por aviso (CompraGamer no los trae; en Gaming City y Mexx la cuota
-  lleva recargo; Venex solo en la ficha y por JS) y un filtro de eso mentiria; el indice no suma campos. Las paginas `/precios/<busqueda>/`
-  muestran 20 opciones: enlazan a la busqueda para filtrar. Si una fuente publica el dato, vuelve como campo al final del indice.
+  gratis quedan afuera por ahora**: las cinco tiendas directas no los publican por aviso (CompraGamer no los trae; en Gaming City y Mexx la
+  cuota lleva recargo; Venex solo en la ficha y por JS) y solo ComparaYa los informa, en 19% y 42% de sus avisos: un filtro asi dejaria afuera
+  a las tiendas directas por no informar. Opcion abierta: ofrecerlos "solo donde la fuente lo informa" con el sello `s`. Las paginas
+  `/precios/<busqueda>/` muestran 20 opciones: enlazan a la busqueda para filtrar.
 - B5 **Rubros**: de hardware a tecnologia completa (notebooks, celulares, monitores, audio, gaming)
   sin perder el foco: cada rubro nuevo entra con sus reglas de "comparable".
 
