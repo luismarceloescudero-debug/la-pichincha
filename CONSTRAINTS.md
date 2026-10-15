@@ -13,8 +13,9 @@ dueño. Subirlos cuando la medicion real los supera, si.
 | Contraste (WCAG AA) | >= 4,5:1 en todo texto, tema claro y oscuro | `tests/test_contraste.py` sobre las variables de `css/sitio.css` | si |
 | Enlaces internos | ninguno roto en el sitio armado | `tests/test_integracion.py` | si |
 | Politica de contenido (CSP) | en todas las paginas, sin `unsafe-eval`, con `object-src 'none'` | `tests/test_sitio.py`, `tests/test_integracion.py` | si |
-| Lighthouse movil: rendimiento, accesibilidad, buenas practicas, SEO | >= 90 | job `lighthouse` sobre /, /precios/, /hoy/, /estado/ y /legal/ | si, salvo el rendimiento de la portada (aviso) |
+| Lighthouse movil: rendimiento, accesibilidad, buenas practicas, SEO | >= 90 en la mediana de tres corridas | job `lighthouse` sobre /, /precios/, /hoy/, /estado/ y /legal/ | si |
 | Portada sin saltos ni recambio de fuentes | `#sello` y `#vista` reservan su lugar, fuentes con `display=optional`, primera foto sin `lazy` | `tests/test_rendimiento.py` | si |
+| Portada pre-renderizada | el sitio publicado trae las pestañas, el sello y la Comparativa escritos, sin animacion de entrada; el JS no los vuelve a armar | `tests/js/portada.test.js`, `tests/test_integracion.py`, `tests/test_rendimiento.py` | si |
 
 ## Por que asi
 
@@ -24,9 +25,18 @@ dueño. Subirlos cuando la medicion real los supera, si.
   abrir, solo al buscar) sino el sello y la vista que crecian despues de pintar (CLS 0,19), la primera
   foto pedida con `lazy` y la fuente que llegaba tarde y volvia a pintar el texto (LCP 3,4 s). Corregido,
   en una maquina comun da 99-100 (LCP 1,4-1,7 s, CLS 0) y bloquea en todas las paginas generadas. En la
-  CPU del runner la portada queda en 77-79 por el TBT (unos 560 ms), porque se arma entera con JS al
-  abrir; ahi el rendimiento avisa hasta que la portada se pre-renderice en el build. Esa es la tarea
-  pendiente; no se baja este umbral para nada mas.
+  CPU del runner la portada quedaba en 66-79: se armaba entera con JS al abrir (TBT 560-800 ms) y el
+  LCP esperaba a ese JS. Desde el 15/10 el build la pre-renderiza (`generar_portada.js`, con las mismas
+  funciones de `js/`) y la vista escrita no se anima al entrar (la animacion desde opacidad 0 llevaba el
+  LCP a 3 s); `js/pagina.js` calcula la hora argentina con UTC-3 fijo, sin crear un `Intl.DateTimeFormat`
+  con zona horaria al cargar (una tarea larga en el runner). Medido en el runner: mediana de 99 en tres
+  jobs seguidos (FCP 1,1 s, LCP 1,6-1,8 s, TBT 0, CLS 0), y su rendimiento bloquea
+  como en las demas paginas. No se baja este umbral para nada.
+- **Mediana de tres corridas**: la primera corrida de Lighthouse del job arranca Chrome en frio en una
+  maquina nueva, y en el runner su primer pintado llego a tardar 1,2 s mas que en las siguientes (la
+  portada daba 86-87 en esa corrida y 99-100 en las otras nueve medidas el 15/10). Es lo que recomienda
+  Lighthouse para la variabilidad: varias corridas y la mediana. Los umbrales son los mismos; la CI guarda
+  los informes completos como artifact `lighthouse`.
 - **CSP con `unsafe-inline` en scripts**: `index.html` lleva los datos del dia en un script en linea, asi
   que un hash fijo no sirve. Lo que si cierra: scripts solo de los dominios listados, conexiones solo al
   propio sitio y a GoatCounter, sin `object`, sin `base` y sin enviar formularios afuera. Va como

@@ -64,8 +64,10 @@ la guia.
   **Hecho el 14/10 con otro diagnostico**: la portada no baja el indice (se pide al buscar, y publicado
   pesa 597 KB gzip, lejos del gatillo de 1,5 MB). Lo que la frenaba era el sello que crecia despues de
   pintar, la primera foto `lazy` y el recambio de fuentes; corregido, Lighthouse movil da 99-100 en una
-  maquina comun (en la CPU del runner la portada queda en 77-79 por el JS de arranque: pre-renderizarla
-  en el build es la tarea que sigue y, hasta entonces, su rendimiento solo avisa en la CI). Partir
+  maquina comun. En la CPU del runner la portada quedaba en 66-79 por el JS de arranque: **el 15/10 se
+  pre-renderiza en el build** (`generar_portada.js`, sin animacion de entrada para la vista escrita) y da
+  99 de mediana en el runner (FCP 1,1 s, LCP 1,6-1,8 s, TBT 0; Lighthouse corre tres veces por pagina
+  porque la primera sale con Chrome en frio); su rendimiento bloquea en la CI como el resto. Partir
   el indice vuelve cuando pase el gatillo o cuando la busqueda tarde en telefonos de gama baja. Las fotos
   ya tienen alto fijo y pesan ~13 KB: WebP no se justifica hoy.
 - A4 **Seguridad y legal** (`security-and-hardening`, `security-review`): CSP estricta, revisar
@@ -75,7 +77,8 @@ la guia.
 
 Sale cuando: dominio andando, Lighthouse >= 90 bloqueante en CI, CONSTRAINTS.md en CI.
 
-**Estado al 14/10/2026:** A2, A3, A4 y A5 hechas (PR #29 y el de A3). Falta solo A1, que depende del dueño.
+**Estado al 15/10/2026:** A2, A3, A4 y A5 hechas (PR #29, #30 y #32: Lighthouse >= 90 bloquea en todas las
+paginas, portada incluida). Falta solo A1, que depende del dueño.
 
 ### Fase B. Cobertura y busqueda al nivel de ComparaYa (semanas 2-6)
 

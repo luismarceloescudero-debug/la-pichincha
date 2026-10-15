@@ -39,6 +39,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
+| `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
@@ -479,7 +480,9 @@ propio) y, despues de la primera visita, abre sin conexion.
 
 Corren en cada PR y antes de cada publicacion, con los umbrales de cobertura de
 `CONSTRAINTS.md`; en el mismo workflow, el job `lighthouse` arma el sitio con el
-indice publicado y lo mide en movil. `tests/test_integracion.py` arma el sitio
+indice publicado (portada pre-renderizada con `node generar_portada.js --salida _sitio`) y lo mide en
+movil, tres corridas por pagina: las cuatro categorias cortan si la mediana baja de 90 en cualquier
+pagina (los informes quedan como artifact `lighthouse`). `tests/test_integracion.py` arma el sitio
 entero y revisa que ningun enlace interno este roto. Los de los extractores usan HTML
 guardado de cada tienda en `tests/fixtures/` y no salen a la red. Cuando una
 tienda cambia su plantilla (llega el issue de `salud-fuente`):
