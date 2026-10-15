@@ -104,10 +104,24 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   `/precios/<busqueda>/` muestran 20 opciones: enlazan a la busqueda para filtrar.
 - B5 **Rubros**: de hardware a tecnologia completa (notebooks, celulares, monitores, audio, gaming)
   sin perder el foco: cada rubro nuevo entra con sus reglas de "comparable".
+- B6 **Orden por novedad y capacidad** (pedido del dueño el 15/10/2026: "si escribo Motorola, que traiga el ultimo, el mas
+  reciente y el de mayor capacidad; y luego la premisa, el mejor precio por la mejor calidad"). Revisado hoy sobre el indice
+  publicado: "Recomendado" ordena por marca y precio ascendente, asi que "motorola" empieza por lo mas barato y viejo (Moto G20, G04,
+  E14, G06) y entierra lo nuevo (Edge 70, Razr 70). **No hay dato de fecha de lanzamiento**: el indice no la tiene y ComparaYa tampoco
+  (su `canonical_product_id` es un cuid con la fecha en que ComparaYa lo importo: casi todos del 11/08, no sirve). Si trae la
+  capacidad (`extracted_specs.storage_gb` y `ram_gb`). Propuesta: un orden "Novedades" por generacion del modelo (tabla editorial
+  `lanzamientos` en `datos.json` por marca y familia, como `marcas`; sin dato, al final), despues capacidad y despues la premisa
+  (calidad por precio). Solo en rubros donde la novedad importa (celulares, notebooks, placas, tablets); RAM y SSD siguen por precio.
+  Alternativa que mejora sola con el tiempo: la fecha en que cada aviso aparecio por primera vez en el historial (util desde ~30
+  dias). Depende de B5 (rubros) y de una tabla de lanzamientos con fuente. Tambien se vio que "iphone" trae mayormente fundas y
+  cargadores y casi ningun iPhone reciente: es un problema de cobertura (B1/B5), no de orden.
 
 Sale cuando: 12 fuentes, 25 mil avisos, filtros en la busqueda y en /precios/.
 
 ### Fase C. "¿Comprar aca o importar?" (semanas 6-10, el diferencial)
+
+**Detalle ampliado el 15/10/2026 en [plan-calculadora.md](plan-calculadora.md)**: reglas de importacion verificadas con fuente y
+fecha, calculadora con desglose, selector de monedas con conversion en vivo. C1 y C3 se hacen alli (fases K0 a K5).
 
 - C1 **Reglas de importacion versionadas** en `importacion.json`: franquicia y alicuotas del regimen
   courier y del postal, tasa estadistica, IVA, con fuente oficial (ARCA/Aduana) y fecha de
