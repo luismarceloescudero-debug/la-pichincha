@@ -15,6 +15,12 @@ la vista) o **dudoso** (fuentes que se contradicen).
 
 ### 1.1 Normativa de importacion
 
+> **Actualizacion del 15/10/2026 (K0 hecha).** Se leyeron los textos oficiales y casi todo lo marcado «prensa» o «dudoso» abajo quedo confirmado o
+> corregido: el excedente paga los tributos del regimen general (el «50% plano» no figura en ninguna norma), el IVA de 21% y su base (Ley 23.349 arts. 25 y 28),
+> la tasa de estadistica del 3% prorrogada hasta 2027 (Decreto 1140/2024), el impuesto interno de 9,5% (Decreto 333/2025) y **la percepcion del 30% sigue vigente en el
+> texto actualizado de la RG 5617**. Lo que no se pudo confirmar (derecho de importacion por rubro, percepciones del courier, honorarios, base del impuesto
+> interno, cronograma de la RG 5884) quedo como `pendiente`. Detalle en [`specs/010-costos/spec.md`](../specs/010-costos/spec.md) y en `importacion.json`.
+
 | Regla | Dato | Fuente | Nivel |
 | --- | --- | --- | --- |
 | Franquicia de pequeños envios (courier privado y Correo, incluido puerta a puerta) | hasta **USD 400 FOB por envio** exentos de derechos de importacion y tasa de estadistica | ARCA, novedad del 30/07/2026 (RG 5884/2026, que reglamenta el Decreto 604/26) | oficial |
@@ -123,6 +129,8 @@ verde. Se pueden hacer en paralelo K1 y K2 (archivos distintos).
   entra como "no incluido, ver nota".
 
 Sale cuando: cada regla del calculo tiene fuente oficial y fecha, o esta marcada como no incluida.
+
+**Hecha el 15/10/2026**: `importacion.json` v1 (26 reglas: 16 oficiales, 8 pendientes, 1 de prensa y 1 dudosa) y `specs/010-costos/spec.md`; `tests/test_importacion.py` exige fuente oficial y fecha. Queda para el dueño confirmar con un contador o despachante la lista de pendientes de la spec.
 
 ### K1. Motor de calculo (semana 2; TDD)
 

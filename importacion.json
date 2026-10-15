@@ -1,0 +1,333 @@
+{
+  "_nota": "Reglas de importacion para la calculadora de costos (plan v3, K0). Cada una dice de donde sale, desde cuando rige, cuando se verifico y con que confianza. Niveles: oficial (leida en el texto de la norma o en una pagina de ARCA o del Gobierno), prensa (la dice un medio o una guia, sin la norma a la vista), dudoso (las fuentes se contradicen) y pendiente (no se pudo confirmar: no tiene valor y la calculadora no lo suma sin avisar). Si una regla pasa 60 dias sin verificar, la pagina lo avisa (K5). Estimacion, no asesoramiento.",
+  "verificado": "2026-10-15",
+  "vence_a_los_dias": 60,
+  "reglas": {
+    "franquicia_usd": {
+      "descripcion": "Valor FOB por envio que queda exento de derechos de importacion y de tasa de estadistica (pequeños envios por courier y por Correo, incluido puerta a puerta).",
+      "valor": 400,
+      "unidad": "USD FOB por envio",
+      "nivel": "oficial",
+      "norma": "Decreto 604/2026 art. 2 (sustituye el art. 80 del Decreto 1001/82, ap. 1.b); RG ARCA 5884/2026; Decreto 1065/2024 art. 1 para el courier",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-427768/texto",
+        "https://servicioscf.afip.gob.ar/publico/sitio/contenido/novedad/ver.aspx?id=5829",
+        "https://www.afip.gob.ar/envios-internacionales/courier/importacion/pequenios-envios.asp"
+      ],
+      "rige_desde": "2026-07-17",
+      "verificado": "2026-10-15",
+      "nota": "El Decreto 604/2026 equipara el Correo con el courier privado, que ya tenia USD 400 desde el Decreto 1065/2024."
+    },
+    "envios_por_anio": {
+      "descripcion": "Cantidad de envios por año calendario y por persona que pueden usar la franquicia.",
+      "valor": 5,
+      "unidad": "envios por persona y por año",
+      "nivel": "oficial",
+      "norma": "Decreto 604/2026 art. 2; Decreto 1065/2024 art. 1",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-427768/texto",
+        "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp"
+      ],
+      "rige_desde": "2026-07-17",
+      "verificado": "2026-10-15"
+    },
+    "tope_fob_usd": {
+      "descripcion": "Valor FOB maximo por envio para entrar por el regimen de pequeños envios.",
+      "valor": 3000,
+      "unidad": "USD FOB por envio",
+      "nivel": "oficial",
+      "norma": "RG ARCA 5884/2026 art. 2",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-428387/texto",
+        "https://www.afip.gob.ar/envios-internacionales/courier/importacion/pequenios-envios.asp"
+      ],
+      "rige_desde": "2026-07-30",
+      "verificado": "2026-10-15"
+    },
+    "unidades_max_misma_especie": {
+      "descripcion": "Unidades iguales por envio.",
+      "valor": 3,
+      "unidad": "unidades de la misma especie",
+      "nivel": "oficial",
+      "norma": "RG ARCA 5884/2026 art. 2",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-428387/texto",
+        "https://www.afip.gob.ar/envios-internacionales/courier/importacion/pequenios-envios.asp"
+      ],
+      "rige_desde": "2026-07-30",
+      "verificado": "2026-10-15"
+    },
+    "peso_max_kg": {
+      "descripcion": "Peso maximo de cada paquete.",
+      "valor": 50,
+      "unidad": "kg por paquete",
+      "nivel": "oficial",
+      "norma": "Pagina de ARCA sobre pequeños envios (courier); sin numero de norma en la pagina",
+      "fuentes": [
+        "https://www.afip.gob.ar/envios-internacionales/courier/importacion/pequenios-envios.asp"
+      ],
+      "rige_desde": null,
+      "verificado": "2026-10-15"
+    },
+    "uso_personal_sin_fin_comercial": {
+      "descripcion": "La franquicia es para uso o consumo personal, sin finalidad comercial.",
+      "valor": true,
+      "unidad": "condicion",
+      "nivel": "oficial",
+      "norma": "RG ARCA 5884/2026 art. 2; Decreto 1065/2024 art. 1",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-428387/texto"
+      ],
+      "rige_desde": "2026-07-30",
+      "verificado": "2026-10-15"
+    },
+    "exento_en_franquicia": {
+      "descripcion": "Tributos de los que queda exento un envio dentro de la franquicia.",
+      "valor": ["derecho_importacion", "tasa_estadistica"],
+      "unidad": "lista",
+      "nivel": "oficial",
+      "norma": "Decreto 604/2026 art. 2; Decreto 1065/2024 art. 1",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-427768/texto",
+        "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp"
+      ],
+      "rige_desde": "2026-07-17",
+      "verificado": "2026-10-15"
+    },
+    "tributos_en_franquicia": {
+      "descripcion": "Lo unico que se paga por un envio dentro de la franquicia: IVA e impuestos internos, de corresponder.",
+      "valor": ["iva", "impuestos_internos"],
+      "unidad": "lista",
+      "nivel": "oficial",
+      "norma": "Pagina de ARCA sobre pequeños envios y puerta a puerta: «Sobre esos envios corresponde abonar unicamente IVA e Impuestos Internos, de corresponder»",
+      "fuentes": [
+        "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp",
+        "https://www.afip.gob.ar/envios-internacionales/courier/importacion/pequenios-envios.asp"
+      ],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "El Decreto 604/2026 no menciona el IVA; lo dice ARCA en sus paginas."
+    },
+    "excedente_franquicia": {
+      "descripcion": "Un envio que supera los USD 400 paga la totalidad de los tributos del regimen general sobre el excedente; la parte dentro de la franquicia paga solo IVA e impuestos internos.",
+      "valor": "regimen_general_sobre_el_excedente",
+      "unidad": "regla",
+      "nivel": "oficial",
+      "norma": "Decreto 604/2026 art. 2 («el excedente quedara sujeto al pago de los tributos que graven la importacion para consumo en el regimen general»); RG ARCA 5884/2026 anexo I",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-427768/texto",
+        "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp"
+      ],
+      "rige_desde": "2026-07-17",
+      "verificado": "2026-10-15",
+      "nota": "Lectura conjunta de las dos paginas de ARCA: el IVA cae sobre todo el valor (FOB mas derechos y tasa del excedente) y los derechos y la tasa solo sobre el excedente. Confirmar con el simulador de ARCA o un despachante."
+    },
+    "cupo_agotado": {
+      "descripcion": "Un envio de hasta USD 400 que se hace con el cupo anual agotado paga todos los tributos del regimen general sobre su valor total, sin franquicia.",
+      "valor": "regimen_general_sobre_el_valor_total",
+      "unidad": "regla",
+      "nivel": "oficial",
+      "norma": "Pagina de ARCA sobre puerta a puerta; RG ARCA 5884/2026 anexo I A.1 y A.2",
+      "fuentes": [
+        "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp",
+        "https://www.argentina.gob.ar/normativa/nacional/norma-428387/texto"
+      ],
+      "rige_desde": "2026-07-30",
+      "verificado": "2026-10-15"
+    },
+    "tasa_estadistica_pct": {
+      "descripcion": "Tasa de estadistica sobre las destinaciones definitivas de importacion para consumo (no se paga dentro de la franquicia).",
+      "valor": 3,
+      "unidad": "% ad valorem",
+      "nivel": "oficial",
+      "norma": "Decreto 1140/2024 art. 1: prorroga hasta el 31/12/2027 la alicuota del 3% del art. 762 del Codigo Aduanero (Ley 22.415)",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-407914/texto"
+      ],
+      "rige_desde": null,
+      "rige_hasta": "2027-12-31",
+      "verificado": "2026-10-15",
+      "nota": "El decreto menciona topes maximos por declaracion que estan en una imagen que no se pudo leer: ver «topes_tasa_estadistica» (pendiente)."
+    },
+    "iva_general_pct": {
+      "descripcion": "Alicuota general del IVA, tambien en las importaciones definitivas.",
+      "valor": 21,
+      "unidad": "%",
+      "nivel": "oficial",
+      "norma": "Ley 23.349 (t.o. Decreto 280/1997) art. 28",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/decreto-280-1997-42701/texto"
+      ],
+      "rige_desde": null,
+      "verificado": "2026-10-15"
+    },
+    "iva_base_importacion": {
+      "descripcion": "Base del IVA en una importacion definitiva: el precio normal definido para los derechos de importacion, mas todos los tributos a la importacion o con motivo de ella (derechos y tasa de estadistica).",
+      "valor": "valor_en_aduana_mas_tributos_a_la_importacion",
+      "unidad": "regla",
+      "nivel": "oficial",
+      "norma": "Ley 23.349 (t.o. Decreto 280/1997) art. 25",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/decreto-280-1997-42701/texto"
+      ],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "Si los impuestos internos integran esa base: ver «base_impuesto_interno» (pendiente)."
+    },
+    "percepcion_tarjeta_pct": {
+      "descripcion": "Percepcion a cuenta de Ganancias y Bienes Personales sobre el cambio de divisas para pagar con tarjeta (credito, compra o debito) bienes o servicios del exterior, incluidas las compras a distancia en portales, cuando se paga en pesos.",
+      "valor": 30,
+      "unidad": "% sobre el monto en pesos",
+      "nivel": "oficial",
+      "norma": "RG ARCA 5617/2024 arts. 1 inc. b) y 6, texto actualizado (modificatorias de 2025: RG 5672 y RG 5677)",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/norma-407430/actualizacion",
+        "https://www.boletinoficial.gob.ar/detalleAviso/primera/318447/20241219"
+      ],
+      "rige_desde": "2024-12-19",
+      "verificado": "2026-10-15",
+      "nota": "Es un pago a cuenta (se recupera segun la situacion en Ganancias o Bienes Personales). El texto actualizado leido hoy no trae modificaciones de 2026, aunque varias notas de prensa dicen que se elimino el 2/1/2026: no hay norma oficial a la vista que lo respalde. Indicio de mercado: la cotizacion «tarjeta» de dolarapi.com (1.995,5) es el oficial (1.535) por 1,30. Pagar con dolares propios la evita."
+    },
+    "derecho_importacion_celulares_pct": {
+      "descripcion": "Derecho de importacion extrazona de celulares y smartphones (NCM 8517.13.00 y 8517.14.31).",
+      "valor": 0,
+      "unidad": "% ad valorem",
+      "nivel": "oficial",
+      "norma": "Decreto 333/2025 (modifica el Decreto 557/2023, Anexo IV): 8% desde su vigencia y 0% desde el 15/01/2026",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/decreto-333-2025-412953/texto",
+        "https://www.argentina.gob.ar/noticias/ya-rige-el-arancel-cero-para-celulares-importados"
+      ],
+      "rige_desde": "2026-01-15",
+      "verificado": "2026-10-15"
+    },
+    "impuesto_interno_electronica_importada_pct": {
+      "descripcion": "Impuesto interno (art. 70 de la Ley de Impuestos Internos) de celulares, televisores y aires acondicionados importados; 0% si se fabrican en Tierra del Fuego con origen acreditado.",
+      "valor": 9.5,
+      "unidad": "%",
+      "nivel": "oficial",
+      "norma": "Decreto 333/2025 art. 3 (baja del 19% al 9,5% para determinadas posiciones NCM)",
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/nacional/decreto-333-2025-412953/texto",
+        "https://www.argentina.gob.ar/noticias/el-gobierno-nacional-eliminara-impuestos-productos-electronicos-para-alentar-la-baja-de"
+      ],
+      "rige_desde": "2025-05-20",
+      "verificado": "2026-10-15",
+      "nota": "El comunicado oficial nombra celulares, televisores y aires acondicionados. La lista exacta de posiciones esta en el art. 3 del decreto (no se leyo) y los monitores no figuran en el comunicado."
+    },
+    "domicilio_fiscal_electronico_courier": {
+      "descripcion": "El destinatario de un envio por courier privado debe tener constituido el Domicilio Fiscal Electronico ante ARCA.",
+      "valor": true,
+      "unidad": "condicion",
+      "nivel": "prensa",
+      "norma": null,
+      "fuentes": [
+        "https://traelodirecto.com.ar/guias/regimen-courier-argentina"
+      ],
+      "rige_desde": "2026-08-18",
+      "verificado": "2026-10-15",
+      "nota": "Lo dice una guia de un despachante; no se encontro la norma en las paginas de ARCA leidas."
+    },
+    "valor_en_aduana_incluye_flete_seguro": {
+      "descripcion": "Si el valor sobre el que se calculan los derechos incluye el flete y el seguro hasta el lugar de introduccion (valor CIF) y no solo el FOB.",
+      "valor": true,
+      "unidad": "regla",
+      "nivel": "dudoso",
+      "norma": null,
+      "fuentes": [
+        "https://www.argentina.gob.ar/normativa/recurso/16536/Ley22415_S9_TituloI/htm"
+      ],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "Los arts. 642 a 644 del Codigo Aduanero lo dicen, pero Infoleg indica que esas disposiciones de valoracion fueron sustituidas por la Ley 23.311 (no leida). Los envios chicos se declaran por valor FOB: hasta confirmarlo, la calculadora pide el flete y el seguro por separado y muestra el resultado con y sin ellos."
+    },
+    "derecho_importacion_hardware_pct": {
+      "descripcion": "Derecho de importacion extrazona de memorias, SSD, placas de video, notebooks, monitores y televisores, que depende de la posicion NCM.",
+      "valor": null,
+      "unidad": "% ad valorem por posicion",
+      "nivel": "pendiente",
+      "norma": null,
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "Ninguna pagina oficial leida lo da por rubro. Falta consultar la posicion arancelaria de cada producto en la Nomenclatura Comun del Mercosur (Decreto 557/2023 y modificatorios) con un despachante. Hasta entonces la calculadora lo pide como dato y no lo supone."
+    },
+    "derecho_importacion_consolas_pct": {
+      "descripcion": "Derecho de importacion extrazona de videoconsolas (NCM 9504.50.00).",
+      "valor": null,
+      "unidad": "% ad valorem",
+      "nivel": "pendiente",
+      "norma": "Decreto 333/2025: elimina la posicion del Anexo V del Decreto 557/2023, que tributaba 35%",
+      "fuentes": [],
+      "rige_desde": "2025-05-20",
+      "verificado": "2026-10-15",
+      "nota": "El decreto remite al Arancel Externo Comun sin decir el numero; un comunicado oficial de mayo de 2025 habla del 20%. Confirmar en el Decreto 557/2023."
+    },
+    "iva_reducido_hardware": {
+      "descripcion": "Si algun rubro de hardware tributa IVA al 10,5% en lugar del 21%.",
+      "valor": null,
+      "unidad": "% por posicion",
+      "nivel": "pendiente",
+      "norma": "Ley 23.349 art. 28: el Poder Ejecutivo puede fijar alicuotas diferenciales de hasta el 50% menos",
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "El articulo no dice a que bienes aplica la reducida; sale de decretos por posicion. Hasta confirmarlo se usa el 21%."
+    },
+    "base_impuesto_interno": {
+      "descripcion": "Sobre que valor se calcula el impuesto interno de una importacion y si integra la base del IVA.",
+      "valor": null,
+      "unidad": "regla",
+      "nivel": "pendiente",
+      "norma": null,
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "No se leyo la Ley de Impuestos Internos. Consultar con un contador o un despachante."
+    },
+    "percepciones_courier": {
+      "descripcion": "Percepciones de IVA y de Ganancias sobre el envio por courier o por Correo.",
+      "valor": null,
+      "unidad": "% por regimen",
+      "nivel": "pendiente",
+      "norma": null,
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "Las paginas de ARCA sobre pequeños envios no las mencionan; las percepciones que aparecen en el regimen general de importadores (hasta 20% de IVA y 6% de Ganancias segun una nota oficial de 2025) no se sabe si alcanzan al courier. No se suman: se muestran como «no incluido»."
+    },
+    "honorarios_courier": {
+      "descripcion": "Lo que cobra el courier o el Correo por gestionar el envio (tasa de servicio y almacenaje).",
+      "valor": null,
+      "unidad": "USD o ARS por envio",
+      "nivel": "pendiente",
+      "norma": null,
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "ARCA dice que el Correo cobra «en todos los casos» una tasa de servicio y almacenaje pero no da montos, y cada courier tiene su tarifa. La calculadora lo pide como dato."
+    },
+    "cronograma_rg_5884": {
+      "descripcion": "Desde cuando funciona cada etapa del nuevo procedimiento postal de la RG 5884/2026.",
+      "valor": null,
+      "unidad": "fechas por etapa",
+      "nivel": "pendiente",
+      "norma": "RG ARCA 5884/2026 art. 7: entra en vigencia el 30/07/2026 y se implementa segun el cronograma del micrositio «Envios internacionales»",
+      "fuentes": [],
+      "rige_desde": "2026-07-30",
+      "verificado": "2026-10-15",
+      "nota": "ARCA avisa que hasta que cada etapa se implemente se aplica el procedimiento anterior (RG 4447, que para el Correo tenia otra franquicia). El cronograma no esta en el texto de la resolucion."
+    },
+    "topes_tasa_estadistica": {
+      "descripcion": "Montos maximos de tasa de estadistica por declaracion, que menciona el Decreto 1140/2024.",
+      "valor": null,
+      "unidad": "USD por declaracion",
+      "nivel": "pendiente",
+      "norma": "Decreto 1140/2024 art. 1",
+      "fuentes": [],
+      "rige_desde": null,
+      "verificado": "2026-10-15",
+      "nota": "El decreto los publica en una imagen que no se pudo leer. En un excedente chico el 3% queda muy por debajo de cualquier tope razonable."
+    }
+  }
+}
