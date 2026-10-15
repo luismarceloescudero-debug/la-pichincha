@@ -46,6 +46,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
+| `docs/proceso-de-trabajo.md` | Como se trabaja con Claude Code en este repo: arranque con OmniRoute, mapa de modelos, que skill usar en cada escenario, auditoria de skills y plugins contra GitHub, ciclo de cada pedido, merge y limpieza, y la cola de pendientes |
 | `docs/og-imagen.html` | Fuente de `img/og.png` |
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
