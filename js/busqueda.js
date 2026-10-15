@@ -20,6 +20,68 @@ function ordenar(filas, med) { return Buscador.ordenar(filas, med, ORDEN, nivelM
 let OTRAS = new Map();
 const avisosDe = filas => filas.reduce((n, f) => n + 1 + (OTRAS.get(f) || []).length, 0);
 
+/* --- Filtros de la lista (B4) -------------------------------------------
+   Acotan lo que se ve: la mediana, el orden y la Comparativa se calculan con todos los avisos. Viven mientras
+   la pagina esta abierta y no se guardan. La logica es pura y esta en js/buscador.js. */
+let FILTROS = Buscador.filtrosVacios();
+const numeroDe = txt => { const n = parseInt(String(txt).replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : null; };
+
+function filtrosHtml() {
+  const tiendas = Object.entries((IDX || {}).tiendas || {}).map(([k, t]) =>
+    `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${FILTROS.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
+  return `<div class="of-fila" role="group" aria-label="Tienda"><span class="of-et" aria-hidden="true">Tienda</span>${tiendas || '<span class="sub">cargando…</span>'}</div>
+    <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
+      <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo"></label>
+      <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo"></label></div>
+    <div class="of-fila"><span class="of-et" aria-hidden="true">Marca</span>
+      <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}">${icono("trofeo")} Solo primera línea</button></div>
+    <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
+      <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil"></div>
+    <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
+}
+
+/* Refleja FILTROS en los controles (si estan en pantalla) sin volver a armar el panel: asi no se pierde el foco. */
+function sincronizarFiltros() {
+  const caja = $("#filtros");
+  if (!caja) return;
+  caja.querySelectorAll('[data-filtro="tienda"]').forEach(b => b.setAttribute("aria-pressed", String(FILTROS.tiendas.includes(b.dataset.valor))));
+  const pr = caja.querySelector('[data-filtro="primera"]');
+  if (pr) pr.setAttribute("aria-pressed", String(FILTROS.primera));
+  const pone = (id, v) => { const c = $(id); if (c && document.activeElement !== c) c.value = v; };
+  const miles = n => n == null ? "" : n.toLocaleString("es-AR");
+  pone("#f-min", miles(FILTROS.min));
+  pone("#f-max", miles(FILTROS.max));
+  pone("#f-excluir", FILTROS.excluir);
+  const hay = Buscador.hayFiltros(FILTROS);
+  caja.classList.toggle("activo", hay);
+  if (hay) caja.open = true;
+}
+
+function cambiarFiltro(que, valor) {
+  if (que === "tienda") {
+    const i = FILTROS.tiendas.indexOf(valor);
+    if (i >= 0) FILTROS.tiendas.splice(i, 1); else FILTROS.tiendas.push(valor);
+  } else if (que === "primera") FILTROS.primera = !FILTROS.primera;
+  else if (que === "quitar") {
+    FILTROS = Buscador.filtrosVacios();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // sincronizar no pisa un campo en uso
+  }
+  sincronizarFiltros();
+  pintarResultados(($("#q") || {}).value || "");
+}
+
+function engancharFiltros(caja) {
+  let t;
+  caja.addEventListener("input", ev => {
+    if (ev.target.id === "f-min") FILTROS.min = numeroDe(ev.target.value);
+    else if (ev.target.id === "f-max") FILTROS.max = numeroDe(ev.target.value);
+    else if (ev.target.id === "f-excluir") FILTROS.excluir = ev.target.value;
+    else return;
+    clearTimeout(t);
+    t = setTimeout(() => { sincronizarFiltros(); pintarResultados(($("#q") || {}).value || ""); }, 220);
+  });
+}
+
 function buscarTodo(q) {
   const coincide = Buscador.filtroDe(q);
   if (!IDX || !coincide) return [];
@@ -64,16 +126,25 @@ function pintarResultados(q) {
   const A = ANALISIS;
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
-  const r = ordenar(conjunto, med).slice(0, 60);
+  // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.
+  const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, nivelMarca);
+  OTRAS = F.otras;
+  const r = ordenar(F.filas, med).slice(0, 60);
   ULTIMA_BUSQUEDA = r;
+  if (!r.length) {
+    est.textContent = `ningún aviso cumple los filtros (hay ${conjunto.length} sin filtrar)`;
+    caja.innerHTML = `<p class="sub">Probá con menos filtros. <button class="acc" data-filtro="quitar">Quitar filtros</button></p>`;
+    return;
+  }
 
   const fuentes = new Set(r.map(f => f[3]));
   const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
   const afuera = A ? A.total - A.base.length - A.internacionales.length : 0;
   const nInt = A ? A.internacionales.length : 0;
-  est.innerHTML = (conjunto.length > r.length ? `Mostrando ${r.length} de ${conjunto.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
+  est.innerHTML = (F.filas.length > r.length ? `Mostrando ${r.length} de ${F.filas.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
     + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
+    + (F.ocultas ? ` · ${F.ocultas} oculto${F.ocultas > 1 ? "s" : ""} por los filtros` : "")
     + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "")
     + (nInt ? ` · ${nInt} compra${nInt > 1 ? "s" : ""} internacional${nInt > 1 ? "es" : ""}, marcada${nInt > 1 ? "s" : ""} y fuera de la comparativa` : "");
   const cat = CATEGORIAS.find(c => (c.claves || []).some(k => normal(q).includes(normal(k))));
@@ -138,8 +209,11 @@ function vistaBuscar() {
       campo.focus();
     }
     pintarHist();
+    const filtros = $("#filtros");
+    if (filtros) engancharFiltros(filtros);
     try {
       await asegurarIndice();
+      if (filtros) { filtros.querySelector(".filtros-cuerpo").innerHTML = filtrosHtml(); sincronizarFiltros(); }
       pintarResultados(campo ? campo.value : "");
     } catch (e) {
       $("#estado").textContent = "no pude cargar el índice";
@@ -154,6 +228,7 @@ function vistaBuscar() {
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
     <div class="segmentos chico">${ORDENES.map(o =>
       `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}">${esc(o.eti)}</button>`).join("")}</div>
+    <details class="filtros" id="filtros"><summary>Filtros</summary><div class="filtros-cuerpo">${filtrosHtml()}</div></details>
     <div id="puente"></div>
     <p class="estado" id="estado">cargando índice…</p>
     ${barraAcciones("buscar")}
