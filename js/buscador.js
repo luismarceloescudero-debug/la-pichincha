@@ -211,11 +211,56 @@
     return { filas: salida, otras };
   }
 
+  /* --- Filtros de la lista (B4) -------------------------------------------
+     Acotan lo que se ve, nada mas: la mediana, el orden y el analisis se calculan con todos los avisos.
+     Solo usan lo que el indice ya trae (tienda, precio, nombre y la lista editorial de marcas): ninguna fuente
+     publica cuotas sin interes ni envio gratis por aviso, y un filtro de eso mentiria (specs/008-filtros). */
+  const filtrosVacios = () => ({ tiendas: [], min: null, max: null, primera: false, excluir: "" });
+  const palabrasExcluidas = texto => normal(String(texto || "")).split(/[\s,;]+/).filter(Boolean);
+  const hayFiltros = f => f.tiendas.length > 0 || Number.isFinite(f.min) || Number.isFinite(f.max)
+    || f.primera || palabrasExcluidas(f.excluir).length > 0;
+
+  function predicadoDeFiltros(f, nivelMarca) {
+    // Las palabras buscan como la busqueda: una medida es palabra entera y "ipad" no esta en "disipador".
+    const excluidas = palabrasExcluidas(f.excluir).map(filtroDe);
+    return fila => {
+      if (f.tiendas.length && !f.tiendas.includes(fila[3])) return false;
+      if (Number.isFinite(f.min) && fila[1] < f.min) return false;
+      if (Number.isFinite(f.max) && fila[1] > f.max) return false;
+      if (f.primera && nivelMarca(fila[0]) !== 2) return false;
+      if (excluidas.length) {
+        const n = normalBusq(fila[0]);
+        if (excluidas.some(coincide => coincide(n))) return false;
+      }
+      return true;
+    };
+  }
+
+  /* Filtra la salida de agruparPorModelo sin perder productos: un grupo (el mismo codigo en varias tiendas) sale con
+     su fila mas barata QUE CUMPLE, en el lugar que tenia, y las demas tiendas quedan como "tambien en". Si ninguna
+     cumple, el producto se oculta. Devuelve { filas, otras, ocultas } (ocultas cuenta productos, no avisos). */
+  function filtrarGrupos(filas, otras, filtros, nivelMarca) {
+    if (!hayFiltros(filtros)) return { filas, otras, ocultas: 0 };
+    const pasa = predicadoDeFiltros(filtros, nivelMarca);
+    const salida = [], nuevas = new Map();
+    let ocultas = 0;
+    for (const f of filas) {
+      const grupo = [f, ...(otras.get(f) || [])];            // f es la mas barata; el resto, de menor a mayor
+      const buenas = grupo.filter(pasa);
+      if (!buenas.length) { ocultas++; continue; }
+      salida.push(buenas[0]);
+      const resto = grupo.filter(x => x !== buenas[0]);
+      if (resto.length) nuevas.set(buenas[0], resto);
+    }
+    return { filas: salida, otras: nuevas, ocultas };
+  }
+
   const textoConteo = (productos, avisos) => productos === avisos
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo };
+                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
 })(this);
