@@ -326,6 +326,12 @@ duda, el aviso queda suelto como siempre.
   (`KF432C16BB1/16`, `SEDC600M/480G`, `GV-N506TEAGLE`). Una velocidad, una
   capacidad o un chipset nunca cuenta. Usado, reacondicionado, bulk y OEM no
   se agrupan con lo nuevo.
+- Venex y Mexx no publican el part number en el listado, pero si en la ficha de
+  cada producto. Para RAM y SSD, `indexar.py` pide esa ficha una sola vez por aviso
+  (`ficha` en `tiendas.json`, `modelo.mpn_de_ficha`), con pausa, tope de 40 por
+  corrida y sin insistir si la tienda bloquea. Lo leido queda en `fichas.json`, en
+  la rama `historial`. Medido en 138 fichas: +5,9 puntos de cobertura en RAM y
+  +10,7 en SSD (`specs/009-mpn-de-fichas/spec.md`).
 - El codigo va en la ultima columna del indice (`modelo`). `js/buscador.js`
   (`agruparPorModelo`) junta lo que tiene el mismo codigo y capacidades
   compatibles; el resultado muestra la fila mas barata y debajo "Tambien en"

@@ -22,7 +22,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import historial
@@ -43,6 +43,11 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
 TOPE_PAGINAS = 40     # paginas por listado antes de cortar
+PAUSA_FICHA = 4       # segundos entre fichas de producto: son paginas pesadas, una por aviso nuevo
+REINTENTO_DIAS = 30   # una ficha que no trajo codigo se vuelve a mirar pasado este tiempo
+PODA_DIAS = 60        # lo guardado de un aviso que ya no se publica se descarta pasado este tiempo
+BLOQUEOS = (403, 429, 503)   # un bloqueo no se esquiva: se corta y se retoma otro dia (principio III)
+FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
 
 for flujo in (sys.stdout, sys.stderr):
     try:
@@ -259,6 +264,84 @@ def indexar_json(tienda):
     return items
 
 
+# --- Part number desde la ficha del producto (B3-bis) ----------------------------------------------------------
+
+def _dias(entrada, hoy):
+    try:
+        return (hoy - date.fromisoformat(entrada["dia"])).days
+    except (KeyError, TypeError, ValueError):
+        return 10 ** 6          # una entrada ilegible cuenta como vieja
+
+
+def leer_fichas(carpeta):
+    """La cache {url: {"mpn": codigo o None, "dia": fecha}} que dejo la corrida anterior; vacia si falta o esta rota."""
+    try:
+        datos = json.loads((Path(carpeta) / FICHAS).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return datos if isinstance(datos, dict) else {}
+
+
+def escribir_fichas(carpeta, cache):
+    """Guarda la cache ordenada (diffs chicos en la rama `historial`) y no toca el archivo si no cambio nada."""
+    carpeta = Path(carpeta)
+    carpeta.mkdir(parents=True, exist_ok=True)
+    ruta = carpeta / FICHAS
+    texto = json.dumps(cache, ensure_ascii=False, sort_keys=True, indent=0)
+    try:
+        if ruta.read_text(encoding="utf-8") == texto:
+            return
+    except OSError:
+        pass
+    ruta.write_text(texto, encoding="utf-8")
+
+
+def completar_con_fichas(tienda, items, cache, hoy, pedir=None, dormir=time.sleep):
+    """Las tiendas que no publican el part number en el listado lo traen en la ficha de cada producto. Esto pide
+    la ficha de los avisos de los rubros de `tienda["ficha"]["rubros"]` que todavia no la tienen y completa
+    `it["sku"]`, que es lo que despues agrupa el mismo modelo entre tiendas.
+
+    Cuesta un pedido por aviso, una sola vez: el resultado (tambien "sin codigo") queda en `cache` y se reintenta a
+    los REINTENTO_DIAS. Se piden como mucho `tope` fichas por corrida, con pausa; si la tienda bloquea (403, 429,
+    503) no se insiste esa corrida. Devuelve {"pedidas", "pendientes", "bloqueada"}."""
+    resumen = {"pedidas": 0, "pendientes": 0, "bloqueada": False}
+    cfg = tienda.get("ficha")
+    if not cfg:
+        return resumen
+    pedir = pedir or bajar
+    rubros, tope = set(cfg.get("rubros", ())), cfg.get("tope", 40)
+    for it in items:
+        if it.get("sku") or modelo.rubro_de(it["nombre"]) not in rubros or modelo.bloqueado_para_agrupar(it["nombre"]):
+            continue
+        guardada = cache.get(it["url"])
+        if guardada and (guardada.get("mpn") or _dias(guardada, hoy) < REINTENTO_DIAS):
+            if guardada.get("mpn"):
+                it["sku"] = guardada["mpn"]
+            continue
+        if resumen["bloqueada"] or resumen["pedidas"] >= tope:
+            resumen["pendientes"] += 1
+            continue
+        try:
+            pagina = pedir(it["url"])
+        except urllib.error.HTTPError as e:
+            if e.code in BLOQUEOS:
+                resumen["bloqueada"] = True
+                resumen["pendientes"] += 1
+            continue            # un 404 u otro error: no se guarda, se prueba en la proxima
+        except (urllib.error.URLError, OSError):
+            continue
+        mpn = modelo.mpn_de_ficha(pagina, cfg["extractor"])
+        cache[it["url"]] = {"mpn": mpn, "dia": hoy.isoformat()}
+        if mpn:
+            it["sku"] = mpn
+        resumen["pedidas"] += 1
+        dormir(PAUSA_FICHA)
+    vivas = {it["url"] for it in items}
+    for url in [u for u, e in cache.items() if u.startswith(tienda["base"]) and u not in vivas and _dias(e, hoy) > PODA_DIAS]:
+        del cache[url]
+    return resumen
+
+
 # --- Diagnostico de una fuente nueva ---------------------------------------
 
 SONDAS = {
@@ -344,6 +427,7 @@ def main(argv=None):
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
+    fichas = leer_fichas(carpeta)                # part numbers ya leidos de las fichas (B3-bis)
     for clave, fuente in fuentes.items():
         if not fuente.get("activa", True) or (args.solo and clave != args.solo):
             if clave in previo:                      # conservo lo que ya tenia indexado
@@ -380,6 +464,12 @@ def main(argv=None):
                 resumen[clave] = (0, "sin productos")
             relevados[clave] = 0
             continue
+        if fuente.get("ficha"):
+            f = completar_con_fichas(fuente, items, fichas, hoy)
+            print("  " + VERDE + OK + FIN + " fichas " + PUNTO + " " + str(f["pedidas"]) + " pedidas, "
+                  + str(f["pendientes"]) + " pendientes para otra corrida")
+            if f["bloqueada"]:
+                print("  " + AMAR + "! la tienda bloqueo las fichas: no se insiste hoy" + FIN)
         rebaja_real = bool(fuente.get("lista_es_oferta"))
         relevados[clave] = len(items)
         frescas.add(clave)
@@ -408,6 +498,8 @@ def main(argv=None):
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
     modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
+    if fichas or (carpeta / FICHAS).exists():
+        escribir_fichas(carpeta, fichas)
     generado = datetime.now(AR).isoformat(timespec="minutes")
     relevado.update(dict.fromkeys(frescas, generado))
     informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado)

@@ -1,6 +1,9 @@
 import unittest
+from pathlib import Path
 
 import modelo
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class RubroDe(unittest.TestCase):
@@ -138,6 +141,49 @@ class SkuDelCatalogo(unittest.TestCase):
         modelo.completar_con_conocidos(uno)
         modelo.completar_con_conocidos(dos)
         self.assertEqual(sorted(f[9] for f in uno), sorted(f[9] for f in dos))
+
+
+class MpnDeFicha(unittest.TestCase):
+    """El part number que publica la ficha de Venex y de Mexx (B3-bis): HTML real guardado, sin red."""
+
+    def ficha(self, ruta):
+        return (FIXTURES / ruta).read_text(encoding="utf-8")
+
+    def test_venex_lee_el_modelo_y_corta_el_gtin(self):
+        self.assertEqual(modelo.mpn_de_ficha(self.ficha("venex/ficha.html"), "venex"), "SA400S37/480G")
+
+    def test_mexx_lee_el_pn_de_un_ssd(self):
+        self.assertEqual(modelo.mpn_de_ficha(self.ficha("mexx/ficha-pn.html"), "mexx"), "SA400S37/240G")
+
+    def test_mexx_sin_pn_usa_el_modelo(self):
+        self.assertEqual(modelo.mpn_de_ficha(self.ficha("mexx/producto.html"), "mexx"), "HSC416U32Z2-16G")
+
+    def test_mexx_prefiere_el_pn_al_modelo(self):
+        html = "<b>Modelo : </b> NOMBRE123 </p> <b>P/N : </b> SA400S37/240G </p>"
+        self.assertEqual(modelo.mpn_de_ficha(html, "mexx"), "SA400S37/240G")
+
+    def test_mexx_si_el_pn_no_sirve_prueba_con_el_modelo(self):
+        html = "<b>P/N : </b> N/A </p> <b>Modelo : </b> XMD4U-8G3200 </p>"
+        self.assertEqual(modelo.mpn_de_ficha(html, "mexx"), "XMD4U-8G3200")
+
+    def test_se_normaliza_a_mayusculas_y_sin_punto_final(self):
+        self.assertEqual(modelo.mpn_de_ficha("<p>MODELO: sa400s37/480g.</p>", "venex"), "SA400S37/480G")
+
+    def test_lo_que_no_tiene_forma_de_codigo_queda_afuera(self):
+        for valor in ("HS-SSD-WAVE(P) 1024G", "WD Green SN350 NVMe SSD 1TB , TLC", "N/A", "KINGSTON", "123456", "A1"):
+            self.assertIsNone(modelo.mpn_de_ficha(f"<p>MODELO: {valor} | GTIN: 1</p>", "venex"), valor)
+            self.assertIsNone(modelo.mpn_de_ficha(f"<b>Modelo : </b> {valor} </p>", "mexx"), valor)
+
+    def test_dos_codigos_distintos_en_la_ficha_no_se_eligen(self):
+        self.assertIsNone(modelo.mpn_de_ficha("<p>MODELO: AAA111X</p><p>MODELO: BBB222X</p>", "venex"))
+
+    def test_sin_el_campo_o_con_un_extractor_desconocido(self):
+        self.assertIsNone(modelo.mpn_de_ficha("<html>sin nada</html>", "venex"))
+        self.assertIsNone(modelo.mpn_de_ficha(self.ficha("venex/ficha.html"), "otra"))
+        self.assertIsNone(modelo.mpn_de_ficha("", "mexx"))
+
+    def test_entidades_html_y_espacios(self):
+        self.assertEqual(modelo.mpn_de_ficha("<p>MODELO:   CMK16GX4M1E3200C16&nbsp;</p>", "venex"), "CMK16GX4M1E3200C16")
 
 
 if __name__ == "__main__":

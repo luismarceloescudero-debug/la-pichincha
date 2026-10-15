@@ -8,6 +8,7 @@ y el aviso queda suelto. Dos avisos son el mismo producto cuando el codigo coinc
 Cada regla nueva entra con un nombre real en tests/test_modelo.py.
 """
 
+import html
 import re
 
 RUBROS = ("ram", "ssd", "gpu")
@@ -101,6 +102,29 @@ def sku_de(valor):
         return None
     codigo = candidatos.pop()
     return codigo if _FORMA_SKU.match(codigo) else None
+
+
+# Donde publica cada tienda el part number en la ficha del producto (no en el listado). El primer patron que da un
+# codigo con forma valida manda: Mexx llama "P/N" al codigo del fabricante y "Modelo" a veces al nombre comercial.
+_FICHAS = {
+    "venex": (re.compile(r"<p>\s*MODELO:\s*([^<|]+?)\s*(?:\|[^<]*)?</p>", re.I),),
+    "mexx": (re.compile(r"<b>\s*P/N\s*:\s*</b>\s*([^<]+?)\s*</p>", re.I),
+             re.compile(r"<b>\s*Modelo\s*:\s*</b>\s*([^<]+?)\s*</p>", re.I)),
+}
+
+
+def mpn_de_ficha(pagina, extractor):
+    """El part number de la ficha de un producto (Venex: "MODELO: X | GTIN: ..."; Mexx: "P/N" o "Modelo"), en
+    mayusculas, o None si la ficha no lo trae, trae dos distintos o no tiene forma de codigo (con espacios, solo
+    letras, muy corto). Ante la duda no hay codigo: el aviso queda suelto, como siempre."""
+    for patron in _FICHAS.get(extractor, ()):
+        codigos = {html.unescape(c).strip().upper().rstrip(".") for c in patron.findall(pagina or "")}
+        if len(codigos) > 1:
+            return None
+        validos = [c for c in codigos if _FORMA_SKU.match(c)]
+        if validos:
+            return validos[0]
+    return None
 
 
 def completar_con_conocidos(filas):

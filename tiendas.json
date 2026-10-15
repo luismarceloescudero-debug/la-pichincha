@@ -1,5 +1,5 @@
 {
-  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas.",
+  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas. 'ficha' (opcional) pide la ficha de cada aviso de esos rubros para leer su part number cuando el listado no lo trae: un pedido por aviso, una sola vez, con tope por corrida y sin insistir si la tienda bloquea.",
   "compragamer": {
     "nombre": "CompraGamer",
     "color": "cg",
@@ -84,6 +84,7 @@
       }
     },
     "extractor": "itemprop",
+    "ficha": {"extractor": "mexx", "rubros": ["ram", "ssd"], "tope": 40},
     "lista_es_oferta": false
   },
   "fullh4rd": {
@@ -162,6 +163,7 @@
         "imagen": "<img src=\"(products_images/thumb/[^\"]+)\""
       }
     },
+    "ficha": {"extractor": "venex", "rubros": ["ram", "ssd"], "tope": 40},
     "lista_es_oferta": false
   },
   "comparaya": {
