@@ -91,11 +91,10 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   (`specs/007-identidad-por-gtin/viabilidad.md`): solo Venex y Mexx publican GTIN, y solo en la ficha; el
   mismo producto coincide por GTIN en 4 de 14 pares, y en placas de video cada tienda publica el codigo de
   barras de otra region. Ganancia estimada: ~3 puntos en RAM, ~4 en SSD y ~1 en placas (umbral: 5).
-- B3-bis **MPN de las fichas** (propuesta, a confirmar con una muestra mayor): las mismas fichas de Venex
-  ("MODELO:") y Mexx ("Modelo") traen el part number, que es lo que CompraGamer ya publica. En la muestra
-  coincidio con un codigo de CompraGamer en 2 de 6 fichas de RAM y 2 de 6 de SSD (0 de 7 en placas):
-  ~10 y ~15 puntos estimados. Mismo costo que el GTIN: un pedido por ficha, una sola vez, con cache por URL
-  y tope de fichas nuevas por corrida. Meta: 40% agrupado en RAM, SSD y placas.
+- ~~B3-bis **MPN de las fichas**~~ **Hecha el 15/10/2026** (`specs/009-mpn-de-fichas/spec.md`): medida sobre 138 fichas de
+  Venex y Mexx, el part number agrupa **+5,9 puntos en RAM y +10,7 en SSD** (placas de video +1,2: no se hacen). Un pedido por
+  aviso, una sola vez, con cache en la rama `historial`, tope de 40 fichas por tienda y por corrida y sin insistir si la tienda
+  bloquea. La meta del 40% sigue lejos (6% y 11%): lo que falta son mas fuentes que publiquen part number (B1).
 - ~~B4 **Filtros**~~ **Hecha el 15/10/2026** (`specs/008-filtros/spec.md`): tienda, rango de precio, solo primera linea y excluir palabras,
   en la busqueda (panel plegable sobre la lista; acotan lo que se ve y no tocan la mediana ni el orden). **Cuotas sin interes y envio
   gratis quedan afuera por ahora**: las cinco tiendas directas no los publican por aviso (CompraGamer no los trae; en Gaming City y Mexx la
