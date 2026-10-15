@@ -96,9 +96,11 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   coincidio con un codigo de CompraGamer en 2 de 6 fichas de RAM y 2 de 6 de SSD (0 de 7 en placas):
   ~10 y ~15 puntos estimados. Mismo costo que el GTIN: un pedido por ficha, una sola vez, con cache por URL
   y tope de fichas nuevas por corrida. Meta: 40% agrupado en RAM, SSD y placas.
-- B4 **Filtros** como ComparaYa: tienda, rango de precio, cuotas sin interes, envio gratis, solo
-  primera linea, excluir palabras. Requiere capturar cuotas y envio por aviso (campos nuevos al
-  final del indice, con su valor por defecto en `FILA_VACIA`).
+- ~~B4 **Filtros**~~ **Hecha el 15/10/2026** (`specs/008-filtros/spec.md`): tienda, rango de precio, solo primera linea y excluir palabras,
+  en la busqueda (panel plegable sobre la lista; acotan lo que se ve y no tocan la mediana ni el orden). **Cuotas sin interes y envio
+  gratis se descartaron tras medirlos**: ninguna fuente los publica por aviso (CompraGamer no los trae; en Gaming City y Mexx la cuota
+  lleva recargo; Venex solo en la ficha y por JS) y un filtro de eso mentiria; el indice no suma campos. Las paginas `/precios/<busqueda>/`
+  muestran 20 opciones: enlazan a la busqueda para filtrar. Si una fuente publica el dato, vuelve como campo al final del indice.
 - B5 **Rubros**: de hardware a tecnologia completa (notebooks, celulares, monitores, audio, gaming)
   sin perder el foco: cada rubro nuevo entra con sus reglas de "comparable".
 

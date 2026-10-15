@@ -185,6 +185,7 @@ function renderPagina(consulta, analisis, ctx) {
   const canonica = `${ctx.baseUrl}/precios/${slug}/`;
   const cuando = P.fechaHora(ctx.idx.generado);   // fija: la pagina queda escrita
   const interactiva = P.armarUrl("../../", q, "comparativa");
+  const filtrable = P.armarUrl("../../", q, "buscar");   // los filtros viven en la busqueda (specs/008-filtros, FR-007)
 
   if (!esIndexable(analisis)) {
     const buscador = P.armarUrl("../../", q, "buscar");
@@ -266,7 +267,7 @@ ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).joi
     </tbody></table></div>
   </section>
 ` : ""}${afuera.length ? `  <p class="sub">Quedaron afuera ${esc(afuera.join(", "))}.</p>\n` : ""}
-  <p><a class="acc" href="${esc(interactiva)}">Ver la comparativa completa</a></p>
+  <p><a class="acc" href="${esc(interactiva)}">Ver la comparativa completa</a> <a class="acc" href="${esc(filtrable)}">Buscar y filtrar por tienda y precio</a></p>
   ${pie(ctx)}
 </div>
 <script src="../../js/pagina.js"></script>

@@ -115,6 +115,12 @@ test("el boton lleva a la comparativa interactiva de la misma consulta", () => {
   assert.match(html, /<a class="acc" href="\.\.\/\.\.\/\?q=ddr4\+16gb#comparativa">Ver la comparativa completa<\/a>/);
 });
 
+test("la pagina muestra las mejores opciones y manda a la busqueda, que es donde se filtra", () => {
+  const { html } = paginaDe(IDX);
+  assert.match(html, /<a class="acc" href="\.\.\/\.\.\/\?q=ddr4\+16gb#buscar">Buscar y filtrar por tienda y precio<\/a>/);
+  assert.doesNotMatch(html, /data-filtro|id="filtros"/);          // el HTML de las paginas no cambia: sin JS nuevo
+});
+
 test("las paginas cargan GoatCounter y cada enlace a una tienda lleva su rubro", () => {
   const { html } = paginaDe(IDX);
   assert.match(html, /<script id="gc" data-goatcounter="https:\/\/mescudero\.goatcounter\.com\/count" async src="https:\/\/gc\.zgo\.at\/count\.js"><\/script>/);
