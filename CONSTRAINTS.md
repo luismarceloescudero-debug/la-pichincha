@@ -42,6 +42,8 @@ dueño. Subirlos cuando la medicion real los supera, si.
   propio sitio y a GoatCounter, sin `object`, sin `base` y sin enviar formularios afuera. Va como
   `<meta>` porque GitHub Pages no deja poner cabeceras.
 
+- **CSP y las cotizaciones (K2)**: `connect-src` suma `https://dolarapi.com`, `https://open.er-api.com` y `https://api.frankfurter.dev` para que la calculadora de costos convierta monedas en el navegador, sin backend. Son pedidos `GET` a una URL fija, sin parametros, cookies ni datos de la persona; si caen, la pagina usa la copia que escribe el build (`cotizaciones.json`). `tests/test_cotizaciones.py` exige que sean esos tres y ninguno mas.
+
 ## Que no es un cambio valido
 
 - Agregar `skip`, borrar un test o vaciar una asercion para que la CI pase.

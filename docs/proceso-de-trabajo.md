@@ -117,7 +117,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | # | Pendiente | Origen | Depende de | Estado |
 | --- | --- | --- | --- | --- |
 | 1 | **K1**: motor de calculo de costos (`js/costos.js`) con los 4 casos de referencia y las reglas de `importacion.json` | plan v3, spec 010 | nada | **hecho el 15/10** (24 tests, mutaciones detectadas, revision multimodelo) |
-| 2 | **K2**: monedas en vivo (`js/monedas.js`, copia del build, CSP) | plan v3 | nada | por hacer |
+| 2 | **K2**: monedas en vivo (`js/monedas.js`, copia del build, CSP) | plan v3 | nada | **hecho el 15/10** (29 tests y 10 del generador, 4 mutaciones, revision de cinco ejes y revision externa) |
 | 3 | Refrescar agent-skills, actualizar spec-kit (PR propio) y Superpowers 7 | seccion 3 | probarlo en sesion aparte | por hacer |
 | 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1 | el dueño (panel de OmniRoute) | propuesto |
 | 5 | **K3**: la calculadora en la app | plan v3 | K1 y K2 | espera |
@@ -137,6 +137,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | 15/10/2026 | La revision externa de K1 con modelos chicos dio falsos positivos o nada; Claude por OmniRoute encontro el unico bug real | Reglas de 1.2: archivo completo, revisor Claude para lo riesgoso, hallazgos demostrables con una entrada numerica y un test por cada hallazgo valido |
 | 15/10/2026 | Los tests de K1 pasaron a la primera: se hicieron mutaciones al codigo para confirmar que los detectan | En alto riesgo, despues del verde se muta el codigo (cambiar una regla clave a proposito) y se mira que los tests fallen |
 | 15/10/2026 | La revision de cinco ejes de `code-review-and-quality` sobre K1 encontro 4 problemas reales que ni el TDD, ni las mutaciones ni los modelos externos habian visto: un campo vacio de formulario (`undefined`) daba `valido: true` con total `NaN`, la percepcion se informaba pagando con dolares propios, 2,5 unidades se aceptaban y un `fleteEnValorAduana` mal escrito se tomaba como «no». Se probaron con una entrada concreta antes de afirmarlos y se arreglaron con su test | La revision de cinco ejes es **obligatoria antes del PR** en todo codigo con plata o normativa, y se corre **con entradas reales** (`node -e`) para demostrar cada hallazgo. Los datos de un formulario se normalizan en el borde (vacio = no escrito) |
+| 15/10/2026 | En K2, la revision de cinco ejes con entradas reales encontro 4 problemas (la moneda `"constructor"` se aceptaba, un dolar con venta cero daba infinito y con venta negativa **plata negativa**, una copia sin dolares avisaba solo «uso la copia»). El revisor externo recibio una version simplificada de `pedir` y su hallazgo no aplicaba al codigo real, pero marco un caso hermano que si lo era (una respuesta de monedas vacia se tomaba como «en vivo» y no activaba la reserva). Ademas un test del generador **llego a la red** por un parametro por defecto atado al definir (`pedir=bajar`) | Un hallazgo se **verifica contra el codigo real** antes de afirmarlo o descartarlo, y se busca el caso hermano. Todo codigo que toca la red recibe el `fetch` por parametro, se resuelve al **llamar** (no al definir) y su test no puede llegar a la red |
 
 ## 8. Verificaciones que quedan abiertas
 

@@ -3,5 +3,5 @@
   "base_url": "https://luismarceloescudero-debug.github.io/la-pichincha",
   "canal_telegram": "https://t.me/pichinchasdeldia",
   "_nota_csp": "Politica de contenido (CSP) de todas las paginas. Va como meta porque GitHub Pages no deja poner cabeceras; index.html la repite (un test exige que coincidan). Un script, fuente o conexion de otro dominio tiene que sumarse aca o el navegador lo bloquea.",
-  "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://mescudero.goatcounter.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+  "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://mescudero.goatcounter.com https://dolarapi.com https://open.er-api.com https://api.frankfurter.dev; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
 }

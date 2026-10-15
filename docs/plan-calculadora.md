@@ -173,6 +173,8 @@ Sale cuando: los casos oficiales dan al centavo y cambiar una regla no toca el c
 
 Sale cuando: la pagina convierte con la ultima cotizacion disponible, dice cuando es, y funciona sin red.
 
+**Hecha el 15/10/2026**: `js/monedas.js` (29 tests con las respuestas reales de las cuatro APIs guardadas en `tests/fixtures/monedas/`), `generar_cotizaciones.py` (copia del build en `_sitio/cotizaciones.json`, un paso nuevo del Action que no frena el sitio si falla) y la CSP con los tres dominios. Pesos con la **venta** del tipo de dolar elegido; las demas monedas via USD con open.er-api.com y frankfurter.dev de reserva; origen `vivo`, `mixto`, `copia` o `sin_datos`, con avisos que dicen de hace cuanto es la copia y que falta; nunca lanza y nunca inventa. Una cotizacion en cero o negativa, una moneda tipeada como `constructor` o una respuesta sin ninguna moneda util cuentan como fuente caida. Todavia no se carga en `index.html`: el selector es K3.
+
 ### K3. Calculadora en la app (semanas 3-4)
 
 - Vista "Costo": formulario, desglose con confianza de cada renglon, escenarios (con o sin percepcion, courier o Correo), enlace para
