@@ -56,8 +56,9 @@ palabras "kit" y "usado".
 - **FR-005**: Los controles DEBEN poder usarse con teclado y con lector de pantalla (etiquetas reales, `aria-pressed` en las
   tiendas) y cumplir contraste AA en tema claro y oscuro.
 - **FR-006**: No se agregan columnas al indice ni dependencias; el indice publicado no crece.
-- **FR-007**: Las paginas estaticas `/precios/<busqueda>/` DEBEN poder acotarse con los mismos filtros, sin que cambie el HTML que
-  ven los buscadores (mejora progresiva: sin JS la pagina se ve completa).
+- **FR-007**: Las paginas estaticas `/precios/<busqueda>/` muestran las 20 mejores opciones, no el catalogo: filtrar 20 filas aportaria poco.
+  Cada una DEBE enlazar a la busqueda de la misma consulta ("Buscar y filtrar por tienda y precio"), que es donde se filtra. Su HTML
+  no suma controles ni JS nuevo.
 
 ## Success Criteria
 
