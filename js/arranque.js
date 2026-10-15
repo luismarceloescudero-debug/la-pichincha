@@ -98,6 +98,9 @@ function arrancar() {
       return pintarResultados(($("#q") || {}).value || "");
     }
 
+    const filtro = ev.target.closest("[data-filtro]");
+    if (filtro) return cambiarFiltro(filtro.dataset.filtro, filtro.dataset.valor);
+
     const irCat = ev.target.closest("[data-ir-cat]");
     if (irCat) { limpiarConsulta(); elegirCategoria(irCat.dataset.irCat); return ir("comparativa", true); }
 

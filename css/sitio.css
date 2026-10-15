@@ -453,6 +453,27 @@ td.mejor{color:var(--good);font-weight:700}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .of-chip[aria-pressed="true"]{color:#0e1117}}
 .of-chip .n{font:600 .68rem var(--font-mono);opacity:.75}
 
+/* ---- Filtros de la busqueda (B4): acotan la lista, no el analisis ---- */
+.filtros{margin:0 0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.filtros summary{cursor:pointer;list-style:none;padding:10px 14px;font:600 .86rem var(--font-sans);color:var(--ink-2);
+  display:flex;align-items:center;gap:8px;border-radius:12px}
+.filtros summary::-webkit-details-marker{display:none}
+.filtros summary::before{content:"▸";font-size:.8rem;color:var(--ink-3);transition:transform .18s}
+.filtros[open] summary::before{transform:rotate(90deg)}
+.filtros.activo summary{color:var(--accent)}
+.filtros.activo summary::after{content:"activos";font:600 .68rem var(--font-mono);padding:1px 8px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent)}
+.filtros summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filtros-cuerpo{display:flex;flex-direction:column;gap:12px;padding:4px 14px 14px}
+.f-campo{display:inline-flex;align-items:center;gap:6px;font:500 .8rem var(--font-sans);color:var(--ink-2)}
+.f-campo input,.f-texto{font:500 .88rem var(--font-sans);padding:7px 10px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--ink);min-width:0}
+.f-campo input{width:9.5em}
+.f-texto{flex:1 1 220px}
+.f-campo input::placeholder,.f-texto::placeholder{color:var(--ink-3);opacity:1}
+.f-campo input:focus,.f-texto:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+@media (max-width:640px){.f-campo input,.f-texto{font-size:16px}}   /* 16px: iOS no hace zoom al enfocar */
+
 .ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:16px;align-items:start}
 .ocard{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--surface);
   border:1px solid var(--line);border-radius:16px;padding:20px 18px 16px;box-shadow:var(--shadow);

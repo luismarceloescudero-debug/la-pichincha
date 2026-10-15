@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-15
 
-**Status**: Implemented (filtros con datos que el indice ya trae; cuotas y envio gratis, descartados)
+**Status**: Implemented en la busqueda (filtros con datos que el indice ya trae; cuotas y envio gratis, descartados)
 
 **Input**: Fase B, B4 de docs/plan-v2.md: "Filtros como ComparaYa: tienda, rango de precio, cuotas sin interes, envio gratis, solo primera linea, excluir palabras. Requiere capturar cuotas y envio por aviso (campos nuevos al final del indice)."
 
@@ -66,6 +66,7 @@ palabras "kit" y "usado".
 
 ## Assumptions
 
-- Es un filtro de la lista, no una busqueda nueva: no se persiste en la URL ni en el navegador (se reinicia al cambiar de busqueda).
+- Es un filtro de la lista, no una busqueda nueva: no se persiste en la URL ni en el navegador. Vive mientras la pagina esta abierta, tambien al cambiar
+  de busqueda (se afina escribiendo: "ssd" y despues "ssd 1tb" no pierde los filtros); "Quitar filtros" los limpia.
 - "Primera linea" usa `nivelMarca === 2`, la misma lista editorial que ya rotula los avisos.
 - Un precio minimo mayor que el maximo no se corrige solo: da cero resultados y lo dice.
