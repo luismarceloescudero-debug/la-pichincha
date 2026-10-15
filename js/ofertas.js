@@ -12,6 +12,7 @@
   const BAJA_MIN_PCT = 0.03, BAJA_MIN_PESOS = 1000;
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
+  const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
 
   /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL, mismo
      precio. Uno por URL, y gana la fila de la tienda (sin "via") sobre la del agregador. */
@@ -27,6 +28,7 @@
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
     for (const f of unaPorUrl(idx.productos)) {
+      if (B.esUsado(f)) continue;       // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer >= BAJA_MIN_PCT) {
         propias.push(f);

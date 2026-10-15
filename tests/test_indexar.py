@@ -35,6 +35,17 @@ class Utilidades(unittest.TestCase):
     def test_limpio_decodifica_entidades(self):
         self.assertEqual(indexar.limpio('SSD 2.5&quot;  Kingston\n &amp; más'), 'SSD 2.5" Kingston & más')
 
+    def test_sellos_marca_con_u_lo_que_la_fuente_dice_que_es_usado_o_de_caja_abierta(self):
+        cfg = {"sellos": {"e": "specifications.Envio gratis"},
+               "usados": {"campo": "condition", "valores": ["open_box", "used", "refurbished", "refurbished_international"]}}
+        self.assertEqual(indexar.sellos({"condition": "open_box", "specifications": {"Envio gratis": True}}, cfg), "eu")
+        self.assertEqual(indexar.sellos({"condition": "refurbished"}, cfg), "u")
+        self.assertEqual(indexar.sellos({"condition": "refurbished_international"}, cfg), "u")
+        for normal in ("new", "new_international", None, ""):
+            self.assertEqual(indexar.sellos({"condition": normal}, cfg), "", normal)
+        self.assertEqual(indexar.sellos({}, cfg), "")
+        self.assertEqual(indexar.sellos({"condition": "open_box"}, {}), "")          # sin configuracion no hay sello
+
     def test_sellos_lee_las_senales_declaradas(self):
         cfg = {"sellos": {"i": "specifications.is_international", "o": "specifications.Tienda oficial",
                           "e": "specifications.Envío gratis"}}

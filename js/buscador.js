@@ -115,6 +115,11 @@
     return s;
   }
 
+  /* Lo usado, reacondicionado o de caja abierta ("Nuevo con caja abierta" de Mercado Libre) no compite con lo nuevo
+     ni es una oferta. Lo dice el nombre o, mejor, la fuente (sello u: la condicion de ComparaYa). */
+  const RE_USADO = /outlet|usado|reacondicionad|refurb|open ?box|caja[ -]?abierta|exhibicion/;
+  const esUsado = f => (typeof f[8] === "string" && f[8].includes("u")) || RE_USADO.test(normal(String(f[0] || "")));
+
   /* Avisos que no son comparables con el resto aunque coincidan con la busqueda,
      salvo que la propia busqueda los pida. */
   const REGLAS_EXCLUSION = [
@@ -124,8 +129,7 @@
     // porque "SSD para notebook" si es un SSD.
     { id: "equipos", re: /^(notebook|laptop|netbook|pc\b|computadora|all in one|mini pc|combo|kit\b|equipo)/,
       pide: /notebook|laptop|netbook|\bpc\b|computadora|all in one|combo|armad|equipo|kit/ },
-    { id: "usados", re: /outlet|usado|reacondicionad|refurb|open box|exhibicion/,
-      pide: /outlet|usado|reacondicionad|refurb|open box|exhibicion/ },
+    { id: "usados", re: RE_USADO, pide: RE_USADO },
   ];
 
   /* Lo que pediste tiene que ser lo que ves. "SIMIL 1TB" no es 1TB, "Cable para SSD"
@@ -140,6 +144,7 @@
 
   function motivoExclusion(n, nq, toks, sellos = "") {
     if (typeof sellos === "string" && sellos.includes("i") && !PIDE_INTERNACIONAL.test(nq)) return "internacionales";
+    if (typeof sellos === "string" && sellos.includes("u") && !RE_USADO.test(nq)) return "usados";
     for (const r of REGLAS_EXCLUSION) if (r.re.test(n) && !r.pide.test(nq)) return r.id;
     // Si lo que buscas aparece justo despues de "simil", ese aviso dice que NO es eso.
     for (const t of toks) {
@@ -153,7 +158,7 @@
   }
 
   /* Las letras que guarda el indice ("ioe") como [clase, texto] de cada sello. */
-  const SELLOS = [["i", "ojo", "compra internacional"], ["o", "conocida", "tienda oficial"],
+  const SELLOS = [["i", "ojo", "compra internacional"], ["u", "ojo", "usado o caja abierta"], ["o", "conocida", "tienda oficial"],
                   ["e", "off2", "envío gratis"],
                   // de la serie de precios (serie.py): solo salen con historial suficiente
                   ["m", "baja", "mínimo de 30 días"], ["h", "baja", "mínimo de 90 días"],
@@ -259,7 +264,7 @@
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
