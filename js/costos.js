@@ -1,7 +1,7 @@
 /* Motor de calculo del costo de importar por courier o por Correo (plan v3, K1; specs/010-costos).
    Funciones puras: no tocan el DOM ni la red. Los numeros de la normativa NO estan aca: salen de importacion.json
    (franquicia, tope, IVA, tasa de estadistica, percepcion), que trae la fuente, la fecha y la confianza de cada regla.
-   index.html lo carga como script comun (queda en window.Costos) y los tests lo cargan con require(). */
+   Se carga como script comun (queda en window.Costos; K3 lo suma a la pagina) y los tests lo cargan con require(). */
 (function (raiz) {
   "use strict";
 
@@ -9,6 +9,9 @@
   const esNumero = n => typeof n === "number" && Number.isFinite(n);
   const falta = n => n === null || n === undefined;
   const MEDIOS_DE_PAGO = ["tarjeta_pesos", "dolares_propios"];
+  const FLETE_EN_ADUANA = ["si", "no", "ambos"];
+  // Un campo vacio de un formulario llega como undefined o null: vale lo mismo que no haberlo escrito.
+  const POR_DEFECTO = { fleteUsd: 0, seguroUsd: 0, enviosUsadosEsteAnio: 0, unidades: 1, pesoKg: 0, fleteEnValorAduana: "ambos" };
 
   /* Una regla firme: tiene que existir, no estar pendiente y traer valor. Sin ella no se calcula. */
   function firme(reglas, clave) {
@@ -33,16 +36,18 @@
     if (!falta(e.derechoImportacionPct) && (!esNumero(e.derechoImportacionPct) || e.derechoImportacionPct < 0)) {
       avisos.push("el derecho de importacion tiene que ser un porcentaje desde cero");
     }
-    if (!esNumero(e.enviosUsadosEsteAnio) || e.enviosUsadosEsteAnio < 0) avisos.push("los envios usados tienen que ser un numero desde cero");
-    if (!esNumero(e.unidades) || e.unidades < 1) avisos.push("las unidades tienen que ser al menos una");
+    if (!Number.isInteger(e.enviosUsadosEsteAnio) || e.enviosUsadosEsteAnio < 0) avisos.push("los envios usados tienen que ser un numero entero desde cero");
+    if (!Number.isInteger(e.unidades) || e.unidades < 1) avisos.push("las unidades tienen que ser un numero entero, al menos una");
     if (!esNumero(e.pesoKg) || e.pesoKg < 0) avisos.push("el peso tiene que ser un numero desde cero");
     if (!falta(e.medioPago) && !MEDIOS_DE_PAGO.includes(e.medioPago)) avisos.push("el medio de pago tiene que ser tarjeta en pesos o dolares propios");
+    if (!FLETE_EN_ADUANA.includes(e.fleteEnValorAduana)) avisos.push("fleteEnValorAduana tiene que ser si, no o ambos");
     return avisos.map(texto => ({ codigo: "entrada", texto }));
   }
 
   const sinCalculo = (regimen, valido, avisos) => ({
     valido, regimen, avisos, renglones: [], tributosUsd: null, totalUsd: null, completo: false,
     noIncluido: [], escenarios: null, rangoUsd: null, percepcionUsd: null, totalConPercepcionUsd: null,
+    percepcionAplica: null, percepcionNota: null,
   });
 
   /* El rango cubre lo que no se sabe: si el flete integra el valor en aduana (dos escenarios) y, solo si la persona no dijo como
@@ -69,7 +74,8 @@
     const iva = firme(reglas, "iva_general_pct");
     const percepcion = firme(reglas, "percepcion_tarjeta_pct").valor;
 
-    const e = { fleteUsd: 0, seguroUsd: 0, enviosUsadosEsteAnio: 0, unidades: 1, pesoKg: 0, fleteEnValorAduana: "ambos", ...entrada };
+    const e = { ...entrada };
+    for (const [campo, valor] of Object.entries(POR_DEFECTO)) if (falta(e[campo])) e[campo] = valor;
     const invalidos = entradaInvalida(e);
     if (invalidos.length) return sinCalculo(null, false, invalidos);
 
@@ -137,7 +143,8 @@
     if (honorarios === null) noIncluido.push({ clave: "honorarios_courier", motivo: motivoDe(reglas, "honorarios_courier") });
 
     // Percepcion sobre lo que se paga con tarjeta en pesos al exterior: va aparte, no es un tributo de la importacion.
-    const percepcionUsd = centavos((e.fobUsd + fleteSeguro) * percepcion / 100);
+    const percepcionAplica = e.medioPago === "tarjeta_pesos" ? true : e.medioPago === "dolares_propios" ? false : null;   // null: no se sabe como paga
+    const percepcionUsd = percepcionAplica === false ? 0 : centavos((e.fobUsd + fleteSeguro) * percepcion / 100);
     const totales = [fueraDeBase.totalUsd, enBase.totalUsd];
 
     return {
@@ -145,7 +152,7 @@
       completo: !faltaDerecho && !faltaInterno, noIncluido,
       escenarios: { fleteFueraDeBase: { tributosUsd: fueraDeBase.tributosUsd, totalUsd: fueraDeBase.totalUsd },
                     fleteEnBase: { tributosUsd: enBase.tributosUsd, totalUsd: enBase.totalUsd } },
-      percepcionUsd, totalConPercepcionUsd: centavos(principal.totalUsd + percepcionUsd),
+      percepcionAplica, percepcionUsd, totalConPercepcionUsd: centavos(principal.totalUsd + percepcionUsd),
       percepcionNota: "Es un pago a cuenta de Ganancias o Bienes Personales (se recupera segun tu situacion) y no un tributo de la importacion; solo si pagas en pesos con tarjeta.",
       rangoUsd: rangoDe(totales, percepcionUsd, e.medioPago),
     };
