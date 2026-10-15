@@ -106,3 +106,17 @@ test("fechaHora da la fecha fija, sin 'hoy' ni 'ayer', para texto que queda escr
   assert.equal(P.fechaHora(""), "");
   assert.equal(P.fechaHora("basura"), "");
 });
+
+test("la hora argentina sale de UTC-3 fijo, sin Intl: crear el formato con zona horaria era una tarea larga al abrir", () => {
+  const vm = require("node:vm");
+  const fs = require("fs");
+  const codigo = fs.readFileSync(require.resolve("../../js/pagina.js"), "utf8");
+  const IntlRoto = { DateTimeFormat: function () { throw new Error("Intl.DateTimeFormat no se usa"); } };
+  const ctx = vm.createContext({ Intl: IntlRoto, URLSearchParams });
+  vm.runInContext(codigo, ctx);
+  const ahora = new Date("2026-10-08T18:00:00-03:00");
+  assert.equal(ctx.Pagina.cuando("2026-10-08T15:25-03:00", ahora), "hoy 15:25");
+  assert.equal(ctx.Pagina.cuando("2026-10-07T22:00-03:00", new Date("2026-10-08T02:00:00Z")), "hoy 22:00");
+  assert.equal(ctx.Pagina.fechaHora("2026-10-12T00:05:00Z"), "11/10 21:05");
+  assert.equal(ctx.Pagina.fechaHora("2026-03-01T03:07:00Z"), "1/3 00:07");
+});

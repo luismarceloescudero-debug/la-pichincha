@@ -40,7 +40,7 @@ jobs:
           "tests/js/*.test.js"
 
   # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md): las cuatro
-  # categorias cortan si bajan de 90.
+  # categorias cortan si la mediana de tres corridas baja de 90.
   lighthouse:
     runs-on: ubuntu-latest
     steps:
@@ -65,19 +65,32 @@ jobs:
           python publicar_app.py --salida _sitio --indice _sitio/indice.json
           node generar_feed.js --indice _sitio/indice.json --salida _sitio
           node generar_info.js --indice _sitio/indice.json --salud no-hay.json --salida _sitio
+          node generar_portada.js --salida _sitio
 
       - name: Medir con Lighthouse
         run: |
           python -m http.server 8080 --directory _sitio >/dev/null 2>&1 &
           sleep 2
+          # Tres corridas por pagina: el verificador evalua la mediana (la primera sale con Chrome en frio).
           for ruta in "" precios/ hoy/ estado/ legal/; do
-            nombre=$(echo "lh-${ruta:-portada}" | tr -d /)
-            npx --yes lighthouse@12.8.2 "http://localhost:8080/$ruta" --quiet --output=json \
-              --output-path="$nombre.json" --only-categories=performance,accessibility,best-practices,seo \
-              --chrome-flags="--headless=new --no-sandbox"
+            for i in 1 2 3; do
+              nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d /)
+              npx --yes lighthouse@12.8.2 "http://localhost:8080/$ruta" --quiet --output=json \
+                --output-path="$nombre.json" --only-categories=performance,accessibility,best-practices,seo \
+                --chrome-flags="--headless=new --no-sandbox"
+            done
           done
           # Sin tubo: el codigo de salida del verificador es el que corta la corrida.
           node .github/lighthouse.js lh-*.json > lighthouse.txt || falla=1
           cat lighthouse.txt
           { echo '### Lighthouse movil'; echo '```'; cat lighthouse.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           exit ${falla:-0}
+
+      # Los informes completos, para diagnosticar una medicion del runner sin repetirla.
+      - name: Guardar los informes de Lighthouse
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: lh-*.json
+          retention-days: 14

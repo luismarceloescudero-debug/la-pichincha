@@ -90,6 +90,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .tab[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
 
 .panel{animation:entraPanel .32s var(--curva) both}
+/* La vista que llega escrita en el HTML (generar_portada.js) ya esta al pintar: animarla desde opacidad 0
+   solo atrasaba el LCP. Al navegar, la vista nueva se anima como siempre. */
+.panel.quieta,.panel.quieta *{animation:none}
 .panel-head{margin-bottom:18px}
 
 /* ---- Grilla de tarjetas verticales ---- */
