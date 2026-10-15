@@ -112,7 +112,7 @@ paginas, portada incluida). Falta solo A1, que depende del dueño.
   `lanzamientos` en `datos.json` por marca y familia, como `marcas`; sin dato, al final), despues capacidad y despues la premisa
   (calidad por precio). Solo en rubros donde la novedad importa (celulares, notebooks, placas, tablets); RAM y SSD siguen por precio.
   Alternativa que mejora sola con el tiempo: la fecha en que cada aviso aparecio por primera vez en el historial (util desde ~30
-  dias). Depende de B5 (rubros) y de una tabla de lanzamientos con fuente. Tambien se vio que "iphone" trae mayormente fundas y
+  dias). Depende de B5 (rubros) y de una tabla de lanzamientos con fuente. **Medido y propuesto el 15/10/2026 en [`specs/011-novedades/spec.md`](../specs/011-novedades/spec.md)**: feeds oficiales de 9 marcas, modelo anterior por Wikidata y «nuevo en tiendas» desde el historial; falta que el dueño decida marcas, revision y criterio. Tambien se vio que "iphone" trae mayormente fundas y
   cargadores y casi ningun iPhone reciente: es un problema de cobertura (B1/B5), no de orden.
 
 Sale cuando: 12 fuentes, 25 mil avisos, filtros en la busqueda y en /precios/.
