@@ -81,6 +81,7 @@ Una persona quiere traer un producto de USD 800 y ver, renglon por renglon, que 
 - **FR-007**: El desglose DEBE separar tributos (con fuente oficial), honorarios del courier o tasa de servicio del Correo (dato que escribe la persona, con la fecha en que
   lo consulto) y percepciones (escenario), y decir si se pagan **prepagos en el checkout** o **a la entrega** (referentes: Amazon, eBay y Tiendamia, plan v3 seccion 1.1 bis).
 - **FR-008**: El resultado DEBE ser una **estimacion con rango**, con la aclaracion de que la liquidacion real puede variar y de quien absorbe la diferencia.
+- **FR-009**: El rango cubre lo que no se sabe: el flete dentro o fuera del valor en aduana y, **solo si la persona no dijo como paga** (`medioPago`: tarjeta en pesos o dolares propios), la percepcion. Con el medio de pago conocido, la percepcion entra en los dos extremos o en ninguno.
 
 ## Casos de referencia para K1 (derivados de las reglas; ARCA no publica ejemplos numericos)
 
