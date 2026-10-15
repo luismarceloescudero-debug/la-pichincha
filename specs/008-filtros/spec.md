@@ -10,7 +10,8 @@
 
 ## Medicion previa: ¿se pueden capturar cuotas y envio por aviso?
 
-Fecha: 2026-10-15. Sobre los fixtures guardados de cada fuente y una ficha de Venex y una de Mexx (2 pedidos).
+Fecha: 2026-10-15. Sobre los fixtures guardados de cada fuente, una ficha de Venex y una de Mexx, y una pagina (100 avisos) de la API de
+ComparaYa por cada una de seis categorias (600 avisos).
 
 | Fuente | Cuotas sin interes | Envio gratis | Donde esta |
 |---|---|---|---|
@@ -18,13 +19,16 @@ Fecha: 2026-10-15. Sobre los fixtures guardados de cada fuente y una ficha de Ve
 | Gaming City | no | no | Solo en la ficha. Las cuotas fijas llevan recargo: 1 pago $249.000, 12 cuotas de $29.050 = $348.600 en total |
 | Mexx | no | no | Solo en la ficha. Hay un "Precio 12 cuotas" aparte del precio de contado (con recargo). El texto "12 cuotas sin interes" es del `<meta description>` general del sitio, no del aviso |
 | Venex | no | no | Solo en la ficha, con una tabla de cuotas por tarjeta. El icono de envio gratis esta oculto y lo decide JS |
-| ComparaYa | no | si, parcial | `specifications["Envio gratis"]` ya entra al indice como el sello `e`, pero solo para los comercios de ComparaYa |
+| ComparaYa (y los comercios que agrega: Mercado Libre, Carrefour, Naldo, Megatone...) | **si, parcial**: 19% de los avisos dice "sin interes" y 49% informa alguna cuota | **si, parcial**: 42% | `specifications.Cuotas` ("12 cuotas sin interes", "6 cuotas"), `specifications["Sin interes"]` y `specifications["Envio gratis"]`. El envio gratis ya entra al indice como el sello `e` |
 
-**Conclusion**: ninguna fuente publica "cuotas sin interes" ni "envio gratis" por aviso en lo que el indice ya releva, y leerlo
-exigiria un pedido por ficha (miles de avisos) para un dato que, en tres de cinco tiendas, ni siquiera es sin interes. Un filtro
-de "cuotas sin interes" o de "envio gratis" que oculte todo lo que no sea de ComparaYa seria un filtro que miente (principio II).
-Por eso **no se suman esos dos filtros ni campos nuevos al indice**: el indice no crece. Cuando una fuente publique el dato en su
-listado o en su API, se agrega como campo al final con su valor por defecto en `FILA_VACIA`, como dice la constitucion.
+**Conclusion**: ninguna de las cinco fuentes directas publica "cuotas sin interes" ni "envio gratis" por aviso en lo que el indice ya releva (y leerlo
+exigiria un pedido por ficha, miles de avisos, para un dato que en tres de ellas ni siquiera es sin interes). Solo ComparaYa lo informa, y en una parte de
+sus avisos. Un filtro que oculte todo lo que no sea de ComparaYa no filtra: **deja afuera a las cinco tiendas directas por no informar**, y eso confundiria
+"no lo dice" con "no lo tiene" (principio II). Por eso **en esta entrega no se suman esos dos filtros ni campos al indice**: el indice no crece.
+
+**Opcion abierta**: ofrecerlos como "solo donde la fuente lo informa", sin sumar columnas: `e` (envio gratis) ya existe y alcanza con una letra nueva
+`s` (cuotas sin interes) en la columna `sellos`, con un aviso al lado del filtro ("lo informan ComparaYa y sus comercios"). Es poco codigo, pero el filtro
+quedaria vacio para las tiendas directas; se decide con el dueño. Cuando una fuente directa publique el dato en su listado o API, se suma ahi mismo.
 
 ## User Scenarios & Testing
 
