@@ -44,6 +44,29 @@ Se leyo hoy: [ARCA, envios postales y puerta a puerta](https://servicioscf.afip.
 pesan (derecho de importacion del excedente por rubro, IVA y percepciones) no tienen todavia una fuente oficial a la vista**. Por eso la
 primera fase es verificar la normativa, y las reglas viven en un archivo con fuente y fecha, no en el codigo.
 
+### 1.1 bis Referentes: como calculan y muestran el costo final (leido el 15/10/2026)
+
+Se busco en la documentacion de las plataformas. **Amazon** (pagina de terminos de envio internacional, error 503) y **Tiendamia** (ayuda, 403 al abrirla con un cliente
+automatico) no se pudieron leer enteras y **no se esquivo el bloqueo**: de ellas va solo lo que citan los resultados de busqueda, marcado como tal. eBay si se leyo completo.
+
+| Referente | Como muestra el costo | Quien importa y cuando se paga | Que nos sirve | Nivel |
+| --- | --- | --- | --- | --- |
+| **Amazon (AmazonGlobal)** | En el checkout cobra un **«Import Fees Deposit»** (una estimacion de aranceles e impuestos) o un monto fijo («Import Charges») segun el pais | Un transportista actua como agente del comprador y despacha; si el deposito sobra, **reembolsa la diferencia**; si falta, **no cobra de mas**; los cargos fijos no se reembolsan | Mostrar una **estimacion con rango**, aclarar que la liquidacion real puede dar distinto y decir quien absorbe la diferencia. Las paginas leidas son genericas: ninguna da los montos para Argentina | prensa (citado por busqueda; pagina no abrio) |
+| **eBay (International Shipping)** | El **«Import Fee»** del checkout puede incluir ventas, IVA, derechos, aranceles, impuestos internos, **honorarios de despacho de terceros y penalidades** | El comprador asume la importacion (secc. 3.1); si no lo paga al comprar, **puede cobrarse a la entrega** (5.e); el faltante despues de la entrega es del comprador (5.j); cobra un cargo por gestionar la **variacion entre lo cotizado y lo real** | Separar **tributos** de **honorarios del despachante** y decir **cuando** se paga (en el checkout o a la entrega). Argentina no figura en el texto leido | oficial (terminos de eBay, leidos) |
+| **Tiendamia** | En el resumen de compra, un renglon **«Impuestos Prepagos y gestion aduanera»** | Por courier privado, **Tiendamia es el responsable tributario ante ARCA** y no hay que pagar nada despues; por Correo Argentino el comprador hace la declaracion simplificada y paga un **VEP** que incluye la «tasa de servicio y almacenaje» | Dos escenarios en la calculadora: **«lo gestiona el courier»** (todo prepago) y **«lo gestiono yo por Correo»** (VEP con tasa fija). Las paginas leidas por busqueda son viejas (hablan de 12 franquicias de USD 50 y de un 50% sobre el excedente, ya reemplazados por el Decreto 604/2026) y la tasa del Correo aparece como ARS 140, 260, 350 y 600 segun la pagina: **no se hardcodea, se pide como dato con su fecha** | prensa (citado por busqueda; 403) |
+| **AliExpress, Temu, Shein** | Calculadoras de terceros: franquicia de USD 400, IVA del 21%, derechos y tasa solo sobre el excedente | Courier privado o Correo; ARCA publico precisiones para Shein y Temu (nota de iProfesional) | Los casos de uso mas comunes: **compras chicas de varias unidades**, donde pesa el **cupo de 5 envios** (ver el pendiente de la RG 5884) | prensa |
+| **Mercado Libre (compras internacionales)** | Precio en pesos con el envio y los impuestos adentro (los 297 avisos con el sello `i` de nuestro indice) | Lo gestiona el vendedor o el courier | Es **lo que hay que comparar contra**: si el precio ya incluye impuestos, el desglose de K4 lo muestra; hoy no lo sabemos | por medir (K4) |
+| **DHL, FedEx, UPS** | Cobran los tributos y sus **honorarios de despacho** («brokerage») aparte, a la entrega | El destinatario | Los **honorarios del courier** son un dato que cambia por empresa: ARCA no da montos | prensa |
+| **Correo Argentino (puerta a puerta)** | VEP con tributos y **tasa de servicio y almacenaje** fija por paquete, sin importar el peso ni el valor | El comprador | Esa tasa se cobra aunque la compra sea chica y **no es parte de la franquicia** | oficial (ARCA, sin monto) |
+| **Calculadoras privadas** (calculadoraimportacion.com.ar, calcusite, alidatos, servidos.ar, shippar.net) | Formulario con valor, envio y tipo de pago | n/a | Competencia directa de K3. **Se contradicen entre si** en el tratamiento de la percepcion del 30%: otra razon para marcar cada renglon con su fuente y su nivel | prensa |
+
+**Que cambia en el diseño por esto** (se suma a K3):
+- **Estimacion con rango y quien absorbe la diferencia**, como el deposito de Amazon: la calculadora da un valor y un rango, y dice que la liquidacion real puede variar.
+- **Separar tributos de gestion**: tributos (oficiales, con fuente), **honorarios del courier o tasa del Correo** (dato que escribe la persona, con la fecha en que se consulto) y **percepciones** (escenario).
+- **Cuando se paga**: «prepago en el checkout» o «a la entrega»; cambia el flujo de caja, no el total.
+- **Escenario de canal**: «lo gestiona el courier» vs «lo gestiono yo por Correo Argentino (VEP)».
+- **No se hardcodean montos que las plataformas no publican**: tasa del Correo y honorarios van como dato con fecha.
+
 ### 1.2 Monedas y cotizaciones
 
 Probadas hoy con `curl` y un `Origin` de nuestro sitio. **Todas responden con `Access-Control-Allow-Origin: *`**, asi que el navegador puede

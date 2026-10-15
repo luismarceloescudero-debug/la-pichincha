@@ -67,7 +67,8 @@ Una persona quiere traer un producto de USD 800 y ver, renglon por renglon, que 
 2. **Given** un envio que supera los USD 400, **When** se calcula, **Then** derechos y tasa caen solo sobre el excedente y el IVA sobre todo el valor mas esos tributos.
 3. **Given** el cupo anual agotado, **When** se calcula, **Then** no hay franquicia: todos los tributos caen sobre el valor total.
 4. **Given** una regla pendiente (por ejemplo el derecho de un notebook), **When** se calcula, **Then** la calculadora pide el dato o lo deja como «no incluido» y lo dice.
-5. **Given** un valor FOB sobre USD 3.000, **When** se calcula, **Then** avisa que no entra en el regimen de pequeños envios (va por regimen general, con despachante).
+5. **Given** un envio por Correo Argentino, **When** se calcula, **Then** suma la tasa de servicio y almacenaje que escribio la persona (nunca un monto supuesto) y la muestra aparte de los tributos.
+6. **Given** un valor FOB sobre USD 3.000, **When** se calcula, **Then** avisa que no entra en el regimen de pequeños envios (va por regimen general, con despachante).
 
 ## Requirements
 
@@ -77,6 +78,9 @@ Una persona quiere traer un producto de USD 800 y ver, renglon por renglon, que 
 - **FR-004**: La pagina DEBE mostrar la fecha de verificacion y avisar si una regla paso 60 dias (K5).
 - **FR-005**: El desglose DEBE marcar cada renglon con su nivel de confianza y decir «estimacion, no asesoramiento».
 - **FR-006**: Lo dudoso (por ejemplo la percepcion) DEBE poder verse como escenario («con» y «sin»), nunca sumarse en silencio.
+- **FR-007**: El desglose DEBE separar tributos (con fuente oficial), honorarios del courier o tasa de servicio del Correo (dato que escribe la persona, con la fecha en que
+  lo consulto) y percepciones (escenario), y decir si se pagan **prepagos en el checkout** o **a la entrega** (referentes: Amazon, eBay y Tiendamia, plan v3 seccion 1.1 bis).
+- **FR-008**: El resultado DEBE ser una **estimacion con rango**, con la aclaracion de que la liquidacion real puede variar y de quien absorbe la diferencia.
 
 ## Casos de referencia para K1 (derivados de las reglas; ARCA no publica ejemplos numericos)
 
