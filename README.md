@@ -123,6 +123,7 @@ una fuente dada de baja con `"activa": false`.
 | Mexx | rubros paginados | microdatos schema.org |
 | FullH4rd | busquedas por termino | Open Graph |
 | Venex | categorias hoja del sitemap, paginadas con `?page=` | el precio de la tarjeta (contado efectivo) |
+| Maximus | cada pagina de cada categoria, listada en `sitemap-paginas.xml` (131) | el bloque de tarjetas que la pagina escribe en el servidor (`mxSeoSSR`): precio por transferencia o efectivo, 10% menos que el de lista |
 | ComparaYa | API publica por categoria | la misma API |
 
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
