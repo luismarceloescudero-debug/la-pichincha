@@ -109,7 +109,15 @@
     return a ? { path: `${a[0]}/${a[1]}/${vista || "pagina"}`, title: vista || "", event: true } : null;
   }
 
-  const api = { leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  /* Afiliado de Amazon (plan v2, E1): una busqueda en amazon.com con el Store ID. No es secreto: va en cada link.
+     La constitucion (principio II) pide que todo enlace de afiliado se rotule y que nunca cambie el orden. */
+  const AMAZON_TAG = "lapichincha-20";
+  function enlaceAmazon(termino) {
+    const t = String(termino || "").replace(/\s+/g, " ").trim().slice(0, TOPE_Q);
+    return t ? "https://www.amazon.com/s?" + new URLSearchParams({ k: t, tag: AMAZON_TAG }) : null;
+  }
+
+  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);

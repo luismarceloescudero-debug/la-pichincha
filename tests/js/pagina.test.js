@@ -120,3 +120,19 @@ test("la hora argentina sale de UTC-3 fijo, sin Intl: crear el formato con zona 
   assert.equal(ctx.Pagina.fechaHora("2026-10-12T00:05:00Z"), "11/10 21:05");
   assert.equal(ctx.Pagina.fechaHora("2026-03-01T03:07:00Z"), "1/3 00:07");
 });
+
+// ---- Afiliado de Amazon (Fase E1): un enlace de busqueda con el Store ID, rotulado ----
+test("enlaceAmazon arma una busqueda en amazon.com con el Store ID y el termino codificado", () => {
+  const u = new URL(P.enlaceAmazon("Cargador UGREEN 65W & cable"));
+  assert.strictEqual(u.origin, "https://www.amazon.com");
+  assert.strictEqual(u.pathname, "/s");
+  assert.strictEqual(u.searchParams.get("k"), "Cargador UGREEN 65W & cable");
+  assert.strictEqual(u.searchParams.get("tag"), "lapichincha-20");
+  assert.strictEqual(P.AMAZON_TAG, "lapichincha-20");
+});
+
+test("enlaceAmazon recorta el termino y no arma nada si esta vacio", () => {
+  assert.strictEqual(P.enlaceAmazon("   "), null);
+  assert.strictEqual(P.enlaceAmazon(null), null);
+  assert.ok(new URL(P.enlaceAmazon("x".repeat(500))).searchParams.get("k").length <= 100);
+});

@@ -666,3 +666,11 @@ td.mejor{color:var(--good);font-weight:700}
   .k-tabla tfoot tr{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 35%,transparent)}
   .k-tabla tfoot th,.k-tabla tfoot td{border-top:0}
 }
+
+/* --- Enlace de afiliado (E1): se ve como un enlace mas, con su rotulo al lado --- */
+.afiliado{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:14px 0 0}
+.afiliado > a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:10px;
+  font:600 .9rem var(--font-sans);color:var(--ink);text-decoration:none;background:var(--surface);border:1px solid var(--line)}
+.afiliado > a:hover{border-color:var(--accent)}
+.afiliado .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
+.afiliado .rotulo a{color:var(--ink-2)}

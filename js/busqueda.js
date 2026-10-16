@@ -114,7 +114,10 @@ function pintarResultados(q) {
   const crudo = buscarTodo(q);   // se ordena sobre TODO el catalogo, no sobre los primeros 180
   if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
-    caja.innerHTML = `<p class="sub">Probá con menos palabras, o con la marca sola. El índice busca por nombre de producto.</p>`;
+    // Si la marca o el producto no estan en ninguna fuente, se dice asi; y se ofrece buscarlo afuera y calcular cuanto sale traerlo.
+    caja.innerHTML = `<p class="sub">Ninguna de las ${Object.keys(IDX.tiendas).length} tiendas del índice tiene «${esc(q)}». Si es un modelo, probá con la marca sola o con menos palabras.</p>
+      ${amazonHtml(q, `Buscar «${q}» en Amazon (EE.UU.)`)}
+      <p class="sub chico">¿Lo traerías de afuera? <button class="acc" data-ir-vista="costo">${icono("camion")} Calculá cuánto te sale puesto en casa</button></p>`;
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
     return;

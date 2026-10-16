@@ -154,6 +154,9 @@ Sale cuando: 1.000 alertas activas, grafico en vivo, carrito usado 100 veces por
 
 - E1 **Afiliados**: Mercado Libre (hasta 15% segun rubro), tiendas locales con programa propio,
   couriers. Siempre rotulado y sin tocar el orden (principio II).
+  **Amazon, empezado el 16/10/2026**: cuenta de Amazon Associates (EE.UU.) `lapichincha-20`; enlaces de busqueda rotulados en la
+  busqueda sin resultados y en el analisis de cada producto, aviso en `/legal/`. Plazo de Amazon: ventas calificadas antes del
+  14/04/2027. La Creators API (reemplazo de PA-API) se pide cuando haya ventas.
 - E2 **CPC o acuerdos con tiendas** mostrando los clics salientes medidos; a cambio, feeds oficiales
   (resuelve bloqueos como el de FullH4rd).
 - E3 **Instagram automatico**: tarjeta /hoy/ generada como imagen y publicada por la API de Meta

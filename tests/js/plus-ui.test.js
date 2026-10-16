@@ -80,3 +80,13 @@ test("el plus no cambia el orden de las opciones ni cual es la mejor compra", ()
   const sinPlus = pagina(SSDS.map(f => [...f.slice(0, 8), "", f[9]]))("ANALISIS.picks.map(p => p.m.f[0])");
   assert.deepStrictEqual([...conPlus], [...sinPlus]);
 });
+
+test("el enlace a Amazon va rotulado como afiliado, con rel sponsored y el Store ID", () => {
+  const correr = pagina([]);
+  const h = correr('amazonHtml("UGREEN 65W", "Buscar en Amazon")');
+  assert.match(h, /rel="noopener sponsored"/);
+  assert.match(h, /enlace de afiliado/);
+  assert.match(h, /tag=lapichincha-20/);
+  assert.match(h, /href="legal\/#afiliados"/);
+  assert.strictEqual(correr('amazonHtml("  ", "x")'), "");
+});
