@@ -145,7 +145,8 @@
     // Percepcion sobre lo que se paga con tarjeta en pesos al exterior: va aparte, no es un tributo de la importacion.
     const percepcionAplica = e.medioPago === "tarjeta_pesos" ? true : e.medioPago === "dolares_propios" ? false : null;   // null: no se sabe como paga
     const percepcionUsd = percepcionAplica === false ? 0 : centavos((e.fobUsd + fleteSeguro) * percepcion / 100);
-    const totales = [fueraDeBase.totalUsd, enBase.totalUsd];
+    // Si la persona dijo si el flete integra el valor en aduana, eso ya no es incertidumbre: queda un solo caso (FR-009).
+    const totales = e.fleteEnValorAduana === "ambos" ? [fueraDeBase.totalUsd, enBase.totalUsd] : [principal.totalUsd];
 
     return {
       valido: true, regimen, avisos: [], renglones: principal.renglones, tributosUsd: principal.tributosUsd, totalUsd: principal.totalUsd,

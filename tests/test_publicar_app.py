@@ -223,7 +223,7 @@ class EnLaAction(unittest.TestCase):
         import re
         sw = (RAIZ / "sw.js").read_text(encoding="utf-8")
         cascara = re.findall(r'"([^"]+)"', re.search(r"const CASCARA = \[(.*?)\];", sw, re.S).group(1))
-        copiados_por_publicar = {"manifest.webmanifest", "sin-red.html", "img/icono-192.png", "img/icono-512.png", "img/apple-touch-icon.png"}
+        copiados_por_publicar = {"manifest.webmanifest", "sin-red.html", "importacion.json", "img/icono-192.png", "img/icono-512.png", "img/apple-touch-icon.png"}
         for ruta in cascara:
             en_la_raiz = ruta in ("./", "index.html", "indice.json")
             en_carpeta_copiada = ruta.split("/")[0] in ("css", "js", "img") and "cp -r img js css _sitio/" in self.yml

@@ -550,3 +550,36 @@ td.mejor{color:var(--good);font-weight:700}
   background:var(--surface-2);border-radius:0 0 8px 8px}
 .mismo a{color:var(--accent);text-decoration:none;font-family:var(--font-mono);white-space:nowrap}
 .mismo a:hover{text-decoration:underline}
+
+/* --- Costo de importar (K3): formulario a la izquierda y desglose a la derecha; en el telefono, uno abajo del otro --- */
+.k-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:960px){.k-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}
+  .k-salida{position:sticky;top:76px}}
+.k-form{display:flex;flex-direction:column;gap:14px}
+.k-form fieldset{margin:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px 6px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 14px}
+.k-form legend{font:600 .78rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:0 6px}
+.k-campo{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.k-campo label{font:600 .86rem var(--font-sans);color:var(--ink)}
+.k-campo input,.k-campo select{font:500 .95rem var(--font-sans);color:var(--ink);background:var(--bg);padding:9px 11px;
+  border:1px solid var(--line);border-radius:8px;min-height:44px;width:100%}
+.k-campo input:focus-visible,.k-campo select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.k-campo input[aria-invalid="true"]{border-color:var(--bad)}
+.k-campo small{font-size:.78rem;color:var(--ink-2);line-height:1.35}
+.k-campo .k-error{color:var(--bad);font-weight:600}
+.k-campo .k-error:empty{display:none}
+.k-salida{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px;box-shadow:var(--shadow)}
+.k-salida h3{margin:0 0 12px}
+.k-regimen{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.k-tabla{min-width:520px}
+.k-tabla caption{text-align:left;font:600 .8rem var(--font-mono);color:var(--ink-2);padding:10px 12px 4px}
+.k-tabla td,.k-tabla th{font-variant-numeric:tabular-nums}
+.k-tabla tfoot th,.k-tabla tfoot td{font-weight:700;border-top:2px solid var(--line)}
+.k-nivel{display:inline-block;font:600 .7rem/1.7 var(--font-mono);padding:0 7px;border-radius:6px;white-space:nowrap;
+  background:var(--surface-2);color:var(--ink-2)}
+.k-nivel.k-oficial{background:var(--good-soft);color:var(--good)}
+.k-nivel.k-pendiente,.k-nivel.k-dudoso,.k-nivel.k-prensa{background:var(--warn-soft);color:var(--warn)}
+.k-nivel.k-dato{background:var(--accent-soft);color:var(--accent)}
+.k-pendiente{margin:14px 0}
+.k-alerta ul{margin:6px 0 0;padding-left:18px}
+.k-res .tiles{margin-bottom:14px}
