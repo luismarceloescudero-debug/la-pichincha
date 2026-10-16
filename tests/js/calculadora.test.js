@@ -28,6 +28,8 @@ test("numero entiende coma decimal, punto de miles y punto decimal", () => {
   assert.strictEqual(K.numero("1,234.56"), 1234.56);      // formato ingles completo
   assert.strictEqual(K.numero(" 15 "), 15);
   assert.strictEqual(K.numero("US$ 300"), 300);
+  assert.strictEqual(K.numero("100 USD"), 100);
+  assert.strictEqual(K.numero(",5"), 0.5);
 });
 
 test("numero devuelve null si esta vacio y NaN si no es un numero", () => {
@@ -261,4 +263,15 @@ test("con tarjeta en pesos se ve aparte lo que sale de la tarjeta, y el rango di
   assert.match(h, /si el envío suma al valor en aduana/);
   const sinDuda = html({ valor: "800", derecho: "20", flete: "40", aduana: "no", pago: "dolares_propios" });
   assert.ok(!sinDuda.includes("Rango"), "sabiendo todo no hay rango");
+});
+
+test("numero no toma un cero inicial como miles ni acepta separadores mal ubicados (revision externa)", () => {
+  assert.strictEqual(K.numero("0.500"), 0.5);
+  assert.strictEqual(K.numero(".500"), 0.5);
+  assert.strictEqual(K.numero("0.001"), 0.001);
+  assert.ok(Number.isNaN(K.numero("12.34,50")), "puntos que no separan miles");
+  assert.ok(Number.isNaN(K.numero("1.5,5")));
+  assert.ok(Number.isNaN(K.numero("1,23.4")));
+  assert.strictEqual(K.numero("12.345,50"), 12345.5);
+  assert.strictEqual(K.numero("12,345.50"), 12345.5);
 });

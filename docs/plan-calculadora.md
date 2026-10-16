@@ -183,6 +183,14 @@ Sale cuando: la pagina convierte con la ultima cotizacion disponible, dice cuand
 
 Sale cuando: una persona calcula un costo puesto en casa en menos de un minuto y lo comparte.
 
+**Hecha el 16/10/2026**: pestaña **Costo de importar** (`#costo`). `js/calculadora.js` (puro, 31 tests: numeros como se escriben en
+Argentina, estado en la URL para compartir, entrada del motor en dolares, formulario y desglose) y `js/vista-costo.js` (carga
+`importacion.json` y las cotizaciones, recalcula en vivo, copia el enlace, mide solo el regimen). Desglose con la confianza de cada
+renglon, lo «no incluido», la percepcion aparte («lo que sale de tu tarjeta»), el rango con lo que cubre y quien absorbe la diferencia
+segun donde se pagan los impuestos (FR-007/008). Montos en cualquier moneda de las cotizaciones y totales en pesos con el tipo de dolar
+elegido. Aviso de reglas viejas a los 60 dias (FR-004, adelanto de K5). En la prueba en el navegador aparecio un bug del motor: el rango
+mezclaba los dos casos del flete aunque la persona dijera cual era; corregido en `js/costos.js` con su test.
+
 ### K4. Del aviso al costo real (semanas 5-6; une con la Fase C del plan v2)
 
 - Desglose dentro de cada aviso internacional del indice (los 297 de Mercado Libre): precio en pesos, de donde sale y que impuestos

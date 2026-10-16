@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-15
 
-**Status**: K0 hecha (normativa verificada); K1 a K5 por hacer
+**Status**: K0 a K3 hechas (normativa verificada, motor, monedas y calculadora en la app); K4 y K5 por hacer
 
 **Input**: Plan v3, fase K0 (`docs/plan-calculadora.md`): "verificar contra el Boletin Oficial y las paginas de ARCA, una por una, las filas
 prensa y dudoso" y escribir `importacion.json` con fuente, fecha y nivel de confianza de cada regla. Pedido del dueño: "una calculadora de costos,
