@@ -82,6 +82,25 @@ gh api repos/<dueño>/<repo>/releases/tags/<tag> --jq .body
 
 Busque tambien alternativas en GitHub (`gh search repos`): no aparecio ninguna con trayectoria comparable a las tres de arriba; las que salen por estrellas son personales y casi sin uso. **No se instala nada nuevo sin medirlo en una sesion aparte.**
 
+### 3.2 Graphify medido el 16/10/2026: no se adopta
+
+`Graphify-Labs/graphify` v0.9.91 (paquete `graphifyy`, Apache-2.0) arma un grafo del codigo con tree-sitter para consultarlo en vez de usar Grep. Se instalo en un venv del scratchpad (nada en `~/.claude/skills`, nada en el repo) y se corrio `graphify extract . --code-only` con `GRAPHIFY_QUERY_LOG_DISABLE=1`.
+
+- **Privacidad y Windows**: el codigo se procesa local y sin telemetria; anda en Windows (35 s, 1262 nodos). Pero los `.md`, PDFs e imagenes solo entran con un LLM (la API o la sesion de Claude), y por defecto guarda cada consulta en `~/.cache/graphify-queries.log`.
+- **Que no ve**: los JSON (`importacion.json`, `tiendas.json`), el YAML de `.github/workflows/actualizar.yml` ni los `subprocess` (`generar_paginas.py` llama a `node generar_paginas.js`). Con `--code-only` tampoco ve `specs/` ni `docs/`.
+
+| Pregunta | Graphify | Grep/Read | Correcta |
+| --- | --- | --- | --- |
+| Donde se calcula el costo de importacion | `explain costos.js`: `calcular()` y sus ayudantes (0,5 KB). Sin `importacion.json` | grep de `importacion.json`: `js/costos.js:67` lo pide como `reglas` y la conversion queda en `js/monedas.js` | Graphify a medias |
+| Que toca `actualizar.py` → `indexar.py` → `generar_paginas.js` | `path`: "No path found"; `query` trajo 382 nodos, casi todo ruido | los pasos de `actualizar.yml` (L62, L99, L142) y `generar_paginas.py:90` | Graphify no |
+| Que cambia con una fuente nueva | trajo tests de fichas y `ofertas.js`, sin `tiendas.json` | `tiendas.json` lo lee `indexar.py`; `indexar.py --probar URL` y la cache del workflow (L88) | Graphify no |
+| De donde salen las monedas | `explain monedas.js`: `pedir()`, `cotizar()`, `convertir()` | `generar_cotizaciones.py:7` (las tres fuentes) y el paso L180 del workflow | Graphify a medias |
+| Que specs siguen abiertas | no puede: devolvio los scripts de `.specify/` | contar `- [ ]` en `specs/*/tasks.md` (001: 27, 002: 20, 003: 2, 004: 1; 005-011 sin `tasks.md`) | Graphify no |
+
+**Costo**: las cinco `query` devolvieron 33 KB (~8000 tokens, cortadas al presupuesto de 2000 tokens cada una y casi todo ruido); los `explain` puntuales, 2,6 KB. Grep/Read respondio las cinco con ~6 KB de salida y en menos de un segundo por busqueda. El cuello de este repo no es el codigo (un centenar de archivos que Grep recorre en 0,2 s) sino el pegamento: workflow, JSON de configuracion y specs, que es justo lo que Graphify no lee.
+
+**Decision: no adoptar.** Se vuelve a mirar si aparece un modo que lea YAML y JSON sin LLM, o si el repo pasa los ~1000 archivos de codigo. El hilo entre sesiones lo siguen llevando este documento, la memoria del proyecto y `specs/`. El venv de prueba se borro.
+
 **Politica de actualizacion**: un plugin global (Superpowers, ui-ux-pro-max) se actualiza avisando, porque cambia el comportamiento de todas las sesiones; lo que vive en el repo (spec-kit) va por PR con su diff y la CI en verde.
 
 ## 4. Ciclo de cada pedido
