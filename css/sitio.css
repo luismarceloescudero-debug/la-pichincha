@@ -528,6 +528,7 @@ td.mejor{color:var(--good);font-weight:700}
 .o-precios .antes{font:500 .8rem var(--font-mono);color:var(--ink-3);text-decoration:line-through}
 .o-ahorro{font-size:.85rem;color:var(--ink-2)}
 .o-ahorro b{font-family:var(--font-mono);color:var(--ink)}
+.o-contra{margin:0;font-size:.8rem;color:var(--ink-2)}
 .o-detalle{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--curva)}
 .o-detalle>.o-in{overflow:hidden;min-height:0}
 .ocard.abierta .o-detalle{grid-template-rows:1fr}

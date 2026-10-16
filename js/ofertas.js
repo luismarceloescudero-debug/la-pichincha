@@ -151,6 +151,12 @@
 
   const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
 
+  /* "mediana de los celulares de gama media de 256 GB: $350.000 (12 avisos)" */
+  function textoContra(c, pesos) {
+    const cap = c.rom >= 1000 ? c.rom / 1000 + " TB" : c.rom + " GB";
+    return `mediana de ${c.rubro === "notebook" ? "las notebooks" : "los celulares"} de gama media de ${cap}: ${pesos(c.mediana)} (${c.avisos} avisos)`;
+  }
+
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
     let descartadas = 0;
@@ -164,8 +170,8 @@
       if (g.rubro && g.pasa && !g.alta && g.rom && !(typeof f[8] === "string" && f[8].includes("i")))
         (precios[g.rubro + ":" + g.rom] = precios[g.rubro + ":" + g.rom] || []).push(f[1]);
     }
-    const medianas = {};
-    for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) medianas[k] = B.mediana(precios[k]);
+    const medianas = {}, muestras = {};
+    for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) { medianas[k] = B.mediana(precios[k]); muestras[k] = precios[k].length; }
     for (const f of filas) {
       if (!gama.get(f).pasa) { descartadas++; continue; }
       const ayer = f[6] || 0;
@@ -184,14 +190,17 @@
       return g.alta && medianas[g.rubro + ":" + g.rom] && f[1] <= medianas[g.rubro + ":" + g.rom];
     }));
     const vigentes = new Set([...cruces].filter(f => gama.get(f).vigente));
-    return { propias, publicadas, descartadas, cruces, vigentes, medianas };   // sin recortar: cada uso filtra y pagina
+    // contra que se cruza cada una: la mediana de su rubro y capacidad, y de cuantos avisos sale
+    const contra = new Map([...cruces].map(f => { const g = gama.get(f), k = g.rubro + ":" + g.rom;
+      return [f, { rubro: g.rubro, rom: g.rom, mediana: medianas[k], avisos: muestras[k] }]; }));
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, medianas };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal): primero las bajas propias, despues las publicadas,
      cada grupo por descuento; las compras internacionales al final y rotuladas. Sin enlaces que no sean http(s). */
   function destacadas(idx, max = 20) {
-    const { propias, publicadas, cruces, vigentes } = calcularOfertas(idx);
-    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f), vigente: vigentes.has(f) });
+    const { propias, publicadas, cruces, vigentes, contra } = calcularOfertas(idx);
+    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f) });
     const intl = f => typeof f[8] === "string" && f[8].includes("i");
     const por = (a, b) => b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const armar = esIntl => [...propias.filter(f => esUrl(f[2]) && intl(f) === esIntl).map(f => nuevo(f, 6, "propia")).sort(por),
@@ -201,7 +210,7 @@
     return [...armar(false), ...armar(true)].slice(0, max);
   }
 
-  const api = { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, PISOS, referencia, aspectosDe, pisoDeGama, calcularOfertas, destacadas };
+  const api = { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, PISOS, referencia, aspectosDe, pisoDeGama, textoContra, calcularOfertas, destacadas };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

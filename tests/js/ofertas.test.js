@@ -198,3 +198,13 @@ test("cruce de gamas: una gama alta del año anterior vigente tambien cruza y qu
   assert.deepEqual([...r.vigentes].map(f => f[0]), ["Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP"]);
   assert.equal(O.destacadas(idx)[0].vigente, true);
 });
+
+test("contra que mediana cruza cada oferta: rubro, capacidad, valor y cantidad de avisos", () => {
+  const m256 = Array.from({ length: 8 }, (_, i) => fila(`Celular Realme ${i} 8GB/256GB`, 400000 + i * 1000));
+  const idx = { productos: [...m256, fila("Celular Samsung Galaxy S26 12GB 256GB", 300000, { antes: 450000 })] };
+  const [o] = O.destacadas(idx);
+  assert.deepEqual(o.contra, { rubro: "celular", rom: 256, mediana: B.mediana(m256.map(f => f[1])), avisos: 8 });
+  const pesos = n => "$" + n;
+  assert.equal(O.textoContra(o.contra, pesos), `mediana de los celulares de gama media de 256 GB: $${o.contra.mediana} (8 avisos)`);
+  assert.match(O.textoContra({ rubro: "notebook", rom: 1000, mediana: 1, avisos: 9 }, pesos), /las notebooks de gama media de 1 TB/);
+});
