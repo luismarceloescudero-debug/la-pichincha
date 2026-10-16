@@ -15,6 +15,7 @@ catalogo (json, api y listados) y cualquier tienda nueva cae en alguna.
 
 import argparse
 import html
+import http.client
 import json
 import re
 import sys
@@ -72,11 +73,20 @@ VERDE, ROJO, GRIS, AMAR, NEG, FIN = (
 
 
 def bajar(url):
+    """Una pagina como texto. Un corte a mitad de respuesta (IncompleteRead) se reintenta una vez:
+    es la red, no la tienda negandose; si se repite, sale como error de red (OSError) y la fuente
+    lo maneja como cualquier caida. Un 403 o un 429 no se reintentan: son una respuesta."""
     pedido = urllib.request.Request(url, headers={
         "User-Agent": UA, "Accept": "text/html,application/json,*/*",
         "Accept-Language": "es-AR,es;q=0.9"})
-    with urllib.request.urlopen(pedido, timeout=45) as r:
-        return r.read().decode("utf-8", "replace")
+    for intento in (1, 2):
+        try:
+            with urllib.request.urlopen(pedido, timeout=45) as r:
+                return r.read().decode("utf-8", "replace")
+        except http.client.IncompleteRead as e:
+            if intento == 2:
+                raise OSError("respuesta cortada dos veces: " + url) from e
+            time.sleep(PAUSA * 4)
 
 
 def numero(texto):
@@ -252,8 +262,9 @@ def indexar_woocommerce(tienda, max_paginas):
     precios vienen en centavos ('currency_minor_unit'). Se usa solo donde robots.txt no prohibe /wp-json/wc/."""
     cfg = tienda["catalogo"]
     por_pagina = cfg.get("por_pagina", 100)
-    tope = cfg.get("tope_paginas", TOPE_PAGINAS)
-    limite = tope if max_paginas >= TOPE_PAGINAS else min(max_paginas, tope)
+    # El tope es el de la tienda: --max-paginas es por categoria de los listados (el workflow usa 12) y aca
+    # no hay categorias; con ese 12, Max Tecno quedaba en 1.200 de 5.954 (16/10). max_paginas no se usa.
+    limite = cfg.get("tope_paginas", TOPE_PAGINAS)
     plantilla = tienda["base"].rstrip("/") + "/wp-json/wc/store/v1/products?per_page=" + str(por_pagina) + "&page={n}"
     vistos, items = set(), []
     for n in range(1, limite + 1):

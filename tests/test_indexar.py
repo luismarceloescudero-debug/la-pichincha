@@ -304,11 +304,13 @@ class Woocommerce(unittest.TestCase):
             items = indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)
         self.assertEqual([it["url"] for it in items], ["https://t.test/producto/mem-3/"])
 
-    def test_respeta_el_tope_de_paginas_y_un_max_paginas_mas_chico(self):
+    def test_el_tope_es_el_de_la_tienda_y_no_el_de_paginas_por_categoria(self):
+        # El workflow indexa con --max-paginas 12 (paginas por categoria de los listados). WooCommerce no tiene
+        # categorias y pagina de a 100: aplicarle ese 12 cortaba Max Tecno en 1.200 de 5.954 (corrida del 16/10).
         with mock.patch.object(indexar, "bajar", side_effect=lambda u: json.dumps([self.producto(int(u.rsplit("=", 1)[1]))])), \
                 mock.patch.object(indexar.time, "sleep"):
-            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)), 10)
-            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, 3)), 3)
+            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, 12)), 10)
+            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, 3)), 10)
 
     def test_una_pagina_que_falla_corta_sin_voltear_lo_ya_leido(self):
         def bajar(url):
@@ -331,3 +333,21 @@ class Woocommerce(unittest.TestCase):
                     self.assertTrue(it["url"].startswith(t["base"].replace("://www.", "://")) or it["url"].startswith(t["base"]), it["url"])
                     self.assertGreaterEqual(it["precio"], 1000)
                     self.assertNotRegex(it["nombre"], r"[<>]|&[a-z#0-9]+;")
+
+
+class Descarga(unittest.TestCase):
+    def test_un_corte_a_mitad_de_respuesta_se_reintenta_una_vez(self):
+        # Gaming City cayo entera el 16/10 por un IncompleteRead: un corte de red no es un bloqueo.
+        import http.client
+        respuesta = mock.MagicMock()
+        respuesta.__enter__.return_value.read.side_effect = [http.client.IncompleteRead(b"x"), "ok".encode()]
+        with mock.patch.object(indexar.urllib.request, "urlopen", return_value=respuesta), mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(indexar.bajar("https://t.test/"), "ok")
+
+    def test_dos_cortes_seguidos_se_informan_como_error_de_red(self):
+        import http.client
+        respuesta = mock.MagicMock()
+        respuesta.__enter__.return_value.read.side_effect = http.client.IncompleteRead(b"x")
+        with mock.patch.object(indexar.urllib.request, "urlopen", return_value=respuesta), mock.patch.object(indexar.time, "sleep"):
+            with self.assertRaises(OSError):
+                indexar.bajar("https://t.test/")
