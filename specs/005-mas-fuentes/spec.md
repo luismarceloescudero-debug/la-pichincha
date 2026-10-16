@@ -57,5 +57,9 @@ correctos, y suma a la mediana y al conteo.
   especial por efectivo o transferencia. **HardCore Computacion** prohibe `/wp-json/wc/` en su `robots.txt`: no entra por esa via.
   **Gezatek, Hyper Gaming, Rocket Hard y Noxie** respondieron 429 (demasiados pedidos): no se insiste. ShopGamer (Tiendanube,
   2.950) queda para medir aparte.
+- **Primera publicacion (16/10, corrida de `main`)**: las WooCommerce quedaron en 1.200 cada una porque el `--max-paginas 12` del
+  workflow (por categoria de los listados) se aplicaba a paginas de 100; se corrigio: el tope es el de la tienda (`tope_paginas`).
+  Gaming City cayo entera por un corte de red (`IncompleteRead`): ahora se reintenta una vez. **Katech no trajo nada desde los
+  servidores de GitHub** aunque responde desde una PC: si es un bloqueo a IPs de centros de datos, se respeta y no se esquiva.
 - **Mercado Libre directo y afiliados** requiere una cuenta de desarrollador y de afiliado del dueño: queda anotado para el, no se hace sin su alta.
 - El orden por `busqueda_vacia` necesita los eventos de GoatCounter (cuenta del dueño): hasta tenerlos, se elige por tamano del catalogo y facilidad de lectura.
