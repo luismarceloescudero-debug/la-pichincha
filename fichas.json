@@ -195,6 +195,18 @@
 "dia": "2026-10-15",
 "mpn": "KF436C18BB/16"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/43525-memoria-ram-sodimm-ddr4-8gb-3200-mhz-lexar-value.html": {
+"dia": "2026-10-16",
+"mpn": "LD4AS008G-B3200GSST"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/46659-memoria-ram-sodimm-ddr4-16gb-3200-mhz-kingston.html": {
+"dia": "2026-10-16",
+"mpn": "KVR32S22D8/16"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/47410-memoria-ram-ddr4-8gb-3200-mhz-lexar.html": {
+"dia": "2026-10-16",
+"mpn": "LD4AU008G-B3200GSST"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/47420-memoria-ram-ddr4-16gb-3200-mhz-adata-value.html": {
 "dia": "2026-10-15",
 "mpn": "AD4U320016G22-SGN"
@@ -211,9 +223,21 @@
 "dia": "2026-10-15",
 "mpn": "AX5U6000C4816G-SLABRBK"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/48906-memoria-ram-sodimm-ddr5-8gb-5600-mhz-kingston.html": {
+"dia": "2026-10-16",
+"mpn": "KVR56S46BS6-8"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/49320-memoria-ram-sodimm-ddr4-8gb-3200-mhz-kingston.html": {
+"dia": "2026-10-16",
+"mpn": "KVR32S22S8/8"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/49383-memoria-ram-ddr4-8gb-3200-mhz-aimerican-telekinesis-value.html": {
 "dia": "2026-10-15",
 "mpn": "AIU8GD432"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/49900-memoria-ram-ddr5-16gb-6400-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-16",
+"mpn": "KF564C32BBEA-16"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/49926-memoria-ram-ddr4-8gb-3200-mhz-aimerican-telekinesis-rgb.html": {
 "dia": "2026-10-15",
@@ -223,9 +247,17 @@
 "dia": "2026-10-15",
 "mpn": "KF560C36BBE-8"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50381-memoria-ram-ddr5-32gb-6400-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-16",
+"mpn": null
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50386-memoria-ram-ddr5-8gb-5600-mhz-kingston-fury-beast.html": {
 "dia": "2026-10-15",
 "mpn": "KF556C36BBE-8"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50390-memoria-ram-ddr5-16gb-6800-mhz-kingston-fury-beast.html": {
+"dia": "2026-10-16",
+"mpn": "KF568C34BBE-16"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50477-memoria-ram-ddr4-8gb-3200-mhz-xpg-d35-negro.html": {
 "dia": "2026-10-15",
@@ -234,6 +266,14 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50488-memoria-ram-ddr4-16gb-3200-mhz-kingston-fury-beast-rgb.html": {
 "dia": "2026-10-15",
 "mpn": "KF432C16BB12A/16"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50489-memoria-ram-ddr5-16gb-6000-mhz-kingston-fury-beast.html": {
+"dia": "2026-10-16",
+"mpn": "KF560C36BBE2-16"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50601-memoria-ram-ddr5-32gb-5600-mhz-adata.html": {
+"dia": "2026-10-16",
+"mpn": "AD5U560032G-S"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50605-memoria-ram-ddr5-16gb-5600-mhz-xpg-lancer-blade-blanco.html": {
 "dia": "2026-10-15",
@@ -315,9 +355,21 @@
 "dia": "2026-10-15",
 "mpn": "MMD516G56U"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52404-memoria-ram-sodimm-ddr5-32gb-5600-mhz-kingston.html": {
+"dia": "2026-10-16",
+"mpn": "KVR56S46BD8-32"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/52437-memoria-ram-ddr4-16gb-3200-mhz-raptor-value.html": {
 "dia": "2026-10-15",
 "mpn": "RAP-UD4-16G-3200"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52559-memoria-ram-sodimm-ddr5-16gb-4800-mhz-corsair.html": {
+"dia": "2026-10-16",
+"mpn": "CMSX16GX5M1A4800C40"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52686-memoria-ram-ddr5-32gb-5600-mhz-kingston-value.html": {
+"dia": "2026-10-16",
+"mpn": "KVR56U46BD8-32"
 },
 "https://www.venex.com.ar/almacenamiento-portatil/discos-externos/disco-solido-ssd-externo-usb-2tb-kingston-xs2000-tipo-c.html": {
 "dia": "2026-10-15",
@@ -487,9 +539,17 @@
 "dia": "2026-10-15",
 "mpn": "CMH32GX5M2D6000Z38"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-16gb-6000mhz-cl38.html": {
+"dia": "2026-10-16",
+"mpn": "CMK16GX5M1D6000Z38"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr2-2gb-800mhz-kimota.html": {
 "dia": "2026-10-15",
 "mpn": "D2LD2G80-KIM"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr4-8gb-3200mhz-corsair-vengeance-lpx-1x8.html": {
+"dia": "2026-10-16",
+"mpn": "CMK8GX4M1E3200C16"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr4-8gb-3200mhz-kingston-fury-beast.html": {
 "dia": "2026-10-15",
