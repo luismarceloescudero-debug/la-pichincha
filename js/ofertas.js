@@ -120,19 +120,27 @@
     if (!ram && !reciente) return no("sin datos de RAM, procesador ni año en el título");
     // La novedad de la ultima generacion cuenta solo si mejoro varios apartados contra la anterior. Si no lo hizo
     // (diferencia minima), la anterior sigue vigente y las dos reciben el punto; si lo hizo, la anterior queda atras.
-    const vigencia = { punto: false, vigente: false };
+    const vigencia = { punto: false, vigente: false, nota: "" };
     for (const g of generacionesDe(nombre)) {
       const tope = ref.gen[g.fam] || 0, s = (ref.salto || {})[g.fam];
-      const minimo = s && s.comparados >= MIN_COMPARADOS && s.mejoras < MIN_SALTO;
+      const hay = s && s.comparados >= MIN_COMPARADOS, minimo = hay && s.mejoras < MIN_SALTO;
       if (g.gen >= tope) vigencia.punto = true;
       else if (minimo && g.gen === tope - 1) vigencia.punto = vigencia.vigente = true;
+      if (hay && g.gen >= tope - 1) {
+        const cuanto = `${s.mejoras} de ${s.comparados} apartados`;
+        vigencia.nota = g.gen >= tope
+          ? (minimo ? `${g.et} ${g.gen} mejoró solo ${cuanto} contra el ${g.gen - 1}: no suma como novedad y queda en la misma gama que el año anterior`
+                    : `${g.et} ${g.gen} mejoró ${cuanto} contra el ${g.gen - 1}: es una novedad real`)
+          : (minimo ? `el ${g.et} ${tope} mejoró solo ${cuanto} contra este modelo: sigue vigente como el año anterior`
+                    : `el ${g.et} ${tope} mejoró ${cuanto} contra este modelo: ya no cuenta como gama alta`);
+      }
     }
     // gama alta: tres señales o mas (RAM ideal, almacenamiento grande, la ultima generacion, linea Pro, OLED, 120 Hz)
     const puntos = [ram >= pi.ideal, rom >= pi.rom_alta,
       vigencia.punto,
       /\b(pro|ultra|max|fold|flip)\b/i.test(nombre), /\bamoled|\boled\b/i.test(nombre),
       (m = nombre.match(/\b(\d{2,3})\s?hz\b/i)) && +m[1] >= 120].filter(Boolean).length;
-    return { rubro, pasa: true, ideal: ram >= pi.ideal, alta: puntos >= 3, vigente: puntos >= 3 && vigencia.vigente, rom };
+    return { rubro, pasa: true, ideal: ram >= pi.ideal, alta: puntos >= 3, vigente: puntos >= 3 && vigencia.vigente, rom, nota: vigencia.nota };
   }
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
@@ -193,14 +201,16 @@
     // contra que se cruza cada una: la mediana de su rubro y capacidad, y de cuantos avisos sale
     const contra = new Map([...cruces].map(f => { const g = gama.get(f), k = g.rubro + ":" + g.rom;
       return [f, { rubro: g.rubro, rom: g.rom, mediana: medianas[k], avisos: muestras[k] }]; }));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, medianas };   // sin recortar: cada uso filtra y pagina
+    // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
+    const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, medianas };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal): primero las bajas propias, despues las publicadas,
      cada grupo por descuento; las compras internacionales al final y rotuladas. Sin enlaces que no sean http(s). */
   function destacadas(idx, max = 20) {
-    const { propias, publicadas, cruces, vigentes, contra } = calcularOfertas(idx);
-    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f) });
+    const { propias, publicadas, cruces, vigentes, contra, notas } = calcularOfertas(idx);
+    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f) });
     const intl = f => typeof f[8] === "string" && f[8].includes("i");
     const por = (a, b) => b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const armar = esIntl => [...propias.filter(f => esUrl(f[2]) && intl(f) === esIntl).map(f => nuevo(f, 6, "propia")).sort(por),

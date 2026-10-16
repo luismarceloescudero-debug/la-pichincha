@@ -208,3 +208,20 @@ test("contra que mediana cruza cada oferta: rubro, capacidad, valor y cantidad d
   assert.equal(O.textoContra(o.contra, pesos), `mediana de los celulares de gama media de 256 GB: $${o.contra.mediana} (8 avisos)`);
   assert.match(O.textoContra({ rubro: "notebook", rom: 1000, mediana: 1, avisos: 9 }, pesos), /las notebooks de gama media de 1 TB/);
 });
+
+test("cada modelo explica por que cuenta o no como gama alta este año respecto del anterior", () => {
+  const q = (n, ref) => O.pisoDeGama(n, ref).nota;
+  assert.match(q("Celular Pixel 10 12GB 256GB", SALTO_CHICO), /Pixel 10 mejoró solo 1 de 5 apartados contra el 9.*misma gama que el año anterior/);
+  assert.match(q("Celular Pixel 9 12GB 256GB", SALTO_CHICO), /el Pixel 10 mejoró solo 1 de 5.*sigue vigente/);
+  assert.match(q("Celular Galaxy S26 12GB 256GB", SALTO_GRANDE), /Galaxy S 26 mejoró 4 de 5 apartados.*novedad real/);
+  assert.match(q("Celular Galaxy S25 12GB 256GB", SALTO_GRANDE), /el Galaxy S 26 mejoró 4 de 5.*ya no cuenta como gama alta/);
+  assert.equal(q("Celular Moto G15 6GB/128GB", SALTO_GRANDE), "");        // sin generacion comparable
+});
+
+test("la nota viaja con las ofertas y con el feed", () => {
+  const productos = [...titulos(["Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP", "Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP",
+    "Celular Pixel 10 12GB 256GB 120Hz 4700mAh 50MP", "Celular Pixel 10 12GB 256GB 120Hz 4800mAh 50MP"]).map(([n]) => fila(n, 700000)),
+    fila("Celular Pixel 9 12GB 256GB 8", 500000, { antes: 700000 })];
+  const [o] = O.destacadas({ productos });
+  assert.match(o.nota, /sigue vigente/);
+});

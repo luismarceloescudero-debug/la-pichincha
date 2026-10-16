@@ -44,6 +44,7 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
     const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
     const desc = `Antes ${pesos(f[o.ref])}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. ` +
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
+      (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
     return `    <item>
       <title>${xml(titulo)}</title>
