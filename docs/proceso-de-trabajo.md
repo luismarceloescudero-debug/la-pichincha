@@ -75,7 +75,7 @@ gh api repos/<dueño>/<repo>/releases/tags/<tag> --jq .body
 | --- | --- | --- | --- |
 | **Superpowers** (`obra/superpowers`, plugin) | **7.0.0** (16/10) | v7.0.0 (10/10) | **Al dia** (actualizado el 16/10). Reconstruye `brainstorming`, y arregla cosas que nos tocan en Windows: `run-hook.cmd` ya no ejecuta un `bash.cmd` plantado en el repo, pasa los codigos de salida y encuentra Git instalado por usuario; `task-done` registra tareas con salida vacia; el ejemplo de `systematic-debugging` ya no imprime secretos. Se actualiza con `/plugin` en una sesion aparte y se prueba antes de usarla |
 | **spec-kit** (`github/spec-kit`, CLI) | 1.1.2 | **v1.2.0** (13/10) | **Actualizar en un PR propio**: trae politica de enlaces simbolicos, escrituras de cache confinadas y la opcion `--no-model-invocation` para Claude. Se revisa el diff de `.specify/`: la constitucion y las plantillas son nuestras y no se pisan |
-| **agent-skills** (`addyosmani/agent-skills`) | copia local del 23/09 con las 25 skills | 0.6.13 (13/10) | **Refrescar la copia**: corrige tres ejemplos que fallaban (`shipping-and-launch`, `frontend-ui-engineering`, `security-and-hardening`), hace que `test-driven-development` se dispare con codigo pegado y aclara que `/review` y `/test` corren en la sesion principal |
+| **agent-skills** (`addyosmani/agent-skills`) | **0.6.13** (16/10, respaldo de la anterior en `~/.claude/backups/skills-antes-0.6.13`) | 0.6.13 (13/10) | **Al dia** (refrescada el 16/10): corrige tres ejemplos que fallaban (`shipping-and-launch`, `frontend-ui-engineering`, `security-and-hardening`), hace que `test-driven-development` se dispare con codigo pegado y aclara que `/review` y `/test` corren en la sesion principal |
 | **ui-ux-pro-max** (`nextlevelbuilder/ui-ux-pro-max-skill`, plugin) | 2.13.0 | v2.15.0 (13/08) | Actualizar cuando se toque UI nueva (K3) |
 | **marketingskills** (`coreyhaines31/marketingskills`) | 4 skills copiadas | v2.11.37 (15/10) | Sin urgencia; solo se usan 4 (`seo-audit`, `schema`, `programmatic-seo`, `site-architecture`) |
 | **OmniRoute** | 3.8.51 | 3.8.51 | Al dia |
@@ -118,7 +118,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | --- | --- | --- | --- | --- |
 | 1 | **K1**: motor de calculo de costos (`js/costos.js`) con los 4 casos de referencia y las reglas de `importacion.json` | plan v3, spec 010 | nada | **hecho el 15/10** (24 tests, mutaciones detectadas, revision multimodelo) |
 | 2 | **K2**: monedas en vivo (`js/monedas.js`, copia del build, CSP) | plan v3 | nada | **hecho el 15/10** (29 tests y 10 del generador, 4 mutaciones, revision de cinco ejes y revision externa) |
-| 3 | Refrescar agent-skills a 0.6.13 y actualizar spec-kit (PR propio); Superpowers 7 ya esta | seccion 3 | el dueño (el permiso de Claude Code no deja que Claude cambie sus propias skills) | por hacer |
+| 3 | Actualizar spec-kit a 1.2.0 (PR propio); Superpowers 7 y agent-skills 0.6.13 ya estan (16/10) | seccion 3 | nada | por hacer |
 | 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1 | el dueño (panel de OmniRoute) | propuesto |
 | 5 | **K3**: la calculadora en la app | plan v3 | K1 y K2 | espera |
 | 6 | **N1 a N5**: novedades por marca | spec 011 | decisiones 1 a 4 de la spec | espera al dueño |
