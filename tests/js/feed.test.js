@@ -126,3 +126,11 @@ test("main escribe hoy/index.html", () => {
   F.main(["--indice", indice, "--salida", dir, "--base-url", BASE]);
   assert.match(fs.readFileSync(path.join(dir, "hoy", "index.html"), "utf8"), /class="historia"/);
 });
+
+test("una compra internacional entra al feed, al final y rotulada", () => {
+  const idx = { ...IDX, productos: [fila("Celular Importado 8GB RAM 256GB", 7000, { antes: 10000, sellos: "i" }), ...IDX.productos] };
+  const xml = F.renderFeed(idx, { baseUrl: BASE });
+  const items = xml.match(/<item>[\s\S]*?<\/item>/g);
+  assert.match(items[items.length - 1], /Celular Importado.*compra internacional/);
+  assert.equal(F.listaParaCanal(idx, 10).pop().comercio.endsWith("compra internacional"), true);
+});

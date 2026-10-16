@@ -31,9 +31,8 @@ test("destacadas: primero las bajas propias, despues las publicadas, cada grupo 
   assert.equal(O.destacadas(idx, 2).length, 2);
 });
 
-test("destacadas deja afuera compras internacionales y enlaces que no son http(s)", () => {
-  const idx = { productos: [fila("intl", 7000, { antes: 10000, sellos: "i" }),
-                            fila("js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
+test("destacadas deja afuera los enlaces que no son http(s)", () => {
+  const idx = { productos: [fila("js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
                             fila("ok", 8000, { antes: 10000 })] };
   assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["ok"]);
 });
@@ -70,23 +69,49 @@ test("el mismo aviso que llega directo y por ComparaYa cuenta una sola vez, y ga
   }
 });
 
-test("piso de gama: un celular necesita 6 GB de RAM y 128 GB, una notebook 16 GB y 512 GB", () => {
-  const p = n => O.pisoDeGama(n);
+// El piso es relativo al propio indice: "reciente" es la generacion mas nueva que hay a la venta o la anterior.
+const REF = O.referencia([
+  "Celular iPhone 17 256GB", "Celular Samsung Galaxy S26 12GB 256GB", "Celular Pixel 10 12GB 256GB",
+  "Notebook Apple MacBook Air M5 16GB 512GB", "Notebook Lenovo Core i7-14700H 16GB 512GB",
+  "Notebook Asus Ryzen 7 8845HS 16GB 512GB", "Celular Xiaomi Poco X8 Snapdragon 8 Gen 5 12GB 2026"].map(n => [n]));
+const p = n => O.pisoDeGama(n, REF);
+
+test("piso de gama: la RAM manda cuando el titulo la dice (celular 6 GB y 128 GB, notebook 16 GB y 512 GB)", () => {
   assert.equal(p("Celular Samsung Galaxy A06 4GB RAM 128GB").pasa, false);
   assert.match(p("Celular Samsung Galaxy A06 4GB RAM 128GB").motivo, /4 GB de RAM/);
   assert.equal(p("Celular Motorola Moto G15 6GB/128GB").pasa, true);
   assert.equal(p("Smartphone Xiaomi Redmi Note 14 8+256GB").pasa, true);
-  assert.equal(p("Celular Xiaomi Redmi 14C 8GB RAM 64GB").pasa, false);          // poca memoria interna
+  assert.equal(p("Celular Xiaomi Redmi 14C 8GB RAM 64GB").pasa, false);
   assert.equal(p("Notebook Lenovo IdeaPad 8GB RAM 256GB SSD").pasa, false);
   assert.equal(p("Notebook Lenovo IdeaPad 16GB 512GB SSD").pasa, true);
   assert.equal(p("Notebook Asus Vivobook 32 GB de RAM 1TB").pasa, true);
+  assert.equal(p("Memoria Kingston Fury DDR5 16GB").pasa, true);          // sin piso
+  assert.equal(p("Auriculares Logitech 4gb").rubro, null);
 });
 
-test("piso de gama: sin RAM en el titulo no se destaca; lo que no tiene piso pasa", () => {
-  assert.equal(O.pisoDeGama("Celular Samsung Galaxy A16 128GB").pasa, false);
-  assert.match(O.pisoDeGama("Celular Samsung Galaxy A16 128GB").motivo, /sin RAM/);
-  assert.equal(O.pisoDeGama("Memoria Kingston Fury DDR5 16GB").pasa, true);       // no es celular ni notebook
-  assert.equal(O.pisoDeGama("Auriculares Logitech 4gb").rubro, null);
+test("piso de gama: sin RAM en el titulo decide la generacion del procesador, no se descarta de entrada", () => {
+  assert.equal(p("Celular Apple iPhone 17 256GB").pasa, true);             // la mas nueva
+  assert.equal(p("Celular Apple iPhone 16 128GB").pasa, true);             // la anterior
+  const viejo = p("Celular Apple iPhone 14 128GB");
+  assert.equal(viejo.pasa, false);
+  assert.match(viejo.motivo, /iphone 14.*generaci/i);
+  assert.equal(p("Notebook Apple MacBook Air M5 13 512GB").pasa, true);
+  assert.equal(p("Notebook Apple MacBook Air M1 256GB").pasa, false);
+  assert.equal(p("Celular Samsung Galaxy A16 128GB").pasa, false);        // ni RAM, ni procesador, ni año
+  assert.match(p("Celular Samsung Galaxy A16 128GB").motivo, /sin datos/);
+});
+
+test("piso de gama: con RAM suficiente igual cuentan procesador viejo, bateria, refresco, pantalla y año", () => {
+  assert.equal(p("Notebook Lenovo Core i5-8250U 16GB 512GB").pasa, false);
+  assert.match(p("Notebook Lenovo Core i5-8250U 16GB 512GB").motivo, /core.*generaci/i);
+  assert.equal(p("Notebook Asus Ryzen 7 8845HS 16GB 512GB").pasa, true);
+  assert.equal(p("Celular Xiaomi Redmi 8GB 256GB 4000mAh").pasa, false);
+  assert.match(p("Celular Xiaomi Redmi 8GB 256GB 4000mAh").motivo, /4000 mAh/);
+  assert.equal(p("Celular Xiaomi Redmi 8GB 256GB 5500mAh 120Hz").pasa, true);
+  assert.equal(p("Celular Xiaomi Redmi 8GB 256GB 60Hz").pasa, false);
+  assert.equal(p("Notebook Lenovo 16GB 512GB 15.6 HD").pasa, false);
+  assert.equal(p("Celular Moto G 8GB 256GB modelo 2023").pasa, false);
+  assert.equal(p("Celular Moto G 8GB 256GB modelo 2026").pasa, true);
 });
 
 test("lo que no llega al piso de gama no es oferta y se cuenta aparte", () => {
@@ -98,4 +123,11 @@ test("lo que no llega al piso de gama no es oferta y se cuenta aparte", () => {
   assert.deepEqual(r.propias, []);
   assert.equal(r.descartadas, 2);
   assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Celular Moto G15 6GB/128GB"]);
+});
+
+test("las compras internacionales no quedan afuera de destacadas: van despues de las locales y rotuladas", () => {
+  const idx = { productos: [fila("intl", 7000, { antes: 10000, sellos: "i" }), fila("local", 8000, { antes: 10000 })] };
+  const d = O.destacadas(idx);
+  assert.deepEqual(d.map(o => o.f[0]), ["local", "intl"]);
+  assert.deepEqual(d.map(o => !!o.internacional), [false, true]);
 });
