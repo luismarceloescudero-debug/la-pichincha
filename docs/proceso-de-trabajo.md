@@ -105,7 +105,7 @@ Busque tambien alternativas en GitHub (`gh search repos`): no aparecio ninguna c
 
 ## 4. Ciclo de cada pedido
 
-1. **Arranque**: seccion 1 (OmniRoute) y `git pull --ff-only origin main`. Leer `.specify/memory/constitution.md`, `CONSTRAINTS.md`, `docs/plan-v2.md`, `docs/plan-calculadora.md` y la memoria del proyecto.
+1. **Arranque**: seccion 1 (OmniRoute) y `git pull --ff-only origin main`. Leer [`docs/mapa.md`](mapa.md) (que corre, que archivo es dueño de que y que tocar), `.specify/memory/constitution.md`, `CONSTRAINTS.md`, `docs/plan-v2.md`, `docs/plan-calculadora.md` y la memoria del proyecto.
 2. **Suposiciones**: se dicen antes de empezar (`using-agent-skills`). Se pregunta solo si la respuesta cambia lo que se construye.
 3. **Definir**: spec en `specs/` (spec-kit). Se mide con datos reales antes de decidir; un dato que no se pudo confirmar queda «pendiente» y sin numero.
 4. **Construir**: worktree propio en `.claude/worktrees/`, cortado de `origin/main`, nunca en la carpeta principal. TDD: test en rojo, codigo minimo, test en verde. Pasos chicos.
