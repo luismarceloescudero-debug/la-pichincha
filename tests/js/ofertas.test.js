@@ -69,3 +69,33 @@ test("el mismo aviso que llega directo y por ComparaYa cuenta una sola vez, y ga
     assert.equal(O.destacadas({ productos }).length, 1);
   }
 });
+
+test("piso de gama: un celular necesita 6 GB de RAM y 128 GB, una notebook 16 GB y 512 GB", () => {
+  const p = n => O.pisoDeGama(n);
+  assert.equal(p("Celular Samsung Galaxy A06 4GB RAM 128GB").pasa, false);
+  assert.match(p("Celular Samsung Galaxy A06 4GB RAM 128GB").motivo, /4 GB de RAM/);
+  assert.equal(p("Celular Motorola Moto G15 6GB/128GB").pasa, true);
+  assert.equal(p("Smartphone Xiaomi Redmi Note 14 8+256GB").pasa, true);
+  assert.equal(p("Celular Xiaomi Redmi 14C 8GB RAM 64GB").pasa, false);          // poca memoria interna
+  assert.equal(p("Notebook Lenovo IdeaPad 8GB RAM 256GB SSD").pasa, false);
+  assert.equal(p("Notebook Lenovo IdeaPad 16GB 512GB SSD").pasa, true);
+  assert.equal(p("Notebook Asus Vivobook 32 GB de RAM 1TB").pasa, true);
+});
+
+test("piso de gama: sin RAM en el titulo no se destaca; lo que no tiene piso pasa", () => {
+  assert.equal(O.pisoDeGama("Celular Samsung Galaxy A16 128GB").pasa, false);
+  assert.match(O.pisoDeGama("Celular Samsung Galaxy A16 128GB").motivo, /sin RAM/);
+  assert.equal(O.pisoDeGama("Memoria Kingston Fury DDR5 16GB").pasa, true);       // no es celular ni notebook
+  assert.equal(O.pisoDeGama("Auriculares Logitech 4gb").rubro, null);
+});
+
+test("lo que no llega al piso de gama no es oferta y se cuenta aparte", () => {
+  const idx = { productos: [fila("Celular Samsung Galaxy A06 4GB RAM 128GB", 100000, { lista: 150000 }),
+                            fila("Celular Moto G15 6GB/128GB", 100000, { lista: 150000 }),
+                            fila("Notebook HP 8GB RAM 256GB", 500000, { antes: 700000 })] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.publicadas.map(f => f[0]), ["Celular Moto G15 6GB/128GB"]);
+  assert.deepEqual(r.propias, []);
+  assert.equal(r.descartadas, 2);
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Celular Moto G15 6GB/128GB"]);
+});

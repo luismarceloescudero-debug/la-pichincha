@@ -160,7 +160,8 @@ function pintarOfertas(append) {
   const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
   est.textContent = `${OF_ACTUAL.length} ofertas`
-    + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "");
+    + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
+    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar al piso de gama de celulares y notebooks` : "");
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length

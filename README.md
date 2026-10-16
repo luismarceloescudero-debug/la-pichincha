@@ -231,6 +231,11 @@ Se muestran las rebajas entre 15% y 60%. El techo esta puesto porque arriba de
 ahi el precio anterior casi siempre esta inflado: un 90% OFF no es una oferta,
 es marketing.
 
+**Piso de gama.** Un descuento no vuelve oferta a un equipo que en 2026 se queda corto: un
+celular necesita 6 GB de RAM y 128 GB de almacenamiento, una notebook 16 GB y 512 GB. Sin RAM
+legible en el titulo no se destaca. La pestaña dice cuantos avisos con descuento quedaron
+afuera. Detalle y lo pendiente en `specs/012-reglas-de-ofertas/spec.md`.
+
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de
 ese producto solo.
