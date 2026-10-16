@@ -18,8 +18,8 @@
         mas nueva que hay a la venta o la anterior (no hay una tabla de años que envejezca).
      3. Sin RAM, hace falta al menos una señal reciente (procesador o año); sin ninguna no se afirma nada. */
   const PISOS = {
-    celular:  { ram: 6,  ideal: 8,  rom: 128, bateria: 4500, hz: 90, re: /\b(celular|smartphone|iphone|redmi|poco\s?[a-z]\d|moto\s?[gex]\d|galaxy\s?[samzf]\d|realme|infinix|tecno|pixel)/i },
-    notebook: { ram: 16, ideal: 32, rom: 512, re: /\b(notebook|laptop|macbook|portatil|ideapad|thinkpad|vivobook|zenbook)/i }
+    celular:  { ram: 6,  ideal: 8,  rom: 128, rom_alta: 256, bateria: 4500, hz: 90, re: /\b(celular|smartphone|iphone|redmi|poco\s?[a-z]\d|moto\s?[gex]\d|galaxy\s?[samzf]\d|realme|infinix|tecno|pixel)/i },
+    notebook: { ram: 16, ideal: 32, rom: 512, rom_alta: 1000, re: /\b(notebook|laptop|macbook|portatil|ideapad|thinkpad|vivobook|zenbook)/i }
   };
   const aGB = (n, u) => Math.round(parseFloat(n) * (/t/i.test(u) ? 1000 : 1));
 
@@ -60,7 +60,8 @@
     }
     if ((m = n.match(/\b(\d{1,2})\s?(?:gb)?\s*[+\/]\s*(\d{2,4})\s?(gb|tb)\b/i)) && +m[1] <= 64)
       return { ram: +m[1], rom: aGB(m[2], m[3]) };
-    return caps.length >= 2 && caps[0] <= 64 ? { ram: caps[0], rom: caps[caps.length - 1] } : { ram: 0, rom: 0 };
+    if (caps.length >= 2 && caps[0] <= 64) return { ram: caps[0], rom: caps[caps.length - 1] };
+    return { ram: 0, rom: caps.length === 1 && caps[0] >= 64 ? caps[0] : 0 };   // una sola capacidad grande: es el almacenamiento
   }
 
   /* { rubro, pasa, motivo }: solo celulares y notebooks tienen piso; el resto pasa. */
@@ -89,7 +90,12 @@
     if (pi.hz && (m = nombre.match(/\b(\d{2,3})\s?hz\b/i)) && +m[1] < pi.hz) return no(`pantalla de ${m[1]} Hz (mínimo ${pi.hz})`);
     if (rubro === "notebook" && /\bhd\b(?!\+)/i.test(nombre) && !/\b(?:f|u|w)hd\b/i.test(nombre)) return no("pantalla HD de baja resolución");
     if (!ram && !reciente) return no("sin datos de RAM, procesador ni año en el título");
-    return { rubro, pasa: true, ideal: ram >= pi.ideal };
+    // gama alta: tres señales o mas (RAM ideal, almacenamiento grande, la ultima generacion, linea Pro, OLED, 120 Hz)
+    const puntos = [ram >= pi.ideal, rom >= pi.rom_alta,
+      generacionesDe(nombre).some(g => g.gen >= (ref.gen[g.fam] || 0)),
+      /\b(pro|ultra|max|fold|flip)\b/i.test(nombre), /\bamoled|\boled\b/i.test(nombre),
+      (m = nombre.match(/\b(\d{2,3})\s?hz\b/i)) && +m[1] >= 120].filter(Boolean).length;
+    return { rubro, pasa: true, ideal: ram >= pi.ideal, alta: puntos >= 3 };
   }
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
@@ -106,13 +112,24 @@
     return [...por.values()];
   }
 
+  const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
+
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
     let descartadas = 0;
     const ref = referencia(idx.productos);
-    for (const f of unaPorUrl(idx.productos)) {
-      if (B.esUsado(f)) continue;       // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
-      if (!pisoDeGama(f[0], ref).pasa) { descartadas++; continue; }
+    const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
+    const gama = new Map(filas.map(f => [f, pisoDeGama(f[0], ref)]));
+    // Mediana de la gama media por rubro (sin internacionales, que traen otro costo): contra eso se mide el cruce.
+    const precios = {};
+    for (const f of filas) {
+      const g = gama.get(f);
+      if (g.rubro && g.pasa && !g.alta && !(typeof f[8] === "string" && f[8].includes("i"))) (precios[g.rubro] = precios[g.rubro] || []).push(f[1]);
+    }
+    const medianas = {};
+    for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) medianas[k] = B.mediana(precios[k]);
+    for (const f of filas) {
+      if (!gama.get(f).pasa) { descartadas++; continue; }
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer >= BAJA_MIN_PCT) {
         propias.push(f);
@@ -123,14 +140,19 @@
       const off = 1 - f[1] / lista;
       if (off >= DESCUENTO_MIN && off <= DESCUENTO_MAX) publicadas.push(f);
     }
-    return { propias, publicadas, descartadas };   // sin recortar: cada uso filtra y pagina
+    // Cruce de gamas: una oferta real de gama alta que cuesta lo mismo o menos que la mediana de la gama media.
+    const cruces = new Set([...propias, ...publicadas].filter(f => {
+      const g = gama.get(f);
+      return g.alta && medianas[g.rubro] && f[1] <= medianas[g.rubro];
+    }));
+    return { propias, publicadas, descartadas, cruces, medianas };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal): primero las bajas propias, despues las publicadas,
      cada grupo por descuento; las compras internacionales al final y rotuladas. Sin enlaces que no sean http(s). */
   function destacadas(idx, max = 20) {
-    const { propias, publicadas } = calcularOfertas(idx);
-    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1] });
+    const { propias, publicadas, cruces } = calcularOfertas(idx);
+    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f) });
     const intl = f => typeof f[8] === "string" && f[8].includes("i");
     const por = (a, b) => b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const armar = esIntl => [...propias.filter(f => esUrl(f[2]) && intl(f) === esIntl).map(f => nuevo(f, 6, "propia")).sort(por),

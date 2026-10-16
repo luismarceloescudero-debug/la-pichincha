@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const O = require("../../js/ofertas.js");
+const B = require("../../js/buscador.js");
 
 // fila: [nombre, precio, url, tienda, via, lista, antes, imagen, sellos, modelo]
 const fila = (nombre, precio, { lista = 0, antes = 0, sellos = "", url } = {}) =>
@@ -130,4 +131,30 @@ test("las compras internacionales no quedan afuera de destacadas: van despues de
   const d = O.destacadas(idx);
   assert.deepEqual(d.map(o => o.f[0]), ["local", "intl"]);
   assert.deepEqual(d.map(o => !!o.internacional), [false, true]);
+});
+
+test("gama alta: varias señales juntas (RAM ideal, almacenamiento grande, ultima generacion, OLED, 120 Hz, linea Pro)", () => {
+  assert.equal(p("Celular Apple iPhone 17 Pro 512GB").alta, true);
+  assert.equal(p("Celular Samsung Galaxy S26 12GB 256GB").alta, true);   // RAM ideal + 256 GB + ultima generacion
+  assert.equal(p("Celular Moto G15 6GB/128GB").alta, false);
+  assert.equal(p("Celular Xiaomi Redmi 8GB 256GB AMOLED 120Hz").alta, true);
+  assert.equal(p("Celular Xiaomi Redmi 8GB 128GB").alta, false);
+});
+
+test("cruce de gamas: una oferta de gama alta que cuesta lo mismo o menos que la mediana de la media", () => {
+  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/128GB`, 300000 + i * 1000));
+  const idx = { productos: [...media,
+    fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 }),   // alta, oferta real, mas barata que la mediana
+    fila("Celular Apple iPhone 17 Pro 512GB", 900000, { antes: 1100000 }),     // alta, oferta, pero carisima
+    fila("Celular Pixel 10 Pro 12GB 256GB", 280000)] };                          // alta y barata, pero sin oferta
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual([...r.cruces].map(f => f[0]), ["Celular Samsung Galaxy S26 12GB 256GB"]);
+  assert.equal(r.medianas.celular, B.mediana(media.map(f => f[1])));
+  const [o] = O.destacadas(idx);
+  assert.equal(o.cruce, true);
+});
+
+test("cruce de gamas: con poca muestra de gama media no se afirma nada", () => {
+  const idx = { productos: [fila("Celular Moto G15 6GB/128GB", 300000), fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
+  assert.equal(O.calcularOfertas(idx).cruces.size, 0);
 });

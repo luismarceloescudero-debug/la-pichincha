@@ -43,6 +43,7 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
     const f = o.f, pct = Math.round(o.off * 100);
     const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
     const desc = `Antes ${pesos(f[o.ref])}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. ` +
+      (o.cruce ? "Gama alta al precio de la gama media. " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
     return `    <item>
       <title>${xml(titulo)}</title>

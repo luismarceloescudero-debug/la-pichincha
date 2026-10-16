@@ -24,6 +24,15 @@ Solo celulares y notebooks tienen piso; el resto de los rubros sigue como antes.
 
 La pestaña dice cuantos avisos con descuento quedaron afuera. Los umbrales estan en `PISOS` de `js/ofertas.js`.
 
+## Cruce de gamas
+
+La idea de fondo: ver cuando la gama alta baja hasta el precio de la media. Una oferta **cruza** cuando es una oferta real (baja propia o rebaja publicada, ya con el piso aplicado), es de **gama alta** y cuesta **lo mismo o menos que la mediana de la gama media** de su rubro.
+
+- **Gama alta** = tres señales o mas entre: RAM ideal (8 GB celular, 32 GB notebook), almacenamiento grande (256 GB / 1 TB), la ultima generacion del procesador, linea Pro/Ultra/Max/Fold/Flip, pantalla OLED/AMOLED y 120 Hz o mas. **Gama media** = pasa el piso y no es alta.
+- La mediana de la media se calcula por rubro con los avisos nuevos, sin internacionales; con menos de 8 avisos no se afirma nada.
+- Se ve en la pestaña Ofertas (filtro "Gama alta al precio de media" y sello en la tarjeta) y en la descripcion del feed.
+- Pendiente: comparar por capacidad (hoy la mediana mezcla 128 y 256 GB) y mostrar la mediana contra la que se cruza.
+
 ## Compras internacionales
 
 No quedan afuera: a igual precio dan mas opciones. Pasan por las mismas reglas de gama, se muestran en la pestaña con su sello, y en el RSS, /hoy/ y Telegram van **despues de las locales y rotuladas** ("compra internacional"; pueden pagar impuestos al llegar).

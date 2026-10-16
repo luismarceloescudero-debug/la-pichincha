@@ -25,7 +25,7 @@ function asegurarIndice(forzar) {
    feed RSS y el canal de Telegram. */
 const { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
-const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, marcadas: false, pagina: 1 };
+const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1 };
 let OF_ACTUAL = [];
 
 const leerEstrellas = () => {
@@ -37,7 +37,7 @@ function listaOfertas() {
   if (!OFERTAS) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
-    niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
+    cruce: OFERTAS.cruces.has(f), niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
                             ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
 }
@@ -48,6 +48,7 @@ function ofertasFiltradas() {
   if (OF.com) l = l.filter(o => o.com === OF.com);
   if (OF.cat) l = l.filter(o => o.cat === OF.cat);
   if (OF.primera) l = l.filter(o => o.niv === 2);
+  if (OF.cruce) l = l.filter(o => o.cruce);
   if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
   const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
                 precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
@@ -76,6 +77,7 @@ function controlesOfertas(todas) {
     <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, c[0].toUpperCase() + c.slice(1), k, OF.cat === c)).join("")}</div>
     <div class="of-fila">
       <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
+      <button class="of-chip" data-of="cruce:1" aria-pressed="${OF.cruce}" title="Ofertas reales de gama alta que cuestan lo mismo o menos que la mediana de la gama media">Gama alta al precio de media <span class="n">${todas.filter(o => o.cruce).length}</span></button>
       <button class="of-chip" data-of="marcadas:1" aria-pressed="${OF.marcadas}">★ Marcadas <span class="n">${ESTRELLAS.size}</span></button>
     </div></div>`;
 }
@@ -106,7 +108,7 @@ function cardOferta(o, i, desde) {
     ${selloOjo(viejoDe(f))}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
     <div class="o-detalle"><div class="o-in">
-      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span></div>
+      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">gama alta al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
       <a class="acc" href="${f[2]}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
@@ -178,6 +180,7 @@ function ofertasAccion(el) {
   if (k === "tipo" || k === "orden") OF[k] = v;
   else if (k === "com" || k === "cat") OF[k] = OF[k] === v ? "" : v;
   else if (k === "primera") OF.primera = !OF.primera;
+  else if (k === "cruce") OF.cruce = !OF.cruce;
   else if (k === "marcadas") OF.marcadas = !OF.marcadas;
   OF.pagina = 1;
   pintarOfertas();

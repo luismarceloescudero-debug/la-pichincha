@@ -134,3 +134,9 @@ test("una compra internacional entra al feed, al final y rotulada", () => {
   assert.match(items[items.length - 1], /Celular Importado.*compra internacional/);
   assert.equal(F.listaParaCanal(idx, 10).pop().comercio.endsWith("compra internacional"), true);
 });
+
+test("una oferta de gama alta al precio de la media lo dice en la descripcion del feed", () => {
+  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/128GB`, 300000 + i * 1000));
+  const idx = { ...IDX, productos: [...media, fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
+  assert.match(F.renderFeed(idx, { baseUrl: BASE }), /Gama alta al precio de la gama media/);
+});
