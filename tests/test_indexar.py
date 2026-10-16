@@ -115,6 +115,27 @@ class TarjetasSinteticas(unittest.TestCase):
             {"url": "https://www.venex.com.ar/x/y/mem.html", "nombre": "Memoria RAM Kingston DDR4 16GB 3200MHz",
              "precio": 45990, "lista": None, "imagen": "products_images/thumb/178_mem_4png"}])
 
+    def test_maximus(self):
+        html = ('<article class="mxCardProduct"><a class="mxCardProduct__link" target="_self" '
+                'href="https://www.maximus.com.ar/Producto/Pendrive-256GB-Kingston/ITEM=9865/maximus.aspx">'
+                '<div class="mxCardProduct__media"><div class="mxCardProduct__imageBox"><img class="mxCardProduct__image" '
+                'src="https://www.maximus.com.ar/Temp/App_WebSite/App_PictureFiles/Items/DTX-256GB_600.jpg" alt="Pendrive"></div></div>'
+                '<div class="mxCardProduct__body"><h3 class="mxCardProduct__title">Pendrive 256GB Kingston Data Traveler Exodia USB 3.2</h3>'
+                '<div class="mxCardProduct__prices"><div class="mxCardProduct__price">$61.830</div></div></div></a></article>'
+                # La plantilla de Vue usa la misma clase pero con :href: no es un producto y se descarta.
+                '<article class="mxCardProduct"><a class="mxCardProduct__link" :href="item.url">'
+                '<h3 class="mxCardProduct__title" v-text="item.name"></h3></a></article>')
+        self.assertEqual(indexar.tarjetas(html, TIENDAS["maximus"]["catalogo"]), [
+            {"url": "https://www.maximus.com.ar/Producto/Pendrive-256GB-Kingston/ITEM=9865/maximus.aspx",
+             "nombre": "Pendrive 256GB Kingston Data Traveler Exodia USB 3.2", "precio": 61830, "lista": None,
+             "imagen": "https://www.maximus.com.ar/Temp/App_WebSite/App_PictureFiles/Items/DTX-256GB_600.jpg"}])
+
+    def test_maximus_recorre_cada_pagina_del_sitemap_una_vez(self):
+        # Maximus publica cada pagina de cada categoria en su sitemap (PAGE=1, PAGE=2...): "pagina" es la misma URL y
+        # el segundo pedido repite productos, asi que el recorrido pasa al siguiente listado sin inventar paginas.
+        cfg = TIENDAS["maximus"]["catalogo"]
+        self.assertEqual(cfg["pagina"].format(listado="https://x.test/a/PAGE=2/", n=7), "https://x.test/a/PAGE=2/")
+
     def test_listados_del_sitemap_con_excluye_y_hojas(self):
         sitemap = ("<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in (
             "https://t.test", "https://t.test/comp", "https://t.test/comp/ram", "https://t.test/comp/ram/desktop",
@@ -145,11 +166,13 @@ class TarjetasReales(unittest.TestCase):
 
     PATRONES = {"gamingcity": r"^[a-z0-9-]+--det--\d+$",
                 "mexx": r"^https://www\.mexx\.com\.ar/productos-rubro/.+\.html$",
-                "venex": r"^https://www\.venex\.com\.ar/.+\.html$"}
+                "venex": r"^https://www\.venex\.com\.ar/.+\.html$",
+                "maximus": r"^https://www\.maximus\.com\.ar/Producto/.+/ITEM=\d+/maximus\.aspx$"}
     # Vacia cuando la tienda no tiene foto: Gaming City muestra img-no-disponible.jpg.
     FOTOS = {"gamingcity": r"^(https://www\.gamingcity\.com\.ar/thumb/imagen_\d+_\d+x\d+\.jpg)?$",
              "mexx": r"^(https://mexx-img-2019\.s3\.amazonaws\.com/tumb_\d+_\d+\.\w+(\?\w+)?)?$",
-             "venex": r"^(products_images/thumb/[\w.]+)?$"}
+             "venex": r"^(products_images/thumb/[\w.]+)?$",
+             "maximus": r"^(https://www\.maximus\.com\.ar/Temp/App_WebSite/App_PictureFiles/Items/[\w.%-]+)?$"}
 
     def test_listados_guardados(self):
         for clave, patron in self.PATRONES.items():

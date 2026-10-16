@@ -209,5 +209,29 @@
     },
     "extractor": null,
     "lista_es_oferta": true
+  },
+  "maximus": {
+    "nombre": "Maximus",
+    "color": "mm",
+    "activa": true,
+    "base": "https://www.maximus.com.ar",
+    "catalogo": {
+      "tipo": "listados",
+      "origen": {
+        "tipo": "sitemap",
+        "url": "https://www.maximus.com.ar/sitemap-paginas.xml",
+        "contiene": "maximus.aspx?/CAT="
+      },
+      "pagina": "{listado}",
+      "desde": 1,
+      "tarjeta": "<article class=\"mxCardProduct\">",
+      "re": {
+        "url": "class=\"mxCardProduct__link\"[^>]*href=\"(https://www\\.maximus\\.com\\.ar/Producto/[^\"]+)\"",
+        "nombre": "class=\"mxCardProduct__title\">([^<]{6,160})</h3>",
+        "precio": "class=\"mxCardProduct__price\">\\$\\s*([\\d.]+)",
+        "imagen": "class=\"mxCardProduct__image\" src=\"([^\"]+)\""
+      }
+    },
+    "lista_es_oferta": false
   }
 }

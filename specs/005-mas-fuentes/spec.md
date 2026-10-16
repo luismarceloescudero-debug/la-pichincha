@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-09
 
-**Status**: Implemented (primera fuente: Venex)
+**Status**: Implemented (Venex el 09/10; Maximus el 16/10)
 
 **Input**: Fase 2, F2.3 de docs/plan-de-escalado.md: "Mercado Libre directo (cobertura y afiliados) y tiendas de hardware a probar con `indexar.py --probar`. El orden lo da `busqueda_vacia`: primero lo que la gente busca y no encuentra."
 
@@ -43,7 +43,12 @@ correctos, y suma a la mediana y al conteo.
 
 - **Venex** (venex.com.ar) es la primera: `robots.txt` permite el catalogo, tiene sitemap, paginacion `?page=` y precio en el HTML
   (el precio es el de "contado efectivo"). Sin extractor de pagina de producto (no hay etiquetas genericas): no sirve para productos curados.
-- Candidatas siguientes, con `robots.txt` que permite el recorrido: Maximus, ArmyTech (PrestaShop) y Compumarket (que no permite `?page=`,
-  hay que ver otra forma de enumerar). Se suman de a una, midiendo.
+- **Maximus** (16/10/2026): `robots.txt` permite el catalogo; el sitemap `sitemap-paginas.xml` lista cada pagina de cada categoria
+  (`PAGE=1`, `PAGE=2`...), asi que `pagina` es la misma URL y el recorrido no inventa paginas. Las tarjetas salen del bloque que la
+  pagina escribe en el servidor (`mxSeoSSR`); la plantilla de Vue con la misma clase se descarta porque no trae `href`. Primera corrida:
+  **1.255 avisos en 3 minutos**. No vende UGREEN ni Anker.
+- Candidatas siguientes, medidas el 16/10/2026 (las cuatro responden 200 y su `robots.txt` permite el catalogo): ArmyTech (PrestaShop),
+  Compumarket (OpenCart; su `robots.txt` solo prohibe `?page=` vacio, no `?page=2`), Logg (sin `robots.txt`) e Integrados Argentinos
+  (Tiendanube, sitemap comprimido). Se suman de a una, midiendo.
 - **Mercado Libre directo y afiliados** requiere una cuenta de desarrollador y de afiliado del dueño: queda anotado para el, no se hace sin su alta.
 - El orden por `busqueda_vacia` necesita los eventos de GoatCounter (cuenta del dueño): hasta tenerlos, se elige por tamano del catalogo y facilidad de lectura.

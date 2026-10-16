@@ -53,8 +53,13 @@ def listado(clave, tienda):
 
 
 def producto(clave):
-    """La pagina de un producto curado, sin scripts ni estilos si el extractor lee lo mismo."""
-    prod = next(p for p in DATOS["productos"] if p["tienda"] == clave and p["fuente"]["tipo"] != "compragamer")
+    """La pagina de un producto curado, sin scripts ni estilos si el extractor lee lo mismo.
+
+    Una fuente que solo aporta al buscador (como Maximus) no tiene productos curados: no hay nada que guardar."""
+    prod = next((p for p in DATOS["productos"] if p["tienda"] == clave and p["fuente"]["tipo"] != "compragamer"), None)
+    if prod is None:
+        print("  sin productos curados: solo el listado")
+        return
     extractor = actualizar.EXTRACTORES[prod["fuente"]["tipo"]]
     html = actualizar.bajar(prod["url"])
     chico = SIN_CODIGO.sub("", html)
