@@ -40,14 +40,42 @@
   });
   const aniosDe = nombre => [...String(nombre).matchAll(/\b(20[12]\d)\b/g)].map(m => +m[1]);
 
-  /* Lo mas nuevo que hay a la venta, por familia y en años, mirando los titulos del indice. */
+  const MIN_SALTO = 2, MIN_COMPARADOS = 2;   // apartados que tiene que mejorar la ultima generacion, de los que se pueden comparar
+
+  /* Apartados que el titulo puede decir. Se comparan generacion contra generacion de la misma familia. */
+  function aspectosDe(nombre) {
+    const { ram, rom } = memoriaDe(nombre), a = {};
+    let m;
+    if (ram) a.ram = ram;
+    if (rom) a.rom = rom;
+    if ((m = nombre.match(/\b(\d{2,3})\s?hz\b/i))) a.hz = +m[1];
+    if ((m = nombre.match(/\b(\d{4,5})\s?mah\b/i))) a.bateria = +m[1];
+    if ((m = nombre.match(/\b(\d{2,3})\s?mp\b/i))) a.camara = +m[1];
+    if (/\bamoled|\boled\b/i.test(nombre)) a.oled = 1;
+    return a;
+  }
+
+  /* Lo mas nuevo que hay a la venta, por familia y en años, mirando los titulos del indice, y cuanto mejoro
+     la ultima generacion de cada familia contra la anterior: { gen, anio, salto: { familia: { mejoras, comparados } } }. */
   function referencia(productos) {
-    const gen = {}; let anio = 0;
+    const gen = {}, porGen = {}; let anio = 0;
     for (const f of productos) {
-      for (const g of generacionesDe(f[0])) gen[g.fam] = Math.max(gen[g.fam] || 0, g.gen);
+      const asp = aspectosDe(f[0]);
+      for (const g of generacionesDe(f[0])) {
+        gen[g.fam] = Math.max(gen[g.fam] || 0, g.gen);
+        const caja = ((porGen[g.fam] = porGen[g.fam] || {})[g.gen] = (porGen[g.fam][g.gen] || {}));
+        for (const k of Object.keys(asp)) (caja[k] = caja[k] || []).push(asp[k]);
+      }
       for (const a of aniosDe(f[0])) anio = Math.max(anio, a);
     }
-    return { gen, anio };
+    const salto = {};
+    for (const fam of Object.keys(gen)) {
+      const ult = (porGen[fam] || {})[gen[fam]], ant = (porGen[fam] || {})[gen[fam] - 1];
+      if (!ult || !ant) continue;
+      const comunes = Object.keys(ult).filter(k => ant[k]);
+      salto[fam] = { comparados: comunes.length, mejoras: comunes.filter(k => B.mediana(ult[k]) > B.mediana(ant[k])).length };
+    }
+    return { gen, anio, salto };
   }
 
   function memoriaDe(nombre) {
@@ -65,7 +93,7 @@
   }
 
   /* { rubro, pasa, motivo }: solo celulares y notebooks tienen piso; el resto pasa. */
-  function pisoDeGama(nombre, ref = { gen: {}, anio: 0 }) {
+  function pisoDeGama(nombre, ref = { gen: {}, anio: 0, salto: {} }) {
     const rubro = Object.keys(PISOS).find(k => PISOS[k].re.test(nombre)) || null;
     if (!rubro) return { rubro, pasa: true };
     const pi = PISOS[rubro], { ram, rom } = memoriaDe(nombre);
@@ -90,12 +118,21 @@
     if (pi.hz && (m = nombre.match(/\b(\d{2,3})\s?hz\b/i)) && +m[1] < pi.hz) return no(`pantalla de ${m[1]} Hz (mínimo ${pi.hz})`);
     if (rubro === "notebook" && /\bhd\b(?!\+)/i.test(nombre) && !/\b(?:f|u|w)hd\b/i.test(nombre)) return no("pantalla HD de baja resolución");
     if (!ram && !reciente) return no("sin datos de RAM, procesador ni año en el título");
+    // La novedad de la ultima generacion cuenta solo si mejoro varios apartados contra la anterior. Si no lo hizo
+    // (diferencia minima), la anterior sigue vigente y las dos reciben el punto; si lo hizo, la anterior queda atras.
+    const vigencia = { punto: false, vigente: false };
+    for (const g of generacionesDe(nombre)) {
+      const tope = ref.gen[g.fam] || 0, s = (ref.salto || {})[g.fam];
+      const minimo = s && s.comparados >= MIN_COMPARADOS && s.mejoras < MIN_SALTO;
+      if (g.gen >= tope) vigencia.punto = true;
+      else if (minimo && g.gen === tope - 1) vigencia.punto = vigencia.vigente = true;
+    }
     // gama alta: tres señales o mas (RAM ideal, almacenamiento grande, la ultima generacion, linea Pro, OLED, 120 Hz)
     const puntos = [ram >= pi.ideal, rom >= pi.rom_alta,
-      generacionesDe(nombre).some(g => g.gen >= (ref.gen[g.fam] || 0)),
+      vigencia.punto,
       /\b(pro|ultra|max|fold|flip)\b/i.test(nombre), /\bamoled|\boled\b/i.test(nombre),
       (m = nombre.match(/\b(\d{2,3})\s?hz\b/i)) && +m[1] >= 120].filter(Boolean).length;
-    return { rubro, pasa: true, ideal: ram >= pi.ideal, alta: puntos >= 3 };
+    return { rubro, pasa: true, ideal: ram >= pi.ideal, alta: puntos >= 3, vigente: puntos >= 3 && vigencia.vigente, rom };
   }
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
@@ -120,11 +157,12 @@
     const ref = referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
     const gama = new Map(filas.map(f => [f, pisoDeGama(f[0], ref)]));
-    // Mediana de la gama media por rubro (sin internacionales, que traen otro costo): contra eso se mide el cruce.
+    // Mediana de la gama media por rubro y capacidad (128 y 256 GB por separado; sin internacionales, que traen otro costo).
     const precios = {};
     for (const f of filas) {
       const g = gama.get(f);
-      if (g.rubro && g.pasa && !g.alta && !(typeof f[8] === "string" && f[8].includes("i"))) (precios[g.rubro] = precios[g.rubro] || []).push(f[1]);
+      if (g.rubro && g.pasa && !g.alta && g.rom && !(typeof f[8] === "string" && f[8].includes("i")))
+        (precios[g.rubro + ":" + g.rom] = precios[g.rubro + ":" + g.rom] || []).push(f[1]);
     }
     const medianas = {};
     for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) medianas[k] = B.mediana(precios[k]);
@@ -143,16 +181,17 @@
     // Cruce de gamas: una oferta real de gama alta que cuesta lo mismo o menos que la mediana de la gama media.
     const cruces = new Set([...propias, ...publicadas].filter(f => {
       const g = gama.get(f);
-      return g.alta && medianas[g.rubro] && f[1] <= medianas[g.rubro];
+      return g.alta && medianas[g.rubro + ":" + g.rom] && f[1] <= medianas[g.rubro + ":" + g.rom];
     }));
-    return { propias, publicadas, descartadas, cruces, medianas };   // sin recortar: cada uso filtra y pagina
+    const vigentes = new Set([...cruces].filter(f => gama.get(f).vigente));
+    return { propias, publicadas, descartadas, cruces, vigentes, medianas };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal): primero las bajas propias, despues las publicadas,
      cada grupo por descuento; las compras internacionales al final y rotuladas. Sin enlaces que no sean http(s). */
   function destacadas(idx, max = 20) {
-    const { propias, publicadas, cruces } = calcularOfertas(idx);
-    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f) });
+    const { propias, publicadas, cruces, vigentes } = calcularOfertas(idx);
+    const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], cruce: cruces.has(f), vigente: vigentes.has(f) });
     const intl = f => typeof f[8] === "string" && f[8].includes("i");
     const por = (a, b) => b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const armar = esIntl => [...propias.filter(f => esUrl(f[2]) && intl(f) === esIntl).map(f => nuevo(f, 6, "propia")).sort(por),
@@ -162,7 +201,7 @@
     return [...armar(false), ...armar(true)].slice(0, max);
   }
 
-  const api = { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, PISOS, referencia, pisoDeGama, calcularOfertas, destacadas };
+  const api = { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, PISOS, referencia, aspectosDe, pisoDeGama, calcularOfertas, destacadas };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

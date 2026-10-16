@@ -37,7 +37,7 @@ function listaOfertas() {
   if (!OFERTAS) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
-    cruce: OFERTAS.cruces.has(f), niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
+    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
                             ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
 }
@@ -108,7 +108,7 @@ function cardOferta(o, i, desde) {
     ${selloOjo(viejoDe(f))}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
     <div class="o-detalle"><div class="o-in">
-      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">gama alta al precio de media</span>` : ""}</div>
+      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
       <a class="acc" href="${f[2]}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>

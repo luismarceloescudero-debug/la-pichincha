@@ -28,10 +28,11 @@ La pestaña dice cuantos avisos con descuento quedaron afuera. Los umbrales esta
 
 La idea de fondo: ver cuando la gama alta baja hasta el precio de la media. Una oferta **cruza** cuando es una oferta real (baja propia o rebaja publicada, ya con el piso aplicado), es de **gama alta** y cuesta **lo mismo o menos que la mediana de la gama media** de su rubro.
 
-- **Gama alta** = tres señales o mas entre: RAM ideal (8 GB celular, 32 GB notebook), almacenamiento grande (256 GB / 1 TB), la ultima generacion del procesador, linea Pro/Ultra/Max/Fold/Flip, pantalla OLED/AMOLED y 120 Hz o mas. **Gama media** = pasa el piso y no es alta.
-- La mediana de la media se calcula por rubro con los avisos nuevos, sin internacionales; con menos de 8 avisos no se afirma nada.
+- **Gama alta** = tres señales o mas entre: RAM ideal (8 GB celular, 32 GB notebook), almacenamiento grande (256 GB / 1 TB), vigencia de la generacion (ver abajo), linea Pro/Ultra/Max/Fold/Flip, pantalla OLED/AMOLED y 120 Hz o mas. **Gama media** = pasa el piso y no es alta.
+- **Mediana por capacidad**: la gama media se mide por rubro y almacenamiento (128 y 256 GB por separado, `celular:256`). Con menos de 8 avisos de media en esa capacidad, o si el aviso no dice su capacidad, no se afirma nada.
+- **Salto entre generaciones** (medido con los titulos del propio indice, por familia: iPhone, Galaxy S, Pixel, chip M, Snapdragon, Core, Ryzen). Se comparan RAM, almacenamiento, Hz, bateria, camara (MP) y OLED de la ultima generacion contra la anterior; solo cuentan los apartados que los titulos de las dos traen (minimo 2). Si la ultima **mejora 2 o mas** apartados, es novedad real: solo ella recibe el punto de vigencia y la anterior queda atras. Si **mejora menos de 2**, la diferencia es minima: la ultima no suma por ser nueva y la **anterior sigue vigente**, asi que las dos reciben el punto (la anterior queda marcada "del año anterior, vigente"). Sin datos suficientes para comparar, solo la ultima.
 - Se ve en la pestaña Ofertas (filtro "Gama alta al precio de media" y sello en la tarjeta) y en la descripcion del feed.
-- Pendiente: comparar por capacidad (hoy la mediana mezcla 128 y 256 GB) y mostrar la mediana contra la que se cruza.
+- Pendiente: mostrar la mediana contra la que se cruza, y comparar el salto con mas apartados (procesador por rendimiento real, carga rapida, proteccion IP, audio) cuando los titulos o las fichas los traigan.
 
 ## Compras internacionales
 

@@ -141,20 +141,60 @@ test("gama alta: varias señales juntas (RAM ideal, almacenamiento grande, ultim
   assert.equal(p("Celular Xiaomi Redmi 8GB 128GB").alta, false);
 });
 
-test("cruce de gamas: una oferta de gama alta que cuesta lo mismo o menos que la mediana de la media", () => {
-  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/128GB`, 300000 + i * 1000));
-  const idx = { productos: [...media,
-    fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 }),   // alta, oferta real, mas barata que la mediana
-    fila("Celular Apple iPhone 17 Pro 512GB", 900000, { antes: 1100000 }),     // alta, oferta, pero carisima
-    fila("Celular Pixel 10 Pro 12GB 256GB", 280000)] };                          // alta y barata, pero sin oferta
+test("cruce de gamas: la mediana de la media se compara por capacidad (128 y 256 GB por separado)", () => {
+  const m128 = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/128GB`, 200000 + i * 1000));
+  const m256 = Array.from({ length: 8 }, (_, i) => fila(`Celular Realme ${i} 8GB/256GB`, 400000 + i * 1000));
+  const idx = { productos: [...m128, ...m256,
+    fila("Celular Samsung Galaxy S26 12GB 256GB", 300000, { antes: 450000 }),   // alta de 256: bajo la mediana de 256 (400k)
+    fila("Celular Pixel 10 Pro 12GB 256GB", 420000, { antes: 500000 }),         // alta de 256: sobre esa mediana, aunque bajo la mezcla
+    fila("Celular Apple iPhone 17 Pro 512GB", 300000, { antes: 450000 })] };    // sin media de 512 con que compararse
   const r = O.calcularOfertas(idx);
   assert.deepEqual([...r.cruces].map(f => f[0]), ["Celular Samsung Galaxy S26 12GB 256GB"]);
-  assert.equal(r.medianas.celular, B.mediana(media.map(f => f[1])));
-  const [o] = O.destacadas(idx);
-  assert.equal(o.cruce, true);
+  assert.equal(r.medianas["celular:128"], B.mediana(m128.map(f => f[1])));
+  assert.equal(r.medianas["celular:256"], B.mediana(m256.map(f => f[1])));
+  assert.equal(r.medianas["celular:512"], undefined);
+  assert.equal(O.destacadas(idx).find(o => o.cruce).f[0], "Celular Samsung Galaxy S26 12GB 256GB");
 });
 
 test("cruce de gamas: con poca muestra de gama media no se afirma nada", () => {
   const idx = { productos: [fila("Celular Moto G15 6GB/128GB", 300000), fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
   assert.equal(O.calcularOfertas(idx).cruces.size, 0);
+});
+
+// Salto entre generaciones, medido con los propios titulos del indice.
+const titulos = n => n.map(x => [x]);
+const SALTO_CHICO = O.referencia(titulos([
+  "Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP", "Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP",
+  "Celular Pixel 10 12GB 256GB 120Hz 4700mAh 50MP", "Celular Pixel 10 12GB 256GB 120Hz 4800mAh 50MP"]));
+const SALTO_GRANDE = O.referencia(titulos([
+  "Celular Galaxy S25 12GB 256GB 120Hz 4000mAh 50MP", "Celular Galaxy S25 12GB 256GB 120Hz 4000mAh 50MP",
+  "Celular Galaxy S26 16GB 512GB 120Hz 4500mAh 200MP", "Celular Galaxy S26 16GB 512GB 120Hz 4500mAh 200MP"]));
+
+test("salto entre generaciones: cuantos apartados mejoro la ultima contra la anterior", () => {
+  assert.deepEqual([SALTO_GRANDE.salto["galaxy-s"].mejoras, SALTO_GRANDE.salto["galaxy-s"].comparados], [4, 5]);
+  assert.equal(SALTO_CHICO.salto.pixel.mejoras, 1);          // solo la bateria, y poco
+});
+
+test("gama alta: si la ultima generacion no mejora varios apartados, la anterior sigue vigente", () => {
+  const q = (n, ref) => O.pisoDeGama(n, ref);
+  // salto chico: Pixel 9 y Pixel 10 compiten entre si, las dos reciben el punto de vigencia
+  assert.equal(q("Celular Pixel 9 12GB 256GB", SALTO_CHICO).alta, true);
+  assert.equal(q("Celular Pixel 9 12GB 256GB", SALTO_CHICO).vigente, true);
+  assert.equal(q("Celular Pixel 10 12GB 256GB", SALTO_CHICO).alta, true);
+  assert.equal(q("Celular Pixel 10 12GB 256GB", SALTO_CHICO).vigente, false);
+  // salto grande: solo la ultima es novedad, la anterior queda atras con las mismas señales
+  assert.equal(q("Celular Galaxy S26 12GB 256GB", SALTO_GRANDE).alta, true);
+  assert.equal(q("Celular Galaxy S25 12GB 256GB", SALTO_GRANDE).alta, false);
+});
+
+test("cruce de gamas: una gama alta del año anterior vigente tambien cruza y queda marcada", () => {
+  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/256GB`, 400000 + i * 1000));
+  const nuevos = ["Celular Pixel 10 12GB 256GB 120Hz 4700mAh 50MP", "Celular Pixel 10 12GB 256GB 120Hz 4800mAh 50MP"].map(n => fila(n, 700000));
+  const idx = { productos: [...media, ...nuevos,
+    fila("Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP", 380000, { antes: 600000 }),
+    fila("Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP 2", 700000)] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual([...r.cruces].map(f => f[0]), ["Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP"]);
+  assert.deepEqual([...r.vigentes].map(f => f[0]), ["Celular Pixel 9 12GB 256GB 120Hz 4700mAh 50MP"]);
+  assert.equal(O.destacadas(idx)[0].vigente, true);
 });

@@ -136,7 +136,7 @@ test("una compra internacional entra al feed, al final y rotulada", () => {
 });
 
 test("una oferta de gama alta al precio de la media lo dice en la descripcion del feed", () => {
-  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/128GB`, 300000 + i * 1000));
+  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/256GB`, 300000 + i * 1000));
   const idx = { ...IDX, productos: [...media, fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
   assert.match(F.renderFeed(idx, { baseUrl: BASE }), /Gama alta al precio de la gama media/);
 });
