@@ -1,0 +1,112 @@
+[
+ {
+  "id": 960642,
+  "name": "Monitor Gamer MSI 24\" MAG 245F FHD Rapid IPS 240Hz 0.5ms 2xHDMI + 1xDP (II) (3242)",
+  "permalink": "https://maxtecno.com.ar/producto/monitor-gamer-msi-24-mag-245f-fhd-rapid-ips-240hz-0-5ms-2xhdmi-1xdp-ii-3242/",
+  "sku": "IC_MAG 245F X24",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "23282636",
+   "regular_price": "23282636",
+   "sale_price": "23282636",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 960638,
+  "name": "Monitor Gamer Msi 24\" Mag 245F Fhd Rapid Ips 240Hz 0.5Ms 2Xhdmi + 1Xdp",
+  "permalink": "https://maxtecno.com.ar/producto/monitor-gamer-msi-24-mag-245f-fhd-rapid-ips-240hz-0-5ms-2xhdmi-1xdp/",
+  "sku": "PT_24786",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "25318132",
+   "regular_price": "25318132",
+   "sale_price": "25318132",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 960637,
+  "name": "Teclado ASUS M705 ROG FALCHION ACE 75HE/WT/V2/ES/A",
+  "permalink": "https://maxtecno.com.ar/producto/teclado-asus-m705-rog-falchion-ace-75he-wt-v2-es-a/",
+  "sku": "EL_ASUTEC75HEWTV2E",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "32545799",
+   "regular_price": "32545799",
+   "sale_price": "32545799",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 960635,
+  "name": "MB ASUS AM5 ROG STRIX X870E-E GAMING NEO DDR5 BOX",
+  "permalink": "https://maxtecno.com.ar/producto/mb-asus-am5-rog-strix-x870e-e-gaming-neo-ddr5-box/",
+  "sku": "AIR_218445",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "125673812",
+   "regular_price": "125673812",
+   "sale_price": "125673812",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 960634,
+  "name": "MB ASUS AM5 ROG STRIX X870E-A GAMING NEO DDR5 BOX",
+  "permalink": "https://maxtecno.com.ar/producto/mb-asus-am5-rog-strix-x870e-a-gaming-neo-ddr5-box/",
+  "sku": "AIR_218444",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "104727476",
+   "regular_price": "104727476",
+   "sale_price": "104727476",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ }
+]

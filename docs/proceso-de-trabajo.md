@@ -143,7 +143,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | 5 | **K3**: la calculadora en la app | plan v3 | K1 y K2 | **hecho el 16/10** (pestaña Costo de importar, 30 tests, un bug del motor corregido) |
 | 6 | **N1 a N5**: novedades por marca | spec 011 | decisiones 1 a 4 de la spec | espera al dueño |
 | 7 | Guardar el stock de las fuentes directas (CompraGamer lo trae) | caja abierta | decision del dueño | propuesto |
-| 8 | **B1**: mas fuentes locales (meta: 12 y 25 mil avisos), una por una y respetando `robots.txt` | plan v2 | nada, pero cada una se mide | **en curso**: Maximus sumada el 16/10 (1.255 avisos); siguen ArmyTech, Compumarket, Logg e Integrados Argentinos |
+| 8 | **B1**: mas fuentes locales (meta: 12 y 25 mil avisos), una por una y respetando `robots.txt` | plan v2 | nada, pero cada una se mide | **en curso**: el 16/10 entraron Maximus y seis tiendas WooCommerce (13 fuentes); quedan ShopGamer (Tiendanube) y las chicas, que no llegan a 1.000 productos |
 | 9 | **B5 y B6**: rubros nuevos y orden por novedad | plan v2 | spec 011 | espera |
 | 10 | **K4**: costo real en cada aviso internacional y «aca o importar» | plan v3, Fase C | K3 y precio del exterior | espera |
 | 11 | **K5**: mantenimiento de la normativa, con aviso a los 60 dias | plan v3 | K1 | espera |

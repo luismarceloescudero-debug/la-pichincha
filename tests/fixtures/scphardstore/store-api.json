@@ -1,0 +1,112 @@
+[
+ {
+  "id": 18713,
+  "name": "FAN Cooler GIGABYTE Aorus Ez Chain Pack 3X ARGB Negro",
+  "permalink": "https://www.scphardstore.com/producto/fan-cooler-gigabyte-aorus-ez-chain-pack-3x-argb-negro/",
+  "sku": "FAN209",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "9743398",
+   "regular_price": "9743398",
+   "sale_price": "9743398",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ".",
+   "currency_thousand_separator": "",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 18712,
+  "name": "FAN Cooler GIGABYTE Aorus Ez Chain Pack 3X ARGB Blanco",
+  "permalink": "https://www.scphardstore.com/producto/fan-cooler-gigabyte-aorus-ez-chain-pack-3x-argb-blanco/",
+  "sku": "FAN208",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "9743398",
+   "regular_price": "9743398",
+   "sale_price": "9743398",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ".",
+   "currency_thousand_separator": "",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 18711,
+  "name": "Disco SSD Lexar 500GB NF100 SATA",
+  "permalink": "https://www.scphardstore.com/producto/disco-ssd-lexar-500gb-nf100-sata/",
+  "sku": "SSD114",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "12755660",
+   "regular_price": "12755660",
+   "sale_price": "12755660",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ".",
+   "currency_thousand_separator": "",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 18710,
+  "name": "Disco SSD Lexar 250GB NF100 SATA",
+  "permalink": "https://www.scphardstore.com/producto/disco-ssd-lexar-250gb-nf100-sata/",
+  "sku": "SSD113",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "7097984",
+   "regular_price": "7097984",
+   "sale_price": "7097984",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ".",
+   "currency_thousand_separator": "",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 18709,
+  "name": "Combo hp 964xl negro + 964 cian/magenta/amarillo comunes",
+  "permalink": "https://www.scphardstore.com/producto/combo-hp-964xl-negro-964-cian-magenta-amarillo-comunes/",
+  "sku": "PT_24854",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "27870411",
+   "regular_price": "27870411",
+   "sale_price": "27870411",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 2,
+   "currency_decimal_separator": ".",
+   "currency_thousand_separator": "",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ }
+]
