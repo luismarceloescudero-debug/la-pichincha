@@ -79,6 +79,7 @@ gh api repos/<dueño>/<repo>/releases/tags/<tag> --jq .body
 | **ui-ux-pro-max** (`nextlevelbuilder/ui-ux-pro-max-skill`, plugin) | 2.13.0 | v2.15.0 (13/08) | Actualizar cuando se toque UI nueva (K3) |
 | **marketingskills** (`coreyhaines31/marketingskills`) | 4 skills copiadas | v2.11.37 (15/10) | Sin urgencia; solo se usan 4 (`seo-audit`, `schema`, `programmatic-seo`, `site-architecture`) |
 | **OmniRoute** | 3.8.51 | 3.8.51 | Al dia |
+| **instagram-skills** (`sergebulaev/instagram-skills`, plugin) | la instala el dueño (16/10) | v1.0.32 (15/10) | **Se usa sin claves**: solo las 9 skills de escritura y planificacion (captions, ganchos, carruseles, hashtags, plan semanal, perfil, humanizar). No se cargan `PUBLORA_API_KEY`, `APIFY_TOKEN` ni `PIXFARO_TOKEN` sin decision del dueño: con la de Publora un tercero puede publicar en la cuenta, y el autor es dueño de Publora. En cada auditoria: leer el changelog y confirmar que no se conecta a servicios nuevos ni publica sin aprobacion; si cambia eso, se desinstala y se pasa a las skills `social` y `content-strategy` de marketingskills |
 
 Busque tambien alternativas en GitHub (`gh search repos`): no aparecio ninguna con trayectoria comparable a las tres de arriba; las que salen por estrellas son personales y casi sin uso. **No se instala nada nuevo sin medirlo en una sesion aparte.**
 
