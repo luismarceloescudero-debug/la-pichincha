@@ -1,3 +1,11 @@
+/* --- Enlace de afiliado a Amazon (E1): siempre rotulado y aparte de los resultados, que no cambian de orden --- */
+function amazonHtml(termino, texto) {
+  const url = Pagina.enlaceAmazon(termino);
+  if (!url) return "";
+  return `<p class="afiliado"><a href="${esc(url)}" target="_blank" rel="noopener sponsored">${icono("fuera")} ${esc(texto)}</a>
+    <span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span></p>`;
+}
+
 /* --- Tarjeta --- */
 function tarjeta(p, i) {
   const t = T[p.tienda] || {};
@@ -62,6 +70,7 @@ function detalle(p) {
         <span class="l"><a class="ir" href="${p.url}" target="_blank" rel="noopener">${icono("fuera")} abrir en ${esc(t.nombre)}</a></span>
       </div>
     </div>
+    ${amazonHtml(p.corto || p.nombre, `Comparar con Amazon (EE.UU.): ${p.corto || p.nombre}`)}
     <div class="dos">
       <div class="bloque"><h3>${icono("check")} A favor</h3>
         <ul class="lista">${(p.pros || []).map(x => `<li class="p">${esc(x)}</li>`).join("")}</ul></div>

@@ -72,6 +72,7 @@ function recalcularCosto(raiz) {
       : '<p class="sub">Cargando las reglas y las cotizaciones…</p>';
     return;
   }
+  $("#k-fuentes", raiz).textContent = fuentesTexto(estado);   // de donde salen las reglas y el dolar, aun sin precio escrito
   const { entrada, errores } = Calculadora.entradaDe(estado, COSTO.tasas, Monedas.convertir);
   if (errores.length) {
     for (const e of errores) {
@@ -94,7 +95,6 @@ function recalcularCosto(raiz) {
   const total = $("#k-total", raiz);
   if (total && antes !== undefined && antes !== ($(".k-total-v", total) || {}).textContent) total.classList.add("k-cambio");
   form.querySelectorAll(".k-prefijo").forEach(p => { p.textContent = estado.moneda; });
-  $("#k-fuentes", raiz).textContent = fuentesTexto(estado);
   // Se mide cuando la cuenta se asienta, no por cada tecla.
   clearTimeout(COSTO.temporizador);
   COSTO.temporizador = setTimeout(() => {
