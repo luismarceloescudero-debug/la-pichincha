@@ -46,14 +46,18 @@
   function numero(texto) {
     const crudo = String(texto === undefined || texto === null ? "" : texto).trim();
     if (!crudo) return null;
-    const t = crudo.replace(/^(US\$|U\$S|USD|\$|€)/i, "").replace(/\s/g, "");
-    let n = t;
+    const t = crudo.replace(/^(US\$|U\$S|USD|\$|€)/i, "").replace(/(US\$|U\$S|USD|\$|€)$/i, "").replace(/\s/g, "");
+    let n = /^[.,]\d/.test(t) ? "0" + t : t;        // ",5" es medio
     const coma = n.lastIndexOf(","), punto = n.lastIndexOf(".");
+    // Con los dos separadores, el ultimo es el decimal y el otro tiene que separar miles de verdad: "12.34,50" es un error.
+    const miles = sep => new RegExp("^[1-9]\\d{0,2}(\\" + sep + "\\d{3})+$");
     if (coma >= 0 && punto >= 0) {
-      n = coma > punto ? n.replace(/\./g, "").replace(",", ".") : n.replace(/,/g, "");
+      const [entero, sep] = coma > punto ? [n.slice(0, coma), "."] : [n.slice(0, punto), ","];
+      if (!miles(sep).test(entero)) return NaN;
+      n = entero.split(sep).join("") + "." + n.slice(Math.max(coma, punto) + 1);
     } else if (coma >= 0) {
       n = n.replace(",", ".");
-    } else if (/^\d{1,3}(\.\d{3})+$/.test(n)) {
+    } else if (miles(".").test(n)) {          // "1.500" son mil quinientos; "0.500" es medio
       n = n.replace(/\./g, "");
     }
     return /^\d+(\.\d+)?$/.test(n) ? Number(n) : NaN;

@@ -80,9 +80,9 @@ Puntos que no se ven en el codigo Python ni JS:
   carga `js/buscador.js`, `js/analisis.js` y `js/pagina.js`; `generar_feed.js:12` carga `js/ofertas.js`;
   `generar_portada.js` corre los scripts de la pagina en `vm`. Cambiar uno de esos modulos cambia el sitio
   **y** las paginas generadas.
-- **`importacion.json` y `js/costos.js` todavia no se publican**: el paso L124 copia solo `index.html`,
-  `img/`, `js/` y `css/`, y nadie carga `importacion.json` fuera de los tests. Entran con K3
-  ([proceso-de-trabajo.md, seccion 7](proceso-de-trabajo.md#7-pendientes-y-cola-de-ejecucion-revisada-el-15102026)).
+- **`importacion.json` viaja con la app**: no lo copia el paso L124 sino `publicar_app.py`
+  (`ARCHIVOS_DE_LA_CASCARA`), igual que el manifiesto, y el service worker lo guarda para usarlo sin red.
+  La pestaña **Costo de importar** (`js/vista-costo.js`) lo pide al abrirse, junto con `cotizaciones.json`.
 - **`tests.yml` corre dos veces**: en cada PR y como primer job de cada publicacion (L37). Su job
   `lighthouse` arma un `_sitio` propio con el indice publicado y los mismos generadores.
 
@@ -98,7 +98,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Fichas** (part number de Venex y Mexx) | `ficha` en `tiendas.json` + `modelo.mpn_de_ficha`; cache en `fichas.json` de la rama `historial` | `indexar.py:276-340` | `tests/test_fichas.py`, fixtures `venex/ficha.html`, `mexx/ficha-pn.html` |
 | **Salud de las fuentes** | `salud.py` | `indexar.py:505` escribe `salud.json`; el workflow abre el issue (L122); `generar_info.js` lo muestra en `/estado/` | `tests/test_salud.py`, `tests/js/info.test.js` |
 | **Ofertas** (que es una) | `js/ofertas.js` | la pestaña Ofertas, `generar_feed.js`, `publicar_telegram.py` | `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
-| **Calculadora de costos** | `js/costos.js` (sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) | por ahora solo los tests; la pagina con K3 | `tests/js/costos.test.js`, `tests/test_importacion.py` |
+| **Calculadora de costos** | `js/costos.js` (el motor, sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) + `js/calculadora.js` (formulario, desglose y URL, puro) + `js/vista-costo.js` (pegamento con la pagina) | la pestaña Costo de importar (`#costo`, `js/arranque.js` la pinta); `publicar_app.py` publica las reglas | `tests/js/costos.test.js`, `tests/js/calculadora.test.js`, `tests/test_importacion.py` |
 | **Monedas** | `js/monedas.js` (en vivo, `URLS` L10, `TIPOS_DOLAR` L16) + `generar_cotizaciones.py` (copia del build, `URLS` L21) | el workflow (L180) escribe `_sitio/cotizaciones.json`; `sitio.json` habilita las tres APIs en `connect-src` | `tests/js/monedas.test.js`, `tests/test_cotizaciones.py`, fixtures en `tests/fixtures/monedas/` |
 | **Portada** | `index.html` (estructura) + `js/` (modulos) + `css/sitio.css`; categorias curadas en `js/base.js:17` | `generar_portada.js` la pre-renderiza en `_sitio/` | `tests/js/portada.test.js`, `tests/js/app.test.js`, `tests/test_sitio.py`, `tests/test_contraste.py` |
 | **Paginas por busqueda** | `consultas.json` + `generar_paginas.py` (valida y orquesta) + `generar_paginas.js` (escribe) | `js/analisis.js`, compartido con la Comparativa | `tests/test_generar_paginas.py`, `tests/js/generador.test.js`, `tests/js/pagina.test.js` |
@@ -160,10 +160,21 @@ node --test "tests/js/*.test.js"
 
 Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
 
+### Cambiar la calculadora (pestaña Costo de importar)
+
+- **Un campo nuevo del formulario**: su parametro corto en `PARAMETROS` y su valor por defecto en
+  `POR_DEFECTO` (`js/calculadora.js`), el campo en `formularioHtml` y, si va al motor, en `entradaDe`.
+  La URL para compartir lo toma sola. `"q"` no se usa: es del buscador.
+- **Un renglon nuevo del desglose** sale del motor (`js/costos.js`); en `js/calculadora.js` solo se le
+  pone el nombre con tildes en `CONCEPTOS`.
+- Tests: `tests/js/calculadora.test.js` (incluye los casos de referencia de la spec de punta a punta) y,
+  si cambia la cuenta, `tests/js/costos.test.js`. Probarla en el navegador con `?v=800&d=20#costo`.
+
 ### Agregar una moneda o un tipo de dolar
 
-- **Una moneda**: no hay lista fija. `js/monedas.js` toma todo codigo de tres letras que traigan
-  open.er-api.com y frankfurter.dev. Si la moneda no esta en ninguna, hace falta una fuente nueva.
+- **Una moneda**: `js/monedas.js` toma todo codigo de tres letras que traigan open.er-api.com y
+  frankfurter.dev; para que aparezca en el formulario, sumarla a `MONEDAS` en `js/calculadora.js`.
+  Si la moneda no esta en ninguna fuente, hace falta una fuente nueva.
 - **Una fuente de cotizaciones**: en **los dos** `URLS` (`js/monedas.js:10` y
   `generar_cotizaciones.py:21`) con su validacion (`_valida`, `generar_cotizaciones.py:45`), su dominio
   en `connect-src` de `sitio.json`, y su respuesta guardada en `tests/fixtures/monedas/`. Los tests nunca

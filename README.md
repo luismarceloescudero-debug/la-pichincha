@@ -30,7 +30,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
@@ -42,7 +42,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
 | `generar_cotizaciones.py`, `js/monedas.js` | Las monedas de la calculadora: la copia de las cotizaciones que escribe el build (`cotizaciones.json`, de dolarapi.com, open.er-api.com y frankfurter.dev) y el modulo que convierte en vivo, con la copia de reserva y la hora de cada cotizacion (plan v3, K2) |
-| `importacion.json` | Reglas de importacion de la calculadora de costos (plan v3), cada una con su norma, fuente oficial, fecha de verificacion y nivel de confianza; lo que no se pudo confirmar va como pendiente y sin numero (`specs/010-costos/spec.md`) |
+| `importacion.json` | Reglas de importacion de la calculadora de costos (plan v3), cada una con su norma, fuente oficial, fecha de verificacion y nivel de confianza; lo que no se pudo confirmar va como pendiente y sin numero (`specs/010-costos/spec.md`). Se publica con la app (`publicar_app.py`) y la pestaña **Costo de importar** lo lee al abrirse |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
