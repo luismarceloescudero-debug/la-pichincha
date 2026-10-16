@@ -157,6 +157,16 @@ test("si se sabe como se paga, el rango cuenta la percepcion en los dos extremos
   assert.deepEqual(dolares.rangoUsd, { minUsd: 463, maxUsd: 484 });
 });
 
+test("si la persona dice si el flete integra el valor en aduana, el rango no mezcla los dos casos (FR-009)", () => {
+  // FOB 300 y flete 100: sin flete en la base el total es 463 y con flete en la base 484.
+  const no = calc({ fobUsd: 300, fleteUsd: 100, medioPago: "dolares_propios", fleteEnValorAduana: "no" });
+  assert.deepEqual(no.rangoUsd, { minUsd: 463, maxUsd: 463 });
+  const si = calc({ fobUsd: 300, fleteUsd: 100, medioPago: "tarjeta_pesos", fleteEnValorAduana: "si" });
+  assert.deepEqual(si.rangoUsd, { minUsd: 604, maxUsd: 604 });
+  const pagoSinSaber = calc({ fobUsd: 300, fleteUsd: 100, fleteEnValorAduana: "no" });
+  assert.deepEqual(pagoSinSaber.rangoUsd, { minUsd: 463, maxUsd: 583 });
+});
+
 test("si no se sabe como se paga, el rango va del que no tiene percepcion al que la tiene", () => {
   const r = calc({ fobUsd: 300 });                                // sin flete: la unica incertidumbre es el medio de pago
   assert.deepEqual(r.rangoUsd, { minUsd: 363, maxUsd: 453 });

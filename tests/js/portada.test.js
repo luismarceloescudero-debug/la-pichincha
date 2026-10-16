@@ -16,7 +16,7 @@ const cuantas = (texto, re) => (texto.match(re) || []).length;
 
 test("el HTML publicado trae las pestañas, con la Comparativa elegida", () => {
   const tabs = entre(PRE, 'id="tablist"', "</div>");
-  assert.strictEqual(cuantas(tabs, /class="tab"/g), 5);
+  assert.strictEqual(cuantas(tabs, /class="tab"/g), 6);   // Comparativa, Tiendas, Ofertas, Buscar, Costo de importar y Veredicto
   assert.match(tabs, /data-ir="comparativa"[^>]*aria-selected="true"/);
   assert.strictEqual(cuantas(tabs, /aria-selected="true"/g), 1);
 });

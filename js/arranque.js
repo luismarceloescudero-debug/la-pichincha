@@ -7,6 +7,7 @@ function pintar(id) {
   else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
+  else if (id === "costo") { v.innerHTML = vistaCosto(); activarCosto(v); }
   else if (porId[id]) { v.innerHTML = detalle(porId[id]); return; }
   document.querySelectorAll(".tab").forEach(b =>
     b.setAttribute("aria-selected", String(b.dataset.ir === id)));
