@@ -1,11 +1,13 @@
 import io
 import json
 import unittest
+import urllib.error
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
 import indexar
+import modelo
 
 RAIZ = Path(__file__).resolve().parent.parent
 FIX = RAIZ / "tests" / "fixtures"
@@ -254,3 +256,78 @@ class Catalogos(unittest.TestCase):
                 redirect_stdout(io.StringIO()):
             items = indexar.indexar_listados(cfg, 2)
         self.assertEqual(items[0]["imagen"], "https://www.gamingcity.com.ar/thumb/imagen_1_400x400.jpg")
+
+
+class Woocommerce(unittest.TestCase):
+    """Tiendas WooCommerce por su Store API publica (/wp-json/wc/store/v1/products): una sola lectura para todas."""
+
+    TIENDA = {"nombre": "Test", "base": "https://t.test",
+              "catalogo": {"tipo": "woocommerce", "por_pagina": 2, "tope_paginas": 10}}
+
+    @staticmethod
+    def producto(i, precio="95355400", regular=None, stock=True, nombre=None, imagen=True):
+        return {"id": i, "name": nombre or f"Memoria Kingston Fury 16GB DDR4 &#8211; {i}",
+                "permalink": f"https://t.test/producto/mem-{i}/", "sku": f"KF432C16BB/{i}",
+                "is_in_stock": stock, "is_purchasable": True,
+                "prices": {"price": precio, "regular_price": regular or precio, "currency_minor_unit": 2},
+                "images": [{"src": f"https://t.test/img/{i}.jpg", "thumbnail": f"https://t.test/img/{i}-300x300.jpg"}] if imagen else []}
+
+    def test_lee_nombre_precio_lista_url_foto_y_sku(self):
+        paginas = {1: [self.producto(1, "4599000", "5299000"), self.producto(2, imagen=False)], 2: []}
+        with mock.patch.object(indexar, "bajar", side_effect=lambda u: "﻿" + json.dumps(paginas[int(u.rsplit("=", 1)[1])])), \
+                mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(items[0], {"nombre": "Memoria Kingston Fury 16GB DDR4 – 1", "precio": 45990, "lista": 52990,
+                                    "url": "https://t.test/producto/mem-1/", "imagen": "https://t.test/img/1-300x300.jpg",
+                                    "sellos": "", "sku": modelo.sku_de("KF432C16BB/1")})
+        self.assertEqual(items[1]["precio"], 953554)
+        self.assertIsNone(items[1]["lista"], "sin rebaja no hay precio de lista")
+        self.assertEqual(items[1]["imagen"], "")
+
+    def test_pide_paginas_de_la_store_api_hasta_que_vuelve_vacia(self):
+        pedidas = []
+        paginas = {1: [self.producto(1), self.producto(2)], 2: [self.producto(3)], 3: []}
+
+        def bajar(url):
+            pedidas.append(url)
+            return json.dumps(paginas[int(url.rsplit("=", 1)[1])])
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(len(items), 3)
+        self.assertEqual(pedidas[0], "https://t.test/wp-json/wc/store/v1/products?per_page=2&page=1")
+        self.assertEqual(len(pedidas), 3)
+
+    def test_saltea_sin_stock_sin_precio_y_repetidos(self):
+        paginas = {1: [self.producto(1, stock=False), self.producto(2, precio="0"), self.producto(3), self.producto(3)], 2: []}
+        with mock.patch.object(indexar, "bajar", side_effect=lambda u: json.dumps(paginas[int(u.rsplit("=", 1)[1])])), \
+                mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual([it["url"] for it in items], ["https://t.test/producto/mem-3/"])
+
+    def test_respeta_el_tope_de_paginas_y_un_max_paginas_mas_chico(self):
+        with mock.patch.object(indexar, "bajar", side_effect=lambda u: json.dumps([self.producto(int(u.rsplit("=", 1)[1]))])), \
+                mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)), 10)
+            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, 3)), 3)
+
+    def test_una_pagina_que_falla_corta_sin_voltear_lo_ya_leido(self):
+        def bajar(url):
+            if url.endswith("page=2"):
+                raise urllib.error.URLError("caida")
+            return json.dumps([self.producto(1)])
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)), 1)
+
+    def test_el_json_real_guardado_de_cada_tienda_woocommerce(self):
+        for clave, t in TIENDAS.items():
+            if clave.startswith("_") or t["catalogo"]["tipo"] != "woocommerce":
+                continue
+            with self.subTest(clave):
+                crudo = leer(clave, "store-api.json")
+                with mock.patch.object(indexar, "bajar", side_effect=[crudo, "[]"]), mock.patch.object(indexar.time, "sleep"):
+                    items = indexar.indexar_woocommerce(t, indexar.TOPE_PAGINAS)
+                self.assertGreaterEqual(len(items), 3)
+                for it in items:
+                    self.assertTrue(it["url"].startswith(t["base"].replace("://www.", "://")) or it["url"].startswith(t["base"]), it["url"])
+                    self.assertGreaterEqual(it["precio"], 1000)
+                    self.assertNotRegex(it["nombre"], r"[<>]|&[a-z#0-9]+;")

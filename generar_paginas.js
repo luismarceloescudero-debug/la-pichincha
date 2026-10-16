@@ -173,8 +173,14 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 </head>`;
 }
 
+// Las fuentes salen del indice: sumar una tienda no obliga a tocar este texto.
+const listaDeFuentes = tiendas => {
+  const n = Object.values(tiendas || {}).map(t => t.nombre).filter(Boolean);
+  return n.length > 1 ? `${n.slice(0, -1).join(", ")} y ${n[n.length - 1]}` : n.join("");
+};
+
 function pie(ctx) {
-  return `<p class="nota">Precios con IVA y sin envío, tomados de CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus y ComparaYa. ` +
+  return `<p class="nota">Precios con IVA y sin envío, tomados de ${esc(listaDeFuentes(ctx.idx.tiendas))}. ` +
     `El stock y los precios de hardware se mueven rápido: confirmá antes de pagar. ` +
     `<a href="../../">Volver a La Pichincha</a> · <a href="../../estado/">Estado de las fuentes</a> · <a href="../../legal/">Términos y privacidad</a>.</p>`;
 }

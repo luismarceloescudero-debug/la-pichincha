@@ -245,6 +245,46 @@ def indexar_api(tienda, max_paginas):
     return items
 
 
+def indexar_woocommerce(tienda, max_paginas):
+    """Tienda WooCommerce por su Store API publica, la que usa el propio carrito del sitio:
+    /wp-json/wc/store/v1/products, de a 'por_pagina' (hasta 100) y en orden, hasta que vuelve vacia.
+    Una sola lectura para todas: sumar una tienda es configuracion. Solo lo que esta en stock; los
+    precios vienen en centavos ('currency_minor_unit'). Se usa solo donde robots.txt no prohibe /wp-json/wc/."""
+    cfg = tienda["catalogo"]
+    por_pagina = cfg.get("por_pagina", 100)
+    tope = cfg.get("tope_paginas", TOPE_PAGINAS)
+    limite = tope if max_paginas >= TOPE_PAGINAS else min(max_paginas, tope)
+    plantilla = tienda["base"].rstrip("/") + "/wp-json/wc/store/v1/products?per_page=" + str(por_pagina) + "&page={n}"
+    vistos, items = set(), []
+    for n in range(1, limite + 1):
+        try:
+            filas = json.loads(bajar(plantilla.format(n=n)).lstrip("\ufeff"))   # algunas tiendas mandan BOM
+        except (urllib.error.URLError, OSError, ValueError):
+            break
+        if not filas:
+            break
+        for f in filas:
+            precios = f.get("prices") or {}
+            divisor = 10 ** int(precios.get("currency_minor_unit") or 0)
+            try:
+                precio = int(precios.get("price") or 0) // divisor
+                regular = int(precios.get("regular_price") or 0) // divisor
+            except (TypeError, ValueError):
+                continue
+            url, nombre = f.get("permalink"), f.get("name")
+            if not f.get("is_in_stock") or precio <= 0 or not url or not nombre or url in vistos:
+                continue
+            vistos.add(url)
+            foto = (f.get("images") or [{}])[0]
+            items.append({"nombre": limpio(nombre), "precio": precio, "lista": regular if regular > precio else None,
+                          "url": url, "imagen": foto.get("thumbnail") or foto.get("src") or "", "sellos": "",
+                          "sku": modelo.sku_de(f.get("sku")) if f.get("sku") else None})
+        if n % 10 == 0:
+            print("    pagina " + str(n) + " " + PUNTO + " " + str(len(items)) + " productos")
+        time.sleep(PAUSA)
+    return items
+
+
 def indexar_json(tienda):
     """Catalogo entero servido como un unico JSON estatico."""
     cfg = tienda["catalogo"]
@@ -442,6 +482,8 @@ def main(argv=None):
                 items = indexar_json(fuente)
             elif tipo == "api":
                 items = indexar_api(fuente, args.max_paginas)
+            elif tipo == "woocommerce":
+                items = indexar_woocommerce(fuente, args.max_paginas)
             else:
                 items = indexar_listados(fuente, args.max_paginas)
         except Exception as e:                       # una fuente caida no voltea el indice

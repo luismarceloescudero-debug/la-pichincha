@@ -92,6 +92,15 @@ def comparaya(tienda):
             json.dumps({cfg["lista"]: cuerpo[cfg["lista"]][:FILAS]}, ensure_ascii=False, indent=1))
 
 
+def woocommerce(clave, tienda):
+    """La primera pagina de la Store API, con pocos productos en stock: lo que lee indexar_woocommerce."""
+    url = tienda["base"].rstrip("/") + "/wp-json/wc/store/v1/products?per_page=20&page=1"
+    filas = [f for f in json.loads(indexar.bajar(url).lstrip("﻿")) if f.get("is_in_stock")][:FILAS]
+    campos = ("id", "name", "permalink", "sku", "is_in_stock", "is_purchasable", "prices", "images")
+    filas = [{k: (f[k][:1] if k == "images" else f[k]) for k in campos if k in f} for f in filas]   # sin descripciones
+    guardar(clave, "store-api.json", json.dumps(filas, ensure_ascii=False, indent=1))
+
+
 def main(argv):
     pedidas = set(argv) or {k for k in TIENDAS if not k.startswith("_")}
     fallidas = []
@@ -103,6 +112,8 @@ def main(argv):
                 compragamer()
             elif clave == "comparaya":
                 comparaya(tienda)
+            elif tienda["catalogo"]["tipo"] == "woocommerce":
+                woocommerce(clave, tienda)
             else:
                 listado(clave, tienda)
                 producto(clave)

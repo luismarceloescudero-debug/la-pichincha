@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-09
 
-**Status**: Implemented (Venex el 09/10; Maximus el 16/10)
+**Status**: Implemented (Venex el 09/10; Maximus y seis tiendas WooCommerce el 16/10)
 
 **Input**: Fase 2, F2.3 de docs/plan-de-escalado.md: "Mercado Libre directo (cobertura y afiliados) y tiendas de hardware a probar con `indexar.py --probar`. El orden lo da `busqueda_vacia`: primero lo que la gente busca y no encuentra."
 
@@ -49,6 +49,13 @@ correctos, y suma a la mediana y al conteo.
   **1.255 avisos en 3 minutos**. No vende UGREEN ni Anker.
 - Candidatas siguientes, medidas el 16/10/2026 (las cuatro responden 200 y su `robots.txt` permite el catalogo): ArmyTech (PrestaShop),
   Compumarket (OpenCart; su `robots.txt` solo prohibe `?page=` vacio, no `?page=2`), Logg (sin `robots.txt`) e Integrados Argentinos
-  (Tiendanube, sitemap comprimido). Se suman de a una, midiendo.
+  (Tiendanube, sitemap comprimido). Las cuatro quedan por debajo de 1.000 productos (632, 467, 435 y Compumarket carga los
+  productos con JavaScript): no cumplen SC-001.
+- **Tiendas grandes, medidas el 16/10/2026** (`robots.txt`, bloqueo y tamano): seis WooCommerce dejan leer su Store API publica
+  (`/wp-json/wc/store/v1/products`) y entran con un solo tipo de catalogo, `woocommerce`: Max Tecno (5.954), Katech (4.016),
+  The Gamer Shop (3.603), SCP Hardstore (2.015), Click Gaming (1.702) y GoldenTech (1.597). Las seis publican ahi el precio
+  especial por efectivo o transferencia. **HardCore Computacion** prohibe `/wp-json/wc/` en su `robots.txt`: no entra por esa via.
+  **Gezatek, Hyper Gaming, Rocket Hard y Noxie** respondieron 429 (demasiados pedidos): no se insiste. ShopGamer (Tiendanube,
+  2.950) queda para medir aparte.
 - **Mercado Libre directo y afiliados** requiere una cuenta de desarrollador y de afiliado del dueño: queda anotado para el, no se hace sin su alta.
 - El orden por `busqueda_vacia` necesita los eventos de GoatCounter (cuenta del dueño): hasta tenerlos, se elige por tamano del catalogo y facilidad de lectura.

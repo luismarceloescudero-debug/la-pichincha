@@ -233,5 +233,77 @@
       }
     },
     "lista_es_oferta": false
+  },
+  "thegamershop": {
+    "nombre": "The Gamer Shop",
+    "color": "tg",
+    "activa": true,
+    "base": "https://thegamershop.com.ar",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "maxtecno": {
+    "nombre": "Max Tecno",
+    "color": "mt",
+    "activa": true,
+    "base": "https://maxtecno.com.ar",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "katech": {
+    "nombre": "Katech",
+    "color": "kt",
+    "activa": true,
+    "base": "https://katech.com.ar",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "scphardstore": {
+    "nombre": "SCP Hardstore",
+    "color": "sh",
+    "activa": true,
+    "base": "https://www.scphardstore.com",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "clickgaming": {
+    "nombre": "Click Gaming",
+    "color": "ck",
+    "activa": true,
+    "base": "https://clickgaming.com.ar",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "goldentech": {
+    "nombre": "GoldenTech",
+    "color": "gt",
+    "activa": true,
+    "base": "https://goldentechstore.com.ar",
+    "catalogo": {
+      "tipo": "woocommerce",
+      "por_pagina": 100,
+      "tope_paginas": 80
+    },
+    "lista_es_oferta": false
   }
 }

@@ -124,6 +124,7 @@ una fuente dada de baja con `"activa": false`.
 | FullH4rd | busquedas por termino | Open Graph |
 | Venex | categorias hoja del sitemap, paginadas con `?page=` | el precio de la tarjeta (contado efectivo) |
 | Maximus | cada pagina de cada categoria, listada en `sitemap-paginas.xml` (131) | el bloque de tarjetas que la pagina escribe en el servidor (`mxSeoSSR`): precio por transferencia o efectivo, 10% menos que el de lista |
+| The Gamer Shop, Max Tecno, Katech, SCP Hardstore, Click Gaming, GoldenTech | la Store API publica de WooCommerce (`/wp-json/wc/store/v1/products`), de a 100 y solo lo que esta en stock | la misma API: el precio especial por efectivo o transferencia (verificado en la pagina de un producto de cada una) |
 | ComparaYa | API publica por categoria | la misma API |
 
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios

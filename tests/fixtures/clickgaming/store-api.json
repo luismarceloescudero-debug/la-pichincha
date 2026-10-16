@@ -1,0 +1,160 @@
+[
+ {
+  "id": 38725,
+  "name": "Monitor GIGABYTE 27&#8243; Edge FHD GS27FC2 &#8211; 240hz 1ms",
+  "permalink": "https://clickgaming.com.ar/producto/monitor-gigabyte-27-edge-fhd-gs27fc2-240hz-1ms/",
+  "sku": "EL_GIGMONGS27FC2",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "314000",
+   "regular_price": "314000",
+   "sale_price": "314000",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 0,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": []
+ },
+ {
+  "id": 38671,
+  "name": "VGA 16GB RTX 5070 TI ASUS TUF GAMING OC 16G GDDR7",
+  "permalink": "https://clickgaming.com.ar/producto/vga-16gb-rtx-5070-ti-asus-tuf-gaming-oc-16g-gddr7/",
+  "sku": "AIR_215213",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "2680000",
+   "regular_price": "2680000",
+   "sale_price": "2680000",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 0,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": [
+   {
+    "id": 38679,
+    "src": "https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7.webp",
+    "thumbnail": "https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-300x300.webp",
+    "srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7.webp 800w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-64x64.webp 64w",
+    "sizes": "(max-width: 800px) 100vw, 800px",
+    "thumbnail_srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7-64x64.webp 64w, https://clickgaming.com.ar/wp-content/uploads/2026/10/VGA-16GB-RTX-5070-TI-ASUS-TUF-GAMING-OC-16G-GDDR7.webp 800w",
+    "thumbnail_sizes": "(max-width: 300px) 100vw, 300px",
+    "name": "VGA 16GB RTX 5070 TI ASUS TUF GAMING OC 16G GDDR7",
+    "alt": ""
+   }
+  ]
+ },
+ {
+  "id": 38670,
+  "name": "SODIMM DDR5 8GB HIKSEMI 4800MHZ",
+  "permalink": "https://clickgaming.com.ar/producto/sodimm-ddr5-8gb-hiksemi-4800mhz/",
+  "sku": "AIR_218772",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "309000",
+   "regular_price": "309000",
+   "sale_price": "309000",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 0,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": [
+   {
+    "id": 38719,
+    "src": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ.webp",
+    "thumbnail": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-300x300.webp",
+    "srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ.webp 1200w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-1024x1024.webp 1024w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-64x64.webp 64w",
+    "sizes": "(max-width: 1200px) 100vw, 1200px",
+    "thumbnail_srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-1024x1024.webp 1024w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ-64x64.webp 64w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR5-8GB-HIKSEMI-4800MHZ.webp 1200w",
+    "thumbnail_sizes": "(max-width: 300px) 100vw, 300px",
+    "name": "SODIMM DDR5 8GB HIKSEMI 4800MHZ",
+    "alt": ""
+   }
+  ]
+ },
+ {
+  "id": 38668,
+  "name": "SODIMM DDR4 8GB KINGSTON 3200MHZ CL20 FURY IMPACT",
+  "permalink": "https://clickgaming.com.ar/producto/sodimm-ddr4-8gb-kingston-3200mhz-cl20-fury-impact/",
+  "sku": "AIR_213844",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "228000",
+   "regular_price": "228000",
+   "sale_price": "228000",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 0,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": [
+   {
+    "id": 38669,
+    "src": "https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL.webp",
+    "thumbnail": "https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-300x300.webp",
+    "srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL.webp 1000w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-64x64.webp 64w",
+    "sizes": "(max-width: 1000px) 100vw, 1000px",
+    "thumbnail_srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-70x70.webp 70w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-600x600.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL-64x64.webp 64w, https://clickgaming.com.ar/wp-content/uploads/2026/10/51fV9xrlYhL.webp 1000w",
+    "thumbnail_sizes": "(max-width: 300px) 100vw, 300px",
+    "name": "SODIMM DDR4 8GB KINGSTON 3200MHZ CL20 FURY IMPACT",
+    "alt": ""
+   }
+  ]
+ },
+ {
+  "id": 38667,
+  "name": "SODIMM DDR4 8GB HIKSEMI 3200MHZ BULK",
+  "permalink": "https://clickgaming.com.ar/producto/sodimm-ddr4-8gb-hiksemi-3200mhz-bulk/",
+  "sku": "AIR_213098CA",
+  "is_in_stock": true,
+  "is_purchasable": true,
+  "prices": {
+   "price": "152000",
+   "regular_price": "152000",
+   "sale_price": "152000",
+   "price_range": null,
+   "currency_code": "ARS",
+   "currency_symbol": "$",
+   "currency_minor_unit": 0,
+   "currency_decimal_separator": ",",
+   "currency_thousand_separator": ".",
+   "currency_prefix": "$ ",
+   "currency_suffix": ""
+  },
+  "images": [
+   {
+    "id": 38721,
+    "src": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1.webp",
+    "thumbnail": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-300x300.webp",
+    "srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1.webp 1000w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-300x295.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-71x70.webp 71w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-600x590.webp 600w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-64x63.webp 64w",
+    "sizes": "(max-width: 1000px) 100vw, 1000px",
+    "thumbnail_srcset": "https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-300x300.webp 300w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-150x150.webp 150w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-48x48.webp 48w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-71x70.webp 71w, https://clickgaming.com.ar/wp-content/uploads/2026/10/SODIMM-DDR4-8GB-HIKSEMI-3200MHZ-BULK-1-64x63.webp 64w",
+    "thumbnail_sizes": "(max-width: 300px) 100vw, 300px",
+    "name": "SODIMM DDR4 8GB HIKSEMI 3200MHZ BULK",
+    "alt": ""
+   }
+  ]
+ }
+]

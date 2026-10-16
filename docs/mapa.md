@@ -90,7 +90,7 @@ Puntos que no se ven en el codigo Python ni JS:
 
 | Tema | Dueño | Lo usan | Tests |
 | --- | --- | --- | --- |
-| **Fuentes** (tiendas) | `tiendas.json` (una clave por fuente; `catalogo.tipo` elige el indexador en `indexar.py:439`) | `indexar.py`, `tests/capturar.py`, la clave de la cache del workflow (L88) | `tests/test_indexar.py`, `tests/test_indexar_corrida.py`, fixtures en `tests/fixtures/<tienda>/` |
+| **Fuentes** (tiendas) | `tiendas.json` (una clave por fuente; `catalogo.tipo` elige el indexador: `listados`, `json`, `api` o `woocommerce`, este ultimo con `indexar_woocommerce` para cualquier tienda WooCommerce cuyo `robots.txt` no prohiba `/wp-json/wc/`) | `indexar.py`, `tests/capturar.py`, la clave de la cache del workflow (L88) | `tests/test_indexar.py`, `tests/test_indexar_corrida.py`, fixtures en `tests/fixtures/<tienda>/` |
 | **Precios seguidos** (Comparativa curada) | `datos.json` (productos, veredicto, marcas) | `actualizar.py` (extractores en `actualizar.py:140`), que lo reinyecta en `index.html` (`actualizar.py:285`) | `tests/test_actualizar.py`, `tests/test_build.py` |
 | **Indice del buscador** | `indexar.py` | `js/buscador.js`, `js/indice-ofertas.js`, los generadores de Node | `tests/test_indexar*.py`, `tests/js/buscador.test.js` |
 | **Historial y sellos de serie** | `historial.py`, `serie.py` (rama `historial`) | `indexar.py:424-425`, `cobertura.py` | `tests/test_historial.py`, `tests/test_serie.py` |
@@ -127,7 +127,8 @@ node --test "tests/js/*.test.js"
 1. `python indexar.py --probar URL` con un producto de la tienda: dice que extractor generico sirve
    (`indexar.py:346`, `SONDAS`) y que poner en la configuracion. Antes, mirar su `robots.txt`.
 2. Una clave nueva en `tiendas.json`, copiando la forma de una fuente del mismo `catalogo.tipo`
-   (`json`, `api` o listados). Si publica el part number en la ficha, `ficha` con `rubros` y `tope`.
+   (`json`, `api`, `woocommerce` o listados). Si la tienda es WooCommerce y su `robots.txt` no prohibe
+   `/wp-json/wc/`, alcanza con `"tipo": "woocommerce"` y su `base`: no hace falta ninguna regex. Si publica el part number en la ficha, `ficha` con `rubros` y `tope`.
 3. `python tests/capturar.py <clave>` guarda su HTML en `tests/fixtures/<clave>/`; sumar el caso a
    `tests/test_indexar.py` (y a `tests/test_fichas.py` si tiene `ficha`).
 4. Si tambien va a seguir productos curados de `datos.json`, su extractor de precio vive en
