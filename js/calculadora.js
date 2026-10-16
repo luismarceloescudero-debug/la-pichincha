@@ -17,7 +17,7 @@
   };
   const OPCIONES = {
     pago: [["", "No sé todavía"], ["tarjeta_pesos", "Tarjeta en pesos"], ["dolares_propios", "Dólares propios (tarjeta en dólares o cuenta)"]],
-    aduana: [["ambos", "No sé (muestro los dos casos)"], ["si", "Sí, el envío suma"], ["no", "No, solo el producto"]],
+    aduana: [["ambos", "No sé (los dos casos)"], ["si", "Sí, el envío suma"], ["no", "No, solo el producto"]],
     cobro: [["", "No sé"], ["checkout", "En el checkout de la tienda (Amazon, eBay, Tiendamia)"], ["entrega", "Al recibir (courier o Correo)"]],
     interno: [["", "No"], ["si", "Sí: celular, TV o aire acondicionado"]],
   };
@@ -133,12 +133,14 @@
   const ars = n => (n === null || n === undefined ? "—" : "$ " + fmt(Math.round(n), 0));
 
   /* --- Formulario --- */
-  function formularioHtml(estado, { esc, tiposDolar }) {
+  function formularioHtml(estado, { esc, tiposDolar, icono = () => "" }) {
     const id = c => `k-${c}`;
+    // Los montos llevan adelante el codigo de la moneda elegida (js/vista-costo.js lo cambia al elegir otra).
+    const prefijo = campo => MONTOS.includes(campo) ? `<span class="k-prefijo" aria-hidden="true">${esc(estado.moneda)}</span>` : "";
     const texto = (campo, etiqueta, ayuda, extra = "") => `<div class="k-campo">
         <label for="${id(campo)}">${etiqueta}</label>
-        <input id="${id(campo)}" name="${campo}" type="text" inputmode="decimal" autocomplete="off" value="${esc(estado[campo])}"${extra}
-          aria-describedby="${id(campo)}-ayuda ${id(campo)}-error">
+        <div class="k-entrada${MONTOS.includes(campo) ? " con-prefijo" : ""}">${prefijo(campo)}<input id="${id(campo)}" name="${campo}" type="text" inputmode="decimal" autocomplete="off" value="${esc(estado[campo])}"${extra}
+          aria-describedby="${id(campo)}-ayuda ${id(campo)}-error"></div>
         <small id="${id(campo)}-ayuda">${ayuda}</small><small class="k-error" id="${id(campo)}-error"></small></div>`;
     const lista = (campo, etiqueta, opciones, ayuda = "") => `<div class="k-campo">
         <label for="${id(campo)}">${etiqueta}</label>
@@ -146,8 +148,10 @@
           `<option value="${esc(v)}"${v === estado[campo] ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>
         ${ayuda ? `<small id="${id(campo)}-ayuda">${ayuda}</small>` : ""}</div>`;
     const dolares = (tiposDolar || []).map(t => [t.id, t.nombre]);
+    const seccion = (n, ico, titulo, bajada) => `<legend><span class="k-paso" aria-hidden="true">${n}</span>
+        <span class="k-sec-ico" aria-hidden="true">${icono(ico)}</span><span class="k-sec-tit">${titulo}<small>${bajada}</small></span></legend>`;
     return `<form class="k-form" id="k-form" novalidate>
-      <fieldset><legend>Lo que comprás</legend>
+      <fieldset class="k-sec k-sec-1" id="k-sec-1" style="--i:0">${seccion(1, "paquete", "Lo que comprás", "Precio, envío y paquete")}
         ${texto("valor", "Precio del producto", "El precio en la tienda, sin el envío.", ' required')}
         ${lista("moneda", "Moneda", MONEDAS, "Los montos de este formulario van en esta moneda.")}
         ${texto("flete", "Envío", "Lo que cobra la tienda o el courier por traerlo.")}
@@ -155,13 +159,13 @@
         ${texto("unidades", "Unidades iguales", "El régimen permite hasta 3 de la misma especie.")}
         ${texto("peso", "Peso del paquete (kg)", "Opcional: el límite es por paquete.")}
       </fieldset>
-      <fieldset><legend>Tu situación</legend>
+      <fieldset class="k-sec k-sec-2" id="k-sec-2" style="--i:1">${seccion(2, "persona", "Tu situación", "Cupo del año y cómo pagás")}
         ${texto("envios", "Envíos que ya usaste este año", "Por courier o Correo, a tu nombre.")}
         ${lista("pago", "Cómo pagás", OPCIONES.pago, "Con tarjeta en pesos se suma la percepción, que se puede recuperar.")}
         ${lista("cobro", "Dónde se pagan los impuestos", OPCIONES.cobro)}
         ${lista("dolar", "Dólar para pasar a pesos", dolares)}
       </fieldset>
-      <fieldset><legend>Lo que no publica ARCA (opcional)</legend>
+      <fieldset class="k-sec k-sec-3" id="k-sec-3" style="--i:2">${seccion(3, "aduana", "Lo que no publica ARCA", "Opcional: si lo sabés, la cuenta se completa")}
         ${texto("derecho", "Derecho de importación (%)", "Depende de la posición arancelaria. Vacío = no lo sé: lo marco como no incluido.")}
         ${lista("aduana", "¿El envío suma al valor en aduana?", OPCIONES.aduana, "La norma no es clara: por defecto muestro los dos casos.")}
         ${texto("honorarios", "Honorarios del courier o tasa del Correo", "Lo que te dijeron que cobran. Nunca lo supongo.")}
@@ -174,7 +178,11 @@
   }
 
   /* --- Desglose --- */
-  const nivelHtml = (nivel, esc) => `<span class="k-nivel k-${esc(nivel)}">${esc(NIVELES[nivel] || nivel)}</span>`;
+  const ICONO_NIVEL = { oficial: "check", dato: "persona", pendiente: "pregunta", dudoso: "pregunta", prensa: "pregunta" };
+  const nivelHtml = (nivel, esc, icono) => `<span class="k-nivel k-${esc(nivel)}">${icono(ICONO_NIVEL[nivel] || "pregunta")}${esc(NIVELES[nivel] || nivel)}</span>`;
+  // Una miniatura por renglon: que es cada plata de un vistazo.
+  const ICONO_CONCEPTO = { producto: "paquete", derecho_importacion: "aduana", tasa_estadistica: "tabla", iva: "recibo",
+    impuesto_interno: "recibo", honorarios: "camion" };
 
   function cobroHtml(cobro) {
     if (cobro === "checkout") {
@@ -186,7 +194,7 @@
     return "Antes de pagar, preguntá si la tienda cobra los impuestos en el checkout o si se pagan al recibir: cambia quién absorbe la diferencia con la liquidación real.";
   }
 
-  function resultadoHtml(res, { esc, aPesos, dolarNombre, estado }) {
+  function resultadoHtml(res, { esc, aPesos, dolarNombre, estado, icono = () => "" }) {
     if (!res) return "";
     if (!res.valido || res.regimen === "fuera_de_regimen") {
       const titulo = res.valido ? REGIMENES.fuera_de_regimen : "Revisá los datos";
@@ -195,12 +203,13 @@
     }
     const enPesos = n => { const p = n === null ? null : aPesos(n); return p === null || p === undefined ? "sin cotización" : ars(p); };
     const productoUsd = res.totalUsd - res.tributosUsd - (res.renglones.find(r => r.clave === "honorarios") || { montoUsd: 0 }).montoUsd;
-    const filas = [`<tr><th scope="row">Producto, envío y seguro</th><td>—</td><td>—</td><td>${usd(productoUsd)}</td><td>${enPesos(productoUsd)}</td><td>${nivelHtml("dato", esc)}</td></tr>`]
-      .concat(res.renglones.map(r => `<tr><th scope="row">${esc(CONCEPTOS[r.clave] || r.concepto)}</th>
-        <td>${r.baseUsd === null ? "—" : usd(r.baseUsd)}</td>
-        <td>${r.exento ? "exento" : r.alicuotaPct === null ? "—" : esc(String(r.alicuotaPct).replace(".", ",")) + " %"}</td>
-        <td>${r.montoUsd === null ? "sin dato" : usd(r.montoUsd)}</td><td>${r.montoUsd === null ? "—" : enPesos(r.montoUsd)}</td>
-        <td>${nivelHtml(r.exento ? "oficial" : r.nivel, esc)}</td></tr>`));
+    const concepto = (clave, texto) => `<span class="k-mini k-mini-${clave}" aria-hidden="true">${icono(ICONO_CONCEPTO[clave] || "moneda")}</span>${esc(texto)}`;
+    const filas = [`<tr style="--i:0"><th scope="row">${concepto("producto", "Producto, envío y seguro")}</th><td data-l="Base">—</td><td data-l="Alícuota">—</td><td data-l="Dólares">${usd(productoUsd)}</td><td data-l="Pesos">${enPesos(productoUsd)}</td><td data-l="Confianza">${nivelHtml("dato", esc, icono)}</td></tr>`]
+      .concat(res.renglones.map((r, i) => `<tr style="--i:${i + 1}"><th scope="row">${concepto(r.clave, CONCEPTOS[r.clave] || r.concepto)}</th>
+        <td data-l="Base">${r.baseUsd === null ? "—" : usd(r.baseUsd)}</td>
+        <td data-l="Alícuota">${r.exento ? "exento" : r.alicuotaPct === null ? "—" : esc(String(r.alicuotaPct).replace(".", ",")) + " %"}</td>
+        <td data-l="Dólares">${r.montoUsd === null ? "sin dato" : usd(r.montoUsd)}</td><td data-l="Pesos">${r.montoUsd === null ? "—" : enPesos(r.montoUsd)}</td>
+        <td data-l="Confianza">${nivelHtml(r.exento ? "oficial" : r.nivel, esc, icono)}</td></tr>`));
     const queCubre = [];
     if (res.escenarios.fleteFueraDeBase.totalUsd !== res.escenarios.fleteEnBase.totalUsd && (!estado || estado.aduana === "ambos")) {
       queCubre.push("si el envío suma al valor en aduana");
@@ -208,25 +217,29 @@
     if (res.percepcionAplica === null) queCubre.push("si pagás con tarjeta en pesos (percepción)");
     const nota = res.percepcionAplica === true ? " Los dos extremos ya incluyen la percepción." : "";
     const rango = res.rangoUsd && res.rangoUsd.minUsd !== res.rangoUsd.maxUsd && queCubre.length
-      ? `<div class="tile"><div class="k">Rango</div><div class="v">${usd(res.rangoUsd.minUsd)} a ${usd(res.rangoUsd.maxUsd)}</div>
+      ? `<div class="tile k-tile-rango"><div class="k">${icono("balanza")} Rango</div><div class="v">${usd(res.rangoUsd.minUsd)} a ${usd(res.rangoUsd.maxUsd)}</div>
          <div class="d">Cubre lo que no se sabe: ${queCubre.join(" y ")}.${nota}</div></div>` : "";
     const conTarjeta = res.percepcionAplica === true
-      ? `<div class="tile"><div class="k">Lo que sale de tu tarjeta</div><div class="v">${usd(res.totalConPercepcionUsd)}</div>
+      ? `<div class="tile k-tile-tarjeta"><div class="k">${icono("tarjeta")} Lo que sale de tu tarjeta</div><div class="v">${usd(res.totalConPercepcionUsd)}</div>
          <div class="d">${enPesos(res.totalConPercepcionUsd)}, con la percepción</div></div>` : "";
     const percepcion = res.percepcionAplica === false
       ? "<p class=\"sub chico\">Con dólares propios no corresponde percepción.</p>"
       : `<p class="sub chico"><b>Percepción${res.percepcionAplica ? "" : " (si pagás con tarjeta en pesos)"}:</b> ${usd(res.percepcionUsd)}
          (${enPesos(res.percepcionUsd)}). ${PERCEPCION}</p>`;
-    const noIncluido = res.noIncluido.length ? `<div class="bloque k-pendiente"><h3>No incluido</h3><ul class="lista">${res.noIncluido.map(n =>
+    const noIncluido = res.noIncluido.length ? `<div class="bloque k-pendiente"><h3>${icono("pregunta")} No incluido</h3><ul class="lista">${res.noIncluido.map(n =>
       `<li class="m">${esc(n.motivo)}</li>`).join("")}</ul></div>` : "";
     const consulta = estado && estado.consulta && estado.honorarios ? ` Los honorarios los consultaste el ${esc(estado.consulta)}.` : "";
     return `<div class="k-res">
       <p class="k-regimen"><span class="chip${res.completo ? " ok" : " ojo"}">${esc(REGIMENES[res.regimen])}</span>
         <span class="chip${res.completo ? " ok" : " ojo"}">${res.completo ? "cálculo completo" : "cálculo incompleto: falta un dato"}</span></p>
+      <div class="k-total" id="k-total">
+        <span class="k-total-ico" aria-hidden="true">${icono("paquete")}</span>
+        <div><div class="k-total-k">Total estimado puesto en casa</div>
+          <div class="k-total-v">${usd(res.totalUsd)}</div>
+          <div class="k-total-d">${enPesos(res.totalUsd)}${dolarNombre ? ` · dólar ${esc(dolarNombre)}` : ""}</div></div>
+      </div>
       <div class="tiles">
-        <div class="tile ok"><div class="k">Total estimado puesto en casa</div><div class="v">${usd(res.totalUsd)}</div>
-          <div class="d">${enPesos(res.totalUsd)}${dolarNombre ? ` · dólar ${esc(dolarNombre)}` : ""}</div></div>
-        <div class="tile"><div class="k">Impuestos</div><div class="v">${usd(res.tributosUsd)}</div><div class="d">${enPesos(res.tributosUsd)}</div></div>
+        <div class="tile k-tile-impuestos"><div class="k">${icono("recibo")} Impuestos</div><div class="v">${usd(res.tributosUsd)}</div><div class="d">${enPesos(res.tributosUsd)}</div></div>
         ${conTarjeta}
         ${rango}
       </div>
@@ -234,7 +247,7 @@
         <thead><tr><th scope="col">Concepto</th><th scope="col">Base</th><th scope="col">Alícuota</th><th scope="col">Dólares</th>
           <th scope="col">Pesos</th><th scope="col">Confianza</th></tr></thead>
         <tbody>${filas.join("")}</tbody>
-        <tfoot><tr><th scope="row">Total</th><td></td><td></td><td>${usd(res.totalUsd)}</td><td>${enPesos(res.totalUsd)}</td><td></td></tr></tfoot>
+        <tfoot><tr><th scope="row">Total</th><td class="k-vacio"></td><td class="k-vacio"></td><td data-l="Dólares">${usd(res.totalUsd)}</td><td data-l="Pesos">${enPesos(res.totalUsd)}</td><td class="k-vacio"></td></tr></tfoot>
       </table></div>
       ${percepcion}
       ${noIncluido}

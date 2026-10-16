@@ -20,11 +20,18 @@ function cargarCosto() {
 
 function vistaCosto() {
   const estado = Calculadora.estadoDeUrl(location.search);
-  return `<div class="panel"><div class="panel-head"><h2>Costo de importar</h2>
-    <p class="sub">Cuánto pagás de verdad por algo comprado afuera y traído por courier o por Correo: impuestos renglón por renglón,
-      con la norma de cada uno y lo que todavía no se sabe.</p></div>
+  return `<div class="panel"><div class="k-hero">
+      <span class="k-hero-ico" aria-hidden="true">${icono("calc")}</span>
+      <div><h2>Costo de importar</h2>
+        <p class="sub">Cuánto pagás de verdad por algo comprado afuera y traído por courier o por Correo: impuestos renglón por renglón,
+          con la norma de cada uno y lo que todavía no se sabe.</p>
+        <ol class="k-pasos">
+          <li><a href="#k-sec-1" data-k-ir="k-sec-1"><span>1</span> Lo que comprás</a></li>
+          <li><a href="#k-sec-2" data-k-ir="k-sec-2"><span>2</span> Tu situación</a></li>
+          <li><a href="#k-sec-3" data-k-ir="k-sec-3"><span>3</span> Lo que no publica ARCA</a></li>
+        </ol></div></div>
     <div class="k-grid">
-      ${Calculadora.formularioHtml(estado, { esc, tiposDolar: Monedas.TIPOS_DOLAR })}
+      ${Calculadora.formularioHtml(estado, { esc, tiposDolar: Monedas.TIPOS_DOLAR, icono })}
       <section class="k-salida" aria-labelledby="k-titulo">
         <h3 id="k-titulo">Resultado</h3>
         <div id="k-resultado" aria-live="polite"><p class="sub">Cargando las reglas y las cotizaciones…</p></div>
@@ -81,7 +88,12 @@ function recalcularCosto(raiz) {
     catch (e) { return null; }
   };
   const tipo = Monedas.TIPOS_DOLAR.find(t => t.id === estado.dolar);
-  salida.innerHTML = Calculadora.resultadoHtml(res, { esc, aPesos, dolarNombre: tipo ? tipo.nombre : estado.dolar, estado });
+  const antes = ($("#k-total .k-total-v", raiz) || {}).textContent;
+  salida.innerHTML = Calculadora.resultadoHtml(res, { esc, aPesos, dolarNombre: tipo ? tipo.nombre : estado.dolar, estado, icono });
+  // El total es lo unico que se anima al cambiar: un pulso corto que marca que la cuenta se rehizo.
+  const total = $("#k-total", raiz);
+  if (total && antes !== undefined && antes !== ($(".k-total-v", total) || {}).textContent) total.classList.add("k-cambio");
+  form.querySelectorAll(".k-prefijo").forEach(p => { p.textContent = estado.moneda; });
   $("#k-fuentes", raiz).textContent = fuentesTexto(estado);
   // Se mide cuando la cuenta se asienta, no por cada tecla.
   clearTimeout(COSTO.temporizador);
@@ -110,6 +122,14 @@ function activarCosto(raiz) {
   form.addEventListener("input", () => recalcularCosto(raiz));
   form.addEventListener("change", () => recalcularCosto(raiz));
   form.addEventListener("submit", ev => ev.preventDefault());
+  // Los pasos del encabezado llevan a su seccion sin tocar el hash, que es la pestaña.
+  raiz.querySelectorAll("[data-k-ir]").forEach(a => a.addEventListener("click", ev => {
+    ev.preventDefault();
+    const destino = document.getElementById(a.dataset.kIr);
+    destino.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    const primero = destino.querySelector("input, select");
+    if (primero) primero.focus({ preventScroll: true });
+  }));
   $("#k-compartir", raiz).addEventListener("click", ev => compartirCosto(ev.currentTarget));
   cargarCosto().then(() => recalcularCosto(raiz));
 }

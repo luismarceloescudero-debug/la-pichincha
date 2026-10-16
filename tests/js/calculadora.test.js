@@ -275,3 +275,15 @@ test("numero no toma un cero inicial como miles ni acepta separadores mal ubicad
   assert.strictEqual(K.numero("12.345,50"), 12345.5);
   assert.strictEqual(K.numero("12,345.50"), 12345.5);
 });
+
+test("con iconos: cada seccion lleva numero e icono, los montos su moneda y cada renglon su miniatura", () => {
+  const icono = n => `<i data-ico="${n}"></i>`;
+  const f = K.formularioHtml(estado({ moneda: "EUR" }), { esc, tiposDolar: [], icono });
+  for (const n of ["paquete", "persona", "aduana"]) assert.ok(f.includes(`data-ico="${n}"`), n);
+  assert.strictEqual((f.match(/class="k-prefijo"[^>]*>EUR</g) || []).length, 5, "valor, flete, seguro, honorarios e interno");
+  assert.match(f, /class="k-sec k-sec-3"/);
+  const { res } = calcular({ valor: "800", derecho: "20" });
+  const h = K.resultadoHtml(res, { esc, aPesos: u => u, estado: estado({}), icono });
+  for (const n of ["paquete", "aduana", "tabla", "recibo", "check", "persona"]) assert.ok(h.includes(`data-ico="${n}"`), n);
+  assert.match(h, /id="k-total"/);
+});
