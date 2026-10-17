@@ -38,7 +38,22 @@
     let descartadas = 0;
     const ref = C.referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
-    const gama = new Map(filas.map(f => [f, C.evaluar(f[0], ref)]));
+    // El mismo producto (mismo codigo de modelo) publicado por otra tienda con mas datos: una tienda que no escribe la RAM o los
+    // Hz en el titulo no deja afuera a un modelo cuya ficha otra si trae. Solo se mira a otra cuando a esta le falta el dato.
+    const porModelo = new Map();
+    for (const f of filas) if (f[9]) (porModelo.get(f[9]) || porModelo.set(f[9], []).get(f[9])).push(f);
+    const sinDato = g => !g.pasa && /^sin dato/.test(g.motivo || "");
+    const evaluar = f => {
+      const propio = C.evaluar(f[0], ref);
+      if (!sinDato(propio) || !f[9]) return propio;
+      for (const otro of porModelo.get(f[9])) {
+        if (otro === f) continue;
+        const g = C.evaluar(otro[0], ref);
+        if (!sinDato(g)) return { ...g, heredada: true };
+      }
+      return propio;
+    };
+    const gama = new Map(filas.map(f => [f, evaluar(f)]));
     // Mediana de la gama media por categoria y capacidad (128 y 256 GB por separado; sin internacionales, que traen otro costo).
     const precios = {};
     for (const f of filas) {

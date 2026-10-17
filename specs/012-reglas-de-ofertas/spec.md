@@ -87,6 +87,10 @@ Bugs encontrados al mirar como publica cada tienda, todos con un titulo real en 
 
 Lo que NO se hizo, a proposito: agrupar notebooks, celulares y monitores por un token con forma de codigo que aparezca en dos tiendas. Los titulos traen el procesador ("i5-13420H") y la placa ("RTX 4050") con forma de codigo y se mezclarian modelos distintos; antes de hacerlo hay que medirlo con el indice real (como en `specs/007`). Hoy esos rubros se agrupan por el part number de un catalogo o de ComparaYa.
 
+10. **Un modelo quedaba afuera porque una tienda no escribe el dato**: si el titulo de una tienda no dice la RAM o los Hz pero otra tienda publica el mismo producto (mismo codigo de modelo) con el dato, la oferta hereda la evaluacion de la que si lo trae. Solo se mira a la otra cuando a esta le *falta* el dato; si la otra dice que no llega al minimo, tampoco llega.
+
+Comprobado de punta a punta con el resumen del 16/10: las tres placas madre B840M, las dos RTX 3060 y los dos SSD SanDisk 2TB reciben cada grupo un identificador comun y ocupan un solo lugar; los dos SSD y la RTX 5070 Ti salen por no llegar al 8% de baja que se exige a un componente.
+
 ### Historial en el buscador
 
 Cada resultado dice "precio sin cambios desde el 12/10" (sin baja ni rebaja a la vista). La columna 11 del indice (`desde`) guarda la fecha del ultimo cambio, de `serie.desde_cuando`; el indice trae `historial.inicio`, el primer dia que se sigue el precio. **Antes de esa fecha no sabemos nada**: el seguimiento empezo el 7/10/2026, asi que "sin cambios desde marzo" solo se podra decir cuando haya historial de marzo; hasta entonces el texto aclara "cuando empezamos a seguirlo; puede ser mas antiguo". Una categoria sin ofertas en el dia (por ejemplo notebooks) se dice en la pestaña Ofertas y se manda al buscador.

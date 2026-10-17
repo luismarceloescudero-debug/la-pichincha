@@ -184,3 +184,20 @@ test("el mismo producto en varias tiendas (mismo codigo de modelo) ocupa un solo
   assert.equal(d.filter(o => o.f[9] === "RTX3060-12G").length, 1);
   assert.equal(d.find(o => o.f[9] === "RTX3060-12G").f[1], 100000);          // la mejor ubicada: la de mayor descuento
 });
+
+test("un modelo no queda afuera porque una tienda no escribe el dato: lo hereda del mismo producto publicado por otra", () => {
+  const con = (n, p, modelo, tienda) => { const f = fila(n, p, { lista: p * 1.3 }); f[3] = tienda; f[9] = modelo; return f; };
+  const idx = { productos: [
+    con("Monitor Samsung LS25BG400ELXZB", 300000, "LS25BG400ELXZB", "cy"),                         // sin Hz en el titulo
+    con("Monitor Samsung 25 LS25BG400ELXZB IPS 240Hz", 310000, "LS25BG400ELXZB", "mx"),            // otra tienda si los trae
+    fila("Monitor Samsung LS24BG300ELXZB", 250000, { lista: 330000 })] };                          // este no tiene de donde sacarlo
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.publicadas.map(f => f[0]).sort(), ["Monitor Samsung 25 LS25BG400ELXZB IPS 240Hz", "Monitor Samsung LS25BG400ELXZB"]);
+  assert.equal(r.descartadas, 1);
+});
+
+test("y si la otra tienda dice que no llega al minimo, tampoco llega: es el mismo producto", () => {
+  const con = (n, p, tienda) => { const f = fila(n, p, { lista: p * 1.3 }); f[3] = tienda; f[9] = "LS24BG300ELXZB"; return f; };
+  const idx = { productos: [con("Monitor Samsung LS24BG300ELXZB", 200000, "cy"), con("Monitor Samsung LS24BG300ELXZB 75Hz IPS", 210000, "mx")] };
+  assert.equal(O.calcularOfertas(idx).publicadas.length, 0);
+});
