@@ -18,9 +18,11 @@
         mas nueva que hay a la venta o la anterior (no hay una tabla de años que envejezca).
      3. Sin RAM, hace falta al menos una señal reciente (procesador o año); sin ninguna no se afirma nada. */
   const PISOS = {
-    celular:  { ram: 6,  ideal: 8,  rom: 128, rom_alta: 256, bateria: 4500, hz: 90, re: /\b(celular|smartphone|iphone|redmi|poco\s?[a-z]\d|moto\s?[gex]\d|galaxy\s?[samzf]\d|realme|infinix|tecno|pixel)/i },
-    notebook: { ram: 16, ideal: 32, rom: 512, rom_alta: 1000, re: /\b(notebook|laptop|macbook|portatil|ideapad|thinkpad|vivobook|zenbook)/i }
+    celular:  { ram: 6,  ideal: 8,  rom: 128, rom_alta: 256, bateria: 4500, hz: 90, re: /\b(celular|smartphone|iphone|redmi|poco\s?[a-z]\d|moto\s?[gex]\d|galaxy\s?[samzf]\d|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i },
+    notebook: { ram: 16, ideal: 32, rom: 512, rom_alta: 1000, re: /\b(notebook|laptop|macbook|portatil|ideapad|thinkpad|vivobook|zenbook)(?![a-z])/i }
   };
+  /* Lo que se vende para un celular o una notebook no es un celular ni una notebook: "Funda iPhone 17" no tiene RAM. */
+  const ACCESORIO = /^\s*(?:funda|fundas|case|carcasa|vidrio|protector|film|cargador|cable|adaptador|soporte|base|mochila|bolso|maletin|funda|auricular|auriculares|parlante|mouse|teclado|monitor|bateria|batería|cooler|pad|skin|lamina|lámina|estuche|correa|pulsera|kit|combo)\b|\b(?:para|de)\s+(?:notebook|laptop|macbook|celular|iphone)\b/i;
   const aGB = (n, u) => Math.round(parseFloat(n) * (/t/i.test(u) ? 1000 : 1));
 
   /* [familia, nombre legible, regex, numero de generacion a partir del match] */
@@ -94,7 +96,7 @@
 
   /* { rubro, pasa, motivo }: solo celulares y notebooks tienen piso; el resto pasa. */
   function pisoDeGama(nombre, ref = { gen: {}, anio: 0, salto: {} }) {
-    const rubro = Object.keys(PISOS).find(k => PISOS[k].re.test(nombre)) || null;
+    const rubro = ACCESORIO.test(nombre) ? null : Object.keys(PISOS).find(k => PISOS[k].re.test(nombre)) || null;
     if (!rubro) return { rubro, pasa: true };
     const pi = PISOS[rubro], { ram, rom } = memoriaDe(nombre);
     const no = motivo => ({ rubro, pasa: false, motivo });

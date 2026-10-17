@@ -296,7 +296,7 @@ Las ofertas del dia salen por dos canales, sin backend:
 - **`ofertas.xml`** (RSS 2.0, archivo estatico): hasta 20 entradas, primero las bajas
   propias (del historial) y despues las rebajas publicadas, cada grupo por descuento. Cada
   entrada dice el precio, cuanto bajo, el comercio, el enlace a la tienda y la hora de los
-  precios. Las compras internacionales y los enlaces que no son `http(s)` no entran. El
+  precios. Las compras internacionales van al final y rotuladas; los enlaces que no son `http(s)` no entran. El
   sitio lo anuncia en el `<head>` con `rel="alternate"`. Lo arma `generar_feed.js`, que
   tambien escribe `ofertas.json` (las 10 mejores) para Telegram.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con

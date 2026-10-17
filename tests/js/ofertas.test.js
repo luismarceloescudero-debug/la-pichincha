@@ -225,3 +225,22 @@ test("la nota viaja con las ofertas y con el feed", () => {
   const [o] = O.destacadas({ productos });
   assert.match(o.nota, /sigue vigente/);
 });
+
+test("rubro: los accesorios y otros productos que nombran un celular o una notebook no son celulares", () => {
+  const r = n => O.pisoDeGama(n, REF).rubro;
+  for (const n of ["Funda Silicona iPhone 15 Pro Max", "Cargador rapido Samsung Galaxy S25 45W", "Vidrio templado Redmi Note 14",
+    "Protector de pantalla para iPhone 17", "Case notebook Lenovo ThinkPad 16GB", "Soporte para notebook plegable",
+    "Mochila para notebook 15.6", "Monitor Samsung 27 pixel perfect", "Auricular Tecnomaster 8GB"])
+    assert.equal(r(n), null, n);
+  assert.equal(r("Celular Tecno Spark 20 6GB 128GB"), "celular");
+  assert.equal(r("Samsung Galaxy S26 12GB 256GB"), "celular");
+  assert.equal(r("Google Pixel 10 Pro 16GB 256GB"), "celular");
+});
+
+test("los accesorios de un celular no entran a la mediana de la gama media ni a los descartados", () => {
+  const fundas = Array.from({ length: 8 }, (_, i) => fila(`Funda iPhone 17 Pro 512GB ${i}`, 5000 + i));
+  const idx = { productos: [...fundas, fila("Celular Apple iPhone 17 Pro 512GB", 900000, { antes: 1100000 })] };
+  const r = O.calcularOfertas(idx);
+  assert.equal(r.descartadas, 0);
+  assert.deepEqual(r.medianas, {});
+});

@@ -24,7 +24,7 @@ enlaces `http(s)` a la tienda y todo el texto escapado.
    entradas, las bajas propias primero y despues las rebajas publicadas, cada una con titulo, enlace, descripcion y fecha.
 2. **Given** un aviso cuyo enlace no es `http(s)`, **Then** no entra al feed.
 3. **Given** que no hay ofertas, **Then** el feed igual sale, vacio y valido.
-4. **Given** una compra internacional, **Then** no entra al feed (no es comparable con el resto).
+4. **Given** una compra internacional, **Then** entra al feed despues de las locales y rotulada "compra internacional" (cambio de la spec 012: a igual precio da mas opciones; antes no entraba).
 
 ### User Story 2 - "Pichinchas del dia" en Telegram (Priority: P2)
 
