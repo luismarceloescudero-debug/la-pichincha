@@ -165,7 +165,7 @@ function pintarOfertas(append) {
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
   est.textContent = `${OF_ACTUAL.length} ofertas`
     + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
-    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar al piso de gama de celulares y notebooks` : "");
+    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
@@ -199,13 +199,13 @@ function marcarEstrella(btn) {
   if (n) n.textContent = ESTRELLAS.size;
 }
 
-/* "Comparar" desde una oferta: busca la categoria y la marca, sin el codigo de modelo,
-   y abre la comparativa de esos resultados. */
+/* "Comparar" desde una oferta: con marca y submarca («Soundcore AeroFit 2 by Anker») prueba submarca + modelo, despues
+   el modelo y por ultimo marca madre + modelo; sin ellas busca la categoria y la marca, sin el codigo de modelo, y
+   abre la comparativa de esos resultados. */
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  const palabras = o.f[0].split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
-  compararConsulta((palabras.slice(0, 3).join(" ") || o.f[0].split(/\s+/).slice(0, 2).join(" ")));
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], q => buscarTodo(q).length > 0));
 }
 
 document.addEventListener("keydown", ev => {

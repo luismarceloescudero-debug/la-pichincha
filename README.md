@@ -231,14 +231,25 @@ Se muestran las rebajas entre 15% y 60%. El techo esta puesto porque arriba de
 ahi el precio anterior casi siempre esta inflado: un 90% OFF no es una oferta,
 es marketing.
 
-**Piso de gama.** Un descuento no vuelve oferta a un equipo que en 2026 se queda corto. En
-celulares y notebooks, si el titulo dice la RAM (celular 6 GB, notebook 16 GB) y el
-almacenamiento, tienen que llegar; y el procesador, el año, la bateria y el refresco tienen que
-ser de la generacion mas nueva del indice o la anterior. Sin RAM en el titulo (iPhone, MacBook)
-alcanza con un procesador o año reciente. La pestaña dice cuantos avisos con descuento quedaron
-afuera. Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y
-Telegram van despues de las locales, rotuladas. Detalle y pendientes en
+**Categorias y minimos.** Cada aviso se evalua en su categoria (`js/categorias.js`): monitores, PCs
+completas, notebooks, smartphones, componentes y perifericos. Cada una tiene sus minimos, su gama media y
+su gama alta con numeros, y lo que se exige a una no se le exige a otra (la VRAM es solo de las placas de
+video). Un monitor entra desde 144 Hz sin panel TN; la gama alta es 240 Hz o mas con OLED, QD-OLED o
+Mini-LED. Un smartphone, desde 6 GB de RAM y 128 GB; una notebook o PC, desde 16 GB y 512 GB, con el
+procesador de la generacion mas nueva del indice o la anterior. Los numeros estan en la spec
 `specs/012-reglas-de-ofertas/spec.md`.
+
+**Descuento por categoria.** Un 10% ya es buena oferta en notebooks, PCs y smartphones (12% en
+monitores); en componentes y perifericos se exige 20%. Las bajas propias piden 5% en equipos y 8% en
+componentes.
+
+**Cupo en el resumen.** El resumen del dia (Telegram, RSS y /hoy/) reserva 2 lugares por categoria y no
+deja pasar de 3 hasta repartir lo que sobra, para que los componentes, que son casi todo el catalogo, no
+lo acaparen. Sale agrupado por categoria.
+
+La pestaña dice cuantos avisos con descuento quedaron afuera por no llegar a los minimos de su categoria.
+Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y Telegram van al
+final de su categoria, rotuladas.
 
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de

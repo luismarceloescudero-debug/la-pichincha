@@ -40,7 +40,8 @@ def mensaje(datos):
            "Verificá en la tienda antes de comprar.")
     lineas = []
     for i, o in enumerate(ofertas, 1):
-        lineas.append(f"{i}. <a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(o['nombre'])}</a>: "
+        categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
+        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(o['nombre'])}</a>: "
                       f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}")
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
         lineas.pop()

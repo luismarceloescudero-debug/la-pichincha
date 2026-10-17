@@ -78,11 +78,80 @@
     };
   }
 
+  /* Submarcas: la marca con la que el producto figura en los filtros y en el nombre, y su marca madre. */
+  const SUBMARCAS = { soundcore: "anker", eufy: "anker", nebula: "anker", redmi: "xiaomi", poco: "xiaomi", hyperx: "hp", omen: "hp",
+                      rog: "asus", tuf: "asus", alienware: "dell", predator: "acer", nitro: "acer", cmf: "nothing" };
+  const GENERICAS = new Set(["auricular", "auriculares", "inalambrico", "inalambricos", "bluetooth", "tws", "true", "wireless", "abierto",
+    "abiertos", "con", "de", "para", "nuevo", "nueva", "original", "oficial", "garantia", "negro", "blanco", "azul", "rojo", "gris", "color",
+    "pack", "combo", "cargador", "cable", "funda", "gancho", "clip", "gamer", "gaming"]);
+  const ES_SPEC = /^\d+(?:gb|tb|mah|w|hz|mp|mm|cm|hs|h|v|ms)$/;
+  const BY_MARCA = /\s+by\s+([a-z0-9&.-]+)/i;
+  const capitalizar = t => t ? t[0].toUpperCase() + t.slice(1).toLowerCase() : t;
+
+  /* "Soundcore AeroFit 2 by Anker Auriculares Soundcore" -> "Soundcore AeroFit 2 Auriculares": sin «by Marca» y sin
+     palabras repetidas. */
+  function limpiarTitulo(nombre) {
+    const vistas = new Set(), salida = [];
+    for (const w of String(nombre).replace(BY_MARCA, " ").split(/\s+/)) {
+      const k = normal(w);
+      if (!k || vistas.has(k)) continue;
+      vistas.add(k);
+      salida.push(w);
+    }
+    return salida.join(" ");
+  }
+
+  /* La submarca que nombra el titulo ("soundcore", "redmi"), o "". */
+  function submarcaDe(nombre) {
+    for (const t of normal(String(nombre)).split(/[^a-z0-9]+/)) if (SUBMARCAS[t]) return t;
+    return "";
+  }
+
+  /* La marca madre: la del «by X» si esta, o la de la tabla de submarcas. */
+  function marcaMadreDe(nombre) {
+    const by = String(nombre).match(BY_MARCA);
+    return capitalizar(by ? by[1] : SUBMARCAS[submarcaDe(nombre)] || "");
+  }
+
+  /* Para buscar un producto con marca y submarca: la cadena de consultas, de la mas precisa a la mas amplia:
+     submarca + modelo, solo el modelo y marca madre + modelo. El modelo conserva su numero (AeroFit 2 no es
+     AeroFit Pro ni AeroClip) y se corta en la primera palabra generica o especificacion. Devuelve null si el titulo no
+     tiene ni submarca conocida ni «by Marca»: ahi no hay cadena que armar. */
+  function consultasDe(nombre) {
+    const tiene = submarcaDe(nombre) || BY_MARCA.test(String(nombre));
+    if (!tiene) return null;
+    const toks = limpiarTitulo(nombre).split(" ");
+    const marca = toks.findIndex(t => SUBMARCAS[normal(t)]);
+    const i = marca >= 0 ? marca : toks.findIndex(t => !GENERICAS.has(normal(t)) && !/^\d+$/.test(t));
+    if (i < 0) return null;
+    const modeloToks = [];
+    for (const t of toks.slice(i + 1)) {
+      if (GENERICAS.has(normal(t)) || ES_SPEC.test(normal(t)) || modeloToks.length >= 4) break;
+      modeloToks.push(t);
+    }
+    if (!modeloToks.length) return null;
+    const modelo = modeloToks.join(" "), madre = marcaMadreDe(nombre) || capitalizar(SUBMARCAS[normal(toks[i])] || "");
+    const consultas = [...new Set([toks[i] + " " + modelo, modelo, madre && normal(madre) !== normal(toks[i]) ? madre + " " + modelo : ""].filter(Boolean))];
+    return { submarca: toks[i], madre, modelo, consultas };
+  }
+
+  /* La consulta con la que "Comparar" abre una oferta. Con marca y submarca, la primera de la cadena que encuentra
+     algo (`hay(q)` dice si una consulta tiene resultados); sin ellas, la marca y las palabras sin cifras, sin el
+     codigo de modelo, para que traiga competencia y no ese producto solo. */
+  function consultaDeOferta(nombre, hay) {
+    const info = consultasDe(nombre);
+    if (info) return info.consultas.find(hay) || info.consultas[0];
+    const palabras = String(nombre).split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
+    return palabras.slice(0, 3).join(" ") || String(nombre).split(/\s+/).slice(0, 2).join(" ");
+  }
+
   const ALIAS_MARCA = { xpg: "adata", gskill: "g.skill", tplink: "tp-link", "western digital": "wd" };
   const armarMarcasRe = lista => lista.map(m => [m, new RegExp("\\b" + escaparRe(m) + "\\b")]);
 
   /* La marca es la que aparece primero en el nombre: "Notebook HP Intel Core" es HP. */
   function marcaDe(nombre, marcasRe, alias = ALIAS_MARCA) {
+    const sub = submarcaDe(nombre);       // «Soundcore AeroFit 2 by Anker» es Soundcore, que es como figura en los filtros
+    if (sub) return sub;
     const n = normal(nombre);
     let mejor = "", pos = 1e9;
     for (const [m, re] of marcasRe) {
@@ -270,7 +339,7 @@
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;

@@ -12,17 +12,27 @@
 
 Un descuento no alcanza: antes de mirar el precio, el producto tiene que llegar al piso de gama de su rubro. Lo que no llega no es oferta, y la pestaña dice cuantos avisos con descuento quedaron afuera (Constitucion II: lo que no es comparable se separa y se cuenta).
 
-## Reglas (hechas, `js/ofertas.js`, `pisoDeGama`)
+## Categorias y criterios (hechos: `js/categorias.js`)
 
-Solo celulares y notebooks tienen piso; el resto de los rubros sigue como antes. Vale para la pestaña Ofertas, el feed RSS, /hoy/ y Telegram.
+Pedido del 17/10/2026: con el piso solo para celulares y notebooks, el resumen de Telegram llegaba lleno de componentes y perifericos (se ordenaba por porcentaje de descuento sobre un catalogo que es casi todo componentes) y no traia monitores, PCs, notebooks ni smartphones. Ahora cada aviso se evalua en **su** categoria, con numeros concretos, y lo que se exige a una no se exige a las otras.
 
-1. **RAM y almacenamiento, si el titulo los dice.** Celular: 6 GB de RAM (ideal 8) y 128 GB. Notebook: 16 GB (ideal 32) y 512 GB. Se leen de "8GB RAM", "6GB/128GB", "8+256GB" o los dos numeros en GB/TB del titulo.
-2. **Generacion del procesador, relativa al indice.** "Reciente" es la generacion mas nueva que hay a la venta en el propio indice o la anterior (iPhone, chip M, Galaxy S, Pixel, Snapdragon 8, Core i, Core Ultra, Ryzen). No hay una tabla de años que envejezca: cuando sale un iPhone nuevo, el de dos generaciones atras deja de ser oferta solo. Tambien vale con RAM suficiente: 16 GB con un Core de 8va generacion no pasa.
-3. **Año del modelo**, si el titulo lo trae: el mas nuevo del indice o el anterior.
-4. **Bateria** (celular, minimo 4.500 mAh), **refresco** (celular, minimo 90 Hz) y **pantalla HD** de notebook, si el titulo los trae.
-5. **Sin RAM en el titulo** (iPhone, MacBook) no se descarta: alcanza con una señal reciente (procesador o año). Sin ninguna de las dos, "sin datos" y no se destaca.
+La categoria sale del titulo: primero lo que se vende *para* un equipo (funda, cargador, soporte: perifericos), despues monitor, PC completa, periferico, componente por el principio del titulo ("Memoria RAM Notebook" es una memoria), notebook, smartphone, componente por palabras clave y, si nada coincide, "otro".
 
-La pestaña dice cuantos avisos con descuento quedaron afuera. Los umbrales estan en `PISOS` de `js/ofertas.js`.
+| Categoria | Minimos (si el titulo trae el dato y esta por debajo, no es oferta) | Gama media | Gama alta |
+| --- | --- | --- | --- |
+| **Monitor** | 144 Hz o mas (sin dato de Hz: no se destaca), panel que no sea TN, 24" o mas | 144 a 239 Hz con IPS, VA, OLED o Mini-LED | **240 Hz o mas con OLED, QD-OLED o Mini-LED** (240 Hz con IPS es media, y dice por que) |
+| **Smartphone** | 6 GB de RAM, 128 GB, bateria 4.500 mAh, 90 Hz, chip que no sea de entrada (Unisoc, Helio, Snapdragon 2/4/6, Dimensity 6xxx, Exynos 8xx), 4 años de actualizaciones, generacion reciente | lo que pasa y no es alta | 3 señales o mas de: 8 GB de RAM, 256 GB, chip tope (Snapdragon 8, Dimensity 9xxx, Tensor G3+, Exynos 24xx+, Apple A17+), camara de 108 MP o mas, 7 años de actualizaciones, OLED con 120 Hz, linea Pro/Ultra/Max/Fold/Flip, ultima generacion |
+| **Notebook** | 16 GB de RAM, 512 GB, generacion reciente del procesador, pantalla que no sea HD | lo que pasa y no es alta | 3 señales o mas de: 32 GB, 1 TB, CPU i7/i9, Ultra 7/9, Ryzen 7/9 o M Pro/Max, GPU RTX serie 40/50 de xx60 o mas, pantalla OLED, 2.5K o mas o 120 Hz, ultima generacion, DDR5 |
+| **PC completa** | 16 GB de RAM, 512 GB, generacion reciente del procesador | igual | igual que notebook |
+| **Componente** | segun el tipo, solo con dato: placa de video 8 GB de VRAM; memoria 16 GB y no DDR3; SSD 480 GB; fuente 550 W | placa 8 a 12 GB; memoria o SSD que pasa; fuente 550 W o mas | placa 16 GB de VRAM o mas; DDR5 de 32 GB a 6000 MHz o mas; NVMe PCIe Gen4/5 de 1 TB o mas; fuente 750 W o mas 80 Plus Gold o mejor |
+| **Periferico** | ninguno | - | - |
+
+- **Generacion reciente** = la mas nueva de su familia que hay en el indice, o la anterior. Ryzen avanza de a dos (5000, 7000, 9000): la anterior es la de dos numeros atras. Los componentes no tienen piso de generacion (un Ryzen 5 5600 suelto sigue siendo una oferta posible).
+- **Sin RAM en el titulo** (iPhone, MacBook): alcanza con un procesador o año reciente; sin ninguna señal, "sin datos" y no se destaca.
+- Limitacion conocida: la generacion se lee del numero del modelo, asi que un refresco como el Ryzen 5 5600GT (2024) cuenta como un 5000 y no pasa.
+- **Descuento minimo por categoria** (el tachado puede estar inflado, la baja propia no): smartphone, notebook y PC 10% y 5% propia; monitor 12% y 5%; componente y periferico 20% y 8%; sin categoria 15% y 3% (como antes). Tope de 60% para todas.
+- **Cupo en el resumen** (Telegram, RSS y /hoy/): 2 lugares reservados por categoria, hasta 3 antes de repartir lo que sobra, para que los componentes no acaparen. Dentro de la categoria: bajas propias primero, a igual señal la gama alta antes que la media, despues por descuento. Sale agrupado por categoria y cada linea de Telegram y del RSS dice la suya.
+- Los numeros viven en `MIN`, `DESCUENTO` y `CUPO` de `js/categorias.js`.
 
 ## Cruce de gamas
 
@@ -35,6 +45,17 @@ La idea de fondo: ver cuando la gama alta baja hasta el precio de la media. Una 
 - **La regla de vigencia no penaliza al modelo nuevo**: con salto chico los dos, nuevo y anterior, quedan en la misma gama. Lo que se agrega es la aclaracion del porque: cada oferta de una familia con generacion comparable dice, en la tarjeta y en el feed, por que cuenta o no como gama alta este año ("el Pixel 10 mejoró solo 1 de 5 apartados contra el 9: queda en la misma gama que el año anterior", "el Galaxy S 26 mejoró 4 de 5 apartados contra este modelo: ya no cuenta como gama alta").
 - Cada oferta que cruza dice **contra que cruza**: "mediana de los celulares de gama media de 256 GB: $X (N avisos)", en la tarjeta y en el feed.
 - Pendiente: comparar el salto con mas apartados (procesador por rendimiento real, carga rapida, proteccion IP, audio) cuando los titulos o las fichas los traigan.
+
+## Busqueda con marca y submarca
+
+«Comparar» desde una oferta armaba la consulta con las primeras palabras sin cifras: «Soundcore AeroFit 2 by Anker» buscaba «Soundcore AeroFit by». Ahora, cuando el titulo tiene una submarca conocida (`SUBMARCAS` en `js/buscador.js`: Soundcore, Eufy y Nebula de Anker; Redmi y Poco de Xiaomi; ROG y TUF de Asus; etc.) o un «by Marca»:
+
+1. Se limpia el titulo: sin «by Anker», sin palabras repetidas ni genericas (auriculares, bluetooth, colores...).
+2. Se prueba en orden: **submarca + modelo** («Soundcore AeroFit 2»), **solo el modelo** («AeroFit 2») y **marca madre + modelo** («Anker AeroFit 2»); la primera que da resultados.
+3. El modelo conserva su numero y se corta en la primera palabra generica o especificacion, asi AeroFit 2 no se confunde con AeroFit Pro ni con AeroClip (el buscador pide todas las palabras).
+4. Al filtrar por marca se usa la submarca (`marcaDe` devuelve «soundcore», no «anker»), que es como figura en los filtros.
+
+Sin submarca ni «by», «Comparar» busca como antes.
 
 ## Compras internacionales
 

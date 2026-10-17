@@ -120,3 +120,12 @@ class Publicacion(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Categoria(unittest.TestCase):
+    def test_la_linea_dice_la_categoria_cuando_el_dato_la_trae(self):
+        datos = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "categoria": "Notebook"}]}
+        self.assertIn('1. <i>Notebook</i> · <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(datos))
+
+    def test_sin_categoria_la_linea_queda_como_antes(self):
+        self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(OFERTAS))
