@@ -77,3 +77,38 @@ test("el mismo aviso con la URL escrita distinto cuenta una sola vez (www, barra
   assert.equal(O.calcularOfertas({ productos: [b, a] }).propias[0][3], "cg");                      // gana la fila directa
   assert.equal(O.calcularOfertas({ productos: [a, c] }).propias.length, 2);                        // otra variante: otro aviso
 });
+
+test("categorias: las unidades pegadas a lo que sigue (165Hz1ms, 5000mAh120Hz) se leen igual", () => {
+  assert.equal(C.evaluar("Monitor Gamer 27 IPS 165Hz1ms").nivel, "media");
+  assert.equal(C.evaluar("Monitor Gamer 27 IPS 165HZ").nivel, "media");
+  assert.equal(C.evaluar("Monitor Gamer MSI 24\" MAG 245F FHD Rapid IPS 240Hz 0.5ms 2xHDMI + 1xDP (II) (3242)").pasa, true);
+  assert.equal(C.evaluar("Celular Redmi 8GB 256GB 5000mAh120Hz").pasa, true);
+  assert.equal(C.evaluar("Celular Redmi 8GB 256GB 4000mAh90Hz").pasa, false);
+  assert.equal(C.aspectosDe("Celular Redmi 8GB 256GB 5000mAh120Hz 108MP").camara, 108);
+});
+
+test("categorias: el mismo equipo escrito con otras palabras", () => {
+  const cat = n => C.categoriaDe(n);
+  for (const n of ["Teléfono Celular Motorola Edge 50", "Motorola Edge 50 Fusion 8GB 256GB", "Honor 400 Lite 8GB 256GB", "Oppo Reno 13 12GB 512GB",
+      "Samsung Galaxy Z Flip7 12GB 256GB", "Nothing Phone (3) 12GB 256GB", "Vivo Y29 8GB 256GB", "OnePlus 13 16GB 512GB"]) assert.equal(cat(n), "smartphone", n);
+  for (const n of ["HP Victus 15 Ryzen 5 16GB 512GB", "Dell Inspiron 15 3520 Core i5 16GB 512GB", "Lenovo LOQ 15 RTX 4050 16GB 512GB", "Portátil Acer Aspire 5", "Chromebook Samsung 4GB"])
+    assert.equal(cat(n), "notebook", n);
+  for (const n of ["LG UltraGear 27GP850 Monitor Gaming 165Hz", "Samsung Odyssey G5 Monitor Curvo 27", "Monitor 27 IPS 100Hz"]) assert.equal(cat(n), "monitor", n);
+  assert.equal(cat("Pc Gamer Ryzen 5 con monitor 24 16GB 512GB"), "pc");
+  assert.equal(cat("Combo teclado mouse y monitor"), "periferico");
+  assert.notEqual(cat("Soporte para monitor doble"), "monitor");
+  assert.notEqual(cat("Cable HDMI para monitor 2m"), "monitor");
+});
+
+test("usado: las mismas palabras que en Python, y el formato SODIMM con otras grafias", () => {
+  for (const n of ["SSD Kingston 480GB seminuevo", "SSD Kingston 480GB semi nuevo", "Placa MSI RTX 4060 (Caja Abierta)", "Disco WD 1TB segunda mano", "SSD 2da mano"])
+    assert.equal(B.esUsado([n, 1, "u", "cg", "", 0, 0, "", "", ""]), true, n);
+  const motivo = n => B.motivoExclusion(B.normal(n), "memoria ddr4 8gb", ["memoria", "ddr4", "8gb"], "");
+  for (const n of ["Memoria SO DIMM DDR4 8GB", "Memoria S.O.DIMM DDR4 8GB", "Memoria SODIMM DDR4 8GB", "Memoria SO-DIMM DDR4 8GB"]) assert.equal(motivo(n), "formato", n);
+  assert.equal(B.specsDe("Monitor LG 21,5'' IPS 100Hz").Pantalla, '21.5"');
+  assert.equal(B.specsDe("Monitor LG 27″ IPS").Pantalla, '27"');
+});
+
+test("busqueda: S.O.DIMM tambien es SODIMM", () => {
+  assert.equal(halla("sodimm", "Memoria S.O.DIMM DDR4 8GB"), true);
+});

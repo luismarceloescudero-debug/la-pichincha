@@ -35,8 +35,10 @@ _OTRA_COSA = re.compile(r"\b(procesador|processor|ryzen|core\s?i[3579]|fuente|ga
                         r"ssd|nvme|disco|rtx|gtx|geforce|radeon|monitor|pendrive|pen drive|micro sd|sd card)\b", re.I)
 
 # Marcas de usado o de venta sin garantia de fabrica: no son el mismo producto que el nuevo.
+# La misma lista que js/buscador.js (RE_USADO) mas lo que solo importa al agrupar (bulk, OEM).
 _BLOQUEADOS = re.compile(
-    r"\b(usad[oa]s?|reacondicionad[oa]s?|refurbished|open ?box|outlet|bulk|oem)\b", re.I)
+    r"\b(usad[oa]s?|seminuev[oa]s?|semi[ -]nuev[oa]s?|segunda mano|2da mano|reacondicionad[oa]s?|refurbished|refurb|open ?box|"
+    r"caja[ -]?abierta|exhibici[oó]n|outlet|bulk|oem)\b", re.I)
 
 # Forma de un part number por rubro. Solo formas conocidas: lo demas no se toma como codigo.
 _FORMAS = {
@@ -68,7 +70,8 @@ def normalizar(nombre):
     t = unicodedata.normalize("NFKC", html.unescape(str(nombre)))
     t = re.sub(r"[\u2010-\u2015\u2212]", "-", t)
     t = re.sub(r"\u2032\u2032|\u2033|[\u201c\u201d]|''", '"', t)         # todas las comillas de pulgadas son una
-    return re.sub(r"\s+", " ", t.replace("\u00a0", " ")).strip()
+    t = re.sub(r"\s+", " ", t.replace("\u00a0", " ")).strip()
+    return re.sub(r"\s*\(\d{3,6}\)$", "", t)         # el codigo interno que algunas tiendas dejan al final: "... 2xHDMI (3242)"
 
 
 def rubro_de(nombre):
@@ -207,7 +210,7 @@ def _tokens(nombre):
     t = re.sub(r"\b\d+\s?mb/s\b|\bpc[345]-?\d+\b|\b\d(?:\.\d+)?\s?v\b|\bcl\s?\d{2}\b", " ", t)   # velocidades, PC4-25600, 1.35V, CL16
     t = re.sub(r"(\d)\s*(gb|tb|mhz)\b", r"\1\2", t)
     t = re.sub(r"\b(\d{1,4})g\b", r"\1gb", t)                              # 16G -> 16GB
-    t = re.sub(r"\bso[\s-]?dimm\b|\b(?:notebook|laptop)\b(?=.*\bddr[2345]\b)", "sodimm", t)
+    t = re.sub(r"\bs\.?o[\s.-]?dimm\b|\b(?:notebook|laptop)\b(?=.*\bddr[2345]\b)", "sodimm", t)
     t = re.sub(r"\bu[\s-]?dimm\b", "udimm", t)
     t = re.sub(r"\b(?:m|micro)[\s-]?atx\b|\be[\s-]?atx\b|\bmini[\s-]?itx\b|\batx\b", " ", t)
     t = re.sub(r"\blga\s?\d{3,4}\b|\bam[45]\b", " ", t)

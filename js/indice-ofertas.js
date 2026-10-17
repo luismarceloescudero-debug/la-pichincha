@@ -37,7 +37,7 @@ function listaOfertas() {
   if (!OFERTAS) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
-    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
+    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
                             ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
 }
@@ -66,15 +66,15 @@ function controlesOfertas(todas) {
     return [...m].sort((a, b) => b[1] - a[1]);
   };
   const coms = cuenta("com").slice(0, 6);
-  // "Outlet" o "Combo" son condiciones del aviso, no rubros.
-  const NO_RUBRO = ["outlet", "combo", "kit", "nuevo", "oferta", "usado"];
-  const cats = cuenta("cat").filter(([c, k]) => k >= 5 && c.length > 2 && !NO_RUBRO.includes(c)).slice(0, 8);
+  // Las categorias de la pagina (monitores, PCs, notebooks, smartphones, componentes y perifericos), no la primera palabra del titulo.
+  const porCat = new Map(cuenta("cat"));
+  const cats = Categorias.ORDEN.filter(c => porCat.has(c)).map(c => [c, porCat.get(c)]);
   const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
   return `<div class="of-ctrl">
     <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}</div>
     <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
     <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
-    <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, c[0].toUpperCase() + c.slice(1), k, OF.cat === c)).join("")}</div>
+    <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, Categorias.ETIQUETAS[c], k, OF.cat === c)).join("")}</div>
     <div class="of-fila">
       <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
       <button class="of-chip" data-of="cruce:1" aria-pressed="${OF.cruce}" title="Ofertas reales de gama alta que cuestan lo mismo o menos que la mediana de la gama media">Gama alta al precio de media <span class="n">${todas.filter(o => o.cruce).length}</span></button>

@@ -89,7 +89,7 @@ function buscarTodo(q) {
   const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
   const halla = [];
   IDX.productos.forEach((f, i) => { if (coincide(N[i])) halla.push(f); });
-  const g = Buscador.agruparPorModelo(Buscador.unaPorUrl(halla));          // el aviso que llega directo y por ComparaYa, una vez
+  const g = Buscador.agruparPorModelo(Buscador.unaPorUrl(halla), comercioDe);          // el aviso que llega directo y por ComparaYa, una vez
   OTRAS = g.otras;
   return g.filas;
 }

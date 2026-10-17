@@ -48,11 +48,13 @@
   const RE = {
     // lo que se vende PARA un equipo no es el equipo: "Funda iPhone 17" no tiene RAM
     accesorio: /^\s*(?:funda|fundas|case|carcasa|vidrio|protector|film|cargador|cable|adaptador|soporte|base|mochila|bolso|maletin|estuche|correa|pulsera|skin|lamina|bateria)\b|\b(?:para|de)\s+(?:notebook|laptop|macbook|celular|iphone|monitor)\b/i,
-    monitor: /^\s*monitor\b|\bmonitor\s+(?:gamer|curvo|led|oled|ips|\d{2})/i,
+    monitor: /^\s*monitor\b|\bmonitor\b/i,
+    // el monitor que viene dentro de un equipo o un lote no es un monitor
+    equipoConMonitor: /^\s*(?:pc|computadora|computador|combo|kit|notebook|all\s?in\s?one|mini\s?pc|escritorio|puesto)\b/i,
     pc: /^\s*(?:pc|computadora|computador|all\s?in\s?one|mini\s?pc|equipo\s+armado)\b/i,
     periferico: /^\s*combo\b.*\b(?:teclado|mouse|auricular)|^\s*(?:mouse|teclado|auricular|auriculares|headset|webcam|camara\s+web|parlante|parlantes|joystick|gamepad|control|mousepad|pad|microfono|silla|alfombrilla|volante|capturadora|impresora|router|switch|placa\s+de\s+sonido)\b/i,
-    notebook: /\b(notebook|laptop|macbook|chromebook|portatil|ideapad|thinkpad|vivobook|zenbook)(?![a-z])/i,
-    smartphone: /\b(celular|smartphone|iphone|redmi|poco\s?[a-z]\d|moto\s?[gex]\d|galaxy\s?[samzf]\d|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,
+    notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|portatil|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
+    smartphone: /\b(celular|smartphone|telefono|movil|iphone|redmi|poco\s?[a-z]\d|moto\s?(?:[gex]\d|edge|razr)|motorola\s+(?:edge|razr)|galaxy\s?(?:[samf]\d|z\s?(?:fold|flip))|honor\s?(?:\d|x\d|magic)|oppo\s?(?:reno|a\d|find)|vivo\s?[vyx]\d|oneplus|nothing\s+phone|zte\s?(?:blade|nubia)|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,
     // por el principio del titulo (antes que notebook/smartphone: "Memoria RAM Notebook SODIMM" es una memoria)
     componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:amd|intel|ryzen))\b/i,
     componente: /\b(?:ddr[345]|nvme|geforce|radeon|rtx|gtx|lga\s?\d{3,4})\b/i
@@ -61,7 +63,7 @@
   function categoriaDe(nombre) {
     const n = String(nombre);
     if (RE.accesorio.test(n)) return "periferico";
-    if (RE.monitor.test(n)) return "monitor";
+    if (RE.monitor.test(n) && !RE.equipoConMonitor.test(n)) return "monitor";
     if (RE.pc.test(n)) return "pc";
     if (RE.periferico.test(n)) return "periferico";
     if (RE.componenteInicio.test(n)) return "componente";
@@ -88,7 +90,7 @@
     return { ram: 0, rom: caps.length === 1 && caps[0] >= 64 ? caps[0] : 0 };   // una sola capacidad grande: es el almacenamiento
   }
 
-  const hzDe = n => { const m = [...String(n).matchAll(/\b(\d{2,3})\s?hz\b/gi)].map(x => +x[1]); return m.length ? Math.max(...m) : 0; };
+  const hzDe = n => { const m = [...String(n).matchAll(/\b(\d{2,3})\s?hz(?![a-z])/gi)].map(x => +x[1]); return m.length ? Math.max(...m) : 0; };
   const panelDe = n => /qd-?\s?oled/i.test(n) ? "qd-oled" : /mini-?\s?led/i.test(n) ? "mini-led" : /\boled\b|amoled/i.test(n) ? "oled"
     : /\bips\b/i.test(n) ? "ips" : /\bva\b/i.test(n) ? "va" : /\btn\b/i.test(n) ? "tn" : "";
   /* 27", 27'', 27″, 27”, 27 pulgadas, 23,8″ y 23.8: cada tienda escribe las pulgadas a su manera. */
@@ -121,8 +123,8 @@
     if (ram) a.ram = ram;
     if (rom) a.rom = rom;
     if (hzDe(nombre)) a.hz = hzDe(nombre);
-    if ((m = nombre.match(/\b(\d{4,5})\s?mah\b/i))) a.bateria = +m[1];
-    if ((m = nombre.match(/\b(\d{2,3})\s?mp\b/i))) a.camara = +m[1];
+    if ((m = nombre.match(/\b(\d{4,5})\s?mah(?![a-z])/i))) a.bateria = +m[1];
+    if ((m = nombre.match(/\b(\d{2,3})\s?mp(?![a-z])/i))) a.camara = +m[1];
     if (/\bamoled|\boled\b/i.test(nombre)) a.oled = 1;
     return a;
   }
@@ -214,7 +216,7 @@
     if (ram && rom && rom < m.rom) return no(categoria, `solo ${rom} GB de almacenamiento (mínimo ${m.rom})`);   // una ROM que no se lee no descalifica
     if (v.falla) return no(categoria, v.falla);
     if (categoria === "smartphone") {
-      if ((x = nombre.match(/\b(\d{4,5})\s?mah\b/i)) && +x[1] < m.bateria) return no(categoria, `batería de ${x[1]} mAh (mínimo ${m.bateria})`);
+      if ((x = nombre.match(/\b(\d{4,5})\s?mah(?![a-z])/i)) && +x[1] < m.bateria) return no(categoria, `batería de ${x[1]} mAh (mínimo ${m.bateria})`);
       if (hzDe(nombre) && hzDe(nombre) < m.hz) return no(categoria, `pantalla de ${hzDe(nombre)} Hz (mínimo ${m.hz})`);
       if (/\bunisoc|\bhelio\b|snapdragon\s?(?:[246]\d{0,2}\b)|dimensity\s?6\d{3}|exynos\s?8\d{2}/i.test(nombre)) return no(categoria, "chip de entrada");
       if ((x = nombre.match(/\b(\d{1,2})\s*(?:años|anos|years?)\s*(?:de\s*)?(?:actualizaciones|updates?|soporte)/i)) && +x[1] < m.actualizaciones)
@@ -224,7 +226,7 @@
     let puntos;
     if (categoria === "smartphone") {
       const act = nombre.match(/\b(\d{1,2})\s*(?:años|anos|years?)\s*(?:de\s*)?(?:actualizaciones|updates?|soporte)/i);
-      const cam = nombre.match(/\b(\d{2,3})\s?mp\b/i);
+      const cam = nombre.match(/\b(\d{2,3})\s?mp(?![a-z])/i);
       puntos = [ram >= m.ram, rom >= m.romAlta, v.punto, /\b(pro|ultra|max|fold|flip)\b/i.test(nombre),
         /snapdragon\s?8\s?(?:gen|elite)|dimensity\s?9\d{3}|tensor\s?g[3-9]|exynos\s?2[4-9]\d{2}|\ba(?:1[7-9]|[2-9]\d)\b/i.test(nombre),
         !!cam && +cam[1] >= m.camaraAlta, !!act && +act[1] >= m.actualizacionesAlta,
@@ -253,7 +255,7 @@
       if (/\bddr3\b/i.test(n)) return no("componente", "memoria DDR3, obsoleta");
       const cap = capacidadMemoria(n);
       if (cap && cap < m.memoria) return no("componente", `solo ${cap} GB de memoria (mínimo ${m.memoria})`);
-      const mhz = (x = n.match(/\b(\d{4,5})\s?mhz\b/i)) ? +x[1] : 0;
+      const mhz = (x = n.match(/\b(\d{4,5})\s?mhz(?![a-z])/i)) ? +x[1] : 0;
       return ok("componente", /\bddr5\b/i.test(n) && cap >= m.memoriaAlta && mhz >= m.mhzAlta ? "alta" : "media");
     }
     if (/\bssd\b|nvme/i.test(n) && !/\bhdd\b/i.test(n)) {

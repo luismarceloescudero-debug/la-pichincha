@@ -68,3 +68,25 @@ No quedan afuera: a igual precio dan mas opciones. Pasan por las mismas reglas d
 - **Costo puesto en casa** de lo internacional con la calculadora de importacion, para comparar contra el equivalente local.
 - **Pantalla, proteccion, audio y multimedia**: los titulos casi no los traen; se necesita la ficha de la tienda. Medir antes.
 - **No medido contra el indice real**: no hay `indice.json` local. Antes de dar por buena la lectura de titulos, mirar en la corrida diaria cuantos avisos de celulares y notebooks quedan afuera y por que.
+
+## Identidad del mismo producto entre tiendas (18/10/2026)
+
+Pedido: que un modelo no quede afuera solo porque una tienda lo publica distinto o porque no comparte las mismas caracteristicas en el titulo. Antes, por part number, la cobertura medida el 14/10 era RAM 38%, SSD 31% y placas de video 14%, con 0 a 4 avisos agrupados (`specs/007-identidad-por-gtin/viabilidad.md`), y las placas madre ni tenian codigo (`modelo.py` las excluia).
+
+Bugs encontrados al mirar como publica cada tienda, todos con un titulo real en los tests:
+
+1. **Placas madre sin identidad**: "Motherboard GIGABYTE B840M H AM5 DDR5", "Mother GIGABYTE B840M H DDR5 – AM5" y "Motherboard Gigabyte B840M H AM5 DDR5 mATX" ocupaban 3 lugares del resumen. Ahora tienen firma.
+2. **El rubro dependia de la primera palabra**: "SODIMM DDR5 8GB HIKSEMI", "Hiksemi Hiker Ddr4 32Gb 3200Mhz U-Dimm" y "Kingston Fury Beast DDR5 16GB" no eran memoria; y "Memoria RAM Notebook SODIMM" se descartaba por decir "notebook".
+3. **Tipografia**: guion largo (–), espacio duro, comillas de pulgadas distintas (27″), "16G" contra "16GB", "2Tb" contra "2000GB", "Negro" contra "Black", "U-Dimm" contra "UDIMM", el codigo interno "(3242)" de Max Tecno al final del nombre.
+4. **La misma placa con dos nombres**: "Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc" y "VGA MSI GeForce RTX 5070 Ti 16GB GDDR7 VENTUS 3X OC".
+5. **ComparaYa ignorado**: su API trae `specifications.Modelo`, `brand` y `extracted_specs` (Hz, pulgadas) y el indexador solo leia el titulo; un monitor "Gaming 25\" FHD 240Hz con panel IPS" (marca Samsung) no se encontraba al buscar Samsung ni se reconocia la marca.
+6. **Dos comercios por ComparaYa eran uno**: `agruparPorModelo` agrupaba por la clave de tienda (`comparaya`) y no por comercio (Frávega, Musimundo...), asi que descartaba el segundo.
+7. **El mismo aviso contado dos veces** cuando llegaba directo y por ComparaYa con la URL escrita distinto (www, barra final, utm_*): la busqueda mostraba las dos filas.
+8. **Unidades pegadas**: "165Hz1ms" y "5000mAh120Hz" no se leian.
+9. **Equipos con otro nombre**: Honor, Oppo, Vivo, Nothing, Galaxy Z Flip, Victus, Inspiron, Aspire... no eran celular ni notebook; un monitor con la marca primero ("LG UltraGear 27GP850 Monitor Gaming") tampoco.
+
+Lo que NO se hizo, a proposito: agrupar notebooks, celulares y monitores por un token con forma de codigo que aparezca en dos tiendas. Los titulos traen el procesador ("i5-13420H") y la placa ("RTX 4050") con forma de codigo y se mezclarian modelos distintos; antes de hacerlo hay que medirlo con el indice real (como en `specs/007`). Hoy esos rubros se agrupan por el part number de un catalogo o de ComparaYa.
+
+### Historial en el buscador
+
+Cada resultado dice "precio sin cambios desde el 12/10" (sin baja ni rebaja a la vista). La columna 11 del indice (`desde`) guarda la fecha del ultimo cambio, de `serie.desde_cuando`; el indice trae `historial.inicio`, el primer dia que se sigue el precio. **Antes de esa fecha no sabemos nada**: el seguimiento empezo el 7/10/2026, asi que "sin cambios desde marzo" solo se podra decir cuando haya historial de marzo; hasta entonces el texto aclara "cuando empezamos a seguirlo; puede ser mas antiguo". Una categoria sin ofertas en el dia (por ejemplo notebooks) se dice en la pestaña Ofertas y se manda al buscador.

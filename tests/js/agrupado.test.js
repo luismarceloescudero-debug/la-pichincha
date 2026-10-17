@@ -76,3 +76,24 @@ test("textoConteo dice productos y avisos solo cuando hay grupos", () => {
   assert.strictEqual(B.textoConteo(1, 1), "1 resultado");
   assert.strictEqual(B.textoConteo(41, 58), "41 productos en 58 avisos");
 });
+
+// ComparaYa lista a muchos comercios con una sola clave de tienda: el comercio es la tienda (f[4]), y uno que llega directo
+// y por ComparaYa es el mismo comercio.
+const via = (nombre, precio, comercio, modelo = "") =>
+  [nombre, precio, `https://${comercio}.test/${encodeURIComponent(nombre)}`, "comparaya", comercio, 0, 0, "", "", modelo];
+
+test("dos comercios que llegan por ComparaYa son dos tiendas, aunque compartan la clave comparaya", () => {
+  const x = via("Monitor Samsung LS27DG300ELXZB", 300, "Fravega", "LS27DG300ELXZB");
+  const y = via("Monitor Samsung 27 LS27DG300ELXZB", 280, "Musimundo", "LS27DG300ELXZB");
+  const { filas, otras } = B.agruparPorModelo([x, y]);
+  assert.deepStrictEqual(filas, [y]);
+  assert.deepStrictEqual(otras.get(y), [x]);
+});
+
+test("el mismo comercio directo y por ComparaYa cuenta una vez, con el nombre que le pasa quien llama", () => {
+  const directa = fila("Monitor Samsung LS27DG300ELXZB", 300, "cg", "LS27DG300ELXZB");
+  const agregador = via("Monitor Samsung 27 LS27DG300ELXZB", 310, "CompraGamer", "LS27DG300ELXZB");
+  const nombre = f => f[4] || { cg: "CompraGamer" }[f[3]] || f[3];
+  assert.strictEqual(B.agruparPorModelo([directa, agregador], nombre).otras.size, 0);
+  assert.strictEqual(B.agruparPorModelo([directa, agregador]).otras.size, 1);       // sin el nombre, parecen dos tiendas
+});

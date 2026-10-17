@@ -9,7 +9,7 @@
      o "16GB", "1TB" o "1000GB". Todo eso se lleva a una sola forma antes de comparar, en lo que se busca y en los nombres:
      asi "b840m-h" encuentra "B840M H", "udimm" encuentra "U-Dimm" y "ssd 1tb" encuentra "SSD 1000GB". */
   const tipografia = t => t.replace(/[\u2010-\u2015\u2212]/g, "-").replace(/\u00a0/g, " ")
-    .replace(/\bso[\s-]?dimm\b/g, "sodimm").replace(/\bu[\s-]?dimm\b/g, "udimm")
+    .replace(/\bs\.?o[\s.-]?dimm\b/g, "sodimm").replace(/\bu[\s-]?dimm\b/g, "udimm")
     .replace(/([a-z0-9])-(?=[a-z0-9])/g, "$1 ");
   /* "1 TB" y "1TB" son lo mismo, y tambien "16G" y "16GB", y "1000GB" y "1024GB" con "1TB". */
   const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2").replace(/(\d)g\b/g, "$1gb")
@@ -179,7 +179,7 @@
     if ((m = n.match(/\b(\d{3,5})\s?mhz\b/i))) s["Velocidad"] = m[1] + " MHz";
     if ((m = n.match(/\bcl\s?(\d{2})\b/i))) s["Latencia"] = "CL" + m[1];
     if ((m = n.match(/\b(\d{3,4})\s?w\b/i))) s["Potencia"] = m[1] + " W";
-    if ((m = n.match(/\b(\d{2}(?:\.\d)?)\s?(?:"|”|″|pulgadas|pulg\b)/i))) s["Pantalla"] = m[1] + '"';
+    if ((m = n.match(/\b(\d{2}(?:\.\d)?)\s?(?:"|”|″|''|′′|pulgadas|pulg\b)/i))) s["Pantalla"] = m[1] + '"';
     if ((m = n.match(/\b(\d{2,3})\s?hz\b/i))) s["Refresco"] = m[1] + " Hz";
     if ((m = n.match(/\b(4k|uhd|wqhd|qhd|2k|fhd|full\s?hd|1080p|1440p|720p)\b/i)))
       s["Resolución"] = /full/i.test(m[1]) ? "FHD" : m[1].toUpperCase();
@@ -193,13 +193,13 @@
 
   /* Lo usado, reacondicionado o de caja abierta ("Nuevo con caja abierta" de Mercado Libre) no compite con lo nuevo
      ni es una oferta. Lo dice el nombre o, mejor, la fuente (sello u: la condicion de ComparaYa). */
-  const RE_USADO = /outlet|usado|reacondicionad|refurb|open ?box|caja[ -]?abierta|exhibicion/;
+  const RE_USADO = /outlet|usado|seminuev|semi[ -]nuev|segunda mano|2da mano|reacondicionad|refurb|open ?box|caja[ -]?abierta|exhibicion/;
   const esUsado = f => (typeof f[8] === "string" && f[8].includes("u")) || RE_USADO.test(normal(String(f[0] || "")));
 
   /* Avisos que no son comparables con el resto aunque coincidan con la busqueda,
      salvo que la propia busqueda los pida. */
   const REGLAS_EXCLUSION = [
-    { id: "formato", re: /so-?dimm/, pide: /so-?dimm|notebook|laptop/ },
+    { id: "formato", re: /s\.?o[\s.-]?dimm/, pide: /s\.?o[\s.-]?dimm|notebook|laptop/ },
     // Un aviso que EMPIEZA con "Notebook", "PC" o "Combo" es un equipo completo: el
     // componente que buscas solo aparece de pasada. Anclado al inicio a proposito,
     // porque "SSD para notebook" si es un SSD.
@@ -291,7 +291,7 @@
 
   /* Devuelve { filas, otras }: cada grupo (2 o mas tiendas) queda como su fila mas barata, y `otras` dice,
      por esa fila, las demas tiendas de menor a mayor precio. Todo lo demas queda igual y en su lugar. */
-  function agruparPorModelo(filas) {
+  function agruparPorModelo(filas, comercio = x => x[4] || x[3]) {
     const porModelo = new Map();
     for (const f of filas) if (f[9]) (porModelo.get(f[9]) || porModelo.set(f[9], []).get(f[9])).push(f);
     const representante = new Map(), otras = new Map(), colapsadas = new Set();
@@ -301,8 +301,9 @@
         const cabeza = resto[0];
         const mios = resto.filter(x => compatibles(cabeza, x));
         resto = resto.filter(x => !mios.includes(x));
+        // Un comercio es una tienda: ComparaYa (f[3]) lista a muchos (f[4]), y uno que llega directo y por ComparaYa es el mismo.
         const porTienda = new Map();
-        for (const x of mios) if (!porTienda.has(x[3])) porTienda.set(x[3], x);
+        for (const x of mios) { const k = normal(comercio(x)); if (!porTienda.has(k)) porTienda.set(k, x); }
         if (porTienda.size < 2) continue;
         const miembros = [...porTienda.values()];
         otras.set(cabeza, miembros.slice(1));

@@ -348,3 +348,25 @@ class ModeloDeCualquierRubro(unittest.TestCase):
                  self.fila("Soporte para monitor LS27DG300ELXZB", "", "fh")]
         modelo.completar_con_conocidos(filas)
         self.assertEqual([f[9] for f in filas], ["LS27DG300ELXZB", "LS27DG300ELXZB", ""])
+
+
+class CodigoInternoDeLaTienda(unittest.TestCase):
+    def test_el_numero_entre_parentesis_al_final_no_es_parte_del_nombre(self):
+        self.assertEqual(modelo.normalizar("Monitor Gamer MSI 24 MAG 245F (II) (3242)"), "Monitor Gamer MSI 24 MAG 245F (II)")
+        self.assertEqual(modelo.normalizar("RE305 Range Extender TP Link AC1200 (7933)"), "RE305 Range Extender TP Link AC1200")
+        self.assertEqual(modelo.normalizar("Memoria 16GB (2 x 8GB)"), "Memoria 16GB (2 x 8GB)")             # un parentesis con texto se queda
+
+    def test_la_misma_placa_con_y_sin_el_codigo_interno_tiene_la_misma_firma(self):
+        a = modelo.firma_de("Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc (4455)")
+        b = modelo.firma_de("Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc")
+        self.assertEqual(a, b)
+
+
+class BloqueadosComoEnElBuscador(unittest.TestCase):
+    """Python y JS tienen que coincidir en que es usado: si no, un aviso "caja abierta" se agrupa con lo nuevo."""
+
+    def test_caja_abierta_exhibicion_y_seminuevo_no_se_agrupan(self):
+        for nombre in ("Placa de Video MSI RTX 4060 8GB (Caja Abierta)", "Disco SSD Kingston 480GB Exhibición", "Memoria Kingston DDR4 16GB Seminuevo",
+                       "Memoria Kingston DDR4 16GB semi nuevo", "Disco SSD WD 1TB segunda mano", "SSD Kingston 480GB open box", "SSD Kingston 480GB Refurb"):
+            self.assertTrue(modelo.bloqueado_para_agrupar(nombre), nombre)
+            self.assertIsNone(modelo.firma_de(nombre), nombre)
