@@ -23,7 +23,7 @@ URLS = {
     "erapi": "https://open.er-api.com/v6/latest/USD",
     "frankfurter": "https://api.frankfurter.dev/v1/latest?base=USD",
 }
-UA = "La Pichincha (+https://luismarceloescudero-debug.github.io/la-pichincha/) generar_cotizaciones.py"
+UA = "La Pichincha (+https://pichinchadeldia.com.ar/) generar_cotizaciones.py"
 TIEMPO_MAXIMO = 20   # segundos por fuente
 
 
