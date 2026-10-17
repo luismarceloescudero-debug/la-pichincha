@@ -15,6 +15,7 @@ catalogo (json, api y listados) y cualquier tienda nueva cae en alguna.
 
 import argparse
 import html
+import math
 import http.client
 import json
 import re
@@ -106,23 +107,28 @@ def _clave(texto):
 _SIN_MARCA = {"", "generico", "generica", "sin marca", "otro", "otra", "otros", "varios", "n a", "na"}
 
 
+def _numero_razonable(x, minimo, maximo):
+    """Un numero de verdad y en rango: el JSON de una API puede traer Infinity, NaN, un booleano o un texto."""
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) and minimo <= x <= maximo
+
+
 def nombre_enriquecido(titulo, marca=None, specs=None):
     """El titulo de un agregador con lo que sabe y el titulo no dice. ComparaYa publica la marca y las especificaciones
     en campos aparte, y muchas tiendas escriben el titulo sin la marca ("Monitor Gaming 25\" FHD 240Hz con panel IPS",
     marca Samsung) o sin los Hz: sin eso el aviso no aparece al buscar por marca, no se reconoce la marca para ordenarlo
     y los minimos de gama (Hz, pulgadas) no lo ven. Solo agrega lo que falta, al final; nunca cambia lo que el titulo ya dice."""
     nombre = limpio(titulo)
-    if marca and _clave(marca).strip() not in _SIN_MARCA:
+    if isinstance(marca, str) and _clave(marca).strip() not in _SIN_MARCA:
         primera = _clave(marca).split()[0]
         if " " + primera + " " not in _clave(nombre):
             # al final: en el medio partiria "Placa de Video", "Disco Solido" o "RTX 4060" y el rubro dejaria de reconocerse
             nombre = f"{nombre} {limpio(marca)}"
     specs = specs if isinstance(specs, dict) else {}
     hz = specs.get("refresh_rate_hz")
-    if isinstance(hz, (int, float)) and hz > 0 and not re.search(r"\d\s?hz", nombre, re.I):
+    if _numero_razonable(hz, 30, 1000) and not re.search(r"\d\s?hz", nombre, re.I):
         nombre += f" {int(hz)}Hz"
     pulgadas = specs.get("screen_inches")
-    if isinstance(pulgadas, (int, float)) and pulgadas > 0:
+    if _numero_razonable(pulgadas, 5, 120):
         cifra = format(float(pulgadas), "g")
         dicho = re.search(r"\d\s?(?:\"|''|\u2033|\u201d|pulg)", nombre, re.I) or re.search(
             r"\b" + re.escape(cifra).replace(r"\.", "[.,]") + r"\b", nombre)
@@ -133,7 +139,7 @@ def nombre_enriquecido(titulo, marca=None, specs=None):
 
 def url_valida(url):
     """Una URL http(s) sin comillas, espacios ni corchetes angulares: lo unico que puede ir a un enlace del sitio."""
-    return isinstance(url, str) and re.fullmatch(r"https?://[^\s\"'<>`]+", url, re.I) is not None
+    return isinstance(url, str) and re.fullmatch(r"https?://[^\s\"'<>`\\\x00-\x1f]+", url, re.I) is not None
 
 
 def absoluta(base, ruta):
@@ -596,7 +602,8 @@ def main(argv=None):
             actuales[(clave, it["url"])] = it["precio"]
             desde = serie.desde_cuando(series.get((clave, it["url"]), []), hoy, it["precio"])
             salida.append([it["nombre"], it["precio"], it["url"], clave,
-                           it.get("via") or "", lista, propia, it.get("imagen") or "",
+                           str(it.get("via") or ""), lista, propia,
+                           it.get("imagen") if url_valida(it.get("imagen")) else "",   # la foto va a un CSS del sitio
                            (it.get("sellos") or "")
                            + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
                            modelo.modelo_de(it["nombre"], it.get("sku")),

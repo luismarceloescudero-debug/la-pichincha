@@ -37,7 +37,8 @@ function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {
     buscarTodo: q => {
       const c = B.filtroDe(q);
       if (!c) return [];
-      const g = B.agruparPorModelo(idx.productos.filter((f, i) => c(nombres[i])));
+      const comercio = f => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3];
+      const g = B.agruparPorModelo(B.unaPorUrl(idx.productos.filter((f, i) => c(nombres[i]))), comercio);
       for (const [f, resto] of g.otras) otras.set(f, resto);
       return g.filas;
     },

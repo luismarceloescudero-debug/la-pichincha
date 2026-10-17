@@ -55,3 +55,19 @@ test("una URL maliciosa de una tienda no rompe el enlace ni corre codigo", () =>
   assert.doesNotMatch(html, /href="javascript:/i);
   assert.equal(correr('enlace("https://ok.test/a?b=1&c=2")'), "https://ok.test/a?b=1&amp;c=2");
 });
+
+test("una imagen con comillas no inyecta CSS en la tarjeta, y la planilla CSV no ejecuta formulas", () => {
+  const mala = fila("Celular Motorola Edge 50 8GB 256GB", 450000, 520000);
+  mala[7] = 'x");position:fixed;inset:0;z-index:9999;background:url("https://evil.test/p.png';
+  const buena = fila("Celular Motorola G85 8GB 256GB", 300000, 360000);
+  buena[7] = "https://img.test/g85.jpg";
+  const { correr, els } = pagina([mala, buena]);
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.doesNotMatch(html, /position:fixed/);
+  assert.match(html, /url\(&quot;https:\/\/img\.test\/g85\.jpg&quot;\)/);
+  assert.equal(correr('csvCampo("=HYPERLINK(\\"https://evil\\")")'), '"\'=HYPERLINK(""https://evil"")"');
+  assert.equal(correr('csvCampo("Memoria 16GB")'), '"Memoria 16GB"');
+  assert.equal(correr("esc(\"a'b\")"), "a&#39;b");
+  assert.equal(correr('enlace("https://evil\\\\@good.com/x")'), "#");
+});

@@ -138,10 +138,10 @@ test("enlaceAmazon recorta el termino y no arma nada si esta vacio", () => {
 });
 
 test("cambioDe: desde cuando tiene el aviso su precio, y que el historial empezo en una fecha", () => {
-  assert.equal(P.cambioDe("2026-10-12", "2026-10-07"), "precio sin cambios desde el 12/10");
-  assert.equal(P.cambioDe("2026-10-07", "2026-10-07"), "precio sin cambios desde el 7/10 (cuando empezamos a seguirlo; puede ser más antiguo)");
-  assert.equal(P.cambioDe("2026-09-30", "2026-10-07"), "precio sin cambios desde el 30/9 (cuando empezamos a seguirlo; puede ser más antiguo)");
-  assert.equal(P.cambioDe("2026-10-12", ""), "precio sin cambios desde el 12/10");
+  assert.equal(P.cambioDe("2026-10-12", "2026-10-07"), "precio sin cambios desde el 12/10/2026");
+  assert.equal(P.cambioDe("2026-10-07", "2026-10-07"), "precio sin cambios desde el 7/10/2026 (cuando empezamos a seguirlo; puede ser más antiguo)");
+  assert.equal(P.cambioDe("2026-09-30", "2026-10-07"), "precio sin cambios desde el 30/9/2026 (cuando empezamos a seguirlo; puede ser más antiguo)");
+  assert.equal(P.cambioDe("2026-10-12", ""), "precio sin cambios desde el 12/10/2026");
 });
 
 test("cambioDe: sin fecha o con una fecha rara no afirma nada", () => {

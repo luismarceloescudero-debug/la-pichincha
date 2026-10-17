@@ -141,3 +141,15 @@ test("revision: los hallazgos de code-review quedan cubiertos", () => {
   assert.equal(O.DESCUENTO_MIN, undefined);
   assert.equal(O.BAJA_MIN_PCT, undefined);
 });
+
+test("trail of bits: el cupo, el comercio no textual y la busqueda de las paginas /precios/", () => {
+  const f = (n, p, l) => [n, p, "https://t.test/" + encodeURIComponent(n), "cg", "", l, 0, "", "", ""];
+  // "otro" no tiene lugar reservado, pero cuando entra lo hace con su mejor oferta, no con la tercera
+  const comp = Array.from({ length: 12 }, (_, i) => f(`Memoria Kingston Fury DDR5 32GB v${i}`, 100000 + i, 200000));
+  const otros = [f("Smart Tv A 55", 45000, 100000), f("Smart Tv B 55", 50000, 100000), f("Smart Tv C 55", 55000, 100000)];
+  const d = O.destacadas({ productos: [...comp, ...otros] }, 6);
+  const tv = d.filter(o => o.categoria === "otro").map(o => Math.round(o.off * 100));
+  assert.ok(tv.length >= 1 && tv[0] === 55, JSON.stringify(tv));
+  // un comercio que no es texto no rompe la busqueda
+  assert.doesNotThrow(() => B.agruparPorModelo([["x", 1, "u", "comparaya", 123, 0, 0, "", "", "M"], ["y", 2, "v", "cg", "", 0, 0, "", "", "M"]]));
+});

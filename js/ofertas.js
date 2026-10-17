@@ -110,13 +110,17 @@
     // gana el mejor ubicado.
     const unico = lista => { const vistos = new Set(); return lista.filter(o => !o.f[9] || (!vistos.has(o.f[9]) && vistos.add(o.f[9]))); };
     const grupos = new Map(C.ORDEN.map(c => [c, unico(todas.filter(o => o.categoria === c).sort(por))]));
-    const elegidas = new Set();
-    const ronda = (desde, hasta, cats) => {
-      for (let i = desde; i < hasta; i++)
-        for (const c of cats) { const o = grupos.get(c)[i]; if (o && elegidas.size < max) elegidas.add(o); }
+    const elegidas = new Set(), puestos = new Map(C.ORDEN.map(c => [c, 0]));
+    // Cada categoria avanza por su propia lista: "otro" no tiene lugar reservado, pero cuando entra lo hace con su mejor oferta.
+    const ronda = (hasta, cats) => {
+      for (let vuelta = 0; vuelta < hasta; vuelta++)
+        for (const c of cats) {
+          const k = puestos.get(c), o = grupos.get(c)[k];
+          if (o && k < hasta && elegidas.size < max) { elegidas.add(o); puestos.set(c, k + 1); }
+        }
     };
-    ronda(0, C.CUPO.reservado, C.ORDEN.filter(c => c !== "otro"));       // lugar reservado de cada categoria
-    ronda(C.CUPO.reservado, C.CUPO.tope, C.ORDEN);                         // lo que sobra, hasta el tope
+    ronda(C.CUPO.reservado, C.ORDEN.filter(c => c !== "otro"));          // lugar reservado de cada categoria
+    ronda(C.CUPO.tope, C.ORDEN);                                           // lo que sobra, hasta el tope
     for (const o of unico([...todas].sort(por))) if (elegidas.size < max) elegidas.add(o);   // si aun falta, lo mejor que quede
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }

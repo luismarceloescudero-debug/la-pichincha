@@ -52,7 +52,12 @@ async function bajarArchivo(nombre, contenido, tipo, boton) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-const csvCampo = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+/* Una celda que empieza con = + - @ es una formula para Excel: un titulo "=HYPERLINK(...)" de una tienda se ejecutaria al
+   abrir el archivo. Se le antepone un apostrofo, que la planilla muestra como texto. */
+const csvCampo = v => {
+  const t = String(v == null ? "" : v);
+  return `"${(/^[=+\-@\t\r]/.test(t) ? "'" + t : t).replace(/"/g, '""')}"`;
+};
 
 function aCSV(filas) {
   // Punto y coma y BOM: asi Excel en español lo abre en columnas sin preguntar nada.
