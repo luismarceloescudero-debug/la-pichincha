@@ -78,11 +78,11 @@
     const n = String(nombre).replace(/(\d),(\d)/g, "$1.$2");
     let m;
     const caps = [...n.matchAll(/\b(\d{1,4})\s?(gb|tb)\b/gi)].map(x => aGB(x[1], x[2])).sort((a, b) => a - b);
-    if ((m = n.match(/(\d{1,3})\s?gb\s*(?:de\s*)?ram\b/i) || n.match(/\bram\s*(?:de\s*)?(\d{1,3})\s?gb/i))) {
+    if ((m = n.match(/(\d{1,3})\s?gb\s*(?:de\s*)?(?:memoria\s+)?ram\b/i) || n.match(/\bram\s*[:\-]?\s*(?:de\s*)?(\d{1,3})\s?gb/i))) {
       const otras = caps.filter(c => c !== +m[1]);       // lo que no es la RAM es el almacenamiento
       return { ram: +m[1], rom: otras.length ? otras[otras.length - 1] : 0 };
     }
-    if ((m = n.match(/\b(\d{1,2})\s?(?:gb)?\s*[+\/]\s*(\d{2,4})\s?(gb|tb)\b/i)) && +m[1] <= 64)
+    if ((m = n.match(/\b(\d{1,2})\s?(?:gb)?\s*[+\/|]\s*(\d{2,4})\s?(gb|tb)\b/i)) && +m[1] <= 64)
       return { ram: +m[1], rom: aGB(m[2], m[3]) };
     if (caps.length >= 2 && caps[0] <= 64) return { ram: caps[0], rom: caps[caps.length - 1] };
     return { ram: 0, rom: caps.length === 1 && caps[0] >= 64 ? caps[0] : 0 };   // una sola capacidad grande: es el almacenamiento
@@ -91,7 +91,8 @@
   const hzDe = n => { const m = [...String(n).matchAll(/\b(\d{2,3})\s?hz\b/gi)].map(x => +x[1]); return m.length ? Math.max(...m) : 0; };
   const panelDe = n => /qd-?\s?oled/i.test(n) ? "qd-oled" : /mini-?\s?led/i.test(n) ? "mini-led" : /\boled\b|amoled/i.test(n) ? "oled"
     : /\bips\b/i.test(n) ? "ips" : /\bva\b/i.test(n) ? "va" : /\btn\b/i.test(n) ? "tn" : "";
-  const pulgadasDe = n => { const m = String(n).match(/(?:^|\s)(\d{2}(?:\.\d)?)(?=\s|"|''|”|$|pulgadas|pulg)/i); return m ? parseFloat(m[1]) : 0; };
+  /* 27", 27'', 27″, 27”, 27 pulgadas, 23,8″ y 23.8: cada tienda escribe las pulgadas a su manera. */
+  const pulgadasDe = n => { const m = String(n).match(/(?:^|\s)(\d{2}(?:[.,]\d)?)(?=\s|"|''|”|″|′′|$|pulgadas|pulg)/i); return m ? parseFloat(m[1].replace(",", ".")) : 0; };
 
   /* Generaciones (familia -> numero) para saber que es "reciente": se comparan con lo mas nuevo del indice. `paso` es
      cuanto avanza la numeracion por generacion (Ryzen salta de a dos: 5000, 7000, 9000). */
@@ -243,7 +244,7 @@
     const m = MIN.componente, n = String(nombre);
     let x;
     if (/\b(?:rtx|gtx|rx\s?\d{4}|radeon|geforce)\b|placa de video|tarjeta grafica/i.test(n)) {
-      const vram = (x = n.match(/\b(\d{1,2})\s?gb\b/i)) ? +x[1] : 0;
+      const vram = (x = n.match(/\b(\d{1,2})\s?g(?:b)?\b/i)) ? +x[1] : 0;     // 16GB o 16G, como lo escribe cada tienda
       if (!vram) return ok("componente", null);
       if (vram < m.vram) return no("componente", `solo ${vram} GB de VRAM (mínimo ${m.vram})`);
       return ok("componente", vram >= m.vramAlta ? "alta" : "media");

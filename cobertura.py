@@ -4,8 +4,9 @@
 Uso:
     python cobertura.py indice.json --salida cobertura.json [--previa RUTA_O_URL] [--resumen RUTA]
 
-Por rubro (ram, ssd, gpu): avisos totales, cuantos tienen codigo de modelo, cuantos quedaron en un grupo
-(mismo codigo en 2 o mas tiendas) y cuantos grupos son. Con --previa compara con la corrida anterior y
+Por rubro (ram, ssd, gpu, mb): avisos totales, cuantos tienen codigo de modelo (`por_firma`: de esos, cuantos
+lo recibieron por la firma normalizada y no por un part number), cuantos quedaron en un grupo (mismo codigo en 2 o
+mas tiendas) y cuantos grupos son. Con --previa compara con la corrida anterior y
 marca una caida de mas de 10 puntos de cobertura: suele ser una tienda que cambio sus nombres.
 Nunca hace fallar la corrida por la comparacion.
 """
@@ -30,7 +31,7 @@ def codigo_de(fila):
 
 
 def informe(filas):
-    rubros = {r: {"avisos": 0, "con_codigo": 0, "agrupados": 0, "grupos": 0} for r in modelo.RUBROS}
+    rubros = {r: {"avisos": 0, "con_codigo": 0, "por_firma": 0, "agrupados": 0, "grupos": 0} for r in modelo.RUBROS}
     tiendas_por_codigo = defaultdict(set)
     avisos_por_codigo = defaultdict(int)
     rubro_por_codigo = {}
@@ -43,6 +44,8 @@ def informe(filas):
         if not codigo:
             continue
         rubros[rubro]["con_codigo"] += 1
+        if codigo.startswith("~"):
+            rubros[rubro]["por_firma"] += 1
         tiendas_por_codigo[codigo].add(f[3])
         avisos_por_codigo[codigo] += 1
         rubro_por_codigo[codigo] = rubro
@@ -100,10 +103,10 @@ def leer_previa(origen):
 
 def resumen_md(datos, alertas):
     lineas = ["### Identidad por codigo de modelo", "",
-              "| Rubro | Avisos | Con codigo | Agrupados | Grupos |", "|---|---:|---:|---:|---:|"]
+              "| Rubro | Avisos | Con codigo | Por firma | Agrupados | Grupos |", "|---|---:|---:|---:|---:|---:|"]
     for rubro, r in datos["rubros"].items():
         lineas.append(f"| {rubro} | {r['avisos']} | {r['con_codigo']} ({porcentaje(r):.0f}%) "
-                      f"| {r['agrupados']} | {r['grupos']} |")
+                      f"| {r.get('por_firma', 0)} | {r['agrupados']} | {r['grupos']} |")
     s = datos.get("serie")
     if s:
         lineas += ["", f"Serie de precios: {s['dias_de_historia']} días de historia · avisos con mínimo de 30 días: "

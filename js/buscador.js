@@ -5,9 +5,16 @@
   "use strict";
 
   const normal = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  /* "1 TB" y "1TB" son lo mismo: se pegan la cifra y la unidad antes de comparar. */
-  const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2");
-  const normalBusq = t => pegarUnidades(normal(t));
+  /* Cada tienda escribe el mismo producto con otra tipografia: guiones largos, espacios duros, "U-Dimm" o "UDIMM", "16G"
+     o "16GB", "1TB" o "1000GB". Todo eso se lleva a una sola forma antes de comparar, en lo que se busca y en los nombres:
+     asi "b840m-h" encuentra "B840M H", "udimm" encuentra "U-Dimm" y "ssd 1tb" encuentra "SSD 1000GB". */
+  const tipografia = t => t.replace(/[\u2010-\u2015\u2212]/g, "-").replace(/\u00a0/g, " ")
+    .replace(/\bso[\s-]?dimm\b/g, "sodimm").replace(/\bu[\s-]?dimm\b/g, "udimm")
+    .replace(/([a-z0-9])-(?=[a-z0-9])/g, "$1 ");
+  /* "1 TB" y "1TB" son lo mismo, y tambien "16G" y "16GB", y "1000GB" y "1024GB" con "1TB". */
+  const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2").replace(/(\d)g\b/g, "$1gb")
+    .replace(/\b(\d{4,5})gb\b/g, (m, n) => +n % 1000 === 0 ? +n / 1000 + "tb" : +n % 1024 === 0 ? +n / 1024 + "tb" : m);
+  const normalBusq = t => pegarUnidades(tipografia(normal(t)));
   const esMedida = t => /^\d+(?:gb|tb|mb|mhz|ghz|hz|w|v)?$/.test(t);
   const escaparRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -262,6 +269,26 @@
   const antes = (x, y) => x[1] - y[1] || (x[3] < y[3] ? -1 : x[3] > y[3] ? 1 : 0) || (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0)
     || (x[2] < y[2] ? -1 : x[2] > y[2] ? 1 : 0);
 
+  /* La misma direccion escrita distinto: sin "www", sin barra final, sin parametros de seguimiento (utm_*, gclid, fbclid, ref...).
+     Un parametro que identifica al producto (?variante=2) se conserva: es otro aviso. */
+  function urlClave(url) {
+    const m = String(url).match(/^https?:\/\/(?:www\.)?([^/?#]*)([^?#]*)(?:\?([^#]*))?/i);
+    if (!m) return String(url);
+    const params = (m[3] || "").split("&").filter(p => p && !/^(utm_|gclid|fbclid|msclkid|ref=|source=|mc_|_hs)/i.test(p)).sort();
+    return m[1].toLowerCase() + m[2].replace(/\/+$/, "") + (params.length ? "?" + params.join("&") : "");
+  }
+
+  /* El mismo aviso llega directo y por un agregador (ComparaYa): misma direccion, mismo precio. Uno por direccion, y gana
+     la fila de la tienda (sin "via") sobre la del agregador. Conserva el orden. */
+  function unaPorUrl(filas) {
+    const por = new Map();
+    for (const f of filas) {
+      const k = urlClave(f[2]), ya = por.get(k);
+      if (!ya || (ya[4] && !f[4])) por.set(k, f);
+    }
+    return [...por.values()];
+  }
+
   /* Devuelve { filas, otras }: cada grupo (2 o mas tiendas) queda como su fila mas barata, y `otras` dice,
      por esa fila, las demas tiendas de menor a mayor precio. Todo lo demas queda igual y en su lugar. */
   function agruparPorModelo(filas) {
@@ -339,7 +366,7 @@
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
-                ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;

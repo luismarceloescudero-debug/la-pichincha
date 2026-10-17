@@ -351,3 +351,51 @@ class Descarga(unittest.TestCase):
         with mock.patch.object(indexar.urllib.request, "urlopen", return_value=respuesta), mock.patch.object(indexar.time, "sleep"):
             with self.assertRaises(OSError):
                 indexar.bajar("https://t.test/")
+
+
+class NombreEnriquecido(unittest.TestCase):
+    """ComparaYa publica la marca y las especificaciones en campos aparte; muchos titulos no las dicen."""
+
+    def test_agrega_la_marca_que_el_titulo_no_dice(self):
+        self.assertEqual(indexar.nombre_enriquecido('Monitor Gaming 25" FHD 240Hz con panel IPS', "Samsung"),
+                         'Monitor Samsung Gaming 25" FHD 240Hz con panel IPS')
+
+    def test_no_repite_la_marca_ni_la_agrega_si_es_generica(self):
+        self.assertEqual(indexar.nombre_enriquecido("Monitor Samsung Odyssey G3", "SAMSUNG"), "Monitor Samsung Odyssey G3")
+        self.assertEqual(indexar.nombre_enriquecido("Monitor Hp 6N4E8AA 21", "HP"), "Monitor Hp 6N4E8AA 21")
+        for marca in (None, "", "Genérico", "Sin marca", "N/A"):
+            self.assertEqual(indexar.nombre_enriquecido("Monitor 24", marca), "Monitor 24")
+
+    def test_agrega_los_hz_y_las_pulgadas_que_faltan(self):
+        self.assertEqual(indexar.nombre_enriquecido("Monitor Samsung LS25BG400ELXZB", "Samsung",
+                                                    {"screen_inches": 25, "refresh_rate_hz": 240}),
+                         'Monitor Samsung LS25BG400ELXZB 240Hz 25"')
+
+    def test_no_agrega_lo_que_el_titulo_ya_dice_con_otra_tipografia(self):
+        for titulo, pulgadas in (("Monitor Hp 21,5'' E22 G5", 21.5), ("Monitor Noblex 27 Pulgadas Nxsm2700", 27),
+                                 ("Monitor 27\u2033 Gamer", 27), ("Monitor Gamer 21.5 FHD", 21.5), ('Monitor 27" Led', 27)):
+            self.assertEqual(indexar.nombre_enriquecido(titulo, None, {"screen_inches": pulgadas}), titulo, titulo)
+        for titulo in ('Monitor 27" 144 hz', "Monitor 27 144Hz", "Monitor 27 144HZ"):
+            self.assertEqual(indexar.nombre_enriquecido(titulo, None, {"refresh_rate_hz": 144}), titulo, titulo)
+
+    def test_especificaciones_raras_no_rompen(self):
+        self.assertEqual(indexar.nombre_enriquecido("Monitor 24", "Lg", {"screen_inches": None, "refresh_rate_hz": "x"}), "Monitor Lg 24")
+        self.assertEqual(indexar.nombre_enriquecido("Monitor 24", None, "no es un dict"), "Monitor 24")
+
+    def test_comparaya_trae_el_modelo_y_los_hz_en_el_indice(self):
+        cuerpo = json.loads(leer("comparaya", "api.json"))
+
+        def bajar(u):
+            return json.dumps(cuerpo if "page=1&" in u else {"data": []})
+
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_api(TIENDAS["comparaya"], 3)
+        por_url = {it["url"]: it for it in items}
+        hp = [it for it in items if "6N4E8AA" in it["nombre"].upper()][0]
+        self.assertEqual(hp["sku"], "6N4E8AA")
+        samsung = [it for it in items if it["nombre"].startswith("Monitor Samsung Gaming 25") or "Gaming 25" in it["nombre"]][0]
+        self.assertIn("Samsung", samsung["nombre"])
+        self.assertIn("240Hz", samsung["nombre"])
+        self.assertIsNone(samsung["sku"])
+        self.assertEqual(len(por_url), len(items))

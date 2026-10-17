@@ -78,6 +78,15 @@
     return r && a.n >= r.n ? "sin verificar hoy" : `sin verificar desde el ${a.dia}/${a.mes}`;
   }
 
+  /* Desde cuando tiene el aviso el precio de hoy, para el buscador: "precio sin cambios desde el 7/10". El historial empezo
+     en una fecha; antes de eso no sabemos, y se dice. `desde` y `inicio` son fechas AAAA-MM-DD. Sin dato: nada. */
+  function cambioDe(desde, inicio) {
+    const f = /^(\d{4})-(\d{2})-(\d{2})$/.exec(desde || "");
+    if (!f) return "";
+    const txt = `precio sin cambios desde el ${+f[3]}/${+f[2]}`;
+    return inicio && desde <= inicio ? `${txt} (cuando empezamos a seguirlo; puede ser más antiguo)` : txt;
+  }
+
   /* El comercio es el dominio: articulo.mercadolibre.com.ar -> mercadolibre.com.ar */
   function comercioDeUrl(href) {
     let host = "";
@@ -117,7 +126,7 @@
     return t ? "https://www.amazon.com/s?" + new URLSearchParams({ k: t, tag: AMAZON_TAG }) : null;
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);

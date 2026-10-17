@@ -154,7 +154,7 @@ function pintarOfertas(append) {
   const todas = listaOfertas();
   if (!todas.length) {
     const sinCampo = !(IDX.campos || []).includes("antes");
-    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento";
+    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento: en Buscar ves los precios y desde cuándo no cambian";
     caja.innerHTML = sinCampo ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
                               : `<p class="sub">Volvé mañana: el índice se rearma una vez por día. El último relevamiento fue ${Pagina.cuando(IDX.generado)}.</p>`;
     return;
@@ -165,8 +165,14 @@ function pintarOfertas(append) {
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
   est.textContent = `${OF_ACTUAL.length} ofertas`
     + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
+    + nota
     + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
   const resto = OF_ACTUAL.length - visibles.length;
+  // Una categoria sin ofertas no es un error: puede no haber habido descuentos. Se dice, y se manda al buscador, que muestra
+  // desde cuando no cambia el precio.
+  const conOferta = new Set([...OFERTAS.categorias.values()].map(g => g.categoria));
+  const sin = ["smartphone", "notebook", "monitor", "pc"].filter(c => !conOferta.has(c)).map(c => Categorias.ETIQUETAS[c].toLowerCase());
+  const nota = sin.length ? ` · hoy sin ofertas en ${sin.join(", ")}: en Buscar ves sus precios y desde cuándo no cambian` : "";
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
       ? `<div class="ogrid">${visibles.map((o, i) => cardOferta(o, i, desde)).join("")}</div>`

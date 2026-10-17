@@ -19,16 +19,9 @@
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
   const C = typeof module === "object" && module.exports ? require("./categorias.js") : raiz.Categorias;
 
-  /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL, mismo
-     precio. Uno por URL, y gana la fila de la tienda (sin "via") sobre la del agregador. */
-  function unaPorUrl(productos) {
-    const por = new Map();
-    for (const f of productos) {
-      const ya = por.get(f[2]);
-      if (!ya || (ya[4] && !f[4])) por.set(f[2], f);
-    }
-    return [...por.values()];
-  }
+  /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL (aunque venga con "www", barra
+     final o parametros de seguimiento), mismo precio. Uno por URL, y gana la fila de la tienda sobre la del agregador. */
+  const unaPorUrl = B.unaPorUrl;
 
   const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
   const esInternacional = f => typeof f[8] === "string" && f[8].includes("i");

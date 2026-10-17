@@ -24,9 +24,10 @@ class Informe(unittest.TestCase):
             fila("Notebook HP 15 SSD 512GB", "uno", ""),
         ]
         r = cobertura.informe(filas)["rubros"]
-        self.assertEqual(r["ram"], {"avisos": 3, "con_codigo": 2, "agrupados": 2, "grupos": 1})
-        self.assertEqual(r["ssd"], {"avisos": 1, "con_codigo": 1, "agrupados": 0, "grupos": 0})
-        self.assertEqual(r["gpu"], {"avisos": 0, "con_codigo": 0, "agrupados": 0, "grupos": 0})
+        self.assertEqual(r["ram"], {"avisos": 3, "con_codigo": 2, "por_firma": 0, "agrupados": 2, "grupos": 1})
+        self.assertEqual(r["ssd"], {"avisos": 1, "con_codigo": 1, "por_firma": 0, "agrupados": 0, "grupos": 0})
+        self.assertEqual(r["gpu"], {"avisos": 0, "con_codigo": 0, "por_firma": 0, "agrupados": 0, "grupos": 0})
+        self.assertEqual(r["mb"]["avisos"], 0)
 
     def test_un_grupo_necesita_tiendas_distintas(self):
         filas = [fila(KF, "uno", "KF432C16BB1/16"), fila(KF + " v2", "uno", "KF432C16BB1/16")]
@@ -37,6 +38,15 @@ class Informe(unittest.TestCase):
         filas = [fila(KF, "uno"), fila(KF, "dos")]
         r = cobertura.informe(filas)["rubros"]["ram"]
         self.assertEqual((r["con_codigo"], r["agrupados"], r["grupos"]), (2, 2, 1))
+
+
+class PorFirma(unittest.TestCase):
+    def test_cuenta_aparte_lo_que_se_agrupo_por_firma_y_no_por_part_number(self):
+        filas = [fila("Motherboard GIGABYTE B840M H AM5 DDR5", "uno", "~ABC123"), fila("Mother GIGABYTE B840M H DDR5 \u2013 AM5", "dos", "~ABC123"),
+                 fila(KF, "uno", "KF432C16BB1/16")]
+        r = cobertura.informe(filas)["rubros"]
+        self.assertEqual(r["mb"], {"avisos": 2, "con_codigo": 2, "por_firma": 2, "agrupados": 2, "grupos": 1})
+        self.assertEqual(r["ram"]["por_firma"], 0)
 
 
 class Comparacion(unittest.TestCase):

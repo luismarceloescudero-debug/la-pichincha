@@ -358,6 +358,7 @@ td.mejor{color:var(--good);font-weight:700}
 
 /* ---- Sellos de calidad en los resultados ---- */
 .sellos{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.hist{display:block;margin-top:4px;font-size:.78rem;color:var(--ink-2)}
 .sello{font:600 .67rem/1.5 var(--font-mono);letter-spacing:.03em;padding:2px 7px;border-radius:5px;
   background:var(--surface-2);color:var(--ink-3)}
 .sello.primera{background:var(--accent-soft);color:var(--accent)}
