@@ -315,7 +315,9 @@ def construir(datos, pagina=INDICE, copia=COPIA, verificado=None):
 
     html = pagina.read_text(encoding="utf-8")
     publicados = dict(datos, verificado=verificado) if verificado else datos
-    bloque = f"{INICIO}\nconst DATOS = {json.dumps(publicados, ensure_ascii=False, indent=1)};\n{FINAL}"
+    # "</" dentro de un <script> lo cerraria: se escribe "<\/", que en JS es lo mismo
+    json_seguro = json.dumps(publicados, ensure_ascii=False, indent=1).replace("</", "<\\/")
+    bloque = f"{INICIO}\nconst DATOS = {json_seguro};\n{FINAL}"
     patron = re.compile(re.escape(INICIO) + r".*?" + re.escape(FINAL), re.S)
     if not patron.search(html):
         print(f"{ROJO}No encuentro el bloque de datos en {pagina.name}{FIN}")

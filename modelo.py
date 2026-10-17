@@ -33,6 +33,11 @@ _RUBRO_POR_INICIO = (
 _MEMORIA_SUELTA = re.compile(r"\bddr[2345]\b.*\b\d{1,3}\s?(?:gb|g)\b|\b\d{1,3}\s?(?:gb|g)\b.*\bddr[2345]\b", re.I)
 _OTRA_COSA = re.compile(r"\b(procesador|processor|ryzen|core\s?i[3579]|fuente|gabinete|cooler|disipador|placa|mother|motherboard|"
                         r"ssd|nvme|disco|rtx|gtx|geforce|radeon|monitor|pendrive|pen drive|micro sd|sd card)\b", re.I)
+# Un equipo que no empieza por la palabra del equipo ("HP 15 Laptop Intel i5 8GB DDR4", "Dell Inspiron Notebook 8GB DDR4"):
+# si el titulo no empieza por un componente, nombrar un equipo en cualquier lugar alcanza para que no sea un componente.
+_EQUIPO_EN_CUALQUIER_LUGAR = re.compile(
+    r"\b(notebook|laptop|netbook|chromebook|macbook|mini\s?pc|all\s?in\s?one|pc\s+(?:gamer|armada|de escritorio)|computadora|"
+    r"celular|smartphone|tablet|consola)\b", re.I)
 
 # Marcas de usado o de venta sin garantia de fabrica: no son el mismo producto que el nuevo.
 # La misma lista que js/buscador.js (RE_USADO) mas lo que solo importa al agrupar (bulk, OEM).
@@ -82,6 +87,8 @@ def rubro_de(nombre):
     encontrados = [r for r, rx in _RUBRO_POR_INICIO if rx.search(nombre)]
     if len(encontrados) == 1:
         return encontrados[0]
+    if _EQUIPO_EN_CUALQUIER_LUGAR.search(nombre):
+        return None
     if not encontrados and _MEMORIA_SUELTA.search(nombre) and not _OTRA_COSA.search(nombre):
         return "ram"
     return None
@@ -147,6 +154,13 @@ _FICHAS = {
 }
 
 
+# Lo que un agregador a veces pone en "Modelo" y no es un part number: un chip, un chipset, una especificacion. Con eso como
+# codigo, todas las RTX 4060 de todas las marcas serian "el mismo modelo".
+_NO_ES_PART_NUMBER = re.compile(
+    r"^(RTX|GTX|RX|ARC|GT)[-\s]?\d{3,4}|^[ABHQWXZ]\d{3}[A-Z]{0,2}$|^DDR\d|^LPDDR|^GDDR|^PCIE|^\d+(GB|TB|MHZ|HZ|W|MAH|MP)$|"
+    r"^(I[3579]|CORE|RYZEN|ULTRA)[-\s]?\d|^M[1-9](PRO|MAX|ULTRA)?$|^A\d{2}(PRO|BIONIC)?$|^SNAPDRAGON|^DIMENSITY|^HELIO")
+
+
 def modelo_de_api(valor):
     """El part number que un agregador publica en sus especificaciones (ComparaYa: `specifications.Modelo`), en
     mayusculas, o None si falta o no tiene forma de codigo (con espacios, solo letras o solo cifras: un nombre
@@ -154,7 +168,7 @@ def modelo_de_api(valor):
     if not isinstance(valor, str):
         return None
     codigo = html.unescape(valor).strip().upper().rstrip(".")
-    return codigo if _FORMA_SKU.match(codigo) else None
+    return codigo if _FORMA_SKU.match(codigo) and not _NO_ES_PART_NUMBER.search(codigo) else None
 
 
 def mpn_de_ficha(pagina, extractor):
@@ -210,6 +224,7 @@ def _tokens(nombre):
     t = normalizar(nombre).lower()
     t = "".join(c for c in unicodedata.normalize("NFD", t) if unicodedata.category(c) != "Mn")
     t = t.replace("&", " ").replace("\u2033", '"')
+    t = re.sub(r"\bsin\s+[a-z0-9]+", " ", t)              # "sin RGB", "sin disipador": lo que NO tiene no es un atributo
     t = re.sub(r"\b[23]\.5\s?(?:\"|pulgadas|pulg)?", " ", t)             # formato del disco: no identifica
     t = re.sub(r"\b\d+\s?mb/s\b|\bpc[345]-?\d+\b|\b\d(?:\.\d+)?\s?v\b|\bcl\s?\d{2}\b", " ", t)   # velocidades, PC4-25600, 1.35V, CL16
     t = re.sub(r"(\d)\s*(gb|tb|mhz)\b", r"\1\2", t)

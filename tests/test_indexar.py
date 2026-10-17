@@ -418,3 +418,16 @@ class UrlValida(unittest.TestCase):
         for u in ("javascript:alert(1)", 'https://x.test/" onmouseover="alert(1)', "https://x.test/a b", "https://x.test/<script>",
                   "data:text/html,hola", "//x.test/a", "", None, 42, "https://x.test/'a'"):
             self.assertFalse(indexar.url_valida(u), u)
+
+
+class RobustezDeComparaYa(unittest.TestCase):
+    def test_una_marca_que_no_es_texto_o_un_numero_raro_no_tumba_la_fuente(self):
+        for marca, specs in ((42, None), ({"x": 1}, None), (["Lg"], None), ("Lg", {"refresh_rate_hz": float("inf")}),
+                             ("Lg", {"refresh_rate_hz": float("nan")}), ("Lg", {"refresh_rate_hz": True}), ("Lg", {"screen_inches": 10 ** 9})):
+            n = indexar.nombre_enriquecido("Monitor 24", marca, specs)
+            self.assertTrue(n.startswith("Monitor 24"), (marca, specs, n))
+            self.assertNotIn("inf", n.lower())
+
+    def test_la_barra_invertida_y_los_caracteres_de_control_no_pasan(self):
+        for u in ("https://evil\\@good.com/x", "https://x.test/a\x00b", "https://x.test/\tb"):
+            self.assertFalse(indexar.url_valida(u), repr(u))

@@ -92,7 +92,8 @@ function cardOferta(o, i, desde) {
   const origen = o.tipo === "propia"
     ? "El precio anterior es lo que valía en nuestro relevamiento previo: lo calculamos nosotros."
     : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
-  const img = f[7] ? `<div class="o-img" style="background-image:url(&quot;${esc(f[7])}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
+  const foto = fondo(f[7]);
+  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
   return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" tabindex="0" aria-label="${esc(f[0])}">
     ${img}
     <div class="o-top">

@@ -376,3 +376,29 @@ class BloqueadosComoEnElBuscador(unittest.TestCase):
                        "Memoria Kingston DDR4 16GB semi nuevo", "Disco SSD WD 1TB segunda mano", "SSD Kingston 480GB open box", "SSD Kingston 480GB Refurb"):
             self.assertTrue(modelo.bloqueado_para_agrupar(nombre), nombre)
             self.assertIsNone(modelo.firma_de(nombre), nombre)
+
+
+class HallazgosDeLaRevisionTrailOfBits(unittest.TestCase):
+    """Cada hallazgo confirmado por fp-check (differential-review y sharp-edges), con su prueba."""
+
+    def test_un_chip_o_una_especificacion_no_es_part_number(self):
+        for v in ("RTX4060", "RTX 4060", "GTX1650", "RX7600", "B650M", "X870E", "DDR4-3200", "DDR5", "16GB", "I5-13420H",
+                  "RYZEN5", "M2PRO", "A17PRO", "SNAPDRAGON8"):
+            self.assertIsNone(modelo.modelo_de_api(v), v)
+        for v in ("6N4E8AA", "LS27DG300ELXZB", "90MB1F40-M0EAY0", "CMK16GX4M1D3200C16"):
+            self.assertEqual(modelo.modelo_de_api(v), v)
+
+    def test_un_equipo_con_la_marca_primero_no_es_memoria(self):
+        for n in ("HP 15 Laptop Intel i5 8GB DDR4 256GB", "Dell Inspiron Notebook 8GB DDR4 1TB HDD", "Mini PC Intel N100 16GB DDR4 512GB",
+                  "Lenovo Tablet M10 4GB DDR4 64GB", "Samsung Celular A15 8GB DDR4"):
+            self.assertIsNone(modelo.rubro_de(n), n)
+            self.assertIsNone(modelo.firma_de(n), n)
+        self.assertEqual(modelo.rubro_de("Memoria RAM Notebook SODIMM Hiksemi DDR4 8GB"), "ram")    # empieza por el componente
+        self.assertEqual(modelo.rubro_de("Kingston Fury Beast DDR5 16GB 5600MHz"), "ram")
+
+    def test_lo_que_no_tiene_no_es_un_atributo(self):
+        con = modelo.firma_de("Memoria Kingston Fury Beast DDR4 16GB 3200MHz RGB")
+        sin = modelo.firma_de("Memoria Kingston Fury Beast DDR4 16GB 3200MHz sin RGB")
+        nada = modelo.firma_de("Memoria Kingston Fury Beast DDR4 16GB 3200MHz")
+        self.assertNotEqual(con, sin)
+        self.assertEqual(sin, nada)

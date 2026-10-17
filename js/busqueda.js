@@ -196,7 +196,7 @@ function pintarResultados(q) {
     // Sin baja ni rebaja, lo que sirve saber es desde cuando esta en este precio (no hace falta que sea una oferta para verlo).
     const quieto = !bajo && !off ? Pagina.cambioDe(f[10], (IDX.historial || {}).inicio) : "";
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${enlace(f[2])}" target="_blank" rel="noopener">
-      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="hist">${esc(quieto)}</span>` : ""}</span>
+      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
     </a>` + (otras.length ? `<div class="mismo"><span>También en</span>${otras.map(o =>

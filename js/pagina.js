@@ -83,7 +83,7 @@
   function cambioDe(desde, inicio) {
     const f = /^(\d{4})-(\d{2})-(\d{2})$/.exec(desde || "");
     if (!f) return "";
-    const txt = `precio sin cambios desde el ${+f[3]}/${+f[2]}`;
+    const txt = `precio sin cambios desde el ${+f[3]}/${+f[2]}/${f[1]}`;
     return inicio && desde <= inicio ? `${txt} (cuando empezamos a seguirlo; puede ser más antiguo)` : txt;
   }
 

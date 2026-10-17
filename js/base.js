@@ -1,9 +1,14 @@
 const $ = (s, r = document) => r.querySelector(s);
 const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR");
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 /* Un enlace a una tienda: solo http(s) y escapado. La URL viene de afuera (las tiendas, ComparaYa): una con comillas
    cerraria el atributo y una "javascript:" correria codigo al tocarla, y la CSP de la pagina permite scripts en linea. */
-const enlace = u => /^https?:\/\//i.test(String(u || "")) ? esc(u) : "#";
+// Sin espacios, comillas, <>, ` ni barra invertida (https://evil\@buena.com va a "evil" en el navegador) ni caracteres de control.
+const URL_SEGURA = /^https?:\/\/[^\s"'<>`\\\u0000-\u001f]+$/i;
+const enlace = u => URL_SEGURA.test(String(u || "")) ? esc(u) : "#";
+/* Una URL para CSS (background-image): esc no sirve ahi, porque el navegador decodifica &quot; antes de leer el CSS y una
+   comilla cerraria el url("..."). Solo pasa una URL segura, que no tiene comillas; si no, nada. */
+const fondo = u => URL_SEGURA.test(String(u || "")) ? String(u) : "";
 const icono = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
 
 /* Funciones puras del buscador: viven en js/buscador.js, con sus tests. */

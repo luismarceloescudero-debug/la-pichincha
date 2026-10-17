@@ -213,3 +213,17 @@ class Combo(unittest.TestCase):
         c = datos["calculado"]
         self.assertEqual(c["combo_gc"], 299249 + 161499)
         self.assertEqual(c["combo_partido"], 221450 + 6639 + 135999)
+
+
+class ScriptEnLinea(unittest.TestCase):
+    def test_un_cierre_de_script_en_los_datos_no_cierra_el_script(self):
+        import tempfile
+        from pathlib import Path
+        import actualizar
+        d = Path(tempfile.mkdtemp())
+        pagina = d / "index.html"
+        pagina.write_text("<script>\n" + actualizar.INICIO + "\n" + actualizar.FINAL + "\n</script>", encoding="utf-8")
+        actualizar.construir({"nota": "</script><img src=x onerror=alert(1)>"}, pagina=pagina, copia=d / "copia.html")
+        html = pagina.read_text(encoding="utf-8")
+        self.assertEqual(html.count("</script>"), 1)
+        self.assertIn("<\\/script>", html)

@@ -309,7 +309,7 @@
         resto = resto.filter(x => !mios.includes(x));
         // Un comercio es una tienda: ComparaYa (f[3]) lista a muchos (f[4]), y uno que llega directo y por ComparaYa es el mismo.
         const porTienda = new Map();
-        for (const x of mios) { const k = normal(comercio(x)); if (!porTienda.has(k)) porTienda.set(k, x); }
+        for (const x of mios) { const k = normal(String(comercio(x) ?? "")); if (!porTienda.has(k)) porTienda.set(k, x); }
         if (porTienda.size < 2) continue;
         const miembros = [...porTienda.values()];
         otras.set(cabeza, miembros.slice(1));

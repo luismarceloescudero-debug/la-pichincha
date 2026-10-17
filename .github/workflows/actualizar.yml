@@ -96,7 +96,12 @@ jobs:
           (github.event_name == 'schedule') ||
           (github.event_name == 'workflow_dispatch' && inputs.indexar) ||
           (github.event_name == 'push' && hashFiles('indice.json') == '')
-        run: python indexar.py --max-paginas ${{ inputs.paginas || 12 }} --historial historial
+        # El valor del formulario va por el entorno y se valida: interpolado en el comando, "12; algo" correria en el job.
+        env:
+          PAGINAS: ${{ inputs.paginas || '12' }}
+        run: |
+          case "$PAGINAS" in ''|*[!0-9]*) echo "::error::paginas tiene que ser un numero"; exit 1 ;; esac
+          python indexar.py --max-paginas "$PAGINAS" --historial historial
         continue-on-error: true
 
       # Una corrida manual con menos paginas no escribe historia: veria como
