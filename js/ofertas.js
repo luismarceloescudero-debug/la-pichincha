@@ -98,7 +98,10 @@
     const por = (a, b) => a.internacional - b.internacional || (a.tipo === b.tipo ? 0 : a.tipo === "propia" ? -1 : 1)
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, 6, "propia")), ...publicadas.map(f => nuevo(f, 5, "publicada"))].filter(o => esUrl(o.f[2]));
-    const grupos = new Map(C.ORDEN.map(c => [c, todas.filter(o => o.categoria === c).sort(por)]));
+    // El mismo producto en varias tiendas (mismo codigo de modelo exacto, nunca por parecido) ocupa un solo lugar:
+    // gana el mejor ubicado.
+    const unico = lista => { const vistos = new Set(); return lista.filter(o => !o.f[9] || (!vistos.has(o.f[9]) && vistos.add(o.f[9]))); };
+    const grupos = new Map(C.ORDEN.map(c => [c, unico(todas.filter(o => o.categoria === c).sort(por))]));
     const elegidas = new Set();
     const ronda = (desde, hasta, cats) => {
       for (let i = desde; i < hasta; i++)
@@ -106,7 +109,7 @@
     };
     ronda(0, C.CUPO.reservado, C.ORDEN.filter(c => c !== "otro"));       // lugar reservado de cada categoria
     ronda(C.CUPO.reservado, C.CUPO.tope, C.ORDEN);                         // lo que sobra, hasta el tope
-    for (const o of [...todas].sort(por)) if (elegidas.size < max) elegidas.add(o);   // si aun falta, lo mejor que quede
+    for (const o of unico([...todas].sort(por))) if (elegidas.size < max) elegidas.add(o);   // si aun falta, lo mejor que quede
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }
 

@@ -172,3 +172,15 @@ test("dentro de una categoria, la gama alta va antes que la media a igual señal
     fila("Monitor Samsung Odyssey OLED 27 240Hz", 800000, { lista: 1000000 })] };   // alta, 20%
   assert.deepEqual(O.destacadas(idx).map(o => o.nivel), ["alta", "media"]);
 });
+
+test("el mismo producto en varias tiendas (mismo codigo de modelo) ocupa un solo lugar del resumen", () => {
+  const mismo = (n, p, tienda) => { const f = fila(n, p, { lista: 200000 }); f[3] = tienda; f[9] = "RTX3060-12G"; return f; };
+  const idx = { productos: [
+    mismo("Placa de Video MSI GeForce RTX 3060 Ventus 2X 12GB", 100000, "scp"),
+    mismo("Placa de Video MSI GeForce RTX 3060 12GB VENTUS 2X", 120000, "mt"),
+    fila("Placa de Video Gigabyte RTX 4060 8GB", 150000, { lista: 200000 })] };
+  const d = O.destacadas(idx, 10);
+  assert.equal(d.length, 2);
+  assert.equal(d.filter(o => o.f[9] === "RTX3060-12G").length, 1);
+  assert.equal(d.find(o => o.f[9] === "RTX3060-12G").f[1], 100000);          // la mejor ubicada: la de mayor descuento
+});

@@ -32,6 +32,7 @@ La categoria sale del titulo: primero lo que se vende *para* un equipo (funda, c
 - Limitacion conocida: la generacion se lee del numero del modelo, asi que un refresco como el Ryzen 5 5600GT (2024) cuenta como un 5000 y no pasa.
 - **Descuento minimo por categoria** (el tachado puede estar inflado, la baja propia no): smartphone, notebook y PC 10% y 5% propia; monitor 12% y 5%; componente y periferico 20% y 8%; sin categoria 15% y 3% (como antes). Tope de 60% para todas.
 - **Cupo en el resumen** (Telegram, RSS y /hoy/): 2 lugares reservados por categoria, hasta 3 antes de repartir lo que sobra, para que los componentes no acaparen. Dentro de la categoria: bajas propias primero, a igual señal la gama alta antes que la media, despues por descuento. Sale agrupado por categoria y cada linea de Telegram y del RSS dice la suya.
+- **El mismo producto en varias tiendas ocupa un solo lugar** del resumen cuando comparte el codigo de modelo exacto (gana el de mayor descuento). Nunca por parecido: el resumen del 16/10 repetia la misma Gigabyte B840M tres veces, y esas no comparten codigo porque `modelo.py` hoy solo lee RAM, SSD y placas de video. Pendiente: leer el codigo de las placas madre para que tambien se junten.
 - Los numeros viven en `MIN`, `DESCUENTO` y `CUPO` de `js/categorias.js`.
 
 ## Cruce de gamas
