@@ -61,6 +61,21 @@ def _tramo_actual(eventos):
     return eventos[inicio:]
 
 
+def desde_cuando(eventos, hoy, precio_hoy):
+    """La fecha desde la que el producto tiene el precio de hoy: la del ultimo cambio, o la del primer dia que se lo sigue si
+    nunca cambio. None si no hay historial del producto (nuevo o sin seguimiento): ahi no se afirma nada."""
+    tramo = _tramo_actual(eventos)
+    if not tramo:
+        return None
+    return tramo[-1][0] if tramo[-1][1] == precio_hoy else hoy
+
+
+def inicio(series):
+    """El primer dia registrado en todo el historial: desde cuando se siguen los precios. None sin historial."""
+    fechas = [e[0] for eventos in series.values() for e in eventos]
+    return min(fechas) if fechas else None
+
+
 def dias_de_historia(eventos, hoy):
     tramo = _tramo_actual(eventos)
     return (hoy - tramo[0][0]).days if tramo else 0

@@ -59,9 +59,9 @@ test("destacadas trae el descuento y el ahorro de cada una", () => {
 });
 
 test("el mismo aviso que llega directo y por ComparaYa cuenta una sola vez, y gana la fila directa", () => {
-  const url = "https://t.test/monitor-acer";
-  const directa = fila("Monitor Acer", 216200, { antes: 292817, url });
-  const viaComparaya = ["Monitor Acer", 216200, url, "comparaya", "CompraGamer", 240222, 292817, "", "", ""];
+  const url = "https://t.test/parlante-acer";
+  const directa = fila("Smart Tv Acer", 216200, { antes: 292817, url });
+  const viaComparaya = ["Smart Tv Acer", 216200, url, "comparaya", "CompraGamer", 240222, 292817, "", "", ""];
   for (const productos of [[directa, viaComparaya], [viaComparaya, directa]]) {
     const { propias } = O.calcularOfertas({ productos });
     assert.equal(propias.length, 1);
@@ -87,7 +87,7 @@ test("piso de gama: la RAM manda cuando el titulo la dice (celular 6 GB y 128 GB
   assert.equal(p("Notebook Lenovo IdeaPad 16GB 512GB SSD").pasa, true);
   assert.equal(p("Notebook Asus Vivobook 32 GB de RAM 1TB").pasa, true);
   assert.equal(p("Memoria Kingston Fury DDR5 16GB").pasa, true);          // sin piso
-  assert.equal(p("Auriculares Logitech 4gb").rubro, null);
+  assert.equal(p("Auriculares Logitech 4gb").categoria, "periferico");
 });
 
 test("piso de gama: sin RAM en el titulo decide la generacion del procesador, no se descarta de entrada", () => {
@@ -150,9 +150,9 @@ test("cruce de gamas: la mediana de la media se compara por capacidad (128 y 256
     fila("Celular Apple iPhone 17 Pro 512GB", 300000, { antes: 450000 })] };    // sin media de 512 con que compararse
   const r = O.calcularOfertas(idx);
   assert.deepEqual([...r.cruces].map(f => f[0]), ["Celular Samsung Galaxy S26 12GB 256GB"]);
-  assert.equal(r.medianas["celular:128"], B.mediana(m128.map(f => f[1])));
-  assert.equal(r.medianas["celular:256"], B.mediana(m256.map(f => f[1])));
-  assert.equal(r.medianas["celular:512"], undefined);
+  assert.equal(r.medianas["smartphone:128"], B.mediana(m128.map(f => f[1])));
+  assert.equal(r.medianas["smartphone:256"], B.mediana(m256.map(f => f[1])));
+  assert.equal(r.medianas["smartphone:512"], undefined);
   assert.equal(O.destacadas(idx).find(o => o.cruce).f[0], "Celular Samsung Galaxy S26 12GB 256GB");
 });
 
@@ -203,9 +203,9 @@ test("contra que mediana cruza cada oferta: rubro, capacidad, valor y cantidad d
   const m256 = Array.from({ length: 8 }, (_, i) => fila(`Celular Realme ${i} 8GB/256GB`, 400000 + i * 1000));
   const idx = { productos: [...m256, fila("Celular Samsung Galaxy S26 12GB 256GB", 300000, { antes: 450000 })] };
   const [o] = O.destacadas(idx);
-  assert.deepEqual(o.contra, { rubro: "celular", rom: 256, mediana: B.mediana(m256.map(f => f[1])), avisos: 8 });
+  assert.deepEqual(o.contra, { rubro: "smartphone", rom: 256, mediana: B.mediana(m256.map(f => f[1])), avisos: 8 });
   const pesos = n => "$" + n;
-  assert.equal(O.textoContra(o.contra, pesos), `mediana de los celulares de gama media de 256 GB: $${o.contra.mediana} (8 avisos)`);
+  assert.equal(O.textoContra(o.contra, pesos), `mediana de los smartphones de gama media de 256 GB: $${o.contra.mediana} (8 avisos)`);
   assert.match(O.textoContra({ rubro: "notebook", rom: 1000, mediana: 1, avisos: 9 }, pesos), /las notebooks de gama media de 1 TB/);
 });
 
@@ -226,15 +226,15 @@ test("la nota viaja con las ofertas y con el feed", () => {
   assert.match(o.nota, /sigue vigente/);
 });
 
-test("rubro: los accesorios y otros productos que nombran un celular o una notebook no son celulares", () => {
-  const r = n => O.pisoDeGama(n, REF).rubro;
+test("categoria: los accesorios y otros productos que nombran un celular o una notebook no son celulares ni notebooks", () => {
+  const r = n => O.pisoDeGama(n, REF).categoria;
   for (const n of ["Funda Silicona iPhone 15 Pro Max", "Cargador rapido Samsung Galaxy S25 45W", "Vidrio templado Redmi Note 14",
     "Protector de pantalla para iPhone 17", "Case notebook Lenovo ThinkPad 16GB", "Soporte para notebook plegable",
-    "Mochila para notebook 15.6", "Monitor Samsung 27 pixel perfect", "Auricular Tecnomaster 8GB"])
-    assert.equal(r(n), null, n);
-  assert.equal(r("Celular Tecno Spark 20 6GB 128GB"), "celular");
-  assert.equal(r("Samsung Galaxy S26 12GB 256GB"), "celular");
-  assert.equal(r("Google Pixel 10 Pro 16GB 256GB"), "celular");
+    "Mochila para notebook 15.6", "Auricular Tecnomaster 8GB"])
+    assert.equal(r(n), "periferico", n);
+  assert.equal(r("Celular Tecno Spark 20 6GB 128GB"), "smartphone");
+  assert.equal(r("Samsung Galaxy S26 12GB 256GB"), "smartphone");
+  assert.equal(r("Google Pixel 10 Pro 16GB 256GB"), "smartphone");
 });
 
 test("los accesorios de un celular no entran a la mediana de la gama media ni a los descartados", () => {

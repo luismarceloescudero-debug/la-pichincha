@@ -55,7 +55,7 @@ function cardPick(p, i) {
   const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
-  return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
+  return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${enlace(f[2])}" target="_blank" rel="noopener">
     <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
@@ -123,7 +123,7 @@ function vistaComparativaDin() {
 
 function vistaTiendasDin() {
   const A = ANALISIS, top = A.comercios.slice(0, 6), resto = A.comercios.length - top.length;
-  const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${c.mejorItem.f[2]}" target="_blank" rel="noopener">
+  const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${enlace(c.mejorItem.f[2])}" target="_blank" rel="noopener">
     <span class="rol"><b class="letra">${i + 1}</b> ${icono("store")} ${i === 0 ? "Más barata en primera línea" : "Comercio"}</span>
     <h3>${esc(c.nom)}</h3>
     <div><span class="precio">${pesos(c.mejorItem.f[1])}</span> ${selloOjo(viejoDe(c.mejorItem.f))}</div>

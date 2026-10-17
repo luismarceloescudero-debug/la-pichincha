@@ -20,6 +20,7 @@ import json
 import re
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,8 +39,8 @@ HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los 
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 # Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
-# url, tienda, via, lista, antes, imagen, sellos, modelo. Completa filas de indices viejos.
-FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", ""]
+# url, tienda, via, lista, antes, imagen, sellos, modelo, desde. Completa filas de indices viejos.
+FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", "", ""]
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -95,6 +96,44 @@ def numero(texto):
         return None
     t = str(texto).strip().replace(".", "").split(",")[0]
     return int(t) if t.isdigit() else None
+
+
+def _clave(texto):
+    sin_acentos = unicodedata.normalize("NFD", str(texto).lower()).encode("ascii", "ignore").decode()
+    return " " + re.sub(r"[^a-z0-9]+", " ", sin_acentos).strip() + " "
+
+
+_SIN_MARCA = {"", "generico", "generica", "sin marca", "otro", "otra", "otros", "varios", "n a", "na"}
+
+
+def nombre_enriquecido(titulo, marca=None, specs=None):
+    """El titulo de un agregador con lo que sabe y el titulo no dice. ComparaYa publica la marca y las especificaciones
+    en campos aparte, y muchas tiendas escriben el titulo sin la marca ("Monitor Gaming 25\" FHD 240Hz con panel IPS",
+    marca Samsung) o sin los Hz: sin eso el aviso no aparece al buscar por marca, no se reconoce la marca para ordenarlo
+    y los minimos de gama (Hz, pulgadas) no lo ven. Solo agrega lo que falta, al final; nunca cambia lo que el titulo ya dice."""
+    nombre = limpio(titulo)
+    if marca and _clave(marca).strip() not in _SIN_MARCA:
+        primera = _clave(marca).split()[0]
+        if " " + primera + " " not in _clave(nombre):
+            # al final: en el medio partiria "Placa de Video", "Disco Solido" o "RTX 4060" y el rubro dejaria de reconocerse
+            nombre = f"{nombre} {limpio(marca)}"
+    specs = specs if isinstance(specs, dict) else {}
+    hz = specs.get("refresh_rate_hz")
+    if isinstance(hz, (int, float)) and hz > 0 and not re.search(r"\d\s?hz", nombre, re.I):
+        nombre += f" {int(hz)}Hz"
+    pulgadas = specs.get("screen_inches")
+    if isinstance(pulgadas, (int, float)) and pulgadas > 0:
+        cifra = format(float(pulgadas), "g")
+        dicho = re.search(r"\d\s?(?:\"|''|\u2033|\u201d|pulg)", nombre, re.I) or re.search(
+            r"\b" + re.escape(cifra).replace(r"\.", "[.,]") + r"\b", nombre)
+        if not dicho:
+            nombre += f' {cifra}"'
+    return nombre
+
+
+def url_valida(url):
+    """Una URL http(s) sin comillas, espacios ni corchetes angulares: lo unico que puede ir a un enlace del sitio."""
+    return isinstance(url, str) and re.fullmatch(r"https?://[^\s\"'<>`]+", url, re.I) is not None
 
 
 def absoluta(base, ruta):
@@ -204,6 +243,13 @@ def imagen(fila, cfg):
     return plantilla.format(nombre=nombre) if plantilla else str(nombre)
 
 
+def valor(fila, ruta):
+    """El valor de un campo anidado: valor(fila, "specifications.Modelo")."""
+    for parte in ruta.split("."):
+        fila = fila.get(parte) if isinstance(fila, dict) else None
+    return fila
+
+
 def sellos(fila, cfg):
     """Letras de las senales que publica la fuente: i internacional, o tienda
     oficial, e envio gratis. 'sellos' en tiendas.json dice donde esta cada una,
@@ -211,10 +257,8 @@ def sellos(fila, cfg):
     viene la condicion y que valores cuentan como usado (u)."""
     salida = ""
     for letra, ruta in (cfg.get("sellos") or {}).items():
-        valor = fila
-        for parte in ruta.split("."):
-            valor = valor.get(parte) if isinstance(valor, dict) else None
-        if valor and str(valor).lower() not in ("false", "no", "0"):
+        dato = valor(fila, ruta)
+        if dato and str(dato).lower() not in ("false", "no", "0"):
             salida += letra
     usados = cfg.get("usados")        # la condicion que publica la fuente: u = usado, reacondicionado o caja abierta
     if usados and fila.get(usados["campo"]) in usados["valores"]:
@@ -244,10 +288,12 @@ def indexar_api(tienda, max_paginas):
                 if not f.get(c["precio"]) or not f.get(c["nombre"]):
                     continue
                 vistos.add(f[c["url"]])
-                items.append({"nombre": limpio(f[c["nombre"]]), "precio": int(f[c["precio"]]),
+                items.append({"nombre": nombre_enriquecido(f[c["nombre"]], f.get(c.get("marca")), f.get(c.get("specs"))),
+                              "precio": int(f[c["precio"]]),
                               "lista": f.get(c.get("lista")), "url": f[c["url"]],
                               "via": f.get(c.get("via")), "imagen": imagen(f, cfg),
-                              "sellos": sellos(f, cfg)})
+                              "sellos": sellos(f, cfg),
+                              "sku": modelo.modelo_de_api(valor(f, c["modelo"])) if c.get("modelo") else None})
             n += 1
             time.sleep(PAUSA)
         print("    " + str(i) + "/" + str(len(cats)) + " categorias " + PUNTO
@@ -458,7 +504,9 @@ def main(argv=None):
     if INDICE.exists():
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
-            fila = list(fila)[:10] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            fila = list(fila)[:11] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            if not url_valida(fila[2]):                       # un indice viejo no reintroduce una URL que hoy no pasa
+                continue
             fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
             previo.setdefault(fila[3], []).append(fila)
         # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
@@ -506,6 +554,12 @@ def main(argv=None):
                 resumen[clave] = (0, "fallo")
             relevados[clave] = 0
             continue
+        # Ni "javascript:" ni comillas: la URL va a un href del sitio. Se filtra antes de contar, asi la salud de la fuente
+        # mide lo que de verdad entra al indice, y se avisa cuanto se descarto.
+        validos = [it for it in items if url_valida(it.get("url"))]
+        if len(validos) < len(items):
+            print("  " + AMAR + "! " + str(len(items) - len(validos)) + " avisos con una URL invalida, descartados" + FIN)
+        items = validos
         if not items:
             # Un bloqueo en los listados no tira excepcion: cada pagina falla y se
             # corta. Cero productos es una fuente caida, no un catalogo vacio.
@@ -540,11 +594,13 @@ def main(argv=None):
             if propia:
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
+            desde = serie.desde_cuando(series.get((clave, it["url"]), []), hoy, it["precio"])
             salida.append([it["nombre"], it["precio"], it["url"], clave,
                            it.get("via") or "", lista, propia, it.get("imagen") or "",
                            (it.get("sellos") or "")
                            + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
-                           modelo.modelo_de(it["nombre"], it.get("sku"))])
+                           modelo.modelo_de(it["nombre"], it.get("sku")),
+                           desde.isoformat() if desde else ""])
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
@@ -567,7 +623,9 @@ def main(argv=None):
                              "segunda": bool(v.get("segunda_opinion"))},
                             **({"relevado": relevado[k]} if relevado.get(k) else {}))
                     for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde"],
+        # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
+        "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

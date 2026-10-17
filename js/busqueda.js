@@ -89,9 +89,17 @@ function buscarTodo(q) {
   const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
   const halla = [];
   IDX.productos.forEach((f, i) => { if (coincide(N[i])) halla.push(f); });
-  const g = Buscador.agruparPorModelo(halla);
+  const g = Buscador.agruparPorModelo(Buscador.unaPorUrl(halla), comercioDe);          // el aviso que llega directo y por ComparaYa, una vez
   OTRAS = g.otras;
   return g.filas;
+}
+
+/* Si una consulta encuentra algo, sin agrupar ni tocar OTRAS: lo usa "Comparar" para elegir entre varias consultas. */
+function hayResultados(q) {
+  const coincide = Buscador.filtroDe(q);
+  if (!IDX || !coincide) return false;
+  const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
+  return N.some(coincide);
 }
 
 function buscar(q, tope = 60) { return buscarTodo(q).slice(0, tope * 3); }
@@ -185,12 +193,14 @@ function pintarResultados(q) {
     if (f[1] === barato && ORDEN === "precio") marcas.push('<span class="sello barato">más barato</span>');
     const otras = OTRAS.get(f) || [];
     if (otras.length) marcas.push(`<span class="sello conocida">mismo modelo en ${otras.length + 1} tiendas</span>`);
-    return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${f[2]}" target="_blank" rel="noopener">
-      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}</span>
+    // Sin baja ni rebaja, lo que sirve saber es desde cuando esta en este precio (no hace falta que sea una oferta para verlo).
+    const quieto = !bajo && !off ? Pagina.cambioDe(f[10], (IDX.historial || {}).inicio) : "";
+    return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${enlace(f[2])}" target="_blank" rel="noopener">
+      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
     </a>` + (otras.length ? `<div class="mismo"><span>También en</span>${otras.map(o =>
-      `<a href="${esc(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "");
+      `<a href="${enlace(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "");
   }).join("");
 }
 

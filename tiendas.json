@@ -194,7 +194,10 @@
         "lista": "original_price",
         "url": "url",
         "via": "store_name",
-        "imagen": "image"
+        "imagen": "image",
+        "marca": "brand",
+        "specs": "extracted_specs",
+        "modelo": "specifications.Modelo"
       },
       "sellos": {
         "i": "specifications.is_international",

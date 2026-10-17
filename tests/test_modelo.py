@@ -24,12 +24,40 @@ class RubroDe(unittest.TestCase):
     def test_lo_que_solo_menciona_el_componente_no_es_del_rubro(self):
         for nombre in (
             "Notebook Gamer HP Victus 15 15.6\" Intel Core i5 13420H 32GB DDR4 SSD 1TB RTX 4050 Win11 15-fa2013la",
-            "MOTHER MSI PRO A620AM-G EVO WIFI DDR5 AM5",
             "PC Gamer AMD Ryzen 7 9800X3D RTX 5080 Y70 TOUCH CHERRY X870 32GB 1TB SSD NVMe WIFI Water Cooler",
             "Auriculares Redragon Zeus X H510W RGB Surround 7.1 White",
             "Disco Rigido WD 8TB Red Plus NAS 256MB SATA 5640RPM",
         ):
             self.assertIsNone(modelo.rubro_de(nombre), nombre)
+
+
+class RubroPorComoSePublica(unittest.TestCase):
+    """Cada tienda publica el mismo producto de otra forma: el rubro no puede depender de la palabra con la que empieza."""
+
+    def test_placas_madre(self):
+        for nombre in ("MOTHER MSI PRO A620AM-G EVO WIFI DDR5 AM5", "Motherboard GIGABYTE B840M H AM5 DDR5",
+                       "Mother GIGABYTE B840M H DDR5 \u2013 AM5", "MB ASUS AM5 ROG STRIX X870E-E GAMING NEO DDR5 BOX",
+                       "Placa Madre Asus Prime B650M-A", "Placa base MSI H410M-A PRO"):
+            self.assertEqual(modelo.rubro_de(nombre), "mb", nombre)
+
+    def test_la_memoria_que_empieza_por_otra_palabra_sigue_siendo_memoria(self):
+        for nombre in ("SODIMM DDR5 8GB HIKSEMI 4800MHZ", "SODIMM DDR4 8GB KINGSTON 3200MHZ CL20 FURY IMPACT",
+                       "Memoria RAM Notebook SODIMM Hiksemi Hiker DDR3 4GB 1600MHz",     # "notebook" es para que equipo es
+                       "Hiksemi Hiker Ddr4 32Gb 3200Mhz U-Dimm", "Kingston Fury Beast DDR5 16GB 5600MHz",
+                       "Memoria Ram Ddr4 32Gb 3200Mhz Patriot Udimm Pc"):
+            self.assertEqual(modelo.rubro_de(nombre), "ram", nombre)
+
+    def test_los_equipos_y_lotes_que_la_nombran_no_son_memoria(self):
+        for nombre in ("Notebook Lenovo 16GB DDR5 512GB", "PC GAMER AMD ATHLON 3000G A520 8GB DDR4 480GB SSD",
+                       "COMBO AMD 9600X B650 16GB DDR5 5600 COOLER DISIPADOR", "Procesador AMD Ryzen 5 7600 DDR5 AM5 16GB",
+                       "Monitor Samsung 27 DDR4 8GB", "Pc Armada AMD Ryzen 7 5700G 16GB DDR4 512GB"):
+            self.assertIsNone(modelo.rubro_de(nombre), nombre)
+
+
+class Normalizar(unittest.TestCase):
+    def test_guiones_espacios_y_entidades(self):
+        self.assertEqual(modelo.normalizar("Mother  GIGABYTE\u00a0B840M H DDR5 \u2013 AM5"), "Mother GIGABYTE B840M H DDR5 - AM5")
+        self.assertEqual(modelo.normalizar("Monitor 27&#8243; &amp; Co \u2014 240hz"), "Monitor 27\" & Co - 240hz")
 
 
 class Bloqueados(unittest.TestCase):
@@ -143,6 +171,120 @@ class SkuDelCatalogo(unittest.TestCase):
         self.assertEqual(sorted(f[9] for f in uno), sorted(f[9] for f in dos))
 
 
+class Firma(unittest.TestCase):
+    """Sin part number en el titulo, el mismo producto se reconoce por sus atributos normalizados (marca, chip o chipset,
+    capacidad, linea y variantes), sin importar el orden, las mayusculas, los guiones ni las palabras de relleno. Si falta
+    un atributo o difiere uno solo, son productos distintos."""
+
+    def firma(self, nombre):
+        r = modelo.firma_de(nombre)
+        return r[1] if r else None
+
+    def mismos(self, *nombres):
+        firmas = {self.firma(n) for n in nombres}
+        self.assertNotIn(None, firmas, nombres)
+        self.assertEqual(len(firmas), 1, nombres)
+
+    def distintos(self, a, b):
+        fa, fb = self.firma(a), self.firma(b)
+        self.assertNotEqual(fa, fb, (a, b))
+
+    def test_placa_madre_publicada_de_tres_maneras(self):
+        self.mismos("Motherboard GIGABYTE B840M H AM5 DDR5", "Mother GIGABYTE B840M H DDR5 \u2013 AM5",
+                    "Motherboard Gigabyte B840M H AM5 DDR5 mATX", "MB GIGABYTE B840M-H AM5 DDR5 Micro ATX BOX")
+
+    def test_placa_madre_orden_distinto_y_guion(self):
+        self.mismos("MOTHER MSI H410M-A PRO DDR4 LGA1200", "Placa Madre MSI PRO H410M A LGA 1200 DDR4")
+        self.mismos("MB ASUS AM5 ROG STRIX X870E-E GAMING NEO DDR5 BOX", "Motherboard Asus ROG Strix X870E-E Gaming Neo AM5")
+
+    def test_placas_madre_parecidas_no_se_confunden(self):
+        self.distintos("MB ASUS AM5 ROG STRIX X870E-E GAMING NEO DDR5 BOX", "MB ASUS AM5 ROG STRIX X870E-A GAMING NEO DDR5 BOX")
+        self.distintos("Motherboard GIGABYTE B840M H AM5 DDR5", "Motherboard GIGABYTE B840M GAMING X AM5 DDR5")
+        self.distintos("MOTHER ASROCK X870 CHALLENGER WIFI WHITE DDR5", "MOTHER ASROCK X870 CHALLENGER DDR5")
+        self.distintos("Motherboard GIGABYTE B840M H AM5 DDR5", "Motherboard ASUS B840M H AM5 DDR5")
+
+    def test_placa_de_video_con_otro_nombre_y_otro_orden(self):
+        self.mismos("Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc",
+                    "VGA MSI GeForce RTX 5070 Ti 16GB GDDR7 VENTUS 3X OC", "Placa de video MSI RTX5070TI 16 GB Ventus 3X OC Edition")
+        self.mismos("Placa de Video MSI GeForce RTX 3060 Ventus 2X 12GB", "Placa de Video MSI GeForce RTX 3060 12GB VENTUS 2X")
+
+    def test_placa_de_video_variantes_distintas(self):
+        base = "Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc"
+        self.distintos(base, "Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X")                 # sin OC
+        self.distintos(base, "Placa De Video Msi Geforce Rtx 5070 16G Ventus 3X Oc")                 # no es Ti
+        self.distintos(base, "Placa De Video Asus Geforce Rtx 5070 TI 16G Ventus 3X Oc")             # otra marca
+        self.distintos("Placa de Video MSI GeForce RTX 3060 Ventus 2X 12GB", "Placa de Video MSI GeForce RTX 3060 Ventus 2X 8GB")
+
+    def test_ssd_con_distinta_tipografia(self):
+        self.mismos("Disco SSD M.2 SANDISK 2TB Plus NVMe Gen3", "Disco Solido Sandisk Ssd Plus Nvme 2Tb",
+                    "SSD SanDisk Plus 2 TB NVMe M.2")
+        self.mismos("Disco SSD Lexar 500GB NF100 SATA", "SSD LEXAR NF100 500 Gb Sata 2.5\"")
+
+    def test_ssd_distinto(self):
+        self.distintos("Disco SSD Sandisk Plus 1TB Sata", "Disco SSD Sandisk Plus 1TB NVMe")
+        self.distintos("Disco SSD Lexar 500GB NF100 SATA", "Disco SSD Lexar 250GB NF100 SATA")
+        self.distintos("Disco SSD Sandisk 1TB Plus Nvme", "Disco SSD Sandisk 2TB Plus Nvme")
+
+    def test_memoria_con_distinta_tipografia(self):
+        self.mismos("Memoria RAM Kingston DDR4 16GB 3200MHz CL22", "Memoria Ram Kingston Ddr4 16Gb 3200Mhz Cl22",
+                    "Memoria Ddr4 16Gb 3200Mhz Kingston", "Kingston DDR4 - 16Gb 3200 Mhz")
+        self.mismos("Hiksemi Hiker Ddr4 32Gb 3200Mhz U-Dimm", "Memoria Hiksemi Hiker DDR4 32GB 3200MHz UDIMM", "Memoria Hiksemi Hiker DDR4 32GB 3200MHz")
+
+    def test_memoria_distinta(self):
+        self.distintos("Memoria RAM Notebook SODIMM Hiksemi Hiker DDR4 8GB 3200MHz", "Memoria Hiksemi Hiker DDR4 8GB 3200MHz")
+        self.distintos("SODIMM DDR4 8GB HIKSEMI 3200MHZ", "SODIMM DDR5 8GB HIKSEMI 4800MHZ")
+        self.distintos("Memoria Kingston DDR4 16GB 3200MHz", "Memoria Kingston DDR4 16GB 3600MHz")
+        self.distintos("Memoria Kingston DDR4 16GB 3200MHz", "Memoria Kingston DDR4 32GB 3200MHz")
+        self.distintos("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Black", "Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX White")
+        self.mismos("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Black", "Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Negro")
+        self.distintos("Memoria Kingston Fury Beast DDR5 32GB 6000MHz", "Memoria Kingston Fury Beast RGB DDR5 32GB 6000MHz")
+
+    def test_genericos_sin_marca_no_comparten_firma(self):
+        for nombre in ("Disco SSD 480GB Sata", "SSD 480GB Sata 2.5", "Disco SSD 1TB NVMe M.2", "Memoria RAM DDR4 8GB Notebook",
+                       "Memoria DDR4 16GB 3200MHz RGB", "Memoria Sodimm DDR4 8GB 2666MHz"):
+            self.assertIsNone(modelo.firma_de(nombre), nombre)
+        self.assertIsNotNone(modelo.firma_de("Disco SSD Kingston 480GB Sata"))
+
+    def test_sin_atributos_suficientes_no_hay_firma(self):
+        for nombre in ("Mother GIGABYTE DDR5 AM5", "Motherboard B840M H AM5", "Placa de video RTX 5070 Ti 16GB",
+                       "Placa de video Msi Ventus 3X Oc", "Memoria RAM DDR4", "Disco SSD Sandisk Plus",
+                       "Disco SSD Sandisk Plus 2TB Nvme Usado", "Memoria Kingston 8Gb OEM DDR4", "Mouse Logitech G502"):
+            self.assertIsNone(modelo.firma_de(nombre), nombre)
+
+    def fila(self, nombre, modelo_="", tienda="uno"):
+        return [nombre, 1000, "https://x.test/" + nombre, tienda, "", 0, 0, "", "", modelo_]
+
+    def test_el_mismo_producto_sin_codigo_recibe_el_mismo_identificador(self):
+        filas = [self.fila("Motherboard GIGABYTE B840M H AM5 DDR5", "", "mt"), self.fila("Mother GIGABYTE B840M H DDR5 \u2013 AM5", "", "scp"),
+                 self.fila("Motherboard Gigabyte B840M H AM5 DDR5 mATX", "", "cg"), self.fila("Motherboard GIGABYTE B840M GAMING X AM5 DDR5", "", "mx")]
+        modelo.completar_con_conocidos(filas)
+        codigos = [f[9] for f in filas]
+        self.assertTrue(codigos[0] and codigos[0] == codigos[1] == codigos[2])
+        self.assertNotEqual(codigos[0], codigos[3])
+        self.assertEqual(codigos[3], "")                         # uno solo: no hay con quien agruparlo
+
+    def test_si_alguien_publica_el_part_number_los_demas_lo_heredan(self):
+        filas = [self.fila("Placa de Video MSI GeForce RTX 3060 Ventus 2X 12GB", "912-V397-299", "cg"),
+                 self.fila("Placa de Video MSI GeForce RTX 3060 12GB VENTUS 2X", "", "mt"),
+                 self.fila("Placa de Video MSI GeForce RTX 3060 Ventus 2X 8GB", "", "scp")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["912-V397-299", "912-V397-299", ""])
+
+    def test_dos_part_numbers_distintos_con_la_misma_firma_no_se_mezclan(self):
+        filas = [self.fila("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX", "CMK16GX4M1D3200C16", "cg"),
+                 self.fila("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX", "CMK16GX4M1E3200C16", "mx"),
+                 self.fila("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX", "", "fh")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["CMK16GX4M1D3200C16", "CMK16GX4M1E3200C16", ""])
+
+    def test_no_depende_del_orden(self):
+        a = [self.fila("Motherboard GIGABYTE B840M H AM5 DDR5", "", "mt"), self.fila("Mother GIGABYTE B840M-H DDR5", "", "scp")]
+        b = [a[1][:], a[0][:]]
+        modelo.completar_con_conocidos(a)
+        modelo.completar_con_conocidos(b)
+        self.assertEqual({f[9] for f in a}, {f[9] for f in b})
+
+
 class MpnDeFicha(unittest.TestCase):
     """El part number que publica la ficha de Venex y de Mexx (B3-bis): HTML real guardado, sin red."""
 
@@ -188,3 +330,49 @@ class MpnDeFicha(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ModeloDeCualquierRubro(unittest.TestCase):
+    def test_el_part_number_de_un_catalogo_vale_en_monitores_notebooks_y_celulares(self):
+        self.assertEqual(modelo.modelo_de("Monitor Samsung Odyssey G3 27", "LS27DG300ELXZB"), "LS27DG300ELXZB")
+        self.assertEqual(modelo.modelo_de("Notebook Lenovo IdeaPad 15", "83DR00B3AR"), "83DR00B3AR")
+        self.assertEqual(modelo.modelo_de("Monitor Samsung OEM", "LS27DG300ELXZB"), "")          # bloqueado
+        self.assertEqual(modelo.modelo_de("Mouse Logitech G203"), "")                            # sin codigo ni forma conocida
+
+    def test_el_part_number_de_un_agregador_se_valida(self):
+        self.assertEqual(modelo.modelo_de_api("6N4E8AA"), "6N4E8AA")
+        self.assertEqual(modelo.modelo_de_api(" ls27dg300elxzb "), "LS27DG300ELXZB")
+        for v in (None, "", "Odyssey G3", "123456", "ABCDEF", 42):
+            self.assertIsNone(modelo.modelo_de_api(v), v)
+
+    def fila(self, nombre, modelo_="", tienda="uno"):
+        return [nombre, 1000, "https://x.test/" + nombre, tienda, "", 0, 0, "", "", modelo_]
+
+    def test_un_monitor_toma_el_codigo_de_otro_monitor_pero_no_de_otra_clase(self):
+        filas = [self.fila("Monitor Gaming Odyssey Samsung G3 27 G30D FHD 180Hz", "LS27DG300ELXZB", "cy"),
+                 self.fila("Monitor Samsung 27 LS27DG300ELXZB FHD", "", "mx"),
+                 self.fila("Soporte para monitor LS27DG300ELXZB", "", "fh")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["LS27DG300ELXZB", "LS27DG300ELXZB", ""])
+
+
+class CodigoInternoDeLaTienda(unittest.TestCase):
+    def test_el_numero_entre_parentesis_al_final_no_es_parte_del_nombre(self):
+        self.assertEqual(modelo.normalizar("Monitor Gamer MSI 24 MAG 245F (II) (3242)"), "Monitor Gamer MSI 24 MAG 245F (II)")
+        self.assertEqual(modelo.normalizar("RE305 Range Extender TP Link AC1200 (7933)"), "RE305 Range Extender TP Link AC1200")
+        self.assertEqual(modelo.normalizar("Memoria 16GB (2 x 8GB)"), "Memoria 16GB (2 x 8GB)")             # un parentesis con texto se queda
+
+    def test_la_misma_placa_con_y_sin_el_codigo_interno_tiene_la_misma_firma(self):
+        a = modelo.firma_de("Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc (4455)")
+        b = modelo.firma_de("Placa De Video Msi Geforce Rtx 5070 TI 16G Ventus 3X Oc")
+        self.assertEqual(a, b)
+
+
+class BloqueadosComoEnElBuscador(unittest.TestCase):
+    """Python y JS tienen que coincidir en que es usado: si no, un aviso "caja abierta" se agrupa con lo nuevo."""
+
+    def test_caja_abierta_exhibicion_y_seminuevo_no_se_agrupan(self):
+        for nombre in ("Placa de Video MSI RTX 4060 8GB (Caja Abierta)", "Disco SSD Kingston 480GB Exhibición", "Memoria Kingston DDR4 16GB Seminuevo",
+                       "Memoria Kingston DDR4 16GB semi nuevo", "Disco SSD WD 1TB segunda mano", "SSD Kingston 480GB open box", "SSD Kingston 480GB Refurb"):
+            self.assertTrue(modelo.bloqueado_para_agrupar(nombre), nombre)
+            self.assertIsNone(modelo.firma_de(nombre), nombre)

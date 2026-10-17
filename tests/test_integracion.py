@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote
 
 RAIZ = Path(__file__).resolve().parent.parent
-CAMPOS = ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo"]
+CAMPOS = ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde"]
 
 
 def fila(nombre, precio, tienda, antes=0):

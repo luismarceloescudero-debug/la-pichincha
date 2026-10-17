@@ -131,3 +131,29 @@ class RebajaInflada(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DesdeCuando(unittest.TestCase):
+    """Desde cuando tiene el precio de hoy: la fecha del ultimo cambio, para decir "sin cambios desde el 07/10"."""
+
+    def test_el_dia_del_ultimo_cambio(self):
+        eventos = [(d(40), 1200), (d(20), 1000)]
+        self.assertEqual(serie.desde_cuando(eventos, HOY, 1000), d(20))
+
+    def test_si_el_precio_cambia_hoy_es_hoy(self):
+        self.assertEqual(serie.desde_cuando([(d(40), 1200)] and [(d(40), 1200)], HOY, 900), HOY)
+
+    def test_si_nunca_cambio_es_el_dia_que_se_empezo_a_seguir(self):
+        self.assertEqual(serie.desde_cuando([(d(13), 500)], HOY, 500), d(13))
+
+    def test_sin_historial_no_se_afirma_nada(self):
+        self.assertIsNone(serie.desde_cuando([], HOY, 500))
+
+    def test_si_dejo_de_publicarse_y_volvio_cuenta_desde_que_volvio(self):
+        eventos = [(d(60), 800), (d(30), None), (d(10), 800)]
+        self.assertEqual(serie.desde_cuando(eventos, HOY, 800), d(10))
+
+    def test_inicio_del_seguimiento_es_el_primer_dia_registrado(self):
+        series = {("cg", "u1"): [(d(13), 500), (d(2), 450)], ("mx", "u2"): [(d(30), 70)]}
+        self.assertEqual(serie.inicio(series), d(30))
+        self.assertIsNone(serie.inicio({}))

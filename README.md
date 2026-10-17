@@ -231,14 +231,25 @@ Se muestran las rebajas entre 15% y 60%. El techo esta puesto porque arriba de
 ahi el precio anterior casi siempre esta inflado: un 90% OFF no es una oferta,
 es marketing.
 
-**Piso de gama.** Un descuento no vuelve oferta a un equipo que en 2026 se queda corto. En
-celulares y notebooks, si el titulo dice la RAM (celular 6 GB, notebook 16 GB) y el
-almacenamiento, tienen que llegar; y el procesador, el año, la bateria y el refresco tienen que
-ser de la generacion mas nueva del indice o la anterior. Sin RAM en el titulo (iPhone, MacBook)
-alcanza con un procesador o año reciente. La pestaña dice cuantos avisos con descuento quedaron
-afuera. Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y
-Telegram van despues de las locales, rotuladas. Detalle y pendientes en
+**Categorias y minimos.** Cada aviso se evalua en su categoria (`js/categorias.js`): monitores, PCs
+completas, notebooks, smartphones, componentes y perifericos. Cada una tiene sus minimos, su gama media y
+su gama alta con numeros, y lo que se exige a una no se le exige a otra (la VRAM es solo de las placas de
+video). Un monitor entra desde 144 Hz sin panel TN; la gama alta es 240 Hz o mas con OLED, QD-OLED o
+Mini-LED. Un smartphone, desde 6 GB de RAM y 128 GB; una notebook o PC, desde 16 GB y 512 GB, con el
+procesador de la generacion mas nueva del indice o la anterior. Los numeros estan en la spec
 `specs/012-reglas-de-ofertas/spec.md`.
+
+**Descuento por categoria.** Un 10% ya es buena oferta en notebooks, PCs y smartphones (12% en
+monitores); en componentes y perifericos se exige 20%. Las bajas propias piden 5% en equipos y 8% en
+componentes.
+
+**Cupo en el resumen.** El resumen del dia (Telegram, RSS y /hoy/) reserva 2 lugares por categoria y no
+deja pasar de 3 hasta repartir lo que sobra, para que los componentes, que son casi todo el catalogo, no
+lo acaparen. Sale agrupado por categoria.
+
+La pestaña dice cuantos avisos con descuento quedaron afuera por no llegar a los minimos de su categoria.
+Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y Telegram van al
+final de su categoria, rotuladas.
 
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de
@@ -331,9 +342,25 @@ sellos se usan.
 ## Identidad por codigo de modelo
 
 El mismo producto en varias tiendas se agrupa **solo** cuando comparte el
-codigo de modelo (part number) EXACTO. Nunca por parecido. Sin codigo, o con
-duda, el aviso queda suelto como siempre.
+codigo de modelo (part number) EXACTO, o la **firma** completa de sus atributos
+(abajo). Nunca por parecido. Sin codigo ni firma, o con duda, el aviso queda
+suelto como siempre.
 
+- **Firma (cuando el titulo no trae part number).** Cada tienda publica el mismo producto
+  distinto: otro orden, mayusculas, guiones, "Mother" o "Motherboard" o "MB", "16Gb" o
+  "16G", "2Tb", "U-Dimm" o "UDIMM", "Negro" o "Black", un guion largo, el codigo interno
+  entre parentesis al final. `modelo.firma_de` lleva el aviso a sus atributos
+  normalizados (marca, chipset o chip, capacidad, linea y variantes como OC, WiFi, RGB,
+  color o SODIMM) y dos avisos son el mismo producto solo si la firma COMPLETA coincide.
+  Si falta un atributo clave o difiere uno solo (X870E-E contra X870E-A, con y sin OC, 8 GB
+  contra 12 GB, SATA contra NVMe) son productos distintos. Rige para memoria, SSD, placas de
+  video y placas madre; si alguno de los avisos de la firma trae part number, los demas lo
+  heredan, y si ninguno lo trae comparten un identificador derivado (empieza con `~`).
+- ComparaYa publica el part number (`specifications.Modelo`), la marca y las especificaciones
+  (Hz, pulgadas) en campos aparte; el indexador los usa: el `Modelo` es el codigo del aviso,
+  y la marca y los datos que el titulo no dice se agregan al nombre (un monitor que decia solo
+  "Gaming 25\" 240Hz" ahora dice Samsung). El part number de un catalogo vale en cualquier
+  rubro (monitores, notebooks, celulares) y solo se hereda dentro de la misma clase.
 - `modelo.py` saca el codigo en tres rubros (RAM, SSD y placas de video): en
   CompraGamer viene del campo `codigo_principal` de su catalogo (dato del
   fabricante); en las demas tiendas, solo si el nombre nombra EXACTO un codigo
@@ -352,6 +379,12 @@ duda, el aviso queda suelto como siempre.
   compatibles; el resultado muestra la fila mas barata y debajo "Tambien en"
   las otras tiendas. La mediana y el conteo cuentan cada producto una vez
   ("41 productos en 58 avisos").
+- La busqueda tolera la tipografia: "b840m-h" encuentra "B840M H", "udimm" encuentra "U-Dimm",
+  "ssd 1tb" encuentra "SSD 1000GB" y "16g" encuentra "16GB". El mismo aviso con la URL escrita
+  distinto (www, barra final, utm_*) cuenta una vez, y un comercio que llega directo y por
+  ComparaYa es un solo comercio. Cada resultado dice desde cuando tiene su precio
+  ("precio sin cambios desde el 12/10"); el seguimiento empezo el 7/10, y antes de esa fecha
+  no sabemos (la columna `desde` del indice y `historial.inicio`).
 - Para sumar una regla: un nombre real a `tests/test_modelo.py`, la forma a
   `_FORMAS` en `modelo.py`. Precision antes que cobertura.
 - `cobertura.py` publica `cobertura.json` en cada corrida y avisa en el resumen

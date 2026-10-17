@@ -195,7 +195,8 @@ async function aXLSX(filas, titulo) {
   filas.forEach((f, i) => {
     const t = (IDX && IDX.tiendas[f[3]]) || T[f[3]] || { nombre: f[3] };
     const fila = hoja.addRow({ p: f[0], v: f[1], f: t.nombre + (viejoDe(f) ? ` (${viejoDe(f)})` : ""), c: f[4] || "", u: null });
-    fila.getCell("u").value = { text: f[2], hyperlink: f[2] };
+    // solo http(s) es un hipervinculo: un "javascript:" o "file://" no se abre desde la planilla
+    fila.getCell("u").value = /^https?:\/\//i.test(String(f[2])) ? { text: f[2], hyperlink: f[2] } : String(f[2] || "");
     fila.getCell("u").font = { color: { argb: ENLACE }, underline: true };
     fila.getCell("p").alignment = { wrapText: true, vertical: "top" };
     fila.getCell("v").alignment = { horizontal: "right" };

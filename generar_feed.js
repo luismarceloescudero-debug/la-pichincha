@@ -10,6 +10,7 @@
 const fs = require("fs");
 const path = require("path");
 const O = require("./js/ofertas.js");
+const C = require("./js/categorias.js");
 const P = require("./js/pagina.js");
 const G = require("./generar_paginas.js");
 
@@ -42,7 +43,7 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const items = O.destacadas(idx, max).map(o => {
     const f = o.f, pct = Math.round(o.off * 100);
     const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
-    const desc = `Antes ${pesos(f[o.ref])}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. ` +
+    const desc = `${C.ETIQUETA[o.categoria]}. Antes ${pesos(f[o.ref])}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. ` +
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
       (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
@@ -131,7 +132,7 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: o.f[o.ref], descuento: Math.round(o.off * 100),
-    comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo }));
+    comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria] }));
 }
 
 function main(argv) {

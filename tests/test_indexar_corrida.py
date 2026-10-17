@@ -134,10 +134,10 @@ class Corrida(unittest.TestCase):
             self.catalogos.pop("https://uno.test/cat")            # al dia siguiente uno se cae
             indexar.main(["--historial", str(self.hist)])
         indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
-        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", "", ""])
         self.assertEqual(self.fila(indice, "dos", 101)[8], "")
-        self.assertTrue(all(len(f) == 10 for f in indice["productos"]))
-        self.assertEqual(indice["campos"][-2:], ["sellos", "modelo"])
+        self.assertTrue(all(len(f) == 11 for f in indice["productos"]))
+        self.assertEqual(indice["campos"][-3:], ["sellos", "modelo", "desde"])
 
     def test_el_codigo_de_modelo_se_guarda_en_la_ultima_columna_tambien_en_filas_reusadas(self):
         nombre = "Disco Ssd 480Gb Kingston Sedc600M/480G"
@@ -184,6 +184,38 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 2)[8], "")       # 5 dias de historia: no afirma nada
         self.assertEqual(self.fila(indice, "dos", 101)[8], "")     # sin historia
 
+    def test_cada_aviso_dice_desde_cuando_tiene_su_precio_y_el_indice_cuando_empezo_el_seguimiento(self):
+        from datetime import timedelta
+        hoy = indexar.datetime.now(indexar.AR).date()
+        self.hist.mkdir(parents=True, exist_ok=True)
+        filas = [("uno", url(1), 1200, hoy - timedelta(days=45)), ("uno", url(1), 1000, hoy - timedelta(days=20)),
+                 ("uno", url(2), 500, hoy - timedelta(days=13)), ("uno", url(3), 700, hoy - timedelta(days=13))]
+        por_mes = {}
+        for tienda, u, precio, dia in filas:
+            por_mes.setdefault(dia.strftime("%Y-%m"), []).append(f"{dia.isoformat()},{tienda},{u},{precio}")
+        for mes, lineas in por_mes.items():
+            (self.hist / f"{mes}.csv").write_text(chr(10).join(["fecha,tienda,id,precio"] + lineas) + chr(10), encoding="utf-8")
+        indice, _ = self.correr([(1, 1000), (2, 500), (3, 650), (4, 300)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[10], (hoy - timedelta(days=20)).isoformat())     # bajo hace 20 dias y sigue igual
+        self.assertEqual(self.fila(indice, "uno", 2)[10], (hoy - timedelta(days=13)).isoformat())     # nunca cambio: desde que se lo sigue
+        self.assertEqual(self.fila(indice, "uno", 3)[10], hoy.isoformat())                            # cambio hoy
+        self.assertEqual(self.fila(indice, "uno", 4)[10], "")                                         # nuevo: todavia no se afirma nada
+        self.assertEqual(indice["historial"]["inicio"], (hoy - timedelta(days=45)).isoformat())
+
+    def test_sin_historial_el_indice_no_inventa_fechas(self):
+        indice, _ = self.correr([(1, 1000)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[10], "")
+        self.assertEqual(indice["historial"]["inicio"], "")
+
+    def test_se_descartan_al_relevar_y_al_reusar_un_indice_viejo(self):
+        viejo = {"productos": [["Viejo malo", 1000, "javascript:alert(1)", "uno", "", 0, 0, "", "", "", ""],
+                               ["Viejo bueno", 1000, url(5), "uno", "", 0, 0, "", "", "", ""]]}
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+        indice, _ = self.correr(None, [(101, 500)])              # uno se cae: se reusa lo viejo, sin la URL mala
+        urls = [f[2] for f in indice["productos"]]
+        self.assertNotIn("javascript:alert(1)", urls)
+        self.assertIn(url(5), urls)
+
     def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
         # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
         # tiene que quedar con su valor por defecto, no corrido de lugar.
@@ -191,8 +223,8 @@ class Corrida(unittest.TestCase):
                                ["Producto 2", 2000, url(2), "uno", "", 0]]}
         (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
         indice, _ = self.correr(None, [(101, 500)])              # uno se cae y se reusa lo viejo
-        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", ""])
-        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", "", ""])
 
     def previo(self, tiendas, generado="2026-10-07T15:25-03:00"):
         """Un indice anterior con un producto de uno, como lo dejo otra corrida."""
@@ -241,3 +273,4 @@ class Corrida(unittest.TestCase):
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "dos", 1)[6], 0)
+

@@ -14,7 +14,7 @@ function tarjeta(p, i) {
     <div class="barra"></div>
     ${p.destacado ? `<span class="cinta">${icono("trofeo")} mejor</span>` : ""}
     <span class="rank">${p.podio}</span>
-    <div class="foto"><img src="${p.img}" alt="${esc(p.nombre)}" loading="${i < 2 ? "eager" : "lazy"}"${i === 0 ? ' fetchpriority="high"' : ""}></div>
+    <div class="foto"><img src="${esc(p.img)}" alt="${esc(p.nombre)}" loading="${i < 2 ? "eager" : "lazy"}"${i === 0 ? ' fetchpriority="high"' : ""}></div>
     <div class="cuerpo">
       <h3>${esc(p.nombre)}</h3>
       <span class="tienda">${icono("store")} ${esc(t.nombre || "")}</span>
@@ -57,17 +57,17 @@ function detalle(p) {
     <button class="volver" data-volver>${icono("izq")} Volver a la comparativa</button>
     ${barraAcciones(p.id)}
     <div class="dcab">
-      <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
+      <div class="dfoto"><img src="${esc(p.img)}" alt="${esc(p.nombre)}"></div>
       <div>
         <h2>${esc(p.nombre)}</h2>
         <p class="dsku">${esc(p.sku || "")}</p>
         <span class="tienda">${icono("store")} ${esc(t.nombre)} · ${esc(t.entrega)}</span>
       </div>
       <div class="dprecio">
-        <a class="v" href="${p.url}" target="_blank" rel="noopener">${pesos(p.precio)}</a>
+        <a class="v" href="${enlace(p.url)}" target="_blank" rel="noopener">${pesos(p.precio)}</a>
         ${avisoDe(p) ? `<span class="l">${selloOjo(avisoDe(p))}</span>` : ""}
         <span class="l">${p.precio_lista ? "lista " + pesos(p.precio_lista) + " · " : ""}${esc(t.promo)}</span>
-        <span class="l"><a class="ir" href="${p.url}" target="_blank" rel="noopener">${icono("fuera")} abrir en ${esc(t.nombre)}</a></span>
+        <span class="l"><a class="ir" href="${enlace(p.url)}" target="_blank" rel="noopener">${icono("fuera")} abrir en ${esc(t.nombre)}</a></span>
       </div>
     </div>
     ${amazonHtml(p.corto || p.nombre, `Comparar con Amazon (EE.UU.): ${p.corto || p.nombre}`)}
@@ -131,8 +131,8 @@ function vistaTiendas() {
         <p class="titular" style="font-family:var(--font-mono);font-size:.8rem">${esc(t.rol)}</p>
         <ul class="wins">${ganadores[k].map(id => {
           const p = porId[id]; if (!p) return "";
-          return `<li><a href="${p.url}" target="_blank" rel="noopener">
-            <span class="mini"><img src="${p.img}" alt="" loading="lazy"></span>
+          return `<li><a href="${enlace(p.url)}" target="_blank" rel="noopener">
+            <span class="mini"><img src="${esc(p.img)}" alt="" loading="lazy"></span>
             <span class="txt">${esc(p.nombre)}${avisoDe(p) ? ` ${selloOjo(avisoDe(p))}` : ""}</span><b>${pesos(p.precio)}</b></a></li>`;
         }).join("")}</ul>
         <p class="flaco">${icono("aviso")} ${esc(flaco[k])}</p>
@@ -142,7 +142,7 @@ function vistaTiendas() {
     <p class="sub">Ninguna gana en todo. Esto es lo que cada una tiene más barato que las demás; cada línea abre el producto.</p></div>
     <div class="grid">${cards}</div>
     <p class="flaco" style="margin-top:18px">${icono("aviso")} <span><b>FullH4rd</b> queda afuera del podio pero es imbatible en Hiksemi:
-    <a href="${porId["hiksemi-hiker"].url}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>${avisoDe(porId["hiksemi-hiker"]) ? ` ${selloOjo(avisoDe(porId["hiksemi-hiker"]))}` : ""}.</span></p></div>`;
+    <a href="${enlace(porId["hiksemi-hiker"].url)}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>${avisoDe(porId["hiksemi-hiker"]) ? ` ${selloOjo(avisoDe(porId["hiksemi-hiker"]))}` : ""}.</span></p></div>`;
 }
 
 function vistaVeredicto() {

@@ -62,7 +62,7 @@ test("el feed trae como mucho 20 entradas", () => {
 test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", () => {
   const lista = F.listaParaCanal(IDX, 10);
   assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", precio: 90000, antes: 120000, descuento: 25,
-    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia" });
+    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente" });
   assert.equal(lista.length, 2);
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
 });
@@ -127,16 +127,16 @@ test("main escribe hoy/index.html", () => {
   assert.match(fs.readFileSync(path.join(dir, "hoy", "index.html"), "utf8"), /class="historia"/);
 });
 
-test("una compra internacional entra al feed, al final y rotulada", () => {
+test("una compra internacional entra al feed, al final de su categoria y rotulada", () => {
   const idx = { ...IDX, productos: [fila("Celular Importado 8GB RAM 256GB", 7000, { antes: 10000, sellos: "i" }), ...IDX.productos] };
   const xml = F.renderFeed(idx, { baseUrl: BASE });
   const items = xml.match(/<item>[\s\S]*?<\/item>/g);
-  assert.match(items[items.length - 1], /Celular Importado.*compra internacional/);
-  assert.equal(F.listaParaCanal(idx, 10).pop().comercio.endsWith("compra internacional"), true);
+  assert.match(items.find(i => i.includes("Celular Importado")), /Celular Importado.*compra internacional/);
+  assert.equal(F.listaParaCanal(idx, 10).find(o => o.nombre.includes("Importado")).comercio.endsWith("compra internacional"), true);
 });
 
 test("una oferta de gama alta al precio de la media lo dice en la descripcion del feed", () => {
   const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Moto G${i} 6GB/256GB`, 300000 + i * 1000));
   const idx = { ...IDX, productos: [...media, fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
-  assert.match(F.renderFeed(idx, { baseUrl: BASE }), /Gama alta al precio de la gama media \(mediana de los celulares de gama media de 256 GB: \$[\d.]+ \(8 avisos\)\)/);
+  assert.match(F.renderFeed(idx, { baseUrl: BASE }), /Gama alta al precio de la gama media \(mediana de los smartphones de gama media de 256 GB: \$[\d.]+ \(8 avisos\)\)/);
 });

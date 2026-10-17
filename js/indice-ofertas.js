@@ -23,7 +23,7 @@ function asegurarIndice(forzar) {
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
    Que es una oferta (bajas propias y rebajas publicadas) vive en js/ofertas.js, compartido con el
    feed RSS y el canal de Telegram. */
-const { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
+const { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
 const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1 };
 let OF_ACTUAL = [];
@@ -37,7 +37,7 @@ function listaOfertas() {
   if (!OFERTAS) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
-    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: categoriaDe(f[0]), com: comercioDe(f) });
+    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
                             ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
 }
@@ -66,15 +66,15 @@ function controlesOfertas(todas) {
     return [...m].sort((a, b) => b[1] - a[1]);
   };
   const coms = cuenta("com").slice(0, 6);
-  // "Outlet" o "Combo" son condiciones del aviso, no rubros.
-  const NO_RUBRO = ["outlet", "combo", "kit", "nuevo", "oferta", "usado"];
-  const cats = cuenta("cat").filter(([c, k]) => k >= 5 && c.length > 2 && !NO_RUBRO.includes(c)).slice(0, 8);
+  // Las categorias de la pagina (monitores, PCs, notebooks, smartphones, componentes y perifericos), no la primera palabra del titulo.
+  const porCat = new Map(cuenta("cat"));
+  const cats = Categorias.ORDEN.filter(c => porCat.has(c)).map(c => [c, porCat.get(c)]);
   const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
   return `<div class="of-ctrl">
     <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}</div>
     <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
     <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
-    <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, c[0].toUpperCase() + c.slice(1), k, OF.cat === c)).join("")}</div>
+    <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, Categorias.ETIQUETAS[c], k, OF.cat === c)).join("")}</div>
     <div class="of-fila">
       <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
       <button class="of-chip" data-of="cruce:1" aria-pressed="${OF.cruce}" title="Ofertas reales de gama alta que cuestan lo mismo o menos que la mediana de la gama media">Gama alta al precio de media <span class="n">${todas.filter(o => o.cruce).length}</span></button>
@@ -113,7 +113,7 @@ function cardOferta(o, i, desde) {
       <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
-      <a class="acc" href="${f[2]}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
+      <a class="acc" href="${enlace(f[2])}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
       <button class="acc" data-comparar-oferta="${i}">${icono("balanza")} Comparar</button>
     </div>
   </article>`;
@@ -154,7 +154,7 @@ function pintarOfertas(append) {
   const todas = listaOfertas();
   if (!todas.length) {
     const sinCampo = !(IDX.campos || []).includes("antes");
-    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento";
+    est.textContent = sinCampo ? "el índice todavía no registra precios anteriores" : "no hay rebajas en este relevamiento: en Buscar ves los precios y desde cuándo no cambian";
     caja.innerHTML = sinCampo ? `<p class="sub">Hace falta volver a indexar con <code>python indexar.py</code>.</p>`
                               : `<p class="sub">Volvé mañana: el índice se rearma una vez por día. El último relevamiento fue ${Pagina.cuando(IDX.generado)}.</p>`;
     return;
@@ -163,9 +163,15 @@ function pintarOfertas(append) {
   const visibles = OF_ACTUAL.slice(0, OF.pagina * POR_PAGINA);
   const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
+  // Una categoria sin ofertas no es un error: puede no haber habido descuentos. Se dice, y se manda al buscador, que muestra
+  // desde cuando no cambia el precio.
+  const conOferta = new Set([...OFERTAS.categorias.values()].map(g => g.categoria));
+  const sin = ["smartphone", "notebook", "monitor", "pc"].filter(c => !conOferta.has(c)).map(c => Categorias.ETIQUETAS[c].toLowerCase());
+  const nota = sin.length ? ` · hoy sin ofertas en ${sin.join(", ")}: en Buscar ves sus precios y desde cuándo no cambian` : "";
   est.textContent = `${OF_ACTUAL.length} ofertas`
     + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
-    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar al piso de gama de celulares y notebooks` : "");
+    + nota
+    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
@@ -199,13 +205,13 @@ function marcarEstrella(btn) {
   if (n) n.textContent = ESTRELLAS.size;
 }
 
-/* "Comparar" desde una oferta: busca la categoria y la marca, sin el codigo de modelo,
-   y abre la comparativa de esos resultados. */
+/* "Comparar" desde una oferta: con marca y submarca («Soundcore AeroFit 2 by Anker») prueba submarca + modelo, despues
+   el modelo y por ultimo marca madre + modelo; sin ellas busca la categoria y la marca, sin el codigo de modelo, y
+   abre la comparativa de esos resultados. */
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  const palabras = o.f[0].split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
-  compararConsulta((palabras.slice(0, 3).join(" ") || o.f[0].split(/\s+/).slice(0, 2).join(" ")));
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados));
 }
 
 document.addEventListener("keydown", ev => {

@@ -8,25 +8,37 @@ y el aviso queda suelto. Dos avisos son el mismo producto cuando el codigo coinc
 Cada regla nueva entra con un nombre real en tests/test_modelo.py.
 """
 
+import hashlib
 import html
 import re
+import unicodedata
 
-RUBROS = ("ram", "ssd", "gpu")
+RUBROS = ("ram", "ssd", "gpu", "mb")
 
-# Nombres que solo mencionan el componente: notebooks, motherboards, PCs armadas, discos mecanicos.
+# Equipos y lotes que solo mencionan el componente: notebooks, PCs armadas, combos, discos mecanicos. Se miran por el
+# PRINCIPIO del titulo: "Memoria RAM Notebook SODIMM" es una memoria que se usa en una notebook, no una notebook.
 _NO_ES_COMPONENTE = re.compile(
-    r"\b(notebook|laptop|mother|motherboard|pc gamer|all in one|aio|macbook|ipad|celular|smartphone)\b|rpm\b",
-    re.I)
+    r"^\s*(notebook|laptop|macbook|ipad|celular|smartphone|pc|computadora|all in one|aio|combo|kit\s+(?:amd|intel|ryzen)|"
+    r"monitor|auricular|auriculares|parlante|teclado|mouse)\b|\bpc gamer\b|rpm\b", re.I)
 
 _RUBRO_POR_INICIO = (
-    ("ram", re.compile(r"^\s*(memoria|memorias|ram|modulo)\b", re.I)),
-    ("ssd", re.compile(r"^\s*(hd ssd|hd m\.?2|disco solido|disco s.lido|disco ssd|ssd)\b", re.I)),
-    ("gpu", re.compile(r"^\s*(placa de v.{1,2}deo|tarjeta de v.{1,2}deo|vga)\b", re.I)),
+    ("ram", re.compile(r"^\s*(memoria|memorias|ram|modulo|sodimm|so-?dimm|udimm|u-?dimm|dimm)\b", re.I)),
+    ("ssd", re.compile(r"^\s*(hd ssd|hd m\.?2|disco solido|disco s.lido|disco ssd|ssd|unidad de estado solido)\b", re.I)),
+    ("gpu", re.compile(r"^\s*(placa de v.{1,2}deo|tarjeta de v.{1,2}deo|tarjeta grafica|placa grafica|vga|gpu)\b", re.I)),
+    ("mb", re.compile(r"^\s*(motherboard|mother|mb|placa madre|placa base|mainboard)\b", re.I)),
 )
 
+# Titulos que no empiezan por el rubro (el que arranca por la marca: "Hiksemi Hiker DDR4 32GB U-Dimm"): se reconocen por
+# lo que son, y solo si no empiezan por otra cosa.
+_MEMORIA_SUELTA = re.compile(r"\bddr[2345]\b.*\b\d{1,3}\s?(?:gb|g)\b|\b\d{1,3}\s?(?:gb|g)\b.*\bddr[2345]\b", re.I)
+_OTRA_COSA = re.compile(r"\b(procesador|processor|ryzen|core\s?i[3579]|fuente|gabinete|cooler|disipador|placa|mother|motherboard|"
+                        r"ssd|nvme|disco|rtx|gtx|geforce|radeon|monitor|pendrive|pen drive|micro sd|sd card)\b", re.I)
+
 # Marcas de usado o de venta sin garantia de fabrica: no son el mismo producto que el nuevo.
+# La misma lista que js/buscador.js (RE_USADO) mas lo que solo importa al agrupar (bulk, OEM).
 _BLOQUEADOS = re.compile(
-    r"\b(usad[oa]s?|reacondicionad[oa]s?|refurbished|open ?box|outlet|bulk|oem)\b", re.I)
+    r"\b(usad[oa]s?|seminuev[oa]s?|semi[ -]nuev[oa]s?|segunda mano|2da mano|reacondicionad[oa]s?|refurbished|refurb|open ?box|"
+    r"caja[ -]?abierta|exhibici[oó]n|outlet|bulk|oem)\b", re.I)
 
 # Forma de un part number por rubro. Solo formas conocidas: lo demas no se toma como codigo.
 _FORMAS = {
@@ -51,12 +63,28 @@ _ESPECIFICACION = re.compile(
 _TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9/\-\.]*[A-Za-z0-9]")
 
 
+def normalizar(nombre):
+    """El nombre como lo escribiria cualquier tienda: sin entidades HTML, con un solo tipo de guion y de espacio.
+    Cada tienda publica el mismo producto con otra tipografia (un guion largo, un espacio duro, una comilla de
+    pulgadas distinta); eso no puede decidir si dos avisos son el mismo."""
+    t = unicodedata.normalize("NFKC", html.unescape(str(nombre)))
+    t = re.sub(r"[\u2010-\u2015\u2212]", "-", t)
+    t = re.sub(r"\u2032\u2032|\u2033|[\u201c\u201d]|''", '"', t)         # todas las comillas de pulgadas son una
+    t = re.sub(r"\s+", " ", t.replace("\u00a0", " ")).strip()
+    return re.sub(r"\s*\(\d{3,6}\)$", "", t)         # el codigo interno que algunas tiendas dejan al final: "... 2xHDMI (3242)"
+
+
 def rubro_de(nombre):
-    """ram, ssd o gpu si el aviso ES ese componente (no una notebook que lo trae); si no, None."""
+    """ram, ssd, gpu o mb si el aviso ES ese componente (no una notebook que lo trae); si no, None."""
+    nombre = normalizar(nombre)
     if _NO_ES_COMPONENTE.search(nombre):
         return None
     encontrados = [r for r, rx in _RUBRO_POR_INICIO if rx.search(nombre)]
-    return encontrados[0] if len(encontrados) == 1 else None
+    if len(encontrados) == 1:
+        return encontrados[0]
+    if not encontrados and _MEMORIA_SUELTA.search(nombre) and not _OTRA_COSA.search(nombre):
+        return "ram"
+    return None
 
 
 def bloqueado_para_agrupar(nombre):
@@ -66,6 +94,7 @@ def bloqueado_para_agrupar(nombre):
 def codigo_de_modelo(nombre, rubro):
     """El codigo normalizado (mayusculas) o None si no hay exactamente uno con la forma del rubro."""
     forma = _FORMAS.get(rubro)
+    nombre = normalizar(nombre)
     if forma is None or bloqueado_para_agrupar(nombre):
         return None
     candidatos = set()
@@ -80,10 +109,15 @@ def codigo_de_modelo(nombre, rubro):
 
 def modelo_de(nombre, sku=None):
     """Lo que va a la columna `modelo` del indice: el codigo, o "" si el aviso queda suelto.
-    Si el catalogo de la tienda publica el part number (`sku`), manda ese, con las mismas guardas."""
-    if rubro_de(nombre) is None or bloqueado_para_agrupar(nombre):
+    Si el catalogo de la tienda publica el part number (`sku`), manda ese en cualquier rubro (monitores, notebooks,
+    celulares...): es un dato del fabricante. Lo que se lee del titulo, solo en los rubros con forma de codigo conocida."""
+    nombre = normalizar(nombre)
+    if bloqueado_para_agrupar(nombre):
         return ""
-    return sku or codigo_de_modelo(nombre, rubro_de(nombre)) or ""
+    if sku:
+        return sku
+    rubro = rubro_de(nombre)
+    return (codigo_de_modelo(nombre, rubro) if rubro else "") or ""
 
 
 _SKU = re.compile(r"SKU:\s*([^'\",\]\[]+)", re.I)
@@ -113,6 +147,16 @@ _FICHAS = {
 }
 
 
+def modelo_de_api(valor):
+    """El part number que un agregador publica en sus especificaciones (ComparaYa: `specifications.Modelo`), en
+    mayusculas, o None si falta o no tiene forma de codigo (con espacios, solo letras o solo cifras: un nombre
+    comercial, un numero de serie). Ante la duda no hay codigo."""
+    if not isinstance(valor, str):
+        return None
+    codigo = html.unescape(valor).strip().upper().rstrip(".")
+    return codigo if _FORMA_SKU.match(codigo) else None
+
+
 def mpn_de_ficha(pagina, extractor):
     """El part number de la ficha de un producto (Venex: "MODELO: X | GTIN: ..."; Mexx: "P/N" o "Modelo"), en
     mayusculas, o None si la ficha no lo trae, trae dos distintos o no tiene forma de codigo (con espacios, solo
@@ -127,17 +171,152 @@ def mpn_de_ficha(pagina, extractor):
     return None
 
 
+# --- Firma: el mismo producto, publicado distinto en cada tienda --------------------------------------------------
+#
+# Sin part number en el titulo (y sin que la tienda lo publique), el mismo producto se reconoce por sus atributos
+# normalizados: marca, chip o chipset, capacidad, linea y variantes (OC, WiFi, RGB, color, SODIMM...). Se ignoran el orden,
+# las mayusculas, los guiones, las unidades pegadas o separadas (16GB, 16 Gb, 16G, 2Tb), los sinonimos del rubro (Mother,
+# Motherboard, MB, Placa Madre) y las palabras de relleno (socket, formato, GDDR, CL, Box). Dos avisos son el mismo producto
+# solo si la firma COMPLETA coincide: si falta un atributo clave o difiere uno solo, no hay firma o es otra. Nunca por parecido.
+
+_COLORES = {"negro": "black", "negra": "black", "blanco": "white", "blanca": "white", "rojo": "red", "roja": "red",
+            "azul": "blue", "plateado": "silver", "plata": "silver", "gris": "gray", "grey": "gray", "rosa": "pink"}
+_RELLENO = {"de", "del", "la", "el", "para", "con", "sin", "y", "nuevo", "nueva", "new", "original", "oficial", "garantia",
+            "box", "caja", "edition", "edicion", "version", "ver", "gaming", "series", "serie", "by", "pcs", "unidad"}
+_RELLENO_POR_RUBRO = {
+    "mb": {"motherboard", "mother", "mb", "placa", "madre", "base", "mainboard", "board", "socket", "ddr3", "ddr4", "ddr5"},
+    "gpu": {"placa", "video", "vga", "tarjeta", "grafica", "graficos", "gpu", "geforce", "nvidia", "radeon", "amd", "graphics",
+            "card", "gddr5", "gddr6", "gddr6x", "gddr7", "pcie", "pci", "e", "x16", "x8"},
+    "ram": {"memoria", "memorias", "ram", "modulo", "pc", "desktop", "dimm", "udimm", "memory", "xmp", "expo", "kit", "latencia"},
+    "ssd": {"disco", "ssd", "solido", "estado", "unidad", "hd", "drive", "interno", "pcie", "pci", "e", "x4", "x2", "m2", "gen3",
+            "gen4", "gen5", "ssds", "internal"},
+}
+_MARCAS_MB = {"gigabyte", "asus", "msi", "asrock", "biostar", "evga", "colorful", "supermicro", "zotac"}
+_MARCAS_GPU = {"asus", "msi", "gigabyte", "zotac", "palit", "pny", "galax", "sapphire", "powercolor", "xfx", "asrock", "colorful",
+               "inno3d", "evga", "gainward", "afox", "maxsun", "sparkle", "biostar", "yeston", "pny", "intel"}
+# Lineas que solo existen en una marca: si el titulo no nombra la marca, la linea la dice.
+_LINEA_DE_MARCA = {"rog": "asus", "tuf": "asus", "prime": "asus", "proart": "asus", "aorus": "gigabyte", "windforce": "gigabyte",
+                   "eagle": "gigabyte", "mag": "msi", "mpg": "msi", "meg": "msi", "ventus": "msi", "suprim": "msi",
+                   "hellhound": "powercolor", "nitro": "sapphire", "pulse": "sapphire"}
+# Lo que describe al producto pero no dice de quien es: con solo esto ("SSD 480GB Sata") dos genericos distintos tendrian la
+# misma firma. Memoria y SSD necesitan ademas una marca o una linea.
+_DESCRIPTORES = {"sata", "iii", "ii", "nvme", "sodimm", "udimm", "rgb", "argb", "black", "white", "red", "blue", "silver", "gray",
+                 "pink", "notebook", "laptop", "ssd", "m2", "msata", "heatsink", "disipador", "low", "profile"}
+_CHIPSET = re.compile(r"^[abhqwxz]\d{3}[a-z]{0,2}$")
+_CHIP_GPU = re.compile(r"^(rtx|gtx|rx|arc)\d{3,4}(ti|tisuper|super|xt|xtx|gre)?$")
+
+
+def _tokens(nombre):
+    t = normalizar(nombre).lower()
+    t = "".join(c for c in unicodedata.normalize("NFD", t) if unicodedata.category(c) != "Mn")
+    t = t.replace("&", " ").replace("\u2033", '"')
+    t = re.sub(r"\b[23]\.5\s?(?:\"|pulgadas|pulg)?", " ", t)             # formato del disco: no identifica
+    t = re.sub(r"\b\d+\s?mb/s\b|\bpc[345]-?\d+\b|\b\d(?:\.\d+)?\s?v\b|\bcl\s?\d{2}\b", " ", t)   # velocidades, PC4-25600, 1.35V, CL16
+    t = re.sub(r"(\d)\s*(gb|tb|mhz)\b", r"\1\2", t)
+    t = re.sub(r"\b(\d{1,4})g\b", r"\1gb", t)                              # 16G -> 16GB
+    t = re.sub(r"\bs\.?o[\s.-]?dimm\b|\b(?:notebook|laptop)\b(?=.*\bddr[2345]\b)", "sodimm", t)
+    t = re.sub(r"\bu[\s-]?dimm\b", "udimm", t)
+    t = re.sub(r"\b(?:m|micro)[\s-]?atx\b|\be[\s-]?atx\b|\bmini[\s-]?itx\b|\batx\b", " ", t)
+    t = re.sub(r"\blga\s?\d{3,4}\b|\bam[45]\b", " ", t)
+    t = re.sub(r"\b(rtx|gtx|rx|arc)\s*-?(\d{3,4})(?:\s*(ti\s*super|super|ti|xtx|xt|gre)\b)?",
+               lambda m: m.group(1) + m.group(2) + (m.group(3) or "").replace(" ", ""), t)
+    t = re.sub(r"\bm\.?\s?2\b", "m2", t)
+    toks = []
+    for x in re.findall(r"[a-z0-9]+", t):
+        mt = re.fullmatch(r"(\d+)tb", x)
+        toks.append(f"{int(mt.group(1)) * 1000}gb" if mt else _COLORES.get(x, x))
+    return toks
+
+
+def firma_de(nombre):
+    """(rubro, firma) del aviso, o None si es usado/OEM/bulk, no es de un rubro con firma o le falta un atributo clave
+    (marca, chipset o chip, capacidad, generacion de memoria). La firma es texto: se compara por igualdad exacta."""
+    rubro = rubro_de(nombre)
+    if rubro is None or bloqueado_para_agrupar(normalizar(nombre)):
+        return None
+    toks = _tokens(nombre)
+    marca = next((t for t in toks if t in (_MARCAS_MB if rubro == "mb" else _MARCAS_GPU)), None)
+    if marca is None:
+        marca = next((_LINEA_DE_MARCA[t] for t in toks if t in _LINEA_DE_MARCA), None)
+    relleno = _RELLENO | _RELLENO_POR_RUBRO[rubro]
+    clave = [t for t in toks if t not in relleno]
+    if rubro == "mb":
+        if marca is None or not any(_CHIPSET.match(t) for t in clave):
+            return None
+    elif rubro == "gpu":
+        chips = {t for t in clave if _CHIP_GPU.match(t)}
+        vram = {t for t in clave if re.fullmatch(r"\d{1,2}gb", t) and int(t[:-2]) <= 48}
+        if marca is None or len(chips) != 1 or len(vram) != 1:
+            return None
+    elif rubro == "ram":
+        gen = {t for t in clave if re.fullmatch(r"ddr[2345]", t)}
+        cap = {t for t in clave if re.fullmatch(r"\d{1,3}gb|\dx\d{1,3}gb", t)}
+        resto = [t for t in clave if t not in gen and t not in cap and t not in _DESCRIPTORES and not re.fullmatch(r"\d+(mhz)?", t)]
+        if len(gen) != 1 or not cap or not resto:
+            return None
+    elif rubro == "ssd":
+        cap = {t for t in clave if re.fullmatch(r"\d{2,5}gb", t)}
+        resto = [t for t in clave if t not in cap and t not in _DESCRIPTORES and not re.fullmatch(r"\d+", t)]
+        if len(cap) != 1 or not resto:
+            return None
+    if marca and marca not in clave:
+        clave.append(marca)                    # la linea nombrada sin la marca ("ROG STRIX") la deduce
+    return rubro, rubro + "|" + " ".join(sorted(set(clave)))
+
+
+def codigo_de_firma(firma):
+    return "~" + hashlib.sha1(firma.encode("utf-8")).hexdigest()[:12].upper()
+
+
+def _clase(nombre):
+    """ram, ssd, gpu o mb; o, para el resto, la primera palabra del titulo (notebook, monitor, celular...)."""
+    rubro = rubro_de(nombre)
+    if rubro:
+        return rubro
+    palabras = re.findall(r"[a-z]+", unicodedata.normalize("NFD", normalizar(nombre).lower()))
+    return palabras[0] if palabras else ""
+
+
 def completar_con_conocidos(filas):
-    """A los avisos sin codigo les pone el de otro aviso cuando su nombre lo nombra EXACTO (un token
-    entero igual a un codigo ya conocido). Dos codigos conocidos en un nombre, o un nombre bloqueado
-    o que no es del rubro, quedan sueltos. Deja las filas como estaban si no hay nada que completar."""
-    conocidos = {f[9] for f in filas if f[9]}
-    if not conocidos:
-        return filas
+    """Completa la columna `modelo` de los avisos que no tienen codigo, en dos pasos:
+    1. Si su nombre nombra EXACTO (un token entero) un codigo ya conocido de otro aviso, toma ese. Dos codigos conocidos
+       en un nombre, o un nombre bloqueado o que no es del rubro, quedan sueltos.
+    2. Si no, por su firma (ver `firma_de`): el mismo producto publicado distinto en cada tienda. Si algun aviso de la
+       firma trae part number (uno solo), los demas lo heredan; si ninguno lo trae y hay dos o mas, comparten un
+       identificador derivado (empieza con "~"). Dos part numbers distintos en una firma no se mezclan.
+    Deja las filas como estaban si no hay nada que completar. Los "~" de una corrida anterior se recalculan."""
     for f in filas:
-        if f[9] or rubro_de(f[0]) is None or bloqueado_para_agrupar(f[0]):
+        if isinstance(f[9], str) and f[9].startswith("~"):
+            f[9] = ""
+    conocidos = {}
+    for f in filas:
+        if f[9]:
+            conocidos.setdefault(f[9], set()).add(_clase(f[0]))
+    if conocidos:
+        for f in filas:
+            if f[9] or bloqueado_para_agrupar(f[0]):
+                continue
+            # un codigo solo se le asigna a un aviso de la misma clase: la notebook que nombra el SSD que trae no es ese SSD
+            halladas = {c for c in (t.upper().rstrip(".") for t in _TOKEN.findall(normalizar(f[0]))) if c in conocidos
+                        and _clase(f[0]) in conocidos[c]}
+            if len(halladas) == 1:
+                f[9] = halladas.pop()
+    por_firma = {}
+    for f in filas:
+        r = firma_de(f[0])
+        if r:
+            por_firma.setdefault(r[1], []).append(f)
+    for firma, grupo in por_firma.items():
+        sueltos = [f for f in grupo if not f[9]]
+        if not sueltos:
             continue
-        halladas = {t.upper().rstrip(".") for t in _TOKEN.findall(f[0])} & conocidos
-        if len(halladas) == 1:
-            f[9] = halladas.pop()
+        codigos = {f[9] for f in grupo if f[9]}
+        if len(codigos) == 1:
+            codigo = next(iter(codigos))
+        elif not codigos and len(grupo) >= 2:
+            codigo = codigo_de_firma(firma)
+        else:
+            continue
+        for f in sueltos:
+            f[9] = codigo
     return filas
