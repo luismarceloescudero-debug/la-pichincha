@@ -31,6 +31,9 @@ const horaDe = iso => /T\d{2}:\d{2}/.test(String(iso)) ? " (hora de Argentina)" 
 
 const comercioDe = (f, idx) => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3];
 
+/* Una compra internacional no se esconde pero se rotula: puede pagar impuestos al llegar. */
+const comercioDeOferta = (o, idx) => comercioDe(o.f, idx) + (o.internacional ? " · compra internacional" : "");
+
 function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   const fecha = new Date(idx.generado);
@@ -38,8 +41,10 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const dia = String(idx.generado).slice(0, 10);
   const items = O.destacadas(idx, max).map(o => {
     const f = o.f, pct = Math.round(o.off * 100);
-    const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDe(f, idx)}`;
+    const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
     const desc = `Antes ${pesos(f[o.ref])}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. ` +
+      (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
+      (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
     return `    <item>
       <title>${xml(titulo)}</title>
@@ -72,11 +77,11 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const fecha = P.fechaHora(idx.generado);
   const dia = fecha.split(" ")[0];
   const ofertas = O.destacadas(idx, max);
-  const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDe(o.f, idx))}`;
+  const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
   const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
     `<span class="h-nom">${esc(o.f[0])}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
   const lista = ofertas.map(o => `    <li><a class="oferta" data-rubro="ofertas" href="${esc(o.f[2])}" rel="noopener">${esc(o.f[0])}</a>` +
-    `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.f[o.ref]))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDe(o.f, idx))}</span></li>`).join("\n");
+    `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.f[o.ref]))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span></li>`).join("\n");
   const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
   const descripcion = ofertas.length
     ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
@@ -126,7 +131,7 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: o.f[o.ref], descuento: Math.round(o.off * 100),
-    comercio: comercioDe(o.f, idx), url: o.f[2], tipo: o.tipo }));
+    comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo }));
 }
 
 function main(argv) {
