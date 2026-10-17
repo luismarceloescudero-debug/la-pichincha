@@ -12,7 +12,7 @@
     .replace(/\bs\.?o[\s.-]?dimm\b/g, "sodimm").replace(/\bu[\s-]?dimm\b/g, "udimm")
     .replace(/([a-z0-9])-(?=[a-z0-9])/g, "$1 ");
   /* "1 TB" y "1TB" son lo mismo, y tambien "16G" y "16GB", y "1000GB" y "1024GB" con "1TB". */
-  const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2").replace(/(\d)g\b/g, "$1gb")
+  const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2").replace(/\b(?![345]g\b)(\d{1,3})g\b/g, "$1gb")    // 16G es 16GB; 4G y 5G son la red de un celular
     .replace(/\b(\d{4,5})gb\b/g, (m, n) => +n % 1000 === 0 ? +n / 1000 + "tb" : +n % 1024 === 0 ? +n / 1024 + "tb" : m);
   const normalBusq = t => pegarUnidades(tipografia(normal(t)));
   const esMedida = t => /^\d+(?:gb|tb|mb|mhz|ghz|hz|w|v)?$/.test(t);
@@ -86,8 +86,9 @@
   }
 
   /* Submarcas: la marca con la que el producto figura en los filtros y en el nombre, y su marca madre. */
-  const SUBMARCAS = { soundcore: "anker", eufy: "anker", nebula: "anker", redmi: "xiaomi", poco: "xiaomi", hyperx: "hp", omen: "hp",
-                      rog: "asus", tuf: "asus", alienware: "dell", predator: "acer", nitro: "acer", cmf: "nothing" };
+  /* Solo marcas de verdad: una linea de producto (ROG, TUF, Omen, Nitro) no es una marca y seguiria siendo Asus, HP o Acer. */
+  const SUBMARCAS = { soundcore: "anker", eufy: "anker", nebula: "anker", redmi: "xiaomi", poco: "xiaomi", hyperx: "hp",
+                      alienware: "dell", cmf: "nothing" };
   const GENERICAS = new Set(["auricular", "auriculares", "inalambrico", "inalambricos", "bluetooth", "tws", "true", "wireless", "abierto",
     "abiertos", "con", "de", "para", "nuevo", "nueva", "original", "oficial", "garantia", "negro", "blanco", "azul", "rojo", "gris", "color",
     "pack", "combo", "cargador", "cable", "funda", "gancho", "clip", "gamer", "gaming"]);
@@ -110,7 +111,12 @@
 
   /* La submarca que nombra el titulo ("soundcore", "redmi"), o "". */
   function submarcaDe(nombre) {
-    for (const t of normal(String(nombre)).split(/[^a-z0-9]+/)) if (SUBMARCAS[t]) return t;
+    const toks = normal(String(nombre)).split(/[^a-z0-9]+/);
+    for (let i = 0; i < toks.length; i++) {
+      // "poco" es tambien una palabra comun ("poco uso"): cuenta solo seguido de un modelo (Poco X7, Poco F6)
+      if (toks[i] === "poco" && !/^[a-z]\d/.test(toks[i + 1] || "")) continue;
+      if (SUBMARCAS[toks[i]]) return toks[i];
+    }
     return "";
   }
 
@@ -125,10 +131,10 @@
      AeroFit Pro ni AeroClip) y se corta en la primera palabra generica o especificacion. Devuelve null si el titulo no
      tiene ni submarca conocida ni «by Marca»: ahi no hay cadena que armar. */
   function consultasDe(nombre) {
-    const tiene = submarcaDe(nombre) || BY_MARCA.test(String(nombre));
-    if (!tiene) return null;
+    const sub = submarcaDe(nombre);
+    if (!sub && !BY_MARCA.test(String(nombre))) return null;
     const toks = limpiarTitulo(nombre).split(" ");
-    const marca = toks.findIndex(t => SUBMARCAS[normal(t)]);
+    const marca = sub ? toks.findIndex(t => normal(t) === sub) : -1;
     const i = marca >= 0 ? marca : toks.findIndex(t => !GENERICAS.has(normal(t)) && !/^\d+$/.test(t));
     if (i < 0) return null;
     const modeloToks = [];

@@ -23,7 +23,7 @@ function asegurarIndice(forzar) {
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
    Que es una oferta (bajas propias y rebajas publicadas) vive en js/ofertas.js, compartido con el
    feed RSS y el canal de Telegram. */
-const { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
+const { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
 const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1 };
 let OF_ACTUAL = [];
@@ -163,16 +163,16 @@ function pintarOfertas(append) {
   const visibles = OF_ACTUAL.slice(0, OF.pagina * POR_PAGINA);
   const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
-  est.textContent = `${OF_ACTUAL.length} ofertas`
-    + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
-    + nota
-    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
-  const resto = OF_ACTUAL.length - visibles.length;
   // Una categoria sin ofertas no es un error: puede no haber habido descuentos. Se dice, y se manda al buscador, que muestra
   // desde cuando no cambia el precio.
   const conOferta = new Set([...OFERTAS.categorias.values()].map(g => g.categoria));
   const sin = ["smartphone", "notebook", "monitor", "pc"].filter(c => !conOferta.has(c)).map(c => Categorias.ETIQUETAS[c].toLowerCase());
   const nota = sin.length ? ` · hoy sin ofertas en ${sin.join(", ")}: en Buscar ves sus precios y desde cuándo no cambian` : "";
+  est.textContent = `${OF_ACTUAL.length} ofertas`
+    + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
+    + nota
+    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
+  const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
       ? `<div class="ogrid">${visibles.map((o, i) => cardOferta(o, i, desde)).join("")}</div>`
@@ -211,7 +211,7 @@ function marcarEstrella(btn) {
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  compararConsulta(Buscador.consultaDeOferta(o.f[0], q => buscarTodo(q).length > 0));
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados));
 }
 
 document.addEventListener("keydown", ev => {

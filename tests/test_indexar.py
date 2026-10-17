@@ -358,7 +358,15 @@ class NombreEnriquecido(unittest.TestCase):
 
     def test_agrega_la_marca_que_el_titulo_no_dice(self):
         self.assertEqual(indexar.nombre_enriquecido('Monitor Gaming 25" FHD 240Hz con panel IPS', "Samsung"),
-                         'Monitor Samsung Gaming 25" FHD 240Hz con panel IPS')
+                         'Monitor Gaming 25" FHD 240Hz con panel IPS Samsung')
+
+    def test_la_marca_va_al_final_para_no_partir_el_rubro_ni_el_chip(self):
+        import modelo
+        for titulo, rubro in (("Placa de Video RTX 4060 8GB", "gpu"), ("Disco Solido SSD 1TB NVMe", "ssd"), ("Placa Madre B650M AM5", "mb")):
+            n = indexar.nombre_enriquecido(titulo, "MSI")
+            self.assertTrue(n.startswith(titulo), n)
+            self.assertEqual(modelo.rubro_de(n), rubro, n)
+        self.assertIn("RTX 4060", indexar.nombre_enriquecido("RTX 4060 8GB", "MSI"))
 
     def test_no_repite_la_marca_ni_la_agrega_si_es_generica(self):
         self.assertEqual(indexar.nombre_enriquecido("Monitor Samsung Odyssey G3", "SAMSUNG"), "Monitor Samsung Odyssey G3")
@@ -379,7 +387,7 @@ class NombreEnriquecido(unittest.TestCase):
             self.assertEqual(indexar.nombre_enriquecido(titulo, None, {"refresh_rate_hz": 144}), titulo, titulo)
 
     def test_especificaciones_raras_no_rompen(self):
-        self.assertEqual(indexar.nombre_enriquecido("Monitor 24", "Lg", {"screen_inches": None, "refresh_rate_hz": "x"}), "Monitor Lg 24")
+        self.assertEqual(indexar.nombre_enriquecido("Monitor 24", "Lg", {"screen_inches": None, "refresh_rate_hz": "x"}), "Monitor 24 Lg")
         self.assertEqual(indexar.nombre_enriquecido("Monitor 24", None, "no es un dict"), "Monitor 24")
 
     def test_comparaya_trae_el_modelo_y_los_hz_en_el_indice(self):
@@ -394,7 +402,7 @@ class NombreEnriquecido(unittest.TestCase):
         por_url = {it["url"]: it for it in items}
         hp = [it for it in items if "6N4E8AA" in it["nombre"].upper()][0]
         self.assertEqual(hp["sku"], "6N4E8AA")
-        samsung = [it for it in items if it["nombre"].startswith("Monitor Samsung Gaming 25") or "Gaming 25" in it["nombre"]][0]
+        samsung = [it for it in items if "Gaming 25" in it["nombre"]][0]
         self.assertIn("Samsung", samsung["nombre"])
         self.assertIn("240Hz", samsung["nombre"])
         self.assertIsNone(samsung["sku"])

@@ -47,7 +47,9 @@
   /* --- Que categoria es --------------------------------------------------- */
   const RE = {
     // lo que se vende PARA un equipo no es el equipo: "Funda iPhone 17" no tiene RAM
-    accesorio: /^\s*(?:funda|fundas|case|carcasa|vidrio|protector|film|cargador|cable|adaptador|soporte|base|mochila|bolso|maletin|estuche|correa|pulsera|skin|lamina|bateria)\b|\b(?:para|de)\s+(?:notebook|laptop|macbook|celular|iphone|monitor)\b/i,
+    accesorio: /^\s*(?:funda|fundas|case|carcasa|vidrio|protector|film|cargador|cable|adaptador|soporte|base|mochila|bolso|maletin|estuche|correa|pulsera|skin|lamina|bateria)\b/i,
+    // "Funda para notebook" es un accesorio; "Memoria RAM de Notebook" o "SSD para notebook" son componentes (se miran antes)
+    accesorioPara: /\b(?:para|de)\s+(?:notebook|laptop|macbook|celular|iphone|monitor)\b/i,
     monitor: /^\s*monitor\b|\bmonitor\b/i,
     // el monitor que viene dentro de un equipo o un lote no es un monitor
     equipoConMonitor: /^\s*(?:pc|computadora|computador|combo|kit|notebook|all\s?in\s?one|mini\s?pc|escritorio|puesto)\b/i,
@@ -63,10 +65,11 @@
   function categoriaDe(nombre) {
     const n = String(nombre);
     if (RE.accesorio.test(n)) return "periferico";
+    if (RE.componenteInicio.test(n)) return "componente";
+    if (RE.accesorioPara.test(n)) return "periferico";
     if (RE.monitor.test(n) && !RE.equipoConMonitor.test(n)) return "monitor";
     if (RE.pc.test(n)) return "pc";
     if (RE.periferico.test(n)) return "periferico";
-    if (RE.componenteInicio.test(n)) return "componente";
     if (RE.notebook.test(n)) return "notebook";
     if (RE.smartphone.test(n)) return "smartphone";
     if (RE.componente.test(n)) return "componente";
@@ -221,14 +224,17 @@
       if (/\bunisoc|\bhelio\b|snapdragon\s?(?:[246]\d{0,2}\b)|dimensity\s?6\d{3}|exynos\s?8\d{2}/i.test(nombre)) return no(categoria, "chip de entrada");
       if ((x = nombre.match(/\b(\d{1,2})\s*(?:años|anos|years?)\s*(?:de\s*)?(?:actualizaciones|updates?|soporte)/i)) && +x[1] < m.actualizaciones)
         return no(categoria, `solo ${x[1]} años de actualizaciones (mínimo ${m.actualizaciones})`);
-    } else if (/\bhd\b(?!\+)/i.test(nombre) && !/\b(?:f|u|w)hd\b/i.test(nombre)) return no(categoria, "pantalla HD de baja resolución");
+    } else if (categoria === "notebook" && /\bhd\b(?!\+)/i.test(nombre) && !/\b(?:f|u|w)hd\b/i.test(nombre)) {
+      return no(categoria, "pantalla HD de baja resolución");             // en una PC, "HD" es el disco o la grafica Intel HD
+    }
     if (!ram && !v.reciente) return no(categoria, "sin datos de RAM, procesador ni año en el título");
     let puntos;
     if (categoria === "smartphone") {
       const act = nombre.match(/\b(\d{1,2})\s*(?:años|anos|years?)\s*(?:de\s*)?(?:actualizaciones|updates?|soporte)/i);
       const cam = nombre.match(/\b(\d{2,3})\s?mp(?![a-z])/i);
       puntos = [ram >= m.ram, rom >= m.romAlta, v.punto, /\b(pro|ultra|max|fold|flip)\b/i.test(nombre),
-        /snapdragon\s?8\s?(?:gen|elite)|dimensity\s?9\d{3}|tensor\s?g[3-9]|exynos\s?2[4-9]\d{2}|\ba(?:1[7-9]|[2-9]\d)\b/i.test(nombre),
+        /snapdragon\s?8\s?(?:gen|elite)|dimensity\s?9\d{3}|tensor\s?g[3-9]|exynos\s?2[4-9]\d{2}/i.test(nombre)
+          || /\biphone\b/i.test(nombre) && /\ba(?:1[7-9]|[2-9]\d)\s?(?:pro|bionic)?\b/i.test(nombre),   // A17+ solo en un iPhone: Galaxy A55 no
         !!cam && +cam[1] >= m.camaraAlta, !!act && +act[1] >= m.actualizacionesAlta,
         /\bamoled|\boled\b/i.test(nombre) && hzDe(nombre) >= 120].filter(Boolean).length;
     } else {

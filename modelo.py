@@ -198,6 +198,10 @@ _MARCAS_GPU = {"asus", "msi", "gigabyte", "zotac", "palit", "pny", "galax", "sap
 _LINEA_DE_MARCA = {"rog": "asus", "tuf": "asus", "prime": "asus", "proart": "asus", "aorus": "gigabyte", "windforce": "gigabyte",
                    "eagle": "gigabyte", "mag": "msi", "mpg": "msi", "meg": "msi", "ventus": "msi", "suprim": "msi",
                    "hellhound": "powercolor", "nitro": "sapphire", "pulse": "sapphire"}
+# Lo que describe al producto pero no dice de quien es: con solo esto ("SSD 480GB Sata") dos genericos distintos tendrian la
+# misma firma. Memoria y SSD necesitan ademas una marca o una linea.
+_DESCRIPTORES = {"sata", "iii", "ii", "nvme", "sodimm", "udimm", "rgb", "argb", "black", "white", "red", "blue", "silver", "gray",
+                 "pink", "notebook", "laptop", "ssd", "m2", "msata", "heatsink", "disipador", "low", "profile"}
 _CHIPSET = re.compile(r"^[abhqwxz]\d{3}[a-z]{0,2}$")
 _CHIP_GPU = re.compile(r"^(rtx|gtx|rx|arc)\d{3,4}(ti|tisuper|super|xt|xtx|gre)?$")
 
@@ -247,12 +251,12 @@ def firma_de(nombre):
     elif rubro == "ram":
         gen = {t for t in clave if re.fullmatch(r"ddr[2345]", t)}
         cap = {t for t in clave if re.fullmatch(r"\d{1,3}gb|\dx\d{1,3}gb", t)}
-        resto = [t for t in clave if t not in gen and t not in cap and not re.fullmatch(r"\d+(mhz)?", t)]
+        resto = [t for t in clave if t not in gen and t not in cap and t not in _DESCRIPTORES and not re.fullmatch(r"\d+(mhz)?", t)]
         if len(gen) != 1 or not cap or not resto:
             return None
     elif rubro == "ssd":
         cap = {t for t in clave if re.fullmatch(r"\d{2,5}gb", t)}
-        resto = [t for t in clave if t not in cap and not re.fullmatch(r"\d+", t)]
+        resto = [t for t in clave if t not in cap and t not in _DESCRIPTORES and not re.fullmatch(r"\d+", t)]
         if len(cap) != 1 or not resto:
             return None
     if marca and marca not in clave:

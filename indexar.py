@@ -110,13 +110,13 @@ def nombre_enriquecido(titulo, marca=None, specs=None):
     """El titulo de un agregador con lo que sabe y el titulo no dice. ComparaYa publica la marca y las especificaciones
     en campos aparte, y muchas tiendas escriben el titulo sin la marca ("Monitor Gaming 25\" FHD 240Hz con panel IPS",
     marca Samsung) o sin los Hz: sin eso el aviso no aparece al buscar por marca, no se reconoce la marca para ordenarlo
-    y los minimos de gama (Hz, pulgadas) no lo ven. Solo agrega lo que falta; nunca cambia lo que el titulo ya dice."""
+    y los minimos de gama (Hz, pulgadas) no lo ven. Solo agrega lo que falta, al final; nunca cambia lo que el titulo ya dice."""
     nombre = limpio(titulo)
     if marca and _clave(marca).strip() not in _SIN_MARCA:
         primera = _clave(marca).split()[0]
         if " " + primera + " " not in _clave(nombre):
-            inicio, _, resto = nombre.partition(" ")
-            nombre = f"{inicio} {limpio(marca)} {resto}".strip()
+            # al final: en el medio partiria "Placa de Video", "Disco Solido" o "RTX 4060" y el rubro dejaria de reconocerse
+            nombre = f"{nombre} {limpio(marca)}"
     specs = specs if isinstance(specs, dict) else {}
     hz = specs.get("refresh_rate_hz")
     if isinstance(hz, (int, float)) and hz > 0 and not re.search(r"\d\s?hz", nombre, re.I):

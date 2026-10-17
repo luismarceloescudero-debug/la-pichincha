@@ -112,3 +112,32 @@ test("usado: las mismas palabras que en Python, y el formato SODIMM con otras gr
 test("busqueda: S.O.DIMM tambien es SODIMM", () => {
   assert.equal(halla("sodimm", "Memoria S.O.DIMM DDR4 8GB"), true);
 });
+
+test("revision: los hallazgos de code-review quedan cubiertos", () => {
+  // RAM y SSD para notebook son componentes, con sus minimos; una funda para notebook es un accesorio
+  assert.equal(C.categoriaDe("Memoria RAM de Notebook Kingston 8GB DDR4"), "componente");
+  assert.equal(C.evaluar("Memoria RAM de Notebook Kingston 8GB DDR4").pasa, false);
+  assert.equal(C.categoriaDe("Disco SSD para notebook 240GB"), "componente");
+  assert.equal(C.evaluar("Disco SSD para notebook 240GB").pasa, false);
+  assert.equal(C.categoriaDe("Funda para notebook 15.6"), "periferico");
+  // el chip A17+ es de Apple: un Galaxy A55 no suma el punto de chip tope
+  assert.equal(C.evaluar("Celular Samsung Galaxy A55 8GB 128GB 5G").alta, false);
+  // en una PC, HD es el disco o la grafica Intel HD, no la pantalla
+  assert.equal(C.evaluar("PC Armada Intel Core i5 12400 16GB HD 1TB").pasa, true);
+  assert.equal(C.evaluar("Notebook HP Core i5 12450H 16GB 512GB 15.6 HD").pasa, false);
+  // poco y nitro no son marcas sueltas; ROG y TUF siguen siendo Asus
+  const re = B.armarMarcasRe(["asus", "sapphire", "motorola", "xiaomi"]);
+  assert.equal(B.marcaDe("Placa de video Sapphire Nitro+ RX 7800 XT", re), "sapphire");
+  assert.equal(B.marcaDe("Celular poco uso Motorola Edge 8GB", re), "motorola");
+  assert.equal(B.marcaDe("Celular Xiaomi Poco X7 Pro 12GB 512GB", re), "poco");
+  assert.equal(B.marcaDe("Notebook Asus ROG Strix G16", re), "asus");
+  assert.equal(B.marcaDe("Placa de video Asus TUF RTX 4070", re), "asus");
+  // 4G y 5G son la red, no una capacidad
+  assert.equal(halla("4gb", "Celular Motorola 5G 4G LTE 8GB"), false);
+  assert.equal(halla("5g", "Celular Motorola Edge 5G"), true);
+  assert.equal(halla("16gb", "VGA RTX 5070 Ti 16G"), true);
+  assert.equal(halla("8gb", "Placa RTX 4060 8G"), true);
+  // los umbrales globales que ya no rigen no se exportan
+  assert.equal(O.DESCUENTO_MIN, undefined);
+  assert.equal(O.BAJA_MIN_PCT, undefined);
+});

@@ -94,6 +94,14 @@ function buscarTodo(q) {
   return g.filas;
 }
 
+/* Si una consulta encuentra algo, sin agrupar ni tocar OTRAS: lo usa "Comparar" para elegir entre varias consultas. */
+function hayResultados(q) {
+  const coincide = Buscador.filtroDe(q);
+  if (!IDX || !coincide) return false;
+  const N = IDX._n || (IDX._n = IDX.productos.map(f => normalBusq(f[0])));
+  return N.some(coincide);
+}
+
 function buscar(q, tope = 60) { return buscarTodo(q).slice(0, tope * 3); }
 
 let ULTIMA_BUSQUEDA = [];

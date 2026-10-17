@@ -11,8 +11,8 @@
 (function (raiz) {
   "use strict";
 
-  const PISO_OFERTA = 15000, DESCUENTO_MIN = 0.15, DESCUENTO_MAX = 0.6;
-  const BAJA_MIN_PCT = 0.03, BAJA_MIN_PESOS = 1000;
+  // El descuento minimo es de cada categoria (Categorias.DESCUENTO); estos valen para todas.
+  const PISO_OFERTA = 15000, DESCUENTO_MAX = 0.6, BAJA_MIN_PESOS = 1000;
   const EPS = 1e-9;   // 24.000 contra 30.000 es 20% justo, no 19,99999%
 
   const esUrl = u => /^https?:\/\//i.test(String(u));
@@ -121,7 +121,7 @@
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }
 
-  const api = { PISO_OFERTA, DESCUENTO_MIN, DESCUENTO_MAX, BAJA_MIN_PCT, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
+  const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
                 referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;

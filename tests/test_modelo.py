@@ -239,6 +239,12 @@ class Firma(unittest.TestCase):
         self.mismos("Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Black", "Memoria Corsair DDR4 16GB 3200MHz Vengeance LPX Negro")
         self.distintos("Memoria Kingston Fury Beast DDR5 32GB 6000MHz", "Memoria Kingston Fury Beast RGB DDR5 32GB 6000MHz")
 
+    def test_genericos_sin_marca_no_comparten_firma(self):
+        for nombre in ("Disco SSD 480GB Sata", "SSD 480GB Sata 2.5", "Disco SSD 1TB NVMe M.2", "Memoria RAM DDR4 8GB Notebook",
+                       "Memoria DDR4 16GB 3200MHz RGB", "Memoria Sodimm DDR4 8GB 2666MHz"):
+            self.assertIsNone(modelo.firma_de(nombre), nombre)
+        self.assertIsNotNone(modelo.firma_de("Disco SSD Kingston 480GB Sata"))
+
     def test_sin_atributos_suficientes_no_hay_firma(self):
         for nombre in ("Mother GIGABYTE DDR5 AM5", "Motherboard B840M H AM5", "Placa de video RTX 5070 Ti 16GB",
                        "Placa de video Msi Ventus 3X Oc", "Memoria RAM DDR4", "Disco SSD Sandisk Plus",
