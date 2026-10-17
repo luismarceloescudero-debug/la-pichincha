@@ -15,7 +15,7 @@ internacional con precio puesto) y cubre cada aspecto de la app. Las reglas de l
 | Historial | 6 dias; los sellos de 30 y 90 dias aparecen desde el 6/11 y el 5/1 |
 | SEO | 50 paginas por busqueda + /precios/ + /hoy/, sitemap enviado, Search Console verificado |
 | Canales | Telegram automatico, RSS, /hoy/ para Instagram, WhatsApp con vista previa |
-| Dominio | github.io; lapichincha.com sin registrar; pichinchadeldia.com.ar delegado a Cloudflare |
+| Dominio | **pichinchadeldia.com.ar** (delegado en NIC Argentina a Cloudflare; registros A hacia GitHub Pages, nube gris); github.io redirige solo; lapichincha.com sin registrar |
 | Usuarios y monetizacion | casi cero trafico; sin ingresos |
 
 ## 2. Que hacen bien los referentes y que nos falta
