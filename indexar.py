@@ -131,6 +131,11 @@ def nombre_enriquecido(titulo, marca=None, specs=None):
     return nombre
 
 
+def url_valida(url):
+    """Una URL http(s) sin comillas, espacios ni corchetes angulares: lo unico que puede ir a un enlace del sitio."""
+    return isinstance(url, str) and re.fullmatch(r"https?://[^\s\"'<>`]+", url, re.I) is not None
+
+
 def absoluta(base, ruta):
     return ruta if ruta.startswith("http") else urllib.parse.urljoin(base + "/", ruta.lstrip("/"))
 
@@ -569,6 +574,8 @@ def main(argv=None):
         frescas.add(clave)
         bajaron = 0
         for it in items:
+            if not url_valida(it.get("url")):        # ni "javascript:" ni comillas: la URL va a un href del sitio
+                continue
             lista = it.get("lista") or 0
             # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
             # el "precio de lista" es apenas el precio sin transferencia.

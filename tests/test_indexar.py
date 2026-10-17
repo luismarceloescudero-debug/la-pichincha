@@ -407,3 +407,14 @@ class NombreEnriquecido(unittest.TestCase):
         self.assertIn("240Hz", samsung["nombre"])
         self.assertIsNone(samsung["sku"])
         self.assertEqual(len(por_url), len(items))
+
+
+class UrlValida(unittest.TestCase):
+    """La URL de un aviso viene de la tienda o de ComparaYa y termina en un href del sitio."""
+
+    def test_solo_http_sin_comillas(self):
+        for u in ("https://www.tienda.test/p/1", "http://tienda.test/a?b=1&c=2"):
+            self.assertTrue(indexar.url_valida(u), u)
+        for u in ("javascript:alert(1)", 'https://x.test/" onmouseover="alert(1)', "https://x.test/a b", "https://x.test/<script>",
+                  "data:text/html,hola", "//x.test/a", "", None, 42, "https://x.test/'a'"):
+            self.assertFalse(indexar.url_valida(u), u)

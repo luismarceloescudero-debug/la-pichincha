@@ -42,3 +42,16 @@ test("sin ninguna oferta manda a buscar los precios", () => {
   correr("pintarOfertas()");
   assert.match(els["#estadoOf"].textContent, /no hay rebajas en este relevamiento: en Buscar/);
 });
+
+test("una URL maliciosa de una tienda no rompe el enlace ni corre codigo", () => {
+  const mala = fila("Celular Motorola Edge 50 8GB 256GB", 450000, 520000);
+  mala[2] = 'https://x.test/" onmouseover="alert(1)';
+  const js = fila("Celular Motorola G85 8GB 256GB", 300000, 360000);
+  js[2] = "javascript:alert(1)";
+  const { correr, els } = pagina([mala, js]);
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.doesNotMatch(html, /onmouseover="alert/);
+  assert.doesNotMatch(html, /href="javascript:/i);
+  assert.equal(correr('enlace("https://ok.test/a?b=1&c=2")'), "https://ok.test/a?b=1&amp;c=2");
+});

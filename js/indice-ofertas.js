@@ -113,7 +113,7 @@ function cardOferta(o, i, desde) {
       <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
-      <a class="acc" href="${f[2]}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
+      <a class="acc" href="${enlace(f[2])}" target="_blank" rel="noopener">${icono("fuera")} Abrir</a>
       <button class="acc" data-comparar-oferta="${i}">${icono("balanza")} Comparar</button>
     </div>
   </article>`;
