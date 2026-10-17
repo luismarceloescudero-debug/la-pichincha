@@ -14,7 +14,7 @@ function tarjeta(p, i) {
     <div class="barra"></div>
     ${p.destacado ? `<span class="cinta">${icono("trofeo")} mejor</span>` : ""}
     <span class="rank">${p.podio}</span>
-    <div class="foto"><img src="${p.img}" alt="${esc(p.nombre)}" loading="${i < 2 ? "eager" : "lazy"}"${i === 0 ? ' fetchpriority="high"' : ""}></div>
+    <div class="foto"><img src="${esc(p.img)}" alt="${esc(p.nombre)}" loading="${i < 2 ? "eager" : "lazy"}"${i === 0 ? ' fetchpriority="high"' : ""}></div>
     <div class="cuerpo">
       <h3>${esc(p.nombre)}</h3>
       <span class="tienda">${icono("store")} ${esc(t.nombre || "")}</span>
@@ -57,7 +57,7 @@ function detalle(p) {
     <button class="volver" data-volver>${icono("izq")} Volver a la comparativa</button>
     ${barraAcciones(p.id)}
     <div class="dcab">
-      <div class="dfoto"><img src="${p.img}" alt="${esc(p.nombre)}"></div>
+      <div class="dfoto"><img src="${esc(p.img)}" alt="${esc(p.nombre)}"></div>
       <div>
         <h2>${esc(p.nombre)}</h2>
         <p class="dsku">${esc(p.sku || "")}</p>
@@ -132,7 +132,7 @@ function vistaTiendas() {
         <ul class="wins">${ganadores[k].map(id => {
           const p = porId[id]; if (!p) return "";
           return `<li><a href="${enlace(p.url)}" target="_blank" rel="noopener">
-            <span class="mini"><img src="${p.img}" alt="" loading="lazy"></span>
+            <span class="mini"><img src="${esc(p.img)}" alt="" loading="lazy"></span>
             <span class="txt">${esc(p.nombre)}${avisoDe(p) ? ` ${selloOjo(avisoDe(p))}` : ""}</span><b>${pesos(p.precio)}</b></a></li>`;
         }).join("")}</ul>
         <p class="flaco">${icono("aviso")} ${esc(flaco[k])}</p>

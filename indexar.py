@@ -505,6 +505,8 @@ def main(argv=None):
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
             fila = list(fila)[:11] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            if not url_valida(fila[2]):                       # un indice viejo no reintroduce una URL que hoy no pasa
+                continue
             fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
             previo.setdefault(fila[3], []).append(fila)
         # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
@@ -552,6 +554,12 @@ def main(argv=None):
                 resumen[clave] = (0, "fallo")
             relevados[clave] = 0
             continue
+        # Ni "javascript:" ni comillas: la URL va a un href del sitio. Se filtra antes de contar, asi la salud de la fuente
+        # mide lo que de verdad entra al indice, y se avisa cuanto se descarto.
+        validos = [it for it in items if url_valida(it.get("url"))]
+        if len(validos) < len(items):
+            print("  " + AMAR + "! " + str(len(items) - len(validos)) + " avisos con una URL invalida, descartados" + FIN)
+        items = validos
         if not items:
             # Un bloqueo en los listados no tira excepcion: cada pagina falla y se
             # corta. Cero productos es una fuente caida, no un catalogo vacio.
@@ -574,8 +582,6 @@ def main(argv=None):
         frescas.add(clave)
         bajaron = 0
         for it in items:
-            if not url_valida(it.get("url")):        # ni "javascript:" ni comillas: la URL va a un href del sitio
-                continue
             lista = it.get("lista") or 0
             # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
             # el "precio de lista" es apenas el precio sin transferencia.

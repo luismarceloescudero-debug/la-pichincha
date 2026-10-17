@@ -207,6 +207,15 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 1)[10], "")
         self.assertEqual(indice["historial"]["inicio"], "")
 
+    def test_se_descartan_al_relevar_y_al_reusar_un_indice_viejo(self):
+        viejo = {"productos": [["Viejo malo", 1000, "javascript:alert(1)", "uno", "", 0, 0, "", "", "", ""],
+                               ["Viejo bueno", 1000, url(5), "uno", "", 0, 0, "", "", "", ""]]}
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+        indice, _ = self.correr(None, [(101, 500)])              # uno se cae: se reusa lo viejo, sin la URL mala
+        urls = [f[2] for f in indice["productos"]]
+        self.assertNotIn("javascript:alert(1)", urls)
+        self.assertIn(url(5), urls)
+
     def test_filas_viejas_se_completan_con_el_tipo_de_cada_campo(self):
         # Un indice anterior a las fotos tiene filas de 7 campos: cada faltante
         # tiene que quedar con su valor por defecto, no corrido de lugar.
@@ -264,3 +273,4 @@ class Corrida(unittest.TestCase):
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "dos", 1)[6], 0)
+
