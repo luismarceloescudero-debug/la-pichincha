@@ -140,3 +140,45 @@ test("una oferta de gama alta al precio de la media lo dice en la descripcion de
   const idx = { ...IDX, productos: [...media, fila("Celular Samsung Galaxy S26 12GB 256GB", 280000, { antes: 450000 })] };
   assert.match(F.renderFeed(idx, { baseUrl: BASE }), /Gama alta al precio de la gama media \(mediana de los smartphones de gama media de 256 GB: \$[\d.]+ \(8 avisos\)\)/);
 });
+
+test("sin las publicaciones caidas: no entran al feed, a /hoy/ ni a la lista del canal, y entra la que sigue", () => {
+  const caida = "https://t.test/caida";
+  const idx = { ...IDX, productos: [fila("Caida", 70000, { antes: 100000, url: caida }),
+                                    fila("Siguiente", 80000, { antes: 100000 }), ...IDX.productos] };
+  const sin = F.sinCaidas(idx, [caida]);
+  assert.equal(sin.productos.some(f => f[2] === caida), false);
+  assert.equal(idx.productos.some(f => f[2] === caida), true);     // el indice original no se toca
+  assert.equal(F.listaParaCanal(sin, 10).some(o => o.url === caida), false);
+  assert.equal(F.renderFeed(sin, { baseUrl: BASE }).includes("caida"), false);
+  assert.equal(F.renderHoy(sin, { baseUrl: BASE }).includes("caida"), false);
+  assert.equal(F.listaParaCanal(sin, 10).some(o => o.nombre === "Siguiente"), true);
+});
+
+test("sinCaidas sin lista devuelve el mismo indice", () => {
+  assert.equal(F.sinCaidas(IDX, []), IDX);
+  assert.equal(F.sinCaidas(IDX, undefined), IDX);
+});
+
+test("main con --descartadas deja afuera esas publicaciones en los tres archivos", () => {
+  const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
+  const caida = "https://t.test/caida";
+  const idx = { ...IDX, productos: [fila("Caida", 70000, { antes: 100000, url: caida }), ...IDX.productos] };
+  fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify(idx));
+  fs.writeFileSync(path.join(dir, "descartadas.json"), JSON.stringify([caida]));
+  F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"),
+          "--descartadas", path.join(dir, "descartadas.json")]);
+  for (const f of ["ofertas.xml", "ofertas.json", "hoy/index.html"])
+    assert.equal(fs.readFileSync(path.join(dir, "s", f), "utf8").includes("caida"), false, f);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("main sin --descartadas, o con el archivo roto, publica todo como antes", () => {
+  const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
+  fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify(IDX));
+  fs.writeFileSync(path.join(dir, "rota.json"), "{no es json");
+  F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"), "--descartadas", path.join(dir, "rota.json")]);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "s", "ofertas.json"), "utf8")).ofertas.length, 2);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

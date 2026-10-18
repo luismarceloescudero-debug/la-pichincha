@@ -309,7 +309,11 @@ Las ofertas del dia salen por dos canales, sin backend:
   entrada dice el precio, cuanto bajo, el comercio, el enlace a la tienda y la hora de los
   precios. Las compras internacionales van al final y rotuladas; los enlaces que no son `http(s)` no entran. El
   sitio lo anuncia en el `<head>` con `rel="alternate"`. Lo arma `generar_feed.js`, que
-  tambien escribe `ofertas.json` (las 10 mejores) para Telegram.
+  tambien escribe `ofertas.json` (las 10 mejores) para Telegram. Antes de publicar,
+  `verificar_ofertas.py` abre el enlace de cada una: si la publicacion esta caida (404/410 o el
+  cartel "Este producto no esta disponible", "Publicacion pausada/finalizada") la descarta y
+  `generar_feed.js --descartadas` arma el feed con la siguiente, hasta 3 rondas. Ante la duda
+  (bloqueo, error del servidor, sin red) se publica: no se vacia el resumen porque una tienda nos frene.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
   las 10 mejores y el enlace al sitio. **Esta apagado hasta que se configure**: hay que
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
