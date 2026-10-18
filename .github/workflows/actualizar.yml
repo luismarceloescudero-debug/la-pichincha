@@ -164,6 +164,22 @@ jobs:
             node generar_feed.js --indice indice.json --salida _sitio || echo "::warning::No se armo el feed de ofertas"
           fi
 
+      # Las publicaciones se pueden caer entre que se leyo el catalogo y ahora (sobre todo las de un agregador, que no
+      # trae el stock). Se abre el enlace de cada oferta, se descartan las caidas y se rearma el feed con la siguiente
+      # candidata; hasta 3 rondas. Ante la duda (bloqueo, sin red) se publica. Si falla, queda el feed de recien.
+      - name: Verificar que las ofertas sigan en pie
+        continue-on-error: true
+        run: |
+          if [ -f indice.json ] && [ -f _sitio/ofertas.json ]; then
+            echo '[]' > descartadas.json
+            for ronda in 1 2 3; do
+              rc=0
+              python verificar_ofertas.py _sitio/ofertas.json --descartadas descartadas.json || rc=$?
+              [ "$rc" -eq 3 ] || break
+              node generar_feed.js --indice indice.json --salida _sitio --descartadas descartadas.json
+            done
+          fi
+
       # /estado/ (cuando se relevo cada tienda, de indice.json y salud.json) y /legal/. Si falla, el sitio sale igual.
       - name: Armar las paginas de estado y legales
         run: node generar_info.js --indice indice.json --salud salud.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"

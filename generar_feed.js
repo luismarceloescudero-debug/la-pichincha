@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* Feed RSS de ofertas (ofertas.xml) y la lista que lee el canal de Telegram (ofertas.json).
 
-   Uso: node generar_feed.js --indice indice.json --salida _sitio [--base-url URL]
+   Uso: node generar_feed.js --indice indice.json --salida _sitio [--base-url URL] [--descartadas descartadas.json]
+   (--descartadas: los enlaces que verificar_ofertas.py encontro caidos; no entran a ninguno de los archivos)
 
    Las ofertas son las de la pestaña Ofertas (js/ofertas.js): primero las bajas propias, despues las
    rebajas publicadas, cada grupo por descuento. El orden no depende de comisiones. */
@@ -34,6 +35,13 @@ const comercioDe = (f, idx) => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3];
 
 /* Una compra internacional no se esconde pero se rotula: puede pagar impuestos al llegar. */
 const comercioDeOferta = (o, idx) => comercioDe(o.f, idx) + (o.internacional ? " · compra internacional" : "");
+
+/* El indice sin las publicaciones que verificar_ofertas.py encontro caidas (por su enlace). Sin lista, el mismo indice. */
+function sinCaidas(idx, descartadas) {
+  if (!Array.isArray(descartadas) || !descartadas.length) return idx;
+  const caidas = new Set(descartadas);
+  return { ...idx, productos: idx.productos.filter(f => !caidas.has(f[2])) };
+}
 
 function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const base = baseUrl.replace(/\/$/, "");
@@ -141,7 +149,9 @@ function main(argv) {
   const salida = arg("salida", path.join(__dirname, "_sitio"));
   const baseUrl = arg("base-url", BASE_URL);
   if (!fs.existsSync(indicePath)) { console.log("sin indice de precios: no se genera el feed"); return 0; }
-  const idx = JSON.parse(fs.readFileSync(indicePath, "utf8"));
+  let descartadas = [];
+  try { descartadas = JSON.parse(fs.readFileSync(arg("descartadas", ""), "utf8")); } catch (e) { /* sin lista o rota: se publica todo */ }
+  const idx = sinCaidas(JSON.parse(fs.readFileSync(indicePath, "utf8")), descartadas);
   fs.mkdirSync(salida, { recursive: true });
   fs.writeFileSync(path.join(salida, "ofertas.xml"), renderFeed(idx, { baseUrl }), "utf8");
   const lista = listaParaCanal(idx, 10);
@@ -153,5 +163,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { renderFeed, renderHoy, listaParaCanal, main, BASE_URL };
+module.exports = { sinCaidas, renderFeed, renderHoy, listaParaCanal, main, BASE_URL };
 if (require.main === module) process.exit(main(process.argv.slice(2)));
