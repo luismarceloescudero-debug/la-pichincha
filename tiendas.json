@@ -1,5 +1,5 @@
 {
-  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas. 'ficha' (opcional) pide la ficha de cada aviso de esos rubros para leer su part number cuando el listado no lo trae: un pedido por aviso, una sola vez, con tope por corrida y sin insistir si la tienda bloquea.",
+  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas. 'ficha' (opcional) pide la ficha de cada aviso de esos rubros para leer su part number cuando el listado no lo trae: un pedido por aviso, una sola vez, con tope por corrida y sin insistir si la tienda bloquea. 'sin_stock' (opcional) dice en que campo la fuente informa la disponibilidad y que valores son sin stock: esas filas no entran.",
   "compragamer": {
     "nombre": "CompraGamer",
     "color": "cg",
@@ -208,6 +208,10 @@
       "usados": {
         "campo": "condition",
         "valores": ["open_box", "used", "refurbished", "refurbished_international"]
+      },
+      "sin_stock": {
+        "campo": "availability",
+        "valores": ["out_of_stock", "sold_out", "discontinued", "unavailable"]
       }
     },
     "extractor": null,

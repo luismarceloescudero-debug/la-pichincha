@@ -290,8 +290,11 @@ def indexar_api(tienda, max_paginas):
             nuevas = [f for f in filas if f.get(c["url"]) and f[c["url"]] not in vistos]
             if not nuevas:
                 break
+            sin_stock = cfg.get("sin_stock")   # lo que la propia fuente dice que no tiene stock no entra
             for f in nuevas:
                 if not f.get(c["precio"]) or not f.get(c["nombre"]):
+                    continue
+                if sin_stock and f.get(sin_stock["campo"]) in sin_stock["valores"]:
                     continue
                 vistos.add(f[c["url"]])
                 items.append({"nombre": nombre_enriquecido(f[c["nombre"]], f.get(c.get("marca")), f.get(c.get("specs"))),

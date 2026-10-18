@@ -75,6 +75,11 @@ class Muro(unittest.TestCase):
         with mock.patch.object(v, "bajar", return_value=(200, pagina)):
             self.assertEqual(v.estatica("https://www.mercadolibre.com.ar/x/p/MLA1"), "dudosa")
 
+    def test_la_pagina_de_error_de_mercado_libre_es_un_muro(self):
+        # Caso real (18/10): lo que el navegador recibia con su identificacion propia.
+        self.assertTrue(v.MURO.search("Mercado Libre - Donde comprar y vender de todo Hubo un error accediendo a esta pagina..."))
+        self.assertTrue(v.MURO.search("Hubo un error accediendo a esta página"))
+
     def test_un_muro_con_el_cartel_igual_cuenta_como_caida(self):
         with mock.patch.object(v, "bajar", return_value=(200, "captcha ... Este producto no está disponible")):
             self.assertEqual(v.estatica("https://t.test/a"), "caida")
