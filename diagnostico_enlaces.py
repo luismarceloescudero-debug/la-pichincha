@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import verificar_ofertas as v
@@ -46,14 +47,23 @@ def pedir(url, cabeceras=None):
         return 0, url, type(e).__name__
 
 
+def texto_visible(html):
+    sin = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", html or "", flags=re.S | re.I)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", sin)).strip()
+
+
 def senales(html):
     disp = DISPONIBILIDAD.findall(html or "")
     return {"largo": len(html or ""), "titulo": titulo(html), "cartel": bool(v.CAIDA.search(html or "")),
-            "muro": bool(v.MURO.search((html or "")[:20000])), "disponibilidad": sorted(set(disp))[:3]}
+            "muro": bool(v.MURO.search((html or "")[:20000])), "disponibilidad": sorted(set(disp))[:3],
+            "texto": texto_visible(html)[:160], "scripts": re.findall(r'src="(https?://[^"]{0,80})', html or "")[:3]}
 
 
 def id_ml(url):
-    """('items'|'products', 'MLA123...') del aviso de Mercado Libre, o None."""
+    """('items'|'products'|'user-products', 'MLA123...') del aviso de Mercado Libre, o None."""
+    m = re.search(r"/up/(MLAU\d{6,})", url)
+    if m:
+        return "user-products", m.group(1)
     m = re.search(r"item_id[:=](MLA\d{6,})", url)
     if m:
         return "items", m.group(1)
@@ -64,12 +74,38 @@ def id_ml(url):
     return ("items", m.group(1) + m.group(2)) if m else None
 
 
+_TOKEN = {}
+
+
+def token_ml():
+    """Token de aplicacion de Mercado Libre (client_credentials) con los secretos ML_CLIENT_ID y ML_CLIENT_SECRET,
+    o None si no estan. Se pide una vez por corrida."""
+    if "valor" in _TOKEN:
+        return _TOKEN["valor"]
+    cid, secreto = os.environ.get("ML_CLIENT_ID"), os.environ.get("ML_CLIENT_SECRET")
+    _TOKEN["valor"] = None
+    if cid and secreto:
+        datos = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": cid,
+                                        "client_secret": secreto}).encode()
+        pedido = urllib.request.Request(f"{API_ML}/oauth/token", data=datos, method="POST", headers={
+            "Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"})
+        try:
+            with urllib.request.urlopen(pedido, timeout=v.TIMEOUT) as r:
+                _TOKEN["valor"] = json.loads(r.read().decode("utf-8")).get("access_token")
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            print(f"::warning::No se obtuvo el token de Mercado Libre ({type(e).__name__})")
+    return _TOKEN["valor"]
+
+
 def api_ml(url):
     ref = id_ml(url)
     if not ref:
         return {"id": None}
     tipo, ident = ref
-    codigo, _, cuerpo = pedir(f"{API_ML}/{tipo}/{ident}", {"Accept": "application/json"})
+    cabeceras = {"Accept": "application/json"}
+    if token_ml():
+        cabeceras["Authorization"] = "Bearer " + token_ml()
+    codigo, _, cuerpo = pedir(f"{API_ML}/{tipo}/{ident}", cabeceras)
     salida = {"id": ident, "tipo": tipo, "codigo": codigo}
     try:
         datos = json.loads(cuerpo)
@@ -80,6 +116,8 @@ def api_ml(url):
     if tipo == "items":
         return {**salida, "status": datos.get("status"), "disponibles": datos.get("available_quantity"),
                 "sub_status": datos.get("sub_status")}
+    if tipo == "user-products":
+        return {**salida, "status": datos.get("status"), "claves": sorted(datos)[:20]}
     ganador = datos.get("buy_box_winner")
     return {**salida, "status": datos.get("status"), "ganador": bool(ganador),
             "ganador_item": (ganador or {}).get("item_id")}
@@ -100,13 +138,35 @@ def diagnosticar(url):
 def linea(f):
     h, rn, rv = f["html"], f["render_nuestro"], f["render_navegador"]
     corto = lambda r: "no abrió" if r is None else ("captcha/muro" if r["muro"] else
-                                                    ("CARTEL" if r["cartel"] else f"ok {r['largo']}b"))
+                                                    ("CARTEL" if r["cartel"] else
+                                                     f"sin cartel {r['largo']}b «{r['titulo'][:40]}» {r['texto'][:90]!r}"))
     api = f.get("api")
-    api_txt = "" if not api else (f" | api {api.get('codigo')} {api.get('status', '')} "
-                                  f"{api.get('disponibles', api.get('ganador', ''))} {api.get('error', '')}".rstrip())
+    api_txt = "" if not api else (f" | api {api.get('tipo', '')} {api.get('codigo')} {api.get('status', '')} "
+                                  f"{api.get('disponibles', api.get('ganador', ''))} {api.get('error', '')}"
+                                  f"{' ' + str(api['claves']) if api.get('claves') else ''}".rstrip())
     return (f"- {f['comercio']}: html {h['codigo']} {'CARTEL' if h['cartel'] else ''}{' muro' if h['muro'] else ''}"
             f" disp={h['disponibilidad']} «{h['titulo'][:60]}» | render nuestro: {corto(rn)} | render navegador: "
             f"{corto(rv)}{api_txt} | veredicto: {f['veredicto'][0]} ({f['veredicto'][1]})\n  {f['url'][:140]}")
+
+
+def comparaya(urls):
+    """Que campos trae ComparaYa por aviso (por si alguno dice stock o fecha) y la fila de los enlaces candidatos."""
+    vistas, campos = {}, None
+    for cat in ("notebooks", "celulares", "monitores"):
+        for n in (1, 2, 3):
+            codigo, _, cuerpo = pedir(f"https://api.comparaya.net/api/products/category/{cat}?page={n}&limit=100",
+                                      {"Accept": "application/json"})
+            try:
+                filas = json.loads(cuerpo).get("data") or []
+            except ValueError:
+                filas = []
+            for fila in filas:
+                if campos is None:
+                    campos = {k: (str(val)[:60] if not isinstance(val, (dict, list)) else type(val).__name__)
+                              for k, val in fila.items()}
+                if fila.get("url") in urls:
+                    vistas[fila["url"]] = {k: val for k, val in fila.items() if k not in ("image", "images", "description")}
+    return campos, vistas
 
 
 def main(argv=None):
@@ -121,7 +181,15 @@ def main(argv=None):
     filas = [diagnosticar(u) for u in urls]
     with open(salida, "w", encoding="utf-8") as f:
         json.dump(filas, f, ensure_ascii=False, indent=1)
-    texto = "### Diagnóstico de enlaces (caso real)\n\n" + "\n".join(linea(f) for f in filas) + "\n"
+    campos, vistas = comparaya(set(urls))
+    texto = ("### Diagnóstico de enlaces (caso real)\n\n"
+             f"Token de Mercado Libre: {'sí' if token_ml() else 'no (faltan los secretos ML_CLIENT_ID y ML_CLIENT_SECRET)'}\n\n"
+             + "\n".join(linea(f) for f in filas) + "\n\n"
+             f"ComparaYa, campos de un aviso: {json.dumps(campos, ensure_ascii=False)[:1500]}\n\n"
+             f"ComparaYa, filas de las candidatas encontradas: {len(vistas)}\n"
+             + "\n".join(f"- {json.dumps(fila, ensure_ascii=False)[:700]}" for fila in list(vistas.values())[:3]) + "\n")
+    with open(salida.replace(".json", "-comparaya.json"), "w", encoding="utf-8") as f:
+        json.dump({"campos": campos, "filas": vistas}, f, ensure_ascii=False, indent=1)
     print(texto)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
