@@ -32,10 +32,13 @@ jobs:
           curl -fsSL "$base/indice.json" -o indice.json
           node generar_feed.js --indice indice.json --candidatas candidatas.json --max 40
       - name: Diagnosticar que ve el servidor en cada publicacion
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
         run: python diagnostico_enlaces.py candidatas.json --max 15 --salida diagnostico.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: diagnostico-enlaces
-          path: diagnostico.json
+          path: diagnostico*.json
           retention-days: 14

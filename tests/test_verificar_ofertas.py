@@ -68,6 +68,18 @@ class Estatica(unittest.TestCase):
         self.assertEqual(v.veredicto(200, en_stock), "viva")
 
 
+class Muro(unittest.TestCase):
+    def test_una_pagina_de_verificacion_con_200_queda_sin_confirmar(self):
+        # Caso real (18/10): los avisos de Mercado Libre respondian 200 con una pagina de verificacion.
+        pagina = '<title>Mercado Libre</title><script src="https://www.mercadolibre.com.ar/gz/account-verification"></script>'
+        with mock.patch.object(v, "bajar", return_value=(200, pagina)):
+            self.assertEqual(v.estatica("https://www.mercadolibre.com.ar/x/p/MLA1"), "dudosa")
+
+    def test_un_muro_con_el_cartel_igual_cuenta_como_caida(self):
+        with mock.patch.object(v, "bajar", return_value=(200, "captcha ... Este producto no está disponible")):
+            self.assertEqual(v.estatica("https://t.test/a"), "caida")
+
+
 class Revisar(unittest.TestCase):
     """Las dos revisiones juntas: alcanza con que una marque la publicacion como caida."""
 
@@ -95,8 +107,9 @@ class Revisar(unittest.TestCase):
     def test_una_pagina_de_captcha_no_prueba_nada(self):
         self.assertEqual(self.revisar("viva", "<title>Captcha</title> Este producto no está disponible"), ("viva", "estatica"))
 
-    def test_si_la_estatica_estaba_bloqueada_y_el_navegador_ve_la_pagina_normal_esta_viva(self):
-        self.assertEqual(self.revisar("dudosa", "<h1>Notebook</h1>"), ("viva", "renderizada"))
+    def test_si_la_estatica_estaba_bloqueada_una_pagina_sin_cartel_no_la_da_por_viva(self):
+        # Caso real (18/10): Mercado Libre le muestra a GitHub una pagina generica igual para todos los avisos.
+        self.assertEqual(self.revisar("dudosa", "<h1>Mercado Libre</h1>"), ("dudosa", "renderizada"))
 
     def test_pasado_el_presupuesto_no_se_abren_mas_navegadores(self):
         with mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar") as abrir:

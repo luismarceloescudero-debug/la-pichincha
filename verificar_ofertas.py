@@ -53,7 +53,7 @@ CAIDA = re.compile(
 
 # Paginas que nos frenan en vez de mostrar la publicacion: no dicen nada de ella.
 MURO = re.compile(r"captcha|verific[aá] que (sos|eres) (un )?(humano|persona)|account-verification|"
-                  r"access denied|attention required|are you a robot", re.I)
+                  r"access denied|attention required|are you a robot|suspicious-traffic|/gz/webdevice", re.I)
 
 
 def veredicto(estado, cuerpo):
@@ -82,7 +82,12 @@ def estatica(url):
         return veredicto(e.code, "")
     except (urllib.error.URLError, OSError, ValueError):
         return "dudosa"
-    return veredicto(estado, cuerpo)
+    juicio = veredicto(estado, cuerpo)
+    # Una pagina de verificacion (captcha) responde 200 pero no es la publicacion: no prueba que este en pie.
+    # Mercado Libre se la muestra a los servidores de GitHub en vez del aviso (diagnostico del 18/10).
+    if juicio == "viva" and MURO.search(cuerpo[:20000]):
+        return "dudosa"
+    return juicio
 
 
 def navegador():
@@ -121,10 +126,11 @@ def revisar(url, desde=None):
     dom = renderizar(url)
     if dom is None or MURO.search(dom[:20000]):
         return previo, "estatica"
-    visto = veredicto(200, dom)
-    if visto == "caida":
+    # El navegador solo puede sumar una caida. Que muestre una pagina sin cartel no prueba que sea la publicacion:
+    # a los servidores de GitHub Mercado Libre les devuelve la misma pagina generica para todos los avisos.
+    if veredicto(200, dom) == "caida":
         return "caida", "renderizada"
-    return (visto if previo == "dudosa" else previo), "renderizada"
+    return previo, "renderizada"
 
 
 def leer(ruta, defecto):
