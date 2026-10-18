@@ -246,6 +246,28 @@ class Catalogos(unittest.TestCase):
         # envio gratis; dice "6 cuotas" sin aclarar interes, y eso no se afirma.
         self.assertEqual([it["sellos"] for it in items], ["", "s", "s", "s", "oe"])
 
+    def test_comparaya_deja_afuera_lo_que_el_propio_agregador_marca_sin_stock(self):
+        # Caso real (18/10): ComparaYa informa "availability" por aviso. Lo que dice sin stock no entra; lo que no lo
+        # dice, o dice en stock, entra (el dato puede estar viejo: la Omen 16 caida figuraba "in_stock").
+        fila = lambda n, disp: {"title": "Notebook " + n, "price": 1000, "url": "https://t.test/" + n,
+                                "store_name": "X", **({"availability": disp} if disp else {})}
+        cuerpo = {"data": [fila("a", "in_stock"), fila("b", "out_of_stock"), fila("c", None), fila("d", "discontinued")]}
+
+        def bajar(u):
+            return json.dumps(cuerpo if "page=1&" in u else {"data": []})
+
+        cfg = json.loads(json.dumps(TIENDAS["comparaya"]))
+        cfg["catalogo"]["categorias"] = ["notebooks"]
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_api(cfg, 3)
+        self.assertEqual([it["url"][-1] for it in items], ["a", "c"])
+
+    def test_tiendas_json_declara_la_disponibilidad_de_comparaya(self):
+        cfg = json.loads((Path(__file__).resolve().parent.parent / "tiendas.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg["comparaya"]["catalogo"]["sin_stock"]["campo"], "availability")
+        self.assertIn("out_of_stock", cfg["comparaya"]["catalogo"]["sin_stock"]["valores"])
+
     def test_listados_completan_la_foto_relativa(self):
         cfg = json.loads(json.dumps(TIENDAS["gamingcity"]))
         cfg["catalogo"]["origen"] = {"tipo": "terminos", "plantilla": "https://gc.test/{termino}", "terminos": ["x"]}
