@@ -3,6 +3,7 @@
 
    Uso: node generar_feed.js --indice indice.json --salida _sitio [--base-url URL] [--descartadas descartadas.json]
    (--descartadas: los enlaces que verificar_ofertas.py encontro caidos; no entran a ninguno de los archivos)
+   --candidatas archivo [--max N]: escribe solo las N mejores ofertas para verificarlas y no genera el sitio
 
    Las ofertas son las de la pestaña Ofertas (js/ofertas.js): primero las bajas propias, despues las
    rebajas publicadas, cada grupo por descuento. El orden no depende de comisiones. */
@@ -152,6 +153,15 @@ function main(argv) {
   let descartadas = [];
   try { descartadas = JSON.parse(fs.readFileSync(arg("descartadas", ""), "utf8")); } catch (e) { /* sin lista o rota: se publica todo */ }
   const idx = sinCaidas(JSON.parse(fs.readFileSync(indicePath, "utf8")), descartadas);
+  // --candidatas archivo [--max N]: solo escribe las N mejores ofertas (por defecto 40) para que verificar_ofertas.py las revise
+  // antes de armar el sitio; no toca nada mas.
+  const candidatas = arg("candidatas", "");
+  if (candidatas) {
+    const n = parseInt(arg("max", "40"), 10) || 40;
+    fs.writeFileSync(candidatas, JSON.stringify({ ofertas: O.destacadas(idx, n).map(o => ({ url: o.f[2], nombre: o.f[0] })) }), "utf8");
+    console.log(`candidatas a verificar: ${Math.min(O.destacadas(idx, n).length, n)}`);
+    return 0;
+  }
   fs.mkdirSync(salida, { recursive: true });
   fs.writeFileSync(path.join(salida, "ofertas.xml"), renderFeed(idx, { baseUrl }), "utf8");
   const lista = listaParaCanal(idx, 10);

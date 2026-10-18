@@ -126,6 +126,27 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python salud.py salud.json
 
+      # Primer chequeo: las publicaciones se pueden caer entre que el agregador (ComparaYa) las leyo y ahora, y no
+      # traen el stock. Se abren las 40 mejores candidatas (con Chrome, que ejecuta el JavaScript: el cartel de "no
+      # esta disponible" de Mercado Libre lo arma el navegador) y las caidas se sacan del indice, asi no aparecen en
+      # la pestaña Ofertas, el buscador, el feed ni Telegram. Hasta 3 rondas. Ante la duda se deja. Si falla, el
+      # indice sigue como estaba.
+      - name: Verificar las publicaciones antes de armar el sitio
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          if [ -f indice.json ]; then
+            command -v google-chrome >/dev/null || echo "::warning::No hay Chrome: solo se revisa el HTML de cada publicacion"
+            echo '[]' > descartadas.json
+            for ronda in 1 2 3; do
+              node generar_feed.js --indice indice.json --descartadas descartadas.json --candidatas candidatas.json --max 40
+              rc=0
+              python verificar_ofertas.py candidatas.json --descartadas descartadas.json || rc=$?
+              [ "$rc" -eq 3 ] || break
+            done
+            python filtrar_indice.py indice.json descartadas.json
+          fi
+
       - name: Preparar el sitio
         run: |
           mkdir -p _sitio
@@ -164,11 +185,12 @@ jobs:
             node generar_feed.js --indice indice.json --salida _sitio || echo "::warning::No se armo el feed de ofertas"
           fi
 
-      # Las publicaciones se pueden caer entre que se leyo el catalogo y ahora (sobre todo las de un agregador, que no
-      # trae el stock). Se abre el enlace de cada oferta, se descartan las caidas y se rearma el feed con la siguiente
-      # candidata; hasta 3 rondas. Ante la duda (bloqueo, sin red) se publica. Si falla, queda el feed de recien.
+      # Segundo chequeo, justo antes de publicar: se vuelve a abrir el enlace de las ofertas elegidas (pasaron minutos
+      # desde el primero) y se rearma el feed con la siguiente candidata si alguna cayo. Hasta 3 rondas. Ante la duda
+      # (bloqueo, sin red) se publica. Si falla, queda el feed de recien.
       - name: Verificar que las ofertas sigan en pie
         continue-on-error: true
+        timeout-minutes: 15
         run: |
           if [ -f indice.json ] && [ -f _sitio/ofertas.json ]; then
             echo '[]' > descartadas.json
