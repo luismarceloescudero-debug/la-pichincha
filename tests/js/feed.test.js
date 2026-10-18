@@ -182,3 +182,31 @@ test("main sin --descartadas, o con el archivo roto, publica todo como antes", (
   assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "s", "ofertas.json"), "utf8")).ofertas.length, 2);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("main con --candidatas escribe solo la lista a verificar (hasta --max) y no genera el sitio", () => {
+  const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
+  const muchas = Array.from({ length: 12 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 }));
+  fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ ...IDX, productos: muchas }));
+  F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"),
+          "--candidatas", path.join(dir, "c.json"), "--max", "5"]);
+  const c = JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8"));
+  assert.equal(c.ofertas.length, 5);
+  assert.deepEqual(Object.keys(c.ofertas[0]).sort(), ["nombre", "url"]);
+  assert.equal(fs.existsSync(path.join(dir, "s")), false);                 // no se armo el sitio
+  F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"), "--candidatas", path.join(dir, "c2.json")]);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "c2.json"), "utf8")).ofertas.length, 12);   // por defecto 40
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("--candidatas ya sin las descartadas: la siguiente candidata ocupa el lugar", () => {
+  const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
+  const caida = "https://t.test/caida";
+  const idx = { ...IDX, productos: [fila("Caida", 70000, { antes: 100000, url: caida }), fila("Otra", 80000, { antes: 100000 })] };
+  fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify(idx));
+  fs.writeFileSync(path.join(dir, "d.json"), JSON.stringify([caida]));
+  F.main(["--indice", path.join(dir, "indice.json"), "--descartadas", path.join(dir, "d.json"), "--candidatas", path.join(dir, "c.json")]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8")).ofertas.map(o => o.nombre), ["Otra"]);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

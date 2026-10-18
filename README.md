@@ -309,11 +309,17 @@ Las ofertas del dia salen por dos canales, sin backend:
   entrada dice el precio, cuanto bajo, el comercio, el enlace a la tienda y la hora de los
   precios. Las compras internacionales van al final y rotuladas; los enlaces que no son `http(s)` no entran. El
   sitio lo anuncia en el `<head>` con `rel="alternate"`. Lo arma `generar_feed.js`, que
-  tambien escribe `ofertas.json` (las 10 mejores) para Telegram. Antes de publicar,
-  `verificar_ofertas.py` abre el enlace de cada una: si la publicacion esta caida (404/410 o el
-  cartel "Este producto no esta disponible", "Publicacion pausada/finalizada") la descarta y
-  `generar_feed.js --descartadas` arma el feed con la siguiente, hasta 3 rondas. Ante la duda
-  (bloqueo, error del servidor, sin red) se publica: no se vacia el resumen porque una tienda nos frene.
+  tambien escribe `ofertas.json` (las 10 mejores) para Telegram. Las publicaciones se pueden
+  caer entre que se leyo el catalogo y ahora (las de un agregador como ComparaYa no traen el stock),
+  asi que se verifican dos veces con `verificar_ofertas.py`: **antes de armar el sitio** (las 40 mejores
+  candidatas; las caidas se sacan de `indice.json`, asi tampoco aparecen en la pestaña Ofertas ni en el
+  buscador) y **justo antes de publicar** (las elegidas, para el feed, `/hoy/` y Telegram). Cada enlace
+  pasa por una revision estatica (404/410, carteles de la tienda, `OutOfStock` de schema.org) y otra
+  **renderizada** en Chrome sin interfaz, que ejecuta el JavaScript: el cartel "Este producto no esta
+  disponible" de Mercado Libre lo arma el navegador y no esta en el HTML. Si cae alguna, entra la siguiente
+  candidata (hasta 3 rondas). Ante la duda (bloqueo, captcha, error del servidor, sin red) se publica: no se
+  vacia el resumen porque una tienda nos frene. El log de cada paso dice, por comercio, cuantas estaban en
+  pie, cuantas cayeron y cuantas quedaron sin confirmar.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
   las 10 mejores y el enlace al sitio. **Esta apagado hasta que se configure**: hay que
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
