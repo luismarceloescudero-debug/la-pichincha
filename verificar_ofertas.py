@@ -93,13 +93,16 @@ def navegador():
     return os.environ.get("CHROME_BIN") or None
 
 
-def renderizar(url):
-    """El DOM de la pagina ya armada por el navegador (con su JavaScript), o None si no se pudo abrir."""
+def renderizar(url, ua=UA):
+    """El DOM de la pagina ya armada por el navegador (con su JavaScript), o None si no se pudo abrir.
+    ua=None deja el que trae el navegador."""
     exe = navegador()
     if not exe or not re.match(r"https?://", url or "", re.I):
         return None
     cmd = [exe, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--hide-scrollbars",
-           f"--virtual-time-budget={RENDER_ESPERA_MS}", f"--user-agent={UA}", "--lang=es-AR", "--dump-dom", url]
+           f"--virtual-time-budget={RENDER_ESPERA_MS}", "--lang=es-AR", "--dump-dom", url]
+    if ua:
+        cmd.insert(-2, f"--user-agent={ua}")
     try:
         r = subprocess.run(cmd, capture_output=True, timeout=RENDER_TIMEOUT, check=False)
     except (subprocess.TimeoutExpired, OSError):

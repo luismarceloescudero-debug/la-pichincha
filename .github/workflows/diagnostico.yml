@@ -1,0 +1,41 @@
+# Prueba la verificacion de enlaces contra el caso real: el indice publicado y las publicaciones de verdad
+# (Mercado Libre, Fravega, AliExpress...). Corre en cada PR que toque la verificacion y a mano. No publica nada.
+name: Verificacion de enlaces (caso real)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - verificar_ofertas.py
+      - diagnostico_enlaces.py
+      - filtrar_indice.py
+      - .github/workflows/diagnostico.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Bajar el indice publicado y elegir las candidatas reales
+        run: |
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/indice.json" -o indice.json
+          node generar_feed.js --indice indice.json --candidatas candidatas.json --max 40
+      - name: Diagnosticar que ve el servidor en cada publicacion
+        run: python diagnostico_enlaces.py candidatas.json --max 15 --salida diagnostico.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: diagnostico-enlaces
+          path: diagnostico.json
+          retention-days: 14
