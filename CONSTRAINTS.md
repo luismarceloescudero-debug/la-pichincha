@@ -37,6 +37,10 @@ dueño. Subirlos cuando la medicion real los supera, si.
   portada daba 86-87 en esa corrida y 99-100 en las otras nueve medidas el 15/10). Es lo que recomienda
   Lighthouse para la variabilidad: varias corridas y la mediana. Los umbrales son los mismos; la CI guarda
   los informes completos como artifact `lighthouse`.
+- **Reintento solo por infraestructura**: a veces Chrome no arranca en el runner ("waiting for dynamic debugging port
+  in chrome-err.log") y el job cortaba la CI, con lo que construir y publicar quedaban salteados (paso con el merge
+  del PR #73, 19/10). `.github/lighthouse-corrida.sh` reintenta una corrida hasta tres veces **solo** con ese error;
+  un puntaje bajo u otra falla corta igual (`tests/test_lighthouse_reintento.py`).
 - **CSP con `unsafe-inline` en scripts**: `index.html` lleva los datos del dia en un script en linea, asi
   que un hash fijo no sirve. Lo que si cierra: scripts solo de los dominios listados, conexiones solo al
   propio sitio y a GoatCounter, sin `object`, sin `base` y sin enviar formularios afuera. Va como
