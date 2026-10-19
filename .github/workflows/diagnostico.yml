@@ -17,7 +17,7 @@ permissions:
 jobs:
   diagnostico:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -47,9 +47,16 @@ jobs:
       # Las tiendas VTEX que llegan por ComparaYa, verificadas por su API publica desde los servidores de GitHub.
       - name: Probar la API de las tiendas VTEX del indice
         run: python diagnostico_enlaces.py --vtex indice.json | tee -a "$GITHUB_STEP_SUMMARY"
+      # Que daria indexarlas directo: avisos de tecnologia en stock, cuantos ya llegan por ComparaYa, rebajas, RefId y EAN.
+      # Guarda lo que respondio cada API (robots.txt, arbol, primera busqueda) para los fixtures de los tests.
+      - name: Medir el catalogo de las tiendas VTEX
+        timeout-minutes: 35
+        run: python diagnostico_enlaces.py --vtex-catalogo indice.json --crudos diagnostico-vtex | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: diagnostico-enlaces
-          path: diagnostico*.json
+          path: |
+            diagnostico*.json
+            diagnostico-vtex/
           retention-days: 14
