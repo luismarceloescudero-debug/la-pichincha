@@ -119,9 +119,11 @@
       if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
       // Un tachado que no se mueve en una semana es el precio de siempre con un tachado de adorno (19/10: la impresora
       // Brother con 55% y los auriculares Philips con 54% tenian el mismo precio desde el 8/10 y el 7/10).
-      if (hoy && f[10] && (hoy - Date.parse(f[10])) / 864e5 >= DIAS_TACHADO_FIJO) { tachadoFijo++; continue; }
       const off = 1 - f[1] / lista;
-      if (off + EPS >= d.publicada && off <= DESCUENTO_MAX) publicadas.push(f);
+      if (!(off + EPS >= d.publicada && off <= DESCUENTO_MAX)) continue;
+      // Se cuenta recien aca: solo lo que habria sido oferta (un tachado de 2% con precio viejo no es un descarte de la regla).
+      if (hoy && f[10] && (hoy - Date.parse(f[10])) / 864e5 >= DIAS_TACHADO_FIJO) { tachadoFijo++; continue; }
+      publicadas.push(f);
     }
     // Cruce de gamas: una oferta real de gama alta que cuesta lo mismo o menos que la mediana de la gama media.
     const cruces = new Set([...propias, ...publicadas].filter(f => {
