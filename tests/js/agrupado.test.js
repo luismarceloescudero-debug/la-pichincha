@@ -97,3 +97,12 @@ test("el mismo comercio directo y por ComparaYa cuenta una vez, con el nombre qu
   assert.strictEqual(B.agruparPorModelo([directa, agregador], nombre).otras.size, 0);
   assert.strictEqual(B.agruparPorModelo([directa, agregador]).otras.size, 1);       // sin el nombre, parecen dos tiendas
 });
+
+test("unaPorUrl: el aviso VTEX que llega directo y por ComparaYa queda una vez, el directo", () => {
+  const directa = ["Celular Moto G06", 199999, "https://www.oncity.com/celular-moto-g06-158039/p", "oncity", ""];
+  const agregador = ["Celular Moto G06", 229999, "https://oncity.com/celular-moto-g06-158039/p/?utm_source=comparaya", "comparaya", "OnCity"];
+  const variante = ["Celular Moto G06", 209999, "https://www.oncity.com/celular-moto-g06-158039/p?variante=2", "comparaya", "OnCity"];
+  assert.deepStrictEqual(B.unaPorUrl([agregador, directa, variante]), [directa, variante]);
+  assert.deepStrictEqual(B.unaPorUrl([directa, agregador]), [directa]);
+  assert.strictEqual(B.urlClave("https://WWW.oncity.com/a/p/?gclid=1&b=2&a=1"), "oncity.com/a/p?a=1&b=2");
+});
