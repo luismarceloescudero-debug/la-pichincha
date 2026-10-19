@@ -201,3 +201,43 @@ test("y si la otra tienda dice que no llega al minimo, tampoco llega: es el mism
   const idx = { productos: [con("Monitor Samsung LS24BG300ELXZB", 200000, "cy"), con("Monitor Samsung LS24BG300ELXZB 75Hz IPS", 210000, "mx")] };
   assert.equal(O.calcularOfertas(idx).publicadas.length, 0);
 });
+
+// Titulos reales del indice del 18/10 que quedaban "sin datos" aunque dicen la RAM y el procesador.
+test("memoriaDe lee capacidades pegadas a letras, con G sola y con barra sin unidad", () => {
+  assert.deepEqual(C.memoriaDe("Notebook HP 15.6 R5-7535HS 8GB SSD512GB Victus RTX3050 W11H"), { ram: 8, rom: 512 });
+  assert.deepEqual(C.memoriaDe("Notebook LENOVO 15.3 IDEA P I5-13420H 8G 512G TOUCH W11H"), { ram: 8, rom: 512 });
+  assert.deepEqual(C.memoriaDe("Notebook HP PB 445G11 14\" R5 7535U 16GB/512 Win11P"), { ram: 16, rom: 512 });
+  assert.deepEqual(C.memoriaDe("NOTEBOOK HP 14 840 I5-1335U 16GB SSD512G W11PRO"), { ram: 16, rom: 512 });
+  assert.deepEqual(C.memoriaDe("Notebook CX 15.6 INTEL I5 1235U+8G+SSD256G"), { ram: 8, rom: 256 });
+  assert.deepEqual(C.memoriaDe("Celular Motorola Moto G06 128/4gb + Auricular De Regalo"), { ram: 4, rom: 128 });
+  assert.deepEqual(C.memoriaDe("Xiaomi Redmi Note 15 Pro Plus 512/8+ Auricular"), { ram: 8, rom: 512 });
+  // la G de un procesador no es una capacidad
+  assert.deepEqual(C.memoriaDe("Pc Armada Gamer Amd Ryzen 5 8600G 16Gb Ram 500Gb Ssd"), { ram: 16, rom: 500 });
+  assert.deepEqual(C.memoriaDe("PC PERFORMANCE AMD ATHLON 3000G+8G+SSD240"), { ram: 8, rom: 0 });
+  assert.deepEqual(C.memoriaDe("Notebook LENOVO 16 TBOOK R5-7535HS 8G SSD512 GTIA 1PS"), { ram: 8, rom: 0 });
+  // lo que ya andaba sigue igual
+  assert.deepEqual(C.memoriaDe("Celular Moto G17 4+128GB Evening Blue Motorola"), { ram: 4, rom: 128 });
+  assert.deepEqual(C.memoriaDe("Celular Samsung Galaxy S26 12GB 256GB"), { ram: 12, rom: 256 });
+});
+
+test("el procesador se reconoce aunque la tienda lo abrevie (I5-1335U, R5-7535HS, INTEL I5 1235U)", () => {
+  const gen = n => C.generacionesDe(n).map(g => g.fam + ":" + g.gen).join(",");
+  assert.equal(gen("NOTEBOOK HP 14 840 I5-1335U 16GB SSD512G W11PRO"), "intel-core:13");
+  assert.equal(gen("Notebook CX 15.6 INTEL I5 1235U+8G+SSD256G"), "intel-core:12");
+  assert.equal(gen("Notebook HP 15.6 R5-7535HS 8GB SSD512GB Victus RTX3050 W11H"), "ryzen:7");
+  assert.equal(gen("Portátil Lenovo Ideapad Gaming 3 15.6 R5 6600h, Rtx 3050..."), "ryzen:6");
+  assert.equal(gen("Notebook Lenovo Core i7-14700H 16GB 512GB"), "intel-core:14");
+  // un modelo de placa o de RAM no es un procesador
+  assert.equal(gen("Notebook HP PB 445G11 14\" 16GB/512"), "");
+  assert.equal(gen("Memoria RAM R5 DDR5 16GB"), "");
+});
+
+test("una notebook con RAM y procesador abreviados ya no queda 'sin datos'", () => {
+  const g = ev("NOTEBOOK HP 14 840 I5-1335U 16GB SSD512G W11PRO");
+  assert.notEqual(g.motivo, "sin datos de RAM, procesador ni año en el título");
+  assert.equal(ev("Notebook LENOVO 15.3 IDEA P I5-13420H 8G 512G TOUCH W11H").motivo, "solo 8 GB de RAM (mínimo 16)");
+});
+
+test("el motivo de una generacion de Ryzen vieja nombra la serie, no el modelo", () => {
+  assert.equal(ev("PC Armada AMD Ryzen 7 5700 16GB 512GB").motivo, "Ryzen serie 5000: la generación vigente es la 9000");
+});
