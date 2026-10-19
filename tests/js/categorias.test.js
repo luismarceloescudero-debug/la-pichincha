@@ -189,7 +189,7 @@ test("un modelo no queda afuera porque una tienda no escribe el dato: lo hereda 
   const con = (n, p, modelo, tienda) => { const f = fila(n, p, { lista: p * 1.3 }); f[3] = tienda; f[9] = modelo; return f; };
   const idx = { productos: [
     con("Monitor Samsung LS25BG400ELXZB", 300000, "LS25BG400ELXZB", "cy"),                         // sin Hz en el titulo
-    con("Monitor Samsung 25 LS25BG400ELXZB IPS 240Hz", 310000, "LS25BG400ELXZB", "mx"),            // otra tienda si los trae
+    con("Monitor Samsung 25 LS25BG400ELXZB IPS 240Hz", 303000, "LS25BG400ELXZB", "mx"),            // otra tienda si los trae
     fila("Monitor Samsung LS24BG300ELXZB", 250000, { lista: 330000 })] };                          // este no tiene de donde sacarlo
   const r = O.calcularOfertas(idx);
   assert.deepEqual(r.publicadas.map(f => f[0]).sort(), ["Monitor Samsung 25 LS25BG400ELXZB IPS 240Hz", "Monitor Samsung LS25BG400ELXZB"]);

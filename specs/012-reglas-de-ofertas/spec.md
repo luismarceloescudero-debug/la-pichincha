@@ -114,3 +114,11 @@ Comprobado de punta a punta con el resumen del 16/10: las tres placas madre B840
 ### Historial en el buscador
 
 Cada resultado dice "precio sin cambios desde el 12/10" (sin baja ni rebaja a la vista). La columna 11 del indice (`desde`) guarda la fecha del ultimo cambio, de `serie.desde_cuando`; el indice trae `historial.inicio`, el primer dia que se sigue el precio. **Antes de esa fecha no sabemos nada**: el seguimiento empezo el 7/10/2026, asi que "sin cambios desde marzo" solo se podra decir cuando haya historial de marzo; hasta entonces el texto aclara "cuando empezamos a seguirlo; puede ser mas antiguo". Una categoria sin ofertas en el dia (por ejemplo notebooks) se dice en la pestaña Ofertas y se manda al buscador.
+
+## Segundo chequeo: el mismo modelo mas barato en otra tienda (19/10/2026)
+
+Una oferta no es oferta si el mismo modelo (codigo exacto, nunca por parecido) esta mas de un 2% mas barato en otro aviso local. Medido con el indice publicado: la MSI RTX 5080 Gaming Trio salia a $4.268.709 con tachado mientras Maxtecno la vendia a $3.679.312; el monitor Arkham 25" a $441.599 contra $299.538 en SCP; la Pantum M6509NW a $390.499 contra $238.589 en Mexx. La regla saco 8 de 858 ofertas, todas revisadas a mano.
+
+- Comparan solo las tiendas que se leen directo, con el precio del dia: lo que llega por ComparaYa puede ser viejo (4 de 11 avisos de Mercado Libre ya no existian a ese precio) y dejaria afuera una oferta real. Lo internacional tampoco cuenta como mas barato (paga impuestos al llegar).
+- En celulares, notebooks y PCs tiene que coincidir ademas la configuracion (RAM, almacenamiento y procesador si los dos lo dicen): el codigo "15IRH10" que trajo ComparaYa es la familia IdeaPad Slim 3 y `modelo.completar_con_conocidos` se lo paso a todas las configuraciones (i5 e i7, 8 y 16 GB). **Pendiente**: que un codigo de familia no agrupe configuraciones distintas en la identidad (afecta tambien el "un solo lugar" del resumen y el buscador), y leer el part number que publica WooCommerce (Maxtecno: `IC_83K101GTAR`, el part number de Lenovo es `83K101GTAR`).
+- `calcularOfertas` devuelve `masBarato` (oferta -> el aviso mas barato) para poder mostrarlo.

@@ -244,3 +244,61 @@ test("los accesorios de un celular no entran a la mediana de la gama media ni a 
   assert.equal(r.descartadas, 0);
   assert.deepEqual(r.medianas, {});
 });
+
+// 19/10, indice publicado: la MSI RTX 5080 Gaming Trio salia como oferta a $4.268.709 (tachado mas alto) mientras
+// Maxtecno vendia el mismo modelo a $3.679.312 sin descuento. Con el mismo modelo mas barato en otra tienda local,
+// no es una oferta.
+const conModelo = (nombre, precio, tienda, modelo, extra = {}) => {
+  const f = fila(nombre + " " + tienda, precio, extra); f[3] = tienda; f[9] = modelo; return f;
+};
+
+test("una oferta con el mismo modelo mas barato en otra tienda local no es oferta", () => {
+  const idx = { productos: [
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 4268709, "comparaya", "RTX5080-GTRIO", { lista: 5600000 }),
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 3679312, "maxtecno", "RTX5080-GTRIO")] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual([...r.propias, ...r.publicadas], []);
+  assert.equal(r.masBarato.get(idx.productos[0])[1], 3679312);     // contra que se descarto
+});
+
+test("si es el precio mas bajo del modelo (o casi igual) sigue siendo oferta", () => {
+  const idx = { productos: [
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 3679312, "maxtecno", "M1", { lista: 4800000 }),
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 3700000, "venex", "M1"),
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 3660000, "mexx", "M1")] };   // 0,5% menos: redondeo
+  assert.deepEqual(O.calcularOfertas(idx).publicadas.map(f => f[3]), ["maxtecno"]);
+});
+
+test("un precio internacional mas bajo no le quita la oferta a una local (paga impuestos al llegar)", () => {
+  const idx = { productos: [
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 3679312, "maxtecno", "M1", { lista: 4800000 }),
+    conModelo("Placa de video MSI RTX 5080 Gaming Trio 16GB", 2500000, "comparaya", "M1", { sellos: "i" })] };
+  assert.deepEqual(O.calcularOfertas(idx).publicadas.map(f => f[3]), ["maxtecno"]);
+});
+
+test("sin codigo de modelo no se compara por parecido", () => {
+  const idx = { productos: [fila("Placa de video MSI RTX 5080 16GB A", 4268709, { lista: 5600000 }),
+                            fila("Placa de video MSI RTX 5080 16GB B", 3679312)] };
+  assert.equal(O.calcularOfertas(idx).publicadas.length, 1);
+});
+
+test("un precio mas bajo que llega por el agregador no le quita la oferta a una tienda directa (puede ser viejo)", () => {
+  const idx = { productos: [
+    conModelo("Notebook Asus Zenbook 14 OLED 16GB 1TB", 2999999, "venex", "UX3405", { lista: 3900000 }),
+    conModelo("Notebook Asus Zenbook 14 OLED 16GB 1TB", 2383703, "comparaya", "UX3405")] };
+  assert.deepEqual(O.calcularOfertas(idx).publicadas.map(f => f[3]), ["venex"]);
+});
+
+test("en equipos solo compara la misma configuracion: el codigo de familia junta i5 e i7, 8 y 16 GB", () => {
+  // 19/10: "15IRH10" (la familia IdeaPad Slim 3) agrupaba configuraciones distintas; la i7 16GB de Mercado Libre
+  // no es mas cara que la i5 8GB de GoldenTech: son otro producto.
+  const idx = { productos: [
+    conModelo("Notebook Lenovo Ideapad Slim 3 15IRH10 Intel Core i7-13620H 16GB RAM DDR5 512GB SSD", 1900899, "comparaya", "15IRH10", { lista: 2600000 }),
+    conModelo("Notebook Lenovo IP Slim 3 15IRH10 INTEL i5-13420H 8GB 4800MHZ DDR5 512GB NVME", 1464575, "goldentech", "15IRH10")] };
+  assert.equal(O.calcularOfertas(idx).masBarato.size, 0);
+  // la misma configuracion si se compara
+  const igual = { productos: [
+    conModelo("Notebook Lenovo Ideapad Slim 3 15IRH10 Intel Core i7-13620H 16GB RAM DDR5 512GB SSD", 2600000, "comparaya", "15IRH10", { lista: 3400000 }),
+    conModelo("Notebook Lenovo IP Slim 3 15IRH10 INTEL I7-13620H 16GB 4800MHZ 512GB NVME W11H", 2337228, "goldentech", "15IRH10")] };
+  assert.equal(O.calcularOfertas(igual).masBarato.size, 1);
+});

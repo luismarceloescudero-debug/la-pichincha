@@ -24,6 +24,8 @@
   const unaPorUrl = B.unaPorUrl;
 
   const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
+  const TOLERANCIA_MODELO = 0.02;
+  const AGREGADOR = "comparaya";   // centavos y redondeos entre tiendas: menos que eso no la descalifica
   const esInternacional = f => typeof f[8] === "string" && f[8].includes("i");
 
   /* "mediana de los smartphones de gama media de 256 GB: $350.000 (12 avisos)" */
@@ -31,6 +33,20 @@
   function textoContra(c, pesos) {
     const cap = c.rom >= 1000 ? c.rom / 1000 + " TB" : c.rom + " GB";
     return `mediana de ${PLURAL[c.rubro] || "los equipos"} de gama media de ${cap}: ${pesos(c.mediana)} (${c.avisos} avisos)`;
+  }
+
+  /* En un equipo, el codigo de modelo puede ser el de la familia (19/10: "15IRH10" juntaba i5 e i7, 8 y 16 GB):
+     para decir que otro aviso es "el mismo, mas barato" tienen que coincidir la RAM, el almacenamiento y el procesador
+     cuando los dos lo dicen. Si alguno no se puede leer, no se comparan. Los demas rubros comparan por el codigo. */
+  const CPU = /\b(?:core\s?)?(?:i[3579]|ultra\s?[3579])[-\s]?\d{3,5}[a-z]{0,2}\b|\b(?:ryzen\s?[3579]|r[3579])[-\s]?\d{4}[a-z]{0,2}\b/i;
+  const cpuDe = n => { const m = String(n).match(CPU); return m ? m[0].toLowerCase().replace(/core|ryzen/g, "").replace(/[^a-z0-9]/g, "") : ""; };
+  function mismaConfiguracion(a, b) {
+    const cat = C.categoriaDe(a[0]);
+    if (cat !== "smartphone" && cat !== "notebook" && cat !== "pc") return true;
+    const ma = C.memoriaDe(a[0]), mb = C.memoriaDe(b[0]);
+    if (!ma.ram || !mb.ram || ma.ram !== mb.ram || !ma.rom || !mb.rom || ma.rom !== mb.rom) return false;
+    const ca = cpuDe(a[0]), cb = cpuDe(b[0]);
+    return !ca || !cb || ca === cb;
   }
 
   function calcularOfertas(idx) {
@@ -63,9 +79,20 @@
     }
     const medianas = {}, muestras = {};
     for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) { medianas[k] = B.mediana(precios[k]); muestras[k] = precios[k].length; }
+    // Segundo chequeo: el mismo modelo (codigo exacto, nunca por parecido) mas barato en otro aviso local quiere decir que
+    // esta no es la oferta, por mas tachado que muestre (19/10: la RTX 5080 Gaming Trio a $4.268.709 con Maxtecno a
+    // $3.679.312). Lo internacional no cuenta como mas barato: paga impuestos al llegar. Lo que llega por un agregador
+    // (ComparaYa) tampoco: trae precios viejos (19/10: 4 de 11 avisos de Mercado Libre ya no existian a ese precio) y
+    // dejaria afuera una oferta real. Comparan las tiendas que se leen directo, con el precio del dia.
+    const masBarato = new Map();
+    for (const f of filas) {
+      if (!f[9]) continue;
+      const otro = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && mismaConfiguracion(f, x)).reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
+      if (otro && f[1] > otro[1] * (1 + TOLERANCIA_MODELO)) masBarato.set(f, otro);
+    }
     for (const f of filas) {
       const g = gama.get(f);
-      if (!g.pasa) { descartadas++; continue; }
+      if (!g.pasa || masBarato.has(f)) { descartadas++; continue; }
       const d = C.DESCUENTO[g.categoria];
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer + EPS >= d.propia) {
@@ -89,7 +116,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
