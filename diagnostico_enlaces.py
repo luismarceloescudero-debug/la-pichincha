@@ -181,8 +181,26 @@ def comparaya(urls):
     return campos, vistas
 
 
+def probar_vtex(indice, por_tienda=3):
+    """Lineas de texto: hasta `por_tienda` avisos de cada tienda VTEX que llega por ComparaYa, verificados por su API."""
+    vistos = {}
+    for f in indice.get("productos") or []:
+        host = urllib.parse.urlparse(f[2]).netloc
+        if f[3] == "comparaya" and f[2].rstrip("/").endswith("/p") and "mercadolibre" not in host                 and len(vistos.setdefault(host, [])) < por_tienda:
+            vistos[host].append(f)
+    lineas = ["### Tiendas VTEX por su API (desde este servidor)", ""]
+    for host, filas in sorted(vistos.items()):
+        for f in filas:
+            lineas.append(f"- {host}: {v.revisar_vtex(f[2], f[1])} (publicado {f[1]})")
+    return lineas
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    if "--vtex" in argv:
+        print("
+".join(probar_vtex(v.leer(argv[argv.index("--vtex") + 1], {}) or {})))
+        return 0
     ruta = argv[0] if argv else "candidatas.json"
     maximo = int(argv[argv.index("--max") + 1]) if "--max" in argv else 15
     salida = argv[argv.index("--salida") + 1] if "--salida" in argv else "diagnostico.json"
