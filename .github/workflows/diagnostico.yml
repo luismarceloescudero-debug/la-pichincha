@@ -44,6 +44,23 @@ jobs:
         run: |
           echo '[]' > diagnostico-descartadas.json
           python verificar_ofertas.py candidatas.json --descartadas diagnostico-descartadas.json | tee -a "$GITHUB_STEP_SUMMARY" || true
+      # Las tiendas VTEX que llegan por ComparaYa, verificadas por su API publica desde los servidores de GitHub.
+      - name: Probar la API de las tiendas VTEX del indice
+        run: |
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, urllib.parse, verificar_ofertas as v
+          idx = json.load(open("indice.json", encoding="utf-8"))
+          vistos = {}
+          for f in idx["productos"]:
+              h = urllib.parse.urlparse(f[2]).netloc
+              if f[3] == "comparaya" and f[2].rstrip("/").endswith("/p") and "mercadolibre" not in h and len(vistos.setdefault(h, [])) < 3:
+                  vistos[h].append(f)
+          print("### Tiendas VTEX por su API (desde GitHub)
+")
+          for h, filas in sorted(vistos.items()):
+              for f in filas:
+                  print(f"- {h}: {v.revisar_vtex(f[2], f[1])} (publicado {f[1]})")
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

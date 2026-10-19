@@ -21,7 +21,8 @@ alguien lo vende al precio publicado (con 2% de tolerancia); si nadie lo vende, 
 Lo que la API no deja ver (/up/MLAU..., avisos sueltos) o no pudo responder tampoco se publica: una oferta de
 Mercado Libre sale solo si se pudo comprobar.
 
-Las tiendas WooCommerce se verifican por su Store API publica (precio y existencias). Lo que llega por un agregador
+Las tiendas WooCommerce se verifican por su Store API publica (precio y existencias), y las VTEX que llegan por ComparaYa
+(Carrefour, OnCity, Naldo, Dricco, Compra Cierta) por su API publica de catalogo. Lo demas que llega por un agregador
 (ComparaYa) desde otra tienda tiene que mostrar el precio publicado en la pagina de esa tienda (en el HTML o ya
 armada en el navegador): si no aparece, o la tienda no se pudo abrir, no se publica (19/10: Fravega bloquea su API,
 pero su pagina armada muestra el precio).
@@ -228,7 +229,7 @@ def revisar(url, desde=None, precio=None, tienda=None):
         if api:
             return api
     if tienda == "comparaya" and "mercadolibre." not in comercio(url):
-        return revisar_agregador(url, precio)
+        return revisar_vtex(url, precio) or revisar_agregador(url, precio)
     previo = estatica(url)
     if previo == "caida":
         return previo, "estatica"
@@ -283,6 +284,28 @@ def revisar_woo(url, precio, base):
         actual = int((p.get("prices") or {}).get("price")) / 10 ** int((p.get("prices") or {}).get("currency_minor_unit", 0))
     except (TypeError, ValueError):
         return None
+    if precio and actual > precio * (1 + TOLERANCIA_PRECIO):
+        return "caida", f"api de la tienda: el precio publicado ya no existe (pide {pesos(actual)})"
+    return "viva", "api de la tienda"
+
+
+def revisar_vtex(url, precio):
+    """('caida'|'viva', motivo) segun la API publica de catalogo de una tienda VTEX (Carrefour, OnCity, Naldo, Dricco...),
+    o None si la URL no es de producto VTEX ("/slug/p") o la API no respondio. La misma que usa ratoneando.ar."""
+    m = re.match(r"(https?://[^/]+)/([^/?#]+)/p/?(?:[?#].*)?$", url or "")
+    if not m:
+        return None
+    codigo, cuerpo = pedir_api(f"{m.group(1)}/api/catalog_system/pub/products/search/{m.group(2)}/p",
+                               {"Accept": "application/json"})
+    try:
+        oferta = json.loads(cuerpo)[0]["items"][0]["sellers"][0]["commertialOffer"] if codigo == 200 else None
+    except (ValueError, IndexError, KeyError, TypeError):
+        oferta = None
+    if not isinstance(oferta, dict):
+        return None
+    actual = oferta.get("Price") or 0
+    if not actual or not oferta.get("AvailableQuantity"):
+        return "caida", "api de la tienda: sin stock"
     if precio and actual > precio * (1 + TOLERANCIA_PRECIO):
         return "caida", f"api de la tienda: el precio publicado ya no existe (pide {pesos(actual)})"
     return "viva", "api de la tienda"
