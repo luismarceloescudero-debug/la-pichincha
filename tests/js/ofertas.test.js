@@ -316,6 +316,17 @@ test("una rebaja publicada cuyo precio no cambio en 7 dias o mas no es oferta", 
   assert.equal(r.tachadoFijo, 2);
 });
 
+test("tachadoFijo cuenta solo lo que habria sido oferta: un tachado de 2% o de 90% con precio viejo no suma", () => {
+  const conDesde = (nombre, precio, lista, desde) => { const f = fila(nombre, precio, { lista }); f[10] = desde; return f; };
+  const idx = { generado: "2026-10-19T09:13-03:00", productos: [
+    conDesde("Mouse Logitech G203 Lightsync", 98000, 100000, "2026-10-01"),      // 2%: nunca fue oferta
+    conDesde("Mouse Logitech G502 Hero", 100000, 1000000, "2026-10-01"),          // 90%: pasa el tope de descuento
+    conDesde("Impresora Brother HL-L2320D", 330000, 729679, "2026-10-08")] };     // 55% viejo: este si
+  const r = O.calcularOfertas(idx);
+  assert.equal(r.publicadas.length, 0);
+  assert.equal(r.tachadoFijo, 1);
+});
+
 test("una baja propia no se descarta por la fecha: la medimos nosotros", () => {
   const f = fila("Fuente Thermaltake 850W 80 Plus Gold", 155000, { antes: 266000 }); f[10] = "2026-10-01";
   assert.equal(O.calcularOfertas({ generado: "2026-10-19T09:13-03:00", productos: [f] }).propias.length, 1);
