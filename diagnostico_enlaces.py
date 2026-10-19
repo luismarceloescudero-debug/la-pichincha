@@ -21,7 +21,7 @@ import urllib.request
 
 import verificar_ofertas as v
 
-API_ML = "https://api.mercadolibre.com"
+API_ML = v.API_ML
 DISPONIBILIDAD = re.compile(r'"availability"\s*:\s*"(?:https?://schema\.org/)?(\w+)"', re.I)
 
 
@@ -59,42 +59,8 @@ def senales(html):
             "texto": texto_visible(html)[:160], "scripts": re.findall(r'src="(https?://[^"]{0,80})', html or "")[:3]}
 
 
-def id_ml(url):
-    """('items'|'products'|'user-products', 'MLA123...') del aviso de Mercado Libre, o None."""
-    m = re.search(r"/up/(MLAU\d{6,})", url)
-    if m:
-        return "user-products", m.group(1)
-    m = re.search(r"item_id[:=](MLA\d{6,})", url)
-    if m:
-        return "items", m.group(1)
-    m = re.search(r"/p/(MLA\d{6,})", url)
-    if m:
-        return "products", m.group(1)
-    m = re.search(r"\b(MLA)-?(\d{6,})", url)
-    return ("items", m.group(1) + m.group(2)) if m else None
-
-
-_TOKEN = {}
-
-
-def token_ml():
-    """Token de aplicacion de Mercado Libre (client_credentials) con los secretos ML_CLIENT_ID y ML_CLIENT_SECRET,
-    o None si no estan. Se pide una vez por corrida."""
-    if "valor" in _TOKEN:
-        return _TOKEN["valor"]
-    cid, secreto = os.environ.get("ML_CLIENT_ID"), os.environ.get("ML_CLIENT_SECRET")
-    _TOKEN["valor"] = None
-    if cid and secreto:
-        datos = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": cid,
-                                        "client_secret": secreto}).encode()
-        pedido = urllib.request.Request(f"{API_ML}/oauth/token", data=datos, method="POST", headers={
-            "Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"})
-        try:
-            with urllib.request.urlopen(pedido, timeout=v.TIMEOUT) as r:
-                _TOKEN["valor"] = json.loads(r.read().decode("utf-8")).get("access_token")
-        except (urllib.error.URLError, OSError, ValueError) as e:
-            print(f"::warning::No se obtuvo el token de Mercado Libre ({type(e).__name__})")
-    return _TOKEN["valor"]
+# Lo comparte con la verificacion que decide que se publica.
+id_ml, token_ml, _TOKEN = v.id_ml, v.token_ml, v._TOKEN
 
 
 def api_ml(url):

@@ -129,11 +129,14 @@ jobs:
       # Primer chequeo: las publicaciones se pueden caer entre que el agregador (ComparaYa) las leyo y ahora, y no
       # traen el stock. Se abren las 40 mejores candidatas (con Chrome, que ejecuta el JavaScript: el cartel de "no
       # esta disponible" de Mercado Libre lo arma el navegador) y las caidas se sacan del indice, asi no aparecen en
-      # la pestaña Ofertas, el buscador, el feed ni Telegram. Hasta 3 rondas. Ante la duda se deja. Si falla, el
+      # la pestaña Ofertas, el buscador, el feed ni Telegram. Hasta 3 rondas. Mercado Libre se verifica por su API (precio y vendedores): lo que no se pudo comprobar no sale. En las demas tiendas, ante la duda se deja. Si falla, el
       # indice sigue como estaba.
       - name: Verificar las publicaciones antes de armar el sitio
         continue-on-error: true
         timeout-minutes: 25
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
         run: |
           if [ -f indice.json ]; then
             command -v google-chrome >/dev/null || echo "::warning::No hay Chrome: solo se revisa el HTML de cada publicacion"
@@ -191,6 +194,9 @@ jobs:
       - name: Verificar que las ofertas sigan en pie
         continue-on-error: true
         timeout-minutes: 15
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
         run: |
           if [ -f indice.json ] && [ -f _sitio/ofertas.json ]; then
             echo '[]' > descartadas.json

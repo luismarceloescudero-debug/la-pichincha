@@ -192,7 +192,8 @@ test("main con --candidatas escribe solo la lista a verificar (hasta --max) y no
           "--candidatas", path.join(dir, "c.json"), "--max", "5"]);
   const c = JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8"));
   assert.equal(c.ofertas.length, 5);
-  assert.deepEqual(Object.keys(c.ofertas[0]).sort(), ["nombre", "url"]);
+  assert.deepEqual(Object.keys(c.ofertas[0]).sort(), ["nombre", "precio", "url"]);   // el precio, para compararlo con el vendedor
+  assert.ok(c.ofertas.every(o => o.precio >= 8000 && o.precio < 8012));
   assert.equal(fs.existsSync(path.join(dir, "s")), false);                 // no se armo el sitio
   F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"), "--candidatas", path.join(dir, "c2.json")]);
   assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "c2.json"), "utf8")).ofertas.length, 12);   // por defecto 40

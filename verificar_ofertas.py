@@ -14,8 +14,15 @@ Cada enlace pasa por dos revisiones, y alcanza con que una lo marque caido:
   2. Renderizada: la pagina abierta en un Chrome sin interfaz, que ejecuta el JavaScript, y lo que ve una persona.
      Mercado Libre arma su cartel de "no esta disponible" en el navegador: no esta en el HTML que baja la primera.
 
-Ante la duda se publica: un bloqueo (403, 429), un error del servidor, una pagina de captcha o un fallo de red no
-prueban que la publicacion este caida, y descartar por eso vaciaria el resumen cada vez que una tienda nos frena.
+Mercado Libre se decide por su API oficial, con el token de aplicacion (secretos ML_CLIENT_ID y ML_CLIENT_SECRET):
+a los servidores de GitHub su pagina les muestra un captcha, y ComparaYa trae precios viejos (19/10: la Zenbook a
+$2.383.703 cuando el vendedor mas barato pedia $2.999.999). Un producto de catalogo (/p/MLA...) esta en pie si
+alguien lo vende al precio publicado (con 2% de tolerancia); si nadie lo vende, o todos piden mas, se descarta.
+Lo que la API no deja ver (/up/MLAU..., avisos sueltos) o no pudo responder tampoco se publica: una oferta de
+Mercado Libre sale solo si se pudo comprobar.
+
+En las demas tiendas, ante la duda se publica: su precio se lee de su propio sitio el mismo dia, y un bloqueo
+(403, 429), un error del servidor, una pagina de captcha o un fallo de red no prueban que la publicacion este caida.
 
 Sale con 3 si encontro caidas nuevas (hay que volver a elegir ofertas) y con 0 si no; nunca falla la corrida.
 """
@@ -55,6 +62,88 @@ CAIDA = re.compile(
 MURO = re.compile(r"captcha|verific[aá] que (sos|eres) (un )?(humano|persona)|account-verification|"
                   r"access denied|attention required|are you a robot|suspicious-traffic|/gz/webdevice|"
                   r"hubo un error accediendo a esta p", re.I)
+
+
+API_ML = "https://api.mercadolibre.com"
+TOLERANCIA_PRECIO = 0.02    # redondeos y diferencias de centavos entre lo que leyo el agregador y el vendedor
+_TOKEN = {}
+
+
+def id_ml(url):
+    """('items'|'products'|'user-products', 'MLA123...') del aviso de Mercado Libre, o None."""
+    m = re.search(r"/up/(MLAU\d{6,})", url)
+    if m:
+        return "user-products", m.group(1)
+    m = re.search(r"item_id[:=](MLA\d{6,})", url)
+    if m:
+        return "items", m.group(1)
+    m = re.search(r"/p/(MLA\d{6,})", url)
+    if m:
+        return "products", m.group(1)
+    m = re.search(r"\b(MLA)-?(\d{6,})", url)
+    return ("items", m.group(1) + m.group(2)) if m else None
+
+
+def token_ml():
+    """Token de aplicacion de Mercado Libre (client_credentials) con los secretos ML_CLIENT_ID y ML_CLIENT_SECRET,
+    o None si no estan. Se pide una vez por corrida."""
+    if "valor" in _TOKEN:
+        return _TOKEN["valor"]
+    cid, secreto = os.environ.get("ML_CLIENT_ID"), os.environ.get("ML_CLIENT_SECRET")
+    _TOKEN["valor"] = None
+    if cid and secreto:
+        datos = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": cid,
+                                        "client_secret": secreto}).encode()
+        pedido = urllib.request.Request(f"{API_ML}/oauth/token", data=datos, method="POST", headers={
+            "Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"})
+        try:
+            with urllib.request.urlopen(pedido, timeout=TIMEOUT) as r:
+                _TOKEN["valor"] = json.loads(r.read().decode("utf-8")).get("access_token")
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            print(f"::warning::No se obtuvo el token de Mercado Libre ({type(e).__name__})")
+    return _TOKEN["valor"]
+
+
+def pedir_api(url, cabeceras):
+    """(codigo, texto) de la API sin levantar excepciones; codigo 0 si no hubo respuesta."""
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=cabeceras), timeout=TIMEOUT) as r:
+            return r.status, r.read(MAX_BYTES).decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        try:
+            return e.code, e.read(4000).decode("utf-8", "replace")
+        except OSError:
+            return e.code, ""
+    except (urllib.error.URLError, OSError, ValueError):
+        return 0, ""
+
+
+def pesos(n):
+    return f"${n:,.0f}".replace(",", ".")
+
+
+def revisar_ml(url, precio=None):
+    """('caida'|'viva', motivo) segun la API de Mercado Libre, o None si no es de Mercado Libre o no hay token (sin
+    token no se puede verificar y queda la revision de la pagina, como antes)."""
+    if "mercadolibre." not in comercio(url) or not token_ml():
+        return None
+    ref = id_ml(url)
+    if not ref or ref[0] != "products":
+        return "caida", "api: no se puede verificar"
+    codigo, cuerpo = pedir_api(f"{API_ML}/products/{ref[1]}/items?limit=100",
+                               {"Accept": "application/json", "Authorization": "Bearer " + token_ml()})
+    try:
+        filas = json.loads(cuerpo).get("results") if codigo == 200 else None
+    except (ValueError, AttributeError):
+        filas = None
+    if not isinstance(filas, list):
+        return "caida", f"api: no se pudo verificar ({codigo})"
+    precios = [f["price"] for f in filas if isinstance(f, dict) and isinstance(f.get("price"), (int, float))]
+    if not precios:
+        return "caida", "api: nadie lo vende"
+    if precio and min(precios) > precio * (1 + TOLERANCIA_PRECIO):
+        return "caida", f"api: el precio publicado ya no existe (el mas barato pide {pesos(min(precios))})"
+    return "viva", "api"
 
 
 def veredicto(estado, cuerpo):
@@ -117,8 +206,12 @@ def renderizar(url, ua=UA):
     return texto or None
 
 
-def revisar(url, desde=None):
-    """('caida'|'viva'|'dudosa', etapa que lo decidio). 'desde' es el reloj (time.time()) del inicio de la corrida."""
+def revisar(url, desde=None, precio=None):
+    """('caida'|'viva'|'dudosa', etapa que lo decidio). 'desde' es el reloj (time.time()) del inicio de la corrida;
+    'precio', el que se va a publicar."""
+    api = revisar_ml(url, precio)
+    if api:
+        return api
     previo = estatica(url)
     if previo == "caida":
         return previo, "estatica"
@@ -167,19 +260,21 @@ def main(argv=None):
     if not isinstance(datos, dict):
         print(f"No hay {ruta}: no hay nada que verificar")
         return 0
-    urls = list(dict.fromkeys(o["url"] for o in datos.get("ofertas") or [] if isinstance(o, dict) and o.get("url")))
+    ofertas = [o for o in datos.get("ofertas") or [] if isinstance(o, dict) and o.get("url")]
+    urls = list(dict.fromkeys(o["url"] for o in ofertas))
+    precios = {o["url"]: o.get("precio") for o in ofertas}
     previas = leer(destino, [])
     previas = previas if isinstance(previas, list) else []
     desde = time.time()
     with ThreadPoolExecutor(max_workers=HILOS) as pool:
-        resultados = list(pool.map(lambda u: revisar(u, desde), urls))
+        resultados = list(pool.map(lambda u: revisar(u, desde, precio=precios.get(u)), urls))
     juicios = {u: r[0] for u, r in zip(urls, resultados)}
     etapas = {u: r[1] for u, r in zip(urls, resultados)}
     caidas = [u for u in urls if juicios[u] == "caida"]
     dudosas = [u for u in urls if juicios[u] == "dudosa"]
     nuevas = [u for u in caidas if u not in previas]
     for u in caidas:
-        print(f"  caída ({etapas[u]}): {u}")
+        print(f"  descartada ({etapas[u]}): {u}")
     print(f"Enlaces revisados: {len(urls)}, {len(caidas)} caída(s), {len(dudosas)} sin confirmar")
     if urls:
         print(resumen(urls, juicios, etapas))

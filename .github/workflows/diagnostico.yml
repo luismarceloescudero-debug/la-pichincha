@@ -36,6 +36,14 @@ jobs:
           ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
           ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
         run: python diagnostico_enlaces.py candidatas.json --max 15 --salida diagnostico.json
+      # La verificacion de verdad (la misma que decide que se publica) sobre las 40 candidatas reales y su precio.
+      - name: Verificar las candidatas reales como en la publicacion
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+        run: |
+          echo '[]' > diagnostico-descartadas.json
+          python verificar_ofertas.py candidatas.json --descartadas diagnostico-descartadas.json | tee -a "$GITHUB_STEP_SUMMARY" || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
