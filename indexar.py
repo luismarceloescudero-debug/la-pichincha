@@ -504,6 +504,28 @@ def indexar_json(tienda):
     return items
 
 
+# --- Un aviso, una vez ---------------------------------------------------------------------------------------------
+
+_SEGUIMIENTO = re.compile(r"^(utm_|gclid|fbclid|msclkid|ref=|source=|mc_|_hs)", re.I)
+
+
+def url_clave(url):
+    """La misma direccion escrita distinto: sin esquema ni "www", sin barra final ni parametros de seguimiento. Es la
+    misma regla que urlClave() de js/buscador.js: un parametro que identifica al producto (?variante=2) se conserva."""
+    m = re.match(r"^https?://(?:www\.)?([^/?#]*)([^?#]*)(?:\?([^#]*))?", str(url), re.I)
+    if not m:
+        return str(url)
+    params = sorted(p for p in (m.group(3) or "").split("&") if p and not _SEGUIMIENTO.match(p))
+    return m.group(1).lower() + re.sub(r"/+$", "", m.group(2)) + ("?" + "&".join(params) if params else "")
+
+
+def sin_repetir_agregador(filas, agregadores):
+    """Las filas del indice sin las de un agregador (ComparaYa) que repiten la URL de un aviso que llega directo de la
+    tienda: el directo trae el precio y el stock del dia; el del agregador puede ser viejo. Conserva el orden."""
+    directas = {url_clave(f[2]) for f in filas if f[3] not in agregadores}
+    return [f for f in filas if f[3] not in agregadores or url_clave(f[2]) not in directas]
+
+
 # --- Part number desde la ficha del producto (B3-bis) ----------------------------------------------------------
 
 def _dias(entrada, hoy):
@@ -759,6 +781,8 @@ def main(argv=None):
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
+    # Antes de confirmar codigos: la copia del agregador no cuenta como "otra tienda" que nombra el mismo codigo.
+    salida = sin_repetir_agregador(salida, {k for k, v in fuentes.items() if v.get("segunda_opinion")})
     modelo.confirmar_codigos_de_tienda(salida, por_confirmar)   # el sku de WooCommerce, si otra tienda lo nombra
     modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
     if fichas or (carpeta / FICHAS).exists():

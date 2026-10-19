@@ -628,3 +628,21 @@ class RobustezDeComparaYa(unittest.TestCase):
     def test_la_barra_invertida_y_los_caracteres_de_control_no_pasan(self):
         for u in ("https://evil\\@good.com/x", "https://x.test/a\x00b", "https://x.test/\tb"):
             self.assertFalse(indexar.url_valida(u), repr(u))
+
+
+class SinRepetirAgregador(unittest.TestCase):
+    """El aviso que llega directo de la tienda y por ComparaYa va una sola vez al indice: gana el directo."""
+
+    def test_url_clave_como_en_el_buscador(self):
+        self.assertEqual(indexar.url_clave("https://WWW.OnCity.com/cel-a/p/?utm_source=x&gclid=1"), "oncity.com/cel-a/p")
+        self.assertEqual(indexar.url_clave("http://oncity.com/cel-a/p?b=2&a=1#x"), "oncity.com/cel-a/p?a=1&b=2")
+        self.assertEqual(indexar.url_clave("no es url"), "no es url")
+
+    def test_saca_la_fila_del_agregador_que_repite_una_directa(self):
+        directa = ["Cel A", 100, "https://www.oncity.com/cel-a/p", "oncity", ""]
+        repetida = ["Cel A", 120, "https://oncity.com/cel-a/p/?utm_medium=cy", "comparaya", "OnCity"]
+        otra = ["Cel B", 90, "https://www.oncity.com/cel-b/p", "comparaya", "OnCity"]
+        ml = ["Cel A", 80, "https://www.mercadolibre.com.ar/cel-a/p", "comparaya", "Mercado Libre"]
+        filas = [repetida, directa, otra, ml]
+        self.assertEqual(indexar.sin_repetir_agregador(filas, {"comparaya"}), [directa, otra, ml])
+        self.assertEqual(indexar.sin_repetir_agregador(filas, set()), filas)
