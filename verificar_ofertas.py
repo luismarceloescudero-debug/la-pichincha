@@ -21,8 +21,9 @@ alguien lo vende al precio publicado (con 2% de tolerancia); si nadie lo vende, 
 Lo que la API no deja ver (/up/MLAU..., avisos sueltos) o no pudo responder tampoco se publica: una oferta de
 Mercado Libre sale solo si se pudo comprobar.
 
-Las tiendas WooCommerce se verifican por su Store API publica (precio y existencias), y las VTEX que llegan por ComparaYa
-(Carrefour, OnCity, Naldo, Dricco, Compra Cierta) por su API publica de catalogo. Lo demas que llega por un agregador
+Las tiendas WooCommerce se verifican por su Store API publica (precio y existencias), y las VTEX (las que se leen directo,
+`"tipo": "vtex"` en tiendas.json, y las que llegan por ComparaYa: Carrefour, OnCity, Naldo, Dricco, Compra Cierta) por su
+API publica de catalogo. Lo demas que llega por un agregador
 (ComparaYa) desde otra tienda tiene que mostrar el precio publicado en la pagina de esa tienda (en el HTML o ya
 armada en el navegador): si no aparece, o la tienda no se pudo abrir, no se publica (19/10: Fravega bloquea su API,
 pero su pagina armada muestra el precio).
@@ -228,6 +229,10 @@ def revisar(url, desde=None, precio=None, tienda=None):
         api = revisar_woo(url, precio, bases_woo()[tienda])
         if api:
             return api
+    if tienda and tienda in tiendas_vtex():
+        api = revisar_vtex(url, precio)
+        if api:
+            return api
     if tienda == "comparaya" and "mercadolibre." not in comercio(url):
         return revisar_vtex(url, precio) or revisar_agregador(url, precio)
     previo = estatica(url)
@@ -263,6 +268,11 @@ def bases_woo():
     tiendas = leer(TIENDAS_JSON, {})
     return {k: t.get("base") for k, t in tiendas.items() if isinstance(t, dict)
             and (t.get("catalogo") or {}).get("tipo") == "woocommerce" and t.get("base")}
+
+
+def tiendas_vtex():
+    """Las claves de las tiendas que se leen por la API de catalogo de VTEX (tiendas.json)."""
+    return {k for k, t in leer(TIENDAS_JSON, {}).items() if isinstance(t, dict) and (t.get("catalogo") or {}).get("tipo") == "vtex"}
 
 
 def revisar_woo(url, precio, base):

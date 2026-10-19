@@ -478,6 +478,36 @@ class Vtex(unittest.TestCase):
         for it in items:
             self.assertTrue(indexar.url_valida(it["url"]))
 
+    def test_el_json_real_guardado_de_cada_tienda_vtex(self):
+        """robots.txt, arbol y primera busqueda tal como los vio GitHub el 19/10 (diagnostico --vtex-catalogo)."""
+        vtex = {k: t for k, t in TIENDAS.items() if not k.startswith("_") and t["catalogo"]["tipo"] == "vtex"}
+        self.assertGreaterEqual(len(vtex), 13)
+        con_busqueda = 0
+        for clave, t in vtex.items():
+            with self.subTest(clave):
+                self.assertEqual(t["color"], "vt")
+                self.assertTrue(indexar.robots_permite(leer(clave, "robots.txt"), indexar.API_VTEX + "products/search"))
+                self.assertTrue(indexar.categorias_vtex(json.loads(leer(clave, "arbol.json"))))
+                if not (FIX / clave / "busqueda.json").exists():
+                    continue        # BGH: la primera categoria de su arbol estaba vacia
+                con_busqueda += 1
+                crudo = json.loads(leer(clave, "busqueda.json"))
+                items = [it for it in (indexar.item_vtex(p, t["base"]) for p in crudo) if it]
+                self.assertGreaterEqual(len(items), 3)
+                for it in items:
+                    self.assertTrue(it["url"].startswith(t["base"] + "/"), it["url"])
+                    self.assertTrue(indexar.url_valida(it["url"]))
+                    self.assertGreaterEqual(it["precio"], 10000)
+                    self.assertNotRegex(it["nombre"], r"[<>]|&[a-z#0-9]+;")
+        self.assertGreaterEqual(con_busqueda, 12)
+
+    def test_el_refid_vale_como_part_number_solo_con_forma_de_codigo(self):
+        def skus(clave):
+            return {it["sku_tienda"] for it in (indexar.item_vtex(p, "https://x") for p in json.loads(leer(clave, "busqueda.json"))) if it}
+        self.assertIn("NP940XFG-KA1AR", skus("pardo"), "Samsung Galaxy Book3 Pro")
+        self.assertIn("27GS60F", skus("lg"))
+        self.assertEqual(skus("naldo"), {None}, "Naldo: numeros internos")
+
     def test_saltea_sin_stock_sin_precio_repetidos_y_sin_lista_si_no_hay_rebaja(self):
         crudo = json.loads(leer("oncity", "busqueda.json"))
         sin_stock, sin_precio, igual = (json.loads(json.dumps(crudo[i])) for i in (0, 1, 2))

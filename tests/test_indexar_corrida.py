@@ -302,3 +302,33 @@ class Corrida(unittest.TestCase):
         indice, _ = self.correr([(1, 800)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
 
+
+
+class CorridaConAgregador(unittest.TestCase):
+    """La fuente "dos" es un agregador (segunda_opinion) que publica las mismas URLs que "uno"."""
+
+    bajar, correr = Corrida.bajar, Corrida.correr
+
+    def setUp(self):
+        Corrida.setUp(self)
+        tiendas = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        tiendas["dos"]["segunda_opinion"] = True
+        (self.dir / "tiendas.json").write_text(json.dumps(tiendas), encoding="utf-8")
+
+    def test_el_aviso_que_llega_directo_y_por_el_agregador_va_una_vez(self):
+        indice, salud = self.correr([(1, 100), (2, 200)], [(2, 250), (3, 300)])
+        filas = sorted((f[3], f[2].rsplit("/", 1)[1], f[1]) for f in indice["productos"])
+        self.assertEqual(filas, [("dos", "Producto_3_3", 300), ("uno", "Producto_1_1", 100), ("uno", "Producto_2_2", 200)])
+        self.assertEqual(salud["fuentes"]["dos"]["ahora"], 2, "la salud del agregador cuenta lo que trajo, no lo que quedo")
+        with redirect_stdout(io.StringIO()) as salida:
+            indexar.main(["--historial", str(self.hist)])
+        self.assertIn("1 avisos del agregador repetian el de una tienda directa", salida.getvalue())
+
+    def test_tipo_releva_solo_las_fuentes_de_ese_tipo(self):
+        self.correr([(1, 100)], [(3, 300)])
+        self.catalogos = {}                                   # si se pidiera algo, fallaria
+        with redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(indexar.main(["--historial", str(self.hist), "--tipo", "vtex"]), 0)
+        self.assertIn("sin tocar", salida.getvalue())
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(indice["productos"]), 2)

@@ -4,6 +4,7 @@
 Uso:
     python indexar.py                   # indexa todas las fuentes activas
     python indexar.py --solo mexx       # una sola
+    python indexar.py --tipo vtex       # solo las de un tipo de catalogo; las demas quedan como estaban
     python indexar.py --max-paginas 5   # corta antes, para probar
     python indexar.py --probar URL      # dice que extractor sirve para una fuente nueva
 
@@ -665,6 +666,7 @@ def probar(url):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Arma el indice de busqueda.")
     ap.add_argument("--solo", metavar="FUENTE")
+    ap.add_argument("--tipo", metavar="TIPO", help="releva solo las fuentes de ese catalogo.tipo (vtex, woocommerce...)")
     ap.add_argument("--max-paginas", type=int, default=TOPE_PAGINAS)
     ap.add_argument("--probar", metavar="URL", help="diagnostica una fuente nueva")
     ap.add_argument("--historial", metavar="DIR", default=str(HISTORIAL),
@@ -713,7 +715,8 @@ def main(argv=None):
     por_confirmar = []
     fichas = leer_fichas(carpeta)                # part numbers ya leidos de las fichas (B3-bis)
     for clave, fuente in fuentes.items():
-        if not fuente.get("activa", True) or (args.solo and clave != args.solo):
+        if (not fuente.get("activa", True) or (args.solo and clave != args.solo)
+                or (args.tipo and fuente["catalogo"]["tipo"] != args.tipo)):
             if clave in previo:                      # conservo lo que ya tenia indexado
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "sin tocar")
@@ -798,7 +801,9 @@ def main(argv=None):
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
     # Antes de confirmar codigos: la copia del agregador no cuenta como "otra tienda" que nombra el mismo codigo.
+    antes_de_sacar = len(salida)
     salida = sin_repetir_agregador(salida, {k for k, v in fuentes.items() if v.get("segunda_opinion")})
+    repetidos = antes_de_sacar - len(salida)
     modelo.confirmar_codigos_de_tienda(salida, por_confirmar)   # el sku de WooCommerce, si otra tienda lo nombra
     modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
     if fichas or (carpeta / FICHAS).exists():
@@ -832,6 +837,9 @@ def main(argv=None):
     bajaron = sum(1 for f in salida if len(f) > 6 and f[6])
     print("\n  " + VERDE + OK + FIN + " indice.json " + PUNTO + " " + str(len(salida))
           + " productos " + PUNTO + " " + format(kb, ".0f") + " KB")
+    if repetidos:
+        print("  " + VERDE + OK + FIN + " " + str(repetidos) + " avisos del agregador repetian el de una tienda directa: "
+              "queda el de la tienda")
     if estado:
         print("  " + VERDE + OK + FIN + " " + str(bajaron) + " bajaron de precio segun el historial")
     else:

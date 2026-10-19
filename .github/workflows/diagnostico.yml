@@ -52,11 +52,22 @@ jobs:
       - name: Medir el catalogo de las tiendas VTEX
         timeout-minutes: 35
         run: python diagnostico_enlaces.py --vtex-catalogo indice.json --crudos diagnostico-vtex | tee -a "$GITHUB_STEP_SUMMARY"
+      # Prueba real, solo a mano: indexa las tiendas VTEX de tiendas.json sobre el indice publicado (las demas fuentes
+      # quedan como estaban, y se saca lo de ComparaYa que repite una tienda directa) y le pasa la guardia del indice.
+      - name: Indexar las tiendas VTEX sobre el indice publicado y pasarle la guardia
+        if: github.event_name == 'workflow_dispatch'
+        timeout-minutes: 20
+        run: |
+          python indexar.py --tipo vtex --historial "$RUNNER_TEMP/historial" | tee diagnostico-indexar.txt
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/guardia.json" -o guardia-previa.json || echo '{}' > guardia-previa.json
+          node guardia.js --indice indice.json --salida diagnostico-guardia.json --previa guardia-previa.json             --resumen "$GITHUB_STEP_SUMMARY" || echo "::warning::la guardia encontro una alarma (salida $?)"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: diagnostico-enlaces
           path: |
             diagnostico*.json
+            diagnostico-indexar.txt
             diagnostico-vtex/
           retention-days: 14
