@@ -317,9 +317,17 @@ Las ofertas del dia salen por dos canales, sin backend:
   pasa por una revision estatica (404/410, carteles de la tienda, `OutOfStock` de schema.org) y otra
   **renderizada** en Chrome sin interfaz, que ejecuta el JavaScript: el cartel "Este producto no esta
   disponible" de Mercado Libre lo arma el navegador y no esta en el HTML. Si cae alguna, entra la siguiente
-  candidata (hasta 3 rondas). Ante la duda (bloqueo, captcha, error del servidor, sin red) se publica: no se
-  vacia el resumen porque una tienda nos frene. El log de cada paso dice, por comercio, cuantas estaban en
-  pie, cuantas cayeron y cuantas quedaron sin confirmar.
+  candidata (hasta 3 rondas). **Mercado Libre se decide por su API oficial** (token de aplicacion con los
+  secretos `ML_CLIENT_ID` y `ML_CLIENT_SECRET`): a los servidores de GitHub su pagina les muestra un captcha y
+  ComparaYa trae precios viejos. Un producto de catalogo (`/p/MLA...`) sale solo si `/products/{id}/items` dice
+  que alguien lo vende al precio publicado (2% de tolerancia); sin vendedores, con todos mas caros o sin poder
+  verificarlo (`/up/MLAU...` da 403 en toda la API, o la API falla) no se publica. En la prueba real del 19/10
+  descarto 11 de 19 avisos de Mercado Libre entre las 40 candidatas: 5 con un precio que ya nadie tenia (la
+  Zenbook 14 a $2.383.703 con el vendedor mas barato a $2.999.999), 5 `/up/` y uno que la API ya no encuentra.
+  En las demas tiendas, ante la duda (bloqueo, captcha, error del servidor, sin red) se publica. El log de
+  cada paso dice, por comercio, cuantas estaban en pie, cuantas se descartaron y cuantas quedaron sin
+  confirmar. `diagnostico_enlaces.py` (workflow *Verificacion de enlaces (caso real)*) corre la misma
+  verificacion sobre las candidatas publicadas y anota que responde cada endpoint de la API.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
   las 10 mejores y el enlace al sitio. **Esta apagado hasta que se configure**: hay que
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
