@@ -325,7 +325,8 @@ Las ofertas del dia salen por dos canales, sin backend:
   verificarlo (`/up/MLAU...` da 403 en toda la API, o la API falla) no se publica. En la prueba real del 19/10
   descarto 11 de 19 avisos de Mercado Libre entre las 40 candidatas: 5 con un precio que ya nadie tenia (la
   Zenbook 14 a $2.383.703 con el vendedor mas barato a $2.999.999), 5 `/up/` y uno que la API ya no encuentra.
-  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias). Lo que llega
+  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias), y las **VTEX** que
+  llegan por ComparaYa (unas 25: OnCity, Naldo, Cetrogar, Coppel...) por su API publica de catalogo (`docs/referencias.md`). El resto de lo que llega
   **por ComparaYa desde otra tienda** tiene que mostrar el precio publicado en la pagina de esa tienda (en el
   HTML o ya armada en Chrome); si no aparece o la tienda no se pudo abrir, no se publica. Prueba real del 19/10
   sobre las 40 candidatas: Frávega le devuelve a GitHub la pagina de bloqueo de CloudFront (en una PC si
