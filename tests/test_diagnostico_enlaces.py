@@ -249,3 +249,21 @@ class Principal(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProbarVtex(unittest.TestCase):
+    def test_toma_avisos_vtex_de_comparaya_y_los_verifica(self):
+        idx = {"productos": [["Celular A", 1000, "https://www.oncity.com/celular-a/p", "comparaya"],
+                             ["Celular B", 2000, "https://www.oncity.com/celular-b/p", "comparaya"],
+                             ["Celular C", 3000, "https://www.fravega.com/p/celular-c-1/", "comparaya"],
+                             ["Celular D", 4000, "https://articulo.mercadolibre.com.ar/x/p", "comparaya"],
+                             ["Celular E", 5000, "https://www.oncity.com/celular-e/p", "venex"]]}
+        with mock.patch.object(d.v, "revisar_vtex", return_value=("viva", "api de la tienda")) as revisar:
+            lineas = d.probar_vtex(idx, por_tienda=1)
+        self.assertEqual(revisar.call_count, 1)
+        self.assertIn("- www.oncity.com: ('viva', 'api de la tienda') (publicado 1000)", lineas)
+
+    def test_main_con_vtex(self):
+        with mock.patch.object(d, "probar_vtex", return_value=["ok"]), mock.patch.object(d.v, "leer", return_value={}),                 redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(d.main(["--vtex", "indice.json"]), 0)
+        self.assertIn("ok", salida.getvalue())
