@@ -257,7 +257,9 @@ def precio_visible(texto, precio):
         return False
     n = int(round(precio))
     miles = f"{n:,}".replace(",", ".")
-    return bool(re.search(r"(?<![\d.])(?:" + re.escape(miles) + "|" + str(n) + r")(?![\d]|\.\d)", texto))
+    # Despues del numero puede venir un decimal en cero (".0", ",00": el mismo precio escrito como decimal, comun en un
+    # JSON-LD); un decimal que no es cero (",50") o un grupo de tres cifras (".000") es otro numero.
+    return bool(re.search(r"(?<![\d.])(?:" + re.escape(miles) + "|" + str(n) + r")(?!\d)(?![.,](?!0{1,2}(?!\d))\d)", texto))
 
 
 TIENDAS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiendas.json")
