@@ -356,6 +356,16 @@ class PrecioVisible(unittest.TestCase):
         self.assertTrue(v.precio_visible("$ 1.833.999,00", 1833999))
         self.assertTrue(v.precio_visible('"price":1833999,', 1833999))
 
+    def test_el_precio_con_decimales_en_cero_es_el_mismo_precio(self):
+        # 19/10, revision de dos modelos de OpenCode (glm y minimax), comprobada con la funcion real: un dato
+        # JSON-LD o un HTML con el precio como decimal ("price": 1833999.0) descartaba una oferta valida
+        for texto in ('"price": 1833999.0', '"price":1833999.00', "$1833999.00", "$ 1.833.999,0", "1.833.999.00"):
+            self.assertTrue(v.precio_visible(texto, 1833999), texto)
+
+    def test_con_centavos_o_con_otro_grupo_de_miles_es_otro_numero(self):
+        for texto in ("1833999,50", "1833999.5", "$1.833.999,5", "1.833.999.000", "$1833999.001", "1.833.999,000"):
+            self.assertFalse(v.precio_visible(texto, 1833999), texto)
+
     def test_otro_numero_que_lo_contiene_no_cuenta(self):
         self.assertFalse(v.precio_visible("$11.833.999", 1833999))
         self.assertFalse(v.precio_visible("$1.833.9990", 1833999))
