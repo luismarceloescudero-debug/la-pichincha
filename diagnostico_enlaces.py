@@ -123,6 +123,46 @@ def api_ml(url):
             "ganador_item": (ganador or {}).get("item_id")}
 
 
+def resumen_ml(codigo, cuerpo):
+    """Lo justo de una respuesta de la API para decidir: codigo, error o los primeros resultados con su estado."""
+    try:
+        datos = json.loads(cuerpo)
+    except ValueError:
+        return {"codigo": codigo, "cuerpo": (cuerpo or "")[:120]}
+    if codigo != 200:
+        return {"codigo": codigo, "error": str(datos.get("message") or datos.get("error") or "")[:120]}
+    filas = datos.get("results") if isinstance(datos, dict) else datos
+    if isinstance(filas, list):
+        return {"codigo": codigo, "total": (datos.get("paging") or {}).get("total", len(filas)) if isinstance(datos, dict) else len(filas),
+                "primeros": [{k: f.get(k) for k in ("item_id", "id", "price", "status", "available_quantity", "seller_id")
+                              if isinstance(f, dict) and k in f} for f in filas[:3]]}
+    return {"codigo": codigo, "status": datos.get("status"), "disponibles": datos.get("available_quantity"),
+            "precio": datos.get("price"), "claves": sorted(datos)[:15]}
+
+
+def explorar_ml(url):
+    """Prueba los endpoints oficiales que podrian decir si alguien vende el aviso y a que precio (19/10: con el
+    token de aplicacion, /products da la ficha 'active' sin ganador y /user-products da 403)."""
+    ref = id_ml(url)
+    if not ref:
+        return {}
+    tipo, ident = ref
+    cab = {"Accept": "application/json", **({"Authorization": "Bearer " + token_ml()} if token_ml() else {})}
+    rutas = {"products": [f"/products/{ident}/items"],
+             "user-products": [f"/user-products/{ident}/items", f"/sites/MLA/search?user_product_id={ident}",
+                               f"/items?user_product_id={ident}"],
+             "items": [f"/items/{ident}"]}.get(tipo, [])
+    salida = {}
+    for ruta in rutas:
+        codigo, _, cuerpo = pedir(API_ML + ruta, cab)
+        salida[ruta.split("?")[0].replace(ident, "{id}") + ("?" + ruta.split("?")[1].split("=")[0] if "?" in ruta else "")] = r = resumen_ml(codigo, cuerpo)
+        # el primer aviso que aparezca: su estado y stock son lo que de verdad dice si esta en pie
+        item = next((f.get("item_id") or f.get("id") for f in r.get("primeros") or [] if f.get("item_id") or f.get("id")), None)
+        if item and "/items/{id}" not in salida:
+            salida["/items/{id}"] = {"item": item, **resumen_ml(*pedir(f"{API_ML}/items/{item}", cab)[::2])}
+    return salida
+
+
 def diagnosticar(url):
     codigo, final, html = pedir(url)
     fila = {"url": url, "comercio": v.comercio(url), "html": {"codigo": codigo, "final": final[:200], **senales(html)}}
@@ -131,6 +171,7 @@ def diagnosticar(url):
         fila[nombre] = None if dom is None else senales(dom)
     if "mercadolibre" in fila["comercio"]:
         fila["api"] = api_ml(url)
+        fila["explorar"] = explorar_ml(url)
     fila["veredicto"] = v.revisar(url)
     return fila
 
@@ -146,7 +187,8 @@ def linea(f):
                                   f"{' ' + str(api['claves']) if api.get('claves') else ''}".rstrip())
     return (f"- {f['comercio']}: html {h['codigo']} {'CARTEL' if h['cartel'] else ''}{' muro' if h['muro'] else ''}"
             f" disp={h['disponibilidad']} «{h['titulo'][:60]}» | render nuestro: {corto(rn)} | render navegador: "
-            f"{corto(rv)}{api_txt} | veredicto: {f['veredicto'][0]} ({f['veredicto'][1]})\n  {f['url'][:140]}")
+            f"{corto(rv)}{api_txt} | veredicto: {f['veredicto'][0]} ({f['veredicto'][1]})\n  {f['url'][:140]}"
+            + "".join(f"\n    {ruta}: {json.dumps(r, ensure_ascii=False)[:300]}" for ruta, r in (f.get("explorar") or {}).items()))
 
 
 def comparaya(urls):
