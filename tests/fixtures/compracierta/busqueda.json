@@ -1,0 +1,811 @@
+[
+ {
+  "productId": "2011191",
+  "productName": "All In One Lite E24T i5 Touch",
+  "brand": "Banghó",
+  "brandId": 2000423,
+  "brandImageUrl": null,
+  "linkText": "all-in-one-lite-e24t-i5-touch-2011191",
+  "productReference": "7798346206158",
+  "productReferenceCode": null,
+  "categoryId": "43",
+  "productTitle": null,
+  "releaseDate": "2025-03-28T00:00:00Z",
+  "clusterHighlights": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "productClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo",
+   "310": "Sellers",
+   "480": "Tech week"
+  },
+  "searchableClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "categories": [
+   "/Tecnología/Monitores/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/39/43/",
+   "/39/"
+  ],
+  "link": "https://www.compracierta.com.ar/all-in-one-lite-e24t-i5-touch-2011191/p",
+  "Origen": [
+   "Ensamblado en Argentina"
+  ],
+  "Características Técnicas": [
+   "Origen"
+  ],
+  "Impuestos": [
+   "IVA:10.5"
+  ],
+  "allSpecifications": [
+   "Origen",
+   "Impuestos"
+  ],
+  "allSpecificationsGroups": [
+   "Características Técnicas",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "11512",
+    "name": "All In One Lite E24T i5 Touch",
+    "nameComplete": "All In One Lite E24T i5 Touch",
+    "complementName": "",
+    "ean": "7798346206158",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "E45E4JFEIBICXXYHXC10"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "243077",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243077-#width#-#height#/image-6e68ee6780ae4a5fbd05de217c56938d.jpg?v=638787653197900000\" width=\"#width#\" height=\"#height#\" alt=\"image-6e68ee6780ae4a5fbd05de217c56938d\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243077/image-6e68ee6780ae4a5fbd05de217c56938d.jpg?v=638787653197900000",
+      "imageText": "image-6e68ee6780ae4a5fbd05de217c56938d",
+      "imageLastModified": "2025-03-28T13:28:39.7900000Z"
+     },
+     {
+      "imageId": "243076",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243076-#width#-#height#/image-c60f0357614949baacad5c19310ba8c9.jpg?v=638787653197900000\" width=\"#width#\" height=\"#height#\" alt=\"image-c60f0357614949baacad5c19310ba8c9\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243076/image-c60f0357614949baacad5c19310ba8c9.jpg?v=638787653197900000",
+      "imageText": "image-c60f0357614949baacad5c19310ba8c9",
+      "imageLastModified": "2025-03-28T13:28:39.7900000Z"
+     },
+     {
+      "imageId": "243079",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243079-#width#-#height#/image-c8ee5b95af4d428cbd8ebf3119fe40e1.jpg?v=638787653198300000\" width=\"#width#\" height=\"#height#\" alt=\"image-c8ee5b95af4d428cbd8ebf3119fe40e1\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243079/image-c8ee5b95af4d428cbd8ebf3119fe40e1.jpg?v=638787653198300000",
+      "imageText": "image-c8ee5b95af4d428cbd8ebf3119fe40e1",
+      "imageLastModified": "2025-03-28T13:28:39.8300000Z"
+     },
+     {
+      "imageId": "243078",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243078-#width#-#height#/image-d32c021a9b3247899d811a73d9eb6fed.jpg?v=638787653197900000\" width=\"#width#\" height=\"#height#\" alt=\"image-d32c021a9b3247899d811a73d9eb6fed\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243078/image-d32c021a9b3247899d811a73d9eb6fed.jpg?v=638787653197900000",
+      "imageText": "image-d32c021a9b3247899d811a73d9eb6fed",
+      "imageLastModified": "2025-03-28T13:28:39.7900000Z"
+     },
+     {
+      "imageId": "243071",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243071-#width#-#height#/image-fb3f2a5e6b9d4919936c3bf512c66526.jpg?v=638787653197730000\" width=\"#width#\" height=\"#height#\" alt=\"image-fb3f2a5e6b9d4919936c3bf512c66526\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243071/image-fb3f2a5e6b9d4919936c3bf512c66526.jpg?v=638787653197730000",
+      "imageText": "image-fb3f2a5e6b9d4919936c3bf512c66526",
+      "imageLastModified": "2025-03-28T13:28:39.7730000Z"
+     },
+     {
+      "imageId": "243074",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243074-#width#-#height#/image-cf2dfd1c40cd4fddaab2bb75df193bc0.jpg?v=638787653197730000\" width=\"#width#\" height=\"#height#\" alt=\"image-cf2dfd1c40cd4fddaab2bb75df193bc0\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243074/image-cf2dfd1c40cd4fddaab2bb75df193bc0.jpg?v=638787653197730000",
+      "imageText": "image-cf2dfd1c40cd4fddaab2bb75df193bc0",
+      "imageLastModified": "2025-03-28T13:28:39.7730000Z"
+     },
+     {
+      "imageId": "243073",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243073-#width#-#height#/image-b98020d88fef4d709cc6250996f596f3.jpg?v=638787653197730000\" width=\"#width#\" height=\"#height#\" alt=\"image-b98020d88fef4d709cc6250996f596f3\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243073/image-b98020d88fef4d709cc6250996f596f3.jpg?v=638787653197730000",
+      "imageText": "image-b98020d88fef4d709cc6250996f596f3",
+      "imageLastModified": "2025-03-28T13:28:39.7730000Z"
+     },
+     {
+      "imageId": "243072",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243072-#width#-#height#/image-1d56f7e9eda24dc2b5c8e3c6e500eae8.jpg?v=638787653197730000\" width=\"#width#\" height=\"#height#\" alt=\"image-1d56f7e9eda24dc2b5c8e3c6e500eae8\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243072/image-1d56f7e9eda24dc2b5c8e3c6e500eae8.jpg?v=638787653197730000",
+      "imageText": "image-1d56f7e9eda24dc2b5c8e3c6e500eae8",
+      "imageLastModified": "2025-03-28T13:28:39.7730000Z"
+     },
+     {
+      "imageId": "243075",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243075-#width#-#height#/image-77a90cb4ad164cd895e709251a1da92b.jpg?v=638787653197900000\" width=\"#width#\" height=\"#height#\" alt=\"image-77a90cb4ad164cd895e709251a1da92b\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243075/image-77a90cb4ad164cd895e709251a1da92b.jpg?v=638787653197900000",
+      "imageText": "image-77a90cb4ad164cd895e709251a1da92b",
+      "imageLastModified": "2025-03-28T13:28:39.7900000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "bangho",
+      "sellerName": "Banghó",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11512&qty=1&seller=bangho&sc=1&price=171439900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 1714399.0,
+       "ListPrice": 2142999.0,
+       "PriceWithoutDiscount": 1714399.0,
+       "FullSellingPrice": 1714399.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjhiMjZlMjExLWM3YzAtNDJjMC1hNzhhLTQzYTZmODQ3NTgzNiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxNzE0Mzk5MDAsInByaWNlV2l0aG91dERpc2NvdW50IjoxNzE0Mzk5MDAsInNlbGxlciI6ImJhbmdobyIsImlkIjoiMTE1MTIiLCJhY2NvdW50TmFtZSI6ImNvbXByYWNpZXJ0YWFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE4OTQsImlhdCI6MTc5MjQyMDA5NCwianRpIjoiOWUzMzY4YjctNzc3MC00ZDliLWFhMjUtZTkwMmY3NmRiNjEwIiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.CnpU0IEY4x4ra44hmlI48MfPx2C4jec059pDIkQrDVF4QLYBP3XuF6_rl0jXmjmSsFKnzK2Ct9hmbT3aAkeznQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2026-09-27T00:00:00Z",
+       "AvailableQuantity": 10,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     },
+     {
+      "sellerId": "1",
+      "sellerName": "Compra Cierta ARG",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11512&qty=1&seller=1&sc=1&price=0&cv=_&sc=1",
+      "sellerDefault": false,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {},
+       "Price": 0.0,
+       "ListPrice": 0.0,
+       "PriceWithoutDiscount": 0.0,
+       "FullSellingPrice": null,
+       "PriceToken": null,
+       "RewardValue": 0.0,
+       "PriceValidUntil": null,
+       "AvailableQuantity": 0,
+       "IsAvailable": false,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [],
+       "GetInfoErrorMessage": "Code: withoutStock | Status:error | Message: El ítem All In One Lite E24T i5 Touch no tiene inventario",
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "2011189",
+  "productName": "All In One Lite E27 i5",
+  "brand": "Banghó",
+  "brandId": 2000423,
+  "brandImageUrl": null,
+  "linkText": "all-in-one-lite-e27-i5-2011189",
+  "productReference": "7798346203256",
+  "productReferenceCode": null,
+  "categoryId": "43",
+  "productTitle": null,
+  "releaseDate": "2025-03-28T00:00:00Z",
+  "clusterHighlights": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "productClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo",
+   "310": "Sellers",
+   "480": "Tech week"
+  },
+  "searchableClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "categories": [
+   "/Tecnología/Monitores/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/39/43/",
+   "/39/"
+  ],
+  "link": "https://www.compracierta.com.ar/all-in-one-lite-e27-i5-2011189/p",
+  "Origen": [
+   "Ensamblado en Argentina"
+  ],
+  "Características Técnicas": [
+   "Origen"
+  ],
+  "allSpecifications": [
+   "Origen"
+  ],
+  "allSpecificationsGroups": [
+   "Características Técnicas"
+  ],
+  "items": [
+   {
+    "itemId": "11510",
+    "name": "All In One Lite E27 i5",
+    "nameComplete": "All In One Lite E27 i5",
+    "complementName": "",
+    "ean": "7798346203256",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "E77E4JFEI2ACXX8HXC20"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "243065",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243065-#width#-#height#/image-5ca4331f7d9345a1a7a0d6e18200bf88.jpg?v=638787652790370000\" width=\"#width#\" height=\"#height#\" alt=\"image-5ca4331f7d9345a1a7a0d6e18200bf88\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243065/image-5ca4331f7d9345a1a7a0d6e18200bf88.jpg?v=638787652790370000",
+      "imageText": "image-5ca4331f7d9345a1a7a0d6e18200bf88",
+      "imageLastModified": "2025-03-28T13:27:59.0370000Z"
+     },
+     {
+      "imageId": "243060",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243060-#width#-#height#/image-5f8e69957bea4270965d024c9fdb0c93.jpg?v=638787652790070000\" width=\"#width#\" height=\"#height#\" alt=\"image-5f8e69957bea4270965d024c9fdb0c93\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243060/image-5f8e69957bea4270965d024c9fdb0c93.jpg?v=638787652790070000",
+      "imageText": "image-5f8e69957bea4270965d024c9fdb0c93",
+      "imageLastModified": "2025-03-28T13:27:59.0070000Z"
+     },
+     {
+      "imageId": "243061",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243061-#width#-#height#/image-ced4fc403e0247e39781c6cac50b9b9c.jpg?v=638787652790070000\" width=\"#width#\" height=\"#height#\" alt=\"image-ced4fc403e0247e39781c6cac50b9b9c\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243061/image-ced4fc403e0247e39781c6cac50b9b9c.jpg?v=638787652790070000",
+      "imageText": "image-ced4fc403e0247e39781c6cac50b9b9c",
+      "imageLastModified": "2025-03-28T13:27:59.0070000Z"
+     },
+     {
+      "imageId": "243064",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243064-#width#-#height#/image-de013e6017a1487d86e1ea05cbbc915e.jpg?v=638787652790200000\" width=\"#width#\" height=\"#height#\" alt=\"image-de013e6017a1487d86e1ea05cbbc915e\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243064/image-de013e6017a1487d86e1ea05cbbc915e.jpg?v=638787652790200000",
+      "imageText": "image-de013e6017a1487d86e1ea05cbbc915e",
+      "imageLastModified": "2025-03-28T13:27:59.0200000Z"
+     },
+     {
+      "imageId": "243067",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243067-#width#-#height#/image-237c467cc2fa4cb189861a81585ecb13.jpg?v=638787652790700000\" width=\"#width#\" height=\"#height#\" alt=\"image-237c467cc2fa4cb189861a81585ecb13\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243067/image-237c467cc2fa4cb189861a81585ecb13.jpg?v=638787652790700000",
+      "imageText": "image-237c467cc2fa4cb189861a81585ecb13",
+      "imageLastModified": "2025-03-28T13:27:59.0700000Z"
+     },
+     {
+      "imageId": "243063",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243063-#width#-#height#/image-91857dd4d36e4ecbadf0be3dd6447444.jpg?v=638787652790070000\" width=\"#width#\" height=\"#height#\" alt=\"image-91857dd4d36e4ecbadf0be3dd6447444\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243063/image-91857dd4d36e4ecbadf0be3dd6447444.jpg?v=638787652790070000",
+      "imageText": "image-91857dd4d36e4ecbadf0be3dd6447444",
+      "imageLastModified": "2025-03-28T13:27:59.0070000Z"
+     },
+     {
+      "imageId": "243062",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243062-#width#-#height#/image-a610ec4b029a4c58922aebda83b55ef5.jpg?v=638787652790070000\" width=\"#width#\" height=\"#height#\" alt=\"image-a610ec4b029a4c58922aebda83b55ef5\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243062/image-a610ec4b029a4c58922aebda83b55ef5.jpg?v=638787652790070000",
+      "imageText": "image-a610ec4b029a4c58922aebda83b55ef5",
+      "imageLastModified": "2025-03-28T13:27:59.0070000Z"
+     },
+     {
+      "imageId": "243066",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243066-#width#-#height#/image-bbc5d1e6956744ba9d884a05aba0349f.jpg?v=638787652790530000\" width=\"#width#\" height=\"#height#\" alt=\"image-bbc5d1e6956744ba9d884a05aba0349f\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243066/image-bbc5d1e6956744ba9d884a05aba0349f.jpg?v=638787652790530000",
+      "imageText": "image-bbc5d1e6956744ba9d884a05aba0349f",
+      "imageLastModified": "2025-03-28T13:27:59.0530000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "bangho",
+      "sellerName": "Banghó",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11510&qty=1&seller=bangho&sc=1&price=153391900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 1533919.0,
+       "ListPrice": 1917399.0,
+       "PriceWithoutDiscount": 1533919.0,
+       "FullSellingPrice": 1533919.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjFkOTQ1MzY0LTNmZGItNDI4OS1hZWMwLTc3MWQwOGMyOWEwNSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxNTMzOTE5MDAsInByaWNlV2l0aG91dERpc2NvdW50IjoxNTMzOTE5MDAsInNlbGxlciI6ImJhbmdobyIsImlkIjoiMTE1MTAiLCJhY2NvdW50TmFtZSI6ImNvbXByYWNpZXJ0YWFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE4OTQsImlhdCI6MTc5MjQyMDA5NCwianRpIjoiZGM0OTMyNWItZjFhNy00MmI0LWFlMTYtYWY5MWI0NTY5YTE5IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.Y_MjofbT5MhtKQqqK3CtZGsEyygS0GfV2RIDimSLJ5qrIY6sB4FOG5ynhQf9jCBqeVH5V3JS0Tynmp1Mu220pQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2026-09-22T00:00:00Z",
+       "AvailableQuantity": 4,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     },
+     {
+      "sellerId": "1",
+      "sellerName": "Compra Cierta ARG",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11510&qty=1&seller=1&sc=1&price=0&cv=_&sc=1",
+      "sellerDefault": false,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {},
+       "Price": 0.0,
+       "ListPrice": 0.0,
+       "PriceWithoutDiscount": 0.0,
+       "FullSellingPrice": null,
+       "PriceToken": null,
+       "RewardValue": 0.0,
+       "PriceValidUntil": null,
+       "AvailableQuantity": 0,
+       "IsAvailable": false,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [],
+       "GetInfoErrorMessage": "Code: withoutStock | Status:error | Message: El ítem All In One Lite E27 i5 no tiene inventario",
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "2011187",
+  "productName": "All In One Lite E24T i7 Touch",
+  "brand": "Banghó",
+  "brandId": 2000423,
+  "brandImageUrl": null,
+  "linkText": "all-in-one-lite-e24t-i7-touch-2011187",
+  "productReference": "7798346206165",
+  "productReferenceCode": null,
+  "categoryId": "43",
+  "productTitle": null,
+  "releaseDate": "2025-03-28T00:00:00Z",
+  "clusterHighlights": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "productClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "254": "12 sin interes en vitrina",
+   "271": "Bangho",
+   "280": "Envio con Cargo",
+   "310": "Sellers",
+   "480": "Tech week"
+  },
+  "searchableClusters": {
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "271": "Bangho",
+   "280": "Envio con Cargo"
+  },
+  "categories": [
+   "/Tecnología/Monitores/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/39/43/",
+   "/39/"
+  ],
+  "link": "https://www.compracierta.com.ar/all-in-one-lite-e24t-i7-touch-2011187/p",
+  "Origen": [
+   "Ensamblado en Argentina"
+  ],
+  "Características Técnicas": [
+   "Origen"
+  ],
+  "Impuestos": [
+   "IVA:10.5"
+  ],
+  "allSpecifications": [
+   "Origen",
+   "Impuestos"
+  ],
+  "allSpecificationsGroups": [
+   "Características Técnicas",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "11508",
+    "name": "All In One Lite E24T i7 Touch",
+    "nameComplete": "All In One Lite E24T i7 Touch",
+    "complementName": "",
+    "ean": "7798346206165",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "E45E4IGEIBICXXYHXC10"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "243053",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243053-#width#-#height#/image-ea8a5cf377904972b7a0b2833068b6bc.jpg?v=638787652245470000\" width=\"#width#\" height=\"#height#\" alt=\"image-ea8a5cf377904972b7a0b2833068b6bc\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243053/image-ea8a5cf377904972b7a0b2833068b6bc.jpg?v=638787652245470000",
+      "imageText": "image-ea8a5cf377904972b7a0b2833068b6bc",
+      "imageLastModified": "2025-03-28T13:27:04.5470000Z"
+     },
+     {
+      "imageId": "243051",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243051-#width#-#height#/image-ca4a18036f3045c6b20c5814a5bcfdec.jpg?v=638787652245000000\" width=\"#width#\" height=\"#height#\" alt=\"image-ca4a18036f3045c6b20c5814a5bcfdec\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243051/image-ca4a18036f3045c6b20c5814a5bcfdec.jpg?v=638787652245000000",
+      "imageText": "image-ca4a18036f3045c6b20c5814a5bcfdec",
+      "imageLastModified": "2025-03-28T13:27:04.5000000Z"
+     },
+     {
+      "imageId": "243049",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243049-#width#-#height#/image-6fcaff4021a743329f62f1dc99f2d0f0.jpg?v=638787652245000000\" width=\"#width#\" height=\"#height#\" alt=\"image-6fcaff4021a743329f62f1dc99f2d0f0\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243049/image-6fcaff4021a743329f62f1dc99f2d0f0.jpg?v=638787652245000000",
+      "imageText": "image-6fcaff4021a743329f62f1dc99f2d0f0",
+      "imageLastModified": "2025-03-28T13:27:04.5000000Z"
+     },
+     {
+      "imageId": "243048",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243048-#width#-#height#/image-edfd7250c5d0472aa8c299aec4a2d615.jpg?v=638787652244870000\" width=\"#width#\" height=\"#height#\" alt=\"image-edfd7250c5d0472aa8c299aec4a2d615\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243048/image-edfd7250c5d0472aa8c299aec4a2d615.jpg?v=638787652244870000",
+      "imageText": "image-edfd7250c5d0472aa8c299aec4a2d615",
+      "imageLastModified": "2025-03-28T13:27:04.4870000Z"
+     },
+     {
+      "imageId": "243050",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243050-#width#-#height#/image-266f6db9f7ba4a078aa543b1d7918f9e.jpg?v=638787652245000000\" width=\"#width#\" height=\"#height#\" alt=\"image-266f6db9f7ba4a078aa543b1d7918f9e\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243050/image-266f6db9f7ba4a078aa543b1d7918f9e.jpg?v=638787652245000000",
+      "imageText": "image-266f6db9f7ba4a078aa543b1d7918f9e",
+      "imageLastModified": "2025-03-28T13:27:04.5000000Z"
+     },
+     {
+      "imageId": "243046",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243046-#width#-#height#/image-cd92ed103f604d1982616189302d0ff4.jpg?v=638787652244700000\" width=\"#width#\" height=\"#height#\" alt=\"image-cd92ed103f604d1982616189302d0ff4\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243046/image-cd92ed103f604d1982616189302d0ff4.jpg?v=638787652244700000",
+      "imageText": "image-cd92ed103f604d1982616189302d0ff4",
+      "imageLastModified": "2025-03-28T13:27:04.4700000Z"
+     },
+     {
+      "imageId": "243054",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243054-#width#-#height#/image-65bad64e5ff247b2bb7b67e648d6c54e.jpg?v=638787652246400000\" width=\"#width#\" height=\"#height#\" alt=\"image-65bad64e5ff247b2bb7b67e648d6c54e\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243054/image-65bad64e5ff247b2bb7b67e648d6c54e.jpg?v=638787652246400000",
+      "imageText": "image-65bad64e5ff247b2bb7b67e648d6c54e",
+      "imageLastModified": "2025-03-28T13:27:04.6400000Z"
+     },
+     {
+      "imageId": "243047",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243047-#width#-#height#/image-4f2c2a13193f46969d0e4eafbff8abff.jpg?v=638787652244870000\" width=\"#width#\" height=\"#height#\" alt=\"image-4f2c2a13193f46969d0e4eafbff8abff\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243047/image-4f2c2a13193f46969d0e4eafbff8abff.jpg?v=638787652244870000",
+      "imageText": "image-4f2c2a13193f46969d0e4eafbff8abff",
+      "imageLastModified": "2025-03-28T13:27:04.4870000Z"
+     },
+     {
+      "imageId": "243052",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/243052-#width#-#height#/image-d2f10f82c9514dbfaf5823f9e3ee45b7.jpg?v=638787652245330000\" width=\"#width#\" height=\"#height#\" alt=\"image-d2f10f82c9514dbfaf5823f9e3ee45b7\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/243052/image-d2f10f82c9514dbfaf5823f9e3ee45b7.jpg?v=638787652245330000",
+      "imageText": "image-d2f10f82c9514dbfaf5823f9e3ee45b7",
+      "imageLastModified": "2025-03-28T13:27:04.5330000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "bangho",
+      "sellerName": "Banghó",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11508&qty=1&seller=bangho&sc=1&price=198503900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 1985039.0,
+       "ListPrice": 2481299.0,
+       "PriceWithoutDiscount": 1985039.0,
+       "FullSellingPrice": 1985039.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjcwNzZmNTM2LThmMGYtNDBlNy04ZGEyLWRjNWE1OGVlYWMxZSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxOTg1MDM5MDAsInByaWNlV2l0aG91dERpc2NvdW50IjoxOTg1MDM5MDAsInNlbGxlciI6ImJhbmdobyIsImlkIjoiMTE1MDgiLCJhY2NvdW50TmFtZSI6ImNvbXByYWNpZXJ0YWFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE4OTQsImlhdCI6MTc5MjQyMDA5NCwianRpIjoiN2I5NDgwNDctMzU3YS00ZDE1LTg2ZjUtOTgyYzE2NWNjNzc5IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.jbJiPxhBhgEsPvOtV3B__8U0KGxaM-E2nipNibxdLvPneG83Z013v6WU-aM2EOLC7YzkLifzpxnM1ZoDmzL6DQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2026-10-02T00:00:00Z",
+       "AvailableQuantity": 13,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     },
+     {
+      "sellerId": "1",
+      "sellerName": "Compra Cierta ARG",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11508&qty=1&seller=1&sc=1&price=0&cv=_&sc=1",
+      "sellerDefault": false,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {},
+       "Price": 0.0,
+       "ListPrice": 0.0,
+       "PriceWithoutDiscount": 0.0,
+       "FullSellingPrice": null,
+       "PriceToken": null,
+       "RewardValue": 0.0,
+       "PriceValidUntil": null,
+       "AvailableQuantity": 0,
+       "IsAvailable": false,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [],
+       "GetInfoErrorMessage": "Code: withoutStock | Status:error | Message: El ítem All In One Lite E24T i7 Touch no tiene inventario",
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "2011121",
+  "productName": "Monitor Curvo Philips LED de 27\" Full HD",
+  "brand": "Philips",
+  "brandId": 2000040,
+  "brandImageUrl": null,
+  "linkText": "monitor-curvo-philips-led-de-27--full-hd-2011121",
+  "productReference": "8712581775681",
+  "productReferenceCode": null,
+  "categoryId": "43",
+  "productTitle": null,
+  "releaseDate": "2025-01-06T00:00:00Z",
+  "clusterHighlights": {
+   "210": "6 cuotas sin interes",
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "280": "Envio con Cargo"
+  },
+  "productClusters": {
+   "210": "6 cuotas sin interes",
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "267": "Philips",
+   "280": "Envio con Cargo",
+   "310": "Sellers",
+   "480": "Tech week"
+  },
+  "searchableClusters": {
+   "210": "6 cuotas sin interes",
+   "213": "CCMarket",
+   "214": "market enero 2021",
+   "220": "Modal - MP",
+   "223": "Nexina",
+   "280": "Envio con Cargo"
+  },
+  "categories": [
+   "/Tecnología/Monitores/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/39/43/",
+   "/39/"
+  ],
+  "link": "https://www.compracierta.com.ar/monitor-curvo-philips-led-de-27--full-hd-2011121/p",
+  "items": [
+   {
+    "itemId": "11439",
+    "name": "271E1SCA/55",
+    "nameComplete": "Monitor Curvo Philips LED de 27\" Full HD 271E1SCA/55",
+    "complementName": "",
+    "ean": "8712581775681",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "271E1SCA/55"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "242720",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/242720-#width#-#height#/image-e5980d60c2354d50854cb183ac669e4c.jpg?v=638717629593800000\" width=\"#width#\" height=\"#height#\" alt=\"image-e5980d60c2354d50854cb183ac669e4c\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/242720/image-e5980d60c2354d50854cb183ac669e4c.jpg?v=638717629593800000",
+      "imageText": "image-e5980d60c2354d50854cb183ac669e4c",
+      "imageLastModified": "2025-01-06T12:22:39.3800000Z"
+     },
+     {
+      "imageId": "242718",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/242718-#width#-#height#/image-b18c601b897a44b39b2ae9f8eea1a6f3.jpg?v=638717629593330000\" width=\"#width#\" height=\"#height#\" alt=\"image-b18c601b897a44b39b2ae9f8eea1a6f3\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/242718/image-b18c601b897a44b39b2ae9f8eea1a6f3.jpg?v=638717629593330000",
+      "imageText": "image-b18c601b897a44b39b2ae9f8eea1a6f3",
+      "imageLastModified": "2025-01-06T12:22:39.3330000Z"
+     },
+     {
+      "imageId": "242717",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/242717-#width#-#height#/image-b1a4d84c41734c19a9be0802ae8c1bb3.jpg?v=638717629592400000\" width=\"#width#\" height=\"#height#\" alt=\"image-b1a4d84c41734c19a9be0802ae8c1bb3\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/242717/image-b1a4d84c41734c19a9be0802ae8c1bb3.jpg?v=638717629592400000",
+      "imageText": "image-b1a4d84c41734c19a9be0802ae8c1bb3",
+      "imageLastModified": "2025-01-06T12:22:39.2400000Z"
+     },
+     {
+      "imageId": "242719",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/242719-#width#-#height#/image-c6f22aa2b5e54df89fc42ccea6c054ba.jpg?v=638717629593800000\" width=\"#width#\" height=\"#height#\" alt=\"image-c6f22aa2b5e54df89fc42ccea6c054ba\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/242719/image-c6f22aa2b5e54df89fc42ccea6c054ba.jpg?v=638717629593800000",
+      "imageText": "image-c6f22aa2b5e54df89fc42ccea6c054ba",
+      "imageLastModified": "2025-01-06T12:22:39.3800000Z"
+     },
+     {
+      "imageId": "242716",
+      "imageLabel": null,
+      "imageTag": "<img src=\"~/arquivos/ids/242716-#width#-#height#/image-ef9c43a338e24346bf001e9c65a818ba.jpg?v=638717629592400000\" width=\"#width#\" height=\"#height#\" alt=\"image-ef9c43a338e24346bf001e9c65a818ba\" id=\"\" />",
+      "imageUrl": "https://compraciertaar.vteximg.com.br/arquivos/ids/242716/image-ef9c43a338e24346bf001e9c65a818ba.jpg?v=638717629592400000",
+      "imageText": "image-ef9c43a338e24346bf001e9c65a818ba",
+      "imageLastModified": "2025-01-06T12:22:39.2400000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "tccommercear",
+      "sellerName": "Philips",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11439&qty=1&seller=tccommercear&sc=1&price=31999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 319999.0,
+       "ListPrice": 458899.0,
+       "PriceWithoutDiscount": 319999.0,
+       "FullSellingPrice": 319999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRmNDZmYTYxLTdlYjAtNDY5ZS1hM2UyLTg4MzgwMzM4MjZjOCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjozMTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjMxOTk5OTAwLCJzZWxsZXIiOiJ0Y2NvbW1lcmNlYXIiLCJpZCI6IjExNDM5IiwiYWNjb3VudE5hbWUiOiJjb21wcmFjaWVydGFhciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxODk0LCJpYXQiOjE3OTI0MjAwOTQsImp0aSI6ImEwMmJjNTkyLTNiZjktNGQ5NS04ODcxLTE0MGJmZTg3YWFiNiIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.hKVWMUpD9EyfHb8NnsWKVjZeput6vDkiAyxavP3gaJXQ2UZpaRAEp2qrZlto1FHaSdQ2-mgALG6dcjVS4z-iEg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 3,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     },
+     {
+      "sellerId": "1",
+      "sellerName": "Compra Cierta ARG",
+      "addToCartLink": "https://www.compracierta.com.ar/checkout/cart/add?sku=11439&qty=1&seller=1&sc=1&price=0&cv=_&sc=1",
+      "sellerDefault": false,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {},
+       "Price": 0.0,
+       "ListPrice": 0.0,
+       "PriceWithoutDiscount": 0.0,
+       "FullSellingPrice": null,
+       "PriceToken": null,
+       "RewardValue": 0.0,
+       "PriceValidUntil": null,
+       "AvailableQuantity": 0,
+       "IsAvailable": false,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [],
+       "GetInfoErrorMessage": "Code: withoutStock | Status:error | Message: El ítem Monitor Curvo Philips LED de 27\" Full HD 271E1SCA/55 no tiene inventario",
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ }
+]

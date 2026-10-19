@@ -1,5 +1,5 @@
 {
-  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas. 'ficha' (opcional) pide la ficha de cada aviso de esos rubros para leer su part number cuando el listado no lo trae: un pedido por aviso, una sola vez, con tope por corrida y sin insistir si la tienda bloquea. 'sin_stock' (opcional) dice en que campo la fuente informa la disponibilidad y que valores son sin stock: esas filas no entran.",
+  "_nota": "Cada tienda es configuracion, no codigo. Para sumar una nueva alcanza con agregar un bloque aca: 'python indexar.py --probar <url de un producto>' te dice que extractor le sirve. Para dar de baja una, activa: false. 'lista_es_oferta' marca las fuentes donde el precio tachado es una rebaja real; en las otras es la diferencia por medio de pago y no sirve para detectar ofertas. 'ficha' (opcional) pide la ficha de cada aviso de esos rubros para leer su part number cuando el listado no lo trae: un pedido por aviso, una sola vez, con tope por corrida y sin insistir si la tienda bloquea. 'sin_stock' (opcional) dice en que campo la fuente informa la disponibilidad y que valores son sin stock: esas filas no entran. 'tipo': 'vtex' lee una tienda VTEX por su API publica de catalogo (indexar.indexar_vtex): solo hace falta su 'base'; las categorias de tecnologia salen de su arbol (o de 'rubros', si se declara), y no se lee si su robots.txt prohibe /api/. El 'nombre' de una tienda que tambien llega por ComparaYa es el mismo que le da ComparaYa: asi cuenta como un solo comercio.",
   "compragamer": {
     "nombre": "CompraGamer",
     "color": "cg",
@@ -310,6 +310,149 @@
       "tipo": "woocommerce",
       "por_pagina": 100,
       "tope_paginas": 80
+    },
+    "lista_es_oferta": false
+  },
+  "oncity": {
+    "nombre": "OnCity",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.oncity.com",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "carrefour": {
+    "nombre": "Carrefour",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.carrefour.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "naldo": {
+    "nombre": "Naldo",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.naldo.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "authogar": {
+    "nombre": "Authogar",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.authogar.com",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "pardo": {
+    "nombre": "Pardo",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.pardo.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "bringeri": {
+    "nombre": "Bringeri",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.bringeri.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "motorola": {
+    "nombre": "Motorola",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.motorola.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "dricco": {
+    "nombre": "D'Ricco",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.dricco.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "nuevashogar": {
+    "nombre": "Nuevas Hogar",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.nuevashogar.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "coppel": {
+    "nombre": "Coppel",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.coppel.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "compracierta": {
+    "nombre": "Compra Cierta",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.compracierta.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": false
+  },
+  "lg": {
+    "nombre": "LG Shop",
+    "color": "vt",
+    "activa": true,
+    "base": "https://shop.lg.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
+    },
+    "lista_es_oferta": true
+  },
+  "bgh": {
+    "nombre": "BGH",
+    "color": "vt",
+    "activa": true,
+    "base": "https://www.bgh.com.ar",
+    "catalogo": {
+      "tipo": "vtex",
+      "tope_paginas": 50
     },
     "lista_es_oferta": false
   }

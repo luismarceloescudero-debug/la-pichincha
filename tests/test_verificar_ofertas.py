@@ -504,6 +504,16 @@ class Vtex(unittest.TestCase):
             self.assertIsNone(v.revisar_vtex("https://www.fravega.com/p/celular-x-123/", 1))
         pedir.assert_not_called()
 
+    def test_una_tienda_vtex_leida_directo_se_verifica_por_su_api(self):
+        self.assertIn("oncity", v.tiendas_vtex())
+        with mock.patch.object(v, "revisar_ml", return_value=None),                 mock.patch.object(v, "revisar_vtex", return_value=("caida", "api de la tienda: sin stock")) as api,                 mock.patch.object(v, "estatica") as estatica:
+            self.assertEqual(v.revisar(ONCITY, precio=239999, tienda="oncity"), ("caida", "api de la tienda: sin stock"))
+        api.assert_called_once_with(ONCITY, 239999)
+        estatica.assert_not_called()
+        # si la API no responde, queda la verificacion de siempre de una tienda directa
+        with mock.patch.object(v, "revisar_ml", return_value=None), mock.patch.object(v, "revisar_vtex", return_value=None),                 mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar", return_value=None):
+            self.assertEqual(v.revisar(ONCITY, precio=239999, tienda="oncity"), ("viva", "estatica"))
+
     def test_el_agregador_prueba_primero_la_api_de_vtex(self):
         with mock.patch.object(v, "revisar_ml", return_value=None), \
                 mock.patch.object(v, "revisar_vtex", return_value=("caida", "api de la tienda: sin stock")), \
