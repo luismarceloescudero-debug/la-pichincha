@@ -57,6 +57,14 @@ test("el sin datos de una categoria que salta mas de 10 puntos es una alarma", (
   assert.ok(a.some(x => /Smartphones.*sin datos.*5%.*25%/.test(x)), a.join("\n"));
 });
 
+test("un salto de exactamente 10 puntos no es alarma (borde de punto flotante: 8/20 - 6/20 da 0,10000000000000003)", () => {
+  const previa = G.medir(sano());
+  previa.categorias.smartphone = { avisos: 20, pasan: 14, sinDatos: 6, ofertas: 3 };
+  const actual = G.medir(sano());
+  actual.categorias.smartphone = { avisos: 20, pasan: 12, sinDatos: 8, ofertas: 3 };
+  assert.ok(!G.alarmas(actual, previa).some(x => /Smartphones.*sin datos/.test(x)));
+});
+
 test("pocas ofertas para el resumen es una alarma", () => {
   const a = G.alarmas({ ...G.medir(sano()), destacadas: 3 }, null);
   assert.ok(a.some(x => /solo 3 ofertas/.test(x)), a.join("\n"));
