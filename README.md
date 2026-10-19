@@ -90,6 +90,7 @@ del lado del cliente.
 ```
 python indexar.py                  # releva las 6 fuentes y arma indice.json
 python indexar.py --solo mexx      # una sola
+python indexar.py --tipo vtex      # solo las fuentes de un tipo de catalogo; las demas quedan como estaban
 python indexar.py --probar URL     # diagnostica una fuente nueva
 ```
 
@@ -126,11 +127,51 @@ una fuente dada de baja con `"activa": false`.
 | Venex | categorias hoja del sitemap, paginadas con `?page=` | el precio de la tarjeta (contado efectivo) |
 | Maximus | cada pagina de cada categoria, listada en `sitemap-paginas.xml` (131) | el bloque de tarjetas que la pagina escribe en el servidor (`mxSeoSSR`): precio por transferencia o efectivo, 10% menos que el de lista |
 | The Gamer Shop, Max Tecno, Katech, SCP Hardstore, Click Gaming, GoldenTech | la Store API publica de WooCommerce (`/wp-json/wc/store/v1/products`), de a 100 y solo lo que esta en stock | la misma API: el precio especial por efectivo o transferencia (verificado en la pagina de un producto de cada una) |
+| OnCity, Carrefour, Naldo, Authogar, Pardo, Bringeri, Motorola, D'Ricco, Nuevas Hogar, Coppel, Compra Cierta, LG Shop, BGH | la API publica de catalogo de VTEX (`/api/catalog_system/pub/`): el arbol de categorias y la busqueda por cada categoria de tecnologia, de a 50, solo si su `robots.txt` no prohibe `/api/` | la misma API: el precio del vendedor por defecto, solo lo que tiene stock (`AvailableQuantity > 0`) |
 | ComparaYa | API publica por categoria | la misma API |
 
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
 (Mercado Libre, Fravega, OnCity, Carrefour). Entra como segunda opinion y cada
-resultado aclara de que comercio sale.
+resultado aclara de que comercio sale. Un aviso que llega directo de la tienda y
+tambien por ComparaYa (la misma URL) va una sola vez al indice, con el precio de
+la tienda (`indexar.sin_repetir_agregador`; en la pagina, `unaPorUrl`).
+
+**Tiendas VTEX** (desde el 19/10/2026). Antes llegaban solo por ComparaYa, con
+precios que a veces eran viejos. Medido desde GitHub Actions
+(`python diagnostico_enlaces.py --vtex-catalogo indice.json`) y probado indexandolas
+sobre el indice publicado (paso manual del workflow de diagnostico):
+
+| Tienda | Avisos de tecnologia en stock | Nuevos contra ComparaYa | Tachado en los avisos |
+| --- | ---: | ---: | ---: |
+| OnCity | 1.970 | 1.908 | 70% |
+| Carrefour | 675 | 613 | 72% |
+| Naldo | 188 | 161 | 59% |
+| Authogar | 132 | 124 | 21% |
+| Pardo | 77 | 71 | 12% |
+| Bringeri | 72 | 62 | 27% |
+| Motorola | 50 | 50 | 34% |
+| D'Ricco | 47 | 42 | 100% |
+| Nuevas Hogar | 45 | 44 | 11% |
+| Coppel | 31 | 27 | 19% |
+| Compra Cierta | 28 | 26 | 78% |
+| LG Shop | 8 | 8 | 0% |
+| BGH | 8 | 8 | 100% |
+| **Total** | **3.331** | **3.144** | |
+
+El indice paso de 22.375 a 25.036 avisos (entran 3.354 y salen 693 de ComparaYa
+que repetian una tienda directa) y de 6,5 a 7,2 MB; la guardia del indice no
+encontro alarmas. Los celulares pasaron de 414 a 1.172 avisos. El tachado cuenta
+como rebaja (`lista_es_oferta`) solo donde aparece en menos de un tercio de los
+avisos: en OnCity, Carrefour o D'Ricco esta en casi todo el catalogo y no dice
+nada. El RefId de VTEX vale como part number solo si otra tienda nombra el mismo
+codigo (Pardo y LG publican el del fabricante; OnCity y Naldo, numeros internos);
+el EAN no se usa porque ninguna otra fuente lo publica.
+
+Quedaron afuera: **Cetrogar** (su `robots.txt` prohibe `/api/`), **Samsung**
+(responde 503 a GitHub), **Tidi** (no devuelve JSON), **Sony** (2 avisos, de
+audio), **Easy** (sin categorias de tecnologia: su "almacenamiento" son frascos)
+y las farmacias y perfumerias que llegan por ComparaYa (Farmacity, FarmaOnline,
+FarmaPlus, Pigmento, Get The Look, Simplicity).
 
 ## Como se publica
 
@@ -225,8 +266,9 @@ asi una tienda que bloquea a medias no borra su catalogo del historial.
 **Rebajas publicadas** es el precio tachado del comercio. No todas las fuentes sirven para esto: en CompraGamer,
 Mexx y FullH4rd el "precio de lista" es apenas el precio sin transferencia, y
 da exactamente el mismo porcentaje en todo el catalogo. Por eso `tiendas.json`
-marca con `lista_es_oferta` las dos fuentes donde el tachado es una rebaja de
-verdad, Gaming City y ComparaYa, y el indexador guarda un cero en las demas.
+marca con `lista_es_oferta` las fuentes donde el tachado es una rebaja de
+verdad (Gaming City, ComparaYa y las tiendas VTEX con tachado en menos de un
+tercio de los avisos), y el indexador guarda un cero en las demas.
 
 Se muestran las rebajas entre 15% y 60%. El techo esta puesto porque arriba de
 ahi el precio anterior casi siempre esta inflado: un 90% OFF no es una oferta,
@@ -325,8 +367,8 @@ Las ofertas del dia salen por dos canales, sin backend:
   verificarlo (`/up/MLAU...` da 403 en toda la API, o la API falla) no se publica. En la prueba real del 19/10
   descarto 11 de 19 avisos de Mercado Libre entre las 40 candidatas: 5 con un precio que ya nadie tenia (la
   Zenbook 14 a $2.383.703 con el vendedor mas barato a $2.999.999), 5 `/up/` y uno que la API ya no encuentra.
-  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias), y las **VTEX** que
-  llegan por ComparaYa (unas 25: OnCity, Naldo, Cetrogar, Coppel...) por su API publica de catalogo (`docs/referencias.md`). El resto de lo que llega
+  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias), y las **VTEX** (las 13
+  que se leen directo y las que llegan por ComparaYa: OnCity, Naldo, Coppel...) por su API publica de catalogo (`docs/referencias.md`). El resto de lo que llega
   **por ComparaYa desde otra tienda** tiene que mostrar el precio publicado en la pagina de esa tienda (en el
   HTML o ya armada en Chrome); si no aparece o la tienda no se pudo abrir, no se publica. Prueba real del 19/10
   sobre las 40 candidatas: Frávega le devuelve a GitHub la pagina de bloqueo de CloudFront (en una PC si
