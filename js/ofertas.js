@@ -150,7 +150,7 @@
     const P = puesto(), est = P.estimar(f, categoria, costo);
     const contra = P.comparar(est, local);
     const nombre = local && (local[4] || ((tiendas || {})[local[3]] || {}).nombre || local[3]);
-    return { est, contra, tienda: local ? local[4] || local[3] : null, texto: P.texto(est),
+    return { est, contra, tienda: local ? local[4] || local[3] : null, texto: P.texto(est), detalle: P.detalle(est),
       comparacion: contra ? P.textoComparacion(contra, nombre) : "" };
   }
 

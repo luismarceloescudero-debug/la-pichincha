@@ -294,6 +294,11 @@ La pestaña dice cuantos avisos con descuento quedaron afuera por no llegar a lo
 Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y Telegram van al
 final de su categoria, rotuladas.
 
+Cada una trae su **costo puesto en casa estimado** (`js/puesto.js`): un rango entre el precio publicado y ese precio con los
+impuestos de importacion, porque no sabemos si el de Mercado Libre ya los incluye. Dice que falta (derecho de importacion del
+hardware, impuesto interno: pendientes en `importacion.json`) y, cuando hay el mismo modelo en una tienda local, la diferencia
+contra ese precio. Es una estimacion, no asesoramiento. Detalle y medicion en `specs/012-reglas-de-ofertas/spec.md`.
+
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de
 ese producto solo.
