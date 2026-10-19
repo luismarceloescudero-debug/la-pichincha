@@ -18,7 +18,7 @@
   const esUrl = u => /^https?:\/\//i.test(String(u));
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
   const C = typeof module === "object" && module.exports ? require("./categorias.js") : raiz.Categorias;
-  const P = typeof module === "object" && module.exports ? require("./puesto.js") : raiz.Puesto;
+  const puesto = () => typeof module === "object" && module.exports ? require("./puesto.js") : raiz.Puesto;   // al usarlo: en la pagina se carga despues
 
   /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL (aunque venga con "www", barra
      final o parametros de seguimiento), mismo precio. Uno por URL, y gana la fila de la tienda sobre la del agregador. */
@@ -147,7 +147,7 @@
      comparacion. costo = { reglas, tasas } (importacion.json y las cotizaciones); sin ellos no se dice nada. */
   function puestoDe(f, categoria, costo, local, tiendas) {
     if (!costo || !costo.reglas || !costo.tasas) return undefined;
-    const est = P.estimar(f, categoria, costo);
+    const P = puesto(), est = P.estimar(f, categoria, costo);
     const contra = P.comparar(est, local);
     const nombre = local && (local[4] || ((tiendas || {})[local[3]] || {}).nombre || local[3]);
     const via = local && local[3] === AGREGADOR ? " (precio de ComparaYa: puede estar desactualizado)" : "";
@@ -186,7 +186,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas, puestoDe };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas, puestoDe, esInternacional };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);
