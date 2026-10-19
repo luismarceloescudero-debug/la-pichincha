@@ -96,7 +96,7 @@ function bloquePuesto(o) {
   const e = p.est;
   const cifra = e.ok ? (e.minPesos === e.maxPesos ? pesos(e.minPesos) : `${pesos(e.minPesos)} a ${pesos(e.maxPesos)}`) : "sin estimar";
   return `<div class="o-puesto"><span><b>Puesto en casa: ${cifra}</b> <small>(estimación)</small></span>
-      <small>${esc(p.texto)}</small>${p.comparacion ? `<span>${esc(p.comparacion)}</span>` : ""}
+      <small>${esc(p.detalle)}</small>${p.comparacion ? `<span>${esc(p.comparacion)}</span>` : ""}
       <small><a href="#costo">Calcular con tus datos</a></small></div>`;
 }
 

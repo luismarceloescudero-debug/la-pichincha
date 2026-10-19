@@ -62,8 +62,15 @@
 
   const queFalta = est => est.faltan.length ? `, sin contar el ${est.faltan.join(" ni el ")} (todavía sin regla confirmada)` : "";
 
-  function texto(est) {
+  /* La aclaracion de la cifra (la tarjeta de la pestaña ya muestra el rango en grande): que significa cada extremo y que falta. */
+  function detalle(est) {
     if (!est || !est.ok) return `No se estima el costo puesto en casa: ${est && est.motivo ? est.motivo : "faltan datos"}.`;
+    return `El menor vale si el precio ya trae los impuestos; el mayor, si no los trae${queFalta(est)}. Dólar ${est.dolar.tipo} a ${pesos(est.dolar.venta)}, ` +
+      "sin flete aparte ni percepción. Es una estimación, no asesoramiento: la liquidación real puede variar.";
+  }
+
+  function texto(est) {
+    if (!est || !est.ok) return detalle(est);
     const extremos = est.minPesos === est.maxPesos ? pesos(est.minPesos) : `${pesos(est.minPesos)} (si el precio ya trae los impuestos) y ${pesos(est.maxPesos)} (si no los trae)`;
     return `Costo puesto en casa, estimación: entre ${extremos}${queFalta(est)}. Dólar ${est.dolar.tipo} a ${pesos(est.dolar.venta)}, sin flete aparte ni percepción. ` +
       "Es una estimación, no asesoramiento: la liquidación real puede variar.";
@@ -79,7 +86,7 @@
     return `${contra}: traerlo sale ${rango}.`;
   }
 
-  const api = { estimar, comparar, texto, textoComparacion };
+  const api = { estimar, comparar, texto, detalle, textoComparacion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Puesto = api;
 })(this);

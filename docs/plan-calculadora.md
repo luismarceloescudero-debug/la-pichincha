@@ -200,6 +200,8 @@ mezclaba los dos casos del flete aunque la persona dijera cual era; corregido en
 
 Sale cuando: 50 productos con el veredicto "aca o importar" y la regla de cada renglon visible.
 
+**Hecha en parte el 19/10/2026** (spec 012): costo puesto en casa como rango en cada oferta internacional y diferencia contra el equivalente local por codigo de modelo. Sin veredicto "conviene": el indice no dice si el precio de Mercado Libre ya trae impuestos, asi que se muestran los dos extremos. Medido: solo 11 de 301 avisos internacionales tienen equivalente local y ninguna de las 48 ofertas; falta cobertura de codigos, no UI.
+
 ### K5. Mantenimiento de la normativa (permanente)
 
 - La CI avisa cuando una regla pasa 60 dias sin verificar; un issue mensual con la lista para revisar contra ARCA.
