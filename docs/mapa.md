@@ -92,15 +92,15 @@ Puntos que no se ven en el codigo Python ni JS:
 
 | Tema | Dueño | Lo usan | Tests |
 | --- | --- | --- | --- |
-| **Fuentes** (tiendas) | `tiendas.json` (una clave por fuente; `catalogo.tipo` elige el indexador: `listados`, `json`, `api` o `woocommerce`, este ultimo con `indexar_woocommerce` para cualquier tienda WooCommerce cuyo `robots.txt` no prohiba `/wp-json/wc/`) | `indexar.py`, `tests/capturar.py`, la clave de la cache del workflow (L88) | `tests/test_indexar.py`, `tests/test_indexar_corrida.py`, fixtures en `tests/fixtures/<tienda>/` |
+| **Fuentes** (tiendas) | `tiendas.json` (una clave por fuente; `catalogo.tipo` elige el indexador: `listados`, `json`, `api`, `woocommerce` o `vtex`; `indexar_woocommerce` sirve para cualquier tienda WooCommerce cuyo `robots.txt` no prohiba `/wp-json/wc/`, e `indexar_vtex` para cualquier tienda VTEX cuyo `robots.txt` no prohiba `/api/` (`robots_permite`, `categorias_vtex`, `item_vtex`); `python indexar.py --tipo vtex` releva solo esas) | `indexar.py`, `tests/capturar.py`, la clave de la cache del workflow (L88) | `tests/test_indexar.py`, `tests/test_indexar_corrida.py`, fixtures en `tests/fixtures/<tienda>/` |
 | **Precios seguidos** (Comparativa curada) | `datos.json` (productos, veredicto, marcas) | `actualizar.py` (extractores en `actualizar.py:140`), que lo reinyecta en `index.html` (`actualizar.py:285`) | `tests/test_actualizar.py`, `tests/test_build.py` |
-| **Indice del buscador** | `indexar.py` | `js/buscador.js`, `js/indice-ofertas.js`, los generadores de Node | `tests/test_indexar*.py`, `tests/js/buscador.test.js` |
+| **Indice del buscador** | `indexar.py` (`sin_repetir_agregador`: lo de ComparaYa que repite la URL de una tienda directa no entra) | `js/buscador.js`, `js/indice-ofertas.js`, los generadores de Node | `tests/test_indexar*.py`, `tests/js/buscador.test.js` |
 | **Historial y sellos de serie** | `historial.py`, `serie.py` (rama `historial`) | `indexar.py:424-425`, `cobertura.py` | `tests/test_historial.py`, `tests/test_serie.py` |
 | **Identidad por codigo** | `modelo.py` (`RUBROS` L14, `_FORMAS` L32, `mpn_de_ficha` L116) | `indexar.py`, `cobertura.py`, `js/buscador.js` (`agruparPorModelo`) | `tests/test_modelo.py`, `tests/test_cobertura.py`, `tests/js/agrupado.test.js` |
 | **Fichas** (part number de Venex y Mexx) | `ficha` en `tiendas.json` + `modelo.mpn_de_ficha`; cache en `fichas.json` de la rama `historial` | `indexar.py:276-340` | `tests/test_fichas.py`, fixtures `venex/ficha.html`, `mexx/ficha-pn.html` |
 | **Salud de las fuentes** | `salud.py` | `indexar.py:505` escribe `salud.json`; el workflow abre el issue (L122); `generar_info.js` lo muestra en `/estado/` | `tests/test_salud.py`, `tests/js/info.test.js` |
 | **Guardia del indice** | `guardia.js` (`medir`, `alarmas`) | el workflow la corre antes de Telegram, publica `_sitio/guardia.json` y con alarma abre el issue `guardia` y no manda Telegram | `tests/js/guardia.test.js` |
-| **Verificacion en la fuente** | `verificar_ofertas.py` (`revisar_ml`, `revisar_woo`, `revisar_vtex`, `revisar_agregador`) | los dos pasos de verificacion del workflow; `diagnostico_enlaces.py` la corre sobre las candidatas publicadas | `tests/test_verificar_ofertas.py`, `tests/test_diagnostico_enlaces.py` |
+| **Verificacion en la fuente** | `verificar_ofertas.py` (`revisar_ml`, `revisar_woo`, `revisar_vtex` para las tiendas VTEX directas y las de ComparaYa, `revisar_agregador`) | los dos pasos de verificacion del workflow; `diagnostico_enlaces.py` la corre sobre las candidatas publicadas, mide el catalogo de las tiendas VTEX (`--vtex-catalogo`) y, a mano, las indexa sobre el indice publicado y le pasa la guardia | `tests/test_verificar_ofertas.py`, `tests/test_diagnostico_enlaces.py` |
 | **Ofertas** (que es una) | `js/ofertas.js` | la pestaña Ofertas, `generar_feed.js`, `publicar_telegram.py` | `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
 | **Calculadora de costos** | `js/costos.js` (el motor, sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) + `js/calculadora.js` (formulario, desglose y URL, puro) + `js/vista-costo.js` (pegamento con la pagina) | la pestaña Costo de importar (`#costo`, `js/arranque.js` la pinta); `publicar_app.py` publica las reglas | `tests/js/costos.test.js`, `tests/js/calculadora.test.js`, `tests/test_importacion.py` |
 | **Monedas** | `js/monedas.js` (en vivo, `URLS` L10, `TIPOS_DOLAR` L16) + `generar_cotizaciones.py` (copia del build, `URLS` L21) | el workflow (L180) escribe `_sitio/cotizaciones.json`; `sitio.json` habilita las tres APIs en `connect-src` | `tests/js/monedas.test.js`, `tests/test_cotizaciones.py`, fixtures en `tests/fixtures/monedas/` |
@@ -131,8 +131,10 @@ node --test "tests/js/*.test.js"
 1. `python indexar.py --probar URL` con un producto de la tienda: dice que extractor generico sirve
    (`indexar.py:346`, `SONDAS`) y que poner en la configuracion. Antes, mirar su `robots.txt`.
 2. Una clave nueva en `tiendas.json`, copiando la forma de una fuente del mismo `catalogo.tipo`
-   (`json`, `api`, `woocommerce` o listados). Si la tienda es WooCommerce y su `robots.txt` no prohibe
-   `/wp-json/wc/`, alcanza con `"tipo": "woocommerce"` y su `base`: no hace falta ninguna regex. Si publica el part number en la ficha, `ficha` con `rubros` y `tope`.
+   (`json`, `api`, `woocommerce`, `vtex` o listados). Si la tienda es WooCommerce y su `robots.txt` no prohibe
+   `/wp-json/wc/`, alcanza con `"tipo": "woocommerce"` y su `base`: no hace falta ninguna regex. Si es VTEX, con
+   `"tipo": "vtex"` y su `base` (y el `nombre` que le da ComparaYa); antes, medirla con
+   `python diagnostico_enlaces.py --vtex-catalogo indice.json <host> --crudos carpeta`, que deja los fixtures. Si publica el part number en la ficha, `ficha` con `rubros` y `tope`.
 3. `python tests/capturar.py <clave>` guarda su HTML en `tests/fixtures/<clave>/`; sumar el caso a
    `tests/test_indexar.py` (y a `tests/test_fichas.py` si tiene `ficha`).
 4. Si tambien va a seguir productos curados de `datos.json`, su extractor de precio vive en
