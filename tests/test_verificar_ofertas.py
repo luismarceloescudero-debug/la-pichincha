@@ -506,6 +506,15 @@ class Vtex(unittest.TestCase):
         self.assertEqual(juicio[0], "caida")
         self.assertIn("$269.999", juicio[1])
 
+    def test_mira_el_mismo_vendedor_y_la_misma_variante_que_el_indice(self):
+        # El indice publica el vendedor por defecto de la primera variante con stock; antes se miraba sellers[0] e items[0]
+        respuesta = json.dumps([{"items": [
+            {"sellers": [{"sellerDefault": True, "commertialOffer": {"Price": 0, "AvailableQuantity": 0}}]},
+            {"sellers": [{"sellerDefault": False, "commertialOffer": {"Price": 0, "AvailableQuantity": 0}},
+                         {"sellerDefault": True, "commertialOffer": {"Price": 4149999.0, "AvailableQuantity": 10}}]}]}])
+        self.assertEqual(self.juzgar(ONCITY, 4149999, (200, respuesta))[0], ("viva", "api de la tienda"))
+        self.assertEqual(self.juzgar(ONCITY, 4149999, (200, "\ufeff" + respuesta))[0], ("viva", "api de la tienda"))
+
     def test_si_no_responde_o_no_es_vtex_no_decide(self):
         self.assertIsNone(self.juzgar(ONCITY, 1, (403, ""))[0])
         self.assertIsNone(self.juzgar(ONCITY, 1, (200, "[]"))[0])

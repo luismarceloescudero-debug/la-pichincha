@@ -48,6 +48,8 @@ import urllib.request
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
+import indexar
+
 UA = "Mozilla/5.0 (compatible; LaPichincha-verificador/1.0; +https://pichinchadeldia.com.ar)"
 TIMEOUT = 15
 MAX_BYTES = 400_000     # alcanza para el cartel; una ficha de Mercado Libre pesa mas y no hace falta leerla entera
@@ -310,14 +312,16 @@ def revisar_vtex(url, precio):
     codigo, cuerpo = pedir_api(f"{m.group(1)}/api/catalog_system/pub/products/search/{m.group(2)}/p",
                                {"Accept": "application/json"})
     try:
-        oferta = json.loads(cuerpo)[0]["items"][0]["sellers"][0]["commertialOffer"] if codigo == 200 else None
-    except (ValueError, IndexError, KeyError, TypeError):
-        oferta = None
-    if not isinstance(oferta, dict):
+        productos = indexar.json_vtex(cuerpo) if codigo == 200 else None
+    except ValueError:
+        productos = None
+    if not isinstance(productos, list) or not productos or not isinstance(productos[0], dict):
         return None
-    actual = oferta.get("Price") or 0
-    if not actual or not oferta.get("AvailableQuantity"):
+    # el mismo vendedor y la misma variante que publico el indice (indexar.oferta_vtex)
+    elegida = indexar.oferta_vtex(productos[0])
+    if not elegida:
         return "caida", "api de la tienda: sin stock"
+    actual = elegida[0]
     if precio and actual > precio * (1 + TOLERANCIA_PRECIO):
         return "caida", f"api de la tienda: el precio publicado ya no existe (pide {pesos(actual)})"
     return "viva", "api de la tienda"

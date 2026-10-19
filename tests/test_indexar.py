@@ -383,6 +383,9 @@ class Robots(unittest.TestCase):
         self.assertFalse(indexar.robots_permite(texto, "/x"))
         self.assertTrue(indexar.robots_permite(texto, "/xy"))
 
+    def test_un_robots_con_bom_se_lee_igual(self):
+        self.assertFalse(indexar.robots_permite("\ufeffUser-agent: *\nDisallow: /\n", self.BUSQUEDA))
+
     def test_solo_cuenta_el_grupo_de_cualquier_robot(self):
         texto = ("User-agent: Googlebot\nDisallow: /api/\n\n# comentario\nUser-agent: *\nUser-agent: GPTBot\n"
                  "Disallow: /api/  # todo\nDisallow:\n")
@@ -436,6 +439,16 @@ class Vtex(unittest.TestCase):
         self.assertFalse([r for r in rutas("bringeri") if "componentes" in r], "minicomponentes de audio no")
         self.assertNotIn("electro-y-tecnologia/informatica-y-gaming/consolas-y-joysticks", rutas("carrefour"))
         self.assertIn("electro-y-tecnologia/informatica-y-gaming/teclados-y-mouse", rutas("carrefour"))
+
+    def test_una_madre_que_mezcla_accesorios_con_celulares_no_corta_sus_hojas(self):
+        # Coppel: "celulares-telefonos-y-accesorios" contiene "accesorios" y se perdia la rama entera (revision del 19/10)
+        cats = indexar.categorias_vtex(json.loads(leer("coppel", "arbol.json")))
+        self.assertIn("/133909/134389/", cats, "celulares")
+        self.assertNotIn("/133909/134417/134419/", cats, "smartwatch no nombra un rubro y su madre mezcla: no arrastra")
+        self.assertNotIn("/133909/133910/", cats, "fundas y accesorios: no")
+        self.assertNotIn("/133909/134348/", cats, "telefonos fijos: no")
+        oncity = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")))
+        self.assertNotIn("/14/109/517/", oncity, "tecnologia/accesorios/bases-para-notebooks: la madre de accesorios corta")
 
     def test_las_categorias_se_pueden_elegir_por_tienda(self):
         cats = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")), rubros=("drones",), ambiguos=())
@@ -557,17 +570,47 @@ class Vtex(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
 
-    def test_un_bloqueo_corta_la_tienda_y_un_error_solo_la_categoria(self):
+    def test_un_bloqueo_falla_la_tienda_y_un_error_solo_corta_la_categoria(self):
+        # Un catalogo a medias no puede entrar como relevamiento del dia: el historial veria como bajas todo lo que no
+        # se llego a leer. Que falle: main reusa lo anterior de la tienda (revision del 19/10).
         fila = json.loads(leer("oncity", "busqueda.json"))[0]
-        base = self.bajar_falso({("/1/3/", 0): [fila]})
-        for error, esperados in ((urllib.error.HTTPError("u", 429, "no", {}, None), 0), (urllib.error.URLError("caida"), 1)):
-            def bajar(url, error=error):
-                if "C:/1/2/" in url:
+        base = self.bajar_falso({("/1/2/", 0): [fila]})
+
+        def con_error(error):
+            def bajar(url):
+                if "C:/1/3/" in url:
                     raise error
                 return base(url)
-            with self.subTest(error), mock.patch.object(indexar, "bajar", side_effect=bajar), \
-                    mock.patch.object(indexar.time, "sleep"):
-                self.assertEqual(len(indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)), esperados)
+            return bajar
+        with mock.patch.object(indexar, "bajar", side_effect=con_error(urllib.error.HTTPError("u", 429, "no", {}, None))), \
+                mock.patch.object(indexar.time, "sleep"):
+            with self.assertRaisesRegex(RuntimeError, "429"):
+                indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        with mock.patch.object(indexar, "bajar", side_effect=con_error(urllib.error.URLError("caida"))), \
+                mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(len(indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)), 1)
+
+    def test_json_con_bom_o_con_formas_raras_no_tumba_la_tienda(self):
+        fila = json.loads(leer("oncity", "busqueda.json"))[0]
+        rara = {"items": [{"sellers": [{"commertialOffer": {"Price": 1000, "AvailableQuantity": 1}}],
+                           "images": "x", "referenceId": [None]}], "link": "https://www.oncity.com/r/p", "productName": "Raro"}
+        raras = [{"items": [None]}, {"items": {"a": 1}}, {"items": [{"sellers": [{"commertialOffer": "x"}]}]},
+                 {"items": [{"sellers": "x"}]}, rara]
+        base = self.bajar_falso({("/1/2/", 0): raras + [fila]})
+        with mock.patch.object(indexar, "bajar", side_effect=lambda u: "\ufeff" + base(u)), \
+                mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual([it["nombre"] for it in items], ["Raro", "Celular Motorola Moto G06 4G 4 Gb 64 Gb Nfc Tapestry"])
+
+    def test_oferta_vtex_elige_el_vendedor_por_defecto_de_la_primera_variante_con_stock(self):
+        p = {"items": [{"sellers": [{"sellerDefault": True, "commertialOffer": {"Price": 0, "AvailableQuantity": 0}}]},
+                       {"sellers": [{"sellerDefault": False, "commertialOffer": {"Price": 0, "AvailableQuantity": 0}},
+                                    {"sellerDefault": True, "commertialOffer": {"Price": 4149999.0, "ListPrice": 6484042.0,
+                                                                                 "AvailableQuantity": 10}}]}]}
+        precio, lista, variante = indexar.oferta_vtex(p)
+        self.assertEqual((precio, lista), (4149999, 6484042))
+        self.assertIs(variante, p["items"][1])
+        self.assertIsNone(indexar.oferta_vtex({"items": [p["items"][0]]}))
 
     def test_el_tope_de_paginas_es_el_de_la_tienda(self):
         fila = json.loads(leer("oncity", "busqueda.json"))[0]
