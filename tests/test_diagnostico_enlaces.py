@@ -160,7 +160,8 @@ class Diagnostico(unittest.TestCase):
         d._TOKEN.clear()
 
     def test_un_aviso_de_mercado_libre_bloqueado(self):
-        with mock.patch.object(d, "pedir", side_effect=[(200, OMEN, MURO_ML), (401, "", '{"message":"sin token"}')]), \
+        sin = (401, "", '{"message":"sin token"}')
+        with mock.patch.object(d, "pedir", side_effect=[(200, OMEN, MURO_ML), sin, sin, sin, sin]), \
                 mock.patch.object(d.v, "renderizar", side_effect=[MURO_ML, "<title>Mercado Libre</title>generica"]), \
                 mock.patch.object(d.v, "revisar", return_value=("dudosa", "renderizada")):
             fila = d.diagnosticar(OMEN)
@@ -172,6 +173,29 @@ class Diagnostico(unittest.TestCase):
         self.assertIn("captcha/muro", texto)
         self.assertIn("veredicto: dudosa", texto)
         self.assertIn("api user-products 401", texto)
+        self.assertEqual(sorted(fila["explorar"]), ["/items?user_product_id", "/sites/MLA/search?user_product_id",
+                                                    "/user-products/{id}/items"])
+        self.assertIn('/user-products/{id}/items: {"codigo": 401', texto)
+
+    def test_explorar_un_producto_de_catalogo_sigue_al_primer_aviso_que_lo_vende(self):
+        items = '{"results":[{"item_id":"MLA99","price":1000,"seller_id":5}],"paging":{"total":3}}'
+        aviso = '{"id":"MLA99","status":"active","available_quantity":4,"price":1000}'
+        with mock.patch.object(d, "pedir", side_effect=[(200, "", items), (200, "", aviso)]) as pedir:
+            r = d.explorar_ml("https://www.mercadolibre.com.ar/x/p/MLA61813247")
+        self.assertEqual(pedir.call_args_list[0][0][0], d.API_ML + "/products/MLA61813247/items")
+        self.assertEqual(r["/products/{id}/items"], {"codigo": 200, "total": 3,
+                                                     "primeros": [{"item_id": "MLA99", "price": 1000, "seller_id": 5}]})
+        self.assertEqual(r["/items/{id}"]["item"], "MLA99")
+        self.assertEqual((r["/items/{id}"]["status"], r["/items/{id}"]["disponibles"]), ("active", 4))
+
+    def test_explorar_sin_id_de_mercado_libre_no_pide_nada(self):
+        with mock.patch.object(d, "pedir") as pedir:
+            self.assertEqual(d.explorar_ml("https://otra.test/x"), {})
+        pedir.assert_not_called()
+
+    def test_resumen_de_respuestas_raras(self):
+        self.assertEqual(d.resumen_ml(500, "no es json"), {"codigo": 500, "cuerpo": "no es json"})
+        self.assertEqual(d.resumen_ml(200, "[]"), {"codigo": 200, "total": 0, "primeros": []})
 
     def test_otro_comercio_sin_navegador_no_consulta_la_api(self):
         with mock.patch.object(d, "pedir", return_value=(200, "https://www.fravega.com/p/x", "<title>Notebook</title>")), \
