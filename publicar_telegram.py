@@ -18,6 +18,15 @@ import urllib.error
 import urllib.request
 
 LIMITE = 4096   # largo maximo de un mensaje de Telegram
+LARGO_TITULO = 100   # un titulo de Mercado Libre llega a 160 caracteres con todas sus palabras clave (19/10)
+
+
+def acortar(nombre):
+    """El titulo en una linea legible: se corta en una palabra entera y termina con puntos suspensivos."""
+    if len(nombre) <= LARGO_TITULO:
+        return nombre
+    corte = nombre[:LARGO_TITULO - 1].rsplit(" ", 1)[0] if " " in nombre[:LARGO_TITULO - 1] else nombre[:LARGO_TITULO - 1]
+    return corte.rstrip(" ,;:-") + "…"
 
 
 def cuando(iso):
@@ -41,7 +50,7 @@ def mensaje(datos):
     lineas = []
     for i, o in enumerate(ofertas, 1):
         categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
-        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(o['nombre'])}</a>: "
+        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(acortar(o['nombre']))}</a>: "
                       f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}"
                       + (f"\n   <i>{html.escape(o['puesto'])}</i>" if o.get("puesto") else ""))
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:

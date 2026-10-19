@@ -389,7 +389,7 @@ Las ofertas del dia salen por dos canales, sin backend:
   confirmar. `diagnostico_enlaces.py` (workflow *Verificacion de enlaces (caso real)*) corre la misma
   verificacion sobre las candidatas publicadas y anota que responde cada endpoint de la API.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
-  las 10 mejores y el enlace al sitio. **Esta apagado hasta que se configure**: hay que
+  las 10 mejores y el enlace al sitio (los titulos de mas de 100 caracteres se cortan en una palabra entera con "…"; el enlace sigue entero). **Esta apagado hasta que se configure**: hay que
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
   `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el repo (Settings > Secrets and variables >
   Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
