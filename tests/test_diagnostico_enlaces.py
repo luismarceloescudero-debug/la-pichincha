@@ -267,3 +267,50 @@ class ProbarVtex(unittest.TestCase):
         with mock.patch.object(d, "probar_vtex", return_value=["ok"]), mock.patch.object(d.v, "leer", return_value={}),                 redirect_stdout(io.StringIO()) as salida:
             self.assertEqual(d.main(["--vtex", "indice.json"]), 0)
         self.assertIn("ok", salida.getvalue())
+
+
+class MedirVtex(unittest.TestCase):
+    FIX = Path(__file__).resolve().parent / "fixtures" / "oncity"
+
+    def bajar(self, url):
+        if url.endswith("/robots.txt"):
+            return (self.FIX / "robots.txt").read_text(encoding="utf-8")
+        if "/category/tree/" in url:
+            return (self.FIX / "arbol.json").read_text(encoding="utf-8")
+        if "fq=C:/14/100/481/&_from=0&" in url:
+            return (self.FIX / "busqueda.json").read_text(encoding="utf-8")
+        return "[]"
+
+    def test_cuenta_lo_que_suma_contra_comparaya_y_guarda_lo_crudo(self):
+        idx = {"productos": [["Moto", 1, "https://www.oncity.com/celular-motorola-moto-g06-4g-4-gb-64-gb-nfc-tapestry-158039/p/",
+                              "comparaya"],
+                             ["Otro", 1, "https://www.oncity.com/otro/p", "comparaya"]]}
+        carpeta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, carpeta)
+        with mock.patch.object(d.indexar, "bajar", side_effect=self.bajar), mock.patch.object(d.indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()) as salida:
+            lineas, filas = d.medir_vtex(idx, carpeta=carpeta)
+        r = filas[0]
+        self.assertEqual((r["host"], r["avisos"], r["por_comparaya"], r["comparaya_tambien_directo"], r["nuevos"]),
+                         ("www.oncity.com", 4, 2, 1, 3))
+        self.assertEqual(r["rebajas"], 4)
+        self.assertEqual(r["con_ean"], "3/4", "el iPhone 17 de un tercero no trae EAN")
+        self.assertEqual(sorted(os.listdir(os.path.join(carpeta, "www.oncity.com"))), ["arbol.json", "busqueda.json", "robots.txt"])
+        self.assertIn("| www.oncity.com |", "\n".join(lineas))
+        self.assertIn("categorias", salida.getvalue())
+
+    def test_una_tienda_que_falla_queda_anotada(self):
+        with mock.patch.object(d.indexar, "bajar", side_effect=urllib.error.URLError("caida")):
+            lineas, filas = d.medir_vtex({"productos": []}, ["www.x.test"])
+        self.assertIn("RuntimeError", filas[0]["error"])
+        self.assertEqual(filas[0]["avisos"], 0)
+
+    def test_main_con_vtex_catalogo(self):
+        carpeta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, carpeta)
+        with mock.patch.object(d, "medir_vtex", return_value=(["tabla"], [{"host": "a"}])) as medir, \
+                mock.patch.object(d.v, "leer", return_value={}), redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(d.main(["--vtex-catalogo", "indice.json", "www.a.test", "--crudos", carpeta]), 0)
+        self.assertEqual(medir.call_args[0][1], ["www.a.test"])
+        self.assertIn("tabla", salida.getvalue())
+        self.assertTrue(os.path.exists(os.path.join(carpeta, "medicion.json")))

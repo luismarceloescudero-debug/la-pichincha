@@ -3,6 +3,8 @@
 
 Uso:
     python diagnostico_enlaces.py candidatas.json [--max 15] [--salida diagnostico.json]
+    python diagnostico_enlaces.py --vtex indice.json            # verifica avisos VTEX de ComparaYa por la API
+    python diagnostico_enlaces.py --vtex-catalogo indice.json [hosts...] [--crudos carpeta]   # que daria indexarlas
 
 No descarta nada: por cada enlace anota la respuesta del HTML (codigo, URL final, titulo, carteles, dato de
 disponibilidad), lo que devuelve el navegador sin interfaz (con nuestra identificacion y con la que trae el
@@ -15,10 +17,13 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 
+import indexar
 import verificar_ofertas as v
 
 API_ML = v.API_ML
@@ -195,8 +200,94 @@ def probar_vtex(indice, por_tienda=3):
     return lineas
 
 
+def _sin_variantes(url):
+    """La URL de un aviso para comparar entre fuentes: sin esquema, www, parametros ni barra final."""
+    p = urllib.parse.urlparse(url or "")
+    return p.netloc.lower().removeprefix("www.") + p.path.rstrip("/").lower()
+
+
+def medir_tienda_vtex(host, de_comparaya, carpeta=None):
+    """Lo que daria leer una tienda VTEX directo: categorias de tecnologia, avisos en stock, rebajas, RefId con forma de
+    part number, EAN, y cuantos avisos suma contra los que ya llegan por ComparaYa. Guarda en `carpeta` el robots.txt,
+    el arbol y la primera pagina de busqueda tal como vinieron (para los fixtures de los tests)."""
+    crudos, base = {}, "https://" + host
+
+    def pedir(url):
+        texto = indexar.bajar(url)
+        crudos.setdefault("robots.txt" if url.endswith("/robots.txt") else
+                          "arbol.json" if "/category/tree/" in url else "busqueda.json", texto)
+        if "/products/search" in url:
+            try:
+                for p in json.loads(texto):
+                    variante = (p.get("items") or [{}])[0]
+                    crudos.setdefault("_ean", []).append(bool(variante.get("ean")))
+            except (ValueError, TypeError, AttributeError):
+                pass
+        return texto
+    inicio = time.time()
+    tienda = {"nombre": host, "base": base, "catalogo": {"tipo": "vtex", "tope_paginas": 50}}
+    try:
+        items = indexar.indexar_vtex(tienda, 0, pedir=pedir)
+        error = ""
+    except Exception as e:                            # noqa: BLE001 - una tienda caida no corta la medicion
+        items, error = [], f"{type(e).__name__}: {str(e)[:120]}"
+    if carpeta:
+        destino = os.path.join(carpeta, host)
+        os.makedirs(destino, exist_ok=True)
+        for nombre, texto in crudos.items():
+            if not nombre.startswith("_"):
+                with open(os.path.join(destino, nombre), "w", encoding="utf-8") as f:
+                    f.write(texto)
+    propias = {_sin_variantes(it["url"]) for it in items}
+    arbol = crudos.get("arbol.json")
+    try:
+        cats = indexar.categorias_vtex(json.loads(arbol)) if arbol else []
+    except ValueError:
+        cats = []
+    eans = crudos.get("_ean", [])
+    return {"host": host, "error": error, "segundos": round(time.time() - inicio),
+            "categorias": len(cats), "avisos": len(items),
+            "rebajas": sum(1 for it in items if it["lista"]),
+            "refid_con_forma": sum(1 for it in items if it["sku_tienda"]),
+            "refid_ejemplos": [it["sku_tienda"] for it in items if it["sku_tienda"]][:4],
+            "con_ean": f"{sum(eans)}/{len(eans)}",
+            "por_comparaya": len(de_comparaya), "comparaya_tambien_directo": len(de_comparaya & propias),
+            "nuevos": len(propias - de_comparaya)}
+
+
+def medir_vtex(indice, hosts=None, carpeta=None, hilos=6):
+    """Mide en paralelo (una tienda por hilo; cada una con sus pausas) las tiendas VTEX: las de `hosts` o, si no se
+    dan, todas las que llegan por ComparaYa con URL de producto VTEX ("/slug/p")."""
+    de_comparaya = {}
+    for f in indice.get("productos") or []:
+        if f[3] == "comparaya" and f[2].rstrip("/").endswith("/p"):
+            de_comparaya.setdefault(urllib.parse.urlparse(f[2]).netloc.lower(), set()).add(_sin_variantes(f[2]))
+    hosts = hosts or sorted(de_comparaya)
+    with ThreadPoolExecutor(max_workers=hilos) as pool:
+        filas = list(pool.map(lambda h: medir_tienda_vtex(h, de_comparaya.get(h, set()), carpeta), hosts))
+    lineas = ["### Tiendas VTEX: que daria leerlas directo (desde este servidor)", "",
+              "| Tienda | Categorias | Avisos en stock | Ya por ComparaYa | Tambien directo | Nuevos | Rebajas | RefId con forma "
+              "| Con EAN | Segundos | Error |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
+    for r in sorted(filas, key=lambda r: -r["avisos"]):
+        lineas.append(f"| {r['host']} | {r['categorias']} | {r['avisos']} | {r['por_comparaya']} | "
+                      f"{r['comparaya_tambien_directo']} | {r['nuevos']} | {r['rebajas']} | {r['refid_con_forma']} "
+                      f"{' '.join(r['refid_ejemplos'])} | {r['con_ean']} | {r['segundos']} | {r['error']} |")
+    return lineas, filas
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    if "--vtex-catalogo" in argv:
+        i = argv.index("--vtex-catalogo")
+        hosts = [a for a in argv[i + 2:] if not a.startswith("--")]
+        carpeta = argv[argv.index("--crudos") + 1] if "--crudos" in argv else None
+        hosts = [h for h in hosts if h != carpeta]
+        lineas, filas = medir_vtex(v.leer(argv[i + 1], {}) or {}, hosts, carpeta)
+        print("\n".join(lineas))
+        if carpeta:
+            with open(os.path.join(carpeta, "medicion.json"), "w", encoding="utf-8") as f:
+                json.dump(filas, f, ensure_ascii=False, indent=1)
+        return 0
     if "--vtex" in argv:
         print("\n".join(probar_vtex(v.leer(argv[argv.index("--vtex") + 1], {}) or {})))
         return 0
