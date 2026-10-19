@@ -320,3 +320,10 @@ test("una baja propia no se descarta por la fecha: la medimos nosotros", () => {
   const f = fila("Fuente Thermaltake 850W 80 Plus Gold", 155000, { antes: 266000 }); f[10] = "2026-10-01";
   assert.equal(O.calcularOfertas({ generado: "2026-10-19T09:13-03:00", productos: [f] }).propias.length, 1);
 });
+
+test("el mismo procesador escrito distinto es la misma configuracion (R5-7535HS y Ryzen 5 7535HS)", () => {
+  const idx = { productos: [
+    conModelo("Notebook Acer Nitro V15 Ryzen 5 7535HS 16GB 512GB RTX 4050", 1500000, "venex", "ANV15", { lista: 2100000 }),
+    conModelo("Notebook Acer Nitro V15 R5-7535HS 16GB 512GB RTX 4050", 1300000, "maxtecno", "ANV15")] };
+  assert.equal(O.calcularOfertas(idx).masBarato.size, 1);
+});

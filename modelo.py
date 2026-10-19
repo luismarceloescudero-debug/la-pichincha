@@ -292,6 +292,117 @@ def _clase(nombre):
     return palabras[0] if palabras else ""
 
 
+# --- Configuracion de un equipo ----------------------------------------------------------------------------------
+# Un codigo de modelo de un equipo puede ser el de la familia (19/10: "15IRH10" es la IdeaPad Slim 3 en todas sus
+# configuraciones). Para saber si dos avisos con el mismo codigo son el mismo producto se mira la configuracion.
+_RED = re.compile(r"(?<![\d.])[345]\s?g(?![a-z\d])", re.I)                 # "4G", "5G": la red del celular
+_DESGLOSE = re.compile(r"\(\s*\d+\s*g?b?\s*\+\s*\d+\s*g?b?\s*\)|\b\d\s?x\s?\d+\s?gb?\b|\(\s*\d\s?x\s?\d+\s?gb?\s*\)", re.I)
+_CAPACIDAD = re.compile(r"(?<![\d.])(\d{1,4})\s?(gb?|tb)(?![a-z\d])", re.I)
+_RAM_EXPLICITA = re.compile(r"(\d{1,3})\s?gb?\s*(?:de\s*)?(?:memoria\s+)?ram\b|\bram\s*[:\-]?\s*(\d{1,3})\s?gb", re.I)
+_PAR = re.compile(r"(?<![\d.])(\d{1,4})\s?(gb?|tb)?\s*[+/|]\s*(\d{1,4})\s?(gb?|tb)?(?![a-z\d])", re.I)
+_RAMS = {2, 3, 4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64}
+_ROMS = {32, 64, 128, 256, 512, 1000, 1024, 2000}
+_CPU_INTEL = re.compile(r"\b(?:core\s?)?(ultra\s?|i)([3579])[-\s_]?(\d{3,5}[a-z]{0,2})\b", re.I)
+_CPU_AMD = re.compile(r"\b(?:ryzen\s?|r)([3579])[-\s]?(\d{4}[a-z]{0,2})\b", re.I)
+# Lo que no es la RAM aunque tenga forma de capacidad: la memoria de la placa de video ("RTX 5070 8GB") y el numero de
+# gama del procesador pegado a una capacidad ("Ryzen 3/512GB").
+_VRAM = re.compile(r"\b(?:rtx|gtx|rx|arc|radeon|geforce)\s?[a-z]?\d{3,4}\s?(?:ti|super|xt|m)?\s+\d{1,2}\s?gb?\b", re.I)
+_GAMA_CPU = re.compile(r"\b(?:ryzen\s?(?:ai\s?)?|core\s?(?:ultra\s?)?|ultra\s?|i|r)[3579]\b", re.I)
+
+
+def cpu_de(nombre):
+    """El procesador en una sola forma, como lo escriba la tienda: "R5-7535HS" y "Ryzen 5 7535HS" son r57535hs."""
+    n = normalizar(nombre).lower()
+    m = _CPU_INTEL.search(n)
+    if m:
+        return ("u" if m.group(1).startswith("u") else "i") + m.group(2) + m.group(3)
+    m = _CPU_AMD.search(n)
+    return "r" + m.group(1) + m.group(2) if m else ""
+
+
+def _gb(n, unidad):
+    return int(round(float(n) * (1000 if unidad and unidad.lower().startswith("t") else 1)))
+
+
+def configuracion(nombre):
+    """(RAM, almacenamiento, procesador) que dice el titulo de un equipo; 0 o "" lo que no dice. Es la misma lectura
+    que js/categorias.js (memoriaDe) y js/ofertas.js (cpuDe), para que el indice y la pagina no se contradigan."""
+    n = _DESGLOSE.sub(" ", _RED.sub(" ", normalizar(nombre).replace(",", ".")))
+    n = _GAMA_CPU.sub(" ", _VRAM.sub(" ", n))
+    caps = sorted(_gb(c, u) for c, u in _CAPACIDAD.findall(n))
+    ram = rom = 0
+    m = _RAM_EXPLICITA.search(n)
+    if m:
+        ram = int(m.group(1) or m.group(2))
+        otras = [c for c in caps if c != ram]
+        rom = otras[-1] if otras else 0
+    else:
+        m = _PAR.search(n)
+        if m:
+            a, b = _gb(m.group(1), m.group(2)), _gb(m.group(3), m.group(4))
+            chico, grande = min(a, b), max(a, b)
+            if chico in _RAMS and grande in _ROMS:
+                ram, rom = chico, grande
+        if not ram and len(caps) >= 2 and caps[0] <= 64:
+            ram, rom = caps[0], caps[-1]
+        elif not ram and len(caps) == 1:
+            ram, rom = (caps[0], 0) if caps[0] <= 24 else (0, caps[0] if caps[0] >= 64 else 0)
+    return ram, rom, cpu_de(nombre)
+
+
+def _es_equipo(nombre):
+    return not rubro_de(nombre) and bool(_EQUIPO_EN_CUALQUIER_LUGAR.search(normalizar(nombre)))
+
+
+def _distintas(a, b):
+    """Si dos configuraciones se contradicen en algo que las dos dicen."""
+    return any(x and y and x != y for x, y in zip(a, b))
+
+
+def separar_familias(filas):
+    """Saca el codigo de los equipos que lo comparten con otra configuracion: ese codigo es de la familia, no un modelo."""
+    grupos = {}
+    for f in filas:
+        if f[9] and _es_equipo(f[0]):
+            grupos.setdefault(f[9], []).append(f)
+    for grupo in grupos.values():
+        confs = [configuracion(f[0]) for f in grupo]
+        if any(_distintas(a, b) for i, a in enumerate(confs) for b in confs[i + 1:]):
+            for f in grupo:
+                f[9] = ""
+    return filas
+
+
+_PREFIJO_MAYORISTA = re.compile(r"^[A-Z]{2,3}_(.+)$")
+
+
+def sku_de_tienda(valor):
+    """El part number que una tienda WooCommerce publica en `sku` con el prefijo de su mayorista (GoldenTech
+    "IC_83K101GTAR", Click Gaming "NB_9S7-15T111-632"), o None. Sin prefijo es un codigo interno de la tienda ("NOT1367")."""
+    if not isinstance(valor, str):
+        return None
+    m = _PREFIJO_MAYORISTA.match(valor.strip().upper())
+    if not m:
+        return None
+    codigo = m.group(1).rstrip(".")
+    return codigo if _FORMA_SKU.match(codigo) and not _NO_ES_PART_NUMBER.search(codigo) else None
+
+
+def confirmar_codigos_de_tienda(filas, candidatos):
+    """Pone el part number del sku de una tienda (ver sku_de_tienda) solo en los avisos sin codigo cuyo codigo nombra otra
+    tienda, en su titulo o en su codigo. candidatos: [(fila, codigo)]."""
+    if not candidatos:
+        return filas
+    tiendas_de = {}
+    for f in filas:
+        for t in set(_TOKEN.findall(normalizar(f[0]).upper())) | ({f[9]} if f[9] else set()):
+            tiendas_de.setdefault(t.rstrip("."), set()).add(f[3])
+    for f, codigo in candidatos:
+        if not f[9] and tiendas_de.get(codigo, set()) - {f[3]}:
+            f[9] = codigo
+    return filas
+
+
 def completar_con_conocidos(filas):
     """Completa la columna `modelo` de los avisos que no tienen codigo, en dos pasos:
     1. Si su nombre nombra EXACTO (un token entero) un codigo ya conocido de otro aviso, toma ese. Dos codigos conocidos
@@ -334,4 +445,4 @@ def completar_con_conocidos(filas):
             continue
         for f in sueltos:
             f[9] = codigo
-    return filas
+    return separar_familias(filas)

@@ -241,3 +241,10 @@ test("una notebook con RAM y procesador abreviados ya no queda 'sin datos'", () 
 test("el motivo de una generacion de Ryzen vieja nombra la serie, no el modelo", () => {
   assert.equal(ev("PC Armada AMD Ryzen 7 5700 16GB 512GB").motivo, "Ryzen serie 5000: la generación vigente es la 9000");
 });
+
+test("memoriaDe: la memoria de la placa de video y el numero del procesador no son la RAM (indice del 19/10)", () => {
+  assert.deepEqual(C.memoriaDe('Notebook Gamer Lenovo Legion 5 15AKP10 15.1" AMD Ryzen AI 7 350 24GB DDR5 SSD 1TB RTX 5070 8GB Free DOS'),
+                   { ram: 24, rom: 1000 });
+  assert.deepEqual(C.memoriaDe('Notebook 15.6" Hp 15-FC0235LA AMD Ryzen 3/512GB Azul'), { ram: 0, rom: 512 });
+  assert.deepEqual(C.memoriaDe("Notebook Hp 15-Fc0235la R3-7320u Amd 15\"8/512gb"), { ram: 8, rom: 512 });
+});

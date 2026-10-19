@@ -85,7 +85,10 @@
   /* Cada tienda escribe las capacidades a su manera: "8GB 512GB", "SSD512GB", "8G 512G", "16GB/512", "128/4gb", "512/8+".
      "4G" y "5G" solos son la red del celular, no una capacidad. */
   function memoriaDe(nombre) {
-    const n = String(nombre).replace(/(\d),(\d)/g, "$1.$2").replace(/(?<![\d.])[345]\s?g(?![a-z\d])/gi, " ");
+    // "4G"/"5G" son la red; "RTX 5070 8GB" es la memoria de la placa de video; "Ryzen 3/512GB", la gama del procesador
+    const n = String(nombre).replace(/(\d),(\d)/g, "$1.$2").replace(/(?<![\d.])[345]\s?g(?![a-z\d])/gi, " ")
+      .replace(/\b(?:rtx|gtx|rx|arc|radeon|geforce)\s?[a-z]?\d{3,4}\s?(?:ti|super|xt|m)?\s+\d{1,2}\s?gb?\b/gi, " ")
+      .replace(/\b(?:ryzen\s?(?:ai\s?)?|core\s?(?:ultra\s?)?|ultra\s?|i|r)[3579]\b/gi, " ");
     let m;
     // con la G sola solo valen capacidades que existen: "8600G" y "3000G" son procesadores
     const caps = [...n.matchAll(/(?<![\d.])(\d{1,4})\s?(gb?|tb)(?![a-z\d])/gi)]
