@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 import urllib.error
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -250,6 +251,17 @@ def vendedores(*precios):
                             "paging": {"total": len(precios)}})
 
 
+class Respuesta(io.BytesIO):
+    def __init__(self, texto):
+        super().__init__(texto.encode("utf-8"))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+
 class ApiMercadoLibre(unittest.TestCase):
     """Casos reales del 19/10: ComparaYa publicaba la Zenbook a $2.383.703 y el vendedor mas barato de Mercado Libre
     la tenia a $2.999.999; la Omen (/up/) estaba caida y ninguna API la deja ver con el token de aplicacion."""
@@ -303,6 +315,23 @@ class ApiMercadoLibre(unittest.TestCase):
                 mock.patch.object(v, "estatica") as estatica:
             self.assertEqual(v.revisar(CATALOGO, precio=1000), ("caida", "api: nadie lo vende"))
         estatica.assert_not_called()
+
+    def test_hilos_a_la_vez_reciben_el_mismo_token_y_se_pide_una_sola_vez(self):
+        # 19/10: con 4 hilos, los que llegaban mientras el primero pedia el token lo veian vacio y caian en la
+        # revision de la pagina: un aviso de Mercado Libre salio "sin confirmar" en vez de verificado.
+        v._TOKEN.clear()
+        llamadas = []
+
+        def lento(*_a, **_k):
+            llamadas.append(1)
+            threading.Event().wait(0.05)
+            return Respuesta('{"access_token":"T"}')
+        entorno = {"ML_CLIENT_ID": "1", "ML_CLIENT_SECRET": "s"}
+        with mock.patch.dict(os.environ, entorno), mock.patch.object(v.urllib.request, "urlopen", side_effect=lento):
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                tokens = list(pool.map(lambda _: v.token_ml(), range(8)))
+        self.assertEqual(tokens, ["T"] * 8)
+        self.assertEqual(len(llamadas), 1)
 
     def test_pedir_api_no_levanta_excepciones(self):
         error = urllib.error.HTTPError("https://t.test", 403, "no", {}, io.BytesIO(b'{"message":"forbidden"}'))

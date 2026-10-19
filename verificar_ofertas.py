@@ -33,6 +33,7 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -67,6 +68,7 @@ MURO = re.compile(r"captcha|verific[aá] que (sos|eres) (un )?(humano|persona)|a
 API_ML = "https://api.mercadolibre.com"
 TOLERANCIA_PRECIO = 0.02    # redondeos y diferencias de centavos entre lo que leyo el agregador y el vendedor
 _TOKEN = {}
+_TOKEN_CANDADO = threading.Lock()     # los hilos de la verificacion piden el token a la vez
 
 
 def id_ml(url):
@@ -87,10 +89,14 @@ def id_ml(url):
 def token_ml():
     """Token de aplicacion de Mercado Libre (client_credentials) con los secretos ML_CLIENT_ID y ML_CLIENT_SECRET,
     o None si no estan. Se pide una vez por corrida."""
-    if "valor" in _TOKEN:
+    with _TOKEN_CANDADO:
+        if "valor" not in _TOKEN:
+            _TOKEN["valor"] = _pedir_token()
         return _TOKEN["valor"]
+
+
+def _pedir_token():
     cid, secreto = os.environ.get("ML_CLIENT_ID"), os.environ.get("ML_CLIENT_SECRET")
-    _TOKEN["valor"] = None
     if cid and secreto:
         datos = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": cid,
                                         "client_secret": secreto}).encode()
@@ -98,10 +104,10 @@ def token_ml():
             "Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"})
         try:
             with urllib.request.urlopen(pedido, timeout=TIMEOUT) as r:
-                _TOKEN["valor"] = json.loads(r.read().decode("utf-8")).get("access_token")
+                return json.loads(r.read().decode("utf-8")).get("access_token")
         except (urllib.error.URLError, OSError, ValueError) as e:
             print(f"::warning::No se obtuvo el token de Mercado Libre ({type(e).__name__})")
-    return _TOKEN["valor"]
+    return None
 
 
 def pedir_api(url, cabeceras):
@@ -266,6 +272,8 @@ def main(argv=None):
     previas = leer(destino, [])
     previas = previas if isinstance(previas, list) else []
     desde = time.time()
+    if any("mercadolibre." in comercio(u) for u in urls):
+        print("Mercado Libre: " + ("se verifica por su API" if token_ml() else "sin token, solo la revision de la pagina"))
     with ThreadPoolExecutor(max_workers=HILOS) as pool:
         resultados = list(pool.map(lambda u: revisar(u, desde, precio=precios.get(u)), urls))
     juicios = {u: r[0] for u, r in zip(urls, resultados)}
