@@ -1,0 +1,17 @@
+# FastStore robots.txt
+
+User-agent: *
+Allow: /
+
+Disallow: /checkout/
+Disallow: /account/
+Disallow: /login/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /*?sc=*
+Disallow: /*?map=*
+Disallow: /~partytown/
+Disallow: /s?
+
+Sitemap: https://www.cetrogar.com.ar/sitemap.xml
