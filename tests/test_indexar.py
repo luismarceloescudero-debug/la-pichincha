@@ -409,12 +409,37 @@ class Vtex(unittest.TestCase):
         self.assertNotIn("/14/100/482/", cats, "cargadores y cables: no")
         self.assertNotIn("/14/103/495/", cats, "videojuegos: no")
         self.assertFalse([c for c in cats if c.startswith("/566/")], "compra internacional: no")
-        self.assertFalse([c for c in cats if c.startswith("/2/")], "audio y tv: no")
         self.assertEqual(len(cats), len(set(cats)))
 
+    def test_categorias_de_los_arboles_reales_sin_falsos_positivos(self):
+        """Lo que se colaba con la primera regla, medido desde GitHub el 19/10."""
+        def rutas(clave):
+            arbol, url = json.loads(leer(clave, "arbol.json")), {}
+
+            def recorrer(nodos, ids):
+                for n in nodos:
+                    url["/" + "/".join(ids + [str(n["id"])]) + "/"] = n["url"].split("/", 3)[-1]
+                    recorrer(n.get("children") or [], ids + [str(n["id"])])
+            recorrer(arbol, [])
+            return [url[c] for c in indexar.categorias_vtex(arbol)]
+        self.assertEqual(rutas("easy"), [], "Easy: 'almacenamiento' son frascos de cocina")
+        self.assertEqual(rutas("authogar"), ["tv-y-celulares/celulares-libres/celulares-libres",
+                                             "tecnologia-e-informatica/informatica/all-in-one",
+                                             "tecnologia-e-informatica/informatica/notebooks",
+                                             "tecnologia-e-informatica/informatica/pc-y-monitores",
+                                             "tecnologia-e-informatica/informatica/tablets"],
+                         "ni televisores (tv-y-celulares), ni consolas, ni escritorios-pc de muebles")
+        self.assertEqual(rutas("compracierta"), ["tecnologia/monitores", "tecnologia/pc", "tecnologia/notebooks"],
+                         "los procesadores de alimentos no")
+        self.assertNotIn("seguros---garantias/garex-max-celulares", rutas("pardo"))
+        self.assertIn("telefonia/celulares", rutas("pardo"))
+        self.assertFalse([r for r in rutas("bringeri") if "componentes" in r], "minicomponentes de audio no")
+        self.assertNotIn("electro-y-tecnologia/informatica-y-gaming/consolas-y-joysticks", rutas("carrefour"))
+        self.assertIn("electro-y-tecnologia/informatica-y-gaming/teclados-y-mouse", rutas("carrefour"))
+
     def test_las_categorias_se_pueden_elegir_por_tienda(self):
-        cats = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")), rubros=("televisores",))
-        self.assertEqual(cats, ["/2/24/"], "una categoria sin hijas se pide entera")
+        cats = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")), rubros=("drones",), ambiguos=())
+        self.assertEqual(cats, ["/14/108/"], "una categoria sin hijas se pide entera")
 
     def bajar_falso(self, paginas, robots="User-agent: *\nDisallow: /checkout/\n", pedidas=None):
         arbol = json.dumps([{"id": 1, "name": "Tecnologia", "url": "https://www.oncity.com/tecnologia", "children": [

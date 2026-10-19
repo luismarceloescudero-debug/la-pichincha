@@ -472,7 +472,8 @@ def indexar_vtex(tienda, max_paginas, pedir=None):
         raise RuntimeError("robots.txt no permite " + API_VTEX + ": no se lee la tienda")
     # Como en WooCommerce, --max-paginas (paginas por categoria de los listados) no se usa: el tope es el de la tienda.
     limite = cfg.get("tope_paginas", TOPE_PAGINAS)
-    cats = categorias_vtex(json.loads(pedir(base + API_VTEX + "category/tree/3")), tuple(cfg.get("rubros", RUBROS_VTEX)))
+    arbol = json.loads(pedir(base + API_VTEX + "category/tree/3"))
+    cats = categorias_vtex(arbol, tuple(cfg["rubros"]), ()) if cfg.get("rubros") else categorias_vtex(arbol)
     print("  " + str(len(cats)) + " categorias")
     vistos, items = set(), []
     for cat in cats:

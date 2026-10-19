@@ -15,6 +15,7 @@
   --mm:#b42318; --mm-soft:#fee4e2;
   --tg:#15803d; --tg-soft:#dcfce7; --mt:#9a3412; --mt-soft:#ffedd5; --kt:#4338ca; --kt-soft:#e0e7ff;
   --sh:#be123c; --sh-soft:#ffe4e6; --ck:#4d7c0f; --ck-soft:#ecfccb; --gt:#854d0e; --gt-soft:#fef9c3;
+  --vt:#475569; --vt-soft:#e2e8f0;
   --font-sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -12px rgba(20,24,31,.18);
@@ -33,6 +34,7 @@
     --mm:#fda29b; --mm-soft:#3d1512;
     --tg:#4ade80; --tg-soft:#0f2a1a; --mt:#fdba74; --mt-soft:#2e1a0e; --kt:#a5b4fc; --kt-soft:#1e1b4b;
     --sh:#fda4af; --sh-soft:#3b0d17; --ck:#bef264; --ck-soft:#1f2a0b; --gt:#fde047; --gt-soft:#2e2606;
+    --vt:#cbd5e1; --vt-soft:#1e293b;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
     color-scheme:dark;
@@ -49,6 +51,7 @@
   --mm:#fda29b; --mm-soft:#3d1512;
   --tg:#4ade80; --tg-soft:#0f2a1a; --mt:#fdba74; --mt-soft:#2e1a0e; --kt:#a5b4fc; --kt-soft:#1e1b4b;
   --sh:#fda4af; --sh-soft:#3b0d17; --ck:#bef264; --ck-soft:#1f2a0b; --gt:#fde047; --gt-soft:#2e2606;
+  --vt:#cbd5e1; --vt-soft:#1e293b;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   --shadow-up:0 2px 4px rgba(0,0,0,.5), 0 20px 44px -16px rgba(0,0,0,.75);
   color-scheme:dark;
@@ -66,6 +69,7 @@
 .c-sh{--c:var(--sh);--c-soft:var(--sh-soft)}
 .c-ck{--c:var(--ck);--c-soft:var(--ck-soft)}
 .c-gt{--c:var(--gt);--c-soft:var(--gt-soft)}
+.c-vt{--c:var(--vt);--c-soft:var(--vt-soft)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);line-height:1.55;margin:0}

@@ -10,7 +10,7 @@ CSS = (Path(__file__).resolve().parent.parent / "css" / "sitio.css").read_text(e
 MINIMO = 4.5
 TEXTOS = ("ink", "ink-2", "ink-3", "accent", "good", "bad", "warn")
 FONDOS = ("bg", "surface", "surface-2")
-CHIPS = ("cg", "gc", "mx", "fh", "cy", "vx", "mm", "tg", "mt", "kt", "sh", "ck", "gt", "good", "accent", "warn")   # color sobre su version -soft
+CHIPS = ("cg", "gc", "mx", "fh", "cy", "vx", "mm", "tg", "mt", "kt", "sh", "ck", "gt", "vt", "good", "accent", "warn")   # color sobre su version -soft
 
 
 def variables(selector):
