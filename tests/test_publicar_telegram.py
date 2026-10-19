@@ -137,3 +137,33 @@ class Categoria(unittest.TestCase):
 
     def test_sin_categoria_la_linea_queda_como_antes(self):
         self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(OFERTAS))
+
+
+class TitulosLargos(unittest.TestCase):
+    """19/10: un titulo de Mercado Libre de 160 caracteres ("... Battery 5160 mah Carga rapida 45 W Diseno Ultrafino De 6.6 mm Ip64") ocupaba cuatro lineas del mensaje."""
+
+    LARGO = ("Celular Infinix Hot 60 Pro Phone Dual Sim Negro 8 GB Ram 256 GB Rom 6.78 Amoled 1.5k 144 Hz Battery 5160 mah "
+             "Carga rápida 45 W Diseño Ultrafino De 6.6 mm Ip64")
+
+    def test_un_titulo_largo_se_corta_en_una_palabra_entera_con_puntos_suspensivos(self):
+        corto = telegram.acortar(self.LARGO)
+        self.assertLessEqual(len(corto), telegram.LARGO_TITULO)
+        self.assertTrue(corto.endswith("…"))
+        self.assertTrue(self.LARGO.startswith(corto[:-1].rstrip()))
+        self.assertNotIn(" 6.78 Amoled 1.5k 144 Hz Battery", corto)
+        self.assertFalse(corto[:-1].endswith(" "))
+
+    def test_un_titulo_corto_queda_igual(self):
+        self.assertEqual(telegram.acortar("Notebook Lenovo IdeaPad 3 15 16GB 512GB"), "Notebook Lenovo IdeaPad 3 15 16GB 512GB")
+
+    def test_una_palabra_sola_larguisima_se_corta_de_todos_modos(self):
+        self.assertEqual(len(telegram.acortar("A" * 300)), telegram.LARGO_TITULO)
+
+    def test_el_mensaje_usa_el_titulo_corto_y_el_enlace_sigue_igual(self):
+        datos = {"generado": "2026-10-19T15:53-03:00", "sitio": "https://t.test/", "ofertas": [
+            {"nombre": self.LARGO, "precio": 479999, "descuento": 31, "comercio": "Mercado Libre", "url": "https://t.test/p/MLA1",
+             "categoria": "Smartphone"}]}
+        m = telegram.mensaje(datos)
+        self.assertNotIn("Ip64", m)
+        self.assertIn('<a href="https://t.test/p/MLA1">Celular Infinix Hot 60 Pro', m)
+        self.assertIn("…</a>", m)
