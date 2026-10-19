@@ -67,7 +67,7 @@ CAIDA = re.compile(
 # Paginas que nos frenan en vez de mostrar la publicacion: no dicen nada de ella.
 MURO = re.compile(r"captcha|verific[aá] que (sos|eres) (un )?(humano|persona)|account-verification|"
                   r"access denied|attention required|are you a robot|suspicious-traffic|/gz/webdevice|"
-                  r"hubo un error accediendo a esta p|request could not be satisfied|request blocked", re.I)
+                  r"hubo un error accediendo a esta p|request could not be satisfied|request blocked|just a moment\.\.\.", re.I)
 
 
 API_ML = "https://api.mercadolibre.com"

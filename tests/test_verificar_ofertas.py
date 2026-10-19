@@ -431,6 +431,11 @@ class Agregador(unittest.TestCase):
         cloudfront = "<TITLE>ERROR: The request could not be satisfied</TITLE> 403 ERROR Request blocked."
         self.assertEqual(self.juzgar(html="", dom=cloudfront)[0], ("caida", "agregador: no se pudo abrir la tienda"))
 
+    def test_el_desafio_de_cloudflare_es_no_poder_abrirla(self):
+        # 19/10: DHgate respondia "Just a moment..." a los servidores de GitHub
+        self.assertEqual(self.juzgar(html="", dom="<title>Just a moment...</title>")[0],
+                         ("caida", "agregador: no se pudo abrir la tienda"))
+
     def test_bloqueada_o_sin_red_no_se_publica(self):
         error = urllib.error.HTTPError(FRAVEGA, 403, "no", {}, None)
         self.assertEqual(self.juzgar(error=error, dom=None)[0], ("caida", "agregador: no se pudo abrir la tienda"))
