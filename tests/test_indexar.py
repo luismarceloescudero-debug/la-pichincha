@@ -301,7 +301,7 @@ class Woocommerce(unittest.TestCase):
             items = indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)
         self.assertEqual(items[0], {"nombre": "Memoria Kingston Fury 16GB DDR4 – 1", "precio": 45990, "lista": 52990,
                                     "url": "https://t.test/producto/mem-1/", "imagen": "https://t.test/img/1-300x300.jpg",
-                                    "sellos": "", "sku": modelo.sku_de("KF432C16BB/1")})
+                                    "sellos": "", "sku": modelo.sku_de("KF432C16BB/1"), "sku_tienda": None})
         self.assertEqual(items[1]["precio"], 953554)
         self.assertIsNone(items[1]["lista"], "sin rebaja no hay precio de lista")
         self.assertEqual(items[1]["imagen"], "")
@@ -341,6 +341,14 @@ class Woocommerce(unittest.TestCase):
             return json.dumps([self.producto(1)])
         with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
             self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)), 1)
+
+    def test_el_sku_con_prefijo_de_mayorista_del_json_real(self):
+        # GoldenTech publica "IC_RE305" (TP-Link RE305); Katech, codigos internos ("CM5012") que no son part number
+        for clave, esperado in (("goldentech", "RE305"), ("katech", None)):
+            with self.subTest(clave), mock.patch.object(indexar, "bajar", side_effect=[leer(clave, "store-api.json"), "[]"]),                     mock.patch.object(indexar.time, "sleep"):
+                items = indexar.indexar_woocommerce(TIENDAS[clave], indexar.TOPE_PAGINAS)
+            skus = {it["sku_tienda"] for it in items}
+            self.assertIn(esperado, skus) if esperado else self.assertEqual(skus, {None})
 
     def test_el_json_real_guardado_de_cada_tienda_woocommerce(self):
         for clave, t in TIENDAS.items():

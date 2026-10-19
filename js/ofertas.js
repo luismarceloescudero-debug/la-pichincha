@@ -39,8 +39,10 @@
   /* En un equipo, el codigo de modelo puede ser el de la familia (19/10: "15IRH10" juntaba i5 e i7, 8 y 16 GB):
      para decir que otro aviso es "el mismo, mas barato" tienen que coincidir la RAM, el almacenamiento y el procesador
      cuando los dos lo dicen. Si alguno no se puede leer, no se comparan. Los demas rubros comparan por el codigo. */
-  const CPU = /\b(?:core\s?)?(?:i[3579]|ultra\s?[3579])[-\s]?\d{3,5}[a-z]{0,2}\b|\b(?:ryzen\s?[3579]|r[3579])[-\s]?\d{4}[a-z]{0,2}\b/i;
-  const cpuDe = n => { const m = String(n).match(CPU); return m ? m[0].toLowerCase().replace(/core|ryzen/g, "").replace(/[^a-z0-9]/g, "") : ""; };
+  // el procesador en una sola forma, como lo escriba la tienda: "R5-7535HS" y "Ryzen 5 7535HS" son r57535hs (como modelo.cpu_de)
+  const cpuDe = nombre => { const n = String(nombre).toLowerCase(); let m;
+    if ((m = n.match(/\b(?:core\s?)?(ultra\s?|i)([3579])[-\s_]?(\d{3,5}[a-z]{0,2})\b/))) return (m[1][0] === "u" ? "u" : "i") + m[2] + m[3];
+    return (m = n.match(/\b(?:ryzen\s?|r)([3579])[-\s]?(\d{4}[a-z]{0,2})\b/)) ? "r" + m[1] + m[2] : ""; };
   function mismaConfiguracion(a, b) {
     const cat = C.categoriaDe(a[0]);
     if (cat !== "smartphone" && cat !== "notebook" && cat !== "pc") return true;

@@ -344,7 +344,9 @@ def indexar_woocommerce(tienda, max_paginas):
             foto = (f.get("images") or [{}])[0]
             items.append({"nombre": limpio(nombre), "precio": precio, "lista": regular if regular > precio else None,
                           "url": url, "imagen": foto.get("thumbnail") or foto.get("src") or "", "sellos": "",
-                          "sku": modelo.sku_de(f.get("sku")) if f.get("sku") else None})
+                          "sku": modelo.sku_de(f.get("sku")) if f.get("sku") else None,
+                          # el part number con el prefijo del mayorista (IC_83K101GTAR): vale si otra tienda lo nombra
+                          "sku_tienda": modelo.sku_de_tienda(f.get("sku"))})
         if n % 10 == 0:
             print("    pagina " + str(n) + " " + PUNTO + " " + str(len(items)) + " productos")
         time.sleep(PAUSA)
@@ -538,6 +540,7 @@ def main(argv=None):
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
+    por_confirmar = []
     fichas = leer_fichas(carpeta)                # part numbers ya leidos de las fichas (B3-bis)
     for clave, fuente in fuentes.items():
         if not fuente.get("activa", True) or (args.solo and clave != args.solo):
@@ -607,18 +610,22 @@ def main(argv=None):
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
             desde = serie.desde_cuando(series.get((clave, it["url"]), []), hoy, it["precio"])
-            salida.append([it["nombre"], it["precio"], it["url"], clave,
-                           str(it.get("via") or ""), lista, propia,
-                           it.get("imagen") if url_valida(it.get("imagen")) else "",   # la foto va a un CSS del sitio
-                           (it.get("sellos") or "")
-                           + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
-                           modelo.modelo_de(it["nombre"], it.get("sku")),
-                           desde.isoformat() if desde else ""])
+            fila = [it["nombre"], it["precio"], it["url"], clave,
+                    str(it.get("via") or ""), lista, propia,
+                    it.get("imagen") if url_valida(it.get("imagen")) else "",   # la foto va a un CSS del sitio
+                    (it.get("sellos") or "")
+                    + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
+                    modelo.modelo_de(it["nombre"], it.get("sku")),
+                    desde.isoformat() if desde else ""]
+            salida.append(fila)
+            if it.get("sku_tienda") and not fila[9]:
+                por_confirmar.append((fila, it["sku_tienda"]))
         if bajaron:
             print("  " + VERDE + str(bajaron) + " bajaron de precio" + FIN)
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
+    modelo.confirmar_codigos_de_tienda(salida, por_confirmar)   # el sku de WooCommerce, si otra tienda lo nombra
     modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
     if fichas or (carpeta / FICHAS).exists():
         escribir_fichas(carpeta, fichas)

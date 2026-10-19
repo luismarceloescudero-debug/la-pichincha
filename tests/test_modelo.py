@@ -402,3 +402,100 @@ class HallazgosDeLaRevisionTrailOfBits(unittest.TestCase):
         nada = modelo.firma_de("Memoria Kingston Fury Beast DDR4 16GB 3200MHz")
         self.assertNotEqual(con, sin)
         self.assertEqual(sin, nada)
+
+
+def fila_de(nombre, modelo_="", tienda="mx"):
+    return [nombre, 1000, "https://t.test/" + str(abs(hash(nombre))), tienda, "", 0, 0, "", "", modelo_, ""]
+
+
+class CodigoDeFamilia(unittest.TestCase):
+    """19/10: ComparaYa trajo "15IRH10" (la familia IdeaPad Slim 3) como Modelo y completar_con_conocidos se lo paso a 24
+    notebooks con i5 e i7, 8 y 16 GB. Un codigo que comparten equipos con distinta configuracion no es un modelo."""
+
+    REALES = [
+        "Notebook Lenovo Ideapad Slim 3 15IRH10 Intel Core i7-13620H 16GB RAM DDR5 512GB SSD NVMe 15.3 WUXGA",
+        "Notebook Lenovo IP Slim 3 15IRH10 15.3\" WUXGA INTEL i5-13420H 8GB 4800MHZ DDR5 512GB NVME SIN SO GRIS (4932)",
+        "Notebook Lenovo IP Slim 3 15IRH10 15.3\" WUXGA INTEL I5-13420H 16GB 4800MHZ DDR5 512GB NVME W11H (0445)",
+    ]
+
+    def test_la_configuracion_de_un_equipo(self):
+        self.assertEqual(modelo.configuracion(self.REALES[0]), (16, 512, "i713620h"))
+        self.assertEqual(modelo.configuracion(self.REALES[1]), (8, 512, "i513420h"))
+        self.assertEqual(modelo.configuracion("Notebook Lenovo IP Slim 3 15IRH10 I7 13620H 16GB (8G+8G) 4800 512GB NVME W11H"),
+                         (16, 512, "i713620h"))
+        self.assertEqual(modelo.configuracion("Notebook HP 15.6 R5-7535HS 8GB SSD512GB Victus RTX3050 W11H"), (8, 512, "r57535hs"))
+        self.assertEqual(modelo.configuracion("Celular Motorola Moto G06 128/4gb"), (4, 128, ""))
+        self.assertEqual(modelo.configuracion("Celular Samsung Galaxy A17 4G + 128GB"), (0, 128, ""))   # 4G es la red
+
+    def test_un_codigo_que_junta_configuraciones_distintas_se_saca(self):
+        filas = [fila_de(self.REALES[0], "15IRH10", "cy")] + [fila_de(n) for n in self.REALES[1:]]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["", "", ""])
+
+    def test_la_misma_configuracion_sigue_agrupada(self):
+        mismo = ["Notebook Lenovo IP Slim 3 15IRH10 15.3\" FHD INTEL I7-13620H 16GB (8G+8G) 4800MHZ 512GB NVME W11H AZUL (7889)",
+                 "Notebook Lenovo IdeaPad Slim 3 15IRH10 Core i7-13620H 16GB (2x8GB) 512GB Win11 Home Azul"]
+        filas = [fila_de(mismo[0], "83K101EJAR", "gt"), fila_de(mismo[1], "83K101EJAR", "cg")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["83K101EJAR", "83K101EJAR"])
+
+    def test_los_componentes_no_se_tocan(self):
+        filas = [fila_de("Memoria Corsair Vengeance DDR5 16GB 6000MHz CMK16GX5M1D6000Z38", "CMK16GX5M1D6000Z38"),
+                 fila_de("Memoria Corsair Vengeance RGB DDR5 16GB 6000 CMK16GX5M1D6000Z38", "CMK16GX5M1D6000Z38", "vx")]
+        modelo.completar_con_conocidos(filas)
+        self.assertEqual([f[9] for f in filas], ["CMK16GX5M1D6000Z38"] * 2)
+
+
+class SkuDeTienda(unittest.TestCase):
+    """19/10: las tiendas WooCommerce publican en `sku` el part number con el prefijo de su mayorista (GoldenTech
+    IC_83K101GTAR, Click Gaming NB_9S7-15T111-632): 40 de 460 aparecian en otra tienda. Sin prefijo es un codigo interno."""
+
+    def test_el_prefijo_del_mayorista_se_saca(self):
+        self.assertEqual(modelo.sku_de_tienda("IC_83K101GTAR"), "83K101GTAR")
+        self.assertEqual(modelo.sku_de_tienda("NB_9S7-15T111-632"), "9S7-15T111-632")
+        self.assertEqual(modelo.sku_de_tienda("ic_cmk16gx5m1d6000z38"), "CMK16GX5M1D6000Z38")
+
+    def test_un_codigo_interno_no_es_part_number(self):
+        for interno in ("NOT1367", "NOG15", "NB_25245", "DELLI7BKP26", "", None, "IC_RTX4060", "EL_16GB"):
+            self.assertIsNone(modelo.sku_de_tienda(interno), interno)
+
+
+class ConfirmarCodigosDeTienda(unittest.TestCase):
+    """El part number del sku de una tienda WooCommerce vale solo si otra tienda nombra el mismo codigo: "EL_GIGMONGS27FC2"
+    (Click Gaming) es un codigo interno del mayorista y no puede tapar la identidad real."""
+
+    def test_se_confirma_con_otra_tienda_que_lo_nombra(self):
+        gt = fila_de("Memoria Corsair Vengeance DDR5 16GB 6000MHz Grey", "", "goldentech")
+        vx = fila_de("Memoria Corsair Vengeance DDR5 16GB 6000 CMK16GX5M1D6000Z38", "", "venex")
+        cg = fila_de("Monitor Gigabyte GS27FC 27 180Hz", "", "clickgaming")
+        modelo.confirmar_codigos_de_tienda([gt, vx, cg], [(gt, "CMK16GX5M1D6000Z38"), (cg, "GIGMONGS27FC2")])
+        self.assertEqual((gt[9], cg[9]), ("CMK16GX5M1D6000Z38", ""))
+
+    def test_la_misma_tienda_no_se_confirma_a_si_misma(self):
+        a = fila_de("Notebook Lenovo IP Slim 3 83K101GTAR", "", "goldentech")
+        modelo.confirmar_codigos_de_tienda([a], [(a, "83K101GTAR")])
+        self.assertEqual(a[9], "")
+
+    def test_lo_que_ya_tiene_codigo_no_se_toca(self):
+        a = fila_de("Memoria Corsair CMK16GX5M1D6000Z38", "OTRO123X", "goldentech")
+        b = fila_de("Memoria Corsair CMK16GX5M1D6000Z38", "", "venex")
+        modelo.confirmar_codigos_de_tienda([a, b], [(a, "CMK16GX5M1D6000Z38")])
+        self.assertEqual(a[9], "OTRO123X")
+
+
+class ConfiguracionTitulosReales(unittest.TestCase):
+    """Errores de lectura encontrados al medir con el indice del 19/10."""
+
+    def test_la_memoria_de_la_placa_de_video_no_es_la_ram(self):
+        t = 'Notebook Gamer Lenovo Legion 5 15AKP10 15.1" AMD Ryzen AI 7 350 24GB DDR5 SSD 1TB RTX 5070 8GB Free DOS 83F1006QAR'
+        self.assertEqual(modelo.configuracion(t)[:2], (24, 1000))
+
+    def test_el_numero_del_procesador_no_es_una_capacidad(self):
+        self.assertEqual(modelo.configuracion('Notebook 15.6" Hp 15-FC0235LA AMD Ryzen 3/512GB Azul')[:2], (0, 512))
+
+    def test_el_procesador_en_una_sola_forma(self):
+        self.assertEqual(modelo.configuracion("Notebook Hp 15-Fc0235la R3-7320u Amd 15\"8/512gb")[2], "r37320u")
+        self.assertEqual(modelo.configuracion("Notebook Hp 15-fc0235la AMD Ryzen 3 7320u 8gb RAM 512gb SSD")[2], "r37320u")
+        self.assertEqual(modelo.configuracion("Notebook Lenovo Core i5-13420H 8GB 512GB")[2], "i513420h")
+        self.assertEqual(modelo.configuracion("Notebook Lenovo INTEL I5 13420H 8GB 512GB")[2], "i513420h")
+        self.assertEqual(modelo.configuracion("Notebook Asus Core Ultra 7 155H 16GB 1TB")[2], "u7155h")
