@@ -196,7 +196,7 @@ class Principal(unittest.TestCase):
         shutil.rmtree(self.dir, ignore_errors=True)
 
     def correr(self, juicios):
-        with mock.patch.object(v, "revisar", side_effect=lambda u, desde=None: (juicios[u], "estatica")), \
+        with mock.patch.object(v, "revisar", side_effect=lambda u, desde=None, precio=None: (juicios[u], "estatica")), \
                 redirect_stdout(io.StringIO()) as salida:
             codigo = v.main([self.ofertas, "--descartadas", self.descartadas])
         return codigo, salida.getvalue()
@@ -207,6 +207,12 @@ class Principal(unittest.TestCase):
         self.assertEqual(json.loads(Path(self.descartadas).read_text(encoding="utf-8")), ["https://t.test/b"])
         self.assertIn("1 caída", salida)
         self.assertIn("t.test: 1 en pie, 1 caída(s), 1 sin confirmar", salida)     # el resumen por comercio
+
+    def test_a_cada_enlace_le_pasa_su_precio(self):
+        Path(self.ofertas).write_text(json.dumps({"ofertas": [{"url": "https://t.test/a", "precio": 900}]}), encoding="utf-8")
+        with mock.patch.object(v, "revisar", return_value=("viva", "api")) as revisar, redirect_stdout(io.StringIO()):
+            v.main([self.ofertas, "--descartadas", self.descartadas])
+        self.assertEqual(revisar.call_args[1]["precio"], 900)
 
     def test_si_no_hay_caidas_sale_con_0_y_no_toca_lo_anterior(self):
         Path(self.descartadas).write_text(json.dumps(["https://t.test/vieja"]), encoding="utf-8")
@@ -233,3 +239,74 @@ class Principal(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+CATALOGO = "https://www.mercadolibre.com.ar/notebook-asus-zenbook-14-oled/p/MLA61813247"
+UP = "https://www.mercadolibre.com.ar/notebook-hp-omen/up/MLAU4085787309"
+
+
+def vendedores(*precios):
+    return 200, json.dumps({"results": [{"item_id": f"MLA{i}", "price": p} for i, p in enumerate(precios)],
+                            "paging": {"total": len(precios)}})
+
+
+class ApiMercadoLibre(unittest.TestCase):
+    """Casos reales del 19/10: ComparaYa publicaba la Zenbook a $2.383.703 y el vendedor mas barato de Mercado Libre
+    la tenia a $2.999.999; la Omen (/up/) estaba caida y ninguna API la deja ver con el token de aplicacion."""
+
+    def setUp(self):
+        v._TOKEN.clear()
+        v._TOKEN["valor"] = "T"
+        self.addCleanup(v._TOKEN.clear)
+
+    def juzgar(self, url, precio, respuesta):
+        with mock.patch.object(v, "pedir_api", return_value=respuesta) as pedir:
+            return v.revisar_ml(url, precio), pedir
+
+    def test_un_precio_que_ningun_vendedor_tiene_ya_no_es_la_oferta(self):
+        (juicio, motivo), pedir = self.juzgar(CATALOGO, 2383703, vendedores(3588563, 2999999, 4125409))
+        self.assertEqual(juicio, "caida")
+        self.assertIn("2.999.999", motivo)
+        self.assertEqual(pedir.call_args[0][0], v.API_ML + "/products/MLA61813247/items?limit=100")
+        self.assertEqual(pedir.call_args[0][1]["Authorization"], "Bearer T")
+
+    def test_con_el_precio_de_algun_vendedor_esta_en_pie(self):
+        self.assertEqual(self.juzgar(CATALOGO, 2144983, vendedores(2190399, 2144983))[0], ("viva", "api"))
+
+    def test_una_diferencia_chica_de_redondeo_no_la_descarta(self):
+        self.assertEqual(self.juzgar(CATALOGO, 530000, vendedores(534000))[0], ("viva", "api"))     # 0,75%
+
+    def test_sin_vendedores_esta_caida(self):
+        self.assertEqual(self.juzgar(CATALOGO, 1000, vendedores())[0], ("caida", "api: nadie lo vende"))
+
+    def test_sin_precio_alcanza_con_que_alguien_lo_venda(self):
+        self.assertEqual(self.juzgar(CATALOGO, None, vendedores(5000))[0], ("viva", "api"))
+
+    def test_un_aviso_que_la_api_no_deja_ver_no_se_publica(self):
+        (juicio, motivo), pedir = self.juzgar(UP, 2956771, vendedores(1))
+        self.assertEqual((juicio, motivo), ("caida", "api: no se puede verificar"))
+        pedir.assert_not_called()
+
+    def test_si_la_api_falla_no_se_publica_lo_que_no_se_pudo_verificar(self):
+        self.assertEqual(self.juzgar(CATALOGO, 1000, (503, "caida"))[0], ("caida", "api: no se pudo verificar (503)"))
+        self.assertEqual(self.juzgar(CATALOGO, 1000, (200, "no es json"))[0], ("caida", "api: no se pudo verificar (200)"))
+
+    def test_sin_token_no_se_decide_por_la_api(self):
+        v._TOKEN["valor"] = None
+        self.assertIsNone(self.juzgar(CATALOGO, 1000, vendedores(1))[0])
+
+    def test_lo_que_no_es_de_mercado_libre_sigue_con_la_revision_de_la_pagina(self):
+        self.assertIsNone(self.juzgar("https://www.fravega.com/p/x-123/", 1000, vendedores(1))[0])
+
+    def test_revisar_usa_la_api_antes_que_la_pagina(self):
+        with mock.patch.object(v, "revisar_ml", return_value=("caida", "api: nadie lo vende")), \
+                mock.patch.object(v, "estatica") as estatica:
+            self.assertEqual(v.revisar(CATALOGO, precio=1000), ("caida", "api: nadie lo vende"))
+        estatica.assert_not_called()
+
+    def test_pedir_api_no_levanta_excepciones(self):
+        error = urllib.error.HTTPError("https://t.test", 403, "no", {}, io.BytesIO(b'{"message":"forbidden"}'))
+        with mock.patch.object(v.urllib.request, "urlopen", side_effect=error):
+            self.assertEqual(v.pedir_api("https://t.test", {}), (403, '{"message":"forbidden"}'))
+        with mock.patch.object(v.urllib.request, "urlopen", side_effect=urllib.error.URLError("sin red")):
+            self.assertEqual(v.pedir_api("https://t.test", {}), (0, ""))

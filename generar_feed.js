@@ -158,7 +158,7 @@ function main(argv) {
   const candidatas = arg("candidatas", "");
   if (candidatas) {
     const n = parseInt(arg("max", "40"), 10) || 40;
-    fs.writeFileSync(candidatas, JSON.stringify({ ofertas: O.destacadas(idx, n).map(o => ({ url: o.f[2], nombre: o.f[0] })) }), "utf8");
+    fs.writeFileSync(candidatas, JSON.stringify({ ofertas: O.destacadas(idx, n).map(o => ({ url: o.f[2], nombre: o.f[0], precio: o.f[1] })) }), "utf8");
     console.log(`candidatas a verificar: ${Math.min(O.destacadas(idx, n).length, n)}`);
     return 0;
   }
