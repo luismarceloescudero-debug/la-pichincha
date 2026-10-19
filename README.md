@@ -324,7 +324,13 @@ Las ofertas del dia salen por dos canales, sin backend:
   verificarlo (`/up/MLAU...` da 403 en toda la API, o la API falla) no se publica. En la prueba real del 19/10
   descarto 11 de 19 avisos de Mercado Libre entre las 40 candidatas: 5 con un precio que ya nadie tenia (la
   Zenbook 14 a $2.383.703 con el vendedor mas barato a $2.999.999), 5 `/up/` y uno que la API ya no encuentra.
-  En las demas tiendas, ante la duda (bloqueo, captcha, error del servidor, sin red) se publica. El log de
+  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias). Lo que llega
+  **por ComparaYa desde otra tienda** tiene que mostrar el precio publicado en la pagina de esa tienda (en el
+  HTML o ya armada en Chrome); si no aparece o la tienda no se pudo abrir, no se publica. Prueba real del 19/10
+  sobre las 40 candidatas: Frávega le devuelve a GitHub la pagina de bloqueo de CloudFront (en una PC si
+  muestra el precio, que coincidia con ComparaYa) y DHgate el desafio de Cloudflare, asi que no salen hasta
+  tener una via oficial (feed o afiliados); Megatone y Maxtecno quedaron confirmados.
+  En las tiendas que se leen directo, ante la duda (bloqueo, captcha, error del servidor, sin red) se publica. El log de
   cada paso dice, por comercio, cuantas estaban en pie, cuantas se descartaron y cuantas quedaron sin
   confirmar. `diagnostico_enlaces.py` (workflow *Verificacion de enlaces (caso real)*) corre la misma
   verificacion sobre las candidatas publicadas y anota que responde cada endpoint de la API.
