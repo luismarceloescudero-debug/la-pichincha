@@ -25,7 +25,8 @@
 
   const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
   const TOLERANCIA_MODELO = 0.02;
-  const AGREGADOR = "comparaya";   // centavos y redondeos entre tiendas: menos que eso no la descalifica
+  const AGREGADOR = "comparaya";
+  const DIAS_TACHADO_FIJO = 7;     // dias con el mismo precio para que una rebaja publicada deje de ser noticia   // centavos y redondeos entre tiendas: menos que eso no la descalifica
   const esInternacional = f => typeof f[8] === "string" && f[8].includes("i");
 
   /* "mediana de los smartphones de gama media de 256 GB: $350.000 (12 avisos)" */
@@ -51,7 +52,8 @@
 
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
-    let descartadas = 0;
+    let descartadas = 0, tachadoFijo = 0;
+    const hoy = Date.parse(String(idx.generado || "").slice(0, 10));
     const ref = C.referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
     // El mismo producto (mismo codigo de modelo) publicado por otra tienda con mas datos: una tienda que no escribe la RAM o los
@@ -101,6 +103,9 @@
       }
       const lista = f[5] || 0;
       if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
+      // Un tachado que no se mueve en una semana es el precio de siempre con un tachado de adorno (19/10: la impresora
+      // Brother con 55% y los auriculares Philips con 54% tenian el mismo precio desde el 8/10 y el 7/10).
+      if (hoy && f[10] && (hoy - Date.parse(f[10])) / 864e5 >= DIAS_TACHADO_FIJO) { tachadoFijo++; continue; }
       const off = 1 - f[1] / lista;
       if (off + EPS >= d.publicada && off <= DESCUENTO_MAX) publicadas.push(f);
     }
@@ -116,7 +121,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
