@@ -198,8 +198,7 @@ def probar_vtex(indice, por_tienda=3):
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--vtex" in argv:
-        print("
-".join(probar_vtex(v.leer(argv[argv.index("--vtex") + 1], {}) or {})))
+        print("\n".join(probar_vtex(v.leer(argv[argv.index("--vtex") + 1], {}) or {})))
         return 0
     ruta = argv[0] if argv else "candidatas.json"
     maximo = int(argv[argv.index("--max") + 1]) if "--max" in argv else 15
