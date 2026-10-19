@@ -607,7 +607,8 @@ Corren en cada PR y antes de cada publicacion, con los umbrales de cobertura de
 `CONSTRAINTS.md`; en el mismo workflow, el job `lighthouse` arma el sitio con el
 indice publicado (portada pre-renderizada con `node generar_portada.js --salida _sitio`) y lo mide en
 movil, tres corridas por pagina: las cuatro categorias cortan si la mediana baja de 90 en cualquier
-pagina (los informes quedan como artifact `lighthouse`). `tests/test_integracion.py` arma el sitio
+pagina (los informes quedan como artifact `lighthouse`; si Chrome no arranca en el runner la corrida se reintenta
+con `.github/lighthouse-corrida.sh`, solo por ese error). `tests/test_integracion.py` arma el sitio
 entero y revisa que ningun enlace interno este roto. Los de los extractores usan HTML
 guardado de cada tienda en `tests/fixtures/` y no salen a la red. Cuando una
 tienda cambia su plantilla (llega el issue de `salud-fuente`):
