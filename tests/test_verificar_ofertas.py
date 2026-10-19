@@ -420,11 +420,16 @@ class Agregador(unittest.TestCase):
         juicio, _ = self.juzgar(html="", dom="Xiaomi Poco F8 Ultra $1.999.999")
         self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda (muestra $1.999.999)"))
         juicio, _ = self.juzgar(html="", dom="<div>cargando</div>")
-        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda (sin precios en 19 caracteres)"))
+        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda (sin precios en 19 caracteres: «»)"))
 
     def test_el_cartel_de_sin_stock_la_da_por_caida(self):
         self.assertEqual(self.juzgar(html="Este producto no está disponible $1.833.999")[0], ("caida", "estatica"))
         self.assertEqual(self.juzgar(html="", dom="Este producto no está disponible")[0], ("caida", "renderizada"))
+
+    def test_el_bloqueo_de_cloudfront_es_no_poder_abrirla(self):
+        # 19/10: a los servidores de GitHub Fravega les devuelve esta pagina de 925 caracteres en vez de la ficha
+        cloudfront = "<TITLE>ERROR: The request could not be satisfied</TITLE> 403 ERROR Request blocked."
+        self.assertEqual(self.juzgar(html="", dom=cloudfront)[0], ("caida", "agregador: no se pudo abrir la tienda"))
 
     def test_bloqueada_o_sin_red_no_se_publica(self):
         error = urllib.error.HTTPError(FRAVEGA, 403, "no", {}, None)

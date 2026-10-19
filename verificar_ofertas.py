@@ -67,7 +67,7 @@ CAIDA = re.compile(
 # Paginas que nos frenan en vez de mostrar la publicacion: no dicen nada de ella.
 MURO = re.compile(r"captcha|verific[aá] que (sos|eres) (un )?(humano|persona)|account-verification|"
                   r"access denied|attention required|are you a robot|suspicious-traffic|/gz/webdevice|"
-                  r"hubo un error accediendo a esta p", re.I)
+                  r"hubo un error accediendo a esta p|request could not be satisfied|request blocked", re.I)
 
 
 API_ML = "https://api.mercadolibre.com"
@@ -308,7 +308,12 @@ def revisar_agregador(url, precio):
         return "viva", "precio confirmado en la tienda (renderizada)"
     vistos = list(dict.fromkeys(re.findall(r"\$\s?\d{1,3}(?:\.\d{3})+", dom)))[:4]
     return "caida", "agregador: el precio no aparece en la tienda" + (
-        f" (muestra {', '.join(vistos)})" if vistos else f" (sin precios en {len(dom)} caracteres)")
+        f" (muestra {', '.join(vistos)})" if vistos else f" (sin precios en {len(dom)} caracteres: «{titulo(dom)}»)")
+
+
+def titulo(html):
+    m = re.search(r"<title[^>]*>([^<]{0,80})", html or "", re.I)
+    return re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
 
 
 def leer(ruta, defecto):
