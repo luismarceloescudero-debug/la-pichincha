@@ -1,0 +1,116 @@
+User-agent:*
+
+# Paginas privadas
+Disallow: /*checkout*
+Disallow: /*account*
+Disallow: /*login*
+
+# Parametros de busqueda y orden
+Disallow: /*?page*
+Disallow: /*?q=*
+Disallow: /*&_q=*
+Disallow: /*?order=*
+Disallow: /*&order=*
+
+# Parametros de campana
+Allow: /*?utm_*
+Allow: /*&utm_*
+Allow: /*?gclid=*
+Allow: /*&gclid=*
+Allow: /*?fbclid=*
+Allow: /*&fbclid=*
+
+
+Disallow:/oncity-trabaja-con-nosotros
+Disallow:/newsletter-suscripcion
+Disallow:/*test*
+Disallow:/*prueba*
+
+
+User-agent: Googlebot
+Allow: /
+Disallow: /*checkout*
+Disallow: /*account*
+Disallow: /*login*
+Disallow:/oncity-trabaja-con-nosotros
+Disallow:/newsletter-suscripcion
+
+
+User-agent: Googlebot-image
+Allow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: SiteAuditBot
+Disallow: /
+
+User-agent: CazoodleBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: dotbot/1.0
+Disallow: /
+
+User-agent: Gigabot
+Disallow: /
+
+sitemap: https://www.oncity.com/sitemap.xml
+sitemap: https://www.oncity.com/sitemap/product-0.xml
+sitemap: https://www.oncity.com/sitemap/product-1.xml
+sitemap: https://www.oncity.com/sitemap/product-2.xml
+sitemap: https://www.oncity.com/sitemap/product-3.xml
+sitemap: https://www.oncity.com/sitemap/product-4.xml
+sitemap: https://www.oncity.com/sitemap/product-5.xml
+sitemap: https://www.oncity.com/sitemap/product-6.xml
+sitemap: https://www.oncity.com/sitemap/product-7.xml
+sitemap: https://www.oncity.com/sitemap/product-8.xml
+sitemap: https://www.oncity.com/sitemap/product-9.xml
+sitemap: https://www.oncity.com/sitemap/product-10.xml
+sitemap: https://www.oncity.com/sitemap/product-11.xml
+sitemap: https://www.oncity.com/sitemap/product-12.xml
+ sitemap: https://www.oncity.com/sitemap/product-13.xml
+ sitemap: https://www.oncity.com/sitemap/product-14.xml
+ sitemap: https://www.oncity.com/sitemap/product-15.xml
+ sitemap: https://www.oncity.com/sitemap/product-16.xml
+ sitemap: https://www.oncity.com/sitemap/product-17.xml
+ sitemap: https://www.oncity.com/sitemap/product-18.xml
+ sitemap: https://www.oncity.com/sitemap/product-19.xml
+ sitemap: https://www.oncity.com/sitemap/product-20.xml
+ sitemap: https://www.oncity.com/sitemap/product-21.xml
+ sitemap: https://www.oncity.com/sitemap/product-22.xml
+ sitemap: https://www.oncity.com/sitemap/product-23.xm
+ sitemap: https://www.oncity.com/sitemap/product-24.xml
+ sitemap: https://www.oncity.com/sitemap/product-25.xm
+ sitemap: https://www.oncity.com/sitemap/product-26.xml
+ sitemap: https://www.oncity.com/sitemap/product-27.xml
+ sitemap: https://www.oncity.com/sitemap/product-28.xml
+ sitemap: https://www.oncity.com/sitemap/product-29.xml
+ sitemap: https://www.oncity.com/sitemap/product-30.xm
+ sitemap: https://www.oncity.com/sitemap/product-31.xml
+ sitemap: https://www.oncity.com/sitemap/product-32.xml
+ sitemap: https://www.oncity.com/sitemap/product-33.xml
+ sitemap: https://www.oncity.com/sitemap/product-34.xml
+ sitemap: https://www.oncity.com/sitemap/product-35.xm
+ sitemap: https://www.oncity.com/sitemap/product-36.xml
+ sitemap: https://www.oncity.com/sitemap/product-37.xml
+ sitemap: https://www.oncity.com/sitemap/product-38.xml
+ sitemap: https://www.oncity.com/sitemap/product-39.xml
+ sitemap: https://www.oncity.com/sitemap/product-40.xm
+ sitemap: https://www.oncity.com/sitemap/product-41.xml
+ sitemap: https://www.oncity.com/sitemap/product-42.xm
+ sitemap: https://www.oncity.com/sitemap/product-43.xml
+ sitemap: https://www.oncity.com/sitemap/product-44.xml
+ sitemap: https://www.oncity.com/sitemap/product-45.xm
+ sitemap: https://www.oncity.com/sitemap/product-46.xml
+ sitemap: https://www.oncity.com/sitemap/product-47.xml
+
+sitemap: https://www.oncity.com/sitemap/subcategory-0.xml
+sitemap: https://www.oncity.com/sitemap/category-0.xml
+sitemap: https://www.oncity.com/sitemap/category-1.xml
+sitemap: https://www.oncity.com/sitemap/userRoute-0.xml

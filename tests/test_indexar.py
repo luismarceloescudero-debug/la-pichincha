@@ -365,6 +365,173 @@ class Woocommerce(unittest.TestCase):
                     self.assertNotRegex(it["nombre"], r"[<>]|&[a-z#0-9]+;")
 
 
+class Robots(unittest.TestCase):
+    """robots.txt manda: la API de una tienda se lee solo si el grupo de cualquier robot (*) no la prohibe."""
+
+    BUSQUEDA = "/api/catalog_system/pub/products/search"
+
+    def test_robots_reales(self):
+        self.assertFalse(indexar.robots_permite(leer("cetrogar", "robots.txt"), self.BUSQUEDA), "Cetrogar: Disallow /api/")
+        # OnCity prohibe todo a ClaudeBot y otros por nombre, pero no al grupo *: la API queda permitida
+        self.assertTrue(indexar.robots_permite(leer("oncity", "robots.txt"), self.BUSQUEDA))
+        self.assertFalse(indexar.robots_permite(leer("oncity", "robots.txt"), "/checkout/cart"))
+
+    def test_comodines_fin_de_ruta_y_la_regla_mas_larga(self):
+        texto = "User-agent: *\nDisallow: /*api*\nAllow: /api/catalog_system/pub/\nDisallow: /x$\n"
+        self.assertTrue(indexar.robots_permite(texto, self.BUSQUEDA), "Allow mas largo gana")
+        self.assertFalse(indexar.robots_permite(texto, "/otra/api/"))
+        self.assertFalse(indexar.robots_permite(texto, "/x"))
+        self.assertTrue(indexar.robots_permite(texto, "/xy"))
+
+    def test_solo_cuenta_el_grupo_de_cualquier_robot(self):
+        texto = ("User-agent: Googlebot\nDisallow: /api/\n\n# comentario\nUser-agent: *\nUser-agent: GPTBot\n"
+                 "Disallow: /api/  # todo\nDisallow:\n")
+        self.assertFalse(indexar.robots_permite(texto, self.BUSQUEDA))
+        self.assertTrue(indexar.robots_permite("User-agent: Googlebot\nDisallow: /\n", self.BUSQUEDA))
+        self.assertTrue(indexar.robots_permite("", self.BUSQUEDA))
+        self.assertTrue(indexar.robots_permite("User-agent: *\nDisallow:\n", self.BUSQUEDA))
+
+
+class Vtex(unittest.TestCase):
+    """Tiendas VTEX por su API publica de catalogo: una sola lectura para todas (OnCity, Naldo, Pardo...)."""
+
+    TIENDA = {"nombre": "OnCity", "base": "https://www.oncity.com", "catalogo": {"tipo": "vtex"}}
+
+    def test_categorias_de_tecnologia_del_arbol_real(self):
+        cats = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")))
+        self.assertIn("/14/100/481/", cats, "celulares")
+        self.assertIn("/14/102/484/", cats, "notebooks")
+        self.assertIn("/14/105/501/", cats, "monitores")
+        self.assertIn("/14/103/493/", cats, "monitores gamer")
+        self.assertIn("/14/106/510/", cats, "perifericos: placas de video")
+        self.assertIn("/14/106/508/", cats, "perifericos: mouse")
+        self.assertNotIn("/14/100/483/", cats, "accesorios para celulares: no")
+        self.assertNotIn("/14/100/482/", cats, "cargadores y cables: no")
+        self.assertNotIn("/14/103/495/", cats, "videojuegos: no")
+        self.assertFalse([c for c in cats if c.startswith("/566/")], "compra internacional: no")
+        self.assertFalse([c for c in cats if c.startswith("/2/")], "audio y tv: no")
+        self.assertEqual(len(cats), len(set(cats)))
+
+    def test_las_categorias_se_pueden_elegir_por_tienda(self):
+        cats = indexar.categorias_vtex(json.loads(leer("oncity", "arbol.json")), rubros=("televisores",))
+        self.assertEqual(cats, ["/2/24/"], "una categoria sin hijas se pide entera")
+
+    def bajar_falso(self, paginas, robots="User-agent: *\nDisallow: /checkout/\n", pedidas=None):
+        arbol = json.dumps([{"id": 1, "name": "Tecnologia", "url": "https://www.oncity.com/tecnologia", "children": [
+            {"id": 2, "name": "Celulares", "url": "https://www.oncity.com/tecnologia/celulares", "children": []},
+            {"id": 3, "name": "Notebooks", "url": "https://www.oncity.com/tecnologia/notebooks", "children": []}]}])
+
+        def bajar(url):
+            if pedidas is not None:
+                pedidas.append(url)
+            if url.endswith("/robots.txt"):
+                if isinstance(robots, Exception):
+                    raise robots
+                return robots
+            if "/category/tree/" in url:
+                return arbol
+            cat = url.split("fq=C:")[1].split("&")[0]
+            desde = int(url.split("_from=")[1].split("&")[0])
+            return json.dumps(paginas.get((cat, desde), []))
+        return bajar
+
+    def test_lee_el_json_real_guardado(self):
+        crudo = json.loads(leer("oncity", "busqueda.json"))
+        with mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso({("/1/2/", 0): crudo})), \
+                mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(len(items), 4)
+        moto = items[0]
+        self.assertEqual(moto["nombre"], "Celular Motorola Moto G06 4G 4 Gb 64 Gb Nfc Tapestry")
+        self.assertEqual(moto["precio"], 199999)
+        self.assertEqual(moto["lista"], 259999, "ListPrice mayor que Price: rebaja")
+        self.assertEqual(moto["url"], "https://www.oncity.com/celular-motorola-moto-g06-4g-4-gb-64-gb-nfc-tapestry-158039/p")
+        self.assertTrue(moto["imagen"].startswith("https://"))
+        self.assertIsNone(moto["sku_tienda"], "OnCity usa un numero interno como RefId: no es part number")
+        # el iPhone lo vende un tercero (el vendedor por defecto) y el segundo vendedor no tiene stock
+        self.assertEqual(items[2]["precio"], 4149999)
+        for it in items:
+            self.assertTrue(indexar.url_valida(it["url"]))
+
+    def test_saltea_sin_stock_sin_precio_repetidos_y_sin_lista_si_no_hay_rebaja(self):
+        crudo = json.loads(leer("oncity", "busqueda.json"))
+        sin_stock, sin_precio, igual = (json.loads(json.dumps(crudo[i])) for i in (0, 1, 2))
+        sin_stock["items"][0]["sellers"][0]["commertialOffer"]["AvailableQuantity"] = 0
+        sin_precio["items"][0]["sellers"][0]["commertialOffer"]["Price"] = 0
+        oferta = igual["items"][0]["sellers"][0]["commertialOffer"]
+        oferta["ListPrice"] = oferta["Price"]
+        paginas = {("/1/2/", 0): [sin_stock, sin_precio, igual], ("/1/3/", 0): [igual, crudo[3]]}
+        with mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso(paginas)), mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual([it["precio"] for it in items], [4149999, 2520000])
+        self.assertIsNone(items[0]["lista"])
+
+    def test_pagina_de_a_50_por_categoria_hasta_que_vuelve_corta(self):
+        fila = json.loads(leer("oncity", "busqueda.json"))[0]
+
+        def copia(i):
+            f = json.loads(json.dumps(fila))
+            f["link"] = f"https://www.oncity.com/cel-{i}/p"
+            return f
+        pedidas = []
+        paginas = {("/1/2/", 0): [copia(i) for i in range(50)], ("/1/2/", 50): [copia(50 + i) for i in range(3)]}
+        with mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso(paginas, pedidas=pedidas)), \
+                mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(len(items), 53)
+        busquedas = [u for u in pedidas if "/products/search" in u]
+        self.assertEqual(busquedas[0], "https://www.oncity.com/api/catalog_system/pub/products/search?fq=C:/1/2/&_from=0&_to=49")
+        self.assertEqual(busquedas[1], "https://www.oncity.com/api/catalog_system/pub/products/search?fq=C:/1/2/&_from=50&_to=99")
+        self.assertEqual(len(busquedas), 3, "la segunda pagina vino corta: no se pide una tercera; despues, notebooks")
+
+    def test_si_robots_lo_prohibe_no_se_lee_nada(self):
+        pedidas = []
+        with mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso({}, robots=leer("cetrogar", "robots.txt"),
+                                                                             pedidas=pedidas)):
+            with self.assertRaisesRegex(RuntimeError, "robots.txt"):
+                indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(len(pedidas), 1)
+
+    def test_robots_que_no_existe_permite_y_uno_que_no_responde_frena(self):
+        no_existe = urllib.error.HTTPError("u", 404, "no", {}, None)
+        with mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso({}, robots=no_existe)), \
+                mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS), [])
+        for error in (urllib.error.HTTPError("u", 403, "no", {}, None), urllib.error.URLError("caida")):
+            with self.subTest(error), mock.patch.object(indexar, "bajar", side_effect=self.bajar_falso({}, robots=error)):
+                with self.assertRaises(RuntimeError):
+                    indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)
+
+    def test_un_bloqueo_corta_la_tienda_y_un_error_solo_la_categoria(self):
+        fila = json.loads(leer("oncity", "busqueda.json"))[0]
+        base = self.bajar_falso({("/1/3/", 0): [fila]})
+        for error, esperados in ((urllib.error.HTTPError("u", 429, "no", {}, None), 0), (urllib.error.URLError("caida"), 1)):
+            def bajar(url, error=error):
+                if "C:/1/2/" in url:
+                    raise error
+                return base(url)
+            with self.subTest(error), mock.patch.object(indexar, "bajar", side_effect=bajar), \
+                    mock.patch.object(indexar.time, "sleep"):
+                self.assertEqual(len(indexar.indexar_vtex(self.TIENDA, indexar.TOPE_PAGINAS)), esperados)
+
+    def test_el_tope_de_paginas_es_el_de_la_tienda(self):
+        fila = json.loads(leer("oncity", "busqueda.json"))[0]
+
+        def bajar(url):
+            if "/products/search" not in url:
+                return self.bajar_falso({})(url)
+            desde = int(url.split("_from=")[1].split("&")[0])
+            filas = []
+            for i in range(50):
+                f = json.loads(json.dumps(fila))
+                f["link"] = f"https://www.oncity.com/{url.split('C:')[1][:6]}-{desde + i}/p"
+                filas.append(f)
+            return json.dumps(filas)
+        tienda = {**self.TIENDA, "catalogo": {"tipo": "vtex", "tope_paginas": 3}}
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            self.assertEqual(len(indexar.indexar_vtex(tienda, 12)), 300, "3 paginas por categoria, 2 categorias")
+
+
 class Descarga(unittest.TestCase):
     def test_un_corte_a_mitad_de_respuesta_se_reintenta_una_vez(self):
         # Gaming City cayo entera el 16/10 por un IncompleteRead: un corte de red no es un bloqueo.

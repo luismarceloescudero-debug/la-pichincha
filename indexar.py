@@ -353,6 +353,138 @@ def indexar_woocommerce(tienda, max_paginas):
     return items
 
 
+def robots_permite(texto, ruta):
+    """Si robots.txt deja a cualquier robot (el grupo `User-agent: *`) pedir `ruta`. Gana la regla mas larga que
+    coincide y, a igual largo, Allow; entiende `*` y `$`. Los grupos con nombre (Googlebot, ClaudeBot) no cuentan:
+    no nos presentamos con ninguno de esos nombres. Sin grupo * o sin reglas, todo permitido."""
+    reglas, agentes, en_reglas = [], set(), False
+    for linea in (texto or "").splitlines():
+        clave, _, valor = linea.split("#", 1)[0].partition(":")
+        clave, valor = clave.strip().lower(), valor.strip()
+        if clave == "user-agent":
+            if en_reglas:
+                agentes, en_reglas = set(), False
+            agentes.add(valor)
+        elif clave in ("allow", "disallow"):
+            en_reglas = True
+            if "*" in agentes and valor:
+                reglas.append((clave == "allow", valor))
+    mejor = (-1, True)
+    for permite, patron in reglas:
+        rx = re.escape(patron).replace(r"\*", ".*")
+        rx = rx[:-2] + "$" if rx.endswith(r"\$") else rx
+        if re.match(rx, ruta) and (len(patron), permite) > mejor:
+            mejor = (len(patron), permite)
+    return mejor[1]
+
+
+# Las categorias de tecnologia de una tienda VTEX, por el nombre en su URL: cada tienda arma su arbol distinto, pero
+# los nombres se repiten. Una categoria que nombra un rubro entra con todas sus hojas, menos las de FUERA_VTEX.
+RUBROS_VTEX = ("celulares", "smartphones", "notebooks", "computadoras", "computacion", "informatica", "all-in-one",
+               "tablets", "monitores", "componentes", "perifericos", "placas-de-video", "procesadores", "motherboards",
+               "memorias", "almacenamiento", "discos", "teclados", "mouse")
+FUERA_VTEX = ("accesorios", "cargadores", "cables", "fundas", "insumos", "repuestos", "internacional", "videojuegos",
+              "e-books", "impres")
+API_VTEX = "/api/catalog_system/pub/"
+POR_PEDIDO_VTEX = 50      # la API de busqueda devuelve como mucho 50 productos por pedido
+
+
+def categorias_vtex(arbol, rubros=RUBROS_VTEX, fuera=FUERA_VTEX):
+    """Las hojas de tecnologia del arbol de categorias (/category/tree/3) como filtro de la busqueda: "/14/100/481/"."""
+    salida = []
+
+    def recorrer(nodos, ruta, adentro):
+        for n in nodos if isinstance(nodos, list) else []:
+            if not isinstance(n, dict) or "id" not in n:
+                continue
+            slug = str(n.get("url") or "").rstrip("/").rsplit("/", 1)[-1].lower()
+            if any(x in slug for x in fuera):
+                continue
+            ids, dentro, hijas = ruta + [str(n["id"])], adentro or any(r in slug for r in rubros), n.get("children")
+            if hijas:
+                recorrer(hijas, ids, dentro)
+            elif dentro:
+                salida.append("/" + "/".join(ids) + "/")
+    recorrer(arbol, [], False)
+    return list(dict.fromkeys(salida))
+
+
+def _robots_vtex(base, pedir):
+    """El robots.txt de la tienda; "" si no tiene (404). Si no se puede leer, no se sabe si se permite: no se lee."""
+    try:
+        return pedir(base + "/robots.txt")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return ""
+        raise RuntimeError(f"robots.txt respondio {e.code}: no se lee la tienda") from e
+    except (urllib.error.URLError, OSError) as e:
+        raise RuntimeError("robots.txt no respondio: no se lee la tienda") from e
+
+
+def item_vtex(p, base):
+    """Un producto de la API de busqueda como aviso, o None si no tiene stock ni precio. El precio es el del vendedor por
+    defecto de la primera variante con stock (lo que muestra la pagina); el de lista, solo si es mas alto."""
+    for variante in p.get("items") or []:
+        vendedores = [s for s in variante.get("sellers") or [] if isinstance(s, dict)]
+        vendedor = next((s for s in vendedores if s.get("sellerDefault")), vendedores[0] if vendedores else {})
+        oferta = vendedor.get("commertialOffer") or {}
+        precio, lista = oferta.get("Price"), oferta.get("ListPrice")
+        if not _numero_razonable(precio, 1, 10 ** 10) or not _numero_razonable(oferta.get("AvailableQuantity"), 1, 10 ** 9):
+            continue
+        url, nombre = p.get("link"), p.get("productName")
+        if not isinstance(url, str) or not isinstance(nombre, str) or not nombre.strip():
+            return None
+        foto = next((i.get("imageUrl") for i in variante.get("images") or [] if isinstance(i, dict)), "") or ""
+        refid = next((r.get("Value") for r in variante.get("referenceId") or [] if isinstance(r, dict)), None)
+        return {"nombre": nombre_enriquecido(nombre, p.get("brand")), "precio": int(precio),
+                "lista": int(lista) if _numero_razonable(lista, precio + 1, 10 ** 10) else None,
+                "url": absoluta(base, url), "imagen": foto, "sellos": "", "sku": None,
+                # el RefId es el codigo que la tienda le da al producto: vale como part number solo si otra tienda lo nombra
+                "sku_tienda": modelo.modelo_de_api(refid)}
+    return None
+
+
+def indexar_vtex(tienda, max_paginas, pedir=None):
+    """Tienda VTEX por su API publica de catalogo, la misma que usa su propio sitio: el arbol de categorias
+    (/category/tree/3) y la busqueda por categoria (/products/search?fq=C:/id/id/), de a 50 y en orden, hasta que vuelve
+    corta. Una sola lectura para todas: sumar una tienda es configuracion. Solo si robots.txt no prohibe la API; un
+    bloqueo (403, 429, 503) corta la tienda sin insistir. 'rubros' (opcional) cambia las categorias que se leen.
+    `pedir` reemplaza a bajar() (el diagnostico la usa para guardar lo que responde la API)."""
+    cfg = tienda["catalogo"]
+    base = tienda["base"].rstrip("/")
+    pedir = pedir or bajar
+    if not robots_permite(_robots_vtex(base, pedir), API_VTEX + "products/search"):
+        raise RuntimeError("robots.txt no permite " + API_VTEX + ": no se lee la tienda")
+    # Como en WooCommerce, --max-paginas (paginas por categoria de los listados) no se usa: el tope es el de la tienda.
+    limite = cfg.get("tope_paginas", TOPE_PAGINAS)
+    cats = categorias_vtex(json.loads(pedir(base + API_VTEX + "category/tree/3")), tuple(cfg.get("rubros", RUBROS_VTEX)))
+    print("  " + str(len(cats)) + " categorias")
+    vistos, items = set(), []
+    for cat in cats:
+        for n in range(limite):
+            desde = n * POR_PEDIDO_VTEX
+            url = f"{base}{API_VTEX}products/search?fq=C:{cat}&_from={desde}&_to={desde + POR_PEDIDO_VTEX - 1}"
+            try:
+                filas = json.loads(pedir(url))
+            except urllib.error.HTTPError as e:
+                if e.code in BLOQUEOS:
+                    print("  " + AMAR + "! la tienda respondio " + str(e.code) + ": no se insiste hoy" + FIN)
+                    return items
+                break
+            except (urllib.error.URLError, OSError, ValueError):
+                break
+            filas = filas if isinstance(filas, list) else []
+            for p in filas:
+                it = item_vtex(p, base) if isinstance(p, dict) else None
+                if it and it["url"] not in vistos:
+                    vistos.add(it["url"])
+                    items.append(it)
+            time.sleep(PAUSA)
+            if len(filas) < POR_PEDIDO_VTEX:
+                break
+    return items
+
+
 def indexar_json(tienda):
     """Catalogo entero servido como un unico JSON estatico."""
     cfg = tienda["catalogo"]
@@ -558,6 +690,8 @@ def main(argv=None):
                 items = indexar_api(fuente, args.max_paginas)
             elif tipo == "woocommerce":
                 items = indexar_woocommerce(fuente, args.max_paginas)
+            elif tipo == "vtex":
+                items = indexar_vtex(fuente, args.max_paginas)
             else:
                 items = indexar_listados(fuente, args.max_paginas)
         except Exception as e:                       # una fuente caida no voltea el indice
