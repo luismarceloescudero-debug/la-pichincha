@@ -1,0 +1,1723 @@
+[
+ {
+  "productId": "46992",
+  "productName": "Celular Motorola Moto G17 Azul 4/128gb 6.72''",
+  "brand": "MOTOROLA",
+  "brandId": 1083,
+  "brandImageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/172599/2c1878a1897ae66efd4f8b58f0fd--1-.jpg",
+  "linkText": "moto-g17-azul-4-128gb-6-72--406972",
+  "productReference": "406972",
+  "productReferenceCode": "406972",
+  "categoryId": "2",
+  "productTitle": "MOTO G17 AZUL 4/128GB 6.72''",
+  "releaseDate": "2026-02-05T11:01:00Z",
+  "clusterHighlights": {
+   "326": "QUINCE-NALDO",
+   "725": "F12 N14 MF/CARD",
+   "751": "BNA Quince",
+   "790": "Ofertas Electro"
+  },
+  "productClusters": {
+   "326": "QUINCE-NALDO",
+   "541": "synerise primer carrusel",
+   "564": "Catalogov2",
+   "567": "Test25",
+   "712": "prueba",
+   "725": "F12 N14 MF/CARD",
+   "732": "Nuevo",
+   "751": "BNA Quince",
+   "790": "Ofertas Electro",
+   "802": "TAB NaldoWeek",
+   "818": "mama tecno"
+  },
+  "searchableClusters": {
+   "725": "F12 N14 MF/CARD",
+   "751": "BNA Quince",
+   "790": "Ofertas Electro"
+  },
+  "categories": [
+   "/Celulares/Celulares/",
+   "/Celulares/"
+  ],
+  "categoriesIds": [
+   "/1/2/",
+   "/1/"
+  ],
+  "link": "https://www.naldo.com.ar/moto-g17-azul-4-128gb-6-72--406972/p",
+  "Memoria RAM": [
+   "4 Gb"
+  ],
+  "Garantía": [
+   "12 meses"
+  ],
+  "Certificado Ramatel": [
+   "H-33121"
+  ],
+  "Memoria Interna": [
+   "128 Gb"
+  ],
+  "Red": [
+   "4G/LTE"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Color": [
+   "Azul"
+  ],
+  "Sistema operativo": [
+   "Android"
+  ],
+  "Tipo de conector de carga": [
+   "Usb Type C"
+  ],
+  "Especificaciones de Producto": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga"
+  ],
+  "Resolución Cámara Trasera Principal": [
+   "48 a 63 Mpx"
+  ],
+  "Resolución Cámara Frontal Principal": [
+   "Más de 13 Mpx"
+  ],
+  "Flash": [
+   "SI"
+  ],
+  "Resolución cámara trasera": [
+   "50 MP"
+  ],
+  "Resolución cámara frontal": [
+   "32 MP"
+  ],
+  "Cámara": [
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal"
+  ],
+  "Capacidad Batería": [
+   "Mayor a 5000 mAh"
+  ],
+  "Capacidad de batería": [
+   "5200 mAh"
+  ],
+  "Batería": [
+   "Capacidad Batería",
+   "Capacidad de batería"
+  ],
+  "Alto": [
+   "16,56 cm"
+  ],
+  "Ancho": [
+   "7,59 cm"
+  ],
+  "Profundidad": [
+   "0,81 cm"
+  ],
+  "Peso": [
+   "187 g"
+  ],
+  "Dimensiones": [
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso"
+  ],
+  "Tecnología de pantalla": [
+   "LTPS"
+  ],
+  "Tipo de desbloqueo": [
+   "Sensor de huella dactilar"
+  ],
+  "Tamaño de Pantalla": [
+   "6.72''"
+  ],
+  "Pantalla": [
+   "Tecnología de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla"
+  ],
+  "Tax": [
+   "247933,06"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "Wifi": [
+   "SI"
+  ],
+  "NFC": [
+   "SI"
+  ],
+  "Bluetooth": [
+   "SI"
+  ],
+  "Conectividad": [
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecifications": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga",
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal",
+   "Capacidad Batería",
+   "Capacidad de batería",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso",
+   "Tecnología de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla",
+   "Tax",
+   "IVA",
+   "Impuestos internos",
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecificationsGroups": [
+   "Especificaciones de Producto",
+   "Cámara",
+   "Batería",
+   "Dimensiones",
+   "Pantalla",
+   "Tax",
+   "Impuestos",
+   "Conectividad"
+  ],
+  "items": [
+   {
+    "itemId": "47336",
+    "name": "MOTO G17 AZUL 4/128GB 6.72''",
+    "nameComplete": "Celular Motorola Moto G17 Azul 4/128gb 6.72'' MOTO G17 AZUL 4/128GB 6.72''",
+    "complementName": "MOTO G17 AZUL 4/128GB 6.72''",
+    "ean": "406972",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "406972"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "215345",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215345-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO-copia.jpg?v=639211151126570000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215345/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO-copia.jpg?v=639211151126570000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO-copia",
+      "imageLastModified": "2026-07-31T17:18:32.6570000Z"
+     },
+     {
+      "imageId": "215346",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215346-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE-copia.jpg?v=639211151126900000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215346/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE-copia.jpg?v=639211151126900000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE-copia",
+      "imageLastModified": "2026-07-31T17:18:32.6900000Z"
+     },
+     {
+      "imageId": "215347",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215347-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-LEFT-copia.jpg?v=639211151126900000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-LEFT-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215347/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-LEFT-copia.jpg?v=639211151126900000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-LEFT-copia",
+      "imageLastModified": "2026-07-31T17:18:32.6900000Z"
+     },
+     {
+      "imageId": "215348",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215348-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT-copia.jpg?v=639211151127030000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215348/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT-copia.jpg?v=639211151127030000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT-copia",
+      "imageLastModified": "2026-07-31T17:18:32.7030000Z"
+     },
+     {
+      "imageId": "215349",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215349-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE.jpg?v=639211151127030000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215349/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE.jpg?v=639211151127030000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE",
+      "imageLastModified": "2026-07-31T17:18:32.7030000Z"
+     },
+     {
+      "imageId": "215350",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215350-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-LEFT.jpg?v=639211151127030000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-LEFT\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215350/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-LEFT.jpg?v=639211151127030000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-LEFT",
+      "imageLastModified": "2026-07-31T17:18:32.7030000Z"
+     },
+     {
+      "imageId": "215351",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215351-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT.jpg?v=639211151127200000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215351/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT.jpg?v=639211151127200000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT",
+      "imageLastModified": "2026-07-31T17:18:32.7200000Z"
+     },
+     {
+      "imageId": "215352",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215352-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_LEFTSIDE.jpg?v=639211151127200000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_LEFTSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215352/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_LEFTSIDE.jpg?v=639211151127200000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_LEFTSIDE",
+      "imageLastModified": "2026-07-31T17:18:32.7200000Z"
+     },
+     {
+      "imageId": "215353",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215353-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_RIGHTSIDE.jpg?v=639211151127370000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_RIGHTSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215353/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_RIGHTSIDE.jpg?v=639211151127370000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_RIGHTSIDE",
+      "imageLastModified": "2026-07-31T17:18:32.7370000Z"
+     },
+     {
+      "imageId": "215354",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215354-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BOTTOM-SIDE.jpg?v=639211151127370000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BOTTOM-SIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215354/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BOTTOM-SIDE.jpg?v=639211151127370000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BOTTOM-SIDE",
+      "imageLastModified": "2026-07-31T17:18:32.7370000Z"
+     },
+     {
+      "imageId": "215355",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/215355-#width#-#height#/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_TOPSIDE.jpg?v=639211151127370000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_TOPSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/215355/Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_TOPSIDE.jpg?v=639211151127370000",
+      "imageText": "Copy-of-2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_TOPSIDE",
+      "imageLastModified": "2026-07-31T17:18:32.7370000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Naldo Lombardi SA Arg",
+      "addToCartLink": "https://www.naldo.com.ar/checkout/cart/add?sku=47336&qty=1&seller=1&sc=1&price=29999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 299999.0,
+       "ListPrice": 461999.0,
+       "PriceWithoutDiscount": 299999.0,
+       "FullSellingPrice": 299999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjFlNWExNmY2LTQxMGItNGRiNS1hYTZkLWVhOWY2MDkyMjc3YiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyOTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjI5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiI0NzMzNiIsImFjY291bnROYW1lIjoibmFsZG9hciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxNDMyLCJpYXQiOjE3OTI0MTk2MzIsImp0aSI6ImM0NWY4MjBkLTc2NGUtNGYzNi1hMTQzLWI2YzhhNmRjNGJiNCIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.u8kImV72zgaxnTCN9J6HDoUiM-itSMB2NuNaObzPnXWhfn_x23edoj-xDboy69hKQIt0aDM-PE9BPjzv20l_Yg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "48759",
+  "productName": "Celular Motorola Moto G06 Azul 4/128gb 6.88'' Nfc",
+  "brand": "MOTOROLA",
+  "brandId": 1083,
+  "brandImageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/172599/2c1878a1897ae66efd4f8b58f0fd--1-.jpg",
+  "linkText": "moto-g06-azul-4-128gb-6-88-nfc-407130",
+  "productReference": "407130",
+  "productReferenceCode": "407130",
+  "categoryId": "2",
+  "productTitle": "MOTO G06 AZUL 4/128GB 6.88'' NFC",
+  "releaseDate": "2026-06-17T11:02:00Z",
+  "clusterHighlights": {
+   "326": "QUINCE-NALDO",
+   "725": "F12 N14 MF/CARD",
+   "791": "Día del Niño 2026"
+  },
+  "productClusters": {
+   "326": "QUINCE-NALDO",
+   "564": "Catalogov2",
+   "567": "Test25",
+   "725": "F12 N14 MF/CARD",
+   "791": "Día del Niño 2026",
+   "812": "Celus & Tablets"
+  },
+  "searchableClusters": {
+   "725": "F12 N14 MF/CARD",
+   "791": "Día del Niño 2026"
+  },
+  "categories": [
+   "/Celulares/Celulares/",
+   "/Celulares/"
+  ],
+  "categoriesIds": [
+   "/1/2/",
+   "/1/"
+  ],
+  "link": "https://www.naldo.com.ar/moto-g06-azul-4-128gb-6-88-nfc-407130/p",
+  "Memoria RAM": [
+   "4 Gb"
+  ],
+  "Garantía": [
+   "12 meses"
+  ],
+  "Certificado Ramatel": [
+   "-"
+  ],
+  "Memoria Interna": [
+   "128 Gb"
+  ],
+  "Red": [
+   "4G/LTE"
+  ],
+  "Color": [
+   "Azul"
+  ],
+  "Sistema operativo": [
+   "Android"
+  ],
+  "Tipo de conector de carga": [
+   "Usb Type C"
+  ],
+  "Especificaciones de Producto": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga"
+  ],
+  "Resolución Cámara Trasera Principal": [
+   "48 a 63 Mpx"
+  ],
+  "Resolución Cámara Frontal Principal": [
+   "De 8 a 12 Mpx"
+  ],
+  "Flash": [
+   "SI"
+  ],
+  "Resolución cámara trasera": [
+   "50 MP"
+  ],
+  "Resolución cámara frontal": [
+   "8 MP"
+  ],
+  "Cámara": [
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal"
+  ],
+  "Capacidad Batería": [
+   "Mayor a 5000 mAh"
+  ],
+  "Capacidad de batería": [
+   "5200 mAh"
+  ],
+  "Batería": [
+   "Capacidad Batería",
+   "Capacidad de batería"
+  ],
+  "Alto": [
+   "17,13 cm"
+  ],
+  "Ancho": [
+   "7,75 cm"
+  ],
+  "Profundidad": [
+   "0,83 cm"
+  ],
+  "Peso": [
+   "347 g"
+  ],
+  "Dimensiones": [
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso"
+  ],
+  "Tecnología de pantalla": [
+   "HD+"
+  ],
+  "Resolución de pantalla": [
+   "720 x 1604"
+  ],
+  "Tipo de desbloqueo": [
+   "Sensor de huella dactilar"
+  ],
+  "Tamaño de Pantalla": [
+   "6.88''"
+  ],
+  "Pantalla": [
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla"
+  ],
+  "Tax": [
+   "190081,83"
+  ],
+  "Modelo del procesador": [
+   "Mediatek Helio G81 Extreme"
+  ],
+  "Núcleos": [
+   "Octa-Core"
+  ],
+  "Velocidad": [
+   "2.0 GHz"
+  ],
+  "Procesador": [
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "Wifi": [
+   "SI"
+  ],
+  "NFC": [
+   "SI"
+  ],
+  "Bluetooth": [
+   "SI"
+  ],
+  "Conectividad": [
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecifications": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga",
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal",
+   "Capacidad Batería",
+   "Capacidad de batería",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso",
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla",
+   "Tax",
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad",
+   "IVA",
+   "Impuestos internos",
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecificationsGroups": [
+   "Especificaciones de Producto",
+   "Cámara",
+   "Batería",
+   "Dimensiones",
+   "Pantalla",
+   "Tax",
+   "Procesador",
+   "Impuestos",
+   "Conectividad"
+  ],
+  "items": [
+   {
+    "itemId": "49356",
+    "name": "MOTO G06 AZUL 4/128GB 6.88'' NFC",
+    "nameComplete": "Celular Motorola Moto G06 Azul 4/128gb 6.88'' Nfc MOTO G06 AZUL 4/128GB 6.88'' NFC",
+    "complementName": "MOTO G06 AZUL 4/128GB 6.88'' NFC",
+    "ean": "7790894902117",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "407130"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "225027",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/225027-#width#-#height#/407030.jpg?v=639179198123100000\" width=\"#width#\" height=\"#height#\" alt=\"407030\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/225027/407030.jpg?v=639179198123100000",
+      "imageText": "407030",
+      "imageLastModified": "2026-06-24T17:43:32.3100000Z"
+     },
+     {
+      "imageId": "225028",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/225028-#width#-#height#/407030_2.jpg?v=639179198123270000\" width=\"#width#\" height=\"#height#\" alt=\"407030_2\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/225028/407030_2.jpg?v=639179198123270000",
+      "imageText": "407030_2",
+      "imageLastModified": "2026-06-24T17:43:32.3270000Z"
+     },
+     {
+      "imageId": "225029",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/225029-#width#-#height#/407030_3.jpg?v=639179198123400000\" width=\"#width#\" height=\"#height#\" alt=\"407030_3\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/225029/407030_3.jpg?v=639179198123400000",
+      "imageText": "407030_3",
+      "imageLastModified": "2026-06-24T17:43:32.3400000Z"
+     },
+     {
+      "imageId": "225030",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/225030-#width#-#height#/407030_4.jpg?v=639179198123400000\" width=\"#width#\" height=\"#height#\" alt=\"407030_4\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/225030/407030_4.jpg?v=639179198123400000",
+      "imageText": "407030_4",
+      "imageLastModified": "2026-06-24T17:43:32.3400000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Naldo Lombardi SA Arg",
+      "addToCartLink": "https://www.naldo.com.ar/checkout/cart/add?sku=49356&qty=1&seller=1&sc=1&price=22999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 229999.0,
+       "ListPrice": 405999.0,
+       "PriceWithoutDiscount": 229999.0,
+       "FullSellingPrice": 229999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ijk3YjVlYmEzLTMwYzMtNGQyOC1iNTIyLTIzMTQzZjQ1NTc4OCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyMjk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjIyOTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiI0OTM1NiIsImFjY291bnROYW1lIjoibmFsZG9hciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxNDMyLCJpYXQiOjE3OTI0MTk2MzIsImp0aSI6IjAxMDUzZTBmLTM0ZDUtNDQ1OS1hOTE2LTFiMjZlNjBkMjUzNCIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.WysVltbrzZhSg5mT2UkRqdgpdbNeRU4LyUvkB3e6n4F0XuvwR0DL-JDFbFEvl8ZhA56fF6v5qSpdZEnXT1q56Q",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "47852",
+  "productName": "Celular Samsung Galaxy A16 Green 4/128 Gb 6.7\"",
+  "brand": "SAMSUNG",
+  "brandId": 1227,
+  "brandImageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/162782/SAMSUNG-100.jpg",
+  "linkText": "galaxy-a16-green-4-128-gb-6-7--407056",
+  "productReference": "407056",
+  "productReferenceCode": "407056",
+  "categoryId": "2",
+  "productTitle": "GALAXY A16 GREEN 4/128 GB 6.7\"",
+  "releaseDate": "2026-04-21T15:04:00Z",
+  "clusterHighlights": {
+   "326": "QUINCE-NALDO",
+   "725": "F12 N14 MF/CARD",
+   "791": "Día del Niño 2026",
+   "799": "Ofertas Samsung - Día del Niño"
+  },
+  "productClusters": {
+   "326": "QUINCE-NALDO",
+   "564": "Catalogov2",
+   "567": "Test25",
+   "725": "F12 N14 MF/CARD",
+   "776": "samsung mundial",
+   "785": "vacaciones",
+   "791": "Día del Niño 2026",
+   "799": "Ofertas Samsung - Día del Niño",
+   "812": "Celus & Tablets"
+  },
+  "searchableClusters": {
+   "725": "F12 N14 MF/CARD",
+   "791": "Día del Niño 2026",
+   "799": "Ofertas Samsung - Día del Niño"
+  },
+  "categories": [
+   "/Celulares/Celulares/",
+   "/Celulares/"
+  ],
+  "categoriesIds": [
+   "/1/2/",
+   "/1/"
+  ],
+  "link": "https://www.naldo.com.ar/galaxy-a16-green-4-128-gb-6-7--407056/p",
+  "Memoria RAM": [
+   "4 Gb"
+  ],
+  "Garantía": [
+   "12 meses"
+  ],
+  "Certificado Ramatel": [
+   "H-31198"
+  ],
+  "Memoria Interna": [
+   "128 Gb"
+  ],
+  "Red": [
+   "4G/LTE"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Color": [
+   "Verde"
+  ],
+  "Sistema operativo": [
+   "Android"
+  ],
+  "Tipo de conector de carga": [
+   "Usb Type C"
+  ],
+  "Especificaciones de Producto": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga"
+  ],
+  "Resolución Cámara Trasera Principal": [
+   "48 a 63 Mpx"
+  ],
+  "Resolución Cámara Frontal Principal": [
+   "Más de 13 Mpx"
+  ],
+  "Cantidad de cámaras": [
+   "3"
+  ],
+  "Flash": [
+   "SI"
+  ],
+  "Resolución cámara trasera": [
+   "50 MP"
+  ],
+  "Resolución cámara frontal": [
+   "12 MP"
+  ],
+  "Cámara": [
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Cantidad de cámaras",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal"
+  ],
+  "Capacidad Batería": [
+   "5000 mAh"
+  ],
+  "Capacidad de batería": [
+   "5000 mAh"
+  ],
+  "Batería": [
+   "Capacidad Batería",
+   "Capacidad de batería"
+  ],
+  "Alto": [
+   "16,4 cm"
+  ],
+  "Ancho": [
+   "7,79 cm"
+  ],
+  "Profundidad": [
+   "0,79 cm"
+  ],
+  "Peso": [
+   "200 grs"
+  ],
+  "Dimensiones": [
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso"
+  ],
+  "Tecnología de pantalla": [
+   "Súper AMOLED"
+  ],
+  "Resolución de pantalla": [
+   "1080 x 2340 (Full HD+)"
+  ],
+  "Tipo de desbloqueo": [
+   "Sensor huella dactilar"
+  ],
+  "Tamaño de Pantalla": [
+   "6,7''"
+  ],
+  "Pantalla": [
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla"
+  ],
+  "Tax": [
+   "314048,78"
+  ],
+  "Modelo del procesador": [
+   "Octa-Core"
+  ],
+  "Núcleos": [
+   "8"
+  ],
+  "Velocidad": [
+   "2,2 GHz, 2 GHz"
+  ],
+  "Procesador": [
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "Wifi": [
+   "SI"
+  ],
+  "NFC": [
+   "SI"
+  ],
+  "Bluetooth": [
+   "SI"
+  ],
+  "Conectividad": [
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecifications": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga",
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Cantidad de cámaras",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal",
+   "Capacidad Batería",
+   "Capacidad de batería",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso",
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla",
+   "Tax",
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad",
+   "IVA",
+   "Impuestos internos",
+   "Wifi",
+   "NFC",
+   "Bluetooth"
+  ],
+  "allSpecificationsGroups": [
+   "Especificaciones de Producto",
+   "Cámara",
+   "Batería",
+   "Dimensiones",
+   "Pantalla",
+   "Tax",
+   "Procesador",
+   "Impuestos",
+   "Conectividad"
+  ],
+  "items": [
+   {
+    "itemId": "48374",
+    "name": "GALAXY A16 GREEN 4/128 GB 6.7\"",
+    "nameComplete": "Celular Samsung Galaxy A16 Green 4/128 Gb 6.7\" GALAXY A16 GREEN 4/128 GB 6.7\"",
+    "complementName": "GALAXY A16 GREEN 4/128 GB 6.7\"",
+    "ean": "8806099112769",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "407056"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "223942",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/223942-#width#-#height#/samsung-a16-lightgreen-frontback_1.jpg?v=639167822271770000\" width=\"#width#\" height=\"#height#\" alt=\"samsung-a16-lightgreen-frontback_1\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/223942/samsung-a16-lightgreen-frontback_1.jpg?v=639167822271770000",
+      "imageText": "samsung-a16-lightgreen-frontback_1",
+      "imageLastModified": "2026-06-11T13:43:47.1770000Z"
+     },
+     {
+      "imageId": "223943",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/223943-#width#-#height#/samsung-a16-lightgreen-front_1.jpg?v=639167822272070000\" width=\"#width#\" height=\"#height#\" alt=\"samsung-a16-lightgreen-front_1\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/223943/samsung-a16-lightgreen-front_1.jpg?v=639167822272070000",
+      "imageText": "samsung-a16-lightgreen-front_1",
+      "imageLastModified": "2026-06-11T13:43:47.2070000Z"
+     },
+     {
+      "imageId": "223944",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/223944-#width#-#height#/samsung-a16-lightgreen-back.jpg?v=639167822272230000\" width=\"#width#\" height=\"#height#\" alt=\"samsung-a16-lightgreen-back\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/223944/samsung-a16-lightgreen-back.jpg?v=639167822272230000",
+      "imageText": "samsung-a16-lightgreen-back",
+      "imageLastModified": "2026-06-11T13:43:47.2230000Z"
+     },
+     {
+      "imageId": "223945",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/223945-#width#-#height#/samsung-a16-lightgreen-side.jpg?v=639167822272270000\" width=\"#width#\" height=\"#height#\" alt=\"samsung-a16-lightgreen-side\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/223945/samsung-a16-lightgreen-side.jpg?v=639167822272270000",
+      "imageText": "samsung-a16-lightgreen-side",
+      "imageLastModified": "2026-06-11T13:43:47.2270000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Naldo Lombardi SA Arg",
+      "addToCartLink": "https://www.naldo.com.ar/checkout/cart/add?sku=48374&qty=1&seller=1&sc=1&price=37999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 379999.0,
+       "ListPrice": 549179.0,
+       "PriceWithoutDiscount": 379999.0,
+       "FullSellingPrice": 379999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjhkMjFjMDU5LTJhMDktNDIyOS05ZDI0LWE5NWQ2NTRiMGI2OSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjozNzk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjM3OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiI0ODM3NCIsImFjY291bnROYW1lIjoibmFsZG9hciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxNDMyLCJpYXQiOjE3OTI0MTk2MzIsImp0aSI6IjAzNmQ1YWE2LTEyYjEtNDlkZC04ZTMzLTUwZmFlNGQwMDY4OSIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.oJBRtX9r_p36zQL3hXVwy99SgK1W9-FBn7E43i55sMJVxSo6nCWWWhuCvNrrV9Bl--WLBfMMibesZOZayzQITQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T14:06:44Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "47604",
+  "productName": "Celular Samsung Galaxy A17 Light Blue 4/128gb 6.7''",
+  "brand": "SAMSUNG",
+  "brandId": 1227,
+  "brandImageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/162782/SAMSUNG-100.jpg",
+  "linkText": "galaxy-a17-light-blue-4-128gb-6-7--407038",
+  "productReference": "407038",
+  "productReferenceCode": "407038",
+  "categoryId": "2",
+  "productTitle": "GALAXY A17 LIGHT BLUE 4/128GB 6.7''",
+  "releaseDate": "2026-03-27T13:04:00Z",
+  "clusterHighlights": {
+   "326": "QUINCE-NALDO",
+   "725": "F12 N14 MF/CARD"
+  },
+  "productClusters": {
+   "326": "QUINCE-NALDO",
+   "541": "synerise primer carrusel",
+   "564": "Catalogov2",
+   "567": "Test25",
+   "712": "prueba",
+   "725": "F12 N14 MF/CARD",
+   "776": "samsung mundial",
+   "812": "Celus & Tablets"
+  },
+  "searchableClusters": {
+   "725": "F12 N14 MF/CARD"
+  },
+  "categories": [
+   "/Celulares/Celulares/",
+   "/Celulares/"
+  ],
+  "categoriesIds": [
+   "/1/2/",
+   "/1/"
+  ],
+  "link": "https://www.naldo.com.ar/galaxy-a17-light-blue-4-128gb-6-7--407038/p",
+  "Memoria RAM": [
+   "4 Gb"
+  ],
+  "Garantía": [
+   "12 meses"
+  ],
+  "Certificado Ramatel": [
+   "H-32395"
+  ],
+  "Memoria Interna": [
+   "128 Gb"
+  ],
+  "Red": [
+   "4G/LTE"
+  ],
+  "Color": [
+   "Light Blue"
+  ],
+  "Sistema operativo": [
+   "Android"
+  ],
+  "Tipo de conector de carga": [
+   "Usb Type C"
+  ],
+  "Especificaciones de Producto": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga"
+  ],
+  "Resolución Cámara Trasera Principal": [
+   "48 a 63 Mpx"
+  ],
+  "Resolución Cámara Frontal Principal": [
+   "Más de 13 Mpx"
+  ],
+  "Flash": [
+   "SI"
+  ],
+  "Resolución cámara trasera": [
+   "50.0 MP + 5.0 MP + 2.0 MP"
+  ],
+  "Resolución cámara frontal": [
+   "13,0 MP"
+  ],
+  "Cámara": [
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal"
+  ],
+  "Capacidad Batería": [
+   "5000 mAh"
+  ],
+  "Capacidad de batería": [
+   "5000 mAh"
+  ],
+  "Batería": [
+   "Capacidad Batería",
+   "Capacidad de batería"
+  ],
+  "Alto": [
+   "16,44 cm"
+  ],
+  "Ancho": [
+   "7,79 cm"
+  ],
+  "Profundidad": [
+   "0,75 cm"
+  ],
+  "Peso": [
+   "192 g"
+  ],
+  "Dimensiones": [
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso"
+  ],
+  "Tecnología de pantalla": [
+   "Super AMOLED"
+  ],
+  "Resolución de pantalla": [
+   "1080 x 2340 (FHD+)"
+  ],
+  "Tipo de desbloqueo": [
+   "Sensor de huella dactilar"
+  ],
+  "Tamaño de Pantalla": [
+   "6.7''"
+  ],
+  "Pantalla": [
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla"
+  ],
+  "Tax": [
+   "347106,62"
+  ],
+  "Modelo del procesador": [
+   "Octa-Core"
+  ],
+  "Velocidad": [
+   "2.4GHz,2GHz"
+  ],
+  "Procesador": [
+   "Modelo del procesador",
+   "Velocidad"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "Wifi": [
+   "SI"
+  ],
+  "Bluetooth": [
+   "SI"
+  ],
+  "Conectividad": [
+   "Wifi",
+   "Bluetooth"
+  ],
+  "allSpecifications": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga",
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal",
+   "Capacidad Batería",
+   "Capacidad de batería",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Peso",
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla",
+   "Tax",
+   "Modelo del procesador",
+   "Velocidad",
+   "IVA",
+   "Impuestos internos",
+   "Wifi",
+   "Bluetooth"
+  ],
+  "allSpecificationsGroups": [
+   "Especificaciones de Producto",
+   "Cámara",
+   "Batería",
+   "Dimensiones",
+   "Pantalla",
+   "Tax",
+   "Procesador",
+   "Impuestos",
+   "Conectividad"
+  ],
+  "items": [
+   {
+    "itemId": "48056",
+    "name": "GALAXY A17 LIGHT BLUE 4/128GB 6.7''",
+    "nameComplete": "Celular Samsung Galaxy A17 Light Blue 4/128gb 6.7'' GALAXY A17 LIGHT BLUE 4/128GB 6.7''",
+    "complementName": "GALAXY A17 LIGHT BLUE 4/128GB 6.7''",
+    "ean": "",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "407038"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "216587",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216587-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_1.-2400x2400-Product.jpg?v=639106663223430000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_1.-2400x2400-Product\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216587/A17-Light-Blue---STANDARD-Carrusel_1.-2400x2400-Product.jpg?v=639106663223430000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_1.-2400x2400-Product",
+      "imageLastModified": "2026-04-01T18:52:02.3430000Z"
+     },
+     {
+      "imageId": "216588",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216588-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_2.-2400x2400-Group-Visual.jpg?v=639106663223770000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_2.-2400x2400-Group-Visual\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216588/A17-Light-Blue---STANDARD-Carrusel_2.-2400x2400-Group-Visual.jpg?v=639106663223770000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_2.-2400x2400-Group-Visual",
+      "imageLastModified": "2026-04-01T18:52:02.3770000Z"
+     },
+     {
+      "imageId": "216589",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216589-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_3.-2400x2400-Spec-KV.jpg?v=639106663223770000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_3.-2400x2400-Spec-KV\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216589/A17-Light-Blue---STANDARD-Carrusel_3.-2400x2400-Spec-KV.jpg?v=639106663223770000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_3.-2400x2400-Spec-KV",
+      "imageLastModified": "2026-04-01T18:52:02.3770000Z"
+     },
+     {
+      "imageId": "216590",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216590-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_4.-2400x2400-What-s-in-the-box.jpg?v=639106663223900000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_4.-2400x2400-What-s-in-the-box\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216590/A17-Light-Blue---STANDARD-Carrusel_4.-2400x2400-What-s-in-the-box.jpg?v=639106663223900000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_4.-2400x2400-What-s-in-the-box",
+      "imageLastModified": "2026-04-01T18:52:02.3900000Z"
+     },
+     {
+      "imageId": "216591",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216591-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_6.-2400x2400-Feature-KV-Gemini.jpg?v=639106663223900000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_6.-2400x2400-Feature-KV-Gemini\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216591/A17-Light-Blue---STANDARD-Carrusel_6.-2400x2400-Feature-KV-Gemini.jpg?v=639106663223900000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_6.-2400x2400-Feature-KV-Gemini",
+      "imageLastModified": "2026-04-01T18:52:02.3900000Z"
+     },
+     {
+      "imageId": "216592",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216592-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_7.-2400x2400-Feature-KV-Design.jpg?v=639106663223900000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_7.-2400x2400-Feature-KV-Design\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216592/A17-Light-Blue---STANDARD-Carrusel_7.-2400x2400-Feature-KV-Design.jpg?v=639106663223900000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_7.-2400x2400-Feature-KV-Design",
+      "imageLastModified": "2026-04-01T18:52:02.3900000Z"
+     },
+     {
+      "imageId": "216593",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216593-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_8.-2400x2400-Feature-OIS-Camera.jpg?v=639106663224070000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_8.-2400x2400-Feature-OIS-Camera\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216593/A17-Light-Blue---STANDARD-Carrusel_8.-2400x2400-Feature-OIS-Camera.jpg?v=639106663224070000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_8.-2400x2400-Feature-OIS-Camera",
+      "imageLastModified": "2026-04-01T18:52:02.4070000Z"
+     },
+     {
+      "imageId": "216594",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216594-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_9.-2400x2400-Feature-KV-OS---SMR-Update.jpg?v=639106663224070000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_9.-2400x2400-Feature-KV-OS---SMR-Update\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216594/A17-Light-Blue---STANDARD-Carrusel_9.-2400x2400-Feature-KV-OS---SMR-Update.jpg?v=639106663224070000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_9.-2400x2400-Feature-KV-OS---SMR-Update",
+      "imageLastModified": "2026-04-01T18:52:02.4070000Z"
+     },
+     {
+      "imageId": "216595",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/216595-#width#-#height#/A17-Light-Blue---STANDARD-Carrusel_10.-2400x2400-Feature-KV-Display.jpg?v=639106663224230000\" width=\"#width#\" height=\"#height#\" alt=\"A17-Light-Blue---STANDARD-Carrusel_10.-2400x2400-Feature-KV-Display\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/216595/A17-Light-Blue---STANDARD-Carrusel_10.-2400x2400-Feature-KV-Display.jpg?v=639106663224230000",
+      "imageText": "A17-Light-Blue---STANDARD-Carrusel_10.-2400x2400-Feature-KV-Display",
+      "imageLastModified": "2026-04-01T18:52:02.4230000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Naldo Lombardi SA Arg",
+      "addToCartLink": "https://www.naldo.com.ar/checkout/cart/add?sku=48056&qty=1&seller=1&sc=1&price=41999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 419999.0,
+       "ListPrice": 537499.0,
+       "PriceWithoutDiscount": 419999.0,
+       "FullSellingPrice": 419999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRiMTk5OGViLWUzNGUtNDUxMy04OWUzLTYxNDNiZWFmYTkwZSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo0MTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjQxOTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiI0ODA1NiIsImFjY291bnROYW1lIjoibmFsZG9hciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxNDMyLCJpYXQiOjE3OTI0MTk2MzIsImp0aSI6IjRhNDlhMjBjLWZhZDMtNDk0YS05MmY5LTgyZTFkZmQ2YzUyNSIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.Rcah4WtuxExtOUt-HuB-P2UqgEvub7rX5XqijrAsuO2mSwgFYRmhjjBM_bIiaELtrRFL1mIGRs3ZLnaSdAQFaA",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-14T00:00:00Z",
+       "AvailableQuantity": 10,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ },
+ {
+  "productId": "47412",
+  "productName": "Celular Motorola Moto Edge70 Fusion 5g Azul 8/256gb",
+  "brand": "MOTOROLA",
+  "brandId": 1083,
+  "brandImageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/172599/2c1878a1897ae66efd4f8b58f0fd--1-.jpg",
+  "linkText": "moto-edge70-fusion-5g-azul-8-256gb-407029",
+  "productReference": "407029",
+  "productReferenceCode": "407029",
+  "categoryId": "2",
+  "productTitle": "MOTO EDGE70 FUSION 5G AZUL 8/256GB",
+  "releaseDate": "2026-03-09T17:01:00Z",
+  "clusterHighlights": {
+   "326": "QUINCE-NALDO",
+   "725": "F12 N14 MF/CARD",
+   "752": "BNA Dieciocho"
+  },
+  "productClusters": {
+   "326": "QUINCE-NALDO",
+   "564": "Catalogov2",
+   "567": "Test25",
+   "712": "prueba",
+   "725": "F12 N14 MF/CARD",
+   "752": "BNA Dieciocho"
+  },
+  "searchableClusters": {
+   "725": "F12 N14 MF/CARD",
+   "752": "BNA Dieciocho"
+  },
+  "categories": [
+   "/Celulares/Celulares/",
+   "/Celulares/"
+  ],
+  "categoriesIds": [
+   "/1/2/",
+   "/1/"
+  ],
+  "link": "https://www.naldo.com.ar/moto-edge70-fusion-5g-azul-8-256gb-407029/p",
+  "Memoria RAM": [
+   "8 Gb"
+  ],
+  "Garantía": [
+   "12 meses"
+  ],
+  "Certificado Ramatel": [
+   "-"
+  ],
+  "Memoria Interna": [
+   "256 Gb"
+  ],
+  "Red": [
+   "5G"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Color": [
+   "Azul"
+  ],
+  "Sistema operativo": [
+   "Android 16"
+  ],
+  "Tipo de conector de carga": [
+   "Usb Type C"
+  ],
+  "Especificaciones de Producto": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga"
+  ],
+  "Resolución Cámara Trasera Principal": [
+   "48 a 63 Mpx"
+  ],
+  "Resolución Cámara Frontal Principal": [
+   "Más de 13 Mpx"
+  ],
+  "Flash": [
+   "SI"
+  ],
+  "Resolución cámara trasera": [
+   "50 MP"
+  ],
+  "Resolución cámara frontal": [
+   "32 MP"
+  ],
+  "Cámara": [
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal"
+  ],
+  "Capacidad Batería": [
+   "Mayor a 5000 mAh"
+  ],
+  "Capacidad de batería": [
+   "5200 mAh"
+  ],
+  "Batería": [
+   "Capacidad Batería",
+   "Capacidad de batería"
+  ],
+  "Alto": [
+   "16,27 cm"
+  ],
+  "Ancho": [
+   "7,56 cm"
+  ],
+  "Profundidad": [
+   "0,72 cm"
+  ],
+  "Dimensiones": [
+   "Alto",
+   "Ancho",
+   "Profundidad"
+  ],
+  "Tecnología de pantalla": [
+   "pOLED"
+  ],
+  "Resolución de pantalla": [
+   "1272 x 2772"
+  ],
+  "Tipo de desbloqueo": [
+   "Sensor de huella dactilar"
+  ],
+  "Tamaño de Pantalla": [
+   "6.78''"
+  ],
+  "Pantalla": [
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla"
+  ],
+  "Tax": [
+   "743800,9"
+  ],
+  "Modelo del procesador": [
+   "Qualcomm Snapdragon 7s gen 3 (SM7635)"
+  ],
+  "Núcleos": [
+   "Octa-Core"
+  ],
+  "Velocidad": [
+   "2.5 GHz"
+  ],
+  "Procesador": [
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "Wifi": [
+   "SI"
+  ],
+  "Bluetooth": [
+   "SI"
+  ],
+  "Conectividad": [
+   "Wifi",
+   "Bluetooth"
+  ],
+  "allSpecifications": [
+   "Memoria RAM",
+   "Garantía",
+   "Certificado Ramatel",
+   "Memoria Interna",
+   "Red",
+   "Dual SIM",
+   "Color",
+   "Sistema operativo",
+   "Tipo de conector de carga",
+   "Resolución Cámara Trasera Principal",
+   "Resolución Cámara Frontal Principal",
+   "Flash",
+   "Resolución cámara trasera",
+   "Resolución cámara frontal",
+   "Capacidad Batería",
+   "Capacidad de batería",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Tecnología de pantalla",
+   "Resolución de pantalla",
+   "Tipo de desbloqueo",
+   "Tamaño de Pantalla",
+   "Tax",
+   "Modelo del procesador",
+   "Núcleos",
+   "Velocidad",
+   "IVA",
+   "Impuestos internos",
+   "Wifi",
+   "Bluetooth"
+  ],
+  "allSpecificationsGroups": [
+   "Especificaciones de Producto",
+   "Cámara",
+   "Batería",
+   "Dimensiones",
+   "Pantalla",
+   "Tax",
+   "Procesador",
+   "Impuestos",
+   "Conectividad"
+  ],
+  "items": [
+   {
+    "itemId": "47841",
+    "name": "MOTO EDGE70 FUSION 5G AZUL 8/256GB",
+    "nameComplete": "Celular Motorola Moto Edge70 Fusion 5g Azul 8/256gb MOTO EDGE70 FUSION 5G AZUL 8/256GB",
+    "complementName": "MOTO EDGE70 FUSION 5G AZUL 8/256GB",
+    "ean": "7790894902100",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "407029"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": null,
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "214950",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214950-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_PDP-HERO-copia.jpg?v=639090021153070000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_PDP-HERO-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214950/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_PDP-HERO-copia.jpg?v=639090021153070000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_PDP-HERO-copia",
+      "imageLastModified": "2026-03-13T12:35:15.3070000Z"
+     },
+     {
+      "imageId": "214951",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214951-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_FRONTSIDE-copia.jpg?v=639090021153200000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_FRONTSIDE-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214951/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_FRONTSIDE-copia.jpg?v=639090021153200000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_FRONTSIDE-copia",
+      "imageLastModified": "2026-03-13T12:35:15.3200000Z"
+     },
+     {
+      "imageId": "214952",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214952-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BACKSIDE.jpg?v=639090021153370000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BACKSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214952/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BACKSIDE.jpg?v=639090021153370000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BACKSIDE",
+      "imageLastModified": "2026-03-13T12:35:15.3370000Z"
+     },
+     {
+      "imageId": "214953",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214953-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-LEFT-copia.jpg?v=639090021153370000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-LEFT-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214953/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-LEFT-copia.jpg?v=639090021153370000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-LEFT-copia",
+      "imageLastModified": "2026-03-13T12:35:15.3370000Z"
+     },
+     {
+      "imageId": "214954",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214954-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-RIGHT-copia.jpg?v=639090021153530000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-RIGHT-copia\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214954/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-RIGHT-copia.jpg?v=639090021153530000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-FRONTSIDE-RIGHT-copia",
+      "imageLastModified": "2026-03-13T12:35:15.3530000Z"
+     },
+     {
+      "imageId": "214955",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214955-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BOTTOM.jpg?v=639090021153530000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BOTTOM\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214955/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BOTTOM.jpg?v=639090021153530000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_BOTTOM",
+      "imageLastModified": "2026-03-13T12:35:15.3530000Z"
+     },
+     {
+      "imageId": "214956",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214956-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_TOPSIDE.jpg?v=639090021153530000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_TOPSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214956/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_TOPSIDE.jpg?v=639090021153530000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_TOPSIDE",
+      "imageLastModified": "2026-03-13T12:35:15.3530000Z"
+     },
+     {
+      "imageId": "214957",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214957-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-LEFT.jpg?v=639090021153700000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-LEFT\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214957/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-LEFT.jpg?v=639090021153700000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-LEFT",
+      "imageLastModified": "2026-03-13T12:35:15.3700000Z"
+     },
+     {
+      "imageId": "214958",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214958-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-RIGHT.jpg?v=639090021153700000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214958/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-RIGHT.jpg?v=639090021153700000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_DYN-BACKSIDE-RIGHT",
+      "imageLastModified": "2026-03-13T12:35:15.3700000Z"
+     },
+     {
+      "imageId": "214959",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214959-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_LEFTSIDE.jpg?v=639090021153700000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_LEFTSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214959/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_LEFTSIDE.jpg?v=639090021153700000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_LEFTSIDE",
+      "imageLastModified": "2026-03-13T12:35:15.3700000Z"
+     },
+     {
+      "imageId": "214960",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/214960-#width#-#height#/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_RIGHTSIDE.jpg?v=639090021153830000\" width=\"#width#\" height=\"#height#\" alt=\"Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_RIGHTSIDE\" id=\"\" />",
+      "imageUrl": "https://naldoar.vteximg.com.br/arquivos/ids/214960/Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_RIGHTSIDE.jpg?v=639090021153830000",
+      "imageText": "Copy-of-2025_AVENGER_BASICPACK_SILHOUETTE_RIGHTSIDE",
+      "imageLastModified": "2026-03-13T12:35:15.3830000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Naldo Lombardi SA Arg",
+      "addToCartLink": "https://www.naldo.com.ar/checkout/cart/add?sku=47841&qty=1&seller=1&sc=1&price=89999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 899999.0,
+       "ListPrice": 1304999.0,
+       "PriceWithoutDiscount": 899999.0,
+       "FullSellingPrice": 899999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ijg5ZDA2NmJmLTM5OTQtNDFjNS1hMWY2LThiOTY0NmNjZDNmZCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo4OTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjg5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiI0Nzg0MSIsImFjY291bnROYW1lIjoibmFsZG9hciIsInNhbGVzQ2hhbm5lbCI6IjEifSwiZXhwIjoxNzkyNDIxNDMyLCJpYXQiOjE3OTI0MTk2MzIsImp0aSI6IjkxNzU0M2MzLTM0NGUtNDAxYS1iOGNhLTA2NTQ1NTUwZWE1YyIsImlzcyI6InNlc3Npb24vZGF0YS1zaWduZXIifQ.87mXra3PqNln37Z2rlE1xJy7w7jp_IhzvjUYvD-M4MiBpPI4xuyGEUGyXgn7dEvZzwh00JOagro0jGFCNH8FQg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ]
+ }
+]

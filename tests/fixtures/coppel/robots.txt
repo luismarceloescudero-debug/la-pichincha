@@ -1,0 +1,62 @@
+# Disallow all crawlers access to certain pages. 
+ User-agent: * 
+User-agent: AdsBot-Google
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Googlebot-Video
+User-agent: Googlebot-Mobile
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: Claude-bot
+User-agent: PerplexityBot
+User-agent: OAI-Search
+
+Disallow: /img/* 
+Disallow: /account/* 
+Disallow: /login/* 
+Disallow: /checkout/* 
+Disallow: /wishlist/* 
+Disallow: /busca/* 
+Disallow: /quick-view/* 
+Disallow: /espiar/* 
+Disallow: /initialMap=/*
+Disallow: /?page=
+Disallow: /register.js?map=
+Disallow: /categoia-agrupada-menu/*
+Disallow: /register.js?page=
+Disallow: /head?page=
+Disallow: /booster?_q
+Disallow: /returnURL/*
+Disallow: /categoria-agrupada-menu/*
+Disallow: /buscapagina/* 
+Disallow: /?map=
+Sitemap: https://coppelar.vteximg.com.br/arquivos/busqueda-generativa.xml
+Sitemap: https://www.coppel.com.ar/sitemap.xml
+
+# Allow AI agents, MCP clients, and AEO crawlers
+# Important: add BELOW existing Disallow rules
+User-agent: *
+Allow: /well-known/ai-plugin.json
+Allow: /well-known/openapi.yaml
+Allow: /well-known/mcp.json
+Allow: /well-known/mcp
+Allow: /well-known/agent.json
+Allow: /well-known/search
+Allow: /well-known/product
+Allow: /well-known/categories
+Allow: /well-known/cart
+Allow: /well-known/healthcheck
+Allow: /llms.txt
+
+# Named AI crawler agents
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /

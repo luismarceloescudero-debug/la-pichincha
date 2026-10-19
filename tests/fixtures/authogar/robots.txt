@@ -1,0 +1,33 @@
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: *
+Disallow: /account/
+Disallow: /login/
+Disallow: /checkout/
+Disallow: /busca/
+Disallow: /quick-view/
+Disallow: /espiar/
+
+Sitemap: https://www.authogar.com/sitemap.xml

@@ -1,0 +1,14 @@
+# Disallow all crawlers access to certain pages. 
+ User-agent: * 
+
+ Disallow: /img/* 
+ Disallow: /account/* 
+ Disallow: /login/* 
+ Disallow: /checkout/* 
+ Disallow: /busca/* 
+ Disallow: /quick-view/* 
+ Disallow: /espiar/* 
+ Disallow: /buscapagina/* 
+ Disallow: /*?_q
+ Disallow: /folletos-new/
+ Sitemap: https://www.carrefour.com.ar/sitemap.xml

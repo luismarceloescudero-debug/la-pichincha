@@ -1,0 +1,37 @@
+# Disallow all crawlers access to certain pages. 
+ User-agent: * 
+
+ Disallow: /img/* 
+ Disallow: /account/* 
+ Disallow: /login/* 
+ Disallow: /checkout/* 
+ Disallow: /busca/* 
+ Disallow: /quick-view/* 
+ Disallow: /espiar/* 
+
+# Allow AI agents and MCP discovery endpoints
+# Important: Put them Always BELOW Disallow Rules
+User-agent: *
+Allow: /well-known/ai-plugin.json
+Allow: /well-known/openapi.yaml
+Allow: /well-known/mcp.json
+Allow: /well-known/mcp
+Allow: /well-known/agent.json
+Allow: /.well-known/ai-plugin.json
+Allow: /.well-known/openapi.yaml
+Allow: /.well-known/mcp.json
+Allow: /.well-known/mcp
+Allow: /.well-known/agent.json
+Allow: /llms.txt
+
+# Named AI crawler agents
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+ Sitemap: https://www.MiTienda.com.br/sitemap.xml

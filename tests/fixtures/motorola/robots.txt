@@ -1,0 +1,24 @@
+# Disallow all crawlers access to certain pages. 
+ User-agent: * 
+
+ Disallow: /img/* 
+ Disallow: /account/* 
+ Disallow: /login/* 
+ Disallow: /search?
+ Disallow: /checkout/* 
+ Disallow: /busca/* 
+ Disallow: /quick-view/* 
+ Disallow: /espiar/* 
+ Noindex: /buscapagina/*
+
+Allow:
+User-agent: Googlebot
+Allow:
+User-agent: Googlebot-Image
+Allow:
+User-agent: Mediapartners-Google
+Allow:
+User-agent: Adsbot-Google
+Allow:
+
+Sitemap: http://www.motorola.com.ar/sitemap.xml
