@@ -18,7 +18,7 @@ Una tanda de cuatro tareas donde cada una tuvo un **modelo asignado**. Reglas: l
 | 3. Analisis pasivo de ZAP y triaje | ZAP 2.17.0 (analisis); OmniRoute `rapido` → qwen3.8-27b y gpt-oss-20b (triaje); `revision` → Gemini 2.5 Flash (segunda opinion) | ZAP ~3 min; modelos 2-20 s | PR #78 (docs/seguridad-zap.md): 15 alertas, ninguna arreglable en el repo | Acertaron 6 de 13 (qwen), 7 de 13 (gpt-oss-20b) y 7 de 15 (Gemini); errores graves descartados: `frame-ancestors` en una meta (se ignora) y un XSS reflejado inexistente |
 | 4. Seccion 1.1.2 de `proceso-de-trabajo.md` | OmniRoute `rapido` → qwen3.8-27b (borrador) | 2 s | PR #77: aplicado y ajustado a mano | 0 / 0 (el borrador era correcto, pero con tono acartonado) |
 
-**Total de la revision cruzada (tarea 1 + CI)**: 2 hallazgos reales y 22 falsos. Los reales vinieron los dos de OpenCode (uno de la respuesta, otro del razonamiento sin respuesta final); Gemini via OmniRoute no acerto ninguno en 21 hallazgos, aunque contesto siempre y en menos de 40 s.
+**Total de la revision cruzada (tarea 1 + CI)**: 2 hallazgos reales y 21 falsos. Los reales vinieron los dos de OpenCode (uno de la respuesta, otro del razonamiento sin respuesta final); Gemini via OmniRoute no acerto ninguno en 17 hallazgos, aunque contesto siempre y en menos de 40 s.
 
 ## Que se aprendio
 
