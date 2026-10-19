@@ -67,7 +67,27 @@ No quedan afuera: a igual precio dan mas opciones. Pasan por las mismas reglas d
 - **Alternativas y combos**: mostrar junto a una oferta local las opciones internacionales al mismo precio, y combos o accesorios del mismo producto (hoy el buscador separa accesorios y combos). Es una vista nueva: se mide antes de armarla (Constitucion V).
 - **Costo puesto en casa** de lo internacional con la calculadora de importacion, para comparar contra el equivalente local.
 - **Pantalla, proteccion, audio y multimedia**: los titulos casi no los traen; se necesita la ficha de la tienda. Medir antes.
-- **No medido contra el indice real**: no hay `indice.json` local. Antes de dar por buena la lectura de titulos, mirar en la corrida diaria cuantos avisos de celulares y notebooks quedan afuera y por que.
+- **Medido contra el indice real el 19/10** (ver abajo). Lo que sigue afuera por falta de dato: ~100 notebooks y ~95 "celulares" sin RAM ni procesador en el titulo (parte son tablets, cosmeticos con "regeneracion celular" y accesorios que la categoria confunde) y 417 monitores sin Hz (casi todos de oficina, 60/75 Hz: bien afuera).
+
+## Medicion contra el indice publicado (19/10/2026)
+
+Indice del 18/10, 22.533 avisos. Antes y despues de arreglar la lectura de titulos:
+
+| Categoria  | Avisos | Pasan antes | Pasan despues | "Sin datos" antes | despues |
+|------------|-------:|------------:|--------------:|------------------:|--------:|
+| notebook   | 1.286  | 448         | 486           | 183               | ~100    |
+| smartphone | 445    | 196         | 211           | 113               | 95      |
+| pc         | 588    | 149         | 154           | 66                | 23      |
+
+Bugs que dejaban afuera equipos que si decian el dato, todos con el titulo real en `tests/js/categorias.test.js`:
+
+1. **Capacidades como las escribe cada tienda**: "SSD512GB" (pegada a letras), "8G 512G" (G sola), "16GB/512", "128/4gb" y "512/8+" (barra o + sin unidad, en cualquier orden). La G sola vale solo para capacidades reales: "8600G" y "3000G" son procesadores. "4G" y "5G" son la red. Una sola capacidad chica ("8G SSD512") es la RAM.
+2. **Procesador abreviado**: "I5-1335U", "INTEL I5 1235U", "R5-7535HS". El modelo de cuatro cifras que empieza con 1 es de 10a a 13a generacion (1335U es 13a, no 1a).
+3. **El motivo de Ryzen** decia "Ryzen 5: la generacion vigente es la 9"; ahora "Ryzen serie 5000: la generacion vigente es la 9000".
+
+Efecto a tener en cuenta: al reconocer "I5-12400F" sin la palabra "Core", esas PCs ahora caen por la regla de generacion (12a contra 14a vigente), igual que ya caian las que decian "Core i5-12400F". Las PCs armadas con Ryzen 5000 (179) caen por la misma regla: es la regla, no un error de lectura.
+
+**Las bajas propias daban 0 en todo el indice** aunque el historial del 18/10 tenia 29: la corrida manual de la tarde comparaba cada precio contra el que la de la mañana ya habia guardado ese dia, y cualquier relanzamiento en el mismo dia borraba las bajas del indice, de Telegram y del RSS. Ahora la baja se mide contra el precio de antes de hoy (`historial.leer(carpeta, antes_de=hoy)`), con su test en `tests/test_indexar_corrida.py`.
 
 ## Identidad del mismo producto entre tiendas (18/10/2026)
 
