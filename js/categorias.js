@@ -78,18 +78,30 @@
 
   /* --- Que dice el titulo ------------------------------------------------- */
   const aGB = (n, u) => Math.round(parseFloat(n) * (/t/i.test(u) ? 1000 : 1));
+  const RAMS = new Set([2, 3, 4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64]);
+  const ROMS = new Set([32, 64, 128, 256, 512, 1000, 1024, 2000]);
+  const CAPACIDADES = new Set([...RAMS, ...ROMS, 120, 240, 250, 450, 480, 500, 960]);
 
+  /* Cada tienda escribe las capacidades a su manera: "8GB 512GB", "SSD512GB", "8G 512G", "16GB/512", "128/4gb", "512/8+".
+     "4G" y "5G" solos son la red del celular, no una capacidad. */
   function memoriaDe(nombre) {
-    const n = String(nombre).replace(/(\d),(\d)/g, "$1.$2");
+    const n = String(nombre).replace(/(\d),(\d)/g, "$1.$2").replace(/(?<![\d.])[345]\s?g(?![a-z\d])/gi, " ");
     let m;
-    const caps = [...n.matchAll(/\b(\d{1,4})\s?(gb|tb)\b/gi)].map(x => aGB(x[1], x[2])).sort((a, b) => a - b);
-    if ((m = n.match(/(\d{1,3})\s?gb\s*(?:de\s*)?(?:memoria\s+)?ram\b/i) || n.match(/\bram\s*[:\-]?\s*(?:de\s*)?(\d{1,3})\s?gb/i))) {
+    // con la G sola solo valen capacidades que existen: "8600G" y "3000G" son procesadores
+    const caps = [...n.matchAll(/(?<![\d.])(\d{1,4})\s?(gb?|tb)(?![a-z\d])/gi)]
+      .filter(x => !/^g$/i.test(x[2]) || CAPACIDADES.has(+x[1])).map(x => aGB(x[1], x[2])).sort((a, b) => a - b);
+    if ((m = n.match(/(\d{1,3})\s?gb?\s*(?:de\s*)?(?:memoria\s+)?ram\b/i) || n.match(/\bram\s*[:\-]?\s*(?:de\s*)?(\d{1,3})\s?gb/i))) {
       const otras = caps.filter(c => c !== +m[1]);       // lo que no es la RAM es el almacenamiento
       return { ram: +m[1], rom: otras.length ? otras[otras.length - 1] : 0 };
     }
-    if ((m = n.match(/\b(\d{1,2})\s?(?:gb)?\s*[+\/|]\s*(\d{2,4})\s?(gb|tb)\b/i)) && +m[1] <= 64)
-      return { ram: +m[1], rom: aGB(m[2], m[3]) };
+    // dos capacidades unidas por + o /, en cualquier orden y con la unidad en una, en las dos o en ninguna
+    if ((m = n.match(/(?<![\d.])(\d{1,4})\s?(gb?|tb)?\s*[+\/|]\s*(\d{1,4})\s?(gb?|tb)?(?![a-z\d])/i))) {
+      const a = aGB(m[1], m[2] || ""), b = aGB(m[3], m[4] || "");
+      const [ram, rom] = a <= b ? [a, b] : [b, a];
+      if (RAMS.has(ram) && (ROMS.has(rom) || /t/i.test((a <= b ? m[4] : m[2]) || ""))) return { ram, rom };
+    }
     if (caps.length >= 2 && caps[0] <= 64) return { ram: caps[0], rom: caps[caps.length - 1] };
+    if (caps.length === 1 && caps[0] <= 24) return { ram: caps[0], rom: 0 };   // una sola capacidad chica: es la RAM ("8G SSD512")
     return { ram: 0, rom: caps.length === 1 && caps[0] >= 64 ? caps[0] : 0 };   // una sola capacidad grande: es el almacenamiento
   }
 
@@ -107,10 +119,13 @@
     ["galaxy-s", "Galaxy S", 1, /\bgalaxy\s?s(\d{1,2})\b/i, m => +m[1]],
     ["pixel", "Pixel", 1, /\bpixel\s?(\d{1,2})\b/i, m => +m[1]],
     ["snapdragon", "Snapdragon 8", 1, /\bsnapdragon\s?8\s?(?:gen\s?(\d)|elite(?:\s?gen\s?(\d))?)/i, m => m[1] ? +m[1] : m[2] ? +m[2] + 1 : 5],
-    ["intel-core", "Core i", 1, /\bcore\s?i[3579][-\s](\d{4,5})/i, m => m[1].length === 5 ? +m[1].slice(0, 2) : +m[1][0]],
+    // "Core i5-1335U", "I5-1335U" e "INTEL I5 1235U": cada tienda lo abrevia distinto
+    ["intel-core", "Core i", 1, /\b(?:core\s?)?i[3579][-\s]?(\d{4,5})[a-z]{0,2}\b/i, m => m[1].length === 5 || m[1][0] === "1" ? +m[1].slice(0, 2) : +m[1][0]],   // 1335U es 13ª, 8250U es 8ª
     ["core-ultra", "Core Ultra", 1, /\bcore\s?ultra\s?[3579]\s?(\d)\d{2}/i, m => +m[1]],
-    ["ryzen", "Ryzen", 2, /\bryzen\s?[3579]\s?(\d)\d{3}/i, m => +m[1]]
+    ["ryzen", "Ryzen serie", 2, /\b(?:ryzen\s?(?:ai\s?)?|r)[3579][-\s]?(\d)\d{3}[a-z]{0,2}\b/i, m => +m[1]]   // "R5-7535HS" es un Ryzen 5
   ];
+  // Como se nombra una generacion: el Ryzen 5700 es de la serie 5000.
+  const nGen = (fam, n) => fam === "ryzen" ? n * 1000 : n;
   const generacionesDe = nombre => GENERACIONES.flatMap(([fam, et, paso, re, gen]) => {
     const m = String(nombre).match(re);
     return m ? [{ fam, et, paso, gen: gen(m) }] : [];
@@ -179,7 +194,7 @@
     for (const g of generacionesDe(nombre)) {
       const tope = ref.gen[g.fam] || g.gen, s = (ref.salto || {})[g.fam];
       const hay = s && s.comparados >= MIN_COMPARADOS, minimo = hay && s.mejoras < MIN_SALTO;
-      if (g.gen < tope - g.paso) { v.falla = v.falla || `${g.et} ${g.gen}: la generación vigente es la ${tope}`; continue; }
+      if (g.gen < tope - g.paso) { v.falla = v.falla || `${g.et} ${nGen(g.fam, g.gen)}: la generación vigente es la ${nGen(g.fam, tope)}`; continue; }
       v.reciente = true;
       // La novedad de la ultima generacion cuenta solo si mejoro varios apartados contra la anterior. Si no lo hizo
       // (diferencia minima), la anterior sigue vigente y las dos reciben el punto; si lo hizo, la anterior queda atras.
@@ -188,10 +203,10 @@
       if (hay && g.gen >= tope - g.paso) {
         const cuanto = `${s.mejoras} de ${s.comparados} apartados`;
         v.nota = g.gen >= tope
-          ? (minimo ? `${g.et} ${g.gen} mejoró solo ${cuanto} contra el ${g.gen - g.paso}: no suma como novedad y queda en la misma gama que el año anterior`
-                    : `${g.et} ${g.gen} mejoró ${cuanto} contra el ${g.gen - g.paso}: es una novedad real`)
-          : (minimo ? `el ${g.et} ${tope} mejoró solo ${cuanto} contra este modelo: sigue vigente como el año anterior`
-                    : `el ${g.et} ${tope} mejoró ${cuanto} contra este modelo: ya no cuenta como gama alta`);
+          ? (minimo ? `${g.et} ${nGen(g.fam, g.gen)} mejoró solo ${cuanto} contra el ${nGen(g.fam, g.gen - g.paso)}: no suma como novedad y queda en la misma gama que el año anterior`
+                    : `${g.et} ${nGen(g.fam, g.gen)} mejoró ${cuanto} contra el ${nGen(g.fam, g.gen - g.paso)}: es una novedad real`)
+          : (minimo ? `el ${g.et} ${nGen(g.fam, tope)} mejoró solo ${cuanto} contra este modelo: sigue vigente como el año anterior`
+                    : `el ${g.et} ${nGen(g.fam, tope)} mejoró ${cuanto} contra este modelo: ya no cuenta como gama alta`);
       }
     }
     const anios = aniosDe(nombre);
@@ -204,7 +219,8 @@
   }
 
   const cpuTier = n => { let m;
-    if ((m = n.match(/\bcore\s?ultra\s?([3579])/i)) || (m = n.match(/\bcore\s?i([3579])/i)) || (m = n.match(/\bryzen\s?(?:ai\s?)?([3579])\b/i))) return +m[1];
+    if ((m = n.match(/\bcore\s?ultra\s?([3579])/i)) || (m = n.match(/\bcore\s?i([3579])/i)) || (m = n.match(/\bryzen\s?(?:ai\s?)?([3579])\b/i))
+        || (m = n.match(/\b[ir]([3579])[-\s]?\d{4,5}[a-z]{0,2}\b/i))) return +m[1];   // abreviados: I7-13620H, R7-7735HS
     if ((m = n.match(/\bm[1-9]\s?(pro|max|ultra)\b/i))) return 9;
     return /\bm[1-9]\b/i.test(n) ? 5 : 0; };
   const gpuAlta = n => { const m = n.match(/\brtx\s?(\d{4})/i); return !!m && Math.floor(+m[1] / 1000) >= 4 && +m[1] % 1000 >= 60; };
