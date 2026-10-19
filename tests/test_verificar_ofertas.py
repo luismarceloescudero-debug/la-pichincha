@@ -418,7 +418,9 @@ class Agregador(unittest.TestCase):
 
     def test_otro_precio_en_la_tienda_no_confirma_la_oferta(self):
         juicio, _ = self.juzgar(html="", dom="Xiaomi Poco F8 Ultra $1.999.999")
-        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda"))
+        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda (muestra $1.999.999)"))
+        juicio, _ = self.juzgar(html="", dom="<div>cargando</div>")
+        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda (sin precios en 19 caracteres)"))
 
     def test_el_cartel_de_sin_stock_la_da_por_caida(self):
         self.assertEqual(self.juzgar(html="Este producto no está disponible $1.833.999")[0], ("caida", "estatica"))

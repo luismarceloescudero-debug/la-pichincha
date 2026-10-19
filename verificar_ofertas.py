@@ -306,7 +306,9 @@ def revisar_agregador(url, precio):
         return "caida", "agregador: no se pudo abrir la tienda"
     if precio_visible(dom, precio):
         return "viva", "precio confirmado en la tienda (renderizada)"
-    return "caida", "agregador: el precio no aparece en la tienda"
+    vistos = list(dict.fromkeys(re.findall(r"\$\s?\d{1,3}(?:\.\d{3})+", dom)))[:4]
+    return "caida", "agregador: el precio no aparece en la tienda" + (
+        f" (muestra {', '.join(vistos)})" if vistos else f" (sin precios en {len(dom)} caracteres)")
 
 
 def leer(ruta, defecto):
