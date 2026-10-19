@@ -133,7 +133,9 @@ def resumen_ml(codigo, cuerpo):
         return {"codigo": codigo, "error": str(datos.get("message") or datos.get("error") or "")[:120]}
     filas = datos.get("results") if isinstance(datos, dict) else datos
     if isinstance(filas, list):
-        return {"codigo": codigo, "total": (datos.get("paging") or {}).get("total", len(filas)) if isinstance(datos, dict) else len(filas),
+        precios = [f["price"] for f in filas if isinstance(f, dict) and isinstance(f.get("price"), (int, float))]
+        return {"codigo": codigo, "minimo": min(precios) if precios else None, "leidos": len(filas),
+                "total": (datos.get("paging") or {}).get("total", len(filas)) if isinstance(datos, dict) else len(filas),
                 "primeros": [{k: f.get(k) for k in ("item_id", "id", "price", "status", "available_quantity", "seller_id")
                               if isinstance(f, dict) and k in f} for f in filas[:3]]}
     return {"codigo": codigo, "status": datos.get("status"), "disponibles": datos.get("available_quantity"),
@@ -148,14 +150,16 @@ def explorar_ml(url):
         return {}
     tipo, ident = ref
     cab = {"Accept": "application/json", **({"Authorization": "Bearer " + token_ml()} if token_ml() else {})}
-    rutas = {"products": [f"/products/{ident}/items"],
-             "user-products": [f"/user-products/{ident}/items", f"/sites/MLA/search?user_product_id={ident}",
-                               f"/items?user_product_id={ident}"],
-             "items": [f"/items/{ident}"]}.get(tipo, [])
+    # (como se anota, que se pide)
+    rutas = {"products": [("/products/{id}/items", f"/products/{ident}/items?limit=100")],
+             "user-products": [("/user-products/{id}/items", f"/user-products/{ident}/items"),
+                               ("/sites/MLA/search?user_product_id", f"/sites/MLA/search?user_product_id={ident}"),
+                               ("/items?user_product_id", f"/items?user_product_id={ident}")],
+             "items": [("/items/{id}", f"/items/{ident}")]}.get(tipo, [])
     salida = {}
-    for ruta in rutas:
+    for clave, ruta in rutas:
         codigo, _, cuerpo = pedir(API_ML + ruta, cab)
-        salida[ruta.split("?")[0].replace(ident, "{id}") + ("?" + ruta.split("?")[1].split("=")[0] if "?" in ruta else "")] = r = resumen_ml(codigo, cuerpo)
+        salida[clave] = r = resumen_ml(codigo, cuerpo)
         # el primer aviso que aparezca: su estado y stock son lo que de verdad dice si esta en pie
         item = next((f.get("item_id") or f.get("id") for f in r.get("primeros") or [] if f.get("item_id") or f.get("id")), None)
         if item and "/items/{id}" not in salida:
