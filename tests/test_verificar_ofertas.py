@@ -197,7 +197,7 @@ class Principal(unittest.TestCase):
         shutil.rmtree(self.dir, ignore_errors=True)
 
     def correr(self, juicios):
-        with mock.patch.object(v, "revisar", side_effect=lambda u, desde=None, precio=None: (juicios[u], "estatica")), \
+        with mock.patch.object(v, "revisar", side_effect=lambda u, desde=None, precio=None, tienda=None: (juicios[u], "estatica")), \
                 redirect_stdout(io.StringIO()) as salida:
             codigo = v.main([self.ofertas, "--descartadas", self.descartadas])
         return codigo, salida.getvalue()
@@ -339,3 +339,115 @@ class ApiMercadoLibre(unittest.TestCase):
             self.assertEqual(v.pedir_api("https://t.test", {}), (403, '{"message":"forbidden"}'))
         with mock.patch.object(v.urllib.request, "urlopen", side_effect=urllib.error.URLError("sin red")):
             self.assertEqual(v.pedir_api("https://t.test", {}), (0, ""))
+
+
+MAXTECNO = "https://maxtecno.com.ar/producto/mfl-pantum-m6509nw-22ppm-1200-x-1200-dpi-wifi-red/"
+FRAVEGA = "https://www.fravega.com/p/celular-xiaomi-poco-f8-ultra-12gb-ram-256gb-rom-black-negro-23003846/"
+
+
+def woo(precio_centavos, en_stock=True):
+    return 200, json.dumps([{"name": "MFL PANTUM M6509NW", "is_in_stock": en_stock,
+                             "prices": {"price": str(precio_centavos), "currency_minor_unit": 2}}])
+
+
+class PrecioVisible(unittest.TestCase):
+    def test_el_precio_con_puntos_de_miles_como_lo_escribe_la_tienda(self):
+        self.assertTrue(v.precio_visible("Precio $1.833.999 antes $2.898.146", 1833999))
+        self.assertTrue(v.precio_visible("$ 1.833.999,00", 1833999))
+        self.assertTrue(v.precio_visible('"price":1833999,', 1833999))
+
+    def test_otro_numero_que_lo_contiene_no_cuenta(self):
+        self.assertFalse(v.precio_visible("$11.833.999", 1833999))
+        self.assertFalse(v.precio_visible("$1.833.9990", 1833999))
+        self.assertFalse(v.precio_visible("$1.833.998", 1833999))
+        self.assertFalse(v.precio_visible("", 1833999))
+        self.assertFalse(v.precio_visible("$1.833.999", None))
+
+
+class WooCommerce(unittest.TestCase):
+    """Maxtecno, 19/10: su Store API publica dio $274.116,63 y 'Hay existencias' para lo publicado a $274.116."""
+
+    def juzgar(self, precio, respuesta):
+        with mock.patch.object(v, "pedir_api", return_value=respuesta) as pedir:
+            return v.revisar_woo(MAXTECNO, precio, "https://maxtecno.com.ar"), pedir
+
+    def test_al_precio_publicado_y_con_stock_esta_en_pie(self):
+        juicio, pedir = self.juzgar(274116, woo(27411663))
+        self.assertEqual(juicio, ("viva", "api de la tienda"))
+        self.assertEqual(pedir.call_args[0][0], "https://maxtecno.com.ar/wp-json/wc/store/v1/products"
+                                                "?slug=mfl-pantum-m6509nw-22ppm-1200-x-1200-dpi-wifi-red")
+
+    def test_sin_stock_esta_caida(self):
+        self.assertEqual(self.juzgar(274116, woo(27411663, en_stock=False))[0], ("caida", "api de la tienda: sin stock"))
+
+    def test_mas_cara_que_lo_publicado_ya_no_es_la_oferta(self):
+        juicio, _ = self.juzgar(274116, woo(31428200))
+        self.assertEqual(juicio[0], "caida")
+        self.assertIn("$314.282", juicio[1])
+
+    def test_si_la_api_no_responde_o_no_la_encuentra_queda_la_revision_de_la_pagina(self):
+        self.assertIsNone(self.juzgar(274116, (503, ""))[0])
+        self.assertIsNone(self.juzgar(274116, (200, "[]"))[0])
+        self.assertIsNone(self.juzgar(274116, (200, "no es json"))[0])
+
+    def test_una_url_que_no_es_de_producto_no_se_consulta(self):
+        with mock.patch.object(v, "pedir_api") as pedir:
+            self.assertIsNone(v.revisar_woo("https://maxtecno.com.ar/categoria/x/", 1, "https://maxtecno.com.ar"))
+        pedir.assert_not_called()
+
+
+class Agregador(unittest.TestCase):
+    """Lo que llega por ComparaYa desde otra tienda: el precio tiene que verse en la pagina de esa tienda.
+    19/10: Fravega bloquea su API (CloudFront 403) y su HTML no trae el precio; ya armada en el navegador muestra
+    $1.833.999, el mismo que trajo ComparaYa."""
+
+    def juzgar(self, html=None, dom=None, error=None):
+        bajar = mock.patch.object(v, "bajar", side_effect=error) if error else \
+            mock.patch.object(v, "bajar", return_value=(200, html or ""))
+        with bajar, mock.patch.object(v, "renderizar", return_value=dom) as abrir:
+            return v.revisar_agregador(FRAVEGA, 1833999), abrir
+
+    def test_el_precio_en_el_html_alcanza_sin_abrir_el_navegador(self):
+        juicio, abrir = self.juzgar(html="<span>$1.833.999</span>")
+        self.assertEqual(juicio, ("viva", "precio confirmado en la tienda"))
+        abrir.assert_not_called()
+
+    def test_el_precio_que_arma_el_javascript_se_confirma_en_el_navegador(self):
+        juicio, _ = self.juzgar(html="<div id=app></div>", dom="Xiaomi Poco F8 Ultra $2.898.146 $1.833.999")
+        self.assertEqual(juicio, ("viva", "precio confirmado en la tienda (renderizada)"))
+
+    def test_otro_precio_en_la_tienda_no_confirma_la_oferta(self):
+        juicio, _ = self.juzgar(html="", dom="Xiaomi Poco F8 Ultra $1.999.999")
+        self.assertEqual(juicio, ("caida", "agregador: el precio no aparece en la tienda"))
+
+    def test_el_cartel_de_sin_stock_la_da_por_caida(self):
+        self.assertEqual(self.juzgar(html="Este producto no está disponible $1.833.999")[0], ("caida", "estatica"))
+        self.assertEqual(self.juzgar(html="", dom="Este producto no está disponible")[0], ("caida", "renderizada"))
+
+    def test_bloqueada_o_sin_red_no_se_publica(self):
+        error = urllib.error.HTTPError(FRAVEGA, 403, "no", {}, None)
+        self.assertEqual(self.juzgar(error=error, dom=None)[0], ("caida", "agregador: no se pudo abrir la tienda"))
+        self.assertEqual(self.juzgar(html="captcha", dom="captcha $1.833.999")[0],
+                         ("caida", "agregador: no se pudo abrir la tienda"))
+
+
+class Despacho(unittest.TestCase):
+    def test_cada_fuente_se_verifica_a_su_manera(self):
+        with mock.patch.object(v, "revisar_ml", return_value=None), \
+                mock.patch.object(v, "revisar_woo", return_value=("viva", "api de la tienda")) as woo_, \
+                mock.patch.object(v, "revisar_agregador", return_value=("viva", "precio confirmado en la tienda")) as agr, \
+                mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar", return_value=None):
+            self.assertEqual(v.revisar(MAXTECNO, precio=274116, tienda="maxtecno"), ("viva", "api de la tienda"))
+            self.assertEqual(v.revisar(FRAVEGA, precio=1833999, tienda="comparaya"), ("viva", "precio confirmado en la tienda"))
+            self.assertEqual(v.revisar("https://compragamer.com/producto/x", precio=1, tienda="compragamer"), ("viva", "estatica"))
+        self.assertEqual(woo_.call_args[0][2], "https://maxtecno.com.ar")
+        agr.assert_called_once_with(FRAVEGA, 1833999)
+
+    def test_main_pasa_la_tienda_de_cada_oferta(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        ruta = os.path.join(d, "o.json")
+        Path(ruta).write_text(json.dumps({"ofertas": [{"url": FRAVEGA, "precio": 1, "tienda": "comparaya"}]}), encoding="utf-8")
+        with mock.patch.object(v, "revisar", return_value=("viva", "x")) as revisar, redirect_stdout(io.StringIO()):
+            v.main([ruta, "--descartadas", os.path.join(d, "d.json")])
+        self.assertEqual(revisar.call_args[1]["tienda"], "comparaya")

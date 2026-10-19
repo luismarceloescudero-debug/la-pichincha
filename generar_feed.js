@@ -141,7 +141,8 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: o.f[o.ref], descuento: Math.round(o.off * 100),
-    comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria] }));
+    comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
+    tienda: o.f[3] }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera
 }
 
 function main(argv) {
@@ -158,7 +159,7 @@ function main(argv) {
   const candidatas = arg("candidatas", "");
   if (candidatas) {
     const n = parseInt(arg("max", "40"), 10) || 40;
-    fs.writeFileSync(candidatas, JSON.stringify({ ofertas: O.destacadas(idx, n).map(o => ({ url: o.f[2], nombre: o.f[0], precio: o.f[1] })) }), "utf8");
+    fs.writeFileSync(candidatas, JSON.stringify({ ofertas: O.destacadas(idx, n).map(o => ({ url: o.f[2], nombre: o.f[0], precio: o.f[1], tienda: o.f[3] })) }), "utf8");
     console.log(`candidatas a verificar: ${Math.min(O.destacadas(idx, n).length, n)}`);
     return 0;
   }
