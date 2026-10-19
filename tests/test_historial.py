@@ -42,6 +42,14 @@ class Leer(Base):
         escribir_csv(self.dir / "viejo.csv", [["2020-01-01", "mexx", "u9", "1"]])
         self.assertEqual(historial.leer(self.dir), {("mexx", "u1"): 1000})
 
+    def test_antes_de_una_fecha_ignora_lo_de_ese_dia_en_adelante(self):
+        escribir_csv(self.dir / "2026-10.csv", [["2026-10-17", "mexx", "u1", "1000"],
+                                                ["2026-10-18", "mexx", "u1", "900"],
+                                                ["2026-10-18", "mexx", "u2", "50"],
+                                                ["2026-10-18", "cg", "u3", ""]])
+        escribir_csv(self.dir / "2026-09.csv", [["2026-09-30", "cg", "u3", "70"]])
+        self.assertEqual(historial.leer(self.dir, antes_de="2026-10-18"), {("mexx", "u1"): 1000, ("cg", "u3"): 70})
+
     def test_vivos_por_tienda(self):
         estado = {("mexx", "a"): 1, ("mexx", "b"): 2, ("cg", "c"): 3}
         self.assertEqual(historial.vivos_por_tienda(estado), {"mexx": 2, "cg": 1})

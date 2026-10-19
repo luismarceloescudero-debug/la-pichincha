@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from contextlib import redirect_stdout
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
@@ -59,6 +60,14 @@ class Corrida(unittest.TestCase):
         salud = json.loads((self.dir / "salud.json").read_text(encoding="utf-8"))
         return indice, salud
 
+    def pasar_a_ayer(self):
+        """Lo que se relevo hoy pasa a ser de ayer: la proxima corrida es la del dia siguiente."""
+        hoy = datetime.now(indexar.AR).date()
+        for ruta in self.hist.glob("*.csv"):
+            texto = ruta.read_text(encoding="utf-8")
+            ruta.write_text(texto.replace(hoy.isoformat() + ",", (hoy - timedelta(days=1)).isoformat() + ","),
+                            encoding="utf-8")
+
     def filas(self):
         salida = []
         for ruta in sorted(self.hist.glob("*.csv")):
@@ -80,6 +89,7 @@ class Corrida(unittest.TestCase):
 
     def test_una_baja_de_precio_queda_en_antes_y_en_el_csv(self):
         self.correr([(1, 1000), (2, 2000)], [(101, 500)])
+        self.pasar_a_ayer()
         indice, _ = self.correr([(1, 900), (2, 2000)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "uno", 2)[6], 0)
@@ -270,7 +280,25 @@ class Corrida(unittest.TestCase):
 
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
+        self.pasar_a_ayer()
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "dos", 1)[6], 0)
+
+    def test_volver_a_correr_el_mismo_dia_no_borra_las_bajas_del_dia(self):
+        # 18/10: la corrida manual de la tarde comparo contra el precio que la de la mañana ya habia guardado
+        # y el indice publicado quedo con 0 bajas propias aunque el historial tenia 29.
+        self.correr([(1, 1000), (2, 2000)], [(101, 500)])
+        self.pasar_a_ayer()
+        self.correr([(1, 900), (2, 2000)], [(101, 500)])
+        indice, _ = self.correr([(1, 900), (2, 2000)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
+        self.assertEqual(self.filas().count(("uno", url(1), "900")), 1)     # el historial no repite la fila
+
+    def test_una_baja_entre_dos_corridas_del_mismo_dia_tambien_cuenta(self):
+        self.correr([(1, 1000)], [(101, 500)])
+        self.pasar_a_ayer()
+        self.correr([(1, 1000)], [(101, 500)])
+        indice, _ = self.correr([(1, 800)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
 
