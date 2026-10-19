@@ -327,3 +327,57 @@ test("el mismo procesador escrito distinto es la misma configuracion (R5-7535HS 
     conModelo("Notebook Acer Nitro V15 R5-7535HS 16GB 512GB RTX 4050", 1300000, "maxtecno", "ANV15")] };
   assert.equal(O.calcularOfertas(idx).masBarato.size, 1);
 });
+
+// ---- costo puesto en casa de lo internacional (spec 012) ----
+const fs = require("fs");
+const path = require("path");
+const M = require("../../js/monedas.js");
+const leerFx = n => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "monedas", n), "utf8"));
+const COSTO = { reglas: JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "importacion.json"), "utf8")),
+  tasas: M.normalizar({ dolarapi: leerFx("dolarapi-dolares.json"), erapi: leerFx("erapi-usd.json"), frankfurter: leerFx("frankfurter-usd.json") }) };
+const SSD = "SSD Kingston NV3 1TB M.2 NVMe";
+const par = (nombre, precio, modelo, o) => { const f = fila(nombre, precio, o); f[9] = modelo; return f; };
+
+test("destacadas: una oferta internacional trae su costo puesto en casa y la comparacion con el equivalente local", () => {
+  const idx = { productos: [
+    par(SSD, 306000, "SNV3S-1000G", { lista: 450000, sellos: "ie" }),
+    par(SSD, 400000, "SNV3S-1000G", { url: "https://venex.test/ssd" }),
+  ].map((f, i) => { if (i) f[3] = "venex"; return f; }) };
+  const [o] = O.destacadas(idx, 20, { costo: COSTO }).filter(x => x.internacional);
+  assert.equal(o.puesto.est.ok, true);
+  assert.equal(o.puesto.est.maxPesos, 370260);
+  assert.equal(o.puesto.contra.localPesos, 400000);
+  assert.equal(o.puesto.tienda, "venex");
+  assert.match(o.puesto.texto, /estimación/);
+  assert.match(o.puesto.comparacion, /Venex|venex/i);
+});
+
+test("destacadas: sin equivalente local solo trae el costo; las locales no traen nada", () => {
+  const idx = { productos: [fila(SSD + " imp", 306000, { lista: 450000, sellos: "ie" }),
+                            fila("SSD WD Black SN770 1TB NVMe", 70000, { lista: 100000 })] };
+  const d = O.destacadas(idx, 20, { costo: COSTO });
+  const intl = d.find(x => x.internacional), loc = d.find(x => !x.internacional);
+  assert.equal(intl.puesto.contra, null);
+  assert.equal(loc.puesto, undefined);
+});
+
+test("destacadas: sin reglas ni cotizaciones no cambia nada (el feed sigue como antes)", () => {
+  const idx = { productos: [fila(SSD, 306000, { lista: 450000, sellos: "ie" })] };
+  for (const opts of [undefined, {}, { costo: null }]) assert.equal(O.destacadas(idx, 20, opts)[0].puesto, undefined);
+});
+
+test("el equivalente local es el mas barato de las tiendas directas con la misma configuracion; el agregador solo si no hay otra", () => {
+  const d = (n, p, tienda, modelo = "ABC123") => { const f = par("Notebook Lenovo " + n + " Ryzen 5 7535HS 16GB 512GB", p, modelo); f[3] = tienda; return f; };
+  const intl = d("i", 1000000, "comparaya"); intl[8] = "ie";
+  const idx = { productos: [intl, d("a", 1500000, "venex"), d("b", 1400000, "maximus"), d("c", 1200000, "comparaya")] };
+  assert.equal(O.calcularOfertas(idx).equivalente.get(intl)[3], "maximus");
+  const soloAgregador = { productos: [intl, d("c", 1200000, "comparaya")] };
+  const eq = O.calcularOfertas(soloAgregador).equivalente.get(intl);
+  assert.equal(eq[3], "comparaya");
+});
+
+test("el equivalente local no mezcla configuraciones de un mismo codigo de familia", () => {
+  const intl = par("Notebook Lenovo IdeaPad Ryzen 5 7535HS 16GB 512GB", 1000000, "FAM1", { sellos: "ie" });
+  const otra = par("Notebook Lenovo IdeaPad Ryzen 5 7535HS 8GB 512GB", 900000, "FAM1"); otra[3] = "venex";
+  assert.equal(O.calcularOfertas({ productos: [intl, otra] }).equivalente.has(intl), false);
+});
