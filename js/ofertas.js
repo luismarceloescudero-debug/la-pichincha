@@ -96,14 +96,14 @@
       if (otro && f[1] > otro[1] * (1 + TOLERANCIA_MODELO)) masBarato.set(f, otro);
     }
     // El equivalente local de cada compra internacional, para comparar el costo puesto en casa: el aviso local mas barato del
-    // mismo modelo (codigo exacto y, en equipos, misma configuracion). Se prefieren las tiendas que se leen directo; el
-    // agregador solo si no hay otra (su precio puede ser viejo y la comparacion lo dice).
+    // mismo modelo (codigo exacto y, en equipos, misma configuracion) de las tiendas que se leen directo. El agregador no
+    // cuenta, como en masBarato: su precio puede ser viejo (19/10: con ComparaYa como equivalente, 2 de 11 comparaciones daban 30% a
+    // 51% de diferencia contra un aviso de Mercado Libre que no se pudo confirmar).
     const equivalente = new Map();
     for (const f of filas) {
       if (!f[9] || !esInternacional(f)) continue;
-      const locales = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && mismaConfiguracion(f, x));
-      const directos = locales.filter(x => x[3] !== AGREGADOR);
-      const mejor = (directos.length ? directos : locales).reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
+      const directos = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && mismaConfiguracion(f, x));
+      const mejor = directos.reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
       if (mejor) equivalente.set(f, mejor);
     }
     for (const f of filas) {
@@ -150,9 +150,8 @@
     const P = puesto(), est = P.estimar(f, categoria, costo);
     const contra = P.comparar(est, local);
     const nombre = local && (local[4] || ((tiendas || {})[local[3]] || {}).nombre || local[3]);
-    const via = local && local[3] === AGREGADOR ? " (precio de ComparaYa: puede estar desactualizado)" : "";
     return { est, contra, tienda: local ? local[4] || local[3] : null, texto: P.texto(est),
-      comparacion: contra ? P.textoComparacion(contra, nombre).replace(/\.$/, via + ".") : "" };
+      comparacion: contra ? P.textoComparacion(contra, nombre) : "" };
   }
 
   function destacadas(idx, max = 20, opciones) {

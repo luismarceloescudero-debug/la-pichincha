@@ -60,7 +60,7 @@
     return { localPesos: local[1], minPct: p(est.minPesos), maxPct: p(est.maxPesos) };
   }
 
-  const queFalta = est => est.faltan.length ? `, más el ${est.faltan.join(" y el ")} que todavía no se pueden calcular` : "";
+  const queFalta = est => est.faltan.length ? `, sin contar el ${est.faltan.join(" ni el ")} (todavía sin regla confirmada)` : "";
 
   function texto(est) {
     if (!est || !est.ok) return `No se estima el costo puesto en casa: ${est && est.motivo ? est.motivo : "faltan datos"}.`;

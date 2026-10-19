@@ -366,14 +366,13 @@ test("destacadas: sin reglas ni cotizaciones no cambia nada (el feed sigue como 
   for (const opts of [undefined, {}, { costo: null }]) assert.equal(O.destacadas(idx, 20, opts)[0].puesto, undefined);
 });
 
-test("el equivalente local es el mas barato de las tiendas directas con la misma configuracion; el agregador solo si no hay otra", () => {
+test("el equivalente local es el mas barato de las tiendas directas con la misma configuracion; el agregador no cuenta", () => {
   const d = (n, p, tienda, modelo = "ABC123") => { const f = par("Notebook Lenovo " + n + " Ryzen 5 7535HS 16GB 512GB", p, modelo); f[3] = tienda; return f; };
   const intl = d("i", 1000000, "comparaya"); intl[8] = "ie";
   const idx = { productos: [intl, d("a", 1500000, "venex"), d("b", 1400000, "maximus"), d("c", 1200000, "comparaya")] };
   assert.equal(O.calcularOfertas(idx).equivalente.get(intl)[3], "maximus");
-  const soloAgregador = { productos: [intl, d("c", 1200000, "comparaya")] };
-  const eq = O.calcularOfertas(soloAgregador).equivalente.get(intl);
-  assert.equal(eq[3], "comparaya");
+  const soloAgregador = { productos: [intl, d("c", 1200000, "comparaya")] };   // su precio puede ser viejo: no se compara contra el
+  assert.equal(O.calcularOfertas(soloAgregador).equivalente.has(intl), false);
 });
 
 test("el equivalente local no mezcla configuraciones de un mismo codigo de familia", () => {
