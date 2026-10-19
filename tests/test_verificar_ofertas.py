@@ -463,3 +463,50 @@ class Despacho(unittest.TestCase):
         with mock.patch.object(v, "revisar", return_value=("viva", "x")) as revisar, redirect_stdout(io.StringIO()):
             v.main([ruta, "--descartadas", os.path.join(d, "d.json")])
         self.assertEqual(revisar.call_args[1]["tienda"], "comparaya")
+
+
+CARREFOUR = "https://www.carrefour.com.ar/telefono-celular-reno-12f-oppo-256gb-12gb-orange-110010234859bl-1750564/p"
+ONCITY = "https://www.oncity.com/celular-nubia-music-2-4g-4-gb-128-gb-melody-white-156018/p"
+
+
+def vtex(precio, cantidad):
+    return 200, json.dumps([{"productName": "x", "items": [{"sellers": [
+        {"commertialOffer": {"Price": precio, "ListPrice": precio * 1.3, "AvailableQuantity": cantidad}}]}]}])
+
+
+class Vtex(unittest.TestCase):
+    """19/10, en vivo: la API publica de catalogo de VTEX confirmo precio y stock de OnCity, Naldo, Dricco y Compra Cierta;
+    Carrefour respondio precio 0 y stock 0 para un celular que ComparaYa daba en stock a $692.999."""
+
+    def juzgar(self, url, precio, respuesta):
+        with mock.patch.object(v, "pedir_api", return_value=respuesta) as pedir:
+            return v.revisar_vtex(url, precio), pedir
+
+    def test_al_precio_publicado_y_con_stock_esta_en_pie(self):
+        juicio, pedir = self.juzgar(ONCITY, 239999, vtex(239999.0, 100))
+        self.assertEqual(juicio, ("viva", "api de la tienda"))
+        self.assertEqual(pedir.call_args[0][0], "https://www.oncity.com/api/catalog_system/pub/products/search/"
+                                                "celular-nubia-music-2-4g-4-gb-128-gb-melody-white-156018/p")
+
+    def test_sin_stock_o_con_precio_cero_esta_caida(self):
+        self.assertEqual(self.juzgar(CARREFOUR, 692999, vtex(0.0, 0))[0], ("caida", "api de la tienda: sin stock"))
+
+    def test_mas_cara_ya_no_es_la_oferta(self):
+        juicio, _ = self.juzgar(ONCITY, 239999, vtex(269999.0, 5))
+        self.assertEqual(juicio[0], "caida")
+        self.assertIn("$269.999", juicio[1])
+
+    def test_si_no_responde_o_no_es_vtex_no_decide(self):
+        self.assertIsNone(self.juzgar(ONCITY, 1, (403, ""))[0])
+        self.assertIsNone(self.juzgar(ONCITY, 1, (200, "[]"))[0])
+        self.assertIsNone(self.juzgar(ONCITY, 1, (200, "no es json"))[0])
+        with mock.patch.object(v, "pedir_api") as pedir:
+            self.assertIsNone(v.revisar_vtex("https://www.fravega.com/p/celular-x-123/", 1))
+        pedir.assert_not_called()
+
+    def test_el_agregador_prueba_primero_la_api_de_vtex(self):
+        with mock.patch.object(v, "revisar_ml", return_value=None), \
+                mock.patch.object(v, "revisar_vtex", return_value=("caida", "api de la tienda: sin stock")), \
+                mock.patch.object(v, "revisar_agregador") as agr:
+            self.assertEqual(v.revisar(CARREFOUR, precio=692999, tienda="comparaya"), ("caida", "api de la tienda: sin stock"))
+        agr.assert_not_called()
