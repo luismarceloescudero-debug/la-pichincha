@@ -55,7 +55,7 @@ function alarmas(m, previa) {
       lista.push(`${C.ETIQUETAS[c]}: sin ofertas hoy (ayer ${b.ofertas}).`);
     if (a.avisos >= MIN_AVISOS && b.avisos >= MIN_AVISOS) {
       const hoy = pct(a.sinDatos, a.avisos), antes = pct(b.sinDatos, b.avisos);
-      if (hoy - antes > SALTO_SIN_DATOS)
+      if (Math.round((hoy - antes) * 1e6) > Math.round(SALTO_SIN_DATOS * 1e6))   // sin el redondeo, 8/20 - 6/20 da 0,10000000000000003
         lista.push(`${C.ETIQUETAS[c]}: los "sin datos" pasaron de ${p100(antes)} a ${p100(hoy)} de los avisos ` +
                    "(¿cambió cómo publica una tienda o se rompió la lectura de títulos?).");
     }
