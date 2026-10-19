@@ -534,6 +534,9 @@ td.mejor{color:var(--good);font-weight:700}
 .o-ahorro{font-size:.85rem;color:var(--ink-2)}
 .o-ahorro b{font-family:var(--font-mono);color:var(--ink)}
 .o-contra{margin:0;font-size:.8rem;color:var(--ink-2)}
+.o-puesto{margin:0;padding:.5rem .6rem;border:1px solid var(--line);border-radius:.5rem;font-size:.8rem;color:var(--ink-2);display:grid;gap:.2rem}
+.o-puesto b{font-family:var(--font-mono);color:var(--ink)}
+.o-puesto small{color:var(--ink-2)}
 .o-detalle{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--curva)}
 .o-detalle>.o-in{overflow:hidden;min-height:0}
 .ocard.abierta .o-detalle{grid-template-rows:1fr}

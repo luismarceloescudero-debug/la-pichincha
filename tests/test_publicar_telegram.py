@@ -37,6 +37,14 @@ class Mensaje(unittest.TestCase):
         self.assertIn("precios del 07/10" + chr(10), telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))
         self.assertNotIn("precios del  ", telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))
 
+    def test_una_compra_internacional_dice_su_costo_puesto_en_casa_y_escapado(self):
+        puesto = "costo puesto en casa, estimado: $306.000 a $370.260. Local <b>más</b> barato"
+        internacional = {**OFERTAS["ofertas"][0], "comercio": "Mercado Libre · compra internacional", "puesto": puesto}
+        texto = telegram.mensaje({**OFERTAS, "ofertas": [internacional, OFERTAS["ofertas"][1]]})
+        self.assertIn("costo puesto en casa, estimado: $306.000 a $370.260", texto)
+        self.assertIn("Local &lt;b&gt;más&lt;/b&gt; barato", texto)
+        self.assertEqual(texto.count("costo puesto en casa"), 1)      # la oferta local no lo trae
+
     def test_sin_ofertas_no_hay_mensaje(self):
         self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
 

@@ -42,7 +42,8 @@ def mensaje(datos):
     for i, o in enumerate(ofertas, 1):
         categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
         lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(o['nombre'])}</a>: "
-                      f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}")
+                      f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}"
+                      + (f"\n   <i>{html.escape(o['puesto'])}</i>" if o.get("puesto") else ""))
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
         lineas.pop()
     return cabeza + "\n".join(lineas) + "\n" + pie if lineas else None

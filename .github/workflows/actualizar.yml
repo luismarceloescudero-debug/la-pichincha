@@ -181,6 +181,12 @@ jobs:
       - name: Dejar lista la app instalable
         run: python publicar_app.py --salida _sitio --indice indice.json || echo "::warning::No se armo la app instalable"
 
+      # La copia de las cotizaciones (K2): lo que usa la calculadora cuando no hay red o una fuente cae y,
+      # desde el feed, el dolar con el que se estima el costo puesto en casa de las compras internacionales (spec 012). Si ninguna
+      # responde, el sitio sale igual y la pagina las pide en vivo.
+      - name: Dejar la copia de las cotizaciones
+        run: python generar_cotizaciones.py --salida _sitio/cotizaciones.json || echo "::warning::No se genero la copia de las cotizaciones"
+
       # El feed RSS de ofertas y la lista para Telegram. Si falla, el sitio sale igual.
       - name: Armar el feed de ofertas
         run: |
@@ -248,11 +254,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python publicar_telegram.py _sitio/ofertas.json
-
-      # La copia de las cotizaciones (K2): lo que usa la calculadora cuando no hay red o una fuente cae. Si ninguna
-      # responde, el sitio sale igual y la pagina las pide en vivo.
-      - name: Dejar la copia de las cotizaciones
-        run: python generar_cotizaciones.py --salida _sitio/cotizaciones.json || echo "::warning::No se genero la copia de las cotizaciones"
 
       # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
       - name: Medir la cobertura por codigo de modelo
