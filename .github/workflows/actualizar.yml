@@ -212,11 +212,37 @@ jobs:
       - name: Armar las paginas de estado y legales
         run: node generar_info.js --indice indice.json --salud salud.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
 
+      # Guardia del indice (guardia.js): mide sobre el indice real bajas propias y, por categoria, avisos, "sin datos" y
+      # ofertas, y lo compara con la medicion publicada de la corrida anterior. Con una alarma (18/10: 0 bajas propias
+      # en todo el indice) no se manda Telegram y se abre o comenta un issue con la etiqueta "guardia".
+      - name: Guardia del indice
+        id: guardia
+        continue-on-error: true
+        run: |
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/guardia.json" -o guardia-previa.json || echo '{}' > guardia-previa.json
+          rc=0
+          node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json             --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" || rc=$?
+          if [ "$rc" -eq 3 ]; then echo "alarma=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Avisar la alarma de la guardia
+        if: steps.guardia.outputs.alarma == 'true' && github.event_name != 'push'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create guardia --color b60205 --description "La guardia del indice encontro algo que no cierra" --force
+          echo "" >> alarma.md
+          echo "Corrida: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. No se mandó Telegram." >> alarma.md
+          n=$(gh issue list --label guardia --state open --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body-file alarma.md
+          else gh issue create --title "Guardia del índice: algo no cierra" --label guardia --body-file alarma.md; fi
+
       # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Publica la
       # corrida programada y la que se lanza a mano (para probar el canal), nunca un push: asi no se
       # repiten mensajes en cada merge.
       - name: Publicar las pichinchas del dia en Telegram
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.guardia.outputs.alarma != 'true'
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
