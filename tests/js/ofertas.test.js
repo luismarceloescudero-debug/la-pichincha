@@ -302,3 +302,21 @@ test("en equipos solo compara la misma configuracion: el codigo de familia junta
     conModelo("Notebook Lenovo IP Slim 3 15IRH10 INTEL I7-13620H 16GB 4800MHZ 512GB NVME W11H", 2337228, "goldentech", "15IRH10")] };
   assert.equal(O.calcularOfertas(igual).masBarato.size, 1);
 });
+
+// 19/10, resumen publicado: la impresora Brother con 55% y los auriculares Philips con 54% tenian el mismo precio desde el
+// 8/10 y el 7/10. Un tachado que no se mueve en una semana es el precio de siempre con un tachado de adorno.
+test("una rebaja publicada cuyo precio no cambio en 7 dias o mas no es oferta", () => {
+  const conDesde = (nombre, precio, lista, desde) => { const f = fila(nombre, precio, { lista }); f[10] = desde; return f; };
+  const idx = { generado: "2026-10-19T09:13-03:00", productos: [
+    conDesde("Impresora Brother HL-L2320D", 330000, 729679, "2026-10-08"),       // 11 dias igual: no
+    conDesde("Monitor Gamer Level Up 24 IPS 144Hz", 215999, 399999, "2026-10-16"), // cambio hace 3 dias: si
+    conDesde("Auriculares Philips TAA1105", 18499, 39999, "2026-10-12")] };     // justo 7 dias: no
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.publicadas.map(f => f[0]), ["Monitor Gamer Level Up 24 IPS 144Hz"]);
+  assert.equal(r.tachadoFijo, 2);
+});
+
+test("una baja propia no se descarta por la fecha: la medimos nosotros", () => {
+  const f = fila("Fuente Thermaltake 850W 80 Plus Gold", 155000, { antes: 266000 }); f[10] = "2026-10-01";
+  assert.equal(O.calcularOfertas({ generado: "2026-10-19T09:13-03:00", productos: [f] }).propias.length, 1);
+});
