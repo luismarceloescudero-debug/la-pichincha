@@ -62,7 +62,7 @@ test("el feed trae como mucho 20 entradas", () => {
 test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", () => {
   const lista = F.listaParaCanal(IDX, 10);
   assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", precio: 90000, antes: 120000, descuento: 25,
-    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente" });
+    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente", tienda: "cg" });
   assert.equal(lista.length, 2);
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
 });
@@ -192,7 +192,7 @@ test("main con --candidatas escribe solo la lista a verificar (hasta --max) y no
           "--candidatas", path.join(dir, "c.json"), "--max", "5"]);
   const c = JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8"));
   assert.equal(c.ofertas.length, 5);
-  assert.deepEqual(Object.keys(c.ofertas[0]).sort(), ["nombre", "precio", "url"]);   // el precio, para compararlo con el vendedor
+  assert.deepEqual(Object.keys(c.ofertas[0]).sort(), ["nombre", "precio", "tienda", "url"]);   // precio y fuente, para verificarla a su manera
   assert.ok(c.ofertas.every(o => o.precio >= 8000 && o.precio < 8012));
   assert.equal(fs.existsSync(path.join(dir, "s")), false);                 // no se armo el sitio
   F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"), "--candidatas", path.join(dir, "c2.json")]);

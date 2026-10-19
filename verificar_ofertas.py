@@ -21,8 +21,13 @@ alguien lo vende al precio publicado (con 2% de tolerancia); si nadie lo vende, 
 Lo que la API no deja ver (/up/MLAU..., avisos sueltos) o no pudo responder tampoco se publica: una oferta de
 Mercado Libre sale solo si se pudo comprobar.
 
-En las demas tiendas, ante la duda se publica: su precio se lee de su propio sitio el mismo dia, y un bloqueo
-(403, 429), un error del servidor, una pagina de captcha o un fallo de red no prueban que la publicacion este caida.
+Las tiendas WooCommerce se verifican por su Store API publica (precio y existencias). Lo que llega por un agregador
+(ComparaYa) desde otra tienda tiene que mostrar el precio publicado en la pagina de esa tienda (en el HTML o ya
+armada en el navegador): si no aparece, o la tienda no se pudo abrir, no se publica (19/10: Fravega bloquea su API,
+pero su pagina armada muestra el precio).
+
+En las tiendas que se leen directo, ante la duda se publica: su precio se lee de su propio sitio el mismo dia, y un
+bloqueo (403, 429), un error del servidor, una pagina de captcha o un fallo de red no prueban que este caida.
 
 Sale con 3 si encontro caidas nuevas (hay que volver a elegir ofertas) y con 0 si no; nunca falla la corrida.
 """
@@ -212,12 +217,18 @@ def renderizar(url, ua=UA):
     return texto or None
 
 
-def revisar(url, desde=None, precio=None):
+def revisar(url, desde=None, precio=None, tienda=None):
     """('caida'|'viva'|'dudosa', etapa que lo decidio). 'desde' es el reloj (time.time()) del inicio de la corrida;
-    'precio', el que se va a publicar."""
+    'precio', el que se va a publicar; 'tienda', la fuente del indice que lo trajo."""
     api = revisar_ml(url, precio)
     if api:
         return api
+    if tienda and tienda in bases_woo():
+        api = revisar_woo(url, precio, bases_woo()[tienda])
+        if api:
+            return api
+    if tienda == "comparaya" and "mercadolibre." not in comercio(url):
+        return revisar_agregador(url, precio)
     previo = estatica(url)
     if previo == "caida":
         return previo, "estatica"
@@ -231,6 +242,71 @@ def revisar(url, desde=None, precio=None):
     if veredicto(200, dom) == "caida":
         return "caida", "renderizada"
     return previo, "renderizada"
+
+
+def precio_visible(texto, precio):
+    """Si el precio aparece en el texto como lo escribe una tienda ("$1.833.999", "1.833.999,00") o en un dato
+    ("price":1833999). Otro numero que lo contiene no cuenta."""
+    if not precio or not texto:
+        return False
+    n = int(round(precio))
+    miles = f"{n:,}".replace(",", ".")
+    return bool(re.search(r"(?<![\d.])(?:" + re.escape(miles) + "|" + str(n) + r")(?![\d]|\.\d)", texto))
+
+
+TIENDAS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiendas.json")
+
+
+def bases_woo():
+    """{clave: base} de las tiendas que se leen por la Store API de WooCommerce (tiendas.json)."""
+    tiendas = leer(TIENDAS_JSON, {})
+    return {k: t.get("base") for k, t in tiendas.items() if isinstance(t, dict)
+            and (t.get("catalogo") or {}).get("tipo") == "woocommerce" and t.get("base")}
+
+
+def revisar_woo(url, precio, base):
+    """('caida'|'viva', motivo) segun la Store API publica de la tienda, o None si no respondio (queda la pagina)."""
+    m = re.search(r"/producto/([^/?#]+)", url or "")
+    if not m:
+        return None
+    codigo, cuerpo = pedir_api(f"{base}/wp-json/wc/store/v1/products?slug={m.group(1)}", {"Accept": "application/json"})
+    try:
+        filas = json.loads(cuerpo) if codigo == 200 else None
+    except ValueError:
+        filas = None
+    if not isinstance(filas, list) or not filas or not isinstance(filas[0], dict):
+        return None
+    p = filas[0]
+    if not p.get("is_in_stock"):
+        return "caida", "api de la tienda: sin stock"
+    try:
+        actual = int((p.get("prices") or {}).get("price")) / 10 ** int((p.get("prices") or {}).get("currency_minor_unit", 0))
+    except (TypeError, ValueError):
+        return None
+    if precio and actual > precio * (1 + TOLERANCIA_PRECIO):
+        return "caida", f"api de la tienda: el precio publicado ya no existe (pide {pesos(actual)})"
+    return "viva", "api de la tienda"
+
+
+def revisar_agregador(url, precio):
+    """Lo que llega por un agregador puede traer un precio viejo: tiene que verse en la pagina de la tienda."""
+    html = ""
+    try:
+        _, html = bajar(url)
+    except (urllib.error.URLError, OSError, ValueError):
+        html = ""
+    if html and CAIDA.search(html):
+        return "caida", "estatica"
+    if html and not MURO.search(html[:20000]) and precio_visible(html, precio):
+        return "viva", "precio confirmado en la tienda"
+    dom = renderizar(url)
+    if dom and CAIDA.search(dom):
+        return "caida", "renderizada"
+    if not dom or MURO.search(dom[:20000]):
+        return "caida", "agregador: no se pudo abrir la tienda"
+    if precio_visible(dom, precio):
+        return "viva", "precio confirmado en la tienda (renderizada)"
+    return "caida", "agregador: el precio no aparece en la tienda"
 
 
 def leer(ruta, defecto):
@@ -269,13 +345,14 @@ def main(argv=None):
     ofertas = [o for o in datos.get("ofertas") or [] if isinstance(o, dict) and o.get("url")]
     urls = list(dict.fromkeys(o["url"] for o in ofertas))
     precios = {o["url"]: o.get("precio") for o in ofertas}
+    fuentes = {o["url"]: o.get("tienda") for o in ofertas}
     previas = leer(destino, [])
     previas = previas if isinstance(previas, list) else []
     desde = time.time()
     if any("mercadolibre." in comercio(u) for u in urls):
         print("Mercado Libre: " + ("se verifica por su API" if token_ml() else "sin token, solo la revision de la pagina"))
     with ThreadPoolExecutor(max_workers=HILOS) as pool:
-        resultados = list(pool.map(lambda u: revisar(u, desde, precio=precios.get(u)), urls))
+        resultados = list(pool.map(lambda u: revisar(u, desde, precio=precios.get(u), tienda=fuentes.get(u)), urls))
     juicios = {u: r[0] for u, r in zip(urls, resultados)}
     etapas = {u: r[1] for u, r in zip(urls, resultados)}
     caidas = [u for u in urls if juicios[u] == "caida"]
