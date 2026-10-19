@@ -532,6 +532,9 @@ def main(argv=None):
     estado = historial.leer(carpeta)
     series = serie.cargar(carpeta)               # para los sellos de minimo y de rebaja inflada
     hoy = datetime.now(AR).date()
+    # La baja propia se mide contra el precio de antes de hoy: si el indexador corre dos veces en el dia,
+    # la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
+    ayeres = historial.leer(carpeta, antes_de=hoy.isoformat())
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
@@ -597,8 +600,8 @@ def main(argv=None):
             if not rebaja_real or not lista or lista <= it["precio"]:
                 lista = 0
             # Baja propia: lo que valia segun el historial. Este dato no depende
-            # de lo que publique la tienda, asi que vale para las cinco.
-            ayer = estado.get((clave, it["url"])) or 0
+            # de lo que publique la tienda, asi que vale para todas.
+            ayer = ayeres.get((clave, it["url"])) or 0
             propia = ayer if ayer > it["precio"] else 0
             if propia:
                 bajaron += 1

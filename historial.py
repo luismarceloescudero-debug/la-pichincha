@@ -22,12 +22,18 @@ def archivos(carpeta):
     return sorted(carpeta.glob(PATRON)) if carpeta.is_dir() else []
 
 
-def leer(carpeta):
-    """Ultimo precio conocido de cada (tienda, id) que sigue publicado."""
+def leer(carpeta, antes_de=None):
+    """Ultimo precio conocido de cada (tienda, id) que sigue publicado.
+
+    antes_de ("AAAA-MM-DD") deja afuera lo de ese dia en adelante: el precio de ayer, aunque hoy
+    ya haya corrido otra vez el indexador y guardado el de hoy.
+    """
     estado = {}
     for ruta in archivos(carpeta):
         with ruta.open(encoding="utf-8", newline="") as f:
             for fila in csv.DictReader(f):
+                if antes_de and fila["fecha"] >= antes_de:
+                    continue
                 clave = (fila["tienda"], fila["id"])
                 if fila["precio"]:
                     estado[clave] = int(fila["precio"])
