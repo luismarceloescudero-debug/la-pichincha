@@ -26,7 +26,22 @@ Cada sesion o pedido nuevo empieza con OmniRoute, antes de leer o tocar el repo.
 | `gemini-3.1-pro-preview` | **timeout** | | No usar; `gemini-2.5-pro` fue retirado por Google |
 | DeepSeek | **eliminado** (sin saldo) | | |
 
-OmniRoute no tiene combos configurados (`omniroute_list_combos` da vacio): **pendiente** crear dos, `revision` (gpt-oss-120b, con Claude de respaldo) y `rapido` (qwen3.8-27b), y volver a medir al arrancar cada fase grande.
+### 1.1.1 Combos y cuando se cambia de modelo (19/10/2026)
+
+**Que cambia de modelo y que no.** El modelo de **esta sesion de Claude Code** (el selector de la ventana: Opus, Sonnet, Haiku...) lo elige una persona y **no cambia solo**: la sesion habla directo con la API de Anthropic, no pasa por OmniRoute. OmniRoute cambia de modelo **solo dentro de un combo**, cuando un pedido va a ese combo y el primer modelo falla (error, limite o enfriamiento): pasa al siguiente de la lista. Cada modelo ademas tiene su propio enfriamiento (un 503 de Google dice "reset after 48s").
+
+| Combo | Estrategia | Orden | Para que |
+| --- | --- | --- | --- |
+| `revision` | prioridad | Groq `openai/gpt-oss-120b` → Gemini `gemini-2.5-flash` → Claude `claude-sonnet-5-5` | Triaje y segunda opinion corta. Para plata, normativa o seguridad el revisor externo sigue siendo Claude con el archivo completo (seccion 1.2) |
+| `rapido` | prioridad | Groq `qwen/qwen3.8-27b` → Gemini `gemini-2.5-flash-lite` (**retirado por Google, 404**) → Groq `openai/gpt-oss-20b` | Clasificar, resumir, extraer. Solo triaje |
+
+**Como se usan.** Por el endpoint del servidor, con el nombre del combo como modelo: `POST http://127.0.0.1:20128/v1/chat/completions` con `{"model": "revision", ...}`. Las cabeceras `x-omniroute-decision` y `x-omniroute-model` dicen quien respondio. Prueba del 19/10: `revision` respondio con gpt-oss-120b en 850 ms y `rapido` con qwen3.8-27b en 884 ms. **Ojo**: la herramienta MCP `omniroute_route_request` **no respeta** el nombre del combo (el 19/10 mando una revision a Gemini, el segundo del combo, con `combo: null`); para los combos se usa el endpoint.
+
+**Pendiente del dueño en el panel de OmniRoute** (las herramientas MCP no editan combos y la API de gestion pide credenciales):
+1. **Reconectar Claude**: la conexion `claude` figura como vencida (`[claude] All 1 connection(s) authentication expired`); es la tercera vez desde el 16/10. Hasta entonces el respaldo de `revision` es solo Gemini.
+2. En `rapido`, cambiar `gemini-2.5-flash-lite` por `gemini-2.5-flash`. Los `gemini-3.x` estaban saturados el 19/10 (503). Hoy el combo anda igual: el segundo falla en 2 s y pasa al tercero.
+
+**No probado de punta a punta**: el salto automatico cuando falla el primero (cada miembro se probo por separado con `omniroute_test_combo`, y el segundo de `rapido` fallo y el combo siguio). Probarlo al reconectar Claude con un combo de prueba.
 
 ### 1.2 Reglas para llamar a otros modelos
 
@@ -139,7 +154,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | 1 | **K1**: motor de calculo de costos (`js/costos.js`) con los 4 casos de referencia y las reglas de `importacion.json` | plan v3, spec 010 | nada | **hecho el 15/10** (24 tests, mutaciones detectadas, revision multimodelo) |
 | 2 | **K2**: monedas en vivo (`js/monedas.js`, copia del build, CSP) | plan v3 | nada | **hecho el 15/10** (29 tests y 10 del generador, 4 mutaciones, revision de cinco ejes y revision externa) |
 | 3 | Actualizar spec-kit 1.2.0, Superpowers 7 y agent-skills 0.6.13 | seccion 3 | nada | **hecho el 16/10** |
-| 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1 | el dueño (panel de OmniRoute) | propuesto |
+| 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1.1 | el dueño (panel de OmniRoute) | **hecho el 19/10** (creados y probados por el endpoint); falta reconectar Claude y cambiar el Gemini lite de `rapido` en el panel |
 | 5 | **K3**: la calculadora en la app | plan v3 | K1 y K2 | **hecho el 16/10** (pestaña Costo de importar, 30 tests, un bug del motor corregido) |
 | 6 | **N1 a N5**: novedades por marca | spec 011 | decisiones 1 a 4 de la spec | espera al dueño |
 | 7 | Guardar el stock de las fuentes directas (CompraGamer lo trae) | caja abierta | decision del dueño | propuesto |
