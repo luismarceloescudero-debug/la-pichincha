@@ -1,0 +1,814 @@
+[
+ {
+  "productId": "98250893",
+  "productName": "MONITOR REDRAGON PORTATIL ONYX RD-MP1601 16 IPS",
+  "brand": "REDRAGON",
+  "brandId": 2000514,
+  "brandImageUrl": null,
+  "linkText": "monitorredragonportatil-onyxrd-mp1601-16ips-",
+  "productReference": "20135005",
+  "productReferenceCode": "20135005",
+  "categoryId": "58",
+  "productTitle": "MONITOR REDRAGON PORTATIL ONYX RD-MP1601 16 IPS",
+  "releaseDate": "2026-08-13T00:00:00Z",
+  "clusterHighlights": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "productClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "searchableClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "categories": [
+   "/Tecnología/Informática/Monitores/",
+   "/Tecnología/Informática/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/6/57/58/",
+   "/6/57/",
+   "/6/"
+  ],
+  "link": "https://www.bringeri.com.ar/monitorredragonportatil-onyxrd-mp1601-16ips-/p",
+  "Modelo": [
+   "RD-MP1601"
+  ],
+  "Garantia": [
+   "12 meses"
+  ],
+  "General": [
+   "Modelo",
+   "Garantia"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecifications": [
+   "Modelo",
+   "Garantia",
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecificationsGroups": [
+   "General",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "20135005",
+    "name": "MONITOR REDRAGON PORTATIL ONYX RD-MP1601 16 IPS",
+    "nameComplete": "MONITOR REDRAGON PORTATIL ONYX RD-MP1601 16 IPS",
+    "complementName": "",
+    "ean": "7798438560335",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "20135005"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "ELECTRONICS",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "180789",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/180789-#width#-#height#/20135005_1.png?v=639229280576370000\" width=\"#width#\" height=\"#height#\" alt=\"20135005_1\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/180789/20135005_1.png?v=639229280576370000",
+      "imageText": "20135005_1",
+      "imageLastModified": "2026-08-21T16:54:17.6370000Z"
+     },
+     {
+      "imageId": "180790",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/180790-#width#-#height#/20135005_2.png?v=639229280576730000\" width=\"#width#\" height=\"#height#\" alt=\"20135005_2\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/180790/20135005_2.png?v=639229280576730000",
+      "imageText": "20135005_2",
+      "imageLastModified": "2026-08-21T16:54:17.6730000Z"
+     },
+     {
+      "imageId": "180791",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/180791-#width#-#height#/20135005_3.png?v=639229280576900000\" width=\"#width#\" height=\"#height#\" alt=\"20135005_3\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/180791/20135005_3.png?v=639229280576900000",
+      "imageText": "20135005_3",
+      "imageLastModified": "2026-08-21T16:54:17.6900000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Bringeri Hogar",
+      "addToCartLink": "https://www.bringeri.com.ar/checkout/cart/add?sku=20135005&qty=1&seller=1&sc=1&price=31569900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 315699.0,
+       "ListPrice": 315699.0,
+       "PriceWithoutDiscount": 315699.0,
+       "FullSellingPrice": 315699.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ijg2NzhlYzAxLTg5NDUtNDllNS1iYTA3LWI4MGE0NjM2OGVjNCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjozMTU2OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjMxNTY5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIyMDEzNTAwNSIsImFjY291bnROYW1lIjoiYnJpbmdlcmlob2dhcmFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE0MjIsImlhdCI6MTc5MjQxOTYyMiwianRpIjoiMWQ4YjJjZjgtZGIzMS00MTIyLThiZmEtZjk4NTdlYTkxZjY5IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.zS1mq7_8isbPJwU8d8hULgCp2UaYhGjom_KgWGQdProJ5YWQfUzdguzCVu5jVjYC64FVBr0_jcUrvjJDT4UpLw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 10,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": "2026-08-13T00:00:00Z"
+   }
+  ]
+ },
+ {
+  "productId": "98251070",
+  "productName": "MONITOR LG ELECTRONIC 19\" 19M38L-B HDMI",
+  "brand": "LG ELECTRONICS",
+  "brandId": 2000033,
+  "brandImageUrl": null,
+  "linkText": "monitorlgelectronic19-19m38l-b-hdmi",
+  "productReference": "21035005",
+  "productReferenceCode": "21035005",
+  "categoryId": "58",
+  "productTitle": "MONITOR LG ELECTRONIC 19\" 19M38L-B HDMI",
+  "releaseDate": "2026-10-06T00:00:00Z",
+  "clusterHighlights": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "productClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "searchableClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "categories": [
+   "/Tecnología/Informática/Monitores/",
+   "/Tecnología/Informática/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/6/57/58/",
+   "/6/57/",
+   "/6/"
+  ],
+  "link": "https://www.bringeri.com.ar/monitorlgelectronic19-19m38l-b-hdmi/p",
+  "Modelo": [
+   "19M38L-B"
+  ],
+  "Color": [
+   "Negro"
+  ],
+  "Garantia": [
+   "12 meses"
+  ],
+  "General": [
+   "Modelo",
+   "Color",
+   "Garantia"
+  ],
+  "Pulgadas de monitor": [
+   "19\""
+  ],
+  "Monitores": [
+   "Pulgadas de monitor"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecifications": [
+   "Modelo",
+   "Color",
+   "Garantia",
+   "Pulgadas de monitor",
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecificationsGroups": [
+   "General",
+   "Monitores",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "21035005",
+    "name": "MONITOR LG ELECTRONIC 19\" 19M38L-B HDMI",
+    "nameComplete": "MONITOR LG ELECTRONIC 19\" 19M38L-B HDMI",
+    "complementName": "",
+    "ean": "8806096230619",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "21035005"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "ELECTRONICS",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "181277",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/181277-#width#-#height#/21035005_1.png?v=639269085800870000\" width=\"#width#\" height=\"#height#\" alt=\"21035005_1\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/181277/21035005_1.png?v=639269085800870000",
+      "imageText": "21035005_1",
+      "imageLastModified": "2026-10-06T18:36:20.0870000Z"
+     },
+     {
+      "imageId": "181278",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/181278-#width#-#height#/21035005_2.png?v=639269085801200000\" width=\"#width#\" height=\"#height#\" alt=\"21035005_2\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/181278/21035005_2.png?v=639269085801200000",
+      "imageText": "21035005_2",
+      "imageLastModified": "2026-10-06T18:36:20.1200000Z"
+     },
+     {
+      "imageId": "181279",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/181279-#width#-#height#/21035005_3.png?v=639269085801200000\" width=\"#width#\" height=\"#height#\" alt=\"21035005_3\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/181279/21035005_3.png?v=639269085801200000",
+      "imageText": "21035005_3",
+      "imageLastModified": "2026-10-06T18:36:20.1200000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Bringeri Hogar",
+      "addToCartLink": "https://www.bringeri.com.ar/checkout/cart/add?sku=21035005&qty=1&seller=1&sc=1&price=16319900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 163199.0,
+       "ListPrice": 163199.0,
+       "PriceWithoutDiscount": 163199.0,
+       "FullSellingPrice": 163199.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjEyOTAwNjAxLTk3YWYtNDdlZC05MGUxLWY0MWIzZjg5YWU4NSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxNjMxOTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjE2MzE5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIyMTAzNTAwNSIsImFjY291bnROYW1lIjoiYnJpbmdlcmlob2dhcmFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE0MjIsImlhdCI6MTc5MjQxOTYyMiwianRpIjoiNDgwNWQ0ODEtNmVkMC00ZTNmLWFkNDctMDkyNjE1NzRiYTA1IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.r8UfIg7csXz3_XC90ryAEXBkxcssjbwX_FCPhLTqhnuHKXX7zuLLXd9lFfDyEADlzfr0_UqNUdHxLd0monCmKg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T14:20:21Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": "2026-10-06T00:00:00Z"
+   }
+  ]
+ },
+ {
+  "productId": "98250468",
+  "productName": "MONITOR SAMSUNG 27\" MAINSTREAM NEGRO FHD 100HZ",
+  "brand": "SAMSUNG",
+  "brandId": 2000003,
+  "brandImageUrl": null,
+  "linkText": "monitor-samsung-27-mainstream-negro",
+  "productReference": "17935008",
+  "productReferenceCode": "17935008",
+  "categoryId": "58",
+  "productTitle": "MONITOR SAMSUNG 27\" MAINSTREAM NEGRO FHD 100HZ",
+  "releaseDate": "2026-05-20T00:00:00Z",
+  "clusterHighlights": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "productClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "searchableClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "categories": [
+   "/Tecnología/Informática/Monitores/",
+   "/Tecnología/Informática/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/6/57/58/",
+   "/6/57/",
+   "/6/"
+  ],
+  "link": "https://www.bringeri.com.ar/monitor-samsung-27-mainstream-negro/p",
+  "Modelo": [
+   "MAINSTREAM"
+  ],
+  "Color": [
+   "Negro"
+  ],
+  "Alto": [
+   "612.7 mm"
+  ],
+  "Ancho": [
+   "470 mm"
+  ],
+  "Profundidad": [
+   "200.4 mm"
+  ],
+  "Garantia": [
+   "12 meses"
+  ],
+  "General": [
+   "Modelo",
+   "Color",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Garantia"
+  ],
+  "Pulgadas de monitor": [
+   "27\""
+  ],
+  "Monitores": [
+   "Pulgadas de monitor"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecifications": [
+   "Modelo",
+   "Color",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Garantia",
+   "Pulgadas de monitor",
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecificationsGroups": [
+   "General",
+   "Monitores",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "17935008",
+    "name": "MONITOR SAMSUNG 27\" MAINSTREAM NEGRO FHD 100HZ",
+    "nameComplete": "MONITOR SAMSUNG 27\" MAINSTREAM NEGRO FHD 100HZ",
+    "complementName": "",
+    "ean": "8806095821931",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "17935008"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "ELECTRONICS",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "179359",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179359-#width#-#height#/17935008_1.png?v=639160190905500000\" width=\"#width#\" height=\"#height#\" alt=\"17935008_1\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179359/17935008_1.png?v=639160190905500000",
+      "imageText": "17935008_1",
+      "imageLastModified": "2026-06-02T17:44:50.5500000Z"
+     },
+     {
+      "imageId": "179360",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179360-#width#-#height#/17935008_2.png?v=639160190905970000\" width=\"#width#\" height=\"#height#\" alt=\"17935008_2\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179360/17935008_2.png?v=639160190905970000",
+      "imageText": "17935008_2",
+      "imageLastModified": "2026-06-02T17:44:50.5970000Z"
+     },
+     {
+      "imageId": "179361",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179361-#width#-#height#/17935008_4.png?v=639160190906130000\" width=\"#width#\" height=\"#height#\" alt=\"17935008_4\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179361/17935008_4.png?v=639160190906130000",
+      "imageText": "17935008_4",
+      "imageLastModified": "2026-06-02T17:44:50.6130000Z"
+     },
+     {
+      "imageId": "179362",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179362-#width#-#height#/17935008_3.png?v=639160190906230000\" width=\"#width#\" height=\"#height#\" alt=\"17935008_3\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179362/17935008_3.png?v=639160190906230000",
+      "imageText": "17935008_3",
+      "imageLastModified": "2026-06-02T17:44:50.6230000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Bringeri Hogar",
+      "addToCartLink": "https://www.bringeri.com.ar/checkout/cart/add?sku=17935008&qty=1&seller=1&sc=1&price=28299900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 282999.0,
+       "ListPrice": 282999.0,
+       "PriceWithoutDiscount": 282999.0,
+       "FullSellingPrice": 282999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjgwMTk0NjY2LWU0ZDctNDVlYy04NzlhLWE4YmU1NDZiYjMyZiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyODI5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjI4Mjk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNzkzNTAwOCIsImFjY291bnROYW1lIjoiYnJpbmdlcmlob2dhcmFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE0MjIsImlhdCI6MTc5MjQxOTYyMiwianRpIjoiOGFjYTRiNzItODc5Yi00MTFhLTk5MjQtODE3ZmY0NDNjNWJjIiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.L-u_LMmkREiREtLB73310ZlZUIj5OaSxGKS18xISATqsPs4kLn7evuFeXmu-vIpVSv6fZGGBun3P4-dMyPdYLQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": "2026-05-20T00:00:00Z"
+   }
+  ]
+ },
+ {
+  "productId": "98250466",
+  "productName": "MONITOR SAMSUNG 22\" MAINSTREAM NEGRO FHD 100HZ",
+  "brand": "SAMSUNG",
+  "brandId": 2000003,
+  "brandImageUrl": null,
+  "linkText": "monitor-samsung-22-mainstream-negro",
+  "productReference": "17935006",
+  "productReferenceCode": "17935006",
+  "categoryId": "58",
+  "productTitle": "MONITOR SAMSUNG 22\" MAINSTREAM NEGRO FHD 100HZ",
+  "releaseDate": "2026-05-20T00:00:00Z",
+  "clusterHighlights": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "productClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "searchableClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "categories": [
+   "/Tecnología/Informática/Monitores/",
+   "/Tecnología/Informática/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/6/57/58/",
+   "/6/57/",
+   "/6/"
+  ],
+  "link": "https://www.bringeri.com.ar/monitor-samsung-22-mainstream-negro/p",
+  "items": [
+   {
+    "itemId": "17935006",
+    "name": "MONITOR SAMSUNG 22\" MAINSTREAM NEGRO FHD 100HZ",
+    "nameComplete": "MONITOR SAMSUNG 22\" MAINSTREAM NEGRO FHD 100HZ",
+    "complementName": "",
+    "ean": "8806095981888",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "17935006"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "ELECTRONICS",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "179363",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179363-#width#-#height#/17935006_1.png?v=639160200228400000\" width=\"#width#\" height=\"#height#\" alt=\"17935006_1\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179363/17935006_1.png?v=639160200228400000",
+      "imageText": "17935006_1",
+      "imageLastModified": "2026-06-02T18:00:22.8400000Z"
+     },
+     {
+      "imageId": "179364",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179364-#width#-#height#/17935006_2.png?v=639160200228530000\" width=\"#width#\" height=\"#height#\" alt=\"17935006_2\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179364/17935006_2.png?v=639160200228530000",
+      "imageText": "17935006_2",
+      "imageLastModified": "2026-06-02T18:00:22.8530000Z"
+     },
+     {
+      "imageId": "179365",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179365-#width#-#height#/17935006_3.png?v=639160200228700000\" width=\"#width#\" height=\"#height#\" alt=\"17935006_3\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179365/17935006_3.png?v=639160200228700000",
+      "imageText": "17935006_3",
+      "imageLastModified": "2026-06-02T18:00:22.8700000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Bringeri Hogar",
+      "addToCartLink": "https://www.bringeri.com.ar/checkout/cart/add?sku=17935006&qty=1&seller=1&sc=1&price=23399900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 233999.0,
+       "ListPrice": 233999.0,
+       "PriceWithoutDiscount": 233999.0,
+       "FullSellingPrice": 233999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjYzODIyMmZkLTBlYTMtNGEzNi1hODFkLWI5MGI4MjA3N2IzZiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyMzM5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjIzMzk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNzkzNTAwNiIsImFjY291bnROYW1lIjoiYnJpbmdlcmlob2dhcmFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE0MjIsImlhdCI6MTc5MjQxOTYyMiwianRpIjoiYmVlNGNlMzUtMGY1Ni00NTA3LTgwZDUtY2E3ZTUyYTcwZjBjIiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.oosTTOxXx6_i1KTKvj9po_Lce2p1MTGKZ44IOxQtICivRaK7KLbdD1HrXtIwn98WmPKUpHBvcx6l71hAbPbD2g",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": "2026-05-20T00:00:00Z"
+   }
+  ]
+ },
+ {
+  "productId": "98250464",
+  "productName": "MONITOR SAMSUNG 24\" MAINSTREAM NEGRO FHD 100HZ",
+  "brand": "SAMSUNG",
+  "brandId": 2000003,
+  "brandImageUrl": null,
+  "linkText": "monitor-samsung-24-mainstream-negro",
+  "productReference": "17935007",
+  "productReferenceCode": "17935007",
+  "categoryId": "58",
+  "productTitle": "MONITOR SAMSUNG 24\" MAINSTREAM NEGRO FHD 100HZ",
+  "releaseDate": "2026-05-20T00:00:00Z",
+  "clusterHighlights": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "productClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "searchableClusters": {
+   "291": "10 Cuotas sin interes con Naranja",
+   "296": "Coleccion productos  3 Todas Tarjetas",
+   "300": "9 todas las tarjetas",
+   "320": "Pagina completa (Excepto Celular)"
+  },
+  "categories": [
+   "/Tecnología/Informática/Monitores/",
+   "/Tecnología/Informática/",
+   "/Tecnología/"
+  ],
+  "categoriesIds": [
+   "/6/57/58/",
+   "/6/57/",
+   "/6/"
+  ],
+  "link": "https://www.bringeri.com.ar/monitor-samsung-24-mainstream-negro/p",
+  "Modelo": [
+   "24\" MAINSTREAM"
+  ],
+  "Color": [
+   "Negro"
+  ],
+  "Alto": [
+   "540.7 mm"
+  ],
+  "Ancho": [
+   "428.5 mm"
+  ],
+  "Profundidad": [
+   "175.1 mm"
+  ],
+  "Garantia": [
+   "12 meses"
+  ],
+  "General": [
+   "Modelo",
+   "Color",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Garantia"
+  ],
+  "Pulgadas de monitor": [
+   "24\""
+  ],
+  "Monitores": [
+   "Pulgadas de monitor"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos internos": [
+   "0"
+  ],
+  "Impuestos": [
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecifications": [
+   "Modelo",
+   "Color",
+   "Alto",
+   "Ancho",
+   "Profundidad",
+   "Garantia",
+   "Pulgadas de monitor",
+   "IVA",
+   "Impuestos internos"
+  ],
+  "allSpecificationsGroups": [
+   "General",
+   "Monitores",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "17935007",
+    "name": "MONITOR SAMSUNG 24\" MAINSTREAM NEGRO FHD 100HZ",
+    "nameComplete": "MONITOR SAMSUNG 24\" MAINSTREAM NEGRO FHD 100HZ",
+    "complementName": "",
+    "ean": "8806095819280",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "17935007"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "ELECTRONICS",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "179369",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179369-#width#-#height#/17935007_1.png?v=639160212143930000\" width=\"#width#\" height=\"#height#\" alt=\"17935007_1\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179369/17935007_1.png?v=639160212143930000",
+      "imageText": "17935007_1",
+      "imageLastModified": "2026-06-02T18:20:14.3930000Z"
+     },
+     {
+      "imageId": "179370",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179370-#width#-#height#/17935007_2.png?v=639160212144200000\" width=\"#width#\" height=\"#height#\" alt=\"17935007_2\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179370/17935007_2.png?v=639160212144200000",
+      "imageText": "17935007_2",
+      "imageLastModified": "2026-06-02T18:20:14.4200000Z"
+     },
+     {
+      "imageId": "179371",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/179371-#width#-#height#/17935007_3.png?v=639160212144300000\" width=\"#width#\" height=\"#height#\" alt=\"17935007_3\" id=\"\" />",
+      "imageUrl": "https://bringerihogarar.vteximg.com.br/arquivos/ids/179371/17935007_3.png?v=639160212144300000",
+      "imageText": "17935007_3",
+      "imageLastModified": "2026-06-02T18:20:14.4300000Z"
+     }
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Bringeri Hogar",
+      "addToCartLink": "https://www.bringeri.com.ar/checkout/cart/add?sku=17935007&qty=1&seller=1&sc=1&price=24999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 249999.0,
+       "ListPrice": 249999.0,
+       "PriceWithoutDiscount": 249999.0,
+       "FullSellingPrice": 249999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjVmMWRkNmI0LTA2YTEtNGE0ZS1hMTQ2LWExMzYzZWI3NjhiMCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyNDk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjI0OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNzkzNTAwNyIsImFjY291bnROYW1lIjoiYnJpbmdlcmlob2dhcmFyIiwic2FsZXNDaGFubmVsIjoiMSJ9LCJleHAiOjE3OTI0MjE0MjIsImlhdCI6MTc5MjQxOTYyMiwianRpIjoiNTQ4NGFhYzAtYzc2MS00YzU3LWI4OGYtYzg3Mjc2NmE4NGE0IiwiaXNzIjoic2Vzc2lvbi9kYXRhLXNpZ25lciJ9.0tmbDNqSsCyJOzwxMf1BEEifk1GMfG3H415PLRdyRTn21yGUC65B0j2St1XcTLx-zFD-VzrWNkM6aZMREAdN8w",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": "2026-05-20T00:00:00Z"
+   }
+  ]
+ }
+]

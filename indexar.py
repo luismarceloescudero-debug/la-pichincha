@@ -378,34 +378,49 @@ def robots_permite(texto, ruta):
     return mejor[1]
 
 
-# Las categorias de tecnologia de una tienda VTEX, por el nombre en su URL: cada tienda arma su arbol distinto, pero
-# los nombres se repiten. Una categoria que nombra un rubro entra con todas sus hojas, menos las de FUERA_VTEX.
-RUBROS_VTEX = ("celulares", "smartphones", "notebooks", "computadoras", "computacion", "informatica", "all-in-one",
-               "tablets", "monitores", "componentes", "perifericos", "placas-de-video", "procesadores", "motherboards",
-               "memorias", "almacenamiento", "discos", "teclados", "mouse")
+# Las categorias de tecnologia de una tienda VTEX, por las palabras de su URL: cada tienda arma su arbol distinto, pero
+# los nombres se repiten. Una hoja entra si nombra un rubro ("celulares-libres"); una categoria cuyo nombre es solo de
+# rubros ("informatica", "pc-y-monitores") entra con todas sus hojas, y una que mezcla ("tv-y-celulares") no arrastra a
+# las suyas. Las de AMBIGUOS_VTEX cuentan solo dentro de una rama de tecnologia (RAMA_VTEX): en Easy "almacenamiento"
+# son frascos de cocina y en Compra Cierta "procesadores" son de alimentos. FUERA_VTEX saca la categoria y sus hijas.
+RUBROS_VTEX = ("celulares", "celular", "smartphones", "smartphone", "notebooks", "notebook", "computadoras",
+               "computadora", "pc", "computacion", "informatica", "all-in-one", "tablets", "tablet", "monitores", "monitor",
+               "perifericos", "placas-de-video", "motherboards")
+AMBIGUOS_VTEX = ("componentes", "procesadores", "memorias", "almacenamiento", "discos", "ssd", "teclados", "teclado",
+                 "mouse")
+RAMA_VTEX = ("tecnolog", "computa", "informatica", "gaming", "gamer")
 FUERA_VTEX = ("accesorios", "cargadores", "cables", "fundas", "insumos", "repuestos", "internacional", "videojuegos",
-              "e-books", "impres")
+              "e-books", "impres", "fijos", "garantia", "seguros", "outlet", "muebles")
+_CONECTORES = {"", "y", "e", "de", "del", "para", "la", "las", "el", "los"}
 API_VTEX = "/api/catalog_system/pub/"
 POR_PEDIDO_VTEX = 50      # la API de busqueda devuelve como mucho 50 productos por pedido
 
 
-def categorias_vtex(arbol, rubros=RUBROS_VTEX, fuera=FUERA_VTEX):
+def categorias_vtex(arbol, rubros=RUBROS_VTEX, ambiguos=AMBIGUOS_VTEX, fuera=FUERA_VTEX):
     """Las hojas de tecnologia del arbol de categorias (/category/tree/3) como filtro de la busqueda: "/14/100/481/"."""
     salida = []
 
-    def recorrer(nodos, ruta, adentro):
+    def recorrer(nodos, ruta, heredado, rama):
         for n in nodos if isinstance(nodos, list) else []:
             if not isinstance(n, dict) or "id" not in n:
                 continue
             slug = str(n.get("url") or "").rstrip("/").rsplit("/", 1)[-1].lower()
             if any(x in slug for x in fuera):
                 continue
-            ids, dentro, hijas = ruta + [str(n["id"])], adentro or any(r in slug for r in rubros), n.get("children")
+            palabras = "-" + "-".join(re.findall(r"[a-z0-9]+", slug)) + "-"
+            en_rama = rama or any(x in slug for x in RAMA_VTEX)
+            buscadas = tuple(rubros) + (tuple(ambiguos) if en_rama else ())
+            nombra = any("-" + r + "-" in palabras for r in buscadas)
+            resto = palabras
+            for r in buscadas:
+                resto = resto.replace("-" + r + "-", "-")
+            pura = nombra and not set(resto.split("-")) - _CONECTORES
+            ids, hijas = ruta + [str(n["id"])], n.get("children")
             if hijas:
-                recorrer(hijas, ids, dentro)
-            elif dentro:
+                recorrer(hijas, ids, heredado or pura, en_rama)
+            elif heredado or nombra:
                 salida.append("/" + "/".join(ids) + "/")
-    recorrer(arbol, [], False)
+    recorrer(arbol, [], False, False)
     return list(dict.fromkeys(salida))
 
 

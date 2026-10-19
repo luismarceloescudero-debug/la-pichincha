@@ -1,0 +1,2849 @@
+[
+ {
+  "productId": "509",
+  "productName": "Moto G Max",
+  "brand": "Motorola",
+  "brandId": 2000000,
+  "brandImageUrl": null,
+  "linkText": "moto-g-max",
+  "productReference": "91PBBR0013AR",
+  "productReferenceCode": null,
+  "categoryId": "4",
+  "productTitle": "Moto g max 256GB | Cámara con 200MP con IA",
+  "releaseDate": "2026-05-27T00:00:00Z",
+  "clusterHighlights": {
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "308": "dual sim",
+   "319": "nfc"
+  },
+  "productClusters": {
+   "166": "Familia G",
+   "168": "Todos los productos",
+   "180": "Comparador",
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "263": "Motosale smartphones",
+   "281": "hasta off",
+   "308": "dual sim",
+   "319": "nfc",
+   "325": "9 cuotas 15 desc",
+   "331": "Familia G 2026"
+  },
+  "searchableClusters": {
+   "183": "Envio Gratis",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping"
+  },
+  "categories": [
+   "/Smartphones/Familia Moto G/",
+   "/Smartphones/"
+  ],
+  "categoriesIds": [
+   "/1/4/",
+   "/1/"
+  ],
+  "link": "https://www.motorola.com.ar/moto-g-max/p",
+  "Familia": [
+   "Familia G"
+  ],
+  "Memoria RAM": [
+   "8GB"
+  ],
+  "Pantalla": [
+   "6.78\" (9:20)"
+  ],
+  "Almacenamiento": [
+   "256GB"
+  ],
+  "Cámara frontal": [
+   "32 MP (88°) F2.2"
+  ],
+  "Cámara posterior": [
+   "Principal: 200 MP (84.1°) F1.88<br>Gran Angular y Macro: 8MP (120°) F2.2<br>Flicker Sensor"
+  ],
+  "Batería (mAh)": [
+   "5200"
+  ],
+  "Procesador": [
+   "Mediatek Dimentsity 6400"
+  ],
+  "Filters": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador"
+  ],
+  "Almacenamiento interno": [
+   "256GB"
+  ],
+  "NFC": [
+   "Si"
+  ],
+  "RAM": [
+   "8GB"
+  ],
+  "Batería specification": [
+   "5200"
+  ],
+  "Pantalla specification": [
+   "6.78\" (9:20)"
+  ],
+  "Sistema Operativo": [
+   "Android 16"
+  ],
+  "Cámara trasera": [
+   "Principal: 200 MP (84.1°) F1.88<br>Gran Angular y Macro: 8MP (120°) F2.2<br>Flicker Sensor"
+  ],
+  "Peso": [
+   "182g"
+  ],
+  "Wifi": [
+   "802.11 a/b/g/n/ac /k/v/r/u - WiFi 5"
+  ],
+  "Dimensiones": [
+   "164.58 mm x 77.37 mm x 7.38 mm"
+  ],
+  "SIM": [
+   "Nano SIM"
+  ],
+  "Bluetooth": [
+   "BT 5.4"
+  ],
+  "Sensores": [
+   "Acelerómetro</br>Sensor de Proximidad</br>Brújula (Campo magnético)</br>Giroscopio</br>Huella Dactilar</br>Luz ambiente</br>Desbloqueo facial"
+  ],
+  "Contenido de la caja": [
+   "Equipo<br>\nCubierta protectora<br>\nHerramienta de extracción de SIM<br>\nInserto informativo<br>\nCable de datos USB-A - USB-C<br>\nCargador 33W USB-A"
+  ],
+  "Resolucion de pantalla": [
+   "1272 x 2772 1.5K, 450 ppi, HiD, 120 Hz"
+  ],
+  "tecnologia pantalla": [
+   "pOLED"
+  ],
+  "Proteccion agua": [
+   "IP68/IP69"
+  ],
+  "Sistema de audio": [
+   "WAV,MP3,AAC,AMR-NB,AMR-WB,MIDI,Vorbis,APE,ACC-plus v1,AAC-plus v2,FLAC, ADPCM"
+  ],
+  "Conector auriculares": [
+   "No (USB-C analógico y digital)"
+  ],
+  "Dual SIM": [
+   "Si (SIM física + SIM digital)"
+  ],
+  "Resolución de video cámara principal": [
+   "2K UHD 9:16@30fps  2K UHD 9:20@30fps  FHD 9:16@30/60fps FHD 9:20@30/60fps"
+  ],
+  "Velocidad de procesador": [
+   "2.4 GHz"
+  ],
+  "Zoom cámara principal": [
+   "Digital (8x fotos / 6x videos)"
+  ],
+  "Formato de reproducción de video": [
+   "MPEG-4, H.263, H.264, HEVC, XVID, MPEG3"
+  ],
+  "Tarjeta de memoria soportada": [
+   "Micro SD"
+  ],
+  "Expande hasta": [
+   "2 TB"
+  ],
+  "Redes": [
+   "5G / 4G+ / 4G / 3G / 2G"
+  ],
+  "GPS": [
+   "GPS, AGPS, Glonass, Galileo, QZSS"
+  ],
+  "Tipo de vidrio de pantalla": [
+   "Gorilla Glass 7i"
+  ],
+  "Otras funciones": [
+   "Cámara lenta</br> Retrato (foto y video)</br> Encuadre perfecto</br> Modo pro</br> Google Lens</br> Flash auto</br> Temporizador (foto y video)</br> Cámara rápida</br> Night Vision (foto y video)</br> Panorámica</br> Escáner</br> Video con Captura Doble</br> Ultra resolución</br> Cabina de fotos</br> Marca de agua</br> Videos eficientes</br> Selfie con un gesto</br> Selfie espejada</br> Captura automática de sonrisa</br> Cuadrícula de asistencia</br> Nivelador</br> Cámara instantánea"
+  ],
+  "Conector USB": [
+   "USB-C"
+  ],
+  "Versión USB": [
+   "2.0"
+  ],
+  "WiFi Direct/Hotspot": [
+   "Si"
+  ],
+  "Bandas de WiFi": [
+   "2.4 y 5 GHz"
+  ],
+  "Resolución de video cámara frontal": [
+   "2K UHD 9:16@30fps</br> 2K UHD 9:20@30fps</br> FHD 9:16@30fps</br>FHD 9:20@30fps"
+  ],
+  "Certificación ENACOM": [
+   "H-33783"
+  ],
+  "new_especificaciones": [
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Cámara frontal",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM"
+  ],
+  "motocare": [
+   "[{\"idSku\": 1499,\"idSeguros\":525},{\"idSku\": 1498,\"idSeguros\":529}]"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos": [
+   "IVA"
+  ],
+  "allSpecifications": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador",
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM",
+   "motocare",
+   "IVA"
+  ],
+  "allSpecificationsGroups": [
+   "Filters",
+   "new_especificaciones",
+   "motocare",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "1499",
+    "name": "Pantone Overture",
+    "nameComplete": "Moto G Max Pantone Overture",
+    "complementName": "",
+    "ean": "",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBBR0013AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173912",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173912-#width#-#height#/1000x1000_1--12-.png?v=639227630752300000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--12-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173912/1000x1000_1--12-.png?v=639227630752300000",
+      "imageText": "1000x1000_1--12-",
+      "imageLastModified": "2026-08-19T19:04:35.2300000Z"
+     },
+     {
+      "imageId": "173913",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173913-#width#-#height#/g-max--overtoure-arg.png?v=639216429767600000\" width=\"#width#\" height=\"#height#\" alt=\"g-max--overtoure-arg\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173913/g-max--overtoure-arg.png?v=639216429767600000",
+      "imageText": "g-max--overtoure-arg",
+      "imageLastModified": "2026-08-06T19:56:16.7600000Z"
+     },
+     {
+      "imageId": "173914",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173914-#width#-#height#/2026_Torino_Basic-Pack_Overture_-PDP-Hero.png?v=639216429767600000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_-PDP-Hero\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173914/2026_Torino_Basic-Pack_Overture_-PDP-Hero.png?v=639216429767600000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_-PDP-Hero",
+      "imageLastModified": "2026-08-06T19:56:16.7600000Z"
+     },
+     {
+      "imageId": "173915",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173915-#width#-#height#/2026_Torino_Basic-Pack_Overture_Frontside.png?v=639216429767730000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173915/2026_Torino_Basic-Pack_Overture_Frontside.png?v=639216429767730000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Frontside",
+      "imageLastModified": "2026-08-06T19:56:16.7730000Z"
+     },
+     {
+      "imageId": "173916",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173916-#width#-#height#/2026_Torino_Basic-Pack_Overture_Backside.png?v=639216429767730000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173916/2026_Torino_Basic-Pack_Overture_Backside.png?v=639216429767730000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Backside",
+      "imageLastModified": "2026-08-06T19:56:16.7730000Z"
+     },
+     {
+      "imageId": "173917",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173917-#width#-#height#/2026_Torino_Basic-Pack_Overture_Dyn-Front-Left.png?v=639216429767730000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Dyn-Front-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173917/2026_Torino_Basic-Pack_Overture_Dyn-Front-Left.png?v=639216429767730000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Dyn-Front-Left",
+      "imageLastModified": "2026-08-06T19:56:16.7730000Z"
+     },
+     {
+      "imageId": "173918",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173918-#width#-#height#/2026_Torino_Basic-Pack_Overture_Dyn-Back-Left.png?v=639216429767900000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Dyn-Back-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173918/2026_Torino_Basic-Pack_Overture_Dyn-Back-Left.png?v=639216429767900000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Dyn-Back-Left",
+      "imageLastModified": "2026-08-06T19:56:16.7900000Z"
+     },
+     {
+      "imageId": "173919",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173919-#width#-#height#/2026_Torino_Basic-Pack_Overture_Rightside.png?v=639216429767900000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Rightside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173919/2026_Torino_Basic-Pack_Overture_Rightside.png?v=639216429767900000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Rightside",
+      "imageLastModified": "2026-08-06T19:56:16.7900000Z"
+     },
+     {
+      "imageId": "173920",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173920-#width#-#height#/2026_Torino_Basic-Pack_Overture_Top.png?v=639216429768030000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Top\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173920/2026_Torino_Basic-Pack_Overture_Top.png?v=639216429768030000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Top",
+      "imageLastModified": "2026-08-06T19:56:16.8030000Z"
+     },
+     {
+      "imageId": "173921",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173921-#width#-#height#/2026_Torino_Basic-Pack_Overture_Bottom--1-.png?v=639216429768030000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Overture_Bottom--1-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173921/2026_Torino_Basic-Pack_Overture_Bottom--1-.png?v=639216429768030000",
+      "imageText": "2026_Torino_Basic-Pack_Overture_Bottom--1-",
+      "imageLastModified": "2026-08-06T19:56:16.8030000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Overture"
+    ],
+    "RAM": [
+     "8RAM"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color",
+     "RAM"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1499&qty=1&seller=1&sc=1&price=79999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 799999.0,
+       "ListPrice": 899999.0,
+       "PriceWithoutDiscount": 899999.0,
+       "FullSellingPrice": 799999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjJkZWY5MzU4LTI4MGEtNGEyZC1iMTBmLWYwYThjNDUxNjM0YiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo3OTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjg5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDk5IiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiJhYjk3ZDgyOS0wZDRkLTQ4NDUtYjc4ZC05ZDBiZDlkMjQxM2UiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.ATyEtBNF9DnYhETuCBPs58yK8bDJRe42p8bMyrDG-J3KxNdnpLFwkFKllhNWMPDhDonaKWr19b8HBeWR0Ot6TQ",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   },
+   {
+    "itemId": "1498",
+    "name": "Pantone Blue Atoll",
+    "nameComplete": "Moto G Max Pantone Blue Atoll",
+    "complementName": "",
+    "ean": "",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBBR0014AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173922",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173922-#width#-#height#/1000x1000_1--11-.png?v=639227630752770000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--11-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173922/1000x1000_1--11-.png?v=639227630752770000",
+      "imageText": "1000x1000_1--11-",
+      "imageLastModified": "2026-08-19T19:04:35.2770000Z"
+     },
+     {
+      "imageId": "173923",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173923-#width#-#height#/g-max-blue-arg.png?v=639216429768500000\" width=\"#width#\" height=\"#height#\" alt=\"g-max-blue-arg\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173923/g-max-blue-arg.png?v=639216429768500000",
+      "imageText": "g-max-blue-arg",
+      "imageLastModified": "2026-08-06T19:56:16.8500000Z"
+     },
+     {
+      "imageId": "173924",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173924-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_PDP-Hero.png?v=639216429768500000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_PDP-Hero\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173924/2026_Torino_Basic-Pack_Blue-Atoll_PDP-Hero.png?v=639216429768500000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_PDP-Hero",
+      "imageLastModified": "2026-08-06T19:56:16.8500000Z"
+     },
+     {
+      "imageId": "173925",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173925-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Frontside.png?v=639216429768500000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173925/2026_Torino_Basic-Pack_Blue-Atoll_Frontside.png?v=639216429768500000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Frontside",
+      "imageLastModified": "2026-08-06T19:56:16.8500000Z"
+     },
+     {
+      "imageId": "173926",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173926-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Backside.png?v=639216429768500000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173926/2026_Torino_Basic-Pack_Blue-Atoll_Backside.png?v=639216429768500000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Backside",
+      "imageLastModified": "2026-08-06T19:56:16.8500000Z"
+     },
+     {
+      "imageId": "173927",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173927-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Front-Left.png?v=639216429768670000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Front-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173927/2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Front-Left.png?v=639216429768670000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Front-Left",
+      "imageLastModified": "2026-08-06T19:56:16.8670000Z"
+     },
+     {
+      "imageId": "173928",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173928-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Back-Left.png?v=639216429768670000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Back-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173928/2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Back-Left.png?v=639216429768670000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Dyn-Back-Left",
+      "imageLastModified": "2026-08-06T19:56:16.8670000Z"
+     },
+     {
+      "imageId": "173929",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173929-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Rightside.png?v=639216429768670000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Rightside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173929/2026_Torino_Basic-Pack_Blue-Atoll_Rightside.png?v=639216429768670000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Rightside",
+      "imageLastModified": "2026-08-06T19:56:16.8670000Z"
+     },
+     {
+      "imageId": "173930",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173930-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Top.png?v=639216429768830000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Top\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173930/2026_Torino_Basic-Pack_Blue-Atoll_Top.png?v=639216429768830000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Top",
+      "imageLastModified": "2026-08-06T19:56:16.8830000Z"
+     },
+     {
+      "imageId": "173931",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173931-#width#-#height#/2026_Torino_Basic-Pack_Blue-Atoll_Bottom.png?v=639216429768830000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Torino_Basic-Pack_Blue-Atoll_Bottom\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173931/2026_Torino_Basic-Pack_Blue-Atoll_Bottom.png?v=639216429768830000",
+      "imageText": "2026_Torino_Basic-Pack_Blue-Atoll_Bottom",
+      "imageLastModified": "2026-08-06T19:56:16.8830000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Blue Atoll"
+    ],
+    "RAM": [
+     "8RAM"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color",
+     "RAM"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1498&qty=1&seller=1&sc=1&price=79999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 799999.0,
+       "ListPrice": 899999.0,
+       "PriceWithoutDiscount": 899999.0,
+       "FullSellingPrice": 799999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUyMTA1ZmUzLWE4ZWMtNDNkZi1iNDU5LTg5N2Y4Yjk2OWU3MCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo3OTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjg5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDk4IiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiI0NzRmOTEyNC1mZDc2LTQyNTktODRkMS1hNDJkNWJiZGEwM2MiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.wnNBDZZs_Asp8MY-j02P9_9eMsTxBqRUneYbUgxnFurbqDYsfO0QWsA9Jwv3_RCeZVqgRZ3kJQaRPzv6H3ALUw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-18T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ],
+  "skuSpecifications": [
+   {
+    "field": {
+     "id": 115,
+     "name": "Storage Size",
+     "isActive": true,
+     "position": 1,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "256",
+      "name": "256GB",
+      "position": 6
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 116,
+     "name": "Color",
+     "isActive": true,
+     "position": 2,
+     "type": "Combo"
+    },
+    "values": [
+     {
+      "id": "830",
+      "name": "Pantone Overture",
+      "position": 231
+     },
+     {
+      "id": "831",
+      "name": "Pantone Blue Atoll",
+      "position": 232
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 246,
+     "name": "RAM",
+     "isActive": true,
+     "position": 3,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "614",
+      "name": "8RAM",
+      "position": 4
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "476",
+  "productName": "Moto G17 128GB",
+  "brand": "Motorola",
+  "brandId": 2000000,
+  "brandImageUrl": null,
+  "linkText": "moto-g17-128gb",
+  "productReference": "7790894901974",
+  "productReferenceCode": null,
+  "categoryId": "4",
+  "productTitle": "Moto g17 128GB | Dual sim + NFC & IP64 vs agua",
+  "releaseDate": "2026-02-10T00:00:00Z",
+  "clusterHighlights": {
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "319": "nfc"
+  },
+  "productClusters": {
+   "166": "Familia G",
+   "168": "Todos los productos",
+   "180": "Comparador",
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "263": "Motosale smartphones",
+   "281": "hasta off",
+   "294": "promo g",
+   "300": "Giftcard",
+   "303": "hotsale",
+   "311": "6 cuotas 15 desc pdp",
+   "319": "nfc",
+   "325": "9 cuotas 15 desc",
+   "331": "Familia G 2026"
+  },
+  "searchableClusters": {
+   "183": "Envio Gratis",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "294": "promo g"
+  },
+  "categories": [
+   "/Smartphones/Familia Moto G/",
+   "/Smartphones/"
+  ],
+  "categoriesIds": [
+   "/1/4/",
+   "/1/"
+  ],
+  "link": "https://www.motorola.com.ar/moto-g17-128gb/p",
+  "Familia": [
+   "Familia G"
+  ],
+  "Memoria RAM": [
+   "4GB"
+  ],
+  "Pantalla": [
+   "6.72\" (9:20)"
+  ],
+  "Almacenamiento": [
+   "128GB"
+  ],
+  "Cámara frontal": [
+   "32 MP (88.8°) F2.2"
+  ],
+  "Cámara posterior": [
+   "Principal: 50 MP (80°) F1.88</br> Gran angular: 5MP (120°) F2.2</br> Sensor Flickering"
+  ],
+  "Batería (mAh)": [
+   "5200"
+  ],
+  "Procesador": [
+   "MediaTek Helio G81"
+  ],
+  "Filters": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador"
+  ],
+  "Almacenamiento interno": [
+   "128GB"
+  ],
+  "NFC": [
+   "Si"
+  ],
+  "RAM": [
+   "4GB"
+  ],
+  "Batería specification": [
+   "5200"
+  ],
+  "Pantalla specification": [
+   "6.72\" (9:20)"
+  ],
+  "Sistema Operativo": [
+   "Android 15"
+  ],
+  "Cámara trasera": [
+   "Principal: 50 MP (80°) F1.88</br>\nGran angular: 5MP (120°) F2.2</br>\nSensor Flickering"
+  ],
+  "Peso": [
+   "187g"
+  ],
+  "Wifi": [
+   "802.11 a/b/g/n/ac - WiFi 5"
+  ],
+  "Dimensiones": [
+   "165.67 mm x 75.98 mm x 8.17 mm"
+  ],
+  "SIM": [
+   "Nano SIM"
+  ],
+  "Bluetooth": [
+   "BT 5.4"
+  ],
+  "Sensores": [
+   "Acelerómetro</br>Sensor de Proximidad</br>Brújula (Campo magnético)</br>Giroscopio</br>Huella Dactilar</br>Luz Ambiente</br>Desbloqueo Facial"
+  ],
+  "Contenido de la caja": [
+   "Equipo</br>\nCubierta protectora</br>\nHerramienta de extracción de SIM</br>\nInserto informativo</br>\nCable de datos USB-A - USB-C</br>\nCargador 20W USB-A"
+  ],
+  "Resolucion de pantalla": [
+   "1080 x 2400 FHD+, 391 ppi, HiD, 60Hz"
+  ],
+  "tecnologia pantalla": [
+   "LTPS"
+  ],
+  "Proteccion agua": [
+   "IP 64"
+  ],
+  "Sistema de audio": [
+   "WAV,MP3,AAC,AMR-NB,AMR-WB,MIDI,Vorbis,APE,ACC-plus v1,AAC-plus v2,FLAC, ADPCM"
+  ],
+  "Conector auriculares": [
+   "3.5mm"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Resolución de video cámara principal": [
+   "FHD 9:16@30fps FHD 9:20@30fps"
+  ],
+  "Velocidad de procesador": [
+   "2.0 GHz"
+  ],
+  "Zoom cámara principal": [
+   "Digital (8x fotos / 6x videos)"
+  ],
+  "Formato de reproducción de video": [
+   "MPEG-4, H.263, H.264, HEVC, XVID, MPEG3"
+  ],
+  "Tarjeta de memoria soportada": [
+   "Micro SD"
+  ],
+  "Expande hasta": [
+   "1 TB"
+  ],
+  "Redes": [
+   "4G / 3G / 2G"
+  ],
+  "GPS": [
+   "GPS, AGPS, Glonass, Galileo, QZSS"
+  ],
+  "Tipo de vidrio de pantalla": [
+   "Gorila Glass 2.5D"
+  ],
+  "Otras funciones": [
+   "Cámara lenta</br>cámara rápida</br>Night Vision</br>Panorámica</br>Modo profesional</br>Retrato</br>QR</br>Google Lens</br>Foto selfie invertida</br>Marca de agua</br>Cuadrícula de asistencia</br>Temporizador</br>Nivelador</br>Captura con toque en pantalla</br>Estabilización de videos"
+  ],
+  "Conector USB": [
+   "USB-C"
+  ],
+  "Versión USB": [
+   "2.0"
+  ],
+  "WiFi Direct/Hotspot": [
+   "Si"
+  ],
+  "Bandas de WiFi": [
+   "2.4 y 5 GHz"
+  ],
+  "Resolución de video cámara frontal": [
+   "FHD 9:16@30fps FHD 9:20@30fps"
+  ],
+  "Certificación ENACOM": [
+   "H-33121"
+  ],
+  "new_especificaciones": [
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Cámara frontal",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM"
+  ],
+  "motocare": [
+   "[{\"idSku\":1413,\"idSeguros\":491}]"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos": [
+   "IVA"
+  ],
+  "allSpecifications": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador",
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM",
+   "motocare",
+   "IVA"
+  ],
+  "allSpecificationsGroups": [
+   "Filters",
+   "new_especificaciones",
+   "motocare",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "1413",
+    "name": "Pantone Evening Blue",
+    "nameComplete": "Moto G17 128GB Pantone Evening Blue",
+    "complementName": "",
+    "ean": "7790894901974",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBBJ0012AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173974",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173974-#width#-#height#/1000x1000_1--21-.png?v=639227648259870000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--21-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173974/1000x1000_1--21-.png?v=639227648259870000",
+      "imageText": "1000x1000_1--21-",
+      "imageLastModified": "2026-08-19T19:33:45.9870000Z"
+     },
+     {
+      "imageId": "173975",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173975-#width#-#height#/g17-20w-evening-blue.png?v=639216437855830000\" width=\"#width#\" height=\"#height#\" alt=\"g17-20w-evening-blue\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173975/g17-20w-evening-blue.png?v=639216437855830000",
+      "imageText": "g17-20w-evening-blue",
+      "imageLastModified": "2026-08-06T20:09:45.5830000Z"
+     },
+     {
+      "imageId": "173976",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173976-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO.png?v=639216437855830000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173976/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO.png?v=639216437855830000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_PDP-HERO",
+      "imageLastModified": "2026-08-06T20:09:45.5830000Z"
+     },
+     {
+      "imageId": "173977",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173977-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE.png?v=639216437856000000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173977/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE.png?v=639216437856000000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_FRONTSIDE",
+      "imageLastModified": "2026-08-06T20:09:45.6000000Z"
+     },
+     {
+      "imageId": "173978",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173978-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT.png?v=639216437856000000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173978/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT.png?v=639216437856000000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-FRONTSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:09:45.6000000Z"
+     },
+     {
+      "imageId": "173979",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173979-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE.png?v=639216437856130000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173979/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE.png?v=639216437856130000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_BACKSIDE",
+      "imageLastModified": "2026-08-06T20:09:45.6130000Z"
+     },
+     {
+      "imageId": "173980",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173980-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT.png?v=639216437856130000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173980/2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT.png?v=639216437856130000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_EVENING-BLUE_DYN-BACKSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:09:45.6130000Z"
+     }
+    ],
+    "Storage Size": [
+     "128GB"
+    ],
+    "Color": [
+     "Pantone Evening Blue"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1413&qty=1&seller=1&sc=1&price=29999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 299999.0,
+       "ListPrice": 399999.0,
+       "PriceWithoutDiscount": 399999.0,
+       "FullSellingPrice": 299999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjZiOTYwOTRhLTJjMDYtNDA1OC1hOWNmLTk1ZmIzNmRmMmMwZiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoyOTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjM5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDEzIiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiJlZGMyZTBmZi1iNzVkLTQ1ZTAtODg4OC0zZGFkZjE1ZmMzN2YiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.ayy7HqfvY0h4njLwuUuvVUcQf3tQfzvGye5GNKezUWd6mMJlzwdD_shMmCi-kSW2grAp1oBMM7-CCELwvz8fOw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ],
+  "skuSpecifications": [
+   {
+    "field": {
+     "id": 115,
+     "name": "Storage Size",
+     "isActive": true,
+     "position": 1,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "255",
+      "name": "128GB",
+      "position": 5
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 116,
+     "name": "Color",
+     "isActive": true,
+     "position": 2,
+     "type": "Combo"
+    },
+    "values": [
+     {
+      "id": "787",
+      "name": "Pantone Evening Blue",
+      "position": 210
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "475",
+  "productName": "Moto G17 256GB",
+  "brand": "Motorola",
+  "brandId": 2000000,
+  "brandImageUrl": null,
+  "linkText": "moto-g17-256gb",
+  "productReference": "7790894901967",
+  "productReferenceCode": null,
+  "categoryId": "4",
+  "productTitle": "Moto g17 | Dual sim + NFC & IP64 vs agua",
+  "releaseDate": "2026-02-10T00:00:00Z",
+  "clusterHighlights": {
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "319": "nfc"
+  },
+  "productClusters": {
+   "166": "Familia G",
+   "168": "Todos los productos",
+   "180": "Comparador",
+   "183": "Envio Gratis",
+   "187": "9 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "263": "Motosale smartphones",
+   "300": "Giftcard",
+   "303": "hotsale",
+   "311": "6 cuotas 15 desc pdp",
+   "319": "nfc",
+   "325": "9 cuotas 15 desc",
+   "331": "Familia G 2026"
+  },
+  "searchableClusters": {
+   "183": "Envio Gratis",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping"
+  },
+  "categories": [
+   "/Smartphones/Familia Moto G/",
+   "/Smartphones/"
+  ],
+  "categoriesIds": [
+   "/1/4/",
+   "/1/"
+  ],
+  "link": "https://www.motorola.com.ar/moto-g17-256gb/p",
+  "Familia": [
+   "Familia G"
+  ],
+  "Memoria RAM": [
+   "4GB"
+  ],
+  "Pantalla": [
+   "6.72\" (9:20)"
+  ],
+  "Almacenamiento": [
+   "256GB"
+  ],
+  "Cámara frontal": [
+   "32 MP (88.8°) F2.2"
+  ],
+  "Cámara posterior": [
+   "Principal: 50 MP (80°) F1.88</br> Gran angular: 5MP (120°) F2.2</br> Sensor Flickering"
+  ],
+  "Batería (mAh)": [
+   "5200"
+  ],
+  "Procesador": [
+   "MediaTek Helio G81"
+  ],
+  "Filters": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador"
+  ],
+  "Almacenamiento interno": [
+   "256GB"
+  ],
+  "NFC": [
+   "Si"
+  ],
+  "RAM": [
+   "4GB"
+  ],
+  "Batería specification": [
+   "5200"
+  ],
+  "Pantalla specification": [
+   "6.72\" (9:20)"
+  ],
+  "Sistema Operativo": [
+   "Android 15"
+  ],
+  "Cámara trasera": [
+   "Principal: 50 MP (80°) F1.88</br>\nGran angular: 5MP (120°) F2.2</br>\nSensor Flickering"
+  ],
+  "Peso": [
+   "187g"
+  ],
+  "Wifi": [
+   "802.11 a/b/g/n/ac - WiFi 5"
+  ],
+  "Dimensiones": [
+   "165.67 mm x 75.98 mm x 8.17 mm"
+  ],
+  "SIM": [
+   "Nano SIM"
+  ],
+  "Bluetooth": [
+   "BT 5.4"
+  ],
+  "Sensores": [
+   "Acelerómetro</br>Sensor de Proximidad</br>Brújula (Campo magnético)</br>Giroscopio</br>Huella Dactilar</br>Luz Ambiente</br>Desbloqueo Facial"
+  ],
+  "Contenido de la caja": [
+   "Equipo</br>\nCubierta protectora</br>\nHerramienta de extracción de SIM</br>\nInserto informativo</br>\nCable de datos USB-A - USB-C</br>\nCargador 20W USB-A"
+  ],
+  "Resolucion de pantalla": [
+   "1080 x 2400 FHD+, 391 ppi, HiD, 60Hz"
+  ],
+  "tecnologia pantalla": [
+   "LTPS"
+  ],
+  "Proteccion agua": [
+   "IP 64"
+  ],
+  "Sistema de audio": [
+   "WAV,MP3,AAC,AMR-NB,AMR-WB,MIDI,Vorbis,APE,ACC-plus v1,AAC-plus v2,FLAC, ADPCM"
+  ],
+  "Conector auriculares": [
+   "3.5mm"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Resolución de video cámara principal": [
+   "FHD 9:16@30fps FHD 9:20@30fps"
+  ],
+  "Velocidad de procesador": [
+   "2.0 GHz"
+  ],
+  "Zoom cámara principal": [
+   "Digital (8x fotos / 6x videos)"
+  ],
+  "Formato de reproducción de video": [
+   "MPEG-4, H.263, H.264, HEVC, XVID, MPEG3"
+  ],
+  "Tarjeta de memoria soportada": [
+   "Micro SD"
+  ],
+  "Expande hasta": [
+   "1TB"
+  ],
+  "Redes": [
+   "4G / 3G / 2G"
+  ],
+  "GPS": [
+   "GPS, AGPS, Glonass, Galileo, QZSS"
+  ],
+  "Tipo de vidrio de pantalla": [
+   "Gorila Glass 2.5D"
+  ],
+  "Otras funciones": [
+   "Cámara lenta</br>cámara rápida</br>Night Vision</br>Panorámica</br>Modo profesional</br>Retrato</br>QR</br>Google Lens</br>Foto selfie invertida</br>Marca de agua</br>Cuadrícula de asistencia</br>Temporizador</br>Nivelador</br>Captura con toque en pantalla</br>Estabilización de videos"
+  ],
+  "Conector USB": [
+   "USB-C"
+  ],
+  "Versión USB": [
+   "2.0"
+  ],
+  "WiFi Direct/Hotspot": [
+   "Si"
+  ],
+  "Bandas de WiFi": [
+   "2.4 y 5 GHz"
+  ],
+  "Resolución de video cámara frontal": [
+   "FHD 9:16@30fps FHD 9:20@30fps"
+  ],
+  "Certificación ENACOM": [
+   "H-33122"
+  ],
+  "new_especificaciones": [
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Cámara frontal",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM"
+  ],
+  "motocare": [
+   "[{\"idSku\":1412,\"idSeguros\":492},{\"idSku\":1414,\"idSeguros\":493}]"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos": [
+   "IVA"
+  ],
+  "allSpecifications": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador",
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM",
+   "motocare",
+   "IVA"
+  ],
+  "allSpecificationsGroups": [
+   "Filters",
+   "new_especificaciones",
+   "motocare",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "1412",
+    "name": "Pantone Alaskan Blue",
+    "nameComplete": "Moto G17 256GB Pantone Alaskan Blue",
+    "complementName": "",
+    "ean": "7790894901967",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBBJ0016AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173981",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173981-#width#-#height#/1000x1000_1--19-.png?v=639227648474030000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--19-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173981/1000x1000_1--19-.png?v=639227648474030000",
+      "imageText": "1000x1000_1--19-",
+      "imageLastModified": "2026-08-19T19:34:07.4030000Z"
+     },
+     {
+      "imageId": "173982",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173982-#width#-#height#/g17-20w-alaskan-blue.png?v=639216438235630000\" width=\"#width#\" height=\"#height#\" alt=\"g17-20w-alaskan-blue\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173982/g17-20w-alaskan-blue.png?v=639216438235630000",
+      "imageText": "g17-20w-alaskan-blue",
+      "imageLastModified": "2026-08-06T20:10:23.5630000Z"
+     },
+     {
+      "imageId": "173983",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173983-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_PDP-HERO.png?v=639216438235630000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_PDP-HERO\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173983/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_PDP-HERO.png?v=639216438235630000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_PDP-HERO",
+      "imageLastModified": "2026-08-06T20:10:23.5630000Z"
+     },
+     {
+      "imageId": "173984",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173984-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_FRONTSIDE.png?v=639216438235630000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_FRONTSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173984/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_FRONTSIDE.png?v=639216438235630000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_FRONTSIDE",
+      "imageLastModified": "2026-08-06T20:10:23.5630000Z"
+     },
+     {
+      "imageId": "173985",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173985-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-FRONTSIDE-RIGHT.png?v=639216438235800000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-FRONTSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173985/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-FRONTSIDE-RIGHT.png?v=639216438235800000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-FRONTSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:10:23.5800000Z"
+     },
+     {
+      "imageId": "173986",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173986-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_BACKSIDE.png?v=639216438235800000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_BACKSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173986/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_BACKSIDE.png?v=639216438235800000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_BACKSIDE",
+      "imageLastModified": "2026-08-06T20:10:23.5800000Z"
+     },
+     {
+      "imageId": "173987",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173987-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-BACKSIDE-RIGHT.png?v=639216438235800000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-BACKSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173987/2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-BACKSIDE-RIGHT.png?v=639216438235800000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_ALASKAN-BLUE_DYN-BACKSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:10:23.5800000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Alaskan Blue"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1412&qty=1&seller=1&sc=1&price=36999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 369999.0,
+       "ListPrice": 449999.0,
+       "PriceWithoutDiscount": 449999.0,
+       "FullSellingPrice": 369999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjgwNzA2MWY1LWM4MzQtNDRiMC04ZWZkLWNjOWQxZWMyMzU1MCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjozNjk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjQ0OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDEyIiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiI4NTYwZjc4Yi0xM2Y1LTQ5YWItOWU3NS1lODM4YjhkY2U1NjciLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.izzJ-nyrEwJEiHbN2wDHMOdDwtTJMXNmn-VQu8ikfg5q_bQJJMnnxZLRNtMPRFWaeZK-5-XDiUhSOkt3K8SKWg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   },
+   {
+    "itemId": "1414",
+    "name": "Pantone Bordeaux",
+    "nameComplete": "Moto G17 256GB Pantone Bordeaux",
+    "complementName": "",
+    "ean": "7790894901950",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBBJ0017AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173988",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173988-#width#-#height#/1000x1000_1--20-.png?v=639227648474470000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--20-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173988/1000x1000_1--20-.png?v=639227648474470000",
+      "imageText": "1000x1000_1--20-",
+      "imageLastModified": "2026-08-19T19:34:07.4470000Z"
+     },
+     {
+      "imageId": "173989",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173989-#width#-#height#/g17-20w-bordeaux.png?v=639216438236100000\" width=\"#width#\" height=\"#height#\" alt=\"g17-20w-bordeaux\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173989/g17-20w-bordeaux.png?v=639216438236100000",
+      "imageText": "g17-20w-bordeaux",
+      "imageLastModified": "2026-08-06T20:10:23.6100000Z"
+     },
+     {
+      "imageId": "173990",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173990-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_PDP-HERO.png?v=639216438236270000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_BORDEAUX_PDP-HERO\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173990/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_PDP-HERO.png?v=639216438236270000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_BORDEAUX_PDP-HERO",
+      "imageLastModified": "2026-08-06T20:10:23.6270000Z"
+     },
+     {
+      "imageId": "173991",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173991-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_FRONTSIDE.png?v=639216438236270000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_BORDEAUX_FRONTSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173991/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_FRONTSIDE.png?v=639216438236270000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_BORDEAUX_FRONTSIDE",
+      "imageLastModified": "2026-08-06T20:10:23.6270000Z"
+     },
+     {
+      "imageId": "173992",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173992-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-FRONTSIDE-RIGHT.png?v=639216438236430000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-FRONTSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173992/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-FRONTSIDE-RIGHT.png?v=639216438236430000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-FRONTSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:10:23.6430000Z"
+     },
+     {
+      "imageId": "173993",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173993-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_BACKSIDE.png?v=639216438236430000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_BORDEAUX_BACKSIDE\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173993/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_BACKSIDE.png?v=639216438236430000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_BORDEAUX_BACKSIDE",
+      "imageLastModified": "2026-08-06T20:10:23.6430000Z"
+     },
+     {
+      "imageId": "173994",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173994-#width#-#height#/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-BACKSIDE-RIGHT.png?v=639216438236430000\" width=\"#width#\" height=\"#height#\" alt=\"2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-BACKSIDE-RIGHT\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173994/2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-BACKSIDE-RIGHT.png?v=639216438236430000",
+      "imageText": "2026_LAMU-BASE_BASIC-PACK_BORDEAUX_DYN-BACKSIDE-RIGHT",
+      "imageLastModified": "2026-08-06T20:10:23.6430000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Bordeaux"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1414&qty=1&seller=1&sc=1&price=36999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 369999.0,
+       "ListPrice": 449999.0,
+       "PriceWithoutDiscount": 449999.0,
+       "FullSellingPrice": 369999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjI1N2ViNTUwLWZiOTQtNGE5Yi1iOTIwLTkyYjEyODA2MjU5ZCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjozNjk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjQ0OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDE0IiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiI5ZWI2NjgwNy1jOWY1LTQ5ZjktOTYwMi1jZTYxYTE4ZjdkZjYiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.Jzsb5-_mlvLPz8pGJU43fen5i7Yl2tfO0-qULv45USteNE8uMZH0scJbN6-cel0T5VyVSJNOKpsn25DWZndtSg",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ],
+  "skuSpecifications": [
+   {
+    "field": {
+     "id": 115,
+     "name": "Storage Size",
+     "isActive": true,
+     "position": 1,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "256",
+      "name": "256GB",
+      "position": 6
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 116,
+     "name": "Color",
+     "isActive": true,
+     "position": 2,
+     "type": "Combo"
+    },
+    "values": [
+     {
+      "id": "786",
+      "name": "Pantone Alaskan Blue",
+      "position": 209
+     },
+     {
+      "id": "788",
+      "name": "Pantone Bordeaux",
+      "position": 211
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "474",
+  "productName": "Moto G77",
+  "brand": "Motorola",
+  "brandId": 2000000,
+  "brandImageUrl": null,
+  "linkText": "moto-g77",
+  "productReference": "7790894901936",
+  "productReferenceCode": null,
+  "categoryId": "4",
+  "productTitle": "Moto g77 | Smartphone dual sim con nfc + android 16",
+  "releaseDate": "2026-02-10T00:00:00Z",
+  "clusterHighlights": {
+   "183": "Envio Gratis",
+   "184": "6 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "308": "dual sim",
+   "319": "nfc"
+  },
+  "productClusters": {
+   "166": "Familia G",
+   "168": "Todos los productos",
+   "180": "Comparador",
+   "183": "Envio Gratis",
+   "184": "6 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "263": "Motosale smartphones",
+   "281": "hasta off",
+   "295": "promo edge",
+   "300": "Giftcard",
+   "303": "hotsale",
+   "308": "dual sim",
+   "311": "6 cuotas 15 desc pdp",
+   "319": "nfc",
+   "325": "9 cuotas 15 desc",
+   "331": "Familia G 2026"
+  },
+  "searchableClusters": {
+   "183": "Envio Gratis",
+   "184": "6 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "295": "promo edge"
+  },
+  "categories": [
+   "/Smartphones/Familia Moto G/",
+   "/Smartphones/"
+  ],
+  "categoriesIds": [
+   "/1/4/",
+   "/1/"
+  ],
+  "link": "https://www.motorola.com.ar/moto-g77/p",
+  "Familia": [
+   "Familia G"
+  ],
+  "Memoria RAM": [
+   "8GB"
+  ],
+  "Pantalla": [
+   "6.78\" (9:20)"
+  ],
+  "Almacenamiento": [
+   "256GB"
+  ],
+  "Cámara frontal": [
+   "32 MP (88°) F2.2"
+  ],
+  "Cámara posterior": [
+   "Principal: 108 MP (83.6°) F1.7<br>Gran Angular: 8MP (120°) F2.2<br>Flicker Sensor"
+  ],
+  "Batería (mAh)": [
+   "5200"
+  ],
+  "Procesador": [
+   "Mediatek Dimentsity 6400"
+  ],
+  "Filters": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador"
+  ],
+  "Almacenamiento interno": [
+   "256GB"
+  ],
+  "NFC": [
+   "Si"
+  ],
+  "RAM": [
+   "8GB"
+  ],
+  "Batería specification": [
+   "5200"
+  ],
+  "Pantalla specification": [
+   "6.78\" (9:20)"
+  ],
+  "Sistema Operativo": [
+   "Android 16"
+  ],
+  "Cámara trasera": [
+   "Principal: 108 MP (83.6°) F1.7<br>Gran Angular: 8MP (120°) F2.2<br>Flicker Sensor"
+  ],
+  "Peso": [
+   "179g"
+  ],
+  "Wifi": [
+   "802.11 a/b/g/n/ac - WiFi 5"
+  ],
+  "Dimensiones": [
+   "164.18 mm x 77.37 mm x 7.33 mm"
+  ],
+  "SIM": [
+   "Nano SIM"
+  ],
+  "Bluetooth": [
+   "BT 5.4"
+  ],
+  "Sensores": [
+   "Acelerómetro</br>Sensor de Proximidad</br>Brújula (Campo magnético)</br>Giroscopio</br>Huella Dactilar</br>Luz ambiente</br>Desbloqueo facial"
+  ],
+  "Contenido de la caja": [
+   "Equipo<br>\nCubierta protectora<br>\nHerramienta de extracción de SIM<br>\nInserto informativo<br>\nCable de datos USB-A - USB-C<br>\nCargador 33W USB-A"
+  ],
+  "Resolucion de pantalla": [
+   "1272 x 2772 1.5K, 450 ppi, HiD, 120 Hz"
+  ],
+  "tecnologia pantalla": [
+   "pOLED"
+  ],
+  "Proteccion agua": [
+   "IP64"
+  ],
+  "Sistema de audio": [
+   "WAV,MP3,AAC,AMR-NB,AMR-WB,MIDI,Vorbis,APE,ACC-plus v1,AAC-plus v2,FLAC, ADPCM"
+  ],
+  "Conector auriculares": [
+   "No (USB-C analógico y digital)"
+  ],
+  "Dual SIM": [
+   "Si (SIM física + SIM digital)"
+  ],
+  "Resolución de video cámara principal": [
+   "2K UHD 9:16@30fps<br>2K UHD 9:16@30fps<br>FHD 9:16@30/60fps<br>FHD 9:20@30/60fps"
+  ],
+  "Velocidad de procesador": [
+   "2.5 GHz"
+  ],
+  "Zoom cámara principal": [
+   "Digital (10x fotos / 8x videos)"
+  ],
+  "Formato de reproducción de video": [
+   "MPEG-4, H.263, H.264, HEVC, XVID, MPEG3"
+  ],
+  "Tarjeta de memoria soportada": [
+   "Micro SD"
+  ],
+  "Expande hasta": [
+   "2 TB"
+  ],
+  "Redes": [
+   "5G / 4G+ / 4G / 3G / 2G"
+  ],
+  "GPS": [
+   "GPS, AGPS, Glonass, Galileo, QZSS"
+  ],
+  "Tipo de vidrio de pantalla": [
+   "Gorilla Glass 7i"
+  ],
+  "Otras funciones": [
+   "Cámara lenta<br>cámara rápida<br>Night Vision (foto)<br>Panorámica<br>Escáner<br>Captura Doble (video)<br>Modo pro<br>Retrato (foto)<br>Cabina de fotos<br>Captura automática de sonrisa<br>Captura con un gesto<br>Captura con toque en pantalla<br>Google Lens<br>Foto selfie espejada<br>Marca de agua<br>Cámara instantánea<br>Cuadrícula de asistencia<br>Nivelador<br>Temporizador<br>Estabilización"
+  ],
+  "Conector USB": [
+   "USB-C"
+  ],
+  "Versión USB": [
+   "2.0"
+  ],
+  "WiFi Direct/Hotspot": [
+   "Si"
+  ],
+  "Bandas de WiFi": [
+   "2.4 y 5 GHz"
+  ],
+  "Resolución de video cámara frontal": [
+   "2K UHD 9:16@30fps<br> 2K UHD 9:20@30fps<br> FHD 9:16@30fps<br> FHD 9:20@30fps"
+  ],
+  "Certificación ENACOM": [
+   "H-33120"
+  ],
+  "new_especificaciones": [
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Cámara frontal",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM"
+  ],
+  "motocare": [
+   "[{\"idSku\":1408,\"idSeguros\":487},{\"idSku\":1409,\"idSeguros\":488}]"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos": [
+   "IVA"
+  ],
+  "allSpecifications": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador",
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM",
+   "motocare",
+   "IVA"
+  ],
+  "allSpecificationsGroups": [
+   "Filters",
+   "new_especificaciones",
+   "motocare",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "1408",
+    "name": "Pantone Black Olive",
+    "nameComplete": "Moto G77 Pantone Black Olive",
+    "complementName": "",
+    "ean": "7790894901936",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBAV0006AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173946",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173946-#width#-#height#/1000x1000_1--15-.png?v=639227631150470000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--15-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173946/1000x1000_1--15-.png?v=639227631150470000",
+      "imageText": "1000x1000_1--15-",
+      "imageLastModified": "2026-08-19T19:05:15.0470000Z"
+     },
+     {
+      "imageId": "173947",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173947-#width#-#height#/g77-33w-black-olive.png?v=639216432074300000\" width=\"#width#\" height=\"#height#\" alt=\"g77-33w-black-olive\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173947/g77-33w-black-olive.png?v=639216432074300000",
+      "imageText": "g77-33w-black-olive",
+      "imageLastModified": "2026-08-06T20:00:07.4300000Z"
+     },
+     {
+      "imageId": "173948",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173948-#width#-#height#/2026_Naples108mp_Basic-Pack_Black-Olive_PDP-Hero.png?v=639216432074470000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples108mp_Basic-Pack_Black-Olive_PDP-Hero\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173948/2026_Naples108mp_Basic-Pack_Black-Olive_PDP-Hero.png?v=639216432074470000",
+      "imageText": "2026_Naples108mp_Basic-Pack_Black-Olive_PDP-Hero",
+      "imageLastModified": "2026-08-06T20:00:07.4470000Z"
+     },
+     {
+      "imageId": "173949",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173949-#width#-#height#/2026_Naples108mp_Basic-Pack_Black-Olive_Frontside.png?v=639216432074470000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples108mp_Basic-Pack_Black-Olive_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173949/2026_Naples108mp_Basic-Pack_Black-Olive_Frontside.png?v=639216432074470000",
+      "imageText": "2026_Naples108mp_Basic-Pack_Black-Olive_Frontside",
+      "imageLastModified": "2026-08-06T20:00:07.4470000Z"
+     },
+     {
+      "imageId": "173950",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173950-#width#-#height#/2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Frontside-Left.png?v=639216432074600000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Frontside-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173950/2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Frontside-Left.png?v=639216432074600000",
+      "imageText": "2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Frontside-Left",
+      "imageLastModified": "2026-08-06T20:00:07.4600000Z"
+     },
+     {
+      "imageId": "173951",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173951-#width#-#height#/2026_Naples108mp_Basic-Pack_Black-Olive_Backside.png?v=639216432074600000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples108mp_Basic-Pack_Black-Olive_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173951/2026_Naples108mp_Basic-Pack_Black-Olive_Backside.png?v=639216432074600000",
+      "imageText": "2026_Naples108mp_Basic-Pack_Black-Olive_Backside",
+      "imageLastModified": "2026-08-06T20:00:07.4600000Z"
+     },
+     {
+      "imageId": "173952",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173952-#width#-#height#/2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Backside-Right.png?v=639216432074600000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Backside-Right\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173952/2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Backside-Right.png?v=639216432074600000",
+      "imageText": "2026_Naples108mp_Basic-Pack_Black-Olive_Dyn-Backside-Right",
+      "imageLastModified": "2026-08-06T20:00:07.4600000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Black Olive"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1408&qty=1&seller=1&sc=1&price=69999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 699999.0,
+       "ListPrice": 799999.0,
+       "PriceWithoutDiscount": 799999.0,
+       "FullSellingPrice": 699999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjA4YmEyNjQ2LTJjODgtNGZlNy04OGUwLWYyNmEzMjk1MDI4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo2OTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjc5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDA4IiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiIwZmIzYzhlYy1hOTlkLTRkYTgtYjcyZi04MmFhNTFlMjYzYTQiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.dhQ8kzbkqap1oa8W--q85abC9Mcki3pOIfvrIhLkIZuItVTYjcHSRxW6E_nN8XyIVzw6wdrS1sIPrkhO3lFqyw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   },
+   {
+    "itemId": "1409",
+    "name": "Pantone Shaded Spruce",
+    "nameComplete": "Moto G77 Pantone Shaded Spruce",
+    "complementName": "",
+    "ean": "7790894901929",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PBAV0007AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "173953",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173953-#width#-#height#/1000x1000_1--16-.png?v=639227631150770000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--16-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173953/1000x1000_1--16-.png?v=639227631150770000",
+      "imageText": "1000x1000_1--16-",
+      "imageLastModified": "2026-08-19T19:05:15.0770000Z"
+     },
+     {
+      "imageId": "173954",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173954-#width#-#height#/g77-33w-shaded-Spruce.png?v=639216432074930000\" width=\"#width#\" height=\"#height#\" alt=\"g77-33w-shaded-Spruce\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173954/g77-33w-shaded-Spruce.png?v=639216432074930000",
+      "imageText": "g77-33w-shaded-Spruce",
+      "imageLastModified": "2026-08-06T20:00:07.4930000Z"
+     },
+     {
+      "imageId": "173955",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173955-#width#-#height#/2026_Naples_Basic-Pack_Shaded-Spruce_PDP-Hero.png?v=639216432075100000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples_Basic-Pack_Shaded-Spruce_PDP-Hero\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173955/2026_Naples_Basic-Pack_Shaded-Spruce_PDP-Hero.png?v=639216432075100000",
+      "imageText": "2026_Naples_Basic-Pack_Shaded-Spruce_PDP-Hero",
+      "imageLastModified": "2026-08-06T20:00:07.5100000Z"
+     },
+     {
+      "imageId": "173956",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173956-#width#-#height#/2026_Naples_Basic-Pack_Shaded-Spruce_Frontside.png?v=639216432075100000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples_Basic-Pack_Shaded-Spruce_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173956/2026_Naples_Basic-Pack_Shaded-Spruce_Frontside.png?v=639216432075100000",
+      "imageText": "2026_Naples_Basic-Pack_Shaded-Spruce_Frontside",
+      "imageLastModified": "2026-08-06T20:00:07.5100000Z"
+     },
+     {
+      "imageId": "173957",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173957-#width#-#height#/2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Front-Right.png?v=639216432075230000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Front-Right\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173957/2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Front-Right.png?v=639216432075230000",
+      "imageText": "2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Front-Right",
+      "imageLastModified": "2026-08-06T20:00:07.5230000Z"
+     },
+     {
+      "imageId": "173958",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173958-#width#-#height#/2026_Naples_Basic-Pack_Shaded-Spruce_Backside.png?v=639216432075230000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples_Basic-Pack_Shaded-Spruce_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173958/2026_Naples_Basic-Pack_Shaded-Spruce_Backside.png?v=639216432075230000",
+      "imageText": "2026_Naples_Basic-Pack_Shaded-Spruce_Backside",
+      "imageLastModified": "2026-08-06T20:00:07.5230000Z"
+     },
+     {
+      "imageId": "173959",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/173959-#width#-#height#/2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Back-Right.png?v=639216432075400000\" width=\"#width#\" height=\"#height#\" alt=\"2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Back-Right\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/173959/2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Back-Right.png?v=639216432075400000",
+      "imageText": "2026_Naples_Basic-Pack_Shaded-Spruce_Dyn-Back-Right",
+      "imageLastModified": "2026-08-06T20:00:07.5400000Z"
+     }
+    ],
+    "Storage Size": [
+     "256GB"
+    ],
+    "Color": [
+     "Pantone Shaded Spruce"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1409&qty=1&seller=1&sc=1&price=69999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 699999.0,
+       "ListPrice": 799999.0,
+       "PriceWithoutDiscount": 799999.0,
+       "FullSellingPrice": 699999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjYzOTdjNGQ5LTZjMGMtNDIzMy05ZTAzLTdhZDI3MjJjNzdiNCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjo2OTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjc5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxNDA5IiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiJhYjAyZjZjNS1jMGFjLTQ5YmMtYjhkMy0zM2I4YmU2MmZkZDciLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.SvJY_E3crO1mA10Y9ihwaNaK00FYW_-BCwtPEsvVY0OOsTRdYzm4MgVtZWRy_u0ZDoeCJcxP63UbY9IOJvqUDw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 99999,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ],
+  "skuSpecifications": [
+   {
+    "field": {
+     "id": 115,
+     "name": "Storage Size",
+     "isActive": true,
+     "position": 1,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "256",
+      "name": "256GB",
+      "position": 6
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 116,
+     "name": "Color",
+     "isActive": true,
+     "position": 2,
+     "type": "Combo"
+    },
+    "values": [
+     {
+      "id": "781",
+      "name": "Pantone Black Olive",
+      "position": 204
+     },
+     {
+      "id": "801",
+      "name": "Pantone Shaded Spruce",
+      "position": 220
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "464",
+  "productName": "Moto G06 128GB",
+  "brand": "Motorola",
+  "brandId": 2000000,
+  "brandImageUrl": null,
+  "linkText": "moto-g06-128gb",
+  "productReference": "7790894901851",
+  "productReferenceCode": null,
+  "categoryId": "4",
+  "productTitle": "Moto g06 | Batería para todo el día + hasta 12GB ram boost",
+  "releaseDate": "2026-01-05T00:00:00Z",
+  "clusterHighlights": {
+   "183": "Envio Gratis",
+   "199": "3 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago"
+  },
+  "productClusters": {
+   "168": "Todos los productos",
+   "180": "Comparador",
+   "183": "Envio Gratis",
+   "199": "3 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping",
+   "263": "Motosale smartphones",
+   "281": "hasta off",
+   "300": "Giftcard",
+   "303": "hotsale",
+   "311": "6 cuotas 15 desc pdp",
+   "325": "9 cuotas 15 desc",
+   "331": "Familia G 2026"
+  },
+  "searchableClusters": {
+   "183": "Envio Gratis",
+   "199": "3 cuotas",
+   "219": "dos tarjetas",
+   "233": "Descuento en un pago",
+   "241": "Google Shopping"
+  },
+  "categories": [
+   "/Smartphones/Familia Moto G/",
+   "/Smartphones/"
+  ],
+  "categoriesIds": [
+   "/1/4/",
+   "/1/"
+  ],
+  "link": "https://www.motorola.com.ar/moto-g06-128gb/p",
+  "Familia": [
+   "Familia G"
+  ],
+  "Memoria RAM": [
+   "4GB"
+  ],
+  "Pantalla": [
+   "6.88\" (4:9)"
+  ],
+  "Almacenamiento": [
+   "128GB"
+  ],
+  "Cámara frontal": [
+   "8 MP (77.5°) F2"
+  ],
+  "Cámara posterior": [
+   "50 MP (74.26°) F1.8"
+  ],
+  "Batería (mAh)": [
+   "5200"
+  ],
+  "Procesador": [
+   "Mediatek Helio G81 Extreme"
+  ],
+  "Filters": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador"
+  ],
+  "Almacenamiento interno": [
+   "128GB"
+  ],
+  "NFC": [
+   "No"
+  ],
+  "RAM": [
+   "4GB"
+  ],
+  "Batería specification": [
+   "5200"
+  ],
+  "Pantalla specification": [
+   "6.88\" (4:9)"
+  ],
+  "Sistema Operativo": [
+   "Android 15"
+  ],
+  "Cámara trasera": [
+   "50 MP (74.26°) F1.8"
+  ],
+  "Peso": [
+   "194g"
+  ],
+  "Wifi": [
+   "802.11 a/b/g/n/ac - WIFI 6"
+  ],
+  "Dimensiones": [
+   "171.35 mm x 77.5 mm x 8.31 mm"
+  ],
+  "SIM": [
+   "Nano SIM"
+  ],
+  "Bluetooth": [
+   "BT 6.0"
+  ],
+  "Sensores": [
+   "Acelerómetro</br>Sensor de Proximidad</br>Huella Dactilar</br>Luz Ambiente</br>Desbloqueo Facial"
+  ],
+  "Contenido de la caja": [
+   "Equipo</br>\nCubierta protectora</br>\nHerramienta de extracción de SIM</br>\nInserto informativo</br>\nCable de datos USB-A - USB-C</br>\nCargador 10W USB-A"
+  ],
+  "Resolucion de pantalla": [
+   "720*1604 HD+, 263 ppi, Notch, 120Hz"
+  ],
+  "tecnologia pantalla": [
+   "A-Si"
+  ],
+  "Proteccion agua": [
+   "IP64"
+  ],
+  "Sistema de audio": [
+   "WAV,MP3,AAC,AMR-NB,AMR-WB,MIDI,Vorbis,APE,ACC-plus v1,AAC-plus v2,FLAC, ADPCM"
+  ],
+  "Conector auriculares": [
+   "SI (3.5 mm)"
+  ],
+  "Dual SIM": [
+   "No"
+  ],
+  "Resolución de video cámara principal": [
+   "1080p HD @30fps 720p HD @30fps"
+  ],
+  "Velocidad de procesador": [
+   "2.0 GHz"
+  ],
+  "Zoom cámara principal": [
+   "digital (6x fotos / 5x videos)"
+  ],
+  "Formato de reproducción de video": [
+   "MPEG-4, H.263, H.264, HEVC, XVID, MPEG2"
+  ],
+  "Tarjeta de memoria soportada": [
+   "Micro SD"
+  ],
+  "Expande hasta": [
+   "1 TB"
+  ],
+  "Redes": [
+   "4G / 3G / 2G"
+  ],
+  "GPS": [
+   "GPS, Glonass, Galileo, QZSS"
+  ],
+  "Tipo de vidrio de pantalla": [
+   "Gorilla Glass 3"
+  ],
+  "Otras funciones": [
+   "Cámara lenta</br>Cámara rápida</br>Night Vision (foto y video)</br>Panorámica</br>Escáner</br>Modo pro</br>Retrato (foto)</br>Google Lens</br>Foto selfie invertida</br>Marca de agua</br>Captura con toque en pantalla</br>Cámara instantánea</br>Cuadrícula de asistencia</br>Temporizador</br>Estabilización"
+  ],
+  "Conector USB": [
+   "USB-C"
+  ],
+  "Versión USB": [
+   "2.0"
+  ],
+  "WiFi Direct/Hotspot": [
+   "Si"
+  ],
+  "Bandas de WiFi": [
+   "2.4 y 5 GHz"
+  ],
+  "Resolución de video cámara frontal": [
+   "1080p HD @30fps 720p HD @30fps"
+  ],
+  "Certificación ENACOM": [
+   "H-33458"
+  ],
+  "new_especificaciones": [
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Cámara frontal",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM"
+  ],
+  "motocare": [
+   "[{\"idSku\":1380,\"idSeguros\":468},{\"idSku\":1381,\"idSeguros\":469},{\"idSku\":1523,\"idSeguros\":546},{\"idSku\":1524,\"idSeguros\":547}]"
+  ],
+  "IVA": [
+   "21"
+  ],
+  "Impuestos": [
+   "IVA"
+  ],
+  "allSpecifications": [
+   "Familia",
+   "Memoria RAM",
+   "Pantalla",
+   "Almacenamiento",
+   "Cámara frontal",
+   "Cámara posterior",
+   "Batería (mAh)",
+   "Procesador",
+   "Almacenamiento interno",
+   "NFC",
+   "RAM",
+   "Batería specification",
+   "Pantalla specification",
+   "Sistema Operativo",
+   "Cámara trasera",
+   "Peso",
+   "Wifi",
+   "Dimensiones",
+   "SIM",
+   "Bluetooth",
+   "Sensores",
+   "Contenido de la caja",
+   "Resolucion de pantalla",
+   "tecnologia pantalla",
+   "Proteccion agua",
+   "Sistema de audio",
+   "Conector auriculares",
+   "Dual SIM",
+   "Resolución de video cámara principal",
+   "Velocidad de procesador",
+   "Zoom cámara principal",
+   "Formato de reproducción de video",
+   "Tarjeta de memoria soportada",
+   "Expande hasta",
+   "Redes",
+   "GPS",
+   "Tipo de vidrio de pantalla",
+   "Otras funciones",
+   "Conector USB",
+   "Versión USB",
+   "WiFi Direct/Hotspot",
+   "Bandas de WiFi",
+   "Resolución de video cámara frontal",
+   "Certificación ENACOM",
+   "motocare",
+   "IVA"
+  ],
+  "allSpecificationsGroups": [
+   "Filters",
+   "new_especificaciones",
+   "motocare",
+   "Impuestos"
+  ],
+  "items": [
+   {
+    "itemId": "1380",
+    "name": "Pantone Tapestry",
+    "nameComplete": "Moto G06 128GB Pantone Tapestry",
+    "complementName": "",
+    "ean": "7790894901851",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PB970104AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "174019",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174019-#width#-#height#/1000x1000_1--23-.png?v=639235230936700000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--23-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174019/1000x1000_1--23-.png?v=639235230936700000",
+      "imageText": "1000x1000_1--23-",
+      "imageLastModified": "2026-08-28T14:11:33.6700000Z"
+     },
+     {
+      "imageId": "174020",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174020-#width#-#height#/G06-10w-tapestri--1-.png?v=639216444327000000\" width=\"#width#\" height=\"#height#\" alt=\"G06-10w-tapestri--1-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174020/G06-10w-tapestri--1-.png?v=639216444327000000",
+      "imageText": "G06-10w-tapestri--1-",
+      "imageLastModified": "2026-08-06T20:20:32.7000000Z"
+     },
+     {
+      "imageId": "174021",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174021-#width#-#height#/2025_LAGOS_Basic-Pack_Tapestry_Frontside.png?v=639216444327170000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tapestry_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174021/2025_LAGOS_Basic-Pack_Tapestry_Frontside.png?v=639216444327170000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tapestry_Frontside",
+      "imageLastModified": "2026-08-06T20:20:32.7170000Z"
+     },
+     {
+      "imageId": "174022",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174022-#width#-#height#/2025_LAGOS_Basic-Pack_Tapestry_Dyn-Front-Left.png?v=639216444327170000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tapestry_Dyn-Front-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174022/2025_LAGOS_Basic-Pack_Tapestry_Dyn-Front-Left.png?v=639216444327170000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tapestry_Dyn-Front-Left",
+      "imageLastModified": "2026-08-06T20:20:32.7170000Z"
+     },
+     {
+      "imageId": "174023",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174023-#width#-#height#/2025_LAGOS_Basic-Pack_Tapestry_PDP.png?v=639216444327300000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tapestry_PDP\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174023/2025_LAGOS_Basic-Pack_Tapestry_PDP.png?v=639216444327300000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tapestry_PDP",
+      "imageLastModified": "2026-08-06T20:20:32.7300000Z"
+     },
+     {
+      "imageId": "174024",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174024-#width#-#height#/2025_LAGOS_Basic-Pack_Tapestry_Backside.png?v=639216444327300000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tapestry_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174024/2025_LAGOS_Basic-Pack_Tapestry_Backside.png?v=639216444327300000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tapestry_Backside",
+      "imageLastModified": "2026-08-06T20:20:32.7300000Z"
+     }
+    ],
+    "Storage Size": [
+     "128GB"
+    ],
+    "Color": [
+     "Pantone Tapestry"
+    ],
+    "RAM": [
+     "4RAM"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color",
+     "RAM"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1380&qty=1&seller=1&sc=1&price=19999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {
+        "0": {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       },
+       "Price": 199999.0,
+       "ListPrice": 299999.0,
+       "PriceWithoutDiscount": 299999.0,
+       "FullSellingPrice": 199999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImY0NGZjMWY3LTlkNmEtNDdlNy04Nzg1LTRkZGI0MGU3YzViZSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxOTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjI5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxMzgwIiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiI2OTg4ZjdjNy02MmZlLTRjNGEtYjk1Mi1jMWM5YjhiNjI0MWYiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0._8AA4011NGVGUnF-brlGB8OHPm3KtbVjPwcafmwt9Qbc_HBmUSwIOEodyyaD2pQDv_pYmPWzCGGErs61klFqCw",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-19T00:00:00Z",
+       "AvailableQuantity": 100,
+       "IsAvailable": true,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [
+        {
+         "DeliverySlaPerTypes": [],
+         "Region": null
+        }
+       ],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   },
+   {
+    "itemId": "1381",
+    "name": "Pantone Tendril",
+    "nameComplete": "Moto G06 128GB Pantone Tendril",
+    "complementName": "",
+    "ean": "7790894901868",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "91PB970105AR"
+     }
+    ],
+    "measurementUnit": "un",
+    "unitMultiplier": 1.0,
+    "modalType": "",
+    "isKit": false,
+    "images": [
+     {
+      "imageId": "174025",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174025-#width#-#height#/1000x1000_1--24-.png?v=639235230937000000\" width=\"#width#\" height=\"#height#\" alt=\"1000x1000_1--24-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174025/1000x1000_1--24-.png?v=639235230937000000",
+      "imageText": "1000x1000_1--24-",
+      "imageLastModified": "2026-08-28T14:11:33.7000000Z"
+     },
+     {
+      "imageId": "174026",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174026-#width#-#height#/G06-10w-tendril--1-.png?v=639216444327800000\" width=\"#width#\" height=\"#height#\" alt=\"G06-10w-tendril--1-\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174026/G06-10w-tendril--1-.png?v=639216444327800000",
+      "imageText": "G06-10w-tendril--1-",
+      "imageLastModified": "2026-08-06T20:20:32.7800000Z"
+     },
+     {
+      "imageId": "174027",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174027-#width#-#height#/2025_LAGOS_Basic-Pack_Tendril_Frontside.png?v=639216444327930000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tendril_Frontside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174027/2025_LAGOS_Basic-Pack_Tendril_Frontside.png?v=639216444327930000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tendril_Frontside",
+      "imageLastModified": "2026-08-06T20:20:32.7930000Z"
+     },
+     {
+      "imageId": "174028",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174028-#width#-#height#/2025_LAGOS_Basic-Pack_Tendril_Dyn-Front-Left.png?v=639216444327930000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tendril_Dyn-Front-Left\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174028/2025_LAGOS_Basic-Pack_Tendril_Dyn-Front-Left.png?v=639216444327930000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tendril_Dyn-Front-Left",
+      "imageLastModified": "2026-08-06T20:20:32.7930000Z"
+     },
+     {
+      "imageId": "174029",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174029-#width#-#height#/2025_LAGOS_Basic-Pack_Tendril_PDP.png?v=639216444328100000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tendril_PDP\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174029/2025_LAGOS_Basic-Pack_Tendril_PDP.png?v=639216444328100000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tendril_PDP",
+      "imageLastModified": "2026-08-06T20:20:32.8100000Z"
+     },
+     {
+      "imageId": "174030",
+      "imageLabel": "",
+      "imageTag": "<img src=\"~/arquivos/ids/174030-#width#-#height#/2025_LAGOS_Basic-Pack_Tendril_Backside.png?v=639216444328100000\" width=\"#width#\" height=\"#height#\" alt=\"2025_LAGOS_Basic-Pack_Tendril_Backside\" id=\"\" />",
+      "imageUrl": "https://armoto.vteximg.com.br/arquivos/ids/174030/2025_LAGOS_Basic-Pack_Tendril_Backside.png?v=639216444328100000",
+      "imageText": "2025_LAGOS_Basic-Pack_Tendril_Backside",
+      "imageLastModified": "2026-08-06T20:20:32.8100000Z"
+     }
+    ],
+    "Storage Size": [
+     "128GB"
+    ],
+    "Color": [
+     "Pantone Tendril"
+    ],
+    "RAM": [
+     "4RAM"
+    ],
+    "variations": [
+     "Storage Size",
+     "Color",
+     "RAM"
+    ],
+    "sellers": [
+     {
+      "sellerId": "1",
+      "sellerName": "Motorola Argentina",
+      "addToCartLink": "https://www.motorola.com.ar/checkout/cart/add?sku=1381&qty=1&seller=1&sc=1&price=19999900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "DeliverySlaSamplesPerRegion": {},
+       "Price": 199999.0,
+       "ListPrice": 299999.0,
+       "PriceWithoutDiscount": 299999.0,
+       "FullSellingPrice": 199999.0,
+       "PriceToken": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjVlNmIyYjg0LTVhNjgtNDY1NC1hNTk1LTgyMjZhMmMzOWE0ZSIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InByaWNlIjoxOTk5OTkwMCwicHJpY2VXaXRob3V0RGlzY291bnQiOjI5OTk5OTAwLCJzZWxsZXIiOiIxIiwiaWQiOiIxMzgxIiwiYWNjb3VudE5hbWUiOiJhcm1vdG8iLCJzYWxlc0NoYW5uZWwiOiIxIn0sImV4cCI6MTc5MjQyMTQyOSwiaWF0IjoxNzkyNDE5NjI5LCJqdGkiOiI5YTZhNjE1ZC1mMjBiLTRkOWYtYjdiMC05YjBhZmY0NjEwMjEiLCJpc3MiOiJzZXNzaW9uL2RhdGEtc2lnbmVyIn0.q007llIV2kCshHFhWVq_9SvNGunnj0gcEF5e7-mFTFUamKgXO0DT57xaul4UR09fKqU2HcE8NQPgT-19lrA-eA",
+       "RewardValue": 0.0,
+       "PriceValidUntil": "2027-10-18T00:00:00Z",
+       "AvailableQuantity": 0,
+       "IsAvailable": false,
+       "Tax": 0.0,
+       "DeliverySlaSamples": [],
+       "GetInfoErrorMessage": null,
+       "CacheVersionUsedToCallCheckout": "_"
+      }
+     }
+    ],
+    "Videos": [],
+    "estimatedDateArrival": null
+   }
+  ],
+  "skuSpecifications": [
+   {
+    "field": {
+     "id": 115,
+     "name": "Storage Size",
+     "isActive": true,
+     "position": 1,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "255",
+      "name": "128GB",
+      "position": 5
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 116,
+     "name": "Color",
+     "isActive": true,
+     "position": 2,
+     "type": "Combo"
+    },
+    "values": [
+     {
+      "id": "775",
+      "name": "Pantone Tapestry",
+      "position": 198
+     },
+     {
+      "id": "777",
+      "name": "Pantone Tendril",
+      "position": 200
+     }
+    ]
+   },
+   {
+    "field": {
+     "id": 246,
+     "name": "RAM",
+     "isActive": true,
+     "position": 3,
+     "type": "Radio"
+    },
+    "values": [
+     {
+      "id": "612",
+      "name": "4RAM",
+      "position": 2
+     }
+    ]
+   }
+  ]
+ }
+]

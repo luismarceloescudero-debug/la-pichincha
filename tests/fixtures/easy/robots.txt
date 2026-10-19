@@ -1,0 +1,10 @@
+User-agent: * 
+
+# No permitir que los rastreadores accedan a determinadas paginas:
+Disallow: /admin/* 
+Disallow: /account*
+Disallow: /p?idsku=*
+Disallow:/*?map=category*
+Disallow:/*?initialMap=*
+
+Sitemap: https://www.easy.com.ar/sitemap.xml
