@@ -18,6 +18,7 @@
   const esUrl = u => /^https?:\/\//i.test(String(u));
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
   const C = typeof module === "object" && module.exports ? require("./categorias.js") : raiz.Categorias;
+  const P = typeof module === "object" && module.exports ? require("./puesto.js") : raiz.Puesto;
 
   /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL (aunque venga con "www", barra
      final o parametros de seguimiento), mismo precio. Uno por URL, y gana la fila de la tienda sobre la del agregador. */
@@ -94,6 +95,17 @@
       const otro = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && mismaConfiguracion(f, x)).reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
       if (otro && f[1] > otro[1] * (1 + TOLERANCIA_MODELO)) masBarato.set(f, otro);
     }
+    // El equivalente local de cada compra internacional, para comparar el costo puesto en casa: el aviso local mas barato del
+    // mismo modelo (codigo exacto y, en equipos, misma configuracion). Se prefieren las tiendas que se leen directo; el
+    // agregador solo si no hay otra (su precio puede ser viejo y la comparacion lo dice).
+    const equivalente = new Map();
+    for (const f of filas) {
+      if (!f[9] || !esInternacional(f)) continue;
+      const locales = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && mismaConfiguracion(f, x));
+      const directos = locales.filter(x => x[3] !== AGREGADOR);
+      const mejor = (directos.length ? directos : locales).reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
+      if (mejor) equivalente.set(f, mejor);
+    }
     for (const f of filas) {
       const g = gama.get(f);
       if (!g.pasa || masBarato.has(f)) { descartadas++; continue; }
@@ -123,7 +135,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -131,12 +143,26 @@
      que los componentes (que son casi todo el catalogo) no acaparen el resumen. Dentro de una categoria: primero las
      bajas propias, despues las publicadas; a igual señal la gama alta antes que la media y despues por descuento. Las
      compras internacionales van al final de su categoria y rotuladas. Sin enlaces que no sean http(s). */
-  function destacadas(idx, max = 20) {
-    const { propias, publicadas, cruces, vigentes, contra, notas, categorias } = calcularOfertas(idx);
+  /* Lo que se dice de una compra internacional: su costo puesto en casa (js/puesto.js) y, si hay un equivalente local, la
+     comparacion. costo = { reglas, tasas } (importacion.json y las cotizaciones); sin ellos no se dice nada. */
+  function puestoDe(f, categoria, costo, local, tiendas) {
+    if (!costo || !costo.reglas || !costo.tasas) return undefined;
+    const est = P.estimar(f, categoria, costo);
+    const contra = P.comparar(est, local);
+    const nombre = local && (local[4] || ((tiendas || {})[local[3]] || {}).nombre || local[3]);
+    const via = local && local[3] === AGREGADOR ? " (precio de ComparaYa: puede estar desactualizado)" : "";
+    return { est, contra, tienda: local ? local[4] || local[3] : null, texto: P.texto(est),
+      comparacion: contra ? P.textoComparacion(contra, nombre).replace(/\.$/, via + ".") : "" };
+  }
+
+  function destacadas(idx, max = 20, opciones) {
+    const { propias, publicadas, cruces, vigentes, contra, notas, categorias, equivalente } = calcularOfertas(idx);
+    const costo = opciones && opciones.costo;
     const rango = { alta: 2, media: 1 };
     const nuevo = (f, ref, tipo) => { const g = categorias.get(f);
       return { f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], categoria: g.categoria, nivel: g.nivel,
-        cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f) }; };
+        cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f),
+        puesto: esInternacional(f) ? puestoDe(f, g.categoria, costo, equivalente.get(f), idx.tiendas) : undefined }; };
     const por = (a, b) => a.internacional - b.internacional || (a.tipo === b.tipo ? 0 : a.tipo === "propia" ? -1 : 1)
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, 6, "propia")), ...publicadas.map(f => nuevo(f, 5, "publicada"))].filter(o => esUrl(o.f[2]));
@@ -160,7 +186,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas, puestoDe };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);
