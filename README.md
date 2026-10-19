@@ -165,7 +165,10 @@ como rebaja (`lista_es_oferta`) solo donde aparece en menos de un tercio de los
 avisos: en OnCity, Carrefour o D'Ricco esta en casi todo el catalogo y no dice
 nada. El RefId de VTEX vale como part number solo si otra tienda nombra el mismo
 codigo (Pardo y LG publican el del fabricante; OnCity y Naldo, numeros internos);
-el EAN no se usa porque ninguna otra fuente lo publica.
+el EAN no se usa porque ninguna otra fuente lo publica. La verificacion antes de
+publicar mira el mismo vendedor y la misma variante que el indice
+(`indexar.oferta_vtex`), y un bloqueo a mitad de una tienda la hace fallar entera
+(se reusa lo anterior) en vez de entrar como un catalogo a medias.
 
 Quedaron afuera: **Cetrogar** (su `robots.txt` prohibe `/api/`), **Samsung**
 (responde 503 a GitHub), **Tidi** (no devuelve JSON), **Sony** (2 avisos, de

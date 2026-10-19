@@ -262,7 +262,10 @@ def medir_vtex(indice, hosts=None, carpeta=None, hilos=6):
     for f in indice.get("productos") or []:
         if f[3] == "comparaya" and f[2].rstrip("/").endswith("/p"):
             de_comparaya.setdefault(urllib.parse.urlparse(f[2]).netloc.lower(), set()).add(_sin_variantes(f[2]))
-    hosts = hosts or sorted(de_comparaya)
+    # con las tiendas directas, ComparaYa ya no trae sus avisos repetidos: la lista sale tambien de tiendas.json
+    directas = {urllib.parse.urlparse(t["base"]).netloc.lower() for t in v.leer(v.TIENDAS_JSON, {}).values()
+                if isinstance(t, dict) and (t.get("catalogo") or {}).get("tipo") == "vtex" and t.get("base")}
+    hosts = hosts or sorted(set(de_comparaya) | directas)
     with ThreadPoolExecutor(max_workers=hilos) as pool:
         filas = list(pool.map(lambda h: medir_tienda_vtex(h, de_comparaya.get(h, set()), carpeta), hosts))
     lineas = ["### Tiendas VTEX: que daria leerlas directo (desde este servidor)", "",
@@ -285,6 +288,7 @@ def main(argv=None):
         lineas, filas = medir_vtex(v.leer(argv[i + 1], {}) or {}, hosts, carpeta)
         print("\n".join(lineas))
         if carpeta:
+            os.makedirs(carpeta, exist_ok=True)
             with open(os.path.join(carpeta, "medicion.json"), "w", encoding="utf-8") as f:
                 json.dump(filas, f, ensure_ascii=False, indent=1)
         return 0

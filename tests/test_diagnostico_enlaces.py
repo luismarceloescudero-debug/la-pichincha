@@ -289,7 +289,7 @@ class MedirVtex(unittest.TestCase):
         self.addCleanup(shutil.rmtree, carpeta)
         with mock.patch.object(d.indexar, "bajar", side_effect=self.bajar), mock.patch.object(d.indexar.time, "sleep"), \
                 redirect_stdout(io.StringIO()) as salida:
-            lineas, filas = d.medir_vtex(idx, carpeta=carpeta)
+            lineas, filas = d.medir_vtex(idx, ["www.oncity.com"], carpeta=carpeta)
         r = filas[0]
         self.assertEqual((r["host"], r["avisos"], r["por_comparaya"], r["comparaya_tambien_directo"], r["nuevos"]),
                          ("www.oncity.com", 4, 2, 1, 3))
@@ -313,4 +313,22 @@ class MedirVtex(unittest.TestCase):
             self.assertEqual(d.main(["--vtex-catalogo", "indice.json", "www.a.test", "--crudos", carpeta]), 0)
         self.assertEqual(medir.call_args[0][1], ["www.a.test"])
         self.assertIn("tabla", salida.getvalue())
+        self.assertTrue(os.path.exists(os.path.join(carpeta, "medicion.json")))
+
+
+class MedirVtexSinComparaYa(unittest.TestCase):
+    def test_mide_tambien_las_tiendas_vtex_de_tiendas_json_y_crea_la_carpeta(self):
+        # Con las tiendas directas, ComparaYa ya no trae sus avisos repetidos: la lista sale tambien de tiendas.json
+        raiz = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, raiz, True)
+        carpeta = os.path.join(raiz, "no-existe")
+        fila = {"host": "", "error": "", "segundos": 0, "categorias": 0, "avisos": 0, "rebajas": 0, "refid_con_forma": 0,
+                "refid_ejemplos": [], "con_ean": "0/0", "por_comparaya": 0, "comparaya_tambien_directo": 0, "nuevos": 0}
+        with mock.patch.object(d, "medir_tienda_vtex", side_effect=lambda h, cy, c: {**fila, "host": h}) as medir, \
+                mock.patch.object(d.v, "leer", side_effect=lambda r, defecto, leer=d.v.leer: {"productos": []}
+                                  if r == "indice.json" else leer(r, defecto)), redirect_stdout(io.StringIO()):
+            self.assertEqual(d.main(["--vtex-catalogo", "indice.json", "--crudos", carpeta]), 0)
+        hosts = {c[0][0] for c in medir.call_args_list}
+        self.assertIn("www.oncity.com", hosts)
+        self.assertIn("shop.lg.com.ar", hosts)
         self.assertTrue(os.path.exists(os.path.join(carpeta, "medicion.json")))
