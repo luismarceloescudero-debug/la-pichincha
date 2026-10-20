@@ -58,14 +58,45 @@ test("premium: selectivo (los umbrales salen de medir el indice y ninguna catego
   for (const c of Object.keys(p)) assert.ok(p[c] / n[c] <= 0.25, `${c}: ${p[c]} de ${n[c]}`);
 });
 
-test("ganadores en pruebas: un modelo de datos/ganadores.json suma y dice la fuente; sin archivo no pasa nada", () => {
-  const ganadores = { ganadores: [{ modelo: "Galaxy S25 Ultra", fuente: "DXOMARK", categoria: "smartphone" }] };
+const GAN = { ganadores: [
+  { modelo: "Samsung Galaxy S25 Ultra", alias: ["galaxy s25 ultra"], categoria: "smartphone", puntaje: 99.4, fuente: { nombre: "DXOMARK, ranking de smartphones", url: "https://www.dxomark.com/smartphones/" }, confianza: "confirmado" },
+  { modelo: "GeForce RTX 5080", alias: ["rtx 5080"], fuente: { nombre: "PassMark G3D Mark, ranking" }, confianza: "confirmado" },
+  { modelo: "GeForce RTX 5070 Ti", alias: ["rtx 5070 ti"], fuente: { nombre: "PassMark G3D Mark" }, confianza: "confirmado" },
+  { modelo: "Apple MacBook Air 13 (M5, 2026)", alias: ["macbook air 13"], fuente: { nombre: "RTINGS, laptops" }, confianza: "confirmado" },
+  { modelo: "Sony WH-1000XM6", alias: ["wh-1000xm6"], fuente: { nombre: "RTINGS, headphones" }, confianza: "confirmado" },
+  { modelo: "Modelo sin confirmar X900", alias: ["x900"], fuente: { nombre: "Otra" }, confianza: "sin confirmar" },
+] };
+
+test("ganadores en pruebas: un modelo de datos/ganadores.json suma, dice la fuente corta y sin archivo no pasa nada", () => {
   const n = "Celular Samsung Galaxy S25 Ultra 12GB 256GB";
-  const con = P.puntaje(n, REF, C.evaluar(n, REF), ganadores), sin = P.puntaje(n, REF, C.evaluar(n, REF));
+  const con = P.puntaje(n, REF, C.evaluar(n, REF), GAN), sin = P.puntaje(n, REF, C.evaluar(n, REF));
   assert.equal(con.puntos - sin.puntos, P.PUNTOS_GANADOR);
-  assert.match(con.ganador.texto, /ganador en pruebas: DXOMARK/);
+  assert.equal(con.ganador.texto, "ganador en pruebas: DXOMARK");
   assert.equal(sin.ganador, null);
   assert.equal(P.ganadorDe(n, null), null);
-  assert.equal(P.ganadorDe(n, [{ modelo: "S2", fuente: "x" }]), null, "un modelo demasiado corto no coincide por casualidad");
-  assert.ok(P.ganadorDe(n, [{ modelo: "galaxy s25 ultra" }]));
+  assert.ok(P.ganadorDe(n, GAN.ganadores), "tambien acepta la lista sola");
+});
+
+test("ganadores: palabras enteras, sin variantes ni chips distintos, solo lo confirmado", () => {
+  const g = t => P.ganadorDe(t, GAN);
+  assert.ok(g("Placa de Video Gigabyte GeForce RTX 5080 Windforce OC 16G"));
+  assert.equal(g("Placa de Video MSI RTX 5080 SUPER 16G"), null, "la SUPER no es la 5080");
+  assert.equal(g("Placa de Video MSI RTX 5080 Ti 16G"), null);
+  assert.ok(g("Placa de Video Asus RTX 5070 Ti Prime 16G"));
+  assert.equal(g("Notebook Apple MacBook Air 13 M4 16GB 512GB"), null, "el ganador es el de M5");
+  assert.ok(g("Notebook Apple MacBook Air 13 M5 16GB 512GB"));
+  assert.equal(g("Notebook X x900 Pro"), null, "lo «sin confirmar» no cuenta");
+  assert.equal(g("Funda para Galaxy S25 Ultra5"), null);
+});
+
+test("ganadores: un periferico sin puntaje (auriculares) que gano pruebas es premium por si solo", () => {
+  const r = P.puntaje("Auriculares Sony WH-1000XM6 Bluetooth Negro", REF, C.evaluar("Auriculares Sony WH-1000XM6", REF), GAN);
+  assert.deepEqual([r.premium, r.puntos, r.ganador.fuente], [true, P.PUNTOS_GANADOR, "RTINGS"]);
+  assert.equal(P.puntaje("Auriculares Sony WH-CH520", REF, C.evaluar("Auriculares Sony WH-CH520", REF), GAN).premium, false);
+});
+
+test("ganadores: el archivo real de datos/ganadores.json se lee y reconoce a su primer ganador", () => {
+  const real = JSON.parse(require("node:fs").readFileSync(require("node:path").join(__dirname, "../../datos/ganadores.json"), "utf8"));
+  assert.ok(real.ganadores.length >= 13);
+  assert.ok(P.ganadorDe("Placa de Video Gigabyte GeForce RTX 5090 Aorus 32G", real));
 });

@@ -264,3 +264,13 @@ test("una fila con el mismo modelo mas barato en otra tienda directa lo dice", (
   correr('pintarResultados("ssd 1tb")');
   assert.match(els["#res"].innerHTML, /otra tienda lo tiene más barato: CompraGamer \$70\.000/);
 });
+
+test("los ganadores en pruebas (datos/ganadores.json) llegan a la fila como sello y suman al modo Primera Linea", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('ORDEN = "primera"; pintarResultados("ssd 1tb")');
+  assert.doesNotMatch(els["#res"].innerHTML, /ganador en pruebas/);
+  correr('GANADORES = { ganadores: [{ modelo: "Kingston NV2", alias: ["nv2"], fuente: { nombre: "PassMark Disk Rating, ranking" }, confianza: "confirmado" }] }');
+  correr('pintarResultados("ssd 1tb")');
+  assert.match(els["#res"].innerHTML, /ganador en pruebas: PassMark Disk Rating/);
+});

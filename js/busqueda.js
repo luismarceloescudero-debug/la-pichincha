@@ -16,8 +16,16 @@ let INCLUIR = guardado("incluirTodo") === "1";
 
 /* Lo que se calcula una vez por indice cargado: las generaciones, la gama de cada titulo y (recien si hace falta) las ofertas. */
 let CTX_MODOS = null;
+/* Ganadores en pruebas reales (datos/ganadores.json, lo arma otra sesion): se piden una vez, al abrir la busqueda. Sin el archivo
+   (o sin red) no cambia nada. Cuando llegan, el contexto se rearma y se vuelve a pintar. */
+let GANADORES = null, pidiendoGanadores = null;
+function cargarGanadores() {
+  if (!pidiendoGanadores) pidiendoGanadores = fetch("datos/ganadores.json").then(r => (r.ok ? r.json() : null)).catch(() => null).then(j => { GANADORES = j && j.ganadores ? j : null; return GANADORES; });
+  return pidiendoGanadores;
+}
 function ctxModos() {
-  if (!CTX_MODOS || CTX_MODOS.idx !== IDX) CTX_MODOS = { idx: IDX, ctx: Modos.preparar(IDX, nivelMarca, () => OFERTAS, DATOS.ganadores || null) };
+  if (!CTX_MODOS || CTX_MODOS.idx !== IDX || CTX_MODOS.ganadores !== GANADORES)
+    CTX_MODOS = { idx: IDX, ganadores: GANADORES, ctx: Modos.preparar(IDX, nivelMarca, () => OFERTAS, GANADORES) };
   return CTX_MODOS.ctx;
 }
 
@@ -295,6 +303,7 @@ function vistaBuscar() {
     if (filtros) engancharFiltros(filtros);
     try {
       await asegurarIndice();
+      cargarGanadores().then(g => { if (g) pintarResultados(($("#q") || {}).value || ""); });
       if (filtros) { filtros.querySelector(".filtros-cuerpo").innerHTML = filtrosHtml(); sincronizarFiltros(); }
       pintarResultados(campo ? campo.value : "");
     } catch (e) {

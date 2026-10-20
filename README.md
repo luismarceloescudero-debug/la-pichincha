@@ -337,8 +337,8 @@ Tres modos (specs 013 y 014, `js/modos.js`):
   la marca (spec 014, `js/premium.js`): pantalla, procesador, generacion,
   bateria, materiales; la memoria sola no alcanza y lo que no llega al minimo de
   su gama no entra. Selectiva (≤25% de cada categoria). Perifericos y «otro» no
-  tienen puntaje. Un modelo de `datos/ganadores.json` (pruebas reales), si existe,
-  suma y muestra «ganador en pruebas».
+  tienen puntaje. Un modelo de `datos/ganadores.json` (pruebas reales de PassMark, RTINGS y
+  DXOMARK) suma y muestra «ganador en pruebas: fuente».
 
 Dentro de cada modo se elige el orden: **Mejor oferta** (por defecto: primero lo
 mas premium y nuevo, y dentro de eso la mayor baja contra el mismo modelo),
