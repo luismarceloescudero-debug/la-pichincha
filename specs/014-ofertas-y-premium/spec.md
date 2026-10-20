@@ -69,7 +69,14 @@ Resultados por busqueda con la nueva Super Oferta (antes, spec 013, entre parent
 Los 96 de «auriculares» son rebajas publicadas verificadas de perifericos (ahora entran, decision 3); no hay ninguna oferta de otro tipo.
 
 Los 6 cruces por generacion de hoy son notebooks y PCs con Ryzen de la serie 8000 contra la gama media de hoy, por ejemplo «Notebook Asus Zenbook 14 OLED Ryzen 7 8840HS 16GB 1TB» a $2.383.703 contra una mediana de $2.785.277 de las notebooks de 1 TB (67 avisos); por construccion ninguno tiene el mismo modelo mas barato en otra tienda (`masBarato`). Se miraron a mano 14 de los 233 «contra el mismo modelo», elegidos al azar: todos con 3 a 10 tiendas y diferencias de 9% a 20% bajo la mediana (placas madre, memorias, un SSD, una silla, una RTX 5050); en tres el aviso de otra tienda esta a menos del 2% (el «casi igual» de `masBarato`). Cuidado: parte de los `modelo` del indice son identificadores derivados del titulo (`~A1F83B3A187A`, `modelo.py`), no codigos del fabricante; la señal depende de esa identidad.
-### 3. Orden por defecto y «nada resta» (PR 3) — pendiente
+### 3. Orden por defecto y «nada resta» (PR 3)
+
+1. **Orden por defecto = «Mejor oferta»** (`Modos.SECUNDARIO_BASE = "mejor"`): primero el **nivel** (premium, despues lo que pasa el minimo de su gama con nivel, despues el resto), dentro del nivel **lo mas nuevo** (`novedadDe`: generacion o año mas reciente), despues **la mayor baja** (la mejor de las razones de oferta: contra el mismo modelo, baja propia, rebaja publicada o cruce) y, a igual baja, el puntaje premium. «Precio ↓», «Novedades» y «Premium» siguen elegibles. Lo internacional va ultimo en todos.
+2. **Dato del relevamiento** (`docs/buscadores-referencia.md`): ninguna de las mejores apps (PriceSpy Best Match, Amazon Featured, Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas ofrecen precio en ambos sentidos y ordenan sus ofertas por % de baja (Keepa) o por diferencia de tendencia (PriceSpy). El orden «Precio ↓» de la spec 013 no se borra: queda elegible. Lo guardado en el navegador («precio») se respeta; quien nunca eligio arranca en «Mejor oferta».
+3. **Nada resta**: Recomendacion ya no esconde lo que no llega al minimo. El control visible **«Incluir lo que no llega al mínimo»** (se recuerda en el navegador) trae TODO lo comparable de la busqueda, con lo recomendado primero y el resto despues (cada grupo con el orden elegido). Una nota bajo los modos dice siempre que deja afuera cada uno y cuanto («Recomendación deja afuera 104 avisos más…», «Súper Oferta muestra solo ofertas reales: 7 de 100…»; `Modos.notaDe`). Super Oferta y Primera Linea son **subconjuntos explicitos** y lo dicen; los minimos solo definen que se llama oferta o gama media.
+4. Un modo vacio explica por que y ofrece otros modos (spec 013, decision 6).
+
+Medido en el navegador con el indice del 20/10: «celular samsung» da 95 en Recomendacion y 199 con todo incluido (104 que no llegaban al minimo o no tenian marca reconocida); el primer resultado en «Mejor oferta» es un Galaxy S26 FE (premium y de la ultima generacion).
 ### 4. Funciones tomadas de las mejores apps (PR 4) — pendiente
 
 ## Medicion (indice publicado el 20/10/2026, 24.954 avisos; `node specs/014-ofertas-y-premium/medir.js indice.json`)
@@ -111,6 +118,13 @@ Antes de los topes (primer prototipo, solo suma de señales): notebook 19,8% con
 - **FR-105**: El sello «premium» de cada fila lista las señales que sumaron; la marca queda como sello informativo.
 - **FR-106**: Un modelo en `datos/ganadores.json` suma puntos y muestra la fuente; sin el archivo nada cambia.
 - **FR-107**: El filtro «Solo premium» usa el mismo puntaje (`filtrarGrupos` recibe `esPremium`).
+
+## Criterios de aceptacion (PR 3)
+
+- **FR-301**: el orden por defecto es «Mejor oferta» y los otros tres siguen elegibles; «Precio ↓» guardado se respeta.
+- **FR-302**: «Mejor oferta» ordena por nivel, novedad, baja y puntaje; lo internacional al final.
+- **FR-303**: con «Incluir lo que no llega al mínimo» no se pierde ningun aviso comparable; lo recomendado va primero.
+- **FR-304**: cada modo dice en una nota que deja afuera y cuanto; Super Oferta y Primera Linea no cambian con el control.
 
 ## Criterios de aceptacion (PR 2)
 
