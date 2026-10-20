@@ -61,6 +61,29 @@ OpenCode 1.19.3 esta instalado (`opencode-ai` global) con cinco proveedores list
 - **Revisor segun el riesgo**: para plata, normativa o seguridad, el revisor externo es **Claude por OmniRoute en un contexto nuevo** (`claude-sonnet-5-5`); los modelos chicos solo hacen triaje. Se les pide poco (hasta 5 hallazgos) y que cada uno traiga **una entrada numerica que lo demuestre**: lo que no se puede demostrar se descarta.
 - **Un hallazgo valido deja un test**: se escribe el test que falla, se arregla y se anota quien lo encontro (TDD).
 
+### 1.3 Claude Code con otros modelos por OmniRoute (colchon, medido el 20/10/2026)
+
+Cuando se agota el limite de Claude, se puede seguir trabajando con Claude Code usando otros modelos a traves de OmniRoute, sin cargar credito nuevo.
+
+- **Como se lanza**: `privado\claude-colchon.cmd` (en `privado/`, ignorado por Git). Pone `ANTHROPIC_BASE_URL=http://127.0.0.1:20128` y `ANTHROPIC_MODEL=colchon-codigo` (combo de OmniRoute) y ejecuta `claude`. El gateway local no pide token, asi que no hace falta guardar ninguna clave.
+- **Comando equivalente**: `omniroute run --model colchon-codigo claude` (la CLI instalada es `run --model <proveedor/modelo> claude`; el README y la guia web no coinciden del todo, asi que se prueba con `--dry-run` antes).
+- **Combo**: `colchon-codigo` = `codex/gpt-5.6-terra-low` → `openrouter/auto` → `gemini/gemini-2.5-flash` (prioridad). Los modelos `groq` y `mistral` fallaron en la prueba (ver tabla).
+- **Como se midio**: `claude -p` en un repo descartable con un bug a proposito en `sumaPrecios` (no suma el primer precio) y un test. Niveles: **a)** responder «ok»; **b)** contar las funciones de `calc.js` (respuesta correcta: 2); **c)** escribir un test que falle, arreglar el bug y dejar `node --test` en verde. Permisos acotados (`acceptEdits` + `Read`, `Edit`, `Write`, `node`, `git`), sin `bypassPermissions`.
+
+| Modelo | a) responde | b) cuenta funciones | c) arregla el bug | Tiempo (c) | Notas |
+|---|---|---|---|---|---|
+| `codex/gpt-5.6-terra-low` | si | si (2) | si, tests 2/0 | 146 s | el mejor medido; `gpt-5.5` da 400 con cuenta ChatGPT |
+| `openrouter/auto` | si | si | si | 59 s | anduvo en los tres niveles |
+| `gemini/gemini-2.5-flash` | si (13 s) | si (19 s) | no, timeout 240 s | — | no cierra la tarea |
+| `mistral/devstral-latest` | timeout | timeout | timeout | — | sin respuesta en 240 s |
+| `groq/openai/gpt-oss-120b` | error 400 | error | error | — | "Request too large" aun con prompt chico |
+| `groq/qwen/qwen3.8-27b` | error | error | error | — | igual que gpt-oss |
+
+- **Limites**: los modelos externos se equivocan mas que Claude. No conviene usarlos para normativa, calculos de plata, seguridad ni para mergear sin revision: para eso se espera a Claude o se usa un revisor de la misma familia en contexto nuevo (ver 1.2).
+- **Todo lo que haga el modelo externo se verifica**: con los tests del repo y con la CI antes de mergear. Lo que dice el modelo es dato, no instruccion.
+- **Que no hacer**: no pegar claves ni `.env` en el chat, no mandar datos personales, no publicar desde una sesion de colchon sin revisar.
+- **Cuando se vuelve a Claude**: al reiniciar la sesion sin el lanzador, Claude vuelve a tomar el modelo por defecto.
+
 ## 2. Elegir la mejor skill para cada escenario
 
 No se aplica siempre la misma cadena: se elige **la mas chica que alcance** y se la **invoca con la herramienta Skill** (no de memoria). Al final se dice cuales se usaron.
