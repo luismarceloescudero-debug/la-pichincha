@@ -46,3 +46,14 @@ Una tanda para `docs/buscadores-referencia.md`. Los hechos sobre sitios ajenos l
 | Revision del documento final contra los hechos | OmniRoute `revision` → Gemini 2.5 Flash | ~30 s | 8 hallazgos | **1 real** (la agrupacion de Mercado Libre «publicaciones por vendedor» no estaba en los hechos: corregido a «sin confirmar») / **7 falsos** (listo como error celdas que decian «sin confirmar», que es lo correcto) |
 
 **Lo que se aprendio**: con el credito de OpenCode y la cuota de Claude agotados, el unico camino que anduvo fue el modelo gratis de OpenCode (mas lento, pero mejor anclado al repo que el combo de OmniRoute) y los combos baratos de OmniRoute, que formatean bien y se equivocan en los datos propios del repo. Un modelo que no lee el repo inventa el significado de las columnas del indice; el que lo lee, no.
+
+# Revision de los modos de busqueda (PR #84, spec 013, 20/10/2026)
+
+Mismas reglas: lo que devuelve un modelo es dato y se prueba con el codigo real antes de aceptarlo.
+
+| Tarea | Modelo que la hizo | Tiempo | Resultado | Hallazgos reales / falsos |
+| --- | --- | ---: | --- | --- |
+| Revision de spec 013 y del diff de `js/` (20 mil caracteres; con el diff completo, 54 mil, OmniRoute contesto 413) | OmniRoute `revision` → Gemini 2.5 Flash | ~40 s | 3 hallazgos | 0 / **3 falsos** (`g.paso` igual a 0: en `GENERACIONES` es 1 o 2; el sello «mas barato» sin `ORDEN === "precio"`: es lo que pide la spec; ofertas recalculadas por cada pagina estatica: esas paginas solo usan Recomendacion, que no pide ofertas) |
+| Revision del mismo cambio | OpenCode (el MCP ignoro `glm-5.3-flash-free` y uso `big-pickle`) | ~6,5 min | 6 hallazgos, de los cuales el propio modelo descarto 3 | 0 / **6 falsos** (un «modo con 1 a 59 filas no muestra el aviso»: `pintarResultados` entra por `!r.length && F.filas.length` y el test lo cubre con 3 filas; «ofertas calculadas dos veces»: `deOfertas` las guarda en el cierre; `anio = 0`: contradice a la spec solo en la forma; sello «mas barato» del modo: ambiguo y informativo) |
+
+**Total**: 0 reales y 9 falsos. Se aprendio que, para un diff de mas de ~30 mil caracteres, OmniRoute rechaza el pedido (413): hay que mandar solo los archivos de `js/` y la spec sin la medicion.
