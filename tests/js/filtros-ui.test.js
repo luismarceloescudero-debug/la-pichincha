@@ -219,31 +219,15 @@ test("al tocar un modo o un orden se guarda, se marca y se vuelve a pintar", () 
   assert.strictEqual(correr("ORDEN"), "recomendacion", "un valor viejo o inventado cae en Recomendacion");
 });
 
-/* --- Spec 014: nada resta --- */
+/* --- Spec 014: el piso de gama se mantiene y el modo dice cuanto deja afuera --- */
 
-test("«Incluir lo que no llega al minimo» trae lo que Recomendacion esconde, se recuerda y la nota lo dice", () => {
-  const { correr, els, almacen } = pagina();
+test("Recomendacion mantiene el piso de gama: no hay control para saltearlo y una nota dice cuanto deja afuera", () => {
+  const { correr, els } = pagina();
   els["#nota-modo"] = elemento(); els["#q"] = elemento({ value: "ssd 1tb" });
-  // una marca que ninguna lista reconoce: Recomendacion la esconde
   correr('IDX.productos.push(["Disco Solido SSD Zzxqv 1TB SATA", 65000, "https://mx.test/zzxqv", "mx", "", 0, 0, "", "", ""]); delete IDX._n');
   correr('pintarResultados("ssd 1tb")');
-  const antes = (els["#res"].innerHTML.match(/class="pre"/g) || []).length;
-  assert.match(els["#nota-modo"].textContent, /Recomendación deja afuera \d+ avisos más.*Incluir lo que no llega al mínimo/);
-  correr('cambiarFiltro("incluir")');
-  assert.strictEqual(correr("INCLUIR"), true);
-  assert.strictEqual(almacen.incluirTodo, "1");
-  const despues = (els["#res"].innerHTML.match(/class="pre"/g) || []).length;
-  assert.ok(despues > antes, `${despues} > ${antes}`);
-  assert.match(els["#nota-modo"].textContent, /Recomendación con todo incluido: lo recomendado va primero/);
-  correr('cambiarFiltro("incluir")');
-  assert.strictEqual(correr("INCLUIR"), false);
-});
-
-test("la vista Buscar trae el control «Incluir lo que no llega al minimo» y la nota del modo", () => {
-  const { correr } = pagina();
-  const html = correr("vistaBuscar()");
-  assert.match(html, /data-filtro="incluir" aria-pressed="false"[^>]*>Incluir lo que no llega al mínimo</);
-  assert.match(html, /id="nota-modo"/);
+  assert.match(els["#nota-modo"].textContent, /Recomendación deja afuera \d+ avisos más/);
+  assert.doesNotMatch(correr("vistaBuscar()"), /Incluir lo que no llega/);
 });
 
 test("los sellos (envio gratis, cuotas, tienda oficial) son chips del panel, se alternan y avisan de su cobertura", () => {

@@ -73,7 +73,7 @@ Los 6 cruces por generacion de hoy son notebooks y PCs con Ryzen de la serie 800
 
 1. **Orden por defecto = «Mejor oferta»** (`Modos.SECUNDARIO_BASE = "mejor"`): primero el **nivel** (premium, despues lo que pasa el minimo de su gama con nivel, despues el resto), dentro del nivel **lo mas nuevo** (`novedadDe`: generacion o año mas reciente), despues **la mayor baja** (la mejor de las razones de oferta: contra el mismo modelo, baja propia, rebaja publicada o cruce) y, a igual baja, el puntaje premium. «Precio ↓», «Novedades» y «Premium» siguen elegibles. Lo internacional va ultimo en todos.
 2. **Dato del relevamiento** (`docs/buscadores-referencia.md`): ninguna de las mejores apps (PriceSpy Best Match, Amazon Featured, Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas ofrecen precio en ambos sentidos y ordenan sus ofertas por % de baja (Keepa) o por diferencia de tendencia (PriceSpy). El orden «Precio ↓» de la spec 013 no se borra: queda elegible. Lo guardado en el navegador («precio») se respeta; quien nunca eligio arranca en «Mejor oferta».
-3. **Nada resta**: Recomendacion ya no esconde lo que no llega al minimo. El control visible **«Incluir lo que no llega al mínimo»** (se recuerda en el navegador) trae TODO lo comparable de la busqueda, con lo recomendado primero y el resto despues (cada grupo con el orden elegido). Una nota bajo los modos dice siempre que deja afuera cada uno y cuanto («Recomendación deja afuera 104 avisos más…», «Súper Oferta muestra solo ofertas reales: 7 de 100…»; `Modos.notaDe`). Super Oferta y Primera Linea son **subconjuntos explicitos** y lo dicen; los minimos solo definen que se llama oferta o gama media.
+3. **El piso de gama se mantiene** (correccion del dueño, 20/10, despues del PR #90 que habia agregado el control «Incluir lo que no llega al mínimo», ya retirado): 4 GB de RAM o 64 GB de almacenamiento son insuficientes hoy y, por ser lo mas barato, confunden como falsa oferta. Recomendacion sigue sin mostrar lo que no pasa el minimo; **no hay control para saltearlo**. En su lugar una linea de texto dice siempre que deja afuera cada modo y cuanto (`Modos.notaDe`: «Recomendación deja afuera 104 avisos más…», «Súper Oferta muestra solo ofertas reales: 7 de 100…»). Super Oferta y Primera Linea son subconjuntos explicitos y lo dicen.
 4. Un modo vacio explica por que y ofrece otros modos (spec 013, decision 6).
 
 Medido en el navegador con el indice del 20/10: «celular samsung» da 95 en Recomendacion y 199 con todo incluido (104 que no llegaban al minimo o no tenian marca reconocida); el primer resultado en «Mejor oferta» es un Galaxy S26 FE (premium y de la ultima generacion).
@@ -139,7 +139,7 @@ Antes de los topes (primer prototipo, solo suma de señales): notebook 19,8% con
 
 - **FR-301**: el orden por defecto es «Mejor oferta» y los otros tres siguen elegibles; «Precio ↓» guardado se respeta.
 - **FR-302**: «Mejor oferta» ordena por nivel, novedad, baja y puntaje; lo internacional al final.
-- **FR-303**: con «Incluir lo que no llega al mínimo» no se pierde ningun aviso comparable; lo recomendado va primero.
+- **FR-303**: el piso de gama se mantiene: ningun control lo saltea.
 - **FR-304**: cada modo dice en una nota que deja afuera y cuanto; Super Oferta y Primera Linea no cambian con el control.
 
 ## Criterios de aceptacion (PR 2)

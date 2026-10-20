@@ -10,7 +10,6 @@ Se actualiza en cada PR. Origen: aclaracion del dueño del 20/10/2026 (spec [014
 | Cruce por generacion: gama alta del año pasado al precio de una media de hoy | Idea propia del dueño | Gama alta anterior (≥3 señales) que cuesta ≤ la mediana de la gama media actual | **hecho** (PR 2: `cruceGen`; 6 avisos hoy: notebooks y PCs con Ryzen 8000) | loving-dubinsky-5ec8db | Claude (hizo) |
 | Minimos de gama media en un solo lugar | — | `Categorias.MIN` (smartphone 6-8 GB y 128-256 GB) con test que los fija | **hecho** (PR 2: coinciden con lo dicho por el dueño) | loving-dubinsky-5ec8db | Claude (hizo) |
 | Orden por defecto «Mejor oferta entre lo mejor» | PriceSpy Best Match, Amazon Featured, Mercado Libre relevancia, Geizhals | Primero lo mas premium y nuevo; dentro, la mayor baja contra el mismo modelo. Precio ↓ queda elegible | **hecho** (PR 3: `Modos.SECUNDARIO_BASE = "mejor"`, `porMejor`) | loving-dubinsky-5ec8db | Claude (hizo) |
-| Nada resta: «Incluir lo que no llega al minimo» | Amazon / Mercado Libre (los filtros se pueden quitar) | Control visible en Recomendacion; Super Oferta y Primera Linea son subconjuntos explicitos | **hecho** (PR 3: «Incluir lo que no llega al mínimo» y `Modos.notaDe`) | loving-dubinsky-5ec8db | Claude (hizo) |
 | «Mayor baja» con ventana 24 h / 7 d / 31 d (idea #2) | Keepa (`sortType`, `dateRange`) | Orden por % de baja contra el promedio de la ventana, solo con lo que `serie.py` afirma | **hecho a medias** (PR 4: «Mayor baja» contra el relevamiento anterior, ~24 h); **pendiente** la ventana 7 d / 31 d: el indice publicado no trae la serie (hace falta `indexar.py`) | loving-dubinsky-5ec8db | Claude (hizo) |
 | «Otra tienda lo tiene mas barato» (idea #12) | PriceSpy, Geizhals | Aviso en la fila cuando el mismo modelo esta mas barato en una tienda que se lee directo | **hecho** (PR 4) | loving-dubinsky-5ec8db | Claude (hizo) |
 | Desempate por cuantas tiendas tienen el modelo (idea #11) | PriceSpy | A igual puntaje, antes el modelo que se puede comparar | **hecho** (PR 4: `ctx.tiendasDe`) | loving-dubinsky-5ec8db | Claude (hizo) |
@@ -20,6 +19,10 @@ Se actualiza en cada PR. Origen: aclaracion del dueño del 20/10/2026 (spec [014
 | Precio por tienda dentro de un producto | Geizhals, PriceSpy | Ya existe «tambien en» (`agruparPorModelo`) | hecho (spec 008) | — | — |
 | GTIN / MPN (idea #8) | Google | — | descartado en esta tanda: fuera de alcance, necesita cambios en `indexar.py` | — | — |
 | Popularidad con clics (idea #6) y precio con envio (idea #10) | PriceSpy, Amazon | — | descartado: no hay señal de uso suficiente ni costo de envio publicado (ver relevamiento) | — | — |
+
+## Decisiones del dueño que cambian el plan
+
+- **El piso de gama se mantiene** (20/10, tras el PR #90): 4 GB de RAM o 64 GB de almacenamiento no alcanzan hoy y, por ser lo mas barato, confunden como falsa oferta. Se saco el control «Incluir lo que no llega al mínimo»; queda una linea de texto con cuantos avisos deja afuera cada modo.
 
 ## Hallazgos que cambian el plan
 

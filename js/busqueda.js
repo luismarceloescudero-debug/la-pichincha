@@ -10,9 +10,6 @@ const nivelMarca = Buscador.crearNivelMarca(MARCAS);
 const guardado = clave => { try { return localStorage.getItem(clave); } catch (e) { return null; } };
 let ORDEN = Modos.migrarModo(guardado("orden"));
 let ORDEN2 = Modos.migrarSecundario(guardado("orden2"));
-/* Nada resta (spec 014): Recomendacion no esconde lo que no llega al minimo de su gama ni lo que no tiene marca reconocida; con
-   este control se incluye todo (lo recomendado va primero). Se recuerda en el navegador. */
-let INCLUIR = guardado("incluirTodo") === "1";
 
 /* Lo que se calcula una vez por indice cargado: las generaciones, la gama de cada titulo y (recien si hace falta) las ofertas. */
 let CTX_MODOS = null;
@@ -34,7 +31,6 @@ function ordenesHtml() {
       <div class="segmentos chico">${Modos.MODOS.map(o =>
         `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}" title="${esc(o.ayuda)}">${esc(o.eti)}</button>`).join("")}</div>
     </div>
-    <div class="of-fila"><button class="of-chip" data-filtro="incluir" aria-pressed="${INCLUIR}" title="Recomendación deja afuera lo que no llega al mínimo de su gama (por ejemplo, 6 GB de RAM y 128 GB en celulares) o no tiene marca reconocida">Incluir lo que no llega al mínimo</button></div>
     <p class="sub chico" id="nota-modo" aria-live="polite"></p>
     <div class="orden2" role="group" aria-label="Ordenar por"><span class="of-et" aria-hidden="true">Ordenar por</span>
       <div class="segmentos chico">${Modos.SECUNDARIOS.map(o =>
@@ -113,10 +109,6 @@ function cambiarFiltro(que, valor) {
   } else if (que === "sello") {
     const i = FILTROS.sellos.indexOf(valor);
     if (i >= 0) FILTROS.sellos.splice(i, 1); else FILTROS.sellos.push(valor);
-  } else if (que === "incluir") {
-    INCLUIR = !INCLUIR;
-    try { localStorage.setItem("incluirTodo", INCLUIR ? "1" : "0"); } catch (e) {}
-    document.querySelectorAll('[data-filtro="incluir"]').forEach(b => b.setAttribute("aria-pressed", String(INCLUIR)));
   } else if (que === "primera") FILTROS.primera = !FILTROS.primera;
   else if (que === "quitar") {
     FILTROS = Buscador.filtrosVacios();
@@ -198,13 +190,10 @@ function pintarResultados(q) {
   const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, n => cm.premium(n).premium);
   OTRAS = F.otras;
   cm.tiendasDe = f => 1 + (OTRAS.get(f) || []).length;
-  const incluir = ORDEN === "recomendacion" && INCLUIR;
-  const enModo = Modos.filtrar(F.filas, ORDEN, cm, med, { incluirTodo: incluir });
-  const recomendadas = incluir ? new Set(Modos.filtrar(F.filas, "recomendacion", cm, med)) : null;
-  const r = Modos.ordenar(enModo, ORDEN2, cm, recomendadas && (f => recomendadas.has(f))).slice(0, 60);
+  const enModo = Modos.filtrar(F.filas, ORDEN, cm, med);
+  const r = Modos.ordenar(enModo, ORDEN2, cm).slice(0, 60);
   const nota = $("#nota-modo");
-  if (nota) nota.textContent = incluir ? `Recomendación con todo incluido: lo recomendado va primero y después los ${F.filas.length - recomendadas.size} avisos que no llegan al mínimo de su gama o no tienen marca reconocida.`
-    : Modos.notaDe(ORDEN, F.filas.length, enModo.length);
+  if (nota) nota.textContent = Modos.notaDe(ORDEN, F.filas.length, enModo.length);
   ULTIMA_BUSQUEDA = r;
   if (!r.length && F.filas.length) {
     est.textContent = `ningún aviso entra en ${Modos.MODOS.find(m => m.id === ORDEN).eti} (hay ${F.filas.length} en esta búsqueda)`;

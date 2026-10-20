@@ -83,14 +83,12 @@
   /* La mayor baja de un aviso: la mejor de sus razones de oferta (0 si no es una oferta). Lee las ofertas del indice. */
   const bajaDe = (f, ctx) => { const e = ctx.ofertas().get(f[2]); return e ? Math.max(...e.razones.map(r => r.off || 0)) : 0; };
 
-  /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. Nada resta (spec 014): con
-     opciones.incluirTodo, Recomendacion trae TODO lo comparable y quien llama pone lo recomendado primero (ordenar). Super
-     Oferta y Primera Linea son subconjuntos explicitos: no los cambia. */
-  function filtrar(filas, modo, ctx, med, opciones) {
+  /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. El piso de gama SE MANTIENE (decision
+     del dueño, spec 014): 4 GB de RAM o 64 GB de almacenamiento no alcanzan hoy y, por ser lo mas barato, parecerian una falsa oferta. */
+  function filtrar(filas, modo, ctx, med) {
     const niv = ctx.nivelMarca;
     if (modo === "super") { const of = ctx.ofertas(); return filas.filter(f => { const e = of.get(f[2]); return e && e.g.pasa; }); }
     if (modo === "primera") return filas.filter(f => ctx.premium(f[0]).premium);
-    if (opciones && opciones.incluirTodo) return [...filas];
     return filas.filter(f => enRecomendacion(f, ctx, med));
   }
 
@@ -104,20 +102,18 @@
       || ((ctx.tiendasDe ? ctx.tiendasDe(b) - ctx.tiendasDe(a) : 0));   // idea #11: a igual todo, el modelo que se puede comparar en mas tiendas
   }
 
-  /* `primero(f)` (opcional) separa lo que va primero (lo recomendado) de lo que se incluyo de mas: cada grupo se ordena aparte. */
-  function ordenar(filas, secundario, ctx, primero) {
+  function ordenar(filas, secundario, ctx) {
     const clave = secundario === "novedades" ? f => novedadDe(f[0], ctx.ref)
       : secundario === "premium" ? f => premiumDe(f[0], ctx)
       : secundario === "baja" ? f => (f[6] > f[1] ? 1 - f[1] / f[6] : 0) : () => 0;
     const extra = secundario === "mejor" ? porMejor(ctx) : () => 0;
     const cmp = (a, b) => (esInternacional(a) - esInternacional(b)) || extra(a, b) || (clave(b) - clave(a)) || (b[1] - a[1]);
-    if (!primero) return [...filas].sort(cmp);
-    return [...filas.filter(primero).sort(cmp), ...filas.filter(f => !primero(f)).sort(cmp)];
+    return [...filas].sort(cmp);
   }
 
   /* Lo que deja afuera un modo, dicho siempre (no se esconde nada): vacio si no deja nada afuera. */
   function notaDe(modo, total, enModo) {
-    if (modo === "recomendacion") return total > enModo ? `Recomendación deja afuera ${total - enModo} avisos más (no llegan al mínimo de su gama, no tienen marca reconocida o están muy por debajo del resto). Tocá «Incluir lo que no llega al mínimo» para verlos.` : "";
+    if (modo === "recomendacion") return total > enModo ? `Recomendación deja afuera ${total - enModo} avisos más (no llegan al mínimo de su gama —por ejemplo, menos de 6 GB de RAM o 128 GB en celulares—, no tienen marca reconocida o están muy por debajo del resto).` : "";
     if (modo === "super") return `Súper Oferta muestra solo ofertas reales: ${enModo} de ${total} avisos de esta búsqueda.`;
     return `Primera Línea muestra solo lo premium por especificaciones y tecnología: ${enModo} de ${total} avisos de esta búsqueda.`;
   }
