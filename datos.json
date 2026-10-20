@@ -391,7 +391,8 @@
       "precio": 184500,
       "precio_lista": 205000,
       "stock": "en stock",
-      "sin_impuestos": 152479
+      "sin_impuestos": 152479,
+      "falla_desde": "2026-10-20"
     },
     {
       "id": "genius1000x",
