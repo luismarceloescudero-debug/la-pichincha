@@ -13,6 +13,7 @@ const fs = require("fs");
 const path = require("path");
 const B = require("./js/buscador.js");
 const A = require("./js/analisis.js");
+const Modos = require("./js/modos.js");
 const P = require("./js/pagina.js");
 
 const SITIO = require("./sitio.json");
@@ -217,10 +218,16 @@ function renderPagina(consulta, analisis, ctx) {
 `;
   }
 
-  const filas = B.ordenar(analisis.base.map(m => m.f), analisis.med, "recomendado", ctx.nivelMarca);
+  // Primero lo que da el modo Recomendacion de la busqueda (precio-calidad, de mayor a menor precio) y despues el resto, en el
+  // mismo orden: la pagina estatica no esconde ningun comparable, que si cuenta para el rango y la mediana.
+  const comparables = analisis.base.map(m => m.f);
+  const cm = Modos.preparar(ctx.idx, ctx.nivelMarca);
+  const recomendadas = new Set(Modos.filtrar(comparables, "recomendacion", cm, analisis.med));
+  const filas = [...Modos.ordenar(comparables.filter(f => recomendadas.has(f)), "precio", cm),
+                 ...Modos.ordenar(comparables.filter(f => !recomendadas.has(f)), "precio", cm)];
   const mostrar = filas.slice(0, MAX_FILAS);
   const resto = filas.length - mostrar.length;
-  const precios = filas.map(f => f[1]);
+  const precios = comparables.map(f => f[1]);   // el rango es el de todo lo comparable, no solo de lo recomendado
   const desde = Math.min(...precios), hasta = Math.max(...precios);
   const mejor = analisis.picks[0].m.f;
   const comercios = analisis.comercios.length;

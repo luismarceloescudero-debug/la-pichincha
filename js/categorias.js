@@ -260,7 +260,7 @@
       puntos = [ram >= m.ramAlta, rom >= m.romAlta, cpuTier(nombre) >= 7, gpuAlta(nombre), pantallaPremium(nombre), v.punto, /\bddr5\b/i.test(nombre)].filter(Boolean).length;
     }
     const alta = puntos >= 3;
-    return ok(categoria, alta ? "alta" : "media", { rom, vigente: alta && v.vigente, nota: v.nota });
+    return ok(categoria, alta ? "alta" : "media", { rom, vigente: alta && v.vigente, nota: v.nota, puntos });
   }
 
   const capacidadMemoria = n => { const k = n.match(/\b(\d)\s?x\s?(\d{1,3})\s?gb\b/i); if (k) return +k[1] * +k[2];
@@ -304,7 +304,7 @@
     return ok(c, null);
   }
 
-  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, memoriaDe, aspectosDe, generacionesDe, referencia, evaluar };
+  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, memoriaDe, aspectosDe, generacionesDe, aniosDe, referencia, evaluar };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Categorias = api;
 })(this);

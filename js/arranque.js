@@ -90,14 +90,8 @@ function arrancar() {
     const repetir = ev.target.closest("[data-rep]");
     if (repetir) return consultar(repetir.dataset.rep);
 
-    const orden = ev.target.closest("[data-orden]");
-    if (orden) {
-      ORDEN = orden.dataset.orden;
-      try { localStorage.setItem("orden", ORDEN); } catch (e) {}
-      document.querySelectorAll("[data-orden]").forEach(b =>
-        b.setAttribute("aria-selected", String(b.dataset.orden === ORDEN)));
-      return pintarResultados(($("#q") || {}).value || "");
-    }
+    const orden = ev.target.closest("[data-orden]"), orden2 = ev.target.closest("[data-orden2]");
+    if (orden || orden2) return elegirOrden(orden && orden.dataset.orden, orden2 && orden2.dataset.orden2);
 
     const filtro = ev.target.closest("[data-filtro]");
     if (filtro) return cambiarFiltro(filtro.dataset.filtro, filtro.dataset.valor);
