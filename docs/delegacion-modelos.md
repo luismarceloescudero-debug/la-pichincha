@@ -74,3 +74,19 @@ Las tareas de extraer tablas y de revisar con otra familia quedan para la proxim
 | --- | --- | --- | --- |
 | Leer RTINGS (monitores, auriculares, notebooks), DXOMARK (pantalla y bateria) y probar Notebookcheck | **Claude** con el navegador de la app (los modelos externos no navegan) | 22 filas confirmadas; las notas de RTINGS estan bloqueadas sin membresia; una regex mia se colgo 45 s | — |
 | Contrastar las 22 filas con los hechos leidos | OmniRoute `revision` → gpt-oss-120b (cabecera) | 1 discrepancia | 0 reales / **1 falsa** («WOLED» contra «WOLED (Tandem)»: la pagina dice «Tandem WOLED») |
+
+---
+
+# Spec 014: Primera Linea premium, Super Oferta real y orden «mejor oferta» (20/10/2026)
+
+Revision cruzada de cada PR con dos modelos distintos (uno de OmniRoute y otro de OpenCode). Hoy Gemini 2.5 Flash daba 503 («high demand») y la conexion de Claude de OmniRoute estaba sin cuota; `privado/revisar.sh` reintenta.
+
+| Tarea | Modelo que la hizo | Tiempo | Resultado | Hallazgos reales / falsos |
+| --- | --- | ---: | --- | --- |
+| PR #86 (`js/premium.js`, modos): revision | OmniRoute `revision` → Gemini 2.5 Flash (tras 3 reintentos) | ~2 min | 4 hallazgos | 0 reales / **4 falsos** (el chip A16 no es «de punta» por decision; `ref.gen[fam] \|\| gen` es la convencion de `categorias.js` y la referencia sale del mismo indice; `gama` nula solo pasa en tests; `PS5` no coincide por el minimo de 4 caracteres, a proposito) |
+| PR #86: segundo modelo | OpenCode `glm-5.3-flash-free` | ~12 min | **Sin respuesta final**: salio del diff y empezo a correr comandos en el worktree (hubo que matar el proceso: 186 MB con la maquina sin memoria) | 0 / 0 |
+| PR #87 (`contraModelo`, `cruceGen`): revision | OmniRoute `revision` → gpt-oss-120b | 40 s | **Respuesta truncada** («reasoning truncated at token limit», 370 caracteres sin contenido) | 0 / 0 |
+| PR #87: segundo modelo | OpenCode `minimax-m3.1-flash-free` | ~8 min | **Vacio**: termino sin texto | 0 / 0 |
+| Mediciones, tablas y revision a mano de 14 «contra el mismo modelo» | **Claude** (scripts `specs/014-ofertas-y-premium/medir.js`) | — | En la spec | — |
+
+**Lo aprendido**: en una tanda con la CI en verde y 440 tests, la revision cruzada con modelos gratis no aporto ningun hallazgo real (0 de 4 con respuesta, 3 corridas sin contenido); lo que si encontro bugs fue medir contra el indice publicado (falsos premium por la memoria, coolers a 59% bajo el resto). Con `opencode run` hay que pasar el mensaje ANTES de `-f` (si no, trata el mensaje como un archivo) y pedirle que no ejecute comandos.
