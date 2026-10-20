@@ -365,24 +365,9 @@ test("Mejor oferta: primero lo premium, dentro de eso lo mas nuevo y despues la 
   assert.equal(Modos.ordenar([inter, a], "mejor", ctx).pop()[8], "i");
 });
 
-test("nada resta: Recomendacion con «incluir todo» trae tambien lo que no llega al minimo o no tiene marca, despues de lo recomendado", () => {
-  const ctx = Modos.preparar(IDX, nivel);
-  const chico = f("Celular Moto G05 4GB 64GB", 100000), sinMarca = PRODUCTOS.find(x => /Generica Core i5/.test(x[0]));
-  const todas = [...PRODUCTOS, chico];
-  const solo = Modos.filtrar(todas, "recomendacion", ctx, med);
-  assert.ok(!solo.includes(chico) && !solo.includes(sinMarca));
-  const con = Modos.filtrar(todas, "recomendacion", ctx, med, { incluirTodo: true });
-  assert.equal(con.length, todas.length, "no se pierde ningun aviso");
-  const ord = Modos.ordenar(con, "precio", ctx, f2 => solo.includes(f2));
-  assert.deepEqual(ord.slice(0, solo.length).sort(), [...solo].sort(), "lo recomendado primero");
-  assert.ok(ord.indexOf(chico) >= solo.length && ord.indexOf(sinMarca) >= solo.length);
-  // Super Oferta y Primera Linea son subconjuntos explicitos: incluirTodo no los toca
-  assert.deepEqual(Modos.filtrar(todas, "primera", ctx, med, { incluirTodo: true }), Modos.filtrar(todas, "primera", ctx, med));
-});
-
 test("notaDe: cada modo dice que deja afuera y cuanto", () => {
   assert.match(Modos.notaDe("recomendacion", 100, 60), /40 avisos más/);
-  assert.match(Modos.notaDe("recomendacion", 100, 60), /Incluir/);
+  assert.doesNotMatch(Modos.notaDe("recomendacion", 100, 60), /Incluir/, "el piso de gama se mantiene: no hay control para saltearlo");
   assert.match(Modos.notaDe("super", 100, 7), /7 de 100/);
   assert.match(Modos.notaDe("primera", 100, 12), /premium.*12 de 100/);
   assert.equal(Modos.notaDe("recomendacion", 50, 50), "", "si no deja nada afuera no hay nota");
