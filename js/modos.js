@@ -23,6 +23,7 @@
      Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas dejan precio en ambos sentidos. */
   const SECUNDARIOS = [
     { id: "mejor", eti: "Mejor oferta", ayuda: "primero lo más premium y nuevo; dentro de eso, la mayor baja contra el mismo modelo" },
+    { id: "baja", eti: "Mayor baja", ayuda: "mayor % de baja contra el relevamiento anterior (24 h); las ventanas de 7 y 31 días esperan a que el índice traiga la serie de precios" },
     { id: "precio", eti: "Precio ↓" },
     { id: "novedades", eti: "Novedades" },
     { id: "premium", eti: "Premium" },
@@ -99,13 +100,15 @@
   const nivelDe = (f, ctx) => ctx.premium(f[0]).premium ? 2 : ctx.gama(f[0]).pasa && ctx.gama(f[0]).nivel ? 1 : 0;
   function porMejor(ctx) {
     return (a, b) => (nivelDe(b, ctx) - nivelDe(a, ctx)) || (novedadDe(b[0], ctx.ref) - novedadDe(a[0], ctx.ref) || 0)
-      || (bajaDe(b, ctx) - bajaDe(a, ctx)) || (premiumDe(b[0], ctx) - premiumDe(a[0], ctx));
+      || (bajaDe(b, ctx) - bajaDe(a, ctx)) || (premiumDe(b[0], ctx) - premiumDe(a[0], ctx))
+      || ((ctx.tiendasDe ? ctx.tiendasDe(b) - ctx.tiendasDe(a) : 0));   // idea #11: a igual todo, el modelo que se puede comparar en mas tiendas
   }
 
   /* `primero(f)` (opcional) separa lo que va primero (lo recomendado) de lo que se incluyo de mas: cada grupo se ordena aparte. */
   function ordenar(filas, secundario, ctx, primero) {
     const clave = secundario === "novedades" ? f => novedadDe(f[0], ctx.ref)
-      : secundario === "premium" ? f => premiumDe(f[0], ctx) : () => 0;
+      : secundario === "premium" ? f => premiumDe(f[0], ctx)
+      : secundario === "baja" ? f => (f[6] > f[1] ? 1 - f[1] / f[6] : 0) : () => 0;
     const extra = secundario === "mejor" ? porMejor(ctx) : () => 0;
     const cmp = (a, b) => (esInternacional(a) - esInternacional(b)) || extra(a, b) || (clave(b) - clave(a)) || (b[1] - a[1]);
     if (!primero) return [...filas].sort(cmp);

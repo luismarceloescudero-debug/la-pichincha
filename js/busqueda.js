@@ -71,6 +71,10 @@ function filtrosHtml() {
       <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo"></label></div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Gama</span>
       <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
+    <div class="of-fila" role="group" aria-label="Sellos"><span class="of-et" aria-hidden="true">Sellos</span>
+      ${[["e", "Envío gratis"], ["s", "Cuotas sin interés"], ["o", "Tienda oficial"]].map(([l, t]) =>
+        `<button class="of-chip" data-filtro="sello" data-valor="${l}" aria-pressed="${FILTROS.sellos.includes(l)}">${t}</button>`).join("")}
+      <span class="sub chico">Solo ComparaYa y sus comercios informan envío y cuotas: un aviso sin sello no quiere decir que no lo tenga.</span></div>
     <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
       <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil"></div>
     <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
@@ -81,6 +85,7 @@ function sincronizarFiltros() {
   const caja = $("#filtros");
   if (!caja) return;
   caja.querySelectorAll('[data-filtro="tienda"]').forEach(b => b.setAttribute("aria-pressed", String(FILTROS.tiendas.includes(b.dataset.valor))));
+  [...caja.querySelectorAll('[data-filtro="sello"]')].filter(b => b.dataset.filtro === "sello").forEach(b => b.setAttribute("aria-pressed", String(FILTROS.sellos.includes(b.dataset.valor))));
   const pr = caja.querySelector('[data-filtro="primera"]');
   if (pr) pr.setAttribute("aria-pressed", String(FILTROS.primera));
   const pone = (id, v) => { const c = $(id); if (c && document.activeElement !== c) c.value = v; };
@@ -97,6 +102,9 @@ function cambiarFiltro(que, valor) {
   if (que === "tienda") {
     const i = FILTROS.tiendas.indexOf(valor);
     if (i >= 0) FILTROS.tiendas.splice(i, 1); else FILTROS.tiendas.push(valor);
+  } else if (que === "sello") {
+    const i = FILTROS.sellos.indexOf(valor);
+    if (i >= 0) FILTROS.sellos.splice(i, 1); else FILTROS.sellos.push(valor);
   } else if (que === "incluir") {
     INCLUIR = !INCLUIR;
     try { localStorage.setItem("incluirTodo", INCLUIR ? "1" : "0"); } catch (e) {}
@@ -181,6 +189,7 @@ function pintarResultados(q) {
   const cm = ctxModos();
   const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, n => cm.premium(n).premium);
   OTRAS = F.otras;
+  cm.tiendasDe = f => 1 + (OTRAS.get(f) || []).length;
   const incluir = ORDEN === "recomendacion" && INCLUIR;
   const enModo = Modos.filtrar(F.filas, ORDEN, cm, med, { incluirTodo: incluir });
   const recomendadas = incluir ? new Set(Modos.filtrar(F.filas, "recomendacion", cm, med)) : null;
@@ -248,6 +257,9 @@ function pintarResultados(q) {
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
     for (const [clase, texto] of sellosDe(f[8])) marcas.push(`<span class="sello ${clase}">${texto}</span>`);
     if (f[1] === barato && r.length > 1) marcas.push('<span class="sello barato">más barato</span>');
+    // Idea #12 (PriceSpy, Geizhals): el mismo modelo mas barato en una tienda que se lee directo (no el agregador ni lo internacional)
+    const mb = OFERTAS && OFERTAS.masBarato.get(f);
+    if (mb) marcas.push(`<span class="sello ojo">otra tienda lo tiene más barato: ${esc(comercioDe(mb))} ${pesos(mb[1])}</span>`);
     const otras = OTRAS.get(f) || [];
     if (otras.length) marcas.push(`<span class="sello conocida">mismo modelo en ${otras.length + 1} tiendas</span>`);
     // Sin baja ni rebaja, lo que sirve saber es desde cuando esta en este precio (no hace falta que sea una oferta para verlo).

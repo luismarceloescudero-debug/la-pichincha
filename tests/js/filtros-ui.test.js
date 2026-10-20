@@ -245,3 +245,22 @@ test("la vista Buscar trae el control «Incluir lo que no llega al minimo» y la
   assert.match(html, /data-filtro="incluir" aria-pressed="false"[^>]*>Incluir lo que no llega al mínimo</);
   assert.match(html, /id="nota-modo"/);
 });
+
+test("los sellos (envio gratis, cuotas, tienda oficial) son chips del panel, se alternan y avisan de su cobertura", () => {
+  const { correr } = pagina();
+  const html = correr("vistaBuscar()");
+  for (const l of ["e", "s", "o"]) assert.ok(html.includes(`data-filtro="sello" data-valor="${l}"`), l);
+  assert.match(html, /Solo ComparaYa y sus comercios informan envío y cuotas/);
+  correr('cambiarFiltro("sello", "e")');
+  assert.strictEqual(JSON.stringify(correr("FILTROS.sellos")), '["e"]');
+  correr('cambiarFiltro("sello", "e")');
+  assert.strictEqual(JSON.stringify(correr("FILTROS.sellos")), "[]");
+});
+
+test("una fila con el mismo modelo mas barato en otra tienda directa lo dice", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('OFERTAS = { masBarato: new Map([[IDX.productos[2], IDX.productos[4]]]), propias: [], publicadas: [] }');
+  correr('pintarResultados("ssd 1tb")');
+  assert.match(els["#res"].innerHTML, /otra tienda lo tiene más barato: CompraGamer \$70\.000/);
+});

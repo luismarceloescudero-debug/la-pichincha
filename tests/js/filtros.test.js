@@ -113,3 +113,18 @@ test("filtrar no toca las filas ni el mapa originales", () => {
   assert.deepStrictEqual(todas, copia);
   assert.deepStrictEqual(otras.get(a), [d]);
 });
+
+test("filtro por sellos (envio gratis, cuotas, tienda oficial): solo lo que la fuente informa y todos los elegidos a la vez", () => {
+  const mk = (n, s) => [n, 1000, "https://t.test/" + n, "cg", "", 0, 0, "", s, ""];
+  const a = mk("a", "es"), b = mk("b", "e"), c = mk("c", ""), d = mk("d", "so");
+  const todas = [a, b, c, d];
+  const con = sellos => B.filtrarGrupos(todas, new Map(), { ...B.filtrosVacios(), sellos }, () => false).filas;
+  assert.deepStrictEqual(con(["e"]), [a, b]);
+  assert.deepStrictEqual(con(["e", "s"]), [a]);
+  assert.deepStrictEqual(con(["o"]), [d]);
+  assert.strictEqual(B.hayFiltros({ ...B.filtrosVacios(), sellos: ["e"] }), true);
+  assert.deepStrictEqual(B.filtrosVacios().sellos, []);
+  assert.deepStrictEqual(B.filtrarGrupos(todas, new Map(), B.filtrosVacios(), () => false).filas, todas);
+  // un aviso de una tienda directa no publica el sello: no por eso es peor, y el filtro lo dice en la pantalla
+  assert.deepStrictEqual(con(["x"]), []);
+});
