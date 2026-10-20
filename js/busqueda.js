@@ -42,7 +42,7 @@ function elegirOrden(modo, secundario) {
 /* Un modo sin resultados no deja la pantalla vacia: dice por que y ofrece los que si tienen. */
 function vacioHtml(cuentas) {
   const v = Modos.textoVacio(ORDEN, cuentas);
-  const otros = v.otros.map(m => `<button class="acc" data-orden="${m.id}">${esc(m.eti)} (${cuentas[m.id]})</button>`).join(" ");
+  const otros = v.otros.map(m => `<button class="acc" data-orden="${m.id}">${esc(m.eti)} (${cuentas[m.id]})</button>`).join(" o ");
   return `<p class="sub">${esc(v.texto)} ${otros ? `Probá con ${otros}` : "Probá con otra búsqueda o menos filtros."}</p>`;
 }
 
