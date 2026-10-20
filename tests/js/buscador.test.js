@@ -53,25 +53,123 @@ test("pisoDeGama es mas exigente sin marca reconocida", () => {
   assert.equal(B.pisoDeGama(300, 2, 1000), true);
 });
 
-test("ordenar por precio, por marca y recomendado", () => {
-  const nivel = n => (/kingston/i.test(n) ? 2 : /hiksemi/i.test(n) ? 1 : 0);
-  const filas = [["Generica 16GB", 300], ["Kingston 16GB", 900], ["Hiksemi 16GB", 800], ["Otra 16GB", 1000]];
-  const nombres = r => r.map(f => f[0].split(" ")[0]);
-  assert.deepEqual(nombres(B.ordenar(filas, 900, "precio", nivel)), ["Generica", "Hiksemi", "Kingston", "Otra"]);
-  assert.deepEqual(nombres(B.ordenar(filas, 900, "marca", nivel)), ["Kingston", "Hiksemi", "Generica", "Otra"]);
-  // Recomendado: primero la marca mas confiable, y al fondo el piso de gama (300 < 45% de 900).
-  assert.deepEqual(nombres(B.ordenar(filas, 900, "recomendado", nivel)), ["Kingston", "Hiksemi", "Otra", "Generica"]);
-  assert.equal(filas[0][0], "Generica 16GB");
+/* --- Los tres modos y su orden (spec 013), con titulos reales del indice del 19/10/2026 --- */
+const Modos = require("../../js/modos.js");
+
+// fila del indice: [nombre, precio, url, tienda, via, lista, antes, imagen, sellos, modelo, desde]
+const f = (nombre, precio, extra = {}) => [nombre, precio, "https://t.test/" + encodeURIComponent(nombre), extra.tienda || "cg", "",
+  extra.lista || 0, extra.antes || 0, "", extra.sellos || "", extra.modelo || "", ""];
+const MARCAS = { primera: ["samsung", "lenovo", "asus", "kingston"], conocida: ["hiksemi", "acer", "logitech"] };
+const PRODUCTOS = [
+  f("Celular Samsung Galaxy S26 256/12GB Black", 2699999),
+  f("Celular Samsung Galaxy S25 256/12GB Black", 1900000),
+  f("Celular Samsung Galaxy A57 5G 8GB 256GB Gray", 1149999, { antes: 1300000 }),       // baja propia de 11%: oferta de gama media
+  f("Celular Hiksemi X1 Pro 8GB 256GB", 400000),                                       // marca conocida, muy por debajo del resto
+  f("Notebook Lenovo LOQ Ryzen 7 7735HS 16GB 512GB SSD RTX 4050", 1500000, { antes: 1800000 }),   // oferta de gama media
+  f("Notebook Asus Zenbook Core Ultra 9 32GB 1TB OLED RTX 5070", 5000000),             // gama alta
+  f("Notebook Generica Core i5-13420H 16GB 512GB", 900000),                            // marca sin reconocer
+  f("Notebook Acer Nitro Core i7-14650HX 16GB 512GB RTX 4060", 1700000, { sellos: "i" }),   // compra internacional
+  f("Auriculares Logitech G733 Lightspeed", 312615),
+  f("Auriculares Generico Bluetooth", 20000),
+];
+const IDX = { generado: "2026-10-19T10:00-03:00", productos: PRODUCTOS, tiendas: {} };
+const nivel = B.crearNivelMarca(MARCAS);
+const nombres = r => r.map(x => x[0].split(" ").slice(0, 3).join(" "));
+const med = B.mediana(PRODUCTOS.map(x => x[1]));
+const descendente = r => r.map(x => x[1]).every((p, i, a) => !i || a[i - 1] >= p);
+
+test("migrar: lo guardado por la version anterior cae en Recomendacion y lo desconocido tambien", () => {
+  for (const viejo of ["recomendado", "precio", "marca", null, "", "otra cosa", undefined]) assert.equal(Modos.migrarModo(viejo), "recomendacion");
+  for (const bueno of ["recomendacion", "super", "primera"]) assert.equal(Modos.migrarModo(bueno), bueno);
+  assert.equal(Modos.migrarSecundario("marca"), "precio");
+  assert.equal(Modos.migrarSecundario("premium"), "premium");
+  assert.deepEqual(Modos.MODOS.map(m => m.id), ["recomendacion", "super", "primera"]);
 });
 
-test("en recomendado las compras internacionales van despues de las comparables", () => {
-  const nivel = n => (/kingston/i.test(n) ? 2 : 0);
-  const filas = [["Kingston A", 800, "", "", "", 0, 0, "", "ie"], ["Kingston B", 900, "", "", "", 0, 0, "", "e"],
-                 ["Otra C", 950, "", "", "", 0, 0, "", ""], ["Vieja D", 990, "", "", "", 0, 0]];
-  const nombres = r => r.map(f => f[0]);
-  assert.deepEqual(nombres(B.ordenar(filas, 900, "recomendado", nivel)), ["Kingston B", "Otra C", "Vieja D", "Kingston A"]);
-  // Por precio manda el numero: la internacional mas barata queda primera, con su sello.
-  assert.deepEqual(nombres(B.ordenar(filas, 900, "precio", nivel)), ["Kingston A", "Kingston B", "Otra C", "Vieja D"]);
+test("Recomendacion: pasa el piso de gama, marca reconocida y no esta muy por debajo; de mayor a menor precio", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "recomendacion", ctx, med), "precio", ctx);
+  const locales = r.filter(x => !/Acer Nitro/.test(x[0]));
+  assert.ok(descendente(locales));
+  assert.ok(!nombres(r).includes("Notebook Generica Core"), "sin marca reconocida no entra");
+  assert.ok(!nombres(r).includes("Auriculares Generico Bluetooth"));
+  assert.ok(!nombres(r).includes("Celular Hiksemi X1"), "400.000 es menos del 35% de la mediana con marca conocida: piso de gama");
+  const audio = PRODUCTOS.filter(x => /^Auriculares/.test(x[0]));
+  assert.deepEqual(nombres(Modos.filtrar(audio, "recomendacion", ctx, B.mediana(audio.map(x => x[1])))), ["Auriculares Logitech G733"],
+    "un periferico entra solo por marca y piso, sin gama");
+});
+
+test("lo internacional va siempre al final, en cualquier modo y orden", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "recomendacion", ctx, med), "precio", ctx);
+  assert.equal(r[r.length - 1][0].startsWith("Notebook Acer Nitro"), true);
+  assert.ok(r[r.length - 1][1] < r[0][1], "la internacional vale mas que otras y aun asi queda ultima");
+  for (const sec of ["precio", "novedades", "premium"])
+    assert.equal(Modos.ordenar(PRODUCTOS, sec, ctx).pop()[8], "i", sec);
+});
+
+test("Super Oferta: solo ofertas reales de gama media, de mayor a menor precio", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "super", ctx, med), "precio", ctx);
+  assert.deepEqual(nombres(r), ["Notebook Lenovo LOQ", "Celular Samsung Galaxy"]);
+  assert.deepEqual(r.map(x => x[1]), [1500000, 1149999]);
+});
+
+test("Super Oferta no calcula ofertas si el modo no las pide (el calculo caro es perezoso) y lo hace una sola vez", () => {
+  let calculos = 0;
+  const ctx = Modos.preparar(IDX, nivel, () => { calculos++; return require("../../js/ofertas.js").calcularOfertas(IDX); });
+  Modos.filtrar(PRODUCTOS, "recomendacion", ctx, med); Modos.filtrar(PRODUCTOS, "primera", ctx, med);
+  assert.equal(calculos, 0);
+  Modos.filtrar(PRODUCTOS, "super", ctx, med); Modos.filtrar(PRODUCTOS, "super", ctx, med);
+  assert.equal(calculos, 1);
+});
+
+test("Primera Linea: solo las marcas de datos.json -> marcas.primera, de mayor a menor", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "precio", ctx);
+  assert.deepEqual(nombres(r), ["Notebook Asus Zenbook", "Celular Samsung Galaxy", "Celular Samsung Galaxy", "Notebook Lenovo LOQ", "Celular Samsung Galaxy"]);
+  assert.ok(descendente(r));
+});
+
+test("orden Novedades: la generacion mas nueva primero; sin dato de generacion ni año, al final", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const celus = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "novedades", ctx).filter(x => /Galaxy S2\d/.test(x[0]));
+  assert.ok(celus[0][0].includes("S26") && celus[1][0].includes("S25"), "S26 antes que S25");
+  assert.equal(Modos.novedadDe("Celular Samsung Galaxy S26", ctx.ref), 0);
+  assert.equal(Modos.novedadDe("Celular Samsung Galaxy S25", ctx.ref), -1);
+  assert.equal(Modos.novedadDe("Auriculares Logitech G733", ctx.ref), -Infinity);
+  const todo = Modos.ordenar(PRODUCTOS.filter(x => !/Acer/.test(x[0])), "novedades", ctx);
+  assert.equal(todo[todo.length - 1][1] <= todo[todo.length - 2][1], true, "sin dato de novedad: de mayor a menor precio");
+});
+
+test("orden Novedades usa el año del titulo cuando no hay generacion", () => {
+  const idx = { productos: [f("Monitor Samsung Odyssey 27 2025 144Hz IPS", 500000), f("Monitor Samsung Odyssey 27 2026 144Hz IPS", 600000)] };
+  const ctx = Modos.preparar(idx, nivel);
+  assert.equal(Modos.novedadDe(idx.productos[0][0], ctx.ref), -1);
+  assert.equal(Modos.novedadDe(idx.productos[1][0], ctx.ref), 0);
+});
+
+test("orden Premium: mas señales de gama alta primero; a igual señal, el mas caro", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "premium", ctx);
+  assert.equal(r[0][0].startsWith("Notebook Asus Zenbook"), true);
+  assert.ok(Modos.premiumDe("Notebook Asus Zenbook Core Ultra 9 32GB 1TB OLED RTX 5070", ctx.gama) >= 3);
+  assert.ok(Modos.premiumDe("Notebook Lenovo LOQ Ryzen 7 7735HS 16GB 512GB SSD RTX 4050", ctx.gama) < 3);
+  assert.equal(Modos.premiumDe("Auriculares Logitech G733", ctx.gama), 0);
+  assert.equal(Modos.premiumDe("Monitor LG 27 OLED 240Hz", ctx.gama), 3, "un monitor de gama alta cuenta como 3 señales");
+});
+
+test("un modo vacio explica por que y nombra los modos que si tienen resultados", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const audio = PRODUCTOS.filter(x => /^Auriculares/.test(x[0]));
+  const cuentas = Modos.contar(audio, ctx, B.mediana(audio.map(x => x[1])));
+  assert.equal(cuentas.super, 0);
+  const v = Modos.textoVacio("super", cuentas);
+  assert.match(v.texto, /Súper Oferta.*no hay nada.*oferta real de gama media/);
+  assert.ok(v.otros.length > 0 && v.otros.every(m => cuentas[m.id] > 0));
+  assert.match(Modos.textoVacio("primera", cuentas).razon, /primera línea/);
+  assert.match(Modos.textoVacio("recomendacion", cuentas).razon, /piso de gama/);
+  assert.match(Modos.textoVacio("inventado", cuentas).texto, /Recomendación/);
 });
 
 test("crearNivelMarca: 2 primera linea, 1 conocida, 0 sin reconocer, con palabra entera", () => {

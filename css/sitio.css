@@ -375,6 +375,8 @@ td.mejor{color:var(--good);font-weight:700}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sello.baja,
   :root:not([data-theme="light"]) .sello.barato{color:#0e1117}}
 .segmentos.chico{margin-bottom:14px}
+.orden2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.orden2 .segmentos.chico{margin-bottom:10px}
 .segmentos.chico .seg{padding:7px 14px;font-size:.83rem}
 
 /* ---- Puente a la comparativa ---- */

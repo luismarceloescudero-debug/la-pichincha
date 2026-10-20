@@ -50,23 +50,6 @@
      viejo o de entrada. Sin marca reconocida el umbral es mas exigente. */
   const pisoDeGama = (precio, niv, med) => precio < med * (niv === 0 ? 0.45 : 0.35);
 
-  /* Ordena el resultado segun el criterio elegido. "recomendado" pone primero la
-     marca mas confiable al menor precio, y manda al fondo lo que esta tan por
-     debajo del resto que probablemente no sea comparable. */
-  function ordenar(filas, med, orden, nivelMarca) {
-    const copia = [...filas];
-    if (orden === "precio") return copia.sort((a, b) => a[1] - b[1]);
-    if (orden === "marca") return copia.sort((a, b) =>
-      nivelMarca(b[0]) - nivelMarca(a[0]) || a[1] - b[1]);
-    // Las compras internacionales no compiten con lo que se compra aca: van al final.
-    const intl = f => typeof f[8] === "string" && f[8].includes("i") ? 1 : 0;
-    return copia.sort((a, b) => {
-      const na = nivelMarca(a[0]), nb = nivelMarca(b[0]);
-      const sa = pisoDeGama(a[1], na, med), sb = pisoDeGama(b[1], nb, med);
-      return (intl(a) - intl(b)) || (sa - sb) || (nb - na) || (a[1] - b[1]);
-    });
-  }
-
   /* Que tan reconocida es la marca: 2 primera linea, 1 conocida, 0 sin reconocer. Es juicio
      editorial (la lista esta en datos.json): lo que no esta en ninguna lista no se castiga,
      solo no se destaca. Devuelve una funcion con memoria. */
@@ -372,7 +355,7 @@
   const textoConteo = (productos, avisos) => productos === avisos
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
-  const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama, ordenar,
+  const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama,
                 ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;

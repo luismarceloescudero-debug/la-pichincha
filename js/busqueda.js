@@ -4,16 +4,47 @@
 const MARCAS = DATOS.marcas || { primera: [], conocida: [] };
 const nivelMarca = Buscador.crearNivelMarca(MARCAS);
 
-const ORDENES = [
-  { id: "recomendado", eti: "Recomendado" },
-  { id: "precio", eti: "Más barato" },
-  { id: "marca", eti: "Mejor marca" },
-];
-let ORDEN = (() => { try { return localStorage.getItem("orden") || "recomendado"; } catch (e) { return "recomendado"; } })();
+/* Tres modos (Recomendacion, Super Oferta, Primera Linea) y, dentro de cada uno, un orden: Precio (de mayor a menor),
+   Novedades o Premium. La logica vive en js/modos.js (spec 013). Lo guardado por la version anterior
+   ("recomendado", "precio", "marca") se trata como Recomendacion. */
+const guardado = clave => { try { return localStorage.getItem(clave); } catch (e) { return null; } };
+let ORDEN = Modos.migrarModo(guardado("orden"));
+let ORDEN2 = Modos.migrarSecundario(guardado("orden2"));
 
-/* "Recomendado" pone primero la marca mas confiable al menor precio y manda al
-   fondo el piso de gama. La logica vive en js/buscador.js. */
-function ordenar(filas, med) { return Buscador.ordenar(filas, med, ORDEN, nivelMarca); }
+/* Lo que se calcula una vez por indice cargado: las generaciones, la gama de cada titulo y (recien si hace falta) las ofertas. */
+let CTX_MODOS = null;
+function ctxModos() {
+  if (!CTX_MODOS || CTX_MODOS.idx !== IDX) CTX_MODOS = { idx: IDX, ctx: Modos.preparar(IDX, nivelMarca, () => OFERTAS) };
+  return CTX_MODOS.ctx;
+}
+
+function ordenesHtml() {
+  return `<div class="orden" role="group" aria-label="Qué mostrar">
+      <div class="segmentos chico">${Modos.MODOS.map(o =>
+        `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}" title="${esc(o.ayuda)}">${esc(o.eti)}</button>`).join("")}</div>
+    </div>
+    <div class="orden2" role="group" aria-label="Ordenar por"><span class="of-et" aria-hidden="true">Ordenar por</span>
+      <div class="segmentos chico">${Modos.SECUNDARIOS.map(o =>
+        `<button class="seg" data-orden2="${o.id}" aria-selected="${o.id === ORDEN2}">${esc(o.eti)}</button>`).join("")}</div>
+    </div>`;
+}
+
+/* Elige un modo y/o un orden: lo guarda en el navegador, marca los botones y vuelve a pintar la lista. */
+function elegirOrden(modo, secundario) {
+  if (modo) ORDEN = Modos.migrarModo(modo);
+  if (secundario) ORDEN2 = Modos.migrarSecundario(secundario);
+  try { if (modo) localStorage.setItem("orden", ORDEN); if (secundario) localStorage.setItem("orden2", ORDEN2); } catch (e) {}
+  document.querySelectorAll("[data-orden]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.orden === ORDEN)));
+  document.querySelectorAll("[data-orden2]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.orden2 === ORDEN2)));
+  pintarResultados(($("#q") || {}).value || "");
+}
+
+/* Un modo sin resultados no deja la pantalla vacia: dice por que y ofrece los que si tienen. */
+function vacioHtml(cuentas) {
+  const v = Modos.textoVacio(ORDEN, cuentas);
+  const otros = v.otros.map(m => `<button class="acc" data-orden="${m.id}">${esc(m.eti)} (${cuentas[m.id]})</button>`).join(" ");
+  return `<p class="sub">${esc(v.texto)} ${otros ? `Probá con ${otros}` : "Probá con otra búsqueda o menos filtros."}</p>`;
+}
 
 /* El mismo modelo (mismo codigo exacto) en varias tiendas es UN producto: queda su fila mas barata y
    OTRAS dice, por fila, las demas tiendas. Asi la mediana y el conteo cuentan cada producto una vez. */
@@ -140,8 +171,15 @@ function pintarResultados(q) {
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.
   const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, nivelMarca);
   OTRAS = F.otras;
-  const r = ordenar(F.filas, med).slice(0, 60);
+  const cm = ctxModos();
+  const enModo = Modos.filtrar(F.filas, ORDEN, cm, med);
+  const r = Modos.ordenar(enModo, ORDEN2, cm).slice(0, 60);
   ULTIMA_BUSQUEDA = r;
+  if (!r.length && F.filas.length) {
+    est.textContent = `ningún aviso entra en ${Modos.MODOS.find(m => m.id === ORDEN).eti} (hay ${F.filas.length} en esta búsqueda)`;
+    caja.innerHTML = vacioHtml(Modos.contar(F.filas, cm, med));
+    return;
+  }
   if (!r.length) {
     est.textContent = `ningún aviso cumple los filtros (hay ${conjunto.length} sin filtrar)`;
     caja.innerHTML = `<p class="sub">Probá con menos filtros. <button class="acc" data-filtro="quitar">Quitar filtros</button></p>`;
@@ -152,7 +190,7 @@ function pintarResultados(q) {
   const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
   const afuera = A ? A.total - A.base.length - A.internacionales.length : 0;
   const nInt = A ? A.internacionales.length : 0;
-  est.innerHTML = (F.filas.length > r.length ? `Mostrando ${r.length} de ${F.filas.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
+  est.innerHTML = (enModo.length > r.length ? `Mostrando ${r.length} de ${enModo.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
     + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
     + (F.ocultas ? ` · ${F.ocultas} oculto${F.ocultas > 1 ? "s" : ""} por los filtros` : "")
@@ -190,7 +228,7 @@ function pintarResultados(q) {
     else if (off) marcas.push(`<span class="sello off2">${off}% OFF</span>`);
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
     for (const [clase, texto] of sellosDe(f[8])) marcas.push(`<span class="sello ${clase}">${texto}</span>`);
-    if (f[1] === barato && ORDEN === "precio") marcas.push('<span class="sello barato">más barato</span>');
+    if (f[1] === barato && r.length > 1) marcas.push('<span class="sello barato">más barato</span>');
     const otras = OTRAS.get(f) || [];
     if (otras.length) marcas.push(`<span class="sello conocida">mismo modelo en ${otras.length + 1} tiendas</span>`);
     // Sin baja ni rebaja, lo que sirve saber es desde cuando esta en este precio (no hace falta que sea una oferta para verlo).
@@ -235,12 +273,11 @@ function vistaBuscar() {
   }, 0);
 
   return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las ${IDX ? Object.keys(IDX.tiendas).length : 13} fuentes</h2>
-    <p class="sub">Un solo cuadro sobre los catálogos de 12 tiendas de hardware (CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus, Katech, Max Tecno, The Gamer Shop, SCP Hardstore, Click Gaming y GoldenTech), más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados salen ordenados por conveniencia, y con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
+    <p class="sub">Un solo cuadro sobre los catálogos de 12 tiendas de hardware (CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus, Katech, Max Tecno, The Gamer Shop, SCP Hardstore, Click Gaming y GoldenTech), más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados se ven en tres modos (Recomendación, Súper Oferta y Primera Línea) y se ordenan por precio, novedades o gama premium; con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
     <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
-    <div class="segmentos chico">${ORDENES.map(o =>
-      `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}">${esc(o.eti)}</button>`).join("")}</div>
+    ${ordenesHtml()}
     <details class="filtros" id="filtros"><summary>Filtros</summary><div class="filtros-cuerpo">${filtrosHtml()}</div></details>
     <div id="puente"></div>
     <p class="estado" id="estado">cargando índice…</p>

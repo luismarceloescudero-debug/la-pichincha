@@ -18,11 +18,13 @@ function elemento(extra = {}) {
   return el;
 }
 
-function pagina() {
-  const els = {};
-  const doc = { querySelector: s => els[s] || (els[s] = elemento()), querySelectorAll: () => [], getElementById: () => null,
-    addEventListener() {}, activeElement: null };
-  const ctx = G.contexto(HTML, leer, { document: doc, setTimeout() {}, clearTimeout() {} });
+function pagina(guardado = {}) {
+  const els = {}, oyentes = {}, botones = [];
+  const doc = { querySelector: s => els[s] || (els[s] = elemento()), querySelectorAll: sel => botones.filter(b => sel === "[data-orden2]" ? b.dataset.orden2 : sel === "[data-orden]" ? b.dataset.orden : true), getElementById: () => null,
+    addEventListener(t, f) { (oyentes[t] = oyentes[t] || []).push(f); }, activeElement: null };
+  const almacen = { ...guardado };
+  const localStorage = { getItem: k => (k in almacen ? almacen[k] : null), setItem: (k, v) => { almacen[k] = v; } };
+  const ctx = G.contexto(HTML, leer, { document: doc, setTimeout() {}, clearTimeout() {}, localStorage });
   // un SSD de cada tienda, y dos tiendas que venden el mismo modelo
   const fila = (nombre, precio, tienda, modelo = "") =>
     [nombre, precio, `https://${tienda}.test/${encodeURIComponent(nombre)}`, tienda, "", 0, 0, "", "", modelo];
@@ -38,7 +40,7 @@ function pagina() {
     ],
   };
   require("vm").runInContext("IDX = __idx", ctx);
-  return { ctx, els, correr: codigo => require("vm").runInContext(codigo, ctx) };
+  return { ctx, els, oyentes, botones, almacen, correr: codigo => require("vm").runInContext(codigo, ctx) };
 }
 
 test("la vista Buscar trae el panel de filtros, plegado, con todos sus controles", () => {
@@ -142,4 +144,76 @@ test("sin ningun resultado dice que son los filtros y ofrece quitarlos", () => {
   correr('FILTROS.min = 9999999; pintarResultados("ssd 1tb")');
   assert.match(els["#estado"].textContent, /ningún aviso cumple los filtros \(hay \d+ sin filtrar\)/);
   assert.match(els["#res"].innerHTML, /data-filtro="quitar"/);
+});
+
+/* --- Los tres modos y el orden de adentro (spec 013) --- */
+
+test("la vista Buscar trae los tres modos y los tres ordenes, y ya no 'Más barato' ni 'Mejor marca'", () => {
+  const { correr } = pagina();
+  const html = correr("vistaBuscar()");
+  for (const m of ["recomendacion", "super", "primera"]) assert.ok(html.includes(`data-orden="${m}"`), m);
+  for (const o of ["precio", "novedades", "premium"]) assert.ok(html.includes(`data-orden2="${o}"`), o);
+  assert.match(html, /data-orden="recomendacion" aria-selected="true"[^>]*>Recomendación</);
+  assert.match(html, /data-orden="super"[^>]*>Súper Oferta</);
+  assert.match(html, /data-orden="primera"[^>]*>Primera Línea</);
+  assert.match(html, /data-orden2="precio" aria-selected="true"[^>]*>Precio ↓</);
+  assert.match(html, /role="group" aria-label="Ordenar por"/);
+  assert.doesNotMatch(html, /Más barato|Mejor marca|Recomendado</);
+});
+
+test("lo guardado por la version anterior ('precio', 'marca') arranca en Recomendacion", () => {
+  for (const viejo of ["precio", "marca", "recomendado"]) {
+    const { correr } = pagina({ orden: viejo, orden2: "marca" });
+    assert.strictEqual(correr("ORDEN"), "recomendacion", viejo);
+    assert.strictEqual(correr("ORDEN2"), "precio");
+  }
+  const { correr } = pagina({ orden: "primera", orden2: "premium" });
+  assert.strictEqual(correr("ORDEN"), "primera");
+  assert.strictEqual(correr("ORDEN2"), "premium");
+});
+
+test("Recomendacion lista de mayor a menor precio, con marca reconocida (Kingston, Hiksemi) y sin la que no", () => {
+  const { correr, els } = pagina();
+  correr("MARCAS.primera.push('kingston'); MARCAS.conocida.push('hiksemi')");
+  correr('pintarResultados("ssd 1tb")');
+  const html = els["#res"].innerHTML;
+  const precios = [...html.matchAll(/class="pre">\$([\d.]+)</g)].map(m => +m[1].replace(/\./g, ""));
+  assert.ok(precios.length >= 2);
+  assert.deepStrictEqual(precios, [...precios].sort((a, b) => b - a));
+});
+
+test("un modo sin resultados no deja la pantalla vacia: lo explica y ofrece el modo que si tiene", () => {
+  const { correr, els } = pagina();
+  correr("MARCAS.primera.push('kingston')");
+  correr('ORDEN = "super"; pintarResultados("ssd 1tb")');
+  assert.match(els["#estado"].textContent, /ningún aviso entra en Súper Oferta \(hay \d+ en esta búsqueda\)/);
+  assert.match(els["#res"].innerHTML, /En «Súper Oferta» no hay nada para esta búsqueda/);
+  assert.match(els["#res"].innerHTML, /data-orden="primera"[^>]*>Primera Línea \(\d+\)/);
+  assert.ok(els["#res"].innerHTML.length > 100);
+});
+
+test("Primera Linea sin marcas de primera linea en la busqueda ofrece Recomendacion, que si tiene", () => {
+  const { correr, els } = pagina();
+  correr('ORDEN = "primera"; pintarResultados("hiksemi")');
+  assert.match(els["#res"].innerHTML, /En «Primera Línea» no hay nada.*ningún aviso es de una marca de primera línea/);
+  assert.match(els["#res"].innerHTML, /data-orden="recomendacion"[^>]*>Recomendación \(1\)/);
+});
+
+test("al tocar un modo o un orden se guarda, se marca y se vuelve a pintar", () => {
+  const { correr, els, botones, almacen } = pagina();
+  const b1 = elemento({ dataset: { orden: "super" } }), b2 = elemento({ dataset: { orden2: "novedades" } });
+  botones.push(b1, b2);
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('elegirOrden("super", null)');
+  assert.strictEqual(correr("ORDEN"), "super");
+  assert.strictEqual(almacen.orden, "super");
+  assert.strictEqual(b1.atributos["aria-selected"], "true");
+  assert.strictEqual(b2.atributos["aria-selected"], "false");
+  correr('elegirOrden(null, "novedades")');
+  assert.strictEqual(correr("ORDEN2"), "novedades");
+  assert.strictEqual(almacen.orden2, "novedades");
+  assert.strictEqual(b2.atributos["aria-selected"], "true");
+  assert.match(els["#estado"].textContent, /ningún aviso entra en Súper Oferta/, "se volvio a pintar");
+  correr('elegirOrden("marca", null)');
+  assert.strictEqual(correr("ORDEN"), "recomendacion", "un valor viejo o inventado cae en Recomendacion");
 });
