@@ -1,0 +1,27 @@
+# Tablero del buscador: Primera Linea premium, Super Oferta real y las funciones de las mejores apps
+
+Se actualiza en cada PR. Origen: aclaracion del dueño del 20/10/2026 (spec [014](../specs/014-ofertas-y-premium/spec.md)) y relevamiento [buscadores-referencia.md](buscadores-referencia.md). Estados: **pendiente / en curso / hecho / descartado** (con el motivo). «Sesion»: `loving-dubinsky-5ec8db` es la sesion que lo hace. «Modelo»: quien lo hizo o lo reviso (el detalle esta en [delegacion-modelos.md](delegacion-modelos.md)).
+
+| Funcion | App de referencia | Que replicamos | Estado | Sesion | Modelo que la hizo o la reviso |
+| --- | --- | --- | --- | --- | --- |
+| Primera Linea por especificaciones (no por marca) | Geizhals (filtros por propiedades), Amazon (refinamientos por caracteristicas) | Puntaje premium por categoria sacado del titulo: pantalla, procesador, generacion, bateria, materiales; la marca queda como sello | **en curso** (PR 1: `js/premium.js`, modo, filtro «Solo premium», orden Premium) | loving-dubinsky-5ec8db | Claude (hizo); revision: pendiente |
+| Ganadores en pruebas reales | Wirecutter / RTINGS (pruebas propias) como idea; no esta en el relevamiento | Un modelo de `datos/ganadores.json` suma puntos y muestra «ganador en pruebas: fuente» | **en curso**: enlace listo (`Premium.ganadorDe`), el archivo lo arma otra sesion y no se espera | loving-dubinsky-5ec8db / otra sesion (datos) | Claude (enlace) |
+| Super Oferta contra el mismo modelo en otras tiendas (idea #1) | PriceSpy (≥3 tiendas, % bajo lo esperado) | «X% bajo la mediana de las otras N tiendas» para modelos en ≥3 tiendas | pendiente (PR 2) | loving-dubinsky-5ec8db | — |
+| Cruce por generacion: gama alta del año pasado al precio de una media de hoy | Idea propia del dueño | Gama alta anterior (≥3 señales) que cuesta ≤ la mediana de la gama media actual | pendiente (PR 2) | loving-dubinsky-5ec8db | — |
+| Minimos de gama media en un solo lugar | — | `Categorias.MIN` (smartphone 6-8 GB y 128-256 GB) con test que los fija | pendiente (PR 2) | loving-dubinsky-5ec8db | — |
+| Orden por defecto «Mejor oferta entre lo mejor» | PriceSpy Best Match, Amazon Featured, Mercado Libre relevancia, Geizhals | Primero lo mas premium y nuevo; dentro, la mayor baja contra el mismo modelo. Precio ↓ queda elegible | pendiente (PR 3) | loving-dubinsky-5ec8db | — |
+| Nada resta: «Incluir lo que no llega al minimo» | Amazon / Mercado Libre (los filtros se pueden quitar) | Control visible en Recomendacion; Super Oferta y Primera Linea son subconjuntos explicitos | pendiente (PR 3) | loving-dubinsky-5ec8db | — |
+| «Mayor baja» con ventana 24 h / 7 d / 31 d (idea #2) | Keepa (`sortType`, `dateRange`) | Orden por % de baja contra el promedio de la ventana, solo con lo que `serie.py` afirma | pendiente (PR 4) | loving-dubinsky-5ec8db | — |
+| «Otra tienda lo tiene mas barato» (idea #12) | PriceSpy, Geizhals | Aviso en la fila cuando el mismo modelo esta mas barato en una tienda que se lee directo | pendiente (PR 4) | loving-dubinsky-5ec8db | — |
+| Desempate por cuantas tiendas tienen el modelo (idea #11) | PriceSpy | A igual puntaje, antes el modelo que se puede comparar | pendiente (PR 4) | loving-dubinsky-5ec8db | — |
+| Novedades por generacion (idea #5) | Amazon Newest Arrivals, Geizhals | Ya existe `Modos.novedadDe` (spec 013); se mide cuantos avisos tienen generacion y se documenta | pendiente (PR 4) | loving-dubinsky-5ec8db | — |
+| Filtro por sellos: envio gratis, cuotas, tienda oficial (idea #13) | Amazon, Mercado Libre | Chips en el panel de filtros; avisa que solo ComparaYa informa envio y cuotas | pendiente (PR 4) | loving-dubinsky-5ec8db | — |
+| Filtros de especificaciones mas usados primero (idea #9) | Geizhals | — | pendiente: esfuerzo L, queda para una tanda propia | — | — |
+| Precio por tienda dentro de un producto | Geizhals, PriceSpy | Ya existe «tambien en» (`agruparPorModelo`) | hecho (spec 008) | — | — |
+| GTIN / MPN (idea #8) | Google | — | descartado en esta tanda: fuera de alcance, necesita cambios en `indexar.py` | — | — |
+| Popularidad con clics (idea #6) y precio con envio (idea #10) | PriceSpy, Amazon | — | descartado: no hay señal de uso suficiente ni costo de envio publicado (ver relevamiento) | — | — |
+
+## Hallazgos que cambian el plan
+
+- Modelos presentes en ≥3 tiendas (sin ComparaYa ni internacionales ni usados), 20/10/2026: **424**, pero casi todos son componentes (327); hay 35 monitores, 4 notebooks y **ningun celular**. La señal «contra el mismo modelo» sirve para componentes y monitores; para celulares y notebooks hay que apoyarse en la baja propia, la rebaja publicada y el cruce por generacion (PR 2 lo mide con mas detalle).
+- Ninguna de las mejores apps (PriceSpy, Amazon, Mercado Libre, Geizhals) usa «precio de mayor a menor» como orden por defecto: todas ofrecen precio en ambos sentidos y ordenan sus ofertas por % de baja (Keepa) o por diferencia de tendencia (PriceSpy). Se aplica en el PR 3.

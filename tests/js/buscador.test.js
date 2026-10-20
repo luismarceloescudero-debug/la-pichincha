@@ -124,16 +124,25 @@ test("Super Oferta no calcula ofertas si el modo no las pide (el calculo caro es
   assert.equal(calculos, 1);
 });
 
-test("Primera Linea: solo las marcas de datos.json -> marcas.primera, de mayor a menor", () => {
-  const ctx = Modos.preparar(IDX, nivel);
+// el indice real tiene Ryzen de la serie 9000: sin eso, el Ryzen 7 7735HS de la LOQ pareceria la ultima generacion
+const IDX_REAL = { ...IDX, productos: [...PRODUCTOS, f("Notebook Asus Ryzen 7 9955HX 16GB 512GB", 1)] };
+
+test("Primera Linea: lo premium por especificaciones y tecnologia, sin mirar la marca (spec 014)", () => {
+  const ctx = Modos.preparar(IDX_REAL, nivel);
   const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "precio", ctx);
-  assert.deepEqual(nombres(r), ["Notebook Asus Zenbook", "Celular Samsung Galaxy", "Celular Samsung Galaxy", "Notebook Lenovo LOQ", "Celular Samsung Galaxy"]);
+  // Samsung y Lenovo estan en marcas.primera y no entran por eso: la A57 y la LOQ no tienen tecnologia de punta
+  assert.deepEqual(nombres(r), ["Notebook Asus Zenbook", "Celular Samsung Galaxy", "Notebook Acer Nitro"]);
+  assert.match(r[1][0], /S26/);
   assert.ok(descendente(r));
+  // una marca sin reconocer con tecnologia de punta entra
+  const nueva = f("Notebook Generica Core Ultra 9 275HX 64GB 2TB RTX 5090 OLED 240Hz", 6000000);
+  assert.ok(Modos.filtrar([nueva], "primera", ctx, med).length === 1);
+  assert.equal(nivel(nueva[0]), 0);
 });
 
 test("orden Novedades: la generacion mas nueva primero; sin dato de generacion ni año, al final", () => {
   const ctx = Modos.preparar(IDX, nivel);
-  const celus = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "novedades", ctx).filter(x => /Galaxy S2\d/.test(x[0]));
+  const celus = Modos.ordenar(PRODUCTOS.filter(x => /Galaxy S2\d/.test(x[0])), "novedades", ctx);
   assert.ok(celus[0][0].includes("S26") && celus[1][0].includes("S25"), "S26 antes que S25");
   assert.equal(Modos.novedadDe("Celular Samsung Galaxy S26", ctx.ref), 0);
   assert.equal(Modos.novedadDe("Celular Samsung Galaxy S25", ctx.ref), -1);
@@ -150,13 +159,13 @@ test("orden Novedades usa el año del titulo cuando no hay generacion", () => {
 });
 
 test("orden Premium: mas señales de gama alta primero; a igual señal, el mas caro", () => {
-  const ctx = Modos.preparar(IDX, nivel);
-  const r = Modos.ordenar(Modos.filtrar(PRODUCTOS, "primera", ctx, med), "premium", ctx);
+  const ctx = Modos.preparar(IDX_REAL, nivel);
+  const r = Modos.ordenar(PRODUCTOS.filter(x => !/Acer/.test(x[0])), "premium", ctx);
   assert.equal(r[0][0].startsWith("Notebook Asus Zenbook"), true);
-  assert.ok(Modos.premiumDe("Notebook Asus Zenbook Core Ultra 9 32GB 1TB OLED RTX 5070", ctx.gama) >= 3);
-  assert.ok(Modos.premiumDe("Notebook Lenovo LOQ Ryzen 7 7735HS 16GB 512GB SSD RTX 4050", ctx.gama) < 3);
-  assert.equal(Modos.premiumDe("Auriculares Logitech G733", ctx.gama), 0);
-  assert.equal(Modos.premiumDe("Monitor LG 27 OLED 240Hz", ctx.gama), 3, "un monitor de gama alta cuenta como 3 señales");
+  assert.ok(Modos.premiumDe("Notebook Asus Zenbook Core Ultra 9 32GB 1TB OLED RTX 5070", ctx) >= 4);
+  assert.ok(Modos.premiumDe("Notebook Lenovo LOQ Ryzen 7 7735HS 16GB 512GB SSD RTX 4050", ctx) < 4);
+  assert.equal(Modos.premiumDe("Auriculares Logitech G733", ctx), 0);
+  assert.equal(Modos.premiumDe("Monitor LG 27 OLED 240Hz", ctx), 5, "OLED (3) y 240 Hz (2)");
 });
 
 test("un modo vacio explica por que y nombra los modos que si tienen resultados", () => {
@@ -167,7 +176,7 @@ test("un modo vacio explica por que y nombra los modos que si tienen resultados"
   const v = Modos.textoVacio("super", cuentas);
   assert.match(v.texto, /Súper Oferta.*no hay nada.*oferta real de gama media/);
   assert.ok(v.otros.length > 0 && v.otros.every(m => cuentas[m.id] > 0));
-  assert.match(Modos.textoVacio("primera", cuentas).razon, /primera línea/);
+  assert.match(Modos.textoVacio("primera", cuentas).razon, /puntaje premium/);
   assert.match(Modos.textoVacio("recomendacion", cuentas).razon, /piso de gama/);
   assert.match(Modos.textoVacio("inventado", cuentas).texto, /Recomendación/);
 });

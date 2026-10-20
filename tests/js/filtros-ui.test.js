@@ -188,14 +188,14 @@ test("un modo sin resultados no deja la pantalla vacia: lo explica y ofrece el m
   correr('ORDEN = "super"; pintarResultados("ssd 1tb")');
   assert.match(els["#estado"].textContent, /ningún aviso entra en Súper Oferta \(hay \d+ en esta búsqueda\)/);
   assert.match(els["#res"].innerHTML, /En «Súper Oferta» no hay nada para esta búsqueda/);
-  assert.match(els["#res"].innerHTML, /data-orden="primera"[^>]*>Primera Línea \(\d+\)/);
+  assert.match(els["#res"].innerHTML, /data-orden="recomendacion"[^>]*>Recomendación \(\d+\)/);
   assert.ok(els["#res"].innerHTML.length > 100);
 });
 
 test("Primera Linea sin marcas de primera linea en la busqueda ofrece Recomendacion, que si tiene", () => {
   const { correr, els } = pagina();
   correr('ORDEN = "primera"; pintarResultados("hiksemi")');
-  assert.match(els["#res"].innerHTML, /En «Primera Línea» no hay nada.*ningún aviso es de una marca de primera línea/);
+  assert.match(els["#res"].innerHTML, /En «Primera Línea» no hay nada.*ningún aviso llega al puntaje premium/);
   assert.match(els["#res"].innerHTML, /data-orden="recomendacion"[^>]*>Recomendación \(1\)/);
 });
 

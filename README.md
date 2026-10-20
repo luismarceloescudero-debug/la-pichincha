@@ -329,19 +329,25 @@ Tres modos (spec 013, `js/modos.js`), cada uno ordenado de mayor a menor precio:
 - **Super Oferta**: las ofertas reales de la pestaña Ofertas (`js/ofertas.js`)
   de gama media; la generacion anterior cuenta cuando la actual mejoro poco. Si
   no hay ninguna lo dice y ofrece otro modo.
-- **Primera Linea**: solo las marcas de `marcas.primera` de `datos.json`.
+- **Primera Linea**: lo **premium por especificaciones y tecnologia**, sin mirar
+  la marca (spec 014, `js/premium.js`): pantalla, procesador, generacion,
+  bateria, materiales; la memoria sola no alcanza y lo que no llega al minimo de
+  su gama no entra. Selectiva (≤25% de cada categoria). Perifericos y «otro» no
+  tienen puntaje. Un modelo de `datos/ganadores.json` (pruebas reales), si existe,
+  suma y muestra «ganador en pruebas».
 
 Dentro de cada modo se elige el orden: **Precio ↓** (por defecto), **Novedades**
 (generacion o año mas nuevo primero) o **Premium** (mas señales de gama alta
 primero). Lo internacional va siempre al final. Lo guardado por la version
 anterior («precio», «marca») arranca en Recomendacion.
 
-El nivel de marca sale de la lista curada en `datos.json`, no de las tiendas:
+El nivel de marca (ya solo informativo: el sello «marca reconocida» y el desempate de
+Recomendacion) sale de la lista curada en `datos.json`, no de las tiendas:
 `primera` son fabricantes con red de garantia y trayectoria, `conocida` son
 marcas reales de segunda linea. Lo que no esta en ninguna lista no se castiga,
 solo no se destaca. Cubre el 67% del indice.
 
-Cada resultado puede traer sellos: marca de primera linea, marca conocida, bajo
+Cada resultado puede traer sellos: premium (con las señales que sumo), marca reconocida, bajo
 N%, N% OFF, y "muy por debajo del resto" cuando el precio no cierra. Arriba va
 la mediana del resultado, para que se vea contra que se compara.
 
