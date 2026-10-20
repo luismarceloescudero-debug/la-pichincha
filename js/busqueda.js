@@ -226,7 +226,10 @@ function pintarResultados(q) {
     if (prem.premium) marcas.push(`<span class="sello primera" title="${esc(prem.senales.join(" · "))}">premium</span>`);
     if (prem.ganador) marcas.push(`<span class="sello conocida">${esc(prem.ganador.texto)}</span>`);
     if (niv >= 1) marcas.push('<span class="sello conocida">marca reconocida</span>');
-    if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
+    // En Super Oferta cada fila dice POR QUE es una oferta (spec 014); en los otros modos, la baja o rebaja de siempre.
+    const por = ORDEN === "super" ? cm.ofertas().get(f[2]) : null;
+    if (por) for (const r of por.razones) marcas.push(`<span class="sello baja">${esc(r.texto)}</span>`);
+    else if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
     else if (off) marcas.push(`<span class="sello off2">${off}% OFF</span>`);
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
     for (const [clase, texto] of sellosDe(f[8])) marcas.push(`<span class="sello ${clase}">${texto}</span>`);

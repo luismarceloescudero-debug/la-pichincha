@@ -1,8 +1,9 @@
 /* Los tres modos de la busqueda (spec 013): Recomendacion, Super Oferta y Primera Linea, y el orden de adentro
    (Precio, Novedades, Premium). Logica pura, sin DOM: la usan la pagina (js/busqueda.js) y las paginas por busqueda.
    - Recomendacion: precio-calidad. Pasa el piso de gama, marca reconocida y no esta muy por debajo del resto.
-   - Super Oferta: una oferta real de js/ofertas.js (baja propia o rebaja publicada, ya con piso de gama, segundo
-     chequeo y tachado fijo) de gama media. La generacion anterior cuenta cuando la actual mejoro poco (vigenciaDe).
+   - Super Oferta: una oferta REAL de js/ofertas.js que pasa el minimo de su gama (spec 014): precio contra el mismo
+     modelo en otras tiendas (la señal principal), baja propia, rebaja publicada (con segundo chequeo y tachado fijo) o
+     gama alta del año pasado al precio de una media de hoy. Cada fila trae SUS razones (`ctx.ofertas().get(url).razones`).
    - Primera Linea: el segmento premium por ESPECIFICACIONES Y TECNOLOGIA (js/premium.js), no por marca (spec 014).
    Lo internacional va siempre al final. Ningun modo mira comisiones (principio II). */
 (function (raiz) {
@@ -15,7 +16,7 @@
 
   const MODOS = [
     { id: "recomendacion", eti: "Recomendación", ayuda: "precio-calidad: marca reconocida y dentro de lo normal" },
-    { id: "super", eti: "Súper Oferta", ayuda: "ofertas reales de gama media" },
+    { id: "super", eti: "Súper Oferta", ayuda: "ofertas reales: bajo el mismo modelo de otras tiendas, bajas propias, rebajas verificadas o gama alta del año pasado al precio de una media" },
     { id: "primera", eti: "Primera Línea", ayuda: "lo más premium por especificaciones y tecnología (pantalla, procesador, batería, materiales), no por marca" },
   ];
   const SECUNDARIOS = [
@@ -46,7 +47,15 @@
       if (ofertas) return ofertas;
       const of = (typeof calculadas === "function" ? calculadas() : calculadas) || O().calcularOfertas(idx);
       ofertas = new Map();
-      for (const f of [...of.propias, ...of.publicadas]) ofertas.set(f[2], of.categorias.get(f));
+      const pone = (f, razon) => {
+        const e = ofertas.get(f[2]) || ofertas.set(f[2], { g: (of.gama || of.categorias).get(f), razones: [] }).get(f[2]);
+        e.razones.push(razon);
+      };
+      const O_ = O(), pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
+      for (const f of of.propias) pone(f, { tipo: "baja", texto: `bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra el relevamiento anterior` });
+      for (const f of of.publicadas) pone(f, { tipo: "rebaja", texto: `${Math.round((1 - f[1] / f[5]) * 100)}% bajo el precio de lista de la tienda` });
+      for (const [f, c] of of.contraModelo || []) pone(f, { tipo: "modelo", texto: O_.textoContraModelo(c, pesos) });
+      for (const [f, c] of of.cruceGen || []) pone(f, { tipo: "generacion", texto: O_.textoCruceGen(c, pesos) });
       return ofertas;
     };
     return { ref, gama, premium, ofertas: deOfertas, nivelMarca };
@@ -67,7 +76,7 @@
   /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. */
   function filtrar(filas, modo, ctx, med) {
     const niv = ctx.nivelMarca;
-    if (modo === "super") { const of = ctx.ofertas(); return filas.filter(f => { const g = of.get(f[2]); return g && g.pasa && g.nivel === "media"; }); }
+    if (modo === "super") { const of = ctx.ofertas(); return filas.filter(f => { const e = of.get(f[2]); return e && e.g.pasa; }); }
     if (modo === "primera") return filas.filter(f => ctx.premium(f[0]).premium);
     return filas.filter(f => ctx.gama(f[0]).pasa && niv(f[0]) >= 1 && !B.pisoDeGama(f[1], niv(f[0]), med));
   }
@@ -87,7 +96,7 @@
   function textoVacio(modo, cuentas) {
     const m = MODOS.find(x => x.id === modo) || MODOS[0];
     const otros = MODOS.filter(x => x.id !== m.id && cuentas[x.id] > 0);
-    const razon = modo === "super" ? "ninguna es una oferta real de gama media hoy"
+    const razon = modo === "super" ? "ninguna es una oferta real hoy (no hay una baja contra el mismo modelo en otras tiendas, ni baja propia, rebaja publicada o gama alta del año pasado al precio de una media de hoy). No se inventan ofertas"
       : modo === "primera" ? "ningún aviso llega al puntaje premium (pantalla, procesador, batería, materiales o generación); en periféricos y otros rubros no hay puntaje"
       : "ningún aviso pasa el piso de gama con marca reconocida";
     return { razon, otros, texto: `En «${m.eti}» no hay nada para esta búsqueda: ${razon}.` };
