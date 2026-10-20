@@ -38,7 +38,16 @@ function vistaCosto() {
         <div class="acciones"><button type="button" class="acc" id="k-compartir">${icono("compartir")} Copiar el enlace de esta cuenta</button></div>
         <p class="sub chico" id="k-fuentes"></p>
       </section>
-    </div></div>`;
+    </div>
+    <section class="panel k-importando" aria-labelledby="k-imp-titulo">
+      <h3 id="k-imp-titulo">Importando: dónde comprar afuera</h3>
+      <p class="sub">Solo son enlaces: no tenemos los precios de estas tiendas. Comparalos por tu cuenta y calculá el costo final acá.</p>
+      <ul class="k-fuentes-lista">
+        ${Importar.FUENTES.map(f => `<li><a href="${esc(Importar.enlaceFuente(f))}" target="_blank" rel="${f.afiliado ? "sponsored noopener" : "noopener"}">${esc(f.nombre)}</a>
+          ${f.afiliado ? '<small class="chico">(enlace de afiliado)</small>' : ""}
+          <span class="sub chico">${esc(f.texto)}</span></li>`).join("")}
+      </ul>
+    </section></div>`;
 }
 
 const leerFormulario = form => Calculadora.estadoDeFormulario(nombre => (form.elements[nombre] || {}).value);
