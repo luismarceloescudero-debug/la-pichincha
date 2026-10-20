@@ -29,3 +29,20 @@ Una tanda de cuatro tareas donde cada una tuvo un **modelo asignado**. Reglas: l
 - **`opencode_fire`/`opencode_wait` devuelven el razonamiento completo** (hasta 220 mil caracteres): se guarda en un archivo y se lee con `python` en vez de abrirlo en el contexto.
 - **OmniRoute rechaza (403) las llamadas de `urllib` de Python** con el user-agent por defecto aunque `curl` pasa: mandar `User-Agent: curl/8`.
 - **El triaje de seguridad con modelos chicos no es fiable**: se equivocaron en la mitad de las alertas, siempre del lado de «arreglable». Lo que decide es medir el sitio.
+
+---
+
+# Relevamiento de buscadores (20/10/2026)
+
+Una tanda para `docs/buscadores-referencia.md`. Los hechos sobre sitios ajenos los leyo y contrasto Claude contra la fuente (WebFetch y `robots.txt`) antes de pasarlos a los modelos en `privado/hechos.md`; los modelos redactaron y revisaron.
+
+| Tarea | Modelo que la hizo | Tiempo | Resultado | Hallazgos reales / falsos |
+| --- | --- | ---: | --- | --- |
+| Borrador de tabla comparativa a partir de los hechos | OmniRoute `rapido` → qwen3.8-27b | segundos | **Descartado**: puso «sin confirmar» en celdas que los hechos si cubrian (PriceSpy filtros/ordenes, Geizhals orden), perdio la columna del nombre del sitio y desordeno las columnas | 0 reales / tabla rehecha a mano |
+| Borrador de 10 ideas con datos propios | OpenCode `claude-sonnet-5-5` | — | **Fallo**: `402 Insufficient account funds` (el proveedor `opencode` sin credito) | — |
+| Mismo borrador por OmniRoute `claude/claude-sonnet-5-5` | OmniRoute | — | **Fallo**: `429`, todas las cuentas de Claude sin cuota (reinicio en 5 min) | — |
+| Borrador de 10 ideas (segundo intento) | OmniRoute `revision` → gpt-oss-120b | ~1 min | 10 ideas con formato correcto, pero **4 con datos falsos**: tomo `s` por «stock» (es cuotas sin interes), invento un envio `free/paid` en la columna `via` (es el agregador), propuso «Trending» por «menciones en el historial» (no existe esa señal) y un backend de mails para un sitio estatico; propuso usar los sellos `m/h/x` como novedad | 3 ideas aprovechables (mayor baja por ventana, alertas, grafico) / 4 con hechos falsos |
+| 6 ideas sobre orden y filtros, leyendo `js/buscador.js`, `js/ofertas.js`, `serie.py` | OpenCode `glm-5.3-flash-free` | ~4,5 min (cerro) | **Util**: cito lineas del repo y marco «sin confirmar» lo que no estaba; escribio el archivo dos veces (33 KB) | **3 reales** que se sumaron (desempate por tiendas, «otra tienda lo tiene mas barato», filtro por sellos) y el dato de que el sello `x` sale desde el 21/10 (14 dias); 0 falsos verificados |
+| Revision del documento final contra los hechos | OmniRoute `revision` → Gemini 2.5 Flash | ~30 s | 8 hallazgos | **1 real** (la agrupacion de Mercado Libre «publicaciones por vendedor» no estaba en los hechos: corregido a «sin confirmar») / **7 falsos** (listo como error celdas que decian «sin confirmar», que es lo correcto) |
+
+**Lo que se aprendio**: con el credito de OpenCode y la cuota de Claude agotados, el unico camino que anduvo fue el modelo gratis de OpenCode (mas lento, pero mejor anclado al repo que el combo de OmniRoute) y los combos baratos de OmniRoute, que formatean bien y se equivocan en los datos propios del repo. Un modelo que no lee el repo inventa el significado de las columnas del indice; el que lo lee, no.
