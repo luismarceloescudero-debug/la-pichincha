@@ -77,7 +77,23 @@ Los 6 cruces por generacion de hoy son notebooks y PCs con Ryzen de la serie 800
 4. Un modo vacio explica por que y ofrece otros modos (spec 013, decision 6).
 
 Medido en el navegador con el indice del 20/10: «celular samsung» da 95 en Recomendacion y 199 con todo incluido (104 que no llegaban al minimo o no tenian marca reconocida); el primer resultado en «Mejor oferta» es un Galaxy S26 FE (premium y de la ultima generacion).
-### 4. Funciones tomadas de las mejores apps (PR 4) — pendiente
+### 4. Funciones tomadas de las mejores apps (PR 4)
+
+Estado de cada una en `docs/plan-buscador.md`.
+
+1. **Mayor baja** (Keepa, idea #2): orden elegible «Mayor baja» por el % de baja contra el **relevamiento anterior** (columna `antes`, ~24 h). **Lo que NO se hizo**: las ventanas de 7 y 31 dias; el indice publicado no trae la serie (la reconstruye `serie.py` desde la rama `historial` y hoy solo emite los sellos `m`/`h`/`x`), asi que no se afirma nada que el indice no diga. Para la ventana hace falta que `indexar.py` publique la serie por aviso (fuera de alcance de esta tanda). Medido: 65 avisos con ≥5% de baja y 20 con ≥10% contra el relevamiento anterior (los 273 de «7 dias» del relevamiento salen de la serie, no del indice).
+2. **Otra tienda lo tiene mas barato** (PriceSpy y Geizhals, idea #12): sello en la fila, con la tienda y el precio, cuando `masBarato` (el mismo modelo, codigo exacto, en una tienda que se lee directo: sin ComparaYa ni internacionales, en equipos misma configuracion) dice que otra lo vende a menos del 2% de diferencia hacia abajo.
+3. **Desempate por tiendas del mismo modelo** (PriceSpy, idea #11): a igual nivel, novedad, baja y puntaje, «Mejor oferta» pone antes el modelo que se puede comparar en mas tiendas (`ctx.tiendasDe`).
+4. **Novedades por generacion** (Amazon Newest Arrivals, Geizhals, idea #5): ya existia (`novedadDe`, spec 013). Medido hoy, avisos con generacion o año detectado por categoria: notebook 46%, PC 79%, smartphone 15%, componente 11%, monitor 0,1% (el monitor no tiene generacion en el titulo), periferico 0,3%. Sin dato queda al final, nunca se inventa.
+5. **Filtro por sellos** (Amazon y Mercado Libre, idea #13): chips «Envío gratis», «Cuotas sin interés» y «Tienda oficial» en el panel de filtros (todos los elegidos a la vez). Cobertura medida: envio gratis 1.405 avisos, cuotas 589, oficial 583 de 24.954; **solo ComparaYa y sus comercios informan envio y cuotas**, asi que el panel lo dice (un aviso sin sello no quiere decir que no lo tenga) y el filtro acota lo que se ve, no la mediana.
+6. **Filtros de especificaciones** (Geizhals, idea #9): esfuerzo L, queda para una tanda propia. **GTIN/MPN** (Google, #8): fuera de alcance, necesita `indexar.py`.
+7. **Ganadores en pruebas**: `datos/ganadores.json` (otra sesion) ya existe con 13 filas confirmadas de PassMark (procesadores, placas de video y SSD). Este PR no lo conecta a la pagina; ver el PR siguiente.
+
+## Criterios de aceptacion (PR 4)
+
+- **FR-401**: «Mayor baja» ordena por el mayor % de baja contra el relevamiento anterior y lo dice en su ayuda; no promete ventanas que el indice no tiene.
+- **FR-402**: la fila dice «otra tienda lo tiene más barato» solo con el mismo modelo en una tienda directa.
+- **FR-403**: los sellos filtran con todos los elegidos y el panel avisa que solo ComparaYa los informa.
 
 ## Medicion (indice publicado el 20/10/2026, 24.954 avisos; `node specs/014-ofertas-y-premium/medir.js indice.json`)
 

@@ -312,20 +312,22 @@
      Acotan lo que se ve, nada mas: la mediana, el orden y el analisis se calculan con todos los avisos.
      Solo usan lo que el indice ya trae (tienda, precio y nombre): ninguna fuente
      publica cuotas sin interes ni envio gratis por aviso, y un filtro de eso mentiria (specs/008-filtros). */
-  const filtrosVacios = () => ({ tiendas: [], min: null, max: null, primera: false, excluir: "" });
+  const filtrosVacios = () => ({ tiendas: [], min: null, max: null, primera: false, excluir: "", sellos: [] });
   const palabrasExcluidas = texto => normal(String(texto || "")).split(/[\s,;]+/).filter(Boolean);
   const hayFiltros = f => f.tiendas.length > 0 || Number.isFinite(f.min) || Number.isFinite(f.max)
-    || f.primera || palabrasExcluidas(f.excluir).length > 0;
+    || f.primera || (f.sellos || []).length > 0 || palabrasExcluidas(f.excluir).length > 0;
 
   /* esPremium(nombre) dice si el titulo llega al puntaje premium (js/premium.js): el filtro `primera` ya no mira la marca (spec 014). */
   function predicadoDeFiltros(f, esPremium) {
     // Las palabras buscan como la busqueda: una medida es palabra entera y "ipad" no esta en "disipador".
-    const excluidas = palabrasExcluidas(f.excluir).map(filtroDe);
+    const excluidas = palabrasExcluidas(f.excluir).map(filtroDe), sellos = f.sellos || [];
     return fila => {
       if (f.tiendas.length && !f.tiendas.includes(fila[3])) return false;
       if (Number.isFinite(f.min) && fila[1] < f.min) return false;
       if (Number.isFinite(f.max) && fila[1] > f.max) return false;
       if (f.primera && !esPremium(fila[0])) return false;
+      // Sellos (envio gratis e, cuotas s, tienda oficial o): todos los elegidos. Solo ComparaYa y sus comercios los informan.
+      if (sellos.length && !(typeof fila[8] === "string" && sellos.every(l => fila[8].includes(l)))) return false;
       if (excluidas.length) {
         const n = normalBusq(fila[0]);
         if (excluidas.some(coincide => coincide(n))) return false;

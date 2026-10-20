@@ -345,7 +345,7 @@ test("categoriaDe es la primera palabra en singular", () => {
 
 test("el orden por defecto es «Mejor oferta» y Precio, Novedades y Premium siguen elegibles", () => {
   assert.equal(Modos.SECUNDARIO_BASE, "mejor");
-  assert.deepEqual(Modos.SECUNDARIOS.map(s => s.id), ["mejor", "precio", "novedades", "premium"]);
+  assert.deepEqual(Modos.SECUNDARIOS.map(s => s.id), ["mejor", "baja", "precio", "novedades", "premium"]);
   assert.equal(Modos.migrarSecundario(null), "mejor");
   assert.equal(Modos.migrarSecundario("precio"), "precio");
 });
@@ -386,4 +386,21 @@ test("notaDe: cada modo dice que deja afuera y cuanto", () => {
   assert.match(Modos.notaDe("super", 100, 7), /7 de 100/);
   assert.match(Modos.notaDe("primera", 100, 12), /premium.*12 de 100/);
   assert.equal(Modos.notaDe("recomendacion", 50, 50), "", "si no deja nada afuera no hay nota");
+});
+
+/* --- Spec 014 PR 4: Mayor baja y desempate por tiendas --- */
+
+test("orden Mayor baja: el mayor % de baja contra el relevamiento anterior primero; sin baja, al final por precio", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const a = f("Celular Moto G15 6GB/128GB", 300000, { antes: 400000 }), b = f("Celular Moto G15 6GB/128GB azul", 500000, { antes: 530000 }), c = f("Celular Moto G15 6GB/128GB rojo", 700000);
+  assert.deepEqual(Modos.ordenar([c, b, a], "baja", ctx).map(x => x[1]), [300000, 500000, 700000]);
+  assert.ok(Modos.SECUNDARIOS.some(s => s.id === "baja" && /relevamiento anterior/.test(s.ayuda)));
+  assert.equal(Modos.migrarSecundario("baja"), "baja");
+});
+
+test("Mejor oferta: a igual nivel, novedad y baja, desempata el modelo que esta en mas tiendas", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const a = f("Memoria Kingston Fury DDR5 16GB 6000MHz", 100000), b = f("Memoria Corsair Vengeance DDR5 16GB 6000MHz", 100000);
+  ctx.tiendasDe = x => (x === b ? 4 : 1);
+  assert.equal(Modos.ordenar([a, b], "mejor", ctx)[0], b);
 });
