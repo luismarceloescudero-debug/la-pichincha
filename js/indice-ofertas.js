@@ -97,7 +97,7 @@ function bloquePuesto(o) {
   const cifra = e.ok ? (e.minPesos === e.maxPesos ? pesos(e.minPesos) : `${pesos(e.minPesos)} a ${pesos(e.maxPesos)}`) : "sin estimar";
   return `<div class="o-puesto"><span><b>Puesto en casa: ${cifra}</b> <small>(estimación)</small></span>
       <small>${esc(p.detalle)}</small>${p.comparacion ? `<span>${esc(p.comparacion)}</span>` : ""}
-      <small><a href="#costo">Calcular con tus datos</a></small></div>`;
+      <small><a href="${esc(e.ok ? Importar.hrefCalculadora(e.fobUsd, o.cat, location.pathname) : "#costo")}">${e.ok ? "Calcular con este precio" : "Calcular con tus datos"}</a></small></div>`;
 }
 
 function cardOferta(o, i, desde) {
