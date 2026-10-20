@@ -152,11 +152,12 @@ test("la vista Buscar trae los tres modos y los tres ordenes, y ya no 'Más bara
   const { correr } = pagina();
   const html = correr("vistaBuscar()");
   for (const m of ["recomendacion", "super", "primera"]) assert.ok(html.includes(`data-orden="${m}"`), m);
-  for (const o of ["precio", "novedades", "premium"]) assert.ok(html.includes(`data-orden2="${o}"`), o);
+  for (const o of ["mejor", "precio", "novedades", "premium"]) assert.ok(html.includes(`data-orden2="${o}"`), o);
   assert.match(html, /data-orden="recomendacion" aria-selected="true"[^>]*>Recomendación</);
   assert.match(html, /data-orden="super"[^>]*>Súper Oferta</);
   assert.match(html, /data-orden="primera"[^>]*>Primera Línea</);
-  assert.match(html, /data-orden2="precio" aria-selected="true"[^>]*>Precio ↓</);
+  assert.match(html, /data-orden2="mejor" aria-selected="true"[^>]*>Mejor oferta</);
+  assert.match(html, /data-orden2="precio" aria-selected="false"[^>]*>Precio ↓</);
   assert.match(html, /role="group" aria-label="Ordenar por"/);
   assert.doesNotMatch(html, /Más barato|Mejor marca|Recomendado</);
 });
@@ -165,7 +166,7 @@ test("lo guardado por la version anterior ('precio', 'marca') arranca en Recomen
   for (const viejo of ["precio", "marca", "recomendado"]) {
     const { correr } = pagina({ orden: viejo, orden2: "marca" });
     assert.strictEqual(correr("ORDEN"), "recomendacion", viejo);
-    assert.strictEqual(correr("ORDEN2"), "precio");
+    assert.strictEqual(correr("ORDEN2"), "mejor");
   }
   const { correr } = pagina({ orden: "primera", orden2: "premium" });
   assert.strictEqual(correr("ORDEN"), "primera");
@@ -216,4 +217,31 @@ test("al tocar un modo o un orden se guarda, se marca y se vuelve a pintar", () 
   assert.match(els["#estado"].textContent, /ningún aviso entra en Súper Oferta/, "se volvio a pintar");
   correr('elegirOrden("marca", null)');
   assert.strictEqual(correr("ORDEN"), "recomendacion", "un valor viejo o inventado cae en Recomendacion");
+});
+
+/* --- Spec 014: nada resta --- */
+
+test("«Incluir lo que no llega al minimo» trae lo que Recomendacion esconde, se recuerda y la nota lo dice", () => {
+  const { correr, els, almacen } = pagina();
+  els["#nota-modo"] = elemento(); els["#q"] = elemento({ value: "ssd 1tb" });
+  // una marca que ninguna lista reconoce: Recomendacion la esconde
+  correr('IDX.productos.push(["Disco Solido SSD Zzxqv 1TB SATA", 65000, "https://mx.test/zzxqv", "mx", "", 0, 0, "", "", ""]); delete IDX._n');
+  correr('pintarResultados("ssd 1tb")');
+  const antes = (els["#res"].innerHTML.match(/class="pre"/g) || []).length;
+  assert.match(els["#nota-modo"].textContent, /Recomendación deja afuera \d+ avisos más.*Incluir lo que no llega al mínimo/);
+  correr('cambiarFiltro("incluir")');
+  assert.strictEqual(correr("INCLUIR"), true);
+  assert.strictEqual(almacen.incluirTodo, "1");
+  const despues = (els["#res"].innerHTML.match(/class="pre"/g) || []).length;
+  assert.ok(despues > antes, `${despues} > ${antes}`);
+  assert.match(els["#nota-modo"].textContent, /Recomendación con todo incluido: lo recomendado va primero/);
+  correr('cambiarFiltro("incluir")');
+  assert.strictEqual(correr("INCLUIR"), false);
+});
+
+test("la vista Buscar trae el control «Incluir lo que no llega al minimo» y la nota del modo", () => {
+  const { correr } = pagina();
+  const html = correr("vistaBuscar()");
+  assert.match(html, /data-filtro="incluir" aria-pressed="false"[^>]*>Incluir lo que no llega al mínimo</);
+  assert.match(html, /id="nota-modo"/);
 });

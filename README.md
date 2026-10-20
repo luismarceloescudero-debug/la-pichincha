@@ -321,7 +321,7 @@ El indice no tiene specs, garantias ni reviews: solo nombre, precio, tienda y
 los precios anterior y tachado. Con eso no se puede calcular "calidad/precio"
 de 8500 productos. Lo que si se puede, y es lo que hace:
 
-Tres modos (spec 013, `js/modos.js`), cada uno ordenado de mayor a menor precio:
+Tres modos (specs 013 y 014, `js/modos.js`):
 
 - **Recomendacion** (por defecto): precio-calidad. Pasa el piso de gama de su
   categoria, tiene marca reconocida y no esta por debajo del 35% de la mediana
@@ -340,9 +340,12 @@ Tres modos (spec 013, `js/modos.js`), cada uno ordenado de mayor a menor precio:
   tienen puntaje. Un modelo de `datos/ganadores.json` (pruebas reales), si existe,
   suma y muestra «ganador en pruebas».
 
-Dentro de cada modo se elige el orden: **Precio ↓** (por defecto), **Novedades**
-(generacion o año mas nuevo primero) o **Premium** (mas señales de gama alta
-primero). Lo internacional va siempre al final. Lo guardado por la version
+Dentro de cada modo se elige el orden: **Mejor oferta** (por defecto: primero lo
+mas premium y nuevo, y dentro de eso la mayor baja contra el mismo modelo),
+**Precio ↓**, **Novedades** (generacion o año mas nuevo primero) o **Premium**
+(mayor puntaje primero). Nada resta: el control «Incluir lo que no llega al
+mínimo» trae a Recomendacion lo que el modo deja afuera, y una nota dice siempre
+cuanto deja afuera cada modo. Lo internacional va siempre al final. Lo guardado por la version
 anterior («precio», «marca») arranca en Recomendacion.
 
 El nivel de marca (ya solo informativo: el sello «marca reconocida» y el desempate de

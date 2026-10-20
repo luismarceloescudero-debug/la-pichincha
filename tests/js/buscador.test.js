@@ -81,7 +81,7 @@ const descendente = r => r.map(x => x[1]).every((p, i, a) => !i || a[i - 1] >= p
 test("migrar: lo guardado por la version anterior cae en Recomendacion y lo desconocido tambien", () => {
   for (const viejo of ["recomendado", "precio", "marca", null, "", "otra cosa", undefined]) assert.equal(Modos.migrarModo(viejo), "recomendacion");
   for (const bueno of ["recomendacion", "super", "primera"]) assert.equal(Modos.migrarModo(bueno), bueno);
-  assert.equal(Modos.migrarSecundario("marca"), "precio");
+  assert.equal(Modos.migrarSecundario("marca"), "mejor");
   assert.equal(Modos.migrarSecundario("premium"), "premium");
   assert.deepEqual(Modos.MODOS.map(m => m.id), ["recomendacion", "super", "primera"]);
 });
@@ -339,4 +339,51 @@ test("categoriaDe es la primera palabra en singular", () => {
   assert.equal(B.categoriaDe("Memorias Kingston"), "memoria");
   assert.equal(B.categoriaDe("SSD Kingston"), "ssd");
   assert.equal(B.categoriaDe("Mouse Logitech"), "mouse");
+});
+
+/* --- Spec 014 PR 3: orden «Mejor oferta entre lo mejor» y «nada resta» --- */
+
+test("el orden por defecto es «Mejor oferta» y Precio, Novedades y Premium siguen elegibles", () => {
+  assert.equal(Modos.SECUNDARIO_BASE, "mejor");
+  assert.deepEqual(Modos.SECUNDARIOS.map(s => s.id), ["mejor", "precio", "novedades", "premium"]);
+  assert.equal(Modos.migrarSecundario(null), "mejor");
+  assert.equal(Modos.migrarSecundario("precio"), "precio");
+});
+
+test("Mejor oferta: primero lo premium, dentro de eso lo mas nuevo y despues la mayor baja; lo internacional al final", () => {
+  const ref = [f("Celular Samsung Galaxy S26 Ultra 16GB 1TB 144Hz OLED 200MP", 1), f("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", 1)];
+  const a = f("Celular Samsung Galaxy S26 Ultra 16GB 1TB 144Hz OLED 200MP", 2000000);                 // premium, ultima generacion, sin baja
+  const b = f("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", 1700000, { antes: 2000000 }); // premium, generacion anterior, bajo 15%
+  const c = f("Celular Realme 11 8GB 256GB", 400000, { antes: 600000 });                              // no premium, bajo 33%
+  const d = f("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED 2", 1650000, { antes: 1700000, tienda: "mx" }); // misma generacion que b, baja 3%
+  d[2] = "https://t.test/d"; d[6] = 1700000;
+  const idx = { generado: "2026-10-19T10:00-03:00", productos: [...ref, a, b, c, d], tiendas: {} };
+  const ctx = Modos.preparar(idx, nivel);
+  const r = Modos.ordenar([c, d, b, a], "mejor", ctx);
+  assert.deepEqual(r.map(x => x[1]), [2000000, 1700000, 1650000, 400000], "S26 primero (premium y nuevo); entre S25, la mayor baja; lo no premium al final");
+  const inter = [...c]; inter[8] = "i";
+  assert.equal(Modos.ordenar([inter, a], "mejor", ctx).pop()[8], "i");
+});
+
+test("nada resta: Recomendacion con «incluir todo» trae tambien lo que no llega al minimo o no tiene marca, despues de lo recomendado", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const chico = f("Celular Moto G05 4GB 64GB", 100000), sinMarca = PRODUCTOS.find(x => /Generica Core i5/.test(x[0]));
+  const todas = [...PRODUCTOS, chico];
+  const solo = Modos.filtrar(todas, "recomendacion", ctx, med);
+  assert.ok(!solo.includes(chico) && !solo.includes(sinMarca));
+  const con = Modos.filtrar(todas, "recomendacion", ctx, med, { incluirTodo: true });
+  assert.equal(con.length, todas.length, "no se pierde ningun aviso");
+  const ord = Modos.ordenar(con, "precio", ctx, f2 => solo.includes(f2));
+  assert.deepEqual(ord.slice(0, solo.length).sort(), [...solo].sort(), "lo recomendado primero");
+  assert.ok(ord.indexOf(chico) >= solo.length && ord.indexOf(sinMarca) >= solo.length);
+  // Super Oferta y Primera Linea son subconjuntos explicitos: incluirTodo no los toca
+  assert.deepEqual(Modos.filtrar(todas, "primera", ctx, med, { incluirTodo: true }), Modos.filtrar(todas, "primera", ctx, med));
+});
+
+test("notaDe: cada modo dice que deja afuera y cuanto", () => {
+  assert.match(Modos.notaDe("recomendacion", 100, 60), /40 avisos más/);
+  assert.match(Modos.notaDe("recomendacion", 100, 60), /Incluir/);
+  assert.match(Modos.notaDe("super", 100, 7), /7 de 100/);
+  assert.match(Modos.notaDe("primera", 100, 12), /premium.*12 de 100/);
+  assert.equal(Modos.notaDe("recomendacion", 50, 50), "", "si no deja nada afuera no hay nota");
 });

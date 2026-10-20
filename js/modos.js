@@ -19,12 +19,15 @@
     { id: "super", eti: "Súper Oferta", ayuda: "ofertas reales: bajo el mismo modelo de otras tiendas, bajas propias, rebajas verificadas o gama alta del año pasado al precio de una media" },
     { id: "primera", eti: "Primera Línea", ayuda: "lo más premium por especificaciones y tecnología (pantalla, procesador, batería, materiales), no por marca" },
   ];
+  /* «Mejor oferta» es el orden por defecto (spec 014): ninguna de las mejores apps (PriceSpy Best Match, Amazon Featured,
+     Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas dejan precio en ambos sentidos. */
   const SECUNDARIOS = [
+    { id: "mejor", eti: "Mejor oferta", ayuda: "primero lo más premium y nuevo; dentro de eso, la mayor baja contra el mismo modelo" },
     { id: "precio", eti: "Precio ↓" },
     { id: "novedades", eti: "Novedades" },
     { id: "premium", eti: "Premium" },
   ];
-  const MODO_BASE = "recomendacion", SECUNDARIO_BASE = "precio";
+  const MODO_BASE = "recomendacion", SECUNDARIO_BASE = "mejor";
 
   const esModo = v => MODOS.some(m => m.id === v);
   const esSecundario = v => SECUNDARIOS.some(s => s.id === v);
@@ -52,10 +55,10 @@
         e.razones.push(razon);
       };
       const O_ = O(), pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
-      for (const f of of.propias) pone(f, { tipo: "baja", texto: `bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra el relevamiento anterior` });
-      for (const f of of.publicadas) pone(f, { tipo: "rebaja", texto: `${Math.round((1 - f[1] / f[5]) * 100)}% bajo el precio de lista de la tienda` });
-      for (const [f, c] of of.contraModelo || []) pone(f, { tipo: "modelo", texto: O_.textoContraModelo(c, pesos) });
-      for (const [f, c] of of.cruceGen || []) pone(f, { tipo: "generacion", texto: O_.textoCruceGen(c, pesos) });
+      for (const f of of.propias) pone(f, { tipo: "baja", off: 1 - f[1] / f[6], texto: `bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra el relevamiento anterior` });
+      for (const f of of.publicadas) pone(f, { tipo: "rebaja", off: 1 - f[1] / f[5], texto: `${Math.round((1 - f[1] / f[5]) * 100)}% bajo el precio de lista de la tienda` });
+      for (const [f, c] of of.contraModelo || []) pone(f, { tipo: "modelo", off: c.off, texto: O_.textoContraModelo(c, pesos) });
+      for (const [f, c] of of.cruceGen || []) pone(f, { tipo: "generacion", off: Math.max(0, 1 - f[1] / c.mediana), texto: O_.textoCruceGen(c, pesos) });
       return ofertas;
     };
     return { ref, gama, premium, ofertas: deOfertas, nivelMarca };
@@ -73,18 +76,47 @@
   /* El puntaje premium de un titulo (js/premium.js): lo que se ordena en «Premium» y lo que decide Primera Linea. */
   const premiumDe = (nombre, ctx) => ctx.premium(nombre).puntos;
 
-  /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. */
-  function filtrar(filas, modo, ctx, med) {
+  /* Recomendacion: pasa el piso de gama, marca reconocida y no esta muy por debajo del resto. */
+  const enRecomendacion = (f, ctx, med) => ctx.gama(f[0]).pasa && ctx.nivelMarca(f[0]) >= 1 && !B.pisoDeGama(f[1], ctx.nivelMarca(f[0]), med);
+
+  /* La mayor baja de un aviso: la mejor de sus razones de oferta (0 si no es una oferta). Lee las ofertas del indice. */
+  const bajaDe = (f, ctx) => { const e = ctx.ofertas().get(f[2]); return e ? Math.max(...e.razones.map(r => r.off || 0)) : 0; };
+
+  /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. Nada resta (spec 014): con
+     opciones.incluirTodo, Recomendacion trae TODO lo comparable y quien llama pone lo recomendado primero (ordenar). Super
+     Oferta y Primera Linea son subconjuntos explicitos: no los cambia. */
+  function filtrar(filas, modo, ctx, med, opciones) {
     const niv = ctx.nivelMarca;
     if (modo === "super") { const of = ctx.ofertas(); return filas.filter(f => { const e = of.get(f[2]); return e && e.g.pasa; }); }
     if (modo === "primera") return filas.filter(f => ctx.premium(f[0]).premium);
-    return filas.filter(f => ctx.gama(f[0]).pasa && niv(f[0]) >= 1 && !B.pisoDeGama(f[1], niv(f[0]), med));
+    if (opciones && opciones.incluirTodo) return [...filas];
+    return filas.filter(f => enRecomendacion(f, ctx, med));
   }
 
-  function ordenar(filas, secundario, ctx) {
+  /* «Mejor oferta entre lo mejor»: primero el nivel (premium, despues lo que pasa el minimo de su gama, despues el resto),
+     dentro del nivel lo mas nuevo, despues la mayor baja contra el mismo modelo (o propia o publicada) y, a igual baja, el
+     puntaje premium. */
+  const nivelDe = (f, ctx) => ctx.premium(f[0]).premium ? 2 : ctx.gama(f[0]).pasa && ctx.gama(f[0]).nivel ? 1 : 0;
+  function porMejor(ctx) {
+    return (a, b) => (nivelDe(b, ctx) - nivelDe(a, ctx)) || (novedadDe(b[0], ctx.ref) - novedadDe(a[0], ctx.ref) || 0)
+      || (bajaDe(b, ctx) - bajaDe(a, ctx)) || (premiumDe(b[0], ctx) - premiumDe(a[0], ctx));
+  }
+
+  /* `primero(f)` (opcional) separa lo que va primero (lo recomendado) de lo que se incluyo de mas: cada grupo se ordena aparte. */
+  function ordenar(filas, secundario, ctx, primero) {
     const clave = secundario === "novedades" ? f => novedadDe(f[0], ctx.ref)
       : secundario === "premium" ? f => premiumDe(f[0], ctx) : () => 0;
-    return [...filas].sort((a, b) => (esInternacional(a) - esInternacional(b)) || (clave(b) - clave(a)) || (b[1] - a[1]));
+    const extra = secundario === "mejor" ? porMejor(ctx) : () => 0;
+    const cmp = (a, b) => (esInternacional(a) - esInternacional(b)) || extra(a, b) || (clave(b) - clave(a)) || (b[1] - a[1]);
+    if (!primero) return [...filas].sort(cmp);
+    return [...filas.filter(primero).sort(cmp), ...filas.filter(f => !primero(f)).sort(cmp)];
+  }
+
+  /* Lo que deja afuera un modo, dicho siempre (no se esconde nada): vacio si no deja nada afuera. */
+  function notaDe(modo, total, enModo) {
+    if (modo === "recomendacion") return total > enModo ? `Recomendación deja afuera ${total - enModo} avisos más (no llegan al mínimo de su gama, no tienen marca reconocida o están muy por debajo del resto). Tocá «Incluir lo que no llega al mínimo» para verlos.` : "";
+    if (modo === "super") return `Súper Oferta muestra solo ofertas reales: ${enModo} de ${total} avisos de esta búsqueda.`;
+    return `Primera Línea muestra solo lo premium por especificaciones y tecnología: ${enModo} de ${total} avisos de esta búsqueda.`;
   }
 
   /* Cuantas filas da cada modo: para decir, cuando uno queda vacio, que otro si tiene resultados. */
@@ -103,7 +135,7 @@
   }
 
   const api = { MODOS, SECUNDARIOS, MODO_BASE, SECUNDARIO_BASE, esModo, esSecundario, migrarModo, migrarSecundario,
-                preparar, novedadDe, premiumDe, filtrar, ordenar, contar, textoVacio };
+                preparar, novedadDe, premiumDe, enRecomendacion, bajaDe, filtrar, ordenar, notaDe, contar, textoVacio };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Modos = api;
 })(this);
