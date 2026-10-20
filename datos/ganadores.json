@@ -1,0 +1,288 @@
+{
+  "_nota": "Generado el 2026-10-20 a mano contra las paginas citadas (cada valor fue leido en la fuente ese dia). Esquema: ganadores[] con modelo (nombre normalizado o codigo del fabricante), categoria, alias (opcional: textos para buscar en el indice), puntaje 0-100 con su escala explicada, criterios {rendimiento|duracion|pantalla|materiales|tecnologia: {valor, unidad}}, fuente {nombre, url https}, fecha ISO de la medicion, confianza (confirmado|sin confirmar). Los puntajes de laboratorios distintos no se mezclan. Valida generar_ganadores.py. Detalle y huecos: docs/ganadores-referencia.md.",
+  "generado": "2026-10-20",
+  "evidencia": {
+    "procesador": "Rendimiento multinucleo de PassMark (muestras de usuarios); sin consumo ni temperatura.",
+    "gpu": "Rendimiento 3D de PassMark; sin consumo ni pruebas de juegos.",
+    "ssd": "Disk Rating de PassMark (varias pruebas de lectura/escritura); sin durabilidad (TBW) ni temperatura.",
+    "smartphone": "Sin datos: DXOMARK, GSMArena y Notebookcheck no se pudieron leer (ver docs).",
+    "notebook": "Sin datos: Notebookcheck respondio 403.",
+    "monitor": "Sin datos: RTINGS carga las mediciones con JavaScript y no se pudieron leer.",
+    "auriculares": "Sin datos: idem RTINGS."
+  },
+  "ganadores": [
+    {
+      "modelo": "Ryzen 9 9950X3D2",
+      "categoria": "procesador",
+      "alias": [
+        "9950x3d2"
+      ],
+      "puntaje": 100.0,
+      "escala": "100 x CPU Mark / 72105 (Ryzen 9 9950X3D2, lider de PassMark entre los CPU de PC de escritorio comunes; se excluyen Threadripper, EPYC y Apple). Solo comparable con otros CPU Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 72105,
+          "unidad": "CPU Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark CPU Mark, ranking de CPU de escritorio",
+        "url": "https://www.cpubenchmark.net/desktop.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Ryzen 9 9950X3D",
+      "categoria": "procesador",
+      "alias": [
+        "9950x3d"
+      ],
+      "puntaje": 97.2,
+      "escala": "100 x CPU Mark / 72105 (Ryzen 9 9950X3D2, lider de PassMark entre los CPU de PC de escritorio comunes; se excluyen Threadripper, EPYC y Apple). Solo comparable con otros CPU Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 70105,
+          "unidad": "CPU Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark CPU Mark, ranking de CPU de escritorio",
+        "url": "https://www.cpubenchmark.net/desktop.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Core Ultra 7 270K Plus",
+      "categoria": "procesador",
+      "alias": [
+        "270k plus"
+      ],
+      "puntaje": 95.0,
+      "escala": "100 x CPU Mark / 72105 (Ryzen 9 9950X3D2, lider de PassMark entre los CPU de PC de escritorio comunes; se excluyen Threadripper, EPYC y Apple). Solo comparable con otros CPU Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 68501,
+          "unidad": "CPU Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark CPU Mark, ranking de CPU de escritorio",
+        "url": "https://www.cpubenchmark.net/desktop.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 5090",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 5090"
+      ],
+      "puntaje": 100.0,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 38991,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 4090",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 4090"
+      ],
+      "puntaje": 97.5,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 38031,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 5080",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 5080"
+      ],
+      "puntaje": 91.4,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 35644,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 4080 SUPER",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 4080 super"
+      ],
+      "puntaje": 87.7,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 34213,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 4080",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 4080"
+      ],
+      "puntaje": 88.3,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 34441,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "GeForce RTX 5070 Ti",
+      "categoria": "gpu",
+      "alias": [
+        "rtx 5070 ti"
+      ],
+      "puntaje": 82.9,
+      "escala": "100 x G3D Mark / 38.991 (GeForce RTX 5090, lider de consumo; la 5090 D de China queda fuera). Solo comparable con otros G3D Mark.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 32333,
+          "unidad": "G3D Mark (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark G3D Mark, ranking de placas de alto rendimiento",
+        "url": "https://www.videocardbenchmark.net/high_end_gpus.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "PNY CS3250",
+      "categoria": "ssd",
+      "alias": [
+        "cs3250"
+      ],
+      "puntaje": 100.0,
+      "escala": "100 x Disk Rating / 100.575 (PNY CS3250 2TB, primero del ranking de PassMark). Solo comparable con otros Disk Rating.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 100575,
+          "unidad": "Disk Rating (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark Disk Rating, ranking de discos de alto rendimiento",
+        "url": "https://www.harddrivebenchmark.net/high_end_drives.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Corsair MP700 PRO XT",
+      "categoria": "ssd",
+      "alias": [
+        "mp700 pro xt"
+      ],
+      "puntaje": 92.6,
+      "escala": "100 x Disk Rating / 100.575 (PNY CS3250 2TB, primero del ranking de PassMark). Solo comparable con otros Disk Rating.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 93137,
+          "unidad": "Disk Rating (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark Disk Rating, ranking de discos de alto rendimiento",
+        "url": "https://www.harddrivebenchmark.net/high_end_drives.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Kioxia Exceria Pro G2",
+      "categoria": "ssd",
+      "alias": [
+        "exceria pro g2"
+      ],
+      "puntaje": 92.1,
+      "escala": "100 x Disk Rating / 100.575 (PNY CS3250 2TB, primero del ranking de PassMark). Solo comparable con otros Disk Rating.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 92639,
+          "unidad": "Disk Rating (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark Disk Rating, ranking de discos de alto rendimiento",
+        "url": "https://www.harddrivebenchmark.net/high_end_drives.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "WD Black SN8100",
+      "categoria": "ssd",
+      "alias": [
+        "sn8100"
+      ],
+      "puntaje": 91.0,
+      "escala": "100 x Disk Rating / 100.575 (PNY CS3250 2TB, primero del ranking de PassMark). Solo comparable con otros Disk Rating.",
+      "criterios": {
+        "rendimiento": {
+          "valor": 91489,
+          "unidad": "Disk Rating (PassMark)"
+        }
+      },
+      "fuente": {
+        "nombre": "PassMark Disk Rating, ranking de discos de alto rendimiento",
+        "url": "https://www.harddrivebenchmark.net/high_end_drives.html"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    }
+  ]
+}

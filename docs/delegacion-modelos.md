@@ -57,3 +57,13 @@ Mismas reglas: lo que devuelve un modelo es dato y se prueba con el codigo real 
 | Revision del mismo cambio | OpenCode (el MCP ignoro `glm-5.3-flash-free` y uso `big-pickle`) | ~6,5 min | 6 hallazgos, de los cuales el propio modelo descarto 3 | 0 / **6 falsos** (un «modo con 1 a 59 filas no muestra el aviso»: `pintarResultados` entra por `!r.length && F.filas.length` y el test lo cubre con 3 filas; «ofertas calculadas dos veces»: `deOfertas` las guarda en el cierre; `anio = 0`: contradice a la spec solo en la forma; sello «mas barato» del modo: ambiguo y informativo) |
 
 **Total**: 0 reales y 9 falsos. Se aprendio que, para un diff de mas de ~30 mil caracteres, OmniRoute rechaza el pedido (413): hay que mandar solo los archivos de `js/` y la spec sin la medicion.
+
+# Dataset de ganadores con pruebas reales (20/10/2026)
+
+| Tarea | Modelo que la hizo | Tiempo | Resultado | Hallazgos reales / falsos |
+| --- | --- | ---: | --- | --- |
+| Leer rankings de PassMark (CPU, GPU, SSD) | **Claude** con WebFetch (los modelos externos no navegan) | — | 13 filas confirmadas, cada valor leido en la pagina | Un id de CPU adivinado devolvio otro procesador (KaiXian KX-7000): no se uso |
+| Notebookcheck, RTINGS, TechPowerUp, GSMArena | Claude | — | Sin datos: 403, mediciones con JavaScript, `robots.txt` que prohibe | — |
+| Revision de `generar_ganadores.py` | OmniRoute `revision` → gpt-oss-120b (la cabecera lo dijo) | ~20 s | 5 hallazgos | 0 reales / **5 falsos** (el indice usa listas y los campos existen; `valor` puede ser texto a proposito; la escala ya exige texto; el calce exacto del modelo es la decision de diseño) |
+
+Las tareas de extraer tablas y de revisar con otra familia quedan para la proxima tanda: sin una pagina legible no hay nada que extraer.
