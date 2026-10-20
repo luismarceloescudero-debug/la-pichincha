@@ -107,6 +107,11 @@ class Publicar(unittest.TestCase):
                      "img/icono-maskable-512.png", "img/apple-touch-icon.png"):
             self.assertTrue((self.salida / ruta).exists(), ruta)
 
+    def test_publica_los_ganadores_que_la_pagina_pide_al_buscar(self):
+        # spec 014: js/busqueda.js hace fetch("datos/ganadores.json"); si no se publica, el sello «ganador en pruebas» no aparece
+        self.correr()
+        self.assertTrue((self.salida / "datos" / "ganadores.json").exists())
+
     def test_correrlo_dos_veces_no_falla(self):
         self.correr()
         self.correr()

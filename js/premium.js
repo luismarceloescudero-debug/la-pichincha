@@ -78,25 +78,45 @@
     return s;
   }
 
-  /* Un modelo que figura en datos/ganadores.json (pruebas reales de rendimiento, duracion y construccion, armado por otra
-     sesion). Acepta { ganadores: [...] } o una lista de { modelo, fuente, categoria?, puntaje? }; sin archivo, no hay ganadores. */
+  /* Un modelo que figura en datos/ganadores.json (pruebas reales de rendimiento, duracion y construccion; lo arma otra sesion,
+     esquema en docs/ganadores-referencia.md): { ganadores: [{ modelo, alias: [...], fuente: { nombre, url }, confianza, ... }] }.
+     Cuenta solo lo «confirmado». Coincide por el alias (o el modelo) como palabras enteras del titulo, el mas largo gana, y no si
+     lo que sigue es otra variante (RTX 5080 SUPER no es la RTX 5080) ni si el chip del modelo (M5, A18) no esta en el titulo. */
   const norm = t => String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const VARIANTES = new Set(["ti", "super", "xt", "xtx", "plus", "pro", "max", "ultra", "fe", "edge", "lite", "mini"]);
   function ganadorDe(nombre, ganadores) {
     const lista = Array.isArray(ganadores) ? ganadores : ganadores && Array.isArray(ganadores.ganadores) ? ganadores.ganadores : [];
     const n = " " + norm(nombre) + " ";
+    let mejor = null;
     for (const g of lista) {
-      const modelo = g && g.modelo ? norm(g.modelo) : "";
-      if (modelo.length >= 4 && n.includes(" " + modelo + " ")) return { fuente: g.fuente || "pruebas independientes", texto: `ganador en pruebas: ${g.fuente || "pruebas independientes"}` };
+      if (!g || (g.confianza && g.confianza !== "confirmado")) continue;
+      const chip = String(g.modelo || "").match(/\(([^)]*)\)/), chips = chip ? norm(chip[1]).split(" ").filter(t => /^[am]\d{1,2}$/.test(t)) : [];
+      if (chips.some(c => !n.includes(" " + c + " "))) continue;
+      for (const a of [...(g.alias || []), g.modelo]) {
+        const alias = norm(a || "");
+        if (alias.length < 4) continue;
+        const i = n.indexOf(" " + alias + " ");
+        if (i < 0) continue;
+        const sigue = n.slice(i + alias.length + 2).split(" ")[0];
+        if (VARIANTES.has(sigue) && !alias.endsWith(sigue)) continue;
+        if (!mejor || alias.length > mejor.largo) {
+          const fuente = typeof g.fuente === "string" ? g.fuente : (g.fuente && g.fuente.nombre) || "pruebas independientes";
+          const corta = fuente.split(/[,(]/)[0].trim();
+          mejor = { largo: alias.length, fuente: corta, modelo: g.modelo, puntaje: g.puntaje, texto: `ganador en pruebas: ${corta}` };
+        }
+      }
     }
-    return null;
+    return mejor && { fuente: mejor.fuente, modelo: mejor.modelo, puntaje: mejor.puntaje, texto: mejor.texto };
   }
 
   /* { puntos, senales: [texto], premium, umbral, ganador }. Sin puntaje para perifericos ni "otro" (umbral 0). */
   function puntaje(nombre, ref, gama, ganadores) {
     const categoria = gama ? gama.categoria : C.categoriaDe(nombre), umbral = UMBRAL[categoria] || 0;
-    if (!umbral) return { categoria, puntos: 0, senales: [], premium: false, umbral: 0, ganador: null };
-    const s = senalesDe(nombre, categoria, ref || { gen: {}, anio: 0 }, gama);
     const g = ganadorDe(nombre, ganadores);
+    // sin puntaje por categoria (perifericos: auriculares), un ganador en pruebas es premium por si solo
+    if (!umbral) return g ? { categoria, puntos: PUNTOS_GANADOR, senales: [g.texto], premium: true, umbral: 0, ganador: g }
+      : { categoria, puntos: 0, senales: [], premium: false, umbral: 0, ganador: null };
+    const s = senalesDe(nombre, categoria, ref || { gen: {}, anio: 0 }, gama);
     if (g) s.push([PUNTOS_GANADOR, g.texto]);
     const memoria = Math.min(TOPE_MEMORIA, s.filter(x => x[2]).reduce((a, x) => a + x[0], 0));
     const tecnologia = s.filter(x => !x[2]).reduce((a, x) => a + x[0], 0), puntos = memoria + tecnologia;

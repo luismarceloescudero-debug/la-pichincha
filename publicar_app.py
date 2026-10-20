@@ -24,6 +24,8 @@ ARCHIVOS_DE_LA_CASCARA = [
     "manifest.webmanifest", "sin-red.html", "importacion.json",
     "img/icono-192.png", "img/icono-512.png", "img/icono-maskable-512.png", "img/apple-touch-icon.png",
 ]
+# Datos que la pagina pide cuando hacen falta (no son de la cascara: el service worker no los guarda de entrada).
+ARCHIVOS_DE_DATOS = ["datos/ganadores.json"]
 
 
 def commit_corto():
@@ -64,7 +66,7 @@ def main(argv=None):
         raise RuntimeError("sw.js no tiene el marcador __VERSION__: no se puede estampar la version")
     salida.mkdir(parents=True, exist_ok=True)
     (salida / "sw.js").write_text(plantilla.replace("__VERSION__", v), encoding="utf-8")
-    for ruta in ARCHIVOS_DE_LA_CASCARA:
+    for ruta in ARCHIVOS_DE_LA_CASCARA + ARCHIVOS_DE_DATOS:
         destino = salida / ruta
         destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RAIZ / ruta, destino)
