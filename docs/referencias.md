@@ -2,6 +2,8 @@
 
 > Para como ordenan y filtran los buscadores de precios comerciales (PriceSpy, Keepa, Geizhals, Mercado Libre, Amazon, Google) y las ideas que salen para nosotros, ver [`docs/buscadores-referencia.md`](buscadores-referencia.md) (20/10/2026).
 
+> Para los ganadores por categoria con pruebas de laboratorio y los umbrales premium por especificaciones, ver [`docs/ganadores-referencia.md`](ganadores-referencia.md) (20/10/2026).
+
 Que hacen los proyectos de codigo abierto a la altura de La Pichincha, que adoptamos y que queda como idea. Relevado el 19/10/2026 con `gh search repos` y los README de cada proyecto; las estrellas y el ultimo commit son de ese dia. Regla que no cambia: nada que esquive controles antibots (Cloudflare, captchas, proxies rotativos, cambiar de IP o de identidad).
 
 ## Proyectos
