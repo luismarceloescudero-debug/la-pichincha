@@ -1,14 +1,14 @@
 {
-  "_nota": "Generado el 2026-10-20 a mano contra las paginas citadas (cada valor fue leido en la fuente ese dia). Esquema: ganadores[] con modelo (nombre normalizado o codigo del fabricante), categoria, alias (opcional: textos para buscar en el indice), puntaje 0-100 con su escala explicada, criterios {rendimiento|duracion|pantalla|materiales|tecnologia: {valor, unidad}}, fuente {nombre, url https}, fecha ISO de la medicion, confianza (confirmado|sin confirmar). Los puntajes de laboratorios distintos no se mezclan. Valida generar_ganadores.py. Detalle y huecos: docs/ganadores-referencia.md.",
+  "_nota": "Generado el 2026-10-20 (segunda tanda: monitores, auriculares, celulares y notebooks, leidos en el navegador de la app, de a una pagina) a mano contra las paginas citadas (cada valor fue leido en la fuente ese dia). Esquema: ganadores[] con modelo (nombre normalizado o codigo del fabricante), categoria, alias (opcional: textos para buscar en el indice), puntaje 0-100 con su escala explicada, criterios {rendimiento|duracion|pantalla|materiales|tecnologia: {valor, unidad}}, fuente {nombre, url https}, fecha ISO de la medicion, confianza (confirmado|sin confirmar). Los puntajes de laboratorios distintos no se mezclan. Valida generar_ganadores.py. Detalle y huecos: docs/ganadores-referencia.md.",
   "generado": "2026-10-20",
   "evidencia": {
     "procesador": "Rendimiento multinucleo de PassMark (muestras de usuarios); sin consumo ni temperatura.",
     "gpu": "Rendimiento 3D de PassMark; sin consumo ni pruebas de juegos.",
     "ssd": "Disk Rating de PassMark (varias pruebas de lectura/escritura); sin durabilidad (TBW) ni temperatura.",
-    "smartphone": "Sin datos: DXOMARK, GSMArena y Notebookcheck no se pudieron leer (ver docs).",
-    "notebook": "Sin datos: Notebookcheck respondio 403.",
-    "monitor": "Sin datos: RTINGS carga las mediciones con JavaScript y no se pudieron leer.",
-    "auriculares": "Sin datos: idem RTINGS."
+    "smartphone": "8 modelos: subpuntajes de pantalla y de bateria de DXOMARK (20/10). Durabilidad fisica: sin datos (no se leyo ninguna prueba). Camara: no se cargo.",
+    "notebook": "4 modelos: lista «mejores laptops» de RTINGS (16/09) con tipo de panel y refresco; bateria en horas y materiales medidos: sin datos (el texto solo dice «larga»).",
+    "monitor": "6 modelos: la lista «mejores OLED» de RTINGS (19/10) con panel, refresco y resolucion; las mediciones de brillo, cobertura y tiempo de respuesta estan bloqueadas sin membresia, asi que no entran.",
+    "auriculares": "4 modelos: autonomia segun la lista de RTINGS (19/10); sin puntaje de ruido ni de sonido (bloqueados)."
   },
   "ganadores": [
     {
@@ -282,6 +282,535 @@
         "url": "https://www.harddrivebenchmark.net/high_end_drives.html"
       },
       "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "ASUS ROG Swift OLED PG32UCDM Gen3",
+      "categoria": "monitor",
+      "alias": [
+        "pg32ucdm"
+      ],
+      "puntaje": 90,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "QD-OLED",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 240,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "3840x2160",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "LG 32GX870B-B",
+      "categoria": "monitor",
+      "alias": [
+        "32gx870b"
+      ],
+      "puntaje": 85,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "WOLED (Tandem)",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 480,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "3840x2160",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Dell Alienware AW2725DF",
+      "categoria": "monitor",
+      "alias": [
+        "aw2725df"
+      ],
+      "puntaje": 80,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "QD-OLED",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 360,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "2560x1440",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "HyperX OMEN OLED 27q",
+      "categoria": "monitor",
+      "alias": [
+        "omen oled 27q"
+      ],
+      "puntaje": 75,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "QD-OLED",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 240,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "2560x1440",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Dell Alienware AW2726DM",
+      "categoria": "monitor",
+      "alias": [
+        "aw2726dm"
+      ],
+      "puntaje": 70,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "QD-OLED",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 240,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "2560x1440",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "ASUS ROG Swift OLED PG34WCDN",
+      "categoria": "monitor",
+      "alias": [
+        "pg34wcdn"
+      ],
+      "puntaje": 80,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS bloquea sus notas numericas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75, 70; mejor de un nicho (ultrawide) 80. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "pantalla": {
+          "valor": "QD-OLED",
+          "unidad": "tipo de panel"
+        },
+        "rendimiento": {
+          "valor": 360,
+          "unidad": "Hz de refresco maximo"
+        },
+        "tecnologia": {
+          "valor": "3440x1440",
+          "unidad": "resolucion nativa"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 6 Best OLED Monitors of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/monitor/reviews/best/oled"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Sony WH-1000XM6",
+      "categoria": "auriculares",
+      "alias": [
+        "wh-1000xm6"
+      ],
+      "puntaje": 90,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "duracion": {
+          "valor": 32,
+          "unidad": "horas de bateria segun RTINGS (casi 32 h con ANC; valor redondeado)"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 7 Best Headphones of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/headphones/reviews/best/headphones"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Bose QuietComfort Headphones (2nd Gen)",
+      "categoria": "auriculares",
+      "alias": [
+        "quietcomfort headphones"
+      ],
+      "puntaje": 85,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "duracion": {
+          "valor": 27,
+          "unidad": "horas de bateria segun RTINGS (poco menos de 27 h; valor redondeado)"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 7 Best Headphones of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/headphones/reviews/best/headphones"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "JBL Live 780NC",
+      "categoria": "auriculares",
+      "alias": [
+        "live 780nc"
+      ],
+      "puntaje": 80,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "duracion": {
+          "valor": 60,
+          "unidad": "horas de bateria segun RTINGS (60 h; valor redondeado)"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 7 Best Headphones of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/headphones/reviews/best/headphones"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Anker Soundcore Space Q45",
+      "categoria": "auriculares",
+      "alias": [
+        "space q45"
+      ],
+      "puntaje": 75,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, siguiente escalon de precio 85, 80, 75. Solo ordena dentro de esta lista y esta categoria.",
+      "criterios": {
+        "duracion": {
+          "valor": 28,
+          "unidad": "horas de bateria segun RTINGS (poco menos de 28 h; valor redondeado)"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 7 Best Headphones of 2026» (actualizada 2026-10-19)",
+        "url": "https://www.rtings.com/headphones/reviews/best/headphones"
+      },
+      "fecha": "2026-10-19",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Samsung Galaxy S25 Ultra",
+      "categoria": "smartphone",
+      "alias": [
+        "galaxy s25 ultra"
+      ],
+      "puntaje": 99.4,
+      "escala": "100 x DXOMARK Display score / 161 (Google Pixel 10 Pro XL, primero del ranking de pantalla el 2026-10-20). Subpuntaje de pantalla: no se compara con los de bateria ni con los de otros laboratorios.",
+      "criterios": {
+        "pantalla": {
+          "valor": 160,
+          "unidad": "DXOMARK Display score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Display (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Samsung Galaxy S25 Edge",
+      "categoria": "smartphone",
+      "alias": [
+        "galaxy s25 edge"
+      ],
+      "puntaje": 98.1,
+      "escala": "100 x DXOMARK Display score / 161 (Google Pixel 10 Pro XL, primero del ranking de pantalla el 2026-10-20). Subpuntaje de pantalla: no se compara con los de bateria ni con los de otros laboratorios.",
+      "criterios": {
+        "pantalla": {
+          "valor": 158,
+          "unidad": "DXOMARK Display score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Display (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Samsung Galaxy S25 FE",
+      "categoria": "smartphone",
+      "alias": [
+        "galaxy s25 fe"
+      ],
+      "puntaje": 96.9,
+      "escala": "100 x DXOMARK Display score / 161 (Google Pixel 10 Pro XL, primero del ranking de pantalla el 2026-10-20). Subpuntaje de pantalla: no se compara con los de bateria ni con los de otros laboratorios.",
+      "criterios": {
+        "pantalla": {
+          "valor": 156,
+          "unidad": "DXOMARK Display score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Display (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Samsung Galaxy Z Fold7",
+      "categoria": "smartphone",
+      "alias": [
+        "z fold7",
+        "z fold 7"
+      ],
+      "puntaje": 96.3,
+      "escala": "100 x DXOMARK Display score / 161 (Google Pixel 10 Pro XL, primero del ranking de pantalla el 2026-10-20). Subpuntaje de pantalla: no se compara con los de bateria ni con los de otros laboratorios.",
+      "criterios": {
+        "pantalla": {
+          "valor": 155,
+          "unidad": "DXOMARK Display score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Display (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Motorola Edge 60 Pro",
+      "categoria": "smartphone",
+      "alias": [
+        "edge 60 pro"
+      ],
+      "puntaje": 97.6,
+      "escala": "100 x DXOMARK Battery score / 168 (Honor 400 Smart, primero del ranking de bateria el 2026-10-20). Subpuntaje de bateria: no se compara con los de pantalla ni con los de otros laboratorios.",
+      "criterios": {
+        "duracion": {
+          "valor": 164,
+          "unidad": "DXOMARK Battery score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Battery (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Motorola Edge 70 Max",
+      "categoria": "smartphone",
+      "alias": [
+        "edge 70 max"
+      ],
+      "puntaje": 95.2,
+      "escala": "100 x DXOMARK Battery score / 168 (Honor 400 Smart, primero del ranking de bateria el 2026-10-20). Subpuntaje de bateria: no se compara con los de pantalla ni con los de otros laboratorios.",
+      "criterios": {
+        "duracion": {
+          "valor": 160,
+          "unidad": "DXOMARK Battery score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Battery (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Motorola Edge 2025",
+      "categoria": "smartphone",
+      "alias": [
+        "motorola edge 2025",
+        "edge 2025"
+      ],
+      "puntaje": 90.5,
+      "escala": "100 x DXOMARK Battery score / 168 (Honor 400 Smart, primero del ranking de bateria el 2026-10-20). Subpuntaje de bateria: no se compara con los de pantalla ni con los de otros laboratorios.",
+      "criterios": {
+        "duracion": {
+          "valor": 152,
+          "unidad": "DXOMARK Battery score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Battery (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Honor X9c",
+      "categoria": "smartphone",
+      "alias": [
+        "honor x9c",
+        "x9c"
+      ],
+      "puntaje": 97.6,
+      "escala": "100 x DXOMARK Battery score / 168 (Honor 400 Smart, primero del ranking de bateria el 2026-10-20). Subpuntaje de bateria: no se compara con los de pantalla ni con los de otros laboratorios.",
+      "criterios": {
+        "duracion": {
+          "valor": 164,
+          "unidad": "DXOMARK Battery score"
+        }
+      },
+      "fuente": {
+        "nombre": "DXOMARK, ranking de smartphones ordenado por Battery (leido 2026-10-20; la pagina no muestra fecha de medicion)",
+        "url": "https://www.dxomark.com/smartphones/"
+      },
+      "fecha": "2026-10-20",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Apple MacBook Pro 14 (M5, 2025)",
+      "categoria": "notebook",
+      "alias": [
+        "macbook pro 14"
+      ],
+      "puntaje": 90,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, mejor de gama media-alta 85, mejor de gama media 80, mejor economica 75. Solo ordena dentro de esta lista.",
+      "criterios": {
+        "pantalla": {
+          "valor": "Mini LED 120 Hz",
+          "unidad": "tipo de panel y refresco"
+        },
+        "tecnologia": {
+          "valor": "Apple M5",
+          "unidad": "procesador"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 8 Best Laptops of 2026» (actualizada 2026-09-16)",
+        "url": "https://www.rtings.com/laptop/reviews/best/laptop"
+      },
+      "fecha": "2026-09-16",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Apple MacBook Air 13 (M5, 2026)",
+      "categoria": "notebook",
+      "alias": [
+        "macbook air 13"
+      ],
+      "puntaje": 85,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, mejor de gama media-alta 85, mejor de gama media 80, mejor economica 75. Solo ordena dentro de esta lista.",
+      "criterios": {
+        "pantalla": {
+          "valor": "IPS 60 Hz",
+          "unidad": "tipo de panel y refresco"
+        },
+        "tecnologia": {
+          "valor": "Apple M5",
+          "unidad": "procesador"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 8 Best Laptops of 2026» (actualizada 2026-09-16)",
+        "url": "https://www.rtings.com/laptop/reviews/best/laptop"
+      },
+      "fecha": "2026-09-16",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Dell XPS 13 (2026)",
+      "categoria": "notebook",
+      "alias": [
+        "xps 13"
+      ],
+      "puntaje": 80,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, mejor de gama media-alta 85, mejor de gama media 80, mejor economica 75. Solo ordena dentro de esta lista.",
+      "criterios": {
+        "pantalla": {
+          "valor": "2.5K tactil 120 Hz",
+          "unidad": "resolucion y refresco"
+        },
+        "materiales": {
+          "valor": "aluminio",
+          "unidad": "material del chasis"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 8 Best Laptops of 2026» (actualizada 2026-09-16)",
+        "url": "https://www.rtings.com/laptop/reviews/best/laptop"
+      },
+      "fecha": "2026-09-16",
+      "confianza": "confirmado"
+    },
+    {
+      "modelo": "Apple MacBook Neo (A18 Pro, 2026)",
+      "categoria": "notebook",
+      "alias": [
+        "macbook neo"
+      ],
+      "puntaje": 75,
+      "escala": "Ordinal propio, no es un puntaje de laboratorio (RTINGS no muestra sus notas sin membresia): mejor general 90, mejor de gama media-alta 85, mejor de gama media 80, mejor economica 75. Solo ordena dentro de esta lista.",
+      "criterios": {
+        "pantalla": {
+          "valor": "60 Hz",
+          "unidad": "refresco"
+        },
+        "tecnologia": {
+          "valor": "Apple A18 Pro",
+          "unidad": "procesador"
+        }
+      },
+      "fuente": {
+        "nombre": "RTINGS, «The 8 Best Laptops of 2026» (actualizada 2026-09-16)",
+        "url": "https://www.rtings.com/laptop/reviews/best/laptop"
+      },
+      "fecha": "2026-09-16",
       "confianza": "confirmado"
     }
   ]

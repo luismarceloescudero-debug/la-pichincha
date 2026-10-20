@@ -67,3 +67,10 @@ Mismas reglas: lo que devuelve un modelo es dato y se prueba con el codigo real 
 | Revision de `generar_ganadores.py` | OmniRoute `revision` → gpt-oss-120b (la cabecera lo dijo) | ~20 s | 5 hallazgos | 0 reales / **5 falsos** (el indice usa listas y los campos existen; `valor` puede ser texto a proposito; la escala ya exige texto; el calce exacto del modelo es la decision de diseño) |
 
 Las tareas de extraer tablas y de revisar con otra familia quedan para la proxima tanda: sin una pagina legible no hay nada que extraer.
+
+## Segunda tanda de ganadores (20/10/2026)
+
+| Tarea | Modelo que la hizo | Resultado | Hallazgos reales / falsos |
+| --- | --- | --- | --- |
+| Leer RTINGS (monitores, auriculares, notebooks), DXOMARK (pantalla y bateria) y probar Notebookcheck | **Claude** con el navegador de la app (los modelos externos no navegan) | 22 filas confirmadas; las notas de RTINGS estan bloqueadas sin membresia; una regex mia se colgo 45 s | — |
+| Contrastar las 22 filas con los hechos leidos | OmniRoute `revision` → gpt-oss-120b (cabecera) | 1 discrepancia | 0 reales / **1 falsa** («WOLED» contra «WOLED (Tandem)»: la pagina dice «Tandem WOLED») |
