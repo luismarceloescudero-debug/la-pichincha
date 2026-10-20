@@ -175,8 +175,8 @@
   }
 
   /* --- Evaluar ------------------------------------------------------------ */
-  const no = (categoria, motivo, extra) => ({ categoria, rubro: categoria, pasa: false, motivo, nivel: null, alta: false, vigente: false, rom: 0, nota: "", ...extra });
-  const ok = (categoria, nivel, extra) => ({ categoria, rubro: categoria, pasa: true, nivel, alta: nivel === "alta", vigente: false, rom: 0, nota: "", ...extra });
+  const no = (categoria, motivo, extra) => ({ categoria, rubro: categoria, pasa: false, motivo, nivel: null, alta: false, vigente: false, anterior: false, rom: 0, nota: "", ...extra });
+  const ok = (categoria, nivel, extra) => ({ categoria, rubro: categoria, pasa: true, nivel, alta: nivel === "alta", vigente: false, anterior: false, rom: 0, nota: "", ...extra });
 
   function monitor(nombre) {
     const m = MIN.monitor, hz = hzDe(nombre), panel = panelDe(nombre), pulg = pulgadasDe(nombre);
@@ -193,7 +193,8 @@
 
   /* El procesador y el año: el titulo puede decirlos aunque no diga la RAM (iPhone, MacBook). */
   function vigenciaDe(nombre, ref) {
-    const v = { reciente: false, punto: false, vigente: false, nota: "", falla: "" };
+    const v = { reciente: false, punto: false, vigente: false, anterior: false, nota: "", falla: "" };
+    let hayActual = false, hayAnterior = false;
     for (const g of generacionesDe(nombre)) {
       const tope = ref.gen[g.fam] || g.gen, s = (ref.salto || {})[g.fam];
       const hay = s && s.comparados >= MIN_COMPARADOS, minimo = hay && s.mejoras < MIN_SALTO;
@@ -201,8 +202,8 @@
       v.reciente = true;
       // La novedad de la ultima generacion cuenta solo si mejoro varios apartados contra la anterior. Si no lo hizo
       // (diferencia minima), la anterior sigue vigente y las dos reciben el punto; si lo hizo, la anterior queda atras.
-      if (g.gen >= tope) v.punto = true;
-      else if (minimo && g.gen === tope - g.paso) v.punto = v.vigente = true;
+      if (g.gen >= tope) { v.punto = true; hayActual = true; }
+      else { hayAnterior = true; if (minimo && g.gen === tope - g.paso) v.punto = v.vigente = true; }
       if (hay && g.gen >= tope - g.paso) {
         const cuanto = `${s.mejoras} de ${s.comparados} apartados`;
         v.nota = g.gen >= tope
@@ -216,8 +217,10 @@
     if (anios.length) {
       const a = Math.max(...anios);
       if (ref.anio && a < ref.anio - 1) v.falla = v.falla || `modelo ${a}: lo vigente es de ${ref.anio}`;
-      else v.reciente = true;
+      else { v.reciente = true; if (ref.anio && a < ref.anio) hayAnterior = true; else hayActual = true; }
     }
+    // «del año pasado»: algun apartado del titulo es de la generacion anterior y ninguno de la ultima
+    v.anterior = hayAnterior && !hayActual;
     return v;
   }
 
@@ -260,7 +263,7 @@
       puntos = [ram >= m.ramAlta, rom >= m.romAlta, cpuTier(nombre) >= 7, gpuAlta(nombre), pantallaPremium(nombre), v.punto, /\bddr5\b/i.test(nombre)].filter(Boolean).length;
     }
     const alta = puntos >= 3;
-    return ok(categoria, alta ? "alta" : "media", { rom, vigente: alta && v.vigente, nota: v.nota, puntos });
+    return ok(categoria, alta ? "alta" : "media", { rom, vigente: alta && v.vigente, anterior: v.anterior, nota: v.nota, puntos });
   }
 
   const capacidadMemoria = n => { const k = n.match(/\b(\d)\s?x\s?(\d{1,3})\s?gb\b/i); if (k) return +k[1] * +k[2];

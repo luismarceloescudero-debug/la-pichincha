@@ -357,7 +357,7 @@
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama,
-                ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, agruparPorModelo, textoConteo,
+                ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, compatibles, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;

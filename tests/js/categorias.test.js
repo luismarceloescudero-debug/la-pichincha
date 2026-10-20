@@ -248,3 +248,14 @@ test("memoriaDe: la memoria de la placa de video y el numero del procesador no s
   assert.deepEqual(C.memoriaDe('Notebook 15.6" Hp 15-FC0235LA AMD Ryzen 3/512GB Azul'), { ram: 0, rom: 512 });
   assert.deepEqual(C.memoriaDe("Notebook Hp 15-Fc0235la R3-7320u Amd 15\"8/512gb"), { ram: 8, rom: 512 });
 });
+
+test("MIN: los minimos de gama media estan en un solo lugar y son los del dueño (smartphone: 6-8 GB de RAM y 128-256 GB)", () => {
+  const s = C.MIN.smartphone;
+  assert.deepEqual([s.ramMin, s.ram, s.rom, s.romAlta, s.bateria, s.hz], [6, 8, 128, 256, 4500, 90]);
+  assert.deepEqual([C.MIN.notebook.ram, C.MIN.notebook.rom, C.MIN.pc.ram, C.MIN.pc.rom], [16, 512, 16, 512]);
+  assert.deepEqual([C.MIN.monitor.hz, C.MIN.monitor.pulgadas], [144, 24]);
+  // un celular con 6 GB y 128 GB pasa; con 4 GB o 64 GB no
+  assert.equal(ev("Celular Moto G15 6GB/128GB").pasa, true);
+  assert.equal(ev("Celular Moto G05 4GB/128GB").pasa, false);
+  assert.equal(ev("Celular Moto G15 6GB/64GB").pasa, false);
+});

@@ -115,6 +115,33 @@ test("Super Oferta: solo ofertas reales de gama media, de mayor a menor precio",
   assert.deepEqual(r.map(x => x[1]), [1500000, 1149999]);
 });
 
+test("Super Oferta (spec 014): suma el precio contra el mismo modelo en otras tiendas y el cruce por generacion, y cada fila trae sus razones", () => {
+  const m = (nombre, precio, tienda, modelo) => { const x = f(nombre, precio, { tienda, modelo }); x[2] = `https://${tienda}.test/${modelo}/${precio}`; return x; };
+  const ram = [m("Memoria Kingston Fury DDR5 32GB 6000MHz", 80000, "cg", "KF560"), m("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, "mx", "KF560"),
+    m("Memoria Kingston Fury DDR5 32GB 6000MHz", 104000, "vx", "KF560")];
+  const media = Array.from({ length: 8 }, (_, i) => f(`Celular Realme ${i} 8GB 512GB`, 700000 + i * 1000));
+  const anterior = f("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", 690000);
+  const actual = f("Celular Samsung Galaxy S26 Ultra 16GB 1TB 144Hz OLED 200MP", 1500000);
+  const idx = { generado: "2026-10-19T10:00-03:00", productos: [...ram, ...media, anterior, actual], tiendas: {} };
+  const ctx = Modos.preparar(idx, nivel);
+  const r = Modos.filtrar(idx.productos, "super", ctx, B.mediana(idx.productos.map(x => x[1])));
+  assert.deepEqual(r.map(x => x[0]).sort(), [anterior[0], ram[0][0]].sort());
+  const razones = x => ctx.ofertas().get(x[2]).razones;
+  assert.match(razones(ram[0])[0].texto, /22% bajo la mediana de las otras 2 tiendas/);
+  assert.equal(razones(ram[0])[0].tipo, "modelo");
+  assert.match(razones(anterior)[0].texto, /gama alta del año pasado al precio de una media de hoy/);
+  assert.equal(razones(anterior)[0].tipo, "generacion");
+});
+
+test("Super Oferta incluye la gama alta si la oferta es real, y no inventa ofertas: sin ninguna queda vacia", () => {
+  const ctx = Modos.preparar(IDX, nivel);
+  const zen = PRODUCTOS.find(x => /Zenbook/.test(x[0]));
+  assert.equal(Modos.filtrar([zen], "super", ctx, med).length, 0, "gama alta sin baja ni rebaja ni otras tiendas: no es oferta");
+  const baja = [...zen]; baja[6] = 5600000;                                           // bajo 11% contra el relevamiento anterior
+  const idx = { ...IDX, productos: [baja] };
+  assert.equal(Modos.filtrar([baja], "super", Modos.preparar(idx, nivel), med).length, 1);
+});
+
 test("Super Oferta no calcula ofertas si el modo no las pide (el calculo caro es perezoso) y lo hace una sola vez", () => {
   let calculos = 0;
   const ctx = Modos.preparar(IDX, nivel, () => { calculos++; return require("../../js/ofertas.js").calcularOfertas(IDX); });
@@ -174,7 +201,7 @@ test("un modo vacio explica por que y nombra los modos que si tienen resultados"
   const cuentas = Modos.contar(audio, ctx, B.mediana(audio.map(x => x[1])));
   assert.equal(cuentas.super, 0);
   const v = Modos.textoVacio("super", cuentas);
-  assert.match(v.texto, /Súper Oferta.*no hay nada.*oferta real de gama media/);
+  assert.match(v.texto, /Súper Oferta.*no hay nada.*oferta real hoy.*No se inventan ofertas/);
   assert.ok(v.otros.length > 0 && v.otros.every(m => cuentas[m.id] > 0));
   assert.match(Modos.textoVacio("primera", cuentas).razon, /puntaje premium/);
   assert.match(Modos.textoVacio("recomendacion", cuentas).razon, /piso de gama/);

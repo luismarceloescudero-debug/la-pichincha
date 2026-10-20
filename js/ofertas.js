@@ -25,6 +25,11 @@
   const unaPorUrl = B.unaPorUrl;
 
   const MUESTRA_MEDIA = 8;   // con menos avisos de gama media no hay mediana que valga
+  /* Oferta contra el mismo modelo en otras tiendas (spec 014, idea #1 del relevamiento; PriceSpy exige 3 tiendas): el modelo
+     tiene que estar en MIN_TIENDAS_MODELO tiendas (la propia y otras dos que se leen directo). Mas de DESCUENTO_MODELO_MAX
+     bajo el resto es mas facil un error de carga o un precio viejo que una oferta (como el 60% del tachado); y si las otras
+     tiendas no coinciden entre si (DISPERSION_MODELO) la referencia no es confiable. El minimo de baja es el de su categoria. */
+  const MIN_TIENDAS_MODELO = 3, DESCUENTO_MODELO_MAX = 0.4, DISPERSION_MODELO = 1.35;
   const TOLERANCIA_MODELO = 0.02;
   const AGREGADOR = "comparaya";
   const DIAS_TACHADO_FIJO = 7;     // dias con el mismo precio para que una rebaja publicada deje de ser noticia   // centavos y redondeos entre tiendas: menos que eso no la descalifica
@@ -52,6 +57,11 @@
     const ca = cpuDe(a[0]), cb = cpuDe(b[0]);
     return !ca || !cb || ca === cb;
   }
+
+  /* «22% bajo la mediana de las otras 2 tiendas ($102.000)» */
+  const textoContraModelo = (c, pesos) => `${Math.round(c.off * 100)}% bajo la mediana de las otras ${c.tiendas} tiendas (${pesos(c.mediana)})`;
+  /* «gama alta del año pasado al precio de una media de hoy: mediana de los smartphones de gama media de 512 GB: $703.500 (8 avisos)» */
+  const textoCruceGen = (c, pesos) => `gama alta del año pasado al precio de una media de hoy — ${textoContra(c, pesos)}`;
 
   function calcularOfertas(idx) {
     const propias = [], publicadas = [];
@@ -84,6 +94,15 @@
     }
     const medianas = {}, muestras = {};
     for (const k of Object.keys(precios)) if (precios[k].length >= MUESTRA_MEDIA) { medianas[k] = B.mediana(precios[k]); muestras[k] = precios[k].length; }
+    // La media de HOY, para el cruce por generacion: sin la que es del año pasado (la gama alta anterior se compara con lo que se vende ahora).
+    const preciosHoy = {};
+    for (const f of filas) {
+      const g = gama.get(f);
+      if (g.pasa && g.nivel === "media" && g.rom && !g.anterior && !esInternacional(f))
+        (preciosHoy[g.categoria + ":" + g.rom] = preciosHoy[g.categoria + ":" + g.rom] || []).push(f[1]);
+    }
+    const medianasHoy = {}, muestrasHoy = {};
+    for (const k of Object.keys(preciosHoy)) if (preciosHoy[k].length >= MUESTRA_MEDIA) { medianasHoy[k] = B.mediana(preciosHoy[k]); muestrasHoy[k] = preciosHoy[k].length; }
     // Segundo chequeo: el mismo modelo (codigo exacto, nunca por parecido) mas barato en otro aviso local quiere decir que
     // esta no es la oferta, por mas tachado que muestre (19/10: la RTX 5080 Gaming Trio a $4.268.709 con Maxtecno a
     // $3.679.312). Lo internacional no cuenta como mas barato: paga impuestos al llegar. Lo que llega por un agregador
@@ -94,6 +113,18 @@
       if (!f[9]) continue;
       const otro = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && mismaConfiguracion(f, x)).reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
       if (otro && f[1] > otro[1] * (1 + TOLERANCIA_MODELO)) masBarato.set(f, otro);
+    }
+    // Contra el mismo modelo en otras tiendas: el mas barato (o casi) de un modelo que esta en 3 tiendas o mas, a mas del minimo
+    // de su categoria bajo la mediana de las otras. Las otras tienen que ser tiendas que se leen directo (como en masBarato).
+    const contraModelo = new Map();
+    for (const f of filas) {
+      const g = gama.get(f);
+      if (!f[9] || !g.pasa || esInternacional(f) || f[3] === AGREGADOR || masBarato.has(f)) continue;
+      const otros = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && x[3] !== f[3] && mismaConfiguracion(f, x) && B.compatibles(f, x));
+      if (new Set(otros.map(x => x[3])).size < MIN_TIENDAS_MODELO - 1) continue;
+      const precios = otros.map(x => x[1]), minimo = Math.min(...precios), mediana = B.mediana(precios), off = 1 - f[1] / mediana;
+      if (f[1] > minimo * (1 + TOLERANCIA_MODELO) || Math.max(...precios) / minimo > DISPERSION_MODELO) continue;
+      if (off + EPS >= C.DESCUENTO[g.categoria].propia && off <= DESCUENTO_MODELO_MAX) contraModelo.set(f, { tiendas: new Set(otros.map(x => x[3])).size, mediana, minimo, off });
     }
     // El equivalente local de cada compra internacional, para comparar el costo puesto en casa: el aviso local mas barato del
     // mismo modelo (codigo exacto y, en equipos, misma configuracion) de las tiendas que se leen directo. El agregador no
@@ -134,10 +165,19 @@
     // contra que se cruza cada una: la mediana de su categoria y capacidad, y de cuantos avisos sale
     const contra = new Map([...cruces].map(f => { const g = gama.get(f), k = g.categoria + ":" + g.rom;
       return [f, { rubro: g.categoria, rom: g.rom, mediana: medianas[k], avisos: muestras[k] }]; }));
+    // Cruce por generacion: una gama alta del año pasado (3 señales o mas sin el punto de novedad, que la generacion anterior no
+    // tiene) que hoy cuesta lo mismo o menos que la mediana de la gama media de hoy de su categoria y capacidad. No necesita
+    // baja ni tachado: el precio contra lo que se vende ahora es la oferta. Si otra tienda lo vende mas barato, esa es la oferta.
+    const cruceGen = new Map();
+    for (const f of filas) {
+      const g = gama.get(f), k = g.categoria + ":" + g.rom;
+      if (g.pasa && g.alta && g.anterior && !g.vigente && !masBarato.has(f) && !esInternacional(f) && medianasHoy[k] && f[1] <= medianasHoy[k])
+        cruceGen.set(f, { rubro: g.categoria, rom: g.rom, mediana: medianasHoy[k], avisos: muestrasHoy[k] });
+    }
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -187,7 +227,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, calcularOfertas, destacadas, puestoDe, esInternacional };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, puestoDe, esInternacional };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

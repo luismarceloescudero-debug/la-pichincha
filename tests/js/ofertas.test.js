@@ -391,3 +391,90 @@ test("el equivalente local no mezcla configuraciones de un mismo codigo de famil
   const otra = par("Notebook Lenovo IdeaPad Ryzen 5 7535HS 8GB 512GB", 900000, "FAM1"); otra[3] = "venex";
   assert.equal(O.calcularOfertas({ productos: [intl, otra] }).equivalente.has(intl), false);
 });
+
+/* --- Spec 014: oferta contra el mismo modelo en otras tiendas y cruce por generacion --- */
+
+test("anterior: la generacion que ya no es la ultima, solo si ningun apartado del titulo es de la ultima", () => {
+  const ref = O.referencia(titulos(["Celular Galaxy S26 12GB 256GB", "Celular Galaxy S25 12GB 256GB"]));
+  assert.equal(O.pisoDeGama("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", ref).anterior, true);
+  assert.equal(O.pisoDeGama("Celular Samsung Galaxy S26 Ultra 12GB 512GB 120Hz OLED", ref).anterior, false);
+  assert.equal(O.pisoDeGama("Celular Moto G15 6GB/128GB", ref).anterior, false, "sin generacion no hay anterior");
+  // un modelo de la serie 2025 cuando lo vigente es 2026
+  const ref2 = O.referencia(titulos(["Notebook Lenovo Yoga 16GB 1TB OLED 2026", "Notebook Lenovo Yoga 16GB 1TB OLED 2025"]));
+  assert.equal(O.pisoDeGama("Notebook Lenovo Yoga 16GB 1TB OLED 2025", ref2).anterior, true);
+  assert.equal(O.pisoDeGama("Notebook Lenovo Yoga 16GB 1TB OLED 2026", ref2).anterior, false);
+});
+
+const conTienda = (nombre, precio, tienda, modelo, extra = {}) => {
+  const f = fila(nombre, precio, extra);
+  f[2] = "https://" + tienda + ".test/" + encodeURIComponent(nombre + precio); f[3] = tienda; f[9] = modelo;
+  return f;
+};
+const TRES = (precios, nombre = "Memoria Kingston Fury DDR5 32GB 6000MHz") =>
+  precios.map(([t, p]) => conTienda(nombre, p, t, "KF560C36-32"));
+
+test("contra el mismo modelo: «X% bajo la mediana de las otras N tiendas» con el modelo en 3 tiendas o mas", () => {
+  const idx = { productos: TRES([["cg", 80000], ["mx", 100000], ["vx", 104000]]) };
+  const r = O.calcularOfertas(idx);
+  const c = r.contraModelo.get(idx.productos[0]);
+  assert.deepEqual([c.tiendas, c.mediana, c.minimo], [2, 102000, 100000]);
+  assert.ok(Math.abs(c.off - (1 - 80000 / 102000)) < 1e-9);
+  assert.equal(r.contraModelo.size, 1, "las otras dos no estan bajo la mediana de las demas");
+  assert.match(O.textoContraModelo(c, n => "$" + n), /22% bajo la mediana de las otras 2 tiendas/);
+});
+
+test("contra el mismo modelo: con dos tiendas no se afirma nada, ni con una baja menor al minimo de la categoria", () => {
+  assert.equal(O.calcularOfertas({ productos: TRES([["cg", 80000], ["mx", 100000]]) }).contraModelo.size, 0);
+  assert.equal(O.calcularOfertas({ productos: TRES([["cg", 97000], ["mx", 100000], ["vx", 101000]]) }).contraModelo.size, 0, "3% en un componente: menos del 8%");
+});
+
+test("contra el mismo modelo: una diferencia de mas del 40% o tiendas que no coinciden entre si es un dato dudoso, no una oferta", () => {
+  assert.equal(O.calcularOfertas({ productos: TRES([["cg", 50000], ["mx", 100000], ["vx", 104000]]) }).contraModelo.size, 0, "52% bajo: mas facil un error que una oferta");
+  assert.equal(O.calcularOfertas({ productos: TRES([["cg", 70000], ["mx", 90000], ["vx", 140000]]) }).contraModelo.size, 0, "las otras dos difieren 56% entre si");
+});
+
+test("contra el mismo modelo: no cuentan el agregador, lo internacional ni lo usado, y en equipos solo la misma configuracion", () => {
+  const ajenas = [conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, "comparaya", "KF560C36-32"),
+    conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, "cg", "KF560C36-32", { sellos: "i" }),
+    conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, "mx", "KF560C36-32", { sellos: "u" })];
+  const mia = conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 80000, "vx", "KF560C36-32");
+  assert.equal(O.calcularOfertas({ productos: [mia, ...ajenas] }).contraModelo.size, 0);
+  const nb = (ram, p, t) => conTienda(`Notebook Lenovo IdeaPad Core i5-13420H ${ram}GB 512GB`, p, t, "15IRH10");
+  const r = O.calcularOfertas({ productos: [nb(8, 500000, "cg"), nb(16, 900000, "mx"), nb(16, 950000, "vx"), nb(16, 960000, "gc")] });
+  assert.deepEqual([...r.contraModelo.keys()].map(f => f[3]), ["mx"], "el de 16 GB mas barato; el de 8 GB no se compara con los de 16");
+});
+
+test("contra el mismo modelo: solo el mas barato (o casi) del modelo, y no si otra tienda lo tiene mas barato", () => {
+  const idx = { productos: TRES([["cg", 80000], ["mx", 81000], ["vx", 100000], ["gc", 102000]]) };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual([...r.contraModelo.keys()].map(f => f[3]).sort(), ["cg", "mx"]);
+  const mas = O.calcularOfertas({ productos: TRES([["cg", 80000], ["mx", 70000], ["vx", 100000], ["gc", 102000]]) });
+  assert.deepEqual([...mas.contraModelo.keys()].map(f => f[3]), ["mx"], "cg no es oferta: mx lo tiene mas barato");
+});
+
+test("contra el mismo modelo: un celular que no llega al minimo de su gama no es oferta aunque este bajo el resto", () => {
+  const c = (p, t) => conTienda("Celular Moto G05 4GB 64GB", p, t, "XT2547");
+  assert.equal(O.calcularOfertas({ productos: [c(100000, "cg"), c(150000, "mx"), c(152000, "vx")] }).contraModelo.size, 0);
+});
+
+test("cruce por generacion: gama alta del año pasado a precio de media de hoy, solo con muestra de la media actual", () => {
+  const media = Array.from({ length: 8 }, (_, i) => fila(`Celular Realme ${i} 8GB 512GB`, 700000 + i * 1000));
+  const anterior = fila("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", 690000);
+  const actual = fila("Celular Samsung Galaxy S26 Ultra 16GB 1TB 144Hz OLED 200MP", 1500000);   // mejora la RAM, el almacenamiento y los Hz
+  const caro = fila("Celular Samsung Galaxy S25 12GB 512GB 120Hz OLED", 900000);
+  const idx = { productos: [...media, anterior, actual, caro] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual([...r.cruceGen.keys()].map(f => f[0]), [anterior[0]]);
+  const x = r.cruceGen.get(anterior);
+  assert.deepEqual([x.rubro, x.rom, x.mediana, x.avisos], ["smartphone", 512, B.mediana(media.map(f => f[1])), 8]);
+  assert.match(O.textoCruceGen(x, n => "$" + n), /gama alta del año pasado al precio de una media de hoy/);
+  assert.equal(O.calcularOfertas({ productos: [...media.slice(0, 5), anterior, actual] }).cruceGen.size, 0, "con 5 avisos de media no hay mediana");
+});
+
+test("cruce por generacion: la media de la generacion anterior no es la media de hoy", () => {
+  const mediaVieja = Array.from({ length: 8 }, (_, i) => fila(`Celular Samsung Galaxy S25 FE ${i} 8GB 512GB`, 600000 + i * 1000));
+  const referencia = [fila("Celular Samsung Galaxy S26 Ultra 16GB 1TB 144Hz OLED 200MP", 1500000)];
+  const anterior = fila("Celular Samsung Galaxy S25 Ultra 12GB 512GB 120Hz OLED", 700000);
+  assert.equal(O.calcularOfertas({ productos: [...mediaVieja, ...referencia, anterior] }).cruceGen.size, 0,
+    "la media de la generacion anterior no es la media de hoy");
+});
