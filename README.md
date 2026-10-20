@@ -326,9 +326,13 @@ Tres modos (spec 013, `js/modos.js`), cada uno ordenado de mayor a menor precio:
 - **Recomendacion** (por defecto): precio-calidad. Pasa el piso de gama de su
   categoria, tiene marca reconocida y no esta por debajo del 35% de la mediana
   (45% si la marca no es reconocida).
-- **Super Oferta**: las ofertas reales de la pestaña Ofertas (`js/ofertas.js`)
-  de gama media; la generacion anterior cuenta cuando la actual mejoro poco. Si
-  no hay ninguna lo dice y ofrece otro modo.
+- **Super Oferta**: ofertas **reales** que pasan el minimo de su gama (spec 014,
+  `js/ofertas.js`). La señal principal es el precio contra el mismo modelo en
+  otras tiendas («22% bajo la mediana de las otras 2 tiendas», con el modelo en
+  ≥3 tiendas directas); ademas, la baja propia, la rebaja publicada verificada y
+  el cruce por generacion («gama alta del año pasado al precio de una media de
+  hoy»). Cada fila dice por que es una oferta. Si no hay ninguna no se inventa:
+  lo dice y ofrece otro modo.
 - **Primera Linea**: lo **premium por especificaciones y tecnologia**, sin mirar
   la marca (spec 014, `js/premium.js`): pantalla, procesador, generacion,
   bateria, materiales; la memoria sola no alcanza y lo que no llega al minimo de
