@@ -2,7 +2,7 @@
 
 **Created**: 2026-10-20
 
-**Status**: En curso (PR 1 de 4: Primera Linea por especificaciones; el resto se agrega en los PRs siguientes y esta spec se actualiza en cada uno)
+**Status**: En curso (PR 1 de 4 mergeado: Primera Linea por especificaciones; PR 2: Super Oferta real; el resto se agrega en los PRs siguientes y esta spec se actualiza en cada uno)
 
 **Input**: Aclaracion del dueño el 20/10/2026, despues de ver los tres modos de la spec 013: «Primera Linea no se centre en marcas, sino en calidad premium, specs premium, ultimas tecnologias; las marcas confunden y no son sinonimo de calidad de construccion, materiales o ultimas tecnologias; investigar ganadores absolutos con pruebas reales de rendimiento, duracion y calidad de materiales. Super Oferta: si no hay ofertas no se inventan; la idea es ver si hay gama media del año anterior con la gama alta actual, que es donde se podria considerar ofertas. La idea es encontrar las mejores ofertas dentro de lo mejor: las ultimas novedades, los articulos con mejor pantalla, lo ultimo en procesadores, en tecnologia, en baterias. La idea principal es la oferta contra el mismo modelo en otras tiendas, pero con filtros y orden diferencial, con requisitos minimos para la gama media (6-8 GB de RAM y 128-256 GB de almacenamiento en smartphones, por ejemplo), seguidos por lo ultimo, por materiales de construccion, por prestaciones. Solo establece parametros minimos para las verdaderas ofertas y el orden de filtrado, que no deberian restar en ningun aspecto de la app. Avisame si algo choca con lo que hacen las mejores apps.»
 
@@ -28,7 +28,47 @@ Plan de trabajo y estado de cada funcion: [docs/plan-buscador.md](../../docs/pla
 9. **Orden «Premium»**: ordena por el puntaje (antes: las señales de `evaluar`). Lo internacional va ultimo, a igual puntaje de mayor a menor precio.
 10. Ningun puntaje mira comisiones (Constitucion II).
 
-### 2. Super Oferta real (PR 2) — pendiente
+### 2. Super Oferta real (PR 2)
+
+1. **Super Oferta = una oferta REAL que pasa el minimo de su gama.** Si no hay ofertas no se inventan: el modo queda vacio, lo dice y ofrece otro. Las señales (cada fila muestra SUS razones, `ctx.ofertas().get(url).razones`):
+   - **Contra el mismo modelo en otras tiendas** (la señal principal; idea #1 del relevamiento, PriceSpy): `Ofertas.calcularOfertas(...).contraModelo`. El modelo (`modelo` del indice, codigo exacto, nunca por parecido) tiene que estar en **≥3 tiendas** que se leen directo (sin ComparaYa, sin internacionales, sin usados; en equipos, la misma configuracion: RAM, almacenamiento y procesador; capacidades compatibles). El aviso tiene que ser el mas barato del modelo (o estar a menos del 2%) y estar **al menos el minimo de su categoria bajo la mediana de las otras** (`Categorias.DESCUENTO[cat].propia`: 5% equipos y monitores, 8% componentes y perifericos, 3% otros). Texto: «22% bajo la mediana de las otras 2 tiendas ($102.000)».
+   - **Cotas contra los datos dudosos**: mas del 40% bajo el resto (`DESCUENTO_MODELO_MAX`) es mas facil un error de carga o un precio viejo que una oferta (el mismo criterio que el tope de 60% del tachado), y si las otras tiendas no coinciden entre si (precio mas alto / mas bajo > 1,35, `DISPERSION_MODELO`) la referencia no es confiable. Medido: sin esas cotas aparecian coolers a 59% bajo el resto.
+   - **Baja propia** y **rebaja publicada** (ya existentes, con segundo chequeo y tachado fijo).
+   - **Cruce por generacion**: una **gama alta del año pasado** (`Categorias.evaluar(...).anterior`: algun apartado del titulo es de la generacion anterior y ninguno de la ultima; ≥3 señales sin el punto de novedad; y la ultima generacion mejoro varios apartados, o sea `!vigente`) que hoy cuesta **≤ la mediana de la gama media de HOY** de su categoria y capacidad (≥8 avisos; la gama media del año pasado no cuenta para la mediana). No necesita baja ni tachado. Texto: «gama alta del año pasado al precio de una media de hoy — mediana de las notebooks de gama media de 1 TB: $2.785.277 (67 avisos)». Si otra tienda lo vende mas barato, esa es la oferta y este no entra.
+2. **Pasa el minimo de su gama** (`evaluar(...).pasa`) siempre. Ya no se exige que sea de gama **media**: la gama alta tambien entra si su oferta es real (cambia el FR-003 de la spec 013: «nunca incluye gama alta» era de cuando Super Oferta era solo gama media; el dueño pide «las mejores ofertas dentro de lo mejor»).
+3. **Perifericos y «otro» entran** si su oferta es real (rebaja publicada y baja propia verificadas; contra el mismo modelo): son las mismas ofertas de la pestaña Ofertas. Antes quedaban afuera por no tener gama. Si el dueño prefiere dejarlos fuera de Super Oferta es una linea en `Modos.filtrar`; se avisa en el PR.
+4. **Minimos de gama media en un solo lugar**: `Categorias.MIN`. Smartphone: RAM ≥6 GB (ideal 8), almacenamiento ≥128 GB (ideal 256), bateria ≥4.500 mAh, ≥90 Hz, ≥4 años de actualizaciones; notebook y PC: 16 GB y 512 GB; monitor: 144 Hz y ≥24". Coinciden con lo dicho por el dueño (6-8 GB y 128-256 GB en smartphones; el resto es de la spec 012); `tests/js/categorias.test.js` los fija. Solo definen que es una oferta o gama media: no sacan nada de la app (decision 4 del PR 3).
+5. La pestaña Ofertas, el feed RSS, el canal de Telegram y `/hoy/` **no cambian** en este PR (siguen con baja propia y rebaja publicada): sumar las nuevas señales ahi cambia lo que se publica en Telegram y se decide aparte.
+
+### Medicion de Super Oferta (indice publicado el 20/10/2026)
+
+Avisos que da cada señal, por categoria (`node specs/014-ofertas-y-premium/medir.js indice.json ofertas`):
+
+| señal | avisos | smartphone | notebook | monitor | pc | componente | periferico | otro |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| baja propia | 39 | 0 | 3 | 2 | 1 | 11 | 8 | 14 |
+| rebaja publicada | 724 | 80 | 73 | 49 | 0 | 44 | 212 | 266 |
+| contra el mismo modelo | 233 | 0 | 2 | 5 | 0 | 192 | 11 | 23 |
+| gama alta del año pasado | 6 | 0 | 3 | 0 | 3 | 0 | 0 | 0 |
+| **union (Super Oferta)** | **996** | 80 | 78 | 56 | 4 | 244 | 231 | 303 |
+
+Modelos en ≥3 tiendas: 424 (componente 327, otro 39, monitor 35, periferico 19, **notebook 4, smartphone 0**). **Lo que choca con la idea del dueño**: «la idea principal es la oferta contra el mismo modelo en otras tiendas» funciona en componentes y monitores, pero **en celulares y notebooks casi no hay modelos en 3 tiendas** (el `modelo` cubre 16% de los avisos y las tiendas titulan distinto). Para ellos la oferta sale de la rebaja publicada y del cruce por generacion (6 hoy). Lo que lo arreglaria es capturar GTIN/MPN de las fuentes (idea #8, fuera de alcance aca, `docs/plan-buscador.md`).
+
+Resultados por busqueda con la nueva Super Oferta (antes, spec 013, entre parentesis):
+
+| consulta | conjunto | Recomendacion | Super Oferta | Primera Linea |
+| --- | ---: | ---: | ---: | ---: |
+| notebook | 1.673 | 861 | 71 (59) | 230 |
+| celular samsung | 213 | 108 | 10 (8) | 29 |
+| ssd 1tb | 119 | 97 | 3 (1) | 47 |
+| monitor 27 | 413 | 191 | 29 (13) | 71 |
+| auriculares | 500 | 213 | 96 (0) | 0 |
+| rtx 5060 | 115 | 111 | 17 (2) | 24 |
+| ryzen 5 | 295 | 273 | 8 (0) | 67 |
+
+Los 96 de «auriculares» son rebajas publicadas verificadas de perifericos (ahora entran, decision 3); no hay ninguna oferta de otro tipo.
+
+Los 6 cruces por generacion de hoy son notebooks y PCs con Ryzen de la serie 8000 contra la gama media de hoy, por ejemplo «Notebook Asus Zenbook 14 OLED Ryzen 7 8840HS 16GB 1TB» a $2.383.703 contra una mediana de $2.785.277 de las notebooks de 1 TB (67 avisos); por construccion ninguno tiene el mismo modelo mas barato en otra tienda (`masBarato`). Se miraron a mano 14 de los 233 «contra el mismo modelo», elegidos al azar: todos con 3 a 10 tiendas y diferencias de 9% a 20% bajo la mediana (placas madre, memorias, un SSD, una silla, una RTX 5050); en tres el aviso de otra tienda esta a menos del 2% (el «casi igual» de `masBarato`). Cuidado: parte de los `modelo` del indice son identificadores derivados del titulo (`~A1F83B3A187A`, `modelo.py`), no codigos del fabricante; la señal depende de esa identidad.
 ### 3. Orden por defecto y «nada resta» (PR 3) — pendiente
 ### 4. Funciones tomadas de las mejores apps (PR 4) — pendiente
 
@@ -72,4 +112,12 @@ Antes de los topes (primer prototipo, solo suma de señales): notebook 19,8% con
 - **FR-106**: Un modelo en `datos/ganadores.json` suma puntos y muestra la fuente; sin el archivo nada cambia.
 - **FR-107**: El filtro «Solo premium» usa el mismo puntaje (`filtrarGrupos` recibe `esPremium`).
 
-Tests: `tests/js/premium.test.js` (puntaje con titulos reales), `tests/js/buscador.test.js` (modos), `tests/js/filtros-ui.test.js` (pagina).
+## Criterios de aceptacion (PR 2)
+
+- **FR-201**: Super Oferta nunca incluye un aviso que no pase el minimo de su gama ni uno sin una razon de oferta; cada fila dice sus razones.
+- **FR-202**: «contra el mismo modelo» exige ≥3 tiendas directas, misma configuracion en equipos, ser el mas barato (o estar a menos del 2%), el minimo de baja de la categoria, tope de 40% y coincidencia entre las otras tiendas.
+- **FR-203**: el cruce por generacion exige ≥8 avisos de gama media de hoy de su categoria y capacidad; con menos no se afirma nada.
+- **FR-204**: un modo vacio dice «No se inventan ofertas» y ofrece los modos con resultados.
+- **FR-205**: los minimos de `Categorias.MIN` son los del dueño y estan fijados por test.
+
+Tests: `tests/js/ofertas.test.js` (contra el mismo modelo, cruce por generacion, `anterior`), `tests/js/buscador.test.js` (modo Super Oferta y sus razones), `tests/js/categorias.test.js` (MIN). Antes: `tests/js/premium.test.js` (puntaje con titulos reales), `tests/js/buscador.test.js` (modos), `tests/js/filtros-ui.test.js` (pagina).

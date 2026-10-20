@@ -36,3 +36,21 @@ if (que === "todo" || que === "busquedas") {
     console.log(`| ${q} | ${g.filas.length} | ${M.MODOS.map(m => c[m.id]).join(" | ")} |`);
   }
 }
+
+if (que === "todo" || que === "ofertas") {
+  const O = require(raiz + "/js/ofertas.js"), r = O.calcularOfertas(idx);
+  const por = filas => { const c = {}; for (const f of filas) { const k = r.gama.get(f).categoria; c[k] = (c[k] || 0) + 1; } return c; };
+  const union = new Set([...r.propias, ...r.publicadas, ...r.contraModelo.keys(), ...r.cruceGen.keys()]);
+  const senales = { "baja propia": r.propias, "rebaja publicada": r.publicadas, "contra el mismo modelo": [...r.contraModelo.keys()], "gama alta del año pasado": [...r.cruceGen.keys()], "union (Super Oferta)": [...union] };
+  console.log("\n| señal | avisos | " + C.ORDEN.join(" | ") + " |\n| --- | ---: | " + C.ORDEN.map(() => "---:").join(" | ") + " |");
+  for (const [k, l] of Object.entries(senales)) { const c = por(l); console.log(`| ${k} | ${l.length} | ${C.ORDEN.map(x => c[x] || 0).join(" | ")} |`); }
+  // modelos presentes en >=3 tiendas por categoria (sin ComparaYa, internacionales ni usados)
+  const tiendas = new Map();
+  for (const f of idx.productos) {
+    if (!f[9] || f[3] === "comparaya" || B.esUsado(f) || (typeof f[8] === "string" && f[8].includes("i"))) continue;
+    (tiendas.get(f[9]) || tiendas.set(f[9], { cat: C.categoriaDe(f[0]), t: new Set() }).get(f[9])).t.add(f[3]);
+  }
+  const cat3 = {}; let total3 = 0;
+  for (const m of tiendas.values()) if (m.t.size >= 3) { cat3[m.cat] = (cat3[m.cat] || 0) + 1; total3++; }
+  console.log(`\nModelos en >=3 tiendas: ${total3}`, JSON.stringify(cat3));
+}
