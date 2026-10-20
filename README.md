@@ -30,7 +30,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
@@ -321,11 +321,20 @@ El indice no tiene specs, garantias ni reviews: solo nombre, precio, tienda y
 los precios anterior y tachado. Con eso no se puede calcular "calidad/precio"
 de 8500 productos. Lo que si se puede, y es lo que hace:
 
-- **Recomendado** (por defecto): primero la marca mas confiable al menor precio.
-  Manda al fondo lo que esta por debajo del 45% de la mediana sin marca
-  reconocida, porque casi nunca es comparable con el resto.
-- **Mas barato**: el orden clasico, por si lo unico que importa es el numero.
-- **Mejor marca**: por nivel de marca, y dentro de cada nivel por precio.
+Tres modos (spec 013, `js/modos.js`), cada uno ordenado de mayor a menor precio:
+
+- **Recomendacion** (por defecto): precio-calidad. Pasa el piso de gama de su
+  categoria, tiene marca reconocida y no esta por debajo del 35% de la mediana
+  (45% si la marca no es reconocida).
+- **Super Oferta**: las ofertas reales de la pestaña Ofertas (`js/ofertas.js`)
+  de gama media; la generacion anterior cuenta cuando la actual mejoro poco. Si
+  no hay ninguna lo dice y ofrece otro modo.
+- **Primera Linea**: solo las marcas de `marcas.primera` de `datos.json`.
+
+Dentro de cada modo se elige el orden: **Precio ↓** (por defecto), **Novedades**
+(generacion o año mas nuevo primero) o **Premium** (mas señales de gama alta
+primero). Lo internacional va siempre al final. Lo guardado por la version
+anterior («precio», «marca») arranca en Recomendacion.
 
 El nivel de marca sale de la lista curada en `datos.json`, no de las tiendas:
 `primera` son fabricantes con red de garantia y trayectoria, `conocida` son
@@ -340,7 +349,7 @@ Los avisos de ComparaYa suman tres sellos mas, que salen de su API (`sellos` en
 `tiendas.json`): **compra internacional** (se envia desde el exterior), **tienda
 oficial** y **envio gratis**. En el indice viajan como letras (`i`, `o`, `e`) en
 el campo `sellos`. Las compras internacionales siguen en la lista, marcadas, pero
-en el orden Recomendado van despues de las comparables.
+en cualquier modo van despues de las comparables.
 
 Cuando la consulta cae en una categoria analizada a fondo, aparece un acceso
 directo a la Comparativa, que es donde estan las specs de fabrica y la garantia

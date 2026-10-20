@@ -377,6 +377,7 @@ td.mejor{color:var(--good);font-weight:700}
 .segmentos.chico{margin-bottom:14px}
 .orden2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
 .orden2 .segmentos.chico{margin-bottom:10px}
+@media(max-width:480px){.orden .segmentos.chico .seg,.orden2 .segmentos.chico .seg{padding:7px 8px;font-size:.78rem}}
 .segmentos.chico .seg{padding:7px 14px;font-size:.83rem}
 
 /* ---- Puente a la comparativa ---- */
