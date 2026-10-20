@@ -19,7 +19,7 @@ Se actualiza en cada PR. Origen: aclaracion del dueño del 20/10/2026 (spec [014
 | Precio por tienda dentro de un producto | Geizhals, PriceSpy | Ya existe «tambien en» (`agruparPorModelo`) | hecho (spec 008) | — | — |
 | GTIN / MPN (idea #8) | Google | — | descartado en esta tanda: fuera de alcance, necesita cambios en `indexar.py` | — | — |
 | Popularidad con clics (idea #6) y precio con envio (idea #10) | PriceSpy, Amazon | — | descartado: no hay señal de uso suficiente ni costo de envio publicado (ver relevamiento) | — | — |
-| Importar desde la búsqueda (spec 015): «Calcular con este precio» precarga la calculadora y la pestaña dice dónde comprar afuera | Pendiente del dueño (spec 014) | Precio en dólares al oficial y peso tipico por rubro en la calculadora; sección «Importando» con Amazon (afiliado), Tiendamia y Loquieroaca solo como enlaces | **hecho** (PR de la spec 015; sin leer Tiendamia ni Loquieroaca: bloquean) | feat/importar-desde-la-busqueda | Claude (hizo); revision de la spec pendiente |
+| Importar desde la búsqueda (spec 015): «Calcular con este precio» precarga la calculadora y la pestaña dice dónde comprar afuera | Pendiente del dueño (spec 014) | Precio en dólares al oficial y peso tipico por rubro en la calculadora; sección «Importando» con Amazon (afiliado), Tiendamia y Loquieroaca solo como enlaces | **hecho** (PR [#94](https://github.com/luismarceloescudero-debug/la-pichincha/pull/94), mergeado el 20/10; sin leer Tiendamia ni Loquieroaca: bloquean) | — (ya mergeada; rama borrada) | Claude (hizo); revision de la spec pendiente |
 
 ## Decisiones del dueño que cambian el plan
 
