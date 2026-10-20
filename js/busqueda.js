@@ -14,7 +14,7 @@ let ORDEN2 = Modos.migrarSecundario(guardado("orden2"));
 /* Lo que se calcula una vez por indice cargado: las generaciones, la gama de cada titulo y (recien si hace falta) las ofertas. */
 let CTX_MODOS = null;
 function ctxModos() {
-  if (!CTX_MODOS || CTX_MODOS.idx !== IDX) CTX_MODOS = { idx: IDX, ctx: Modos.preparar(IDX, nivelMarca, () => OFERTAS) };
+  if (!CTX_MODOS || CTX_MODOS.idx !== IDX) CTX_MODOS = { idx: IDX, ctx: Modos.preparar(IDX, nivelMarca, () => OFERTAS, DATOS.ganadores || null) };
   return CTX_MODOS.ctx;
 }
 
@@ -64,8 +64,8 @@ function filtrosHtml() {
     <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
       <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo"></label>
       <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo"></label></div>
-    <div class="of-fila"><span class="of-et" aria-hidden="true">Marca</span>
-      <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}">${icono("trofeo")} Solo primera línea</button></div>
+    <div class="of-fila"><span class="of-et" aria-hidden="true">Gama</span>
+      <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
     <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
       <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil"></div>
     <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
@@ -169,9 +169,9 @@ function pintarResultados(q) {
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.
-  const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, nivelMarca);
-  OTRAS = F.otras;
   const cm = ctxModos();
+  const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, n => cm.premium(n).premium);
+  OTRAS = F.otras;
   const enModo = Modos.filtrar(F.filas, ORDEN, cm, med);
   const r = Modos.ordenar(enModo, ORDEN2, cm).slice(0, 60);
   ULTIMA_BUSQUEDA = r;
@@ -187,12 +187,12 @@ function pintarResultados(q) {
   }
 
   const fuentes = new Set(r.map(f => f[3]));
-  const conMarca = r.filter(f => nivelMarca(f[0]) === 2).length;
+  const nPremium = r.filter(f => cm.premium(f[0]).premium).length;
   const afuera = A ? A.total - A.base.length - A.internacionales.length : 0;
   const nInt = A ? A.internacionales.length : 0;
   est.innerHTML = (enModo.length > r.length ? `Mostrando ${r.length} de ${enModo.length}` : Buscador.textoConteo(r.length, avisosDe(r)))
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
-    + ` · mediana ${pesos(med)} · ${conMarca} de marca de primera línea`
+    + ` · mediana ${pesos(med)} · ${nPremium} premium por especificaciones`
     + (F.ocultas ? ` · ${F.ocultas} oculto${F.ocultas > 1 ? "s" : ""} por los filtros` : "")
     + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "")
     + (nInt ? ` · ${nInt} compra${nInt > 1 ? "s" : ""} internacional${nInt > 1 ? "es" : ""}, marcada${nInt > 1 ? "s" : ""} y fuera de la comparativa` : "");
@@ -222,8 +222,10 @@ function pintarResultados(q) {
     const sospechoso = pisoDeGama(f[1], niv, med);
     const marcas = [];
     if (viejoDe(f)) marcas.push(selloOjo(viejoDe(f)));
-    if (niv === 2) marcas.push('<span class="sello primera">primera línea</span>');
-    else if (niv === 1) marcas.push('<span class="sello conocida">marca conocida</span>');
+    const prem = cm.premium(f[0]);
+    if (prem.premium) marcas.push(`<span class="sello primera" title="${esc(prem.senales.join(" · "))}">premium</span>`);
+    if (prem.ganador) marcas.push(`<span class="sello conocida">${esc(prem.ganador.texto)}</span>`);
+    if (niv >= 1) marcas.push('<span class="sello conocida">marca reconocida</span>');
     if (bajo) marcas.push(`<span class="sello baja">bajó ${bajo}%</span>`);
     else if (off) marcas.push(`<span class="sello off2">${off}% OFF</span>`);
     if (sospechoso) marcas.push('<span class="sello ojo">muy por debajo del resto</span>');
