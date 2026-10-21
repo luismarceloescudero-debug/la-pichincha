@@ -31,6 +31,9 @@ pero su pagina armada muestra el precio).
 En las tiendas que se leen directo, ante la duda se publica: su precio se lee de su propio sitio el mismo dia, y un
 bloqueo (403, 429), un error del servidor, una pagina de captcha o un fallo de red no prueban que este caida.
 
+Con --telemetria RUTA anota el veredicto de cada enlace (comercio, juicio, motivo) para fiabilidad.py, que lo cuenta por
+comercio y lo guarda en la rama `historial`.
+
 Sale con 3 si encontro caidas nuevas (hay que volver a elegir ofertas) y con 0 si no; nunca falla la corrida.
 """
 
@@ -380,10 +383,26 @@ def resumen(urls, juicios, etapas):
     return "\n".join(lineas)
 
 
+def guardar_telemetria(ruta, urls, juicios, etapas):
+    """Suma a `ruta` el veredicto de cada enlace ({url: {comercio, juicio, motivo}}) para fiabilidad.py. Entre rondas y
+    entre los dos pasos del workflow gana la ultima revision de cada enlace; un archivo previo roto se reemplaza.
+    Es telemetria: si no se puede escribir, la corrida sigue."""
+    previa = leer(ruta, {})
+    datos = previa if isinstance(previa, dict) else {}
+    for u in urls:
+        datos[u] = {"comercio": comercio(u), "juicio": juicios[u], "motivo": etapas[u]}
+    try:
+        with open(ruta, "w", encoding="utf-8") as f:
+            json.dump(datos, f)
+    except OSError as e:
+        print(f"::warning::No se guardo la telemetria ({type(e).__name__})")
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     ruta = argv[0] if argv and not argv[0].startswith("--") else "candidatas.json"
     destino = argv[argv.index("--descartadas") + 1] if "--descartadas" in argv else "descartadas.json"
+    telemetria = argv[argv.index("--telemetria") + 1] if "--telemetria" in argv else None
     datos = leer(ruta, None)
     if not isinstance(datos, dict):
         print(f"No hay {ruta}: no hay nada que verificar")
@@ -412,6 +431,8 @@ def main(argv=None):
     if urls and len(dudosas) == len(urls):
         print("::warning::No se pudo confirmar ningun enlace (bloqueo o sin red): se publican tal cual")
         print("no se pudo confirmar ningún enlace")
+    if telemetria:
+        guardar_telemetria(telemetria, urls, juicios, etapas)
     if not nuevas:
         return 0
     with open(destino, "w", encoding="utf-8") as f:

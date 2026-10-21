@@ -407,7 +407,10 @@ Las ofertas del dia salen por dos canales, sin backend:
   tener una via oficial (feed o afiliados); Megatone y Maxtecno quedaron confirmados.
   En las tiendas que se leen directo, ante la duda (bloqueo, captcha, error del servidor, sin red) se publica. El log de
   cada paso dice, por comercio, cuantas estaban en pie, cuantas se descartaron y cuantas quedaron sin
-  confirmar. `diagnostico_enlaces.py` (workflow *Verificacion de enlaces (caso real)*) corre la misma
+  confirmar, y ademas cada enlace deja su veredicto en `telemetria.json` (`--telemetria`): con eso
+  `fiabilidad.py` arma la serie por comercio que se ve en [/estado/](https://pichinchadeldia.com.ar/estado/)
+  (seccion «Ofertas que ya no estaban en pie», ver [Fiabilidad por comercio](#fiabilidad-por-comercio)).
+  `diagnostico_enlaces.py` (workflow *Verificacion de enlaces (caso real)*) corre la misma
   verificacion sobre las candidatas publicadas y anota que responde cada endpoint de la API.
 - **Telegram**: `publicar_telegram.py` manda UN mensaje "Pichinchas del dia" a un canal con
   las 10 mejores y el enlace al sitio (los titulos de mas de 100 caracteres se cortan en una palabra entera con "…"; el enlace sigue entero). **Esta apagado hasta que se configure**: hay que
@@ -419,6 +422,37 @@ Las ofertas del dia salen por dos canales, sin backend:
 Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el feed y el
 canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
 rotulan.
+
+## Fiabilidad por comercio
+
+Es dato propio, y por eso ComparaYa no lo puede mostrar: de las ofertas que este sitio
+verifico en los ultimos dias, cuantas ya no estaban en pie o estaban a otro precio. Se ve en
+`/estado/`, en la seccion «Ofertas que ya no estaban en pie» (spec
+[016](specs/016-fiabilidad-por-comercio/spec.md), D4 del plan v2).
+
+- **De donde sale.** `verificar_ofertas.py --telemetria telemetria.json` anota, por enlace, el
+  comercio, el veredicto (`viva`, `caida`, `dudosa`) y el motivo. Entre las hasta 3 rondas de
+  cada paso y entre los dos pasos del workflow gana la ultima revision de cada enlace, asi que
+  no se cuenta dos veces.
+- **Que cuenta como caida.** Solo lo que se probo: un 404/410, el cartel de la tienda, sin
+  stock en su API o el precio publicado que ya no existe. Lo que se descarta porque la tienda
+  bloqueo la revision o no respondio (`sin comprobar`) se informa aparte y **no** entra en el
+  porcentaje: un bloqueo no prueba nada contra la tienda.
+- **Donde se guarda.** Una fila por comercio y dia en
+  `historial/verificacion/AAAA-MM.csv` de la rama `historial`, como los precios: main queda
+  limpio, la cache de Actions no se puede desalojar y el artefacto del sitio solo tendria la
+  ultima publicacion. Un push a main no suma filas (no es una revision del dia); si resume la
+  serie. La subcarpeta es a proposito: `historial.py` lee los CSV de la raiz y ahi estan los
+  precios.
+- **Que se muestra.** `fiabilidad.py` resume los ultimos 30 dias y escribe
+  `_sitio/fiabilidad.json`; ventana, fecha de corte y minimo de muestras van escritos en la
+  pagina. Con menos de 30 ofertas verificadas no se muestra porcentaje («Pocas revisiones»),
+  para no rotular a una tienda por dos casos. La tabla se ordena por cantidad de verificadas,
+  no por peor porcentaje: no es un ranking.
+- **Como se lee.** Se revisan las mejores ofertas del dia, que son las mas propensas a haberse
+  agotado, y lo que llega por ComparaYa puede traer un precio viejo: un porcentaje alto no es
+  una opinion sobre la atencion de la tienda y la pagina lo dice. Sin `fiabilidad.json` la
+  seccion no aparece.
 
 ## Serie de precios
 

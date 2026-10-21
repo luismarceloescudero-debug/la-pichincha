@@ -237,6 +237,42 @@ class Principal(unittest.TestCase):
         _, salida = self.correr({u["url"]: "dudosa" for u in OFERTAS["ofertas"]})
         self.assertIn("no se pudo confirmar", salida)
 
+    def test_telemetria_guarda_comercio_juicio_y_motivo_de_cada_enlace(self):
+        tele = os.path.join(self.dir, "tele.json")
+        with mock.patch.object(v, "revisar", side_effect=lambda u, desde=None, precio=None, tienda=None: (
+                {"https://t.test/a": "viva", "https://t.test/b": "caida", "https://t.test/c": "dudosa"}[u], "api de la tienda: sin stock")),                 redirect_stdout(io.StringIO()):
+            v.main([self.ofertas, "--descartadas", self.descartadas, "--telemetria", tele])
+        datos = json.loads(Path(tele).read_text(encoding="utf-8"))
+        self.assertEqual(datos["https://t.test/b"], {"comercio": "t.test", "juicio": "caida", "motivo": "api de la tienda: sin stock"})
+        self.assertEqual(len(datos), 3)
+
+    def test_telemetria_se_suma_entre_rondas_y_gana_la_ultima_revision_de_cada_enlace(self):
+        tele = os.path.join(self.dir, "tele.json")
+        Path(tele).write_text(json.dumps({"https://t.test/a": {"comercio": "t.test", "juicio": "dudosa", "motivo": "estatica"},
+                                          "https://t.test/vieja": {"comercio": "otra.test", "juicio": "viva", "motivo": "api"}}), encoding="utf-8")
+        with mock.patch.object(v, "revisar", return_value=("viva", "api")), redirect_stdout(io.StringIO()):
+            v.main([self.ofertas, "--descartadas", self.descartadas, "--telemetria", tele])
+        datos = json.loads(Path(tele).read_text(encoding="utf-8"))
+        self.assertEqual(datos["https://t.test/a"]["juicio"], "viva")
+        self.assertIn("https://t.test/vieja", datos)
+
+    def test_telemetria_se_escribe_aunque_no_haya_caidas_nuevas(self):
+        tele = os.path.join(self.dir, "tele.json")
+        with mock.patch.object(v, "revisar", return_value=("viva", "api")), redirect_stdout(io.StringIO()):
+            self.assertEqual(v.main([self.ofertas, "--descartadas", self.descartadas, "--telemetria", tele]), 0)
+        self.assertTrue(os.path.exists(tele))
+
+    def test_sin_telemetria_no_escribe_nada_extra(self):
+        self.correr({u["url"]: "viva" for u in OFERTAS["ofertas"]})
+        self.assertEqual(sorted(os.listdir(self.dir)), ["ofertas.json"])
+
+    def test_una_telemetria_previa_rota_se_reemplaza(self):
+        tele = os.path.join(self.dir, "tele.json")
+        Path(tele).write_text("{roto", encoding="utf-8")
+        with mock.patch.object(v, "revisar", return_value=("viva", "api")), redirect_stdout(io.StringIO()):
+            v.main([self.ofertas, "--descartadas", self.descartadas, "--telemetria", tele])
+        self.assertEqual(len(json.loads(Path(tele).read_text(encoding="utf-8"))), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
