@@ -78,10 +78,11 @@ function pintarTira() {
   const c = $("#ultimas");
   if (c) c.innerHTML = tiraHtml(true);
 }
-/* Abre la comparativa de una busqueda guardada sin pasar por el buscador. */
-async function compararConsulta(q) {
+/* Abre la comparativa de una busqueda guardada sin pasar por el buscador. `referencia` (opcional): la fila de la tarjeta
+   desde la que se compara; la comparativa queda con sus mismas especificaciones (spec 017). */
+async function compararConsulta(q, referencia = null) {
   try { await asegurarIndice(); } catch (e) { return; }
-  fijarConsulta(q);
+  fijarConsulta(q, referencia);
   if (!ANALISIS) return;
   guardarHist(q);
   registrarBusqueda(q);

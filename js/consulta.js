@@ -3,7 +3,7 @@
    mismo. Ahora lo que buscas gobierna las tres: la comparativa sale de los
    resultados, el ranking de comercios sale de los resultados y el veredicto
    lo escribe la propia busqueda. Sin consulta vuelve el contenido curado. */
-let CONSULTA = "", ANALISIS = null;
+let CONSULTA = "", ANALISIS = null, REFERENCIA = null;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
 const DINAMICAS = ["comparativa", "tiendas", "veredicto"];
 const LETRAS = ["A", "B", "C", "D"];
 const MARCAS_RE = Buscador.armarMarcasRe([...(MARCAS.primera || []), ...(MARCAS.conocida || [])]);
@@ -24,28 +24,39 @@ function marcaDe(nombre) { return Buscador.marcaDe(nombre, MARCAS_RE); }
 /* La logica vive en js/analisis.js: la comparten esta pagina y las paginas por busqueda. */
 function analizarConsulta(q) {
   return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe: f => OTRAS.get(f) || [],
-    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "" });
+    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA });
 }
 
-function fijarConsulta(q) {
+/* `referencia` (opcional): la fila de la tarjeta desde la que se compara; la comparativa queda con sus mismas especificaciones. */
+function fijarConsulta(q, referencia = null) {
   const t = q.trim();
   if (t.length < 2) return limpiarConsulta();
   CONSULTA = t;
+  REFERENCIA = referencia;
   ANALISIS = analizarConsulta(t);
-  if (!ANALISIS) CONSULTA = "";
+  if (!ANALISIS) { CONSULTA = ""; REFERENCIA = null; }
   marcarConsulta();
 }
-function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; marcarConsulta(); }
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; marcarConsulta(); }
 function marcarConsulta() {
   const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
   sincronizarUrl();
 }
 
 /* ---- Vistas ---- */
+/* Cuando se compara desde una tarjeta: contra que especificaciones se compara y, si hay pocos avisos, lo dice. */
+function notaEspecificaciones(A) {
+  const e = A.espec;
+  if (!e) return "";
+  if (!e.aplica) return ` <span class="nota-espec">No pudimos comparar por especificaciones: el título del aviso no las dice. Comparamos con toda la búsqueda.</span>`;
+  const pocos = e.pocos ? ` Hay pocos avisos con esta configuración: esto es todo lo que hay con exactamente esas especificaciones.` : "";
+  return ` <span class="nota-espec">Comparando solo con avisos de las mismas especificaciones: <b>${esc(e.resumen)}</b> (${e.comparables} ${e.comparables === 1 ? "aviso" : "avisos"}).${pocos}</span>`;
+}
+
 function bannerConsulta() {
   const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
   return `<div class="consulta-activa"><span class="txt">${icono("lupa")} Armado para tu búsqueda <b>«${esc(CONSULTA)}»</b>:
-    ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}</span>
+    ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
     <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button>
     <button class="acc" data-quitar-consulta>Ver el análisis curado</button></div>`;
 }
