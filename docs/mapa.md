@@ -30,7 +30,8 @@ flowchart TD
         GP --> PA["python publicar_app.py (L153)"]
         PA --> FE["node generar_feed.js (L156)"]
         FE --> VO["python verificar_ofertas.py (ML por su API, WooCommerce por su API, agregador por la tienda)"]
-        VO --> IN["node generar_info.js (L164)"]
+        VO --> FI["python fiabilidad.py (historial/verificacion + _sitio/fiabilidad.json, no en push)"]
+        FI --> IN["node generar_info.js (L164)"]
         IN --> GU["node guardia.js (alarma: issue 'guardia' y sin Telegram)"]
         GU --> TG["python publicar_telegram.py (schedule o manual, sin alarma de la guardia)"]
         TG --> CO["python generar_cotizaciones.py (L180)"]
@@ -75,7 +76,9 @@ Puntos que no se ven en el codigo Python ni JS:
   `_sitio/`. Si la fuente falla, se publica el de la cache (L84-91). En un push a `main` solo se rearma
   si no hay cache (L95-98).
 - **El historial vive en la rama huerfana `historial`**: un CSV por mes y `fichas.json` (`indexar.py:50`).
-  Se trae con un segundo checkout (L47) y se commitea desde ese directorio (L104).
+  Se trae con un segundo checkout (L47) y se commitea desde ese directorio (L104). Ahi tambien
+  `verificacion/AAAA-MM.csv`: una fila por comercio y dia con lo que reviso la verificacion de ofertas
+  (`fiabilidad.py`), que se commitea en su propio paso despues de la segunda verificacion.
 - **Tres llamadas por `subprocess`**: `generar_paginas.py:89` corre `node generar_paginas.js`,
   `publicar_app.py:34` pide el commit con `git rev-parse` y `salud.py:86` abre issues con `gh`.
 - **Los generadores de Node reusan los modulos del navegador** con `require`: `generar_paginas.js:14-16`
@@ -102,7 +105,8 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Fichas** (part number de Venex y Mexx) | `ficha` en `tiendas.json` + `modelo.mpn_de_ficha`; cache en `fichas.json` de la rama `historial` | `indexar.py:276-340` | `tests/test_fichas.py`, fixtures `venex/ficha.html`, `mexx/ficha-pn.html` |
 | **Salud de las fuentes** | `salud.py` | `indexar.py:505` escribe `salud.json`; el workflow abre el issue (L122); `generar_info.js` lo muestra en `/estado/` | `tests/test_salud.py`, `tests/js/info.test.js` |
 | **Guardia del indice** | `guardia.js` (`medir`, `alarmas`) | el workflow la corre antes de Telegram, publica `_sitio/guardia.json` y con alarma abre el issue `guardia` y no manda Telegram | `tests/js/guardia.test.js` |
-| **Verificacion en la fuente** | `verificar_ofertas.py` (`revisar_ml`, `revisar_woo`, `revisar_vtex` para las tiendas VTEX directas y las de ComparaYa, `revisar_agregador`) | los dos pasos de verificacion del workflow; `diagnostico_enlaces.py` la corre sobre las candidatas publicadas, mide el catalogo de las tiendas VTEX (`--vtex-catalogo`) y, a mano, las indexa sobre el indice publicado y le pasa la guardia | `tests/test_verificar_ofertas.py`, `tests/test_diagnostico_enlaces.py` |
+| **Verificacion en la fuente** | `verificar_ofertas.py` (`revisar_ml`, `revisar_woo`, `revisar_vtex` para las tiendas VTEX directas y las de ComparaYa, `revisar_agregador`; `--telemetria` anota el veredicto de cada enlace) | los dos pasos de verificacion del workflow; `diagnostico_enlaces.py` la corre sobre las candidatas publicadas, mide el catalogo de las tiendas VTEX (`--vtex-catalogo`) y, a mano, las indexa sobre el indice publicado y le pasa la guardia | `tests/test_verificar_ofertas.py`, `tests/test_diagnostico_enlaces.py` |
+| **Fiabilidad por comercio** (spec 016, D4) | `fiabilidad.py` (`clasificar`: caida probada contra sin comprobar; `contar`, `escribir`, `resumen` de 30 dias con minimo de 30) | lee la `telemetria.json` de `verificar_ofertas.py`; escribe `historial/verificacion/AAAA-MM.csv` (rama `historial`) y `_sitio/fiabilidad.json`; `generar_info.js` (`fiabilidadComercios`, seccion «Ofertas que ya no estaban en pie») lo muestra en `/estado/` | `tests/test_fiabilidad.py`, `tests/js/fiabilidad-estado.test.js` |
 | **Ofertas** (que es una) | `js/ofertas.js` | la pestaña Ofertas, `generar_feed.js`, `publicar_telegram.py` | `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
 | **Costo puesto en casa de lo internacional** | `js/puesto.js` (rango y comparacion, puro) + `equivalente` de `calcularOfertas` en `js/ofertas.js` | tarjeta de Ofertas (`bloquePuesto` en `js/indice-ofertas.js`), `generar_feed.js` (RSS, /hoy/, `ofertas.json`), `publicar_telegram.py` | `tests/js/puesto.test.js`, `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
 | **Calculadora de costos** | `js/costos.js` (el motor, sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) + `js/calculadora.js` (formulario, desglose y URL, puro) + `js/vista-costo.js` (pegamento con la pagina) | la pestaña Costo de importar (`#costo`, `js/arranque.js` la pinta); `publicar_app.py` publica las reglas | `tests/js/costos.test.js`, `tests/js/calculadora.test.js`, `tests/test_importacion.py` |
@@ -193,6 +197,15 @@ Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
   van a la red: el `fetch` se pasa por parametro.
 - **Un tipo de dolar**: una entrada en `TIPOS_DOLAR` (`js/monedas.js:16`) con el `id` que usa dolarapi.com.
 - Tests: `tests/js/monedas.test.js` y `tests/test_cotizaciones.py`.
+
+### Cambiar que cuenta la fiabilidad por comercio
+
+- **Que se cuenta** (pie, caida probada, sin comprobar): `clasificar` y `NO_COMPROBADO` en `fiabilidad.py`. Una
+  frase nueva de `verificar_ofertas.revisar` que descarte sin probar nada tiene que sumarse ahi, o se le cuenta
+  como caida a la tienda; `tests/test_fiabilidad.py` fija las que hay hoy.
+- **Ventana y minimo de muestras**: `DIAS` y `MINIMO` en `fiabilidad.py`; la pagina toma los dos del JSON, asi que
+  no hay nada mas que tocar. La serie no se reescribe: cambiar la ventana cambia el resumen, no el historial.
+- **Como se ve**: `seccionFiabilidad` en `generar_info.js`. Tests: `tests/js/fiabilidad-estado.test.js`.
 
 ## 4. Regla de mantenimiento
 

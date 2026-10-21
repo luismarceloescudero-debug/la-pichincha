@@ -126,7 +126,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python salud.py salud.json
 
-      # Primer chequeo: las publicaciones se pueden caer entre que el agregador (ComparaYa) las leyo y ahora, y no
+      # Primer chequeo (cada enlace deja su veredicto en telemetria.json, ver "Contar la fiabilidad por comercio"): las publicaciones se pueden caer entre que el agregador (ComparaYa) las leyo y ahora, y no
       # traen el stock. Se abren las 40 mejores candidatas (con Chrome, que ejecuta el JavaScript: el cartel de "no
       # esta disponible" de Mercado Libre lo arma el navegador) y las caidas se sacan del indice, asi no aparecen en
       # la pestaña Ofertas, el buscador, el feed ni Telegram. Hasta 3 rondas. Mercado Libre se verifica por su API (precio y vendedores): lo que no se pudo comprobar no sale. En las demas tiendas, ante la duda se deja. Si falla, el
@@ -144,7 +144,7 @@ jobs:
             for ronda in 1 2 3; do
               node generar_feed.js --indice indice.json --descartadas descartadas.json --candidatas candidatas.json --max 40
               rc=0
-              python verificar_ofertas.py candidatas.json --descartadas descartadas.json || rc=$?
+              python verificar_ofertas.py candidatas.json --descartadas descartadas.json --telemetria telemetria.json || rc=$?
               [ "$rc" -eq 3 ] || break
             done
             python filtrar_indice.py indice.json descartadas.json
@@ -208,15 +208,44 @@ jobs:
             echo '[]' > descartadas.json
             for ronda in 1 2 3; do
               rc=0
-              python verificar_ofertas.py _sitio/ofertas.json --descartadas descartadas.json || rc=$?
+              python verificar_ofertas.py _sitio/ofertas.json --descartadas descartadas.json --telemetria telemetria.json || rc=$?
               [ "$rc" -eq 3 ] || break
               node generar_feed.js --indice indice.json --salida _sitio --descartadas descartadas.json
             done
           fi
 
+      # Fiabilidad del dato por comercio (fiabilidad.py): de lo que cada verificacion de arriba reviso, cuantas ofertas
+      # estaban en pie, caidas o con otro precio y sin comprobar. Se suma una fila por comercio y dia a
+      # historial/verificacion/AAAA-MM.csv (rama `historial`, no main) y se resume la ventana de 30 dias en
+      # _sitio/fiabilidad.json, que lee /estado/. Un push a main no suma filas (reusa el indice de la cache: no es una
+      # revision del dia) pero si resume la historia. Si falla, el sitio sale igual.
+      - name: Contar la fiabilidad por comercio
+        continue-on-error: true
+        env:
+          EVENTO: ${{ github.event_name }}
+        run: |
+          args=""
+          if [ "$EVENTO" != "push" ] && [ -f telemetria.json ]; then args="--telemetria telemetria.json"; fi
+          python fiabilidad.py $args --historial historial --salida _sitio/fiabilidad.json
+
+      - name: Guardar la fiabilidad por comercio en el historial
+        if: github.event_name != 'push'
+        continue-on-error: true
+        working-directory: historial
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "sin filas nuevas de fiabilidad"
+          else
+            git commit -m "Fiabilidad por comercio del $(TZ=America/Argentina/Buenos_Aires date +%F)"
+            git push
+          fi
+
       # /estado/ (cuando se relevo cada tienda, de indice.json y salud.json) y /legal/. Si falla, el sitio sale igual.
       - name: Armar las paginas de estado y legales
-        run: node generar_info.js --indice indice.json --salud salud.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
+        run: node generar_info.js --indice indice.json --salud salud.json --fiabilidad _sitio/fiabilidad.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
 
       # Guardia del indice (guardia.js): mide sobre el indice real bajas propias y, por categoria, avisos, "sin datos" y
       # ofertas, y lo compara con la medicion publicada de la corrida anterior. Con una alarma (18/10: 0 bajas propias

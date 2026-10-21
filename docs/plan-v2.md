@@ -145,6 +145,12 @@ Sale cuando: 200 productos con veredicto local contra importado, reglas con fech
 - D3 **Carrito comparador** de ComparaYa: armar una PC o una compra de varios productos y que proponga
   "todo en una tienda", "hasta dos tiendas" o "maximo ahorro", con envio al codigo postal.
 - D4 **Reputacion de tiendas**: tiempo real de entrega, garantia y reclamos publicos, con fuente.
+  **Empezada el 21/10/2026 con la parte que es dato propio** (`specs/016-fiabilidad-por-comercio/spec.md`):
+  `verificar_ofertas.py --telemetria` anota el veredicto de cada enlace, `fiabilidad.py` cuenta por comercio
+  cuantas ofertas estaban en pie, caidas o con otro precio y sin comprobar, lo guarda dia a dia en
+  `historial/verificacion/AAAA-MM.csv` (rama `historial`) y `/estado/` muestra la ventana de 30 dias con la
+  ultima revision, sin veredicto con menos de 30 verificadas. Lo que falta de D4 (entrega, garantia, reclamos)
+  pide fuente externa y sigue abierto: la ventaja sobre ComparaYa es que esto lo medimos nosotros.
 - D5 **Guias de compra** (`programmatic-seo`, `seo-audit`): "que SSD comprar en 2026", "DDR4 o DDR5",
   armadas con los datos del dia, no texto generico.
 
