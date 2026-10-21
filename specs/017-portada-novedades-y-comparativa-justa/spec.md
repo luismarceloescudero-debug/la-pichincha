@@ -2,7 +2,7 @@
 
 **Created**: 2026-10-21
 
-**Status**: Borrador, pendiente de dos decisiones del dueño (ver «Preguntas abiertas»)
+**Status**: Fase 1 implementada (comparación justa por especificaciones clave). Fases 2 y 3 pendientes de dos decisiones del dueño (ver «Preguntas abiertas»)
 
 **Input**: Pedido del dueño el 21/10/2026, en dos puntos. (1) La portada arranca con búsquedas fijas (webcams, RAM, SSD) que escribimos a mano en `js/indice-ofertas.js` (`SUGERIDAS`), no con lo que se busca de verdad. (2) Al elegir una tarjeta (por ejemplo un monitor 27" OLED de 300 Hz, o una PC con 32 GB de RAM y 1 TB de SSD), la comparación se hace con toda la familia o categoría y no con las mismas especificaciones. Decisión del dueño: **la comparación se arma a partir de las novedades** (lo último en tecnología y las especificaciones premium) y eso aparece **ya en la portada, con su comparativa directa**. Más buscados y más vendidos, por igual.
 
@@ -38,7 +38,7 @@
 
 ## Plan por fases
 
-1. **Fase 1 (sin decisiones pendientes)**: comparación justa por especificaciones clave en la tarjeta del buscador y en las ofertas (decisión 1), con el aviso de pocos comparables. Tests por categoría con avisos de ejemplo.
+1. **Fase 1 (hecha, 21/10/2026)**: comparación justa por especificaciones clave (decisión 1), con el aviso de pocos comparables. `js/especificaciones.js` (`clavesDe`, `mismas`, `resumen`) lee las claves del título; `Analisis.analizarConsulta` recibe una `referencia` y filtra; el banner de la Comparativa dice contra qué se compara. **Alcance real**: el botón «Comparar» de las **ofertas** pasa su tarjeta como referencia. La lista de **Buscar** no tiene un botón «Comparar» por fila, solo el de toda la consulta («Comparativa»), que sigue comparando la búsqueda completa; cuando se agregue uno por fila, usa `compararConsulta(q, fila)`. La referencia no va en la URL: al recargar la página la comparativa vuelve a la búsqueda completa. Medido en el índice real (21/10): desde el monitor Samsung Odyssey G3 27" VA 180 Hz Full HD, la comparativa pasó de 25 avisos mezclados a 5 con exactamente esas especificaciones. Tests: `tests/js/especificaciones.test.js` (13).
 2. **Fase 2**: portada con novedades premium y su comparativa directa (decisión 2), en el mismo lugar que hoy tienen las sugerencias.
 3. **Fase 3**: más buscados, cuando el dueño decida el conteo y la política de privacidad (decisión 3.1). Más vendidos, cuando haya fuente (decisión 3.2).
 
