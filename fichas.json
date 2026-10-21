@@ -375,6 +375,10 @@
 "dia": "2026-10-16",
 "mpn": "KVR56U46BD8-32"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52792-memoria-ram-sodimm-ddr5-32gb-5600-mhz-adata.html": {
+"dia": "2026-10-21",
+"mpn": null
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/52806-memoria-ram-sodimm-ddr5-16gb-4800-mhz-adata.html": {
 "dia": "2026-10-21",
 "mpn": "AD5S480016G-S"
@@ -478,6 +482,10 @@
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-1tb-m-2-nvme-gammix-s70-7400mb-s.html": {
 "dia": "2026-10-15",
 "mpn": "AGAMMIXS70B-1T-CS"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-crucial-e100-2tb-m-2-nvme-5000mb-s.html": {
+"dia": "2026-10-21",
+"mpn": "CT2000E100SSD8"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-120gb-wave-sata.html": {
 "dia": "2026-10-15",
@@ -643,6 +651,10 @@
 "dia": "2026-10-15",
 "mpn": "KVR32N22D8/16WP"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-5600mhz-negra-1.html": {
+"dia": "2026-10-21",
+"mpn": "KF556C36BBE-16"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-6400mhz-cl32.html": {
 "dia": "2026-10-21",
 "mpn": "KF564C32BBE-16"
@@ -659,12 +671,20 @@
 "dia": "2026-10-15",
 "mpn": "KF556C40BBAK2-32"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-bolt-v-ddr5-32gb-2x16gb-6000mhz-cl28.html": {
+"dia": "2026-10-21",
+"mpn": null
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-ddr5-16gb-5600mhz-cl46.html": {
 "dia": "2026-10-15",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-16gb-6000mhz-blanco-cl30.html": {
 "dia": "2026-10-15",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-16gb-6000mhz-cl30.html": {
+"dia": "2026-10-21",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-32gb-kit-2x16gb-6000mhz-cl30.html": {
