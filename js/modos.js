@@ -23,7 +23,9 @@
      Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas dejan precio en ambos sentidos. */
   const SECUNDARIOS = [
     { id: "mejor", eti: "Mejor oferta", ayuda: "primero lo más premium y nuevo; dentro de eso, la mayor baja contra el mismo modelo" },
-    { id: "baja", eti: "Mayor baja", ayuda: "mayor % de baja contra el relevamiento anterior (24 h); las ventanas de 7 y 31 días esperan a que el índice traiga la serie de precios" },
+    { id: "baja", eti: "Mayor baja", ayuda: "mayor % de baja contra el relevamiento anterior (24 h)" },
+    { id: "baja7", eti: "Baja 7 días", ayuda: "mayor % de baja contra el precio de hace 7 días; sin historia de 7 días no se ordena por este criterio" },
+    { id: "baja31", eti: "Baja 31 días", ayuda: "mayor % de baja contra el precio de hace 31 días; sin historia de 31 días no se ordena por este criterio" },
     { id: "precio", eti: "Precio ↓" },
     { id: "novedades", eti: "Novedades" },
     { id: "premium", eti: "Premium" },
@@ -102,10 +104,15 @@
       || ((ctx.tiendasDe ? ctx.tiendasDe(b) - ctx.tiendasDe(a) : 0));   // idea #11: a igual todo, el modelo que se puede comparar en mas tiendas
   }
 
+  /* Baja de una ventana (7 o 31 dias) de la columna `pos` del indice, como fraccion (20 = 0,2). Sin dato (historia corta) vale 0: no se ordena por algo que no se afirma. */
+  const bajaDeVentana = (f, pos) => (typeof f[pos] === "number" && f[pos] > 0 ? f[pos] / 100 : 0);
+
   function ordenar(filas, secundario, ctx) {
     const clave = secundario === "novedades" ? f => novedadDe(f[0], ctx.ref)
       : secundario === "premium" ? f => premiumDe(f[0], ctx)
-      : secundario === "baja" ? f => (f[6] > f[1] ? 1 - f[1] / f[6] : 0) : () => 0;
+      : secundario === "baja" ? f => (f[6] > f[1] ? 1 - f[1] / f[6] : 0)
+      : secundario === "baja7" ? f => bajaDeVentana(f, 11)
+      : secundario === "baja31" ? f => bajaDeVentana(f, 12) : () => 0;
     const extra = secundario === "mejor" ? porMejor(ctx) : () => 0;
     const cmp = (a, b) => (esInternacional(a) - esInternacional(b)) || extra(a, b) || (clave(b) - clave(a)) || (b[1] - a[1]);
     return [...filas].sort(cmp);

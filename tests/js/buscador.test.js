@@ -345,7 +345,7 @@ test("categoriaDe es la primera palabra en singular", () => {
 
 test("el orden por defecto es «Mejor oferta» y Precio, Novedades y Premium siguen elegibles", () => {
   assert.equal(Modos.SECUNDARIO_BASE, "mejor");
-  assert.deepEqual(Modos.SECUNDARIOS.map(s => s.id), ["mejor", "baja", "precio", "novedades", "premium"]);
+  assert.deepEqual(Modos.SECUNDARIOS.map(s => s.id), ["mejor", "baja", "baja7", "baja31", "precio", "novedades", "premium"]);
   assert.equal(Modos.migrarSecundario(null), "mejor");
   assert.equal(Modos.migrarSecundario("precio"), "precio");
 });
@@ -388,4 +388,16 @@ test("Mejor oferta: a igual nivel, novedad y baja, desempata el modelo que esta 
   const a = f("Memoria Kingston Fury DDR5 16GB 6000MHz", 100000), b = f("Memoria Corsair Vengeance DDR5 16GB 6000MHz", 100000);
   ctx.tiendasDe = x => (x === b ? 4 : 1);
   assert.equal(Modos.ordenar([a, b], "mejor", ctx)[0], b);
+});
+
+test("Baja 7 días y Baja 31 días ordenan por su ventana; sin historia de la ventana queda al final", () => {
+  // Columnas: nombre, precio, url, tienda, via, lista, antes, imagen, sellos, modelo, desde, baja7, baja31
+  const filas = [
+    ["Sin historia", 100, "u1", "t", "", 0, 0, "", "", "", "", "", ""],
+    ["Baja 5 y 40", 100, "u2", "t", "", 0, 0, "", "", "", "", 5, 40],
+    ["Baja 20 y 10", 100, "u3", "t", "", 0, 0, "", "", "", "", 20, 10],
+  ];
+  const nombres = sec => Modos.ordenar(filas, sec, {}).map(f => f[0]);
+  assert.deepEqual(nombres("baja7"), ["Baja 20 y 10", "Baja 5 y 40", "Sin historia"]);
+  assert.deepEqual(nombres("baja31"), ["Baja 5 y 40", "Baja 20 y 10", "Sin historia"]);
 });
