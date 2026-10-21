@@ -585,6 +585,14 @@ dan siempre la misma mejor compra y la misma mediana. `generar_paginas.js` (Node
 dependencias) las escribe y `generar_paginas.py` orquesta, valida la lista y arma el mapa del
 sitio. Una fuente que no se relevo ese dia muestra "precio del D/M", igual que el sitio.
 
+**Consultas automaticas.** Ademas de `consultas.json` (curado a mano, siempre primero), cada
+publicacion suma las que descubre `generar_consultas.js` en el indice: las mismas que arma
+"Comparar" con cada oferta (`Buscador.consultaDeOferta`), de mas a menos comparables, con al
+menos 8 opciones en 2 comercios, de 2 palabras o mas (nunca "monitor" a secas), sin repetir la
+URL de una manual ni los mismos avisos de otra pagina, hasta 150. Asi la lista sigue al indice
+(nuevas placas, memorias o notebooks) sin tocar nada. `python generar_paginas.py --sin-auto`
+las apaga; si Node falla, salen solo las manuales.
+
 **Agregar una busqueda:** sumar una entrada a `consultas.json` y publicar:
 
     { "q": "rtx 4070", "nota": "Placas de video: 19 avisos, 9 comparables en 3 comercios" }

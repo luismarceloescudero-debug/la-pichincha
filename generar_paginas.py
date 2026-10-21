@@ -5,6 +5,8 @@ Uso:
     python generar_paginas.py --indice indice.json --salida _sitio
 
 La lista de consultas vive en consultas.json: agregar una entrada y publicar crea su pagina.
+A esas, curadas a mano y siempre primeras, se suman las que descubre generar_consultas.js en el
+indice (las mismas que arma "Comparar"); --sin-auto las apaga.
 El analisis de cada consulta lo hace js/analisis.js, el mismo modulo que usa la Comparativa
 del sitio, asi que pagina y comparativa dan siempre lo mismo.
 """
@@ -55,6 +57,30 @@ def cargar_consultas(ruta=CONSULTAS):
     return salida
 
 
+def consultas_automaticas(indice, manuales, tope=None):
+    """Las consultas que descubre generar_consultas.js en el indice, sin repetir la URL de una manual.
+    Si Node falla no se corta nada: las paginas salen solo con las manuales."""
+    cmd = ["node", str(RAIZ / "generar_consultas.js"), "--indice", str(indice), "--manuales", str(CONSULTAS)]
+    if tope:
+        cmd += ["--tope", str(tope)]
+    hecho = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+    if hecho.returncode:
+        print("aviso: no se pudieron descubrir consultas automaticas: " + hecho.stderr.strip()[:200])
+        return []
+    vistos = {c["slug"] for c in manuales}
+    autos = []
+    for e in json.loads(hecho.stdout or "[]"):
+        q = (e.get("q") or "").strip()
+        try:
+            s = slug(q)
+        except ValueError:
+            continue
+        if LARGO_MIN <= len(q) <= LARGO_MAX and s not in vistos:
+            vistos.add(s)
+            autos.append({"q": q, "nota": e.get("nota", ""), "slug": s})
+    return autos
+
+
 def sitemap(paginas, generado, base_url=BASE_URL):
     """sitemap.xml: la principal, el indice /precios/ y solo las paginas indexables.
     lastmod es la fecha de los precios; sin indice no hay fecha ni paginas (FR-016)."""
@@ -78,9 +104,12 @@ def main(argv=None):
     ap.add_argument("--consultas", default=str(CONSULTAS))
     ap.add_argument("--salida", default=str(RAIZ / "_sitio"))
     ap.add_argument("--base-url", default=BASE_URL)
+    ap.add_argument("--sin-auto", action="store_true", help="solo las consultas de consultas.json")
     args = ap.parse_args(argv)
 
     consultas = cargar_consultas(args.consultas)      # una lista invalida corta antes de generar nada
+    if not args.sin_auto and Path(args.indice).exists():
+        consultas += consultas_automaticas(args.indice, consultas)
     manifiesto = {"generado": None, "paginas": []}
     with tempfile.TemporaryDirectory() as tmp:
         validadas = Path(tmp) / "consultas-validadas.json"

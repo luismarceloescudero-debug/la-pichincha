@@ -23,6 +23,23 @@ class Slug(unittest.TestCase):
             generar_paginas.slug("¿¿??")
 
 
+class ConsultasAutomaticas(unittest.TestCase):
+    def correr(self, stdout="[]", codigo=0):
+        from unittest import mock
+        hecho = mock.Mock(returncode=codigo, stdout=stdout, stderr="boom")
+        with mock.patch.object(generar_paginas.subprocess, "run", return_value=hecho):
+            return generar_paginas.consultas_automaticas("indice.json", [{"q": "SSD 1TB", "nota": "", "slug": "ssd-1tb"}])
+
+    def test_no_repite_la_url_de_una_manual_ni_entre_si(self):
+        salida = json.dumps([{"q": "ssd 1tb", "nota": "A: x"}, {"q": "monitor 27 fhd", "nota": "Monitores: x"},
+                             {"q": "Monitor 27 FHD", "nota": "Monitores: y"}, {"q": "x", "nota": ""}])
+        autos = self.correr(salida)
+        self.assertEqual([a["slug"] for a in autos], ["monitor-27-fhd"])
+
+    def test_si_node_falla_salen_solo_las_manuales(self):
+        self.assertEqual(self.correr(codigo=1), [])
+
+
 BASE = "https://ejemplo.test/la-pichincha"
 NS = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
