@@ -228,11 +228,11 @@ function marcarEstrella(btn) {
 
 /* "Comparar" desde una oferta: con marca y submarca («Soundcore AeroFit 2 by Anker») prueba submarca + modelo, despues
    el modelo y por ultimo marca madre + modelo; sin ellas busca la categoria y la marca, sin el codigo de modelo, y
-   abre la comparativa de esos resultados. */
+   abre la comparativa de esos resultados, solo con los avisos de las mismas especificaciones que la oferta (spec 017). */
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados));
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f);
 }
 
 document.addEventListener("keydown", ev => {
