@@ -157,3 +157,32 @@ class DesdeCuando(unittest.TestCase):
         series = {("cg", "u1"): [(d(13), 500), (d(2), 450)], ("mx", "u2"): [(d(30), 70)]}
         self.assertEqual(serie.inicio(series), d(30))
         self.assertIsNone(serie.inicio({}))
+
+
+class BajaEnDias(unittest.TestCase):
+    def test_baja_contra_el_precio_de_hace_7_dias(self):
+        eventos = [(d(10), 1000), (d(3), 900), (HOY, 800)]
+        self.assertEqual(serie.baja_en(eventos, HOY, 800, 7), 20)   # hace 7 dias valia 1.000
+
+    def test_baja_contra_el_precio_de_hace_31_dias(self):
+        eventos = [(d(40), 1000), (d(20), 950), (HOY, 800)]
+        self.assertEqual(serie.baja_en(eventos, HOY, 800, 31), 20)  # hace 31 dias seguia en 1.000
+
+    def test_sin_historia_hasta_la_fecha_de_referencia_no_afirma_nada(self):
+        eventos = [(d(5), 1000), (HOY, 800)]                         # solo 5 dias: no llega a 7
+        self.assertIsNone(serie.baja_en(eventos, HOY, 800, 7))
+        self.assertIsNone(serie.baja_en(eventos, HOY, 800, 31))
+
+    def test_si_no_bajo_es_cero(self):
+        self.assertEqual(serie.baja_en([(d(10), 800), (HOY, 800)], HOY, 800, 7), 0)
+
+    def test_si_subio_tambien_es_cero_y_no_negativo(self):
+        self.assertEqual(serie.baja_en([(d(10), 800), (HOY, 900)], HOY, 900, 7), 0)
+
+    def test_si_no_estaba_publicado_en_la_referencia_no_afirma_nada(self):
+        eventos = [(d(20), None), (d(6), 1000), (HOY, 900)]         # publicado desde hace 6 dias: no estaba hace 7
+        self.assertIsNone(serie.baja_en(eventos, HOY, 900, 7))
+
+    def test_sin_historial_o_sin_precio_no_afirma_nada(self):
+        self.assertIsNone(serie.baja_en([], HOY, 800, 7))
+        self.assertIsNone(serie.baja_en([(d(10), 1000), (HOY, None)], HOY, None, 7))
