@@ -565,7 +565,9 @@ ahorro o precio; y se paginan de a 24. Tocar una tarjeta la abre con el detalle
 y de donde sale el precio anterior. La estrella marca ofertas para seguirlas, y
 "Comparar" abre la comparativa con productos de la misma categoria y especificaciones
 que definen la compra: en monitores conserva pulgadas, resolucion y refresco; en
-memorias, DDR, capacidad y velocidad; y en SSD, capacidad y formato. Reconoce
+memorias, DDR, capacidad y velocidad; en SSD, capacidad y formato; en placas de
+video, chip y memoria; en procesadores, familia y modelo; y en notebooks, gama del
+procesador, RAM y almacenamiento. Reconoce
 FHD/Full HD/1080p, 4K/UHD/2160p y QHD/2K/1440p como equivalentes. Si no encuentra
 la configuracion exacta, relaja la ultima especificacion, nunca el tipo de producto.
 

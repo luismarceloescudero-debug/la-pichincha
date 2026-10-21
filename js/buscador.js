@@ -133,6 +133,39 @@
     return { submarca: toks[i], madre, modelo, consultas };
   }
 
+  /* Chip de una placa de video ("rtx 5060 ti") y su memoria ("16gb"); `n` ya pasó por normalBusq. */
+  function gpuDe(n) {
+    const m = n.match(/\b(rtx|gtx|rx|arc)\s?([a-z]?\d{3,4})(?:\s?(ti super|ti|super|xtx|xt|gre))?\b/);
+    if (!m) return null;
+    const vram = n.slice(m.index + m[0].length).match(/^\s*(\d{1,2}gb)\b/) || n.match(/\b(\d{1,2}gb)\s?gddr/);
+    return { chip: m[1] + " " + m[2] + (m[3] ? " " + m[3] : ""), vram: vram ? vram[1] : "" };
+  }
+
+  /* Familia y modelo de un procesador suelto: ["ryzen 7", "9850x3d"], ["i7", "14700kf"], ["core ultra 9", "285k"]. */
+  function cpuDe(n) {
+    let m = n.match(/\bryzen\s([3579])\s(\d{4,5}[a-z0-9]*)/);
+    if (m) return ["ryzen " + m[1], m[2]];
+    if ((m = n.match(/\bcore ultra\s([3579])\s(\d{3}[a-z]*)/))) return ["core ultra " + m[1], m[2]];
+    if ((m = n.match(/\bi([3579])\s?(\d{4,5}[a-z]{0,2})\b/))) return ["i" + m[1], m[2]];
+    return null;
+  }
+
+  /* Solo la gama del procesador de un notebook ("ryzen 7", "i5", "core ultra 7", "m4"): el modelo exacto cambia con cada tienda. */
+  function gamaCpuDe(n) {
+    const m = n.match(/\b(ryzen\s[3579]|core ultra\s[3579]|i[3579]|m[1-9])\b/);
+    return m ? m[1] : "";
+  }
+
+  /* RAM y almacenamiento de un notebook: de las capacidades del titulo, la menor es la RAM y la mayor el disco.
+     Se descarta la memoria de la placa ("RTX 5050 8GB") y la gama del procesador. */
+  function ramRomDe(n) {
+    const t = n.replace(/\b(?:rtx|gtx|rx|arc)\s?[a-z]?\d{3,4}\s?(?:ti super|ti|super|xtx|xt|gre)?\s+\d{1,2}gb\b/g, " ");
+    const caps = [...t.matchAll(/\b(\d{1,4})(gb|tb)\b/g)].map(x => x[2] === "tb" ? +x[1] * 1000 : +x[1]).sort((a, b) => a - b);
+    const gb = v => v >= 1000 ? v / 1000 + "tb" : v + "gb";
+    if (caps.length >= 2 && caps[0] <= 64) return [gb(caps[0]), gb(caps[caps.length - 1])];
+    return caps.length === 1 && caps[0] <= 64 ? [gb(caps[0])] : [];
+  }
+
   /* La consulta con la que "Comparar" abre una oferta. Con marca y submarca, la primera de la cadena que encuentra
      algo (`hay(q)` dice si una consulta tiene resultados); sin ellas conserva categoria y especificaciones que definen
      comparabilidad. Si la combinacion completa no existe, afloja las ultimas especificaciones, no tamaño ni categoria. */
@@ -140,7 +173,13 @@
     const info = consultasDe(nombre);
     if (info) return info.consultas.find(hay) || info.consultas[0];
     const n = normalBusq(nombre), s = specsDe(nombre), base = [];
-    if (/\bmonitor\b/.test(n)) {
+    let piso = 2;                       // minimo de palabras: la categoria nunca se afloja
+    if (/^(notebook|laptop)\b/.test(n)) {      // el equipo manda sobre lo que lleva adentro (un SSD, una RTX)
+      base.push("notebook");
+      const cpu = gamaCpuDe(n);
+      if (cpu) base.push(cpu);
+      base.push(...ramRomDe(n));
+    } else if (/\bmonitor\b/.test(n)) {
       base.push("monitor");
       if (s["Pantalla"]) base.push(s["Pantalla"].replace('"', ""));
       if (s["Resolución"]) base.push(normalBusq(s["Resolución"]));
@@ -154,12 +193,20 @@
       base.push("ssd");
       if (s["Capacidad"]) base.push(normalBusq(s["Capacidad"]).split(" + ")[0]);
       if (s["Formato"]) base.push(normalBusq(s["Formato"]));
+    } else if (/\b(placa|tarjeta) de video\b|\bgpu\b|\bgrafica\b/.test(n) && gpuDe(n)) {
+      const g = gpuDe(n);
+      piso = 1;                         // el chip es la categoria: se afloja la memoria, no el chip
+      base.push(g.chip);
+      if (g.vram) base.push(g.vram);
+    } else if (/\b(procesador|cpu|microprocesador)\b/.test(n) && cpuDe(n)) {
+      piso = 1;                         // la familia es la categoria: se afloja el modelo, no la familia
+      base.push(...cpuDe(n));
     }
     if (!base.length) {
       const palabras = String(nombre).split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
       return palabras.slice(0, 3).join(" ") || String(nombre).split(/\s+/).slice(0, 2).join(" ");
     }
-    for (let i = base.length; i > 1; i--) {
+    for (let i = base.length; i >= piso; i--) {
       const q = base.slice(0, i).join(" ");
       if (hay(q)) return q;
     }
