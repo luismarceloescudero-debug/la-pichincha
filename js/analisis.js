@@ -7,10 +7,66 @@
   "use strict";
 
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
-  const { mediana, motivoExclusion, normalBusq, pisoDeGama } = B;
+  const { capacidadGB, compatibles, mediana, motivoExclusion, normal, normalBusq, pisoDeGama } = B;
+  // Ofertas carga categorias; la comparacion de configuraciones de equipos vive ahi. Se pide al usarla: en la pagina
+  // js/ofertas.js se carga despues de este modulo.
+  const mismaConfig = () => (typeof module === "object" && module.exports ? require("./ofertas.js") : raiz.Ofertas).mismaConfiguracion;
+
+  /* --- Precio por tienda --------------------------------------------------
+     El mismo modelo en cada comercio, de menor a mayor precio, con el porcentaje contra la tienda mas barata y lo que
+     se ahorra contra la mas cara. Solo entran avisos comparables del mismo modelo: mismo codigo (lo garantiza
+     agruparPorModelo), misma capacidad, OC contra OC, la misma configuracion en un equipo, y lo que la consulta no excluye
+     (internacionales, usados, accesorios). Varios avisos de una misma tienda son UNA tienda: queda el mas barato.
+     Con una sola tienda no hay comparacion y no se inventa. El orden es solo por precio (comisiones nunca lo cambian).
+     ctx = { comercioDe(f), pesos(n), fechaDe(f)?, admite(f)? } */
+  const esOC = nombre => /\b(?:oc|overclock(?:ed)?)\b/.test(normal(String(nombre)));
+
+  function precioPorTienda(f, otras, ctx) {
+    const { comercioDe, pesos, fechaDe = () => "", admite = () => true } = ctx;
+    const mismaC = mismaConfig();
+    const grupo = [f, ...(otras || [])].filter(x => x === f || admite(x));
+    const conCap = [...grupo].sort((a, b) => a[1] - b[1]).find(x => capacidadGB(x[0]));
+    const pivote = capacidadGB(f[0]) ? f : conCap || f;
+    const oc = esOC(f[0]);
+    const mismos = grupo.filter(x => x === f || (compatibles(pivote, x) && esOC(x[0]) === oc && mismaC(f, x)));
+    const porComercio = new Map();
+    for (const x of [...mismos].sort((a, b) => a[1] - b[1] || (comercioDe(a) < comercioDe(b) ? -1 : 1))) {
+      const k = normal(String(comercioDe(x) ?? ""));
+      if (!porComercio.has(k)) porComercio.set(k, x);
+    }
+    const filas = [...porComercio.values()];
+    const unico = filas.length < 2;
+    const minimo = filas[0][1], maximo = filas[filas.length - 1][1];
+    const tiendas = filas.map(x => {
+      const pct = unico ? null : Math.round((x[1] / minimo - 1) * 100);
+      const pctTexto = unico ? "" : x[1] === minimo ? "la más barata" : pct === 0 ? "+<1%" : `+${pct}%`;
+      return { f: x, comercio: comercioDe(x), precio: x[1], url: x[2], pct, pctTexto, fecha: fechaDe(x) || "" };
+    });
+    const ahorro = unico ? null : maximo - minimo;
+    return { tiendas, unico, barata: tiendas[0], cara: tiendas[tiendas.length - 1], ahorro,
+      ahorroPct: unico ? null : Math.round((1 - minimo / maximo) * 100),
+      textoAhorro: unico ? "un solo comercio: no hay con qué comparar"
+        : ahorro === 0 ? "mismo precio en todas las tiendas" : `${pesos(ahorro)} menos que en la más cara` };
+  }
+
+  /* La tabla (o la nota de "un solo comercio") de un precioPorTienda, la misma en la Comparativa y en las paginas
+     estaticas. h = { esc, pesos, enlace(f, texto, etiqueta), titulo? }; `enlace` arma el <a> de cada pagina. */
+  function tablaTiendasHtml(pt, h) {
+    if (pt.unico) return `<p class="sub pt-nota">${h.esc(pt.textoAhorro)}.</p>`;
+    const fila = t => `<tr><th scope="row">${h.esc(t.comercio)}</th><td class="num">${h.pesos(t.precio)}</td>`
+      + `<td${t.f === pt.barata.f ? ' class="mejor"' : ""}>${h.esc(t.pctTexto)}</td>`
+      + `<td>${h.esc(t.fecha || "sin fecha")}</td>`
+      + `<td>${h.enlace(t.f, "Ver aviso", `Abrir el aviso de ${t.comercio}`)}</td></tr>`;
+    const ahorro = pt.ahorro > 0 ? ` (${pt.ahorroPct}%)` : "";
+    return `<div class="scroll"><table class="pt-tabla">${h.titulo ? `<caption>${h.esc(h.titulo)}</caption>` : ""}`
+      + `<thead><tr><th scope="col">Tienda</th><th scope="col" class="num">Precio</th><th scope="col">Contra la más barata</th>`
+      + `<th scope="col">Fecha del precio</th><th scope="col">Aviso</th></tr></thead>`
+      + `<tbody>${pt.tiendas.map(fila).join("")}</tbody></table></div>`
+      + `<p class="pt-ahorro"><b>${h.esc(pt.textoAhorro)}</b>${ahorro}.</p>`;
+  }
 
   function analizarConsulta(q, ctx) {
-    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos } = ctx;
+    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe } = ctx;
   const crudo = buscarTodo(q);
   if (!crudo.length) return null;
   const nq = normalBusq(q);
@@ -92,6 +148,10 @@
       razon: `La más cara de primera línea: ${pctSobre(alta)}% sobre la mejor compra. Solo si necesitás esas prestaciones.` }); }
   }
 
+  // Precio por tienda de cada opcion: solo con lo que esta consulta considera comparable (mismo filtro que arriba).
+  const admite = f => !motivoExclusion(normalBusq(f[0]), nq, toks, f[8]);
+  for (const p of picks) p.porTienda = precioPorTienda(p.m.f, otrasDe ? otrasDe(p.m.f) : [], { comercioDe, pesos, fechaDe, admite });
+
   // Ranking de comercios: cada comercio de ComparaYa cuenta por separado.
   const mapa = new Map();
   for (const m of base) {
@@ -129,7 +189,7 @@
     ].filter(Boolean);
   }
 
-  const api = { analizarConsulta, partesExclusion };
+  const api = { analizarConsulta, partesExclusion, precioPorTienda, tablaTiendasHtml };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Analisis = api;
 })(this);

@@ -44,6 +44,9 @@ function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {
       return g.filas;
     },
     comercioDe: f => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3],
+    // el mismo modelo en las otras tiendas y la fecha real del precio de cada aviso (para "Precio por tienda")
+    otrasDe: f => otras.get(f) || [],
+    fechaDe: f => P.precioFecha((idx.tiendas[f[3]] || {}).relevado, idx.generado),
     colorDe: f => (idx.tiendas[f[3]] || {}).color || "fh",
     marcaDe: nombre => B.marcaDe(nombre, marcasRe),
     nivelMarca: B.crearNivelMarca(marcas),
@@ -85,6 +88,26 @@ function tambienEn(f, ctx) {
     return esUrl(o[2]) ? `<a href="${esc(o[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(o[0]) || "otro")}">${txt}</a>` : txt;
   });
   return `<span class="mismo">También en ${links.join(" · ")}</span>`;
+}
+
+/* Seccion "Precio por tienda": para cada opcion que lidera (mejor compra, mas barata...), el mismo modelo en cada tienda
+   con el porcentaje contra la mas barata y lo que se ahorra contra la mas cara. Misma tabla que la Comparativa. */
+function enlaceTienda(f, texto, etiqueta) {
+  return esUrl(f[2])
+    ? `<a href="${esc(f[2])}" target="_blank" rel="noopener" aria-label="${esc(etiqueta)}" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${texto}</a>`
+    : "—";
+}
+function precioPorTiendaHtml(analisis, ctx) {
+  const h = { esc, pesos, enlace: enlaceTienda };
+  const hay = analisis.picks.some(p => p.porTienda && !p.porTienda.unico);
+  const bloques = analisis.picks.filter(p => p.porTienda).map(p =>
+    `    <h3>${esc(p.rol)}: ${esc(p.m.f[0])}</h3>\n    ${A.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rol}: ${p.m.f[0]}` })}`).join("\n");
+  return `  <section>
+    <h2>Precio por tienda</h2>
+    <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.${hay ? "" : " Ninguna de estas opciones está en más de un comercio."}</p>
+${bloques}
+  </section>
+`;
 }
 
 function filaHtml(f, ctx) {
@@ -182,6 +205,7 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 .wrap td.num{text-align:right;font-family:var(--font-mono);white-space:nowrap}
 .wrap th:nth-child(3){text-align:right}
 .wrap .nota{margin-top:34px;color:var(--ink-3);font-size:.82rem}
+.wrap h3{font-size:.95rem;margin:18px 0 8px}
 .wrap .mismo{display:block;margin-top:4px;font-size:.78rem;color:var(--ink-3)}
 </style>
 </head>`;
@@ -270,6 +294,7 @@ function renderPagina(consulta, analisis, ctx) {
     <div class="tile"><div class="k">Comercios</div><div class="v">${comercios}</div><div class="d">con opciones comparables</div></div>
   </div>
 
+${precioPorTiendaHtml(analisis, ctx)}
   <section>
     <h2>Opciones de ${esc(q)}</h2>
     <div class="scroll"><table>

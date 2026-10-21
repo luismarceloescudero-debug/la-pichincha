@@ -227,7 +227,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, puestoDe, esInternacional };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, puestoDe, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);
