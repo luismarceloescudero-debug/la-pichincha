@@ -79,6 +79,34 @@ test("Comparar: si faltan coincidencias, relaja primero la especificacion menos 
   assert.equal(B.consultaDeOferta(nombre, solo(["monitor 27 fhd"])), "monitor 27 fhd");
 });
 
+test("Comparar: una placa de video conserva el chip y la memoria", () => {
+  const c = n => B.consultaDeOferta(n, () => true);
+  assert.equal(c("Placa de Video ASUS Dual GeForce RTX 3060 12GB GDDR6 OC V2"), "rtx 3060 12gb");
+  assert.equal(c("PLACA DE VIDEO RADEON RX 9070 XT 16GB SAPPHIRE PULSE"), "rx 9070 xt 16gb");
+  assert.equal(c("Placa De Video Msi Gaming Rtx 5060 Ti 16gb Gddr7"), "rtx 5060 ti 16gb");
+  const solo = qs => q => qs.includes(q);
+  assert.equal(B.consultaDeOferta("Placa de Video ASUS Dual GeForce RTX 3060 12GB GDDR6 OC V2", solo(["rtx 3060"])), "rtx 3060");
+  // sin ningun resultado, no pierde el chip
+  assert.equal(B.consultaDeOferta("Placa de Video ASUS Dual GeForce RTX 3060 12GB GDDR6 OC V2", () => false), "rtx 3060 12gb");
+});
+
+test("Comparar: un procesador conserva la familia y el modelo", () => {
+  const c = n => B.consultaDeOferta(n, () => true);
+  assert.equal(c("Procesador AMD Ryzen 7 9850X3D 5.6GHz Turbo AM5"), "ryzen 7 9850x3d");
+  assert.equal(c("Procesador Intel Core I7-14700Kf 14Va Gen S1700"), "i7 14700kf");
+  assert.equal(c("Procesador Intel Core Ultra 9 285K"), "core ultra 9 285k");
+  const solo = qs => q => qs.includes(q);
+  assert.equal(B.consultaDeOferta("Procesador AMD Ryzen 7 9850X3D 5.6GHz Turbo AM5", solo(["ryzen 7"])), "ryzen 7");
+});
+
+test("Comparar: un notebook conserva la gama del procesador, la RAM y el almacenamiento", () => {
+  const c = n => B.consultaDeOferta(n, () => true);
+  assert.equal(c("Notebook Gamer Lenovo LOQ Essential 15ARP11 15.6\" AMD Ryzen 7 170 32GB DDR5 SSD 512GB RTX 5050 8GB"), "notebook ryzen 7 32gb 512gb");
+  assert.equal(c("Notebook Hp Probook 450 G5 Core I5 (7ma) 256gb 8gb (Reacondicionado)"), "notebook i5 8gb 256gb");
+  const solo = qs => q => qs.includes(q);
+  assert.equal(B.consultaDeOferta("Notebook Hp Probook 450 G5 Core I5 (7ma) 256gb 8gb (Reacondicionado)", solo(["notebook i5 8gb"])), "notebook i5 8gb");
+});
+
 test("buscar: normaliza resoluciones equivalentes", () => {
   const n = t => B.normalBusq(t);
   assert.equal(B.filtroDe("monitor 27 fhd")(n("Monitor 27 pulgadas Full HD")), true);

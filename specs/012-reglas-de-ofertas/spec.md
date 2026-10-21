@@ -59,7 +59,10 @@ La idea de fondo: ver cuando la gama alta baja hasta el precio de la media. Una 
 Sin submarca ni «by», «Comparar» arma la consulta con la categoria y las especificaciones
 que hacen comparable el producto, en vez de descartar todas las cifras. Para un monitor
 conserva pulgadas, resolucion y Hz; para una memoria, DDR, capacidad y velocidad; y para
-un SSD, capacidad y formato. Las equivalencias FHD/Full HD/1080p, 4K/UHD/2160p y
+un SSD, capacidad y formato; para una placa de video, chip y memoria (se afloja la
+memoria, nunca el chip); para un procesador, familia y modelo (se afloja el modelo, nunca
+la familia); y para un notebook, gama del procesador, RAM y almacenamiento (un titulo que
+empieza con «Notebook» manda sobre el SSD o la RTX que lleva adentro). Las equivalencias FHD/Full HD/1080p, 4K/UHD/2160p y
 QHD/WQHD/2K/1440p se normalizan antes de buscar. Si no hay resultados con la configuracion
 completa, se relaja desde la ultima especificacion, manteniendo siempre la categoria.
 
