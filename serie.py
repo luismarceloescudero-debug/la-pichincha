@@ -70,6 +70,21 @@ def desde_cuando(eventos, hoy, precio_hoy):
     return tramo[-1][0] if tramo[-1][1] == precio_hoy else hoy
 
 
+def baja_en(eventos, hoy, precio_hoy, dias):
+    """Cuanto bajo el precio de hoy frente al que tenia hace `dias` dias, en % entero (0 si no bajo). None si el
+    historial no llega a esa fecha o el producto no estaba publicado entonces: sin historia suficiente no se afirma nada."""
+    tramo = _tramo_actual(eventos)
+    if not tramo or not precio_hoy:
+        return None
+    referencia = hoy - timedelta(days=dias)
+    if tramo[0][0] > referencia:          # el producto todavia no tenia `dias` dias de historia
+        return None
+    antes = precio_el(tramo, referencia)
+    if not antes:
+        return None
+    return max(0, round((antes - precio_hoy) / antes * 100))
+
+
 def inicio(series):
     """El primer dia registrado en todo el historial: desde cuando se siguen los precios. None sin historial."""
     fechas = [e[0] for eventos in series.values() for e in eventos]
