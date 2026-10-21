@@ -56,7 +56,12 @@ La idea de fondo: ver cuando la gama alta baja hasta el precio de la media. Una 
 3. El modelo conserva su numero y se corta en la primera palabra generica o especificacion, asi AeroFit 2 no se confunde con AeroFit Pro ni con AeroClip (el buscador pide todas las palabras).
 4. Al filtrar por marca se usa la submarca (`marcaDe` devuelve «soundcore», no «anker»), que es como figura en los filtros.
 
-Sin submarca ni «by», «Comparar» busca como antes.
+Sin submarca ni «by», «Comparar» arma la consulta con la categoria y las especificaciones
+que hacen comparable el producto, en vez de descartar todas las cifras. Para un monitor
+conserva pulgadas, resolucion y Hz; para una memoria, DDR, capacidad y velocidad; y para
+un SSD, capacidad y formato. Las equivalencias FHD/Full HD/1080p, 4K/UHD/2160p y
+QHD/WQHD/2K/1440p se normalizan antes de buscar. Si no hay resultados con la configuracion
+completa, se relaja desde la ultima especificacion, manteniendo siempre la categoria.
 
 ## Compras internacionales
 

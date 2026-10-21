@@ -67,7 +67,22 @@ test("Comparar: prueba la cadena y se queda con la primera consulta que encuentr
   assert.equal(B.consultaDeOferta(nombre, () => false), "Soundcore AeroFit 2");          // sin resultados en ninguna: la mas precisa
 });
 
-test("Comparar: sin marca y submarca busca como antes, sin el codigo de modelo", () => {
-  assert.equal(B.consultaDeOferta("Memoria Kingston Fury Beast DDR5 16GB 5600MHz", () => true), "Memoria Kingston Fury");
-  assert.equal(B.consultaDeOferta("Ssd 480gb", () => true), "Ssd");
+test("Comparar: una oferta sin submarca conserva las especificaciones que la hacen comparable", () => {
+  assert.equal(B.consultaDeOferta("Monitor Gamer Samsung Odyssey G3 G30D 27\" FHD VA 180Hz", () => true), "monitor 27 fhd 180hz");
+  assert.equal(B.consultaDeOferta("Memoria Kingston Fury Beast DDR5 16GB 5600MHz", () => true), "memoria ddr5 16gb 5600mhz");
+  assert.equal(B.consultaDeOferta("Ssd 480gb", () => true), "ssd 480gb");
+});
+
+test("Comparar: si faltan coincidencias, relaja primero la especificacion menos importante", () => {
+  const nombre = "Monitor Gamer Samsung Odyssey G3 G30D 27\" FHD VA 180Hz";
+  const solo = qs => q => qs.includes(q);
+  assert.equal(B.consultaDeOferta(nombre, solo(["monitor 27 fhd"])), "monitor 27 fhd");
+});
+
+test("buscar: normaliza resoluciones equivalentes", () => {
+  const n = t => B.normalBusq(t);
+  assert.equal(B.filtroDe("monitor 27 fhd")(n("Monitor 27 pulgadas Full HD")), true);
+  assert.equal(B.filtroDe("monitor 27 fhd")(n("Monitor 27\" 1080p")), true);
+  assert.equal(B.filtroDe("monitor 27 4k")(n("Monitor 27 pulgadas UHD")), true);
+  assert.equal(B.filtroDe("monitor 27 qhd")(n("Monitor 27\" 1440p")), true);
 });
