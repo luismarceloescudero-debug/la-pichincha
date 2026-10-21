@@ -375,6 +375,10 @@
 "dia": "2026-10-16",
 "mpn": "KVR56U46BD8-32"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52806-memoria-ram-sodimm-ddr5-16gb-4800-mhz-adata.html": {
+"dia": "2026-10-21",
+"mpn": "AD5S480016G-S"
+},
 "https://www.venex.com.ar/almacenamiento-portatil/discos-externos/disco-solido-ssd-externo-usb-2tb-kingston-xs2000-tipo-c.html": {
 "dia": "2026-10-15",
 "mpn": "SXS2000/2000G"
@@ -563,9 +567,21 @@
 "dia": "2026-10-15",
 "mpn": "KF432C16BB/8"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr5-16gb-6000mhz-kingston-fury-beast-negra-rgb-cl36.html": {
+"dia": "2026-10-21",
+"mpn": "KF560C36BBE2A-16"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr5-16gb-6800mhz-kingston-fury-beast-negra.html": {
+"dia": "2026-10-21",
+"mpn": "KF568C34BBE-16"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr5-8gb-5600mhz-adata-cl46-1-1v.html": {
 "dia": "2026-10-15",
 "mpn": "AD5U56008G-S"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr5-kingston-fury-beast-16gb-6000mhz-negra.html": {
+"dia": "2026-10-21",
+"mpn": "KF560C36BBE2-16"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-armor-ddr4-16gb-3200mhz.html": {
 "dia": "2026-10-15",
@@ -626,6 +642,18 @@
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-16gb-3200mhz.html": {
 "dia": "2026-10-15",
 "mpn": "KVR32N22D8/16WP"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-6400mhz-cl32.html": {
+"dia": "2026-10-21",
+"mpn": "KF564C32BBE-16"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-6400mhz-rgb-cl32.html": {
+"dia": "2026-10-21",
+"mpn": "KF564C32BBEA-16"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-32gb-5600mhz-cl36-negra.html": {
+"dia": "2026-10-21",
+"mpn": "KF556C36BBE-32"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-32gb-kit-2x16gb-5600mhz-rgb-cl40.html": {
 "dia": "2026-10-15",
