@@ -307,7 +307,7 @@
     return ok(c, null);
   }
 
-  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, memoriaDe, aspectosDe, generacionesDe, aniosDe, referencia, evaluar };
+  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, memoriaDe, hzDe, panelDe, pulgadasDe, aspectosDe, generacionesDe, aniosDe, referencia, evaluar };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Categorias = api;
 })(this);
