@@ -11,6 +11,8 @@
   // Ofertas carga categorias; la comparacion de configuraciones de equipos vive ahi. Se pide al usarla: en la pagina
   // js/ofertas.js se carga despues de este modulo.
   const mismaConfig = () => (typeof module === "object" && module.exports ? require("./ofertas.js") : raiz.Ofertas).mismaConfiguracion;
+  // Las especificaciones clave de una tarjeta (spec 017). Tambien se pide al usarla, por el mismo motivo.
+  const especificaciones = () => (typeof module === "object" && module.exports ? require("./especificaciones.js") : raiz.Especificaciones);
 
   /* --- Precio por tienda --------------------------------------------------
      El mismo modelo en cada comercio, de menor a mayor precio, con el porcentaje contra la tienda mas barata y lo que
@@ -67,22 +69,35 @@
   }
 
   function analizarConsulta(q, ctx) {
-    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe } = ctx;
+    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia } = ctx;
   const crudo = buscarTodo(q);
   if (!crudo.length) return null;
   const nq = normalBusq(q);
   const toks = nq.split(/\s+/).filter(Boolean);
-  const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0 };
+  const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0, especificaciones: 0 };
   const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
   // Las compras internacionales no compiten en la comparativa, pero siguen en la
   // lista de Buscar con su sello: son otra forma de comprar, no otro producto.
   const internacionales = [];
-  const utiles = meta.filter(m => {
+  const candidatas = meta.filter(m => {
     const motivo = motivoExclusion(m.n, nq, toks, m.f[8]);
     if (motivo) { excl[motivo]++; if (motivo === "internacionales") internacionales.push(m); return false; }
     return true;
   });
+  // Comparacion justa (spec 017): al comparar desde una tarjeta, solo entran avisos con SUS especificaciones clave. Si la tarjeta
+  // no dice las suficientes no se filtra (se compara como siempre) y se avisa; si quedan pocos, se dice en vez de mezclar familias.
+  let espec = null, utiles = candidatas;
+  if (referencia) {
+    const Esp = especificaciones();
+    if (Esp.mismas(referencia, referencia).aplica) {
+      utiles = candidatas.filter(m => m.f[2] === referencia[2] || Esp.mismas(referencia, m.f).coincide);
+      excl.especificaciones = candidatas.length - utiles.length;
+      espec = { aplica: true, resumen: Esp.resumen(referencia), comparables: utiles.length, pocos: utiles.length < Esp.MIN_COMPARABLES };
+    } else {
+      espec = { aplica: false, resumen: "", comparables: candidatas.length, pocos: false };
+    }
+  }
   if (!utiles.length) return null;
 
   // Lo que cuesta menos del 45% de la mediana y no tiene marca reconocida casi
@@ -169,7 +184,7 @@
       bajas: c.items.filter(m => m.f[6] > m.f[1]).length };
   }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
 
-  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales,
+  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec,
            primeras: base.filter(m => m.niv === 2) };
 }
 
@@ -185,6 +200,7 @@
       ex.accesorios ? `${ex.accesorios} accesorios (cables, adaptadores, soportes)` : null,
       ex.tipo ? `${ex.tipo} de otro tipo de producto` : null,
       ex.usados ? `${ex.usados} usados u outlet` : null,
+      ex.especificaciones ? `${ex.especificaciones} con otras especificaciones (no son la misma configuración)` : null,
       ex.raros ? `${ex.raros} muy por debajo del resto y sin marca conocida` : null,
       ex.caros ? `${ex.caros} que cuestan más del triple (suelen ser equipos completos)` : null,
     ].filter(Boolean);
