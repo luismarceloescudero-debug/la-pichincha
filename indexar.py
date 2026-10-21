@@ -41,8 +41,8 @@ HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los 
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 # Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
-# url, tienda, via, lista, antes, imagen, sellos, modelo, desde. Completa filas de indices viejos.
-FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", "", ""]
+# url, tienda, via, lista, antes, imagen, sellos, modelo, desde, baja7, baja31. Completa filas de indices viejos.
+FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", "", "", "", ""]
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -709,7 +709,7 @@ def main(argv=None):
     if INDICE.exists():
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
-            fila = list(fila)[:11] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor
+            fila = list(fila)[:13] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor (las bajas, vacias)
             if not url_valida(fila[2]):                       # un indice viejo no reintroduce una URL que hoy no pasa
                 continue
             fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
@@ -806,14 +806,20 @@ def main(argv=None):
             if propia:
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
-            desde = serie.desde_cuando(series.get((clave, it["url"]), []), hoy, it["precio"])
+            eventos = series.get((clave, it["url"]), [])
+            desde = serie.desde_cuando(eventos, hoy, it["precio"])
+            # Bajas de 7 y 31 dias (%): vacias si el historial no llega; 0 si no bajo. Van al final: el sitio lee por posicion.
+            b7 = serie.baja_en(eventos, hoy, it["precio"], 7)
+            b31 = serie.baja_en(eventos, hoy, it["precio"], 31)
             fila = [it["nombre"], it["precio"], it["url"], clave,
                     str(it.get("via") or ""), lista, propia,
                     it.get("imagen") if url_valida(it.get("imagen")) else "",   # la foto va a un CSS del sitio
                     (it.get("sellos") or "")
-                    + serie.sellos_de(series.get((clave, it["url"]), []), hoy, it["precio"]),
+                    + serie.sellos_de(eventos, hoy, it["precio"]),
                     modelo.modelo_de(it["nombre"], it.get("sku")),
-                    desde.isoformat() if desde else ""]
+                    desde.isoformat() if desde else "",
+                    "" if b7 is None else b7,
+                    "" if b31 is None else b31]
             salida.append(fila)
             if it.get("sku_tienda") and not fila[9]:
                 por_confirmar.append((fila, it["sku_tienda"]))
@@ -844,7 +850,7 @@ def main(argv=None):
                              "segunda": bool(v.get("segunda_opinion"))},
                             **({"relevado": relevado[k]} if relevado.get(k) else {}))
                     for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31"],
         # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
         "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
         "productos": salida,

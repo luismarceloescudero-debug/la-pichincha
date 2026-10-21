@@ -144,10 +144,11 @@ class Corrida(unittest.TestCase):
             self.catalogos.pop("https://uno.test/cat")            # al dia siguiente uno se cae
             indexar.main(["--historial", str(self.hist)])
         indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
-        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", "", ""])
+        # Las bajas de 7 y 31 dias van vacias: el historial de la prueba no tiene dias suficientes (principio II).
+        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", "", "", "", ""])
         self.assertEqual(self.fila(indice, "dos", 101)[8], "")
-        self.assertTrue(all(len(f) == 11 for f in indice["productos"]))
-        self.assertEqual(indice["campos"][-3:], ["sellos", "modelo", "desde"])
+        self.assertTrue(all(len(f) == 13 for f in indice["productos"]))
+        self.assertEqual(indice["campos"][-5:], ["sellos", "modelo", "desde", "baja7", "baja31"])
 
     def test_el_codigo_de_modelo_se_guarda_en_la_ultima_columna_tambien_en_filas_reusadas(self):
         nombre = "Disco Ssd 480Gb Kingston Sedc600M/480G"
@@ -233,8 +234,8 @@ class Corrida(unittest.TestCase):
                                ["Producto 2", 2000, url(2), "uno", "", 0]]}
         (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
         indice, _ = self.correr(None, [(101, 500)])              # uno se cae y se reusa lo viejo
-        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", "", ""])
-        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", "", "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", "", "", "", ""])
 
     def previo(self, tiendas, generado="2026-10-07T15:25-03:00"):
         """Un indice anterior con un producto de uno, como lo dejo otra corrida."""
