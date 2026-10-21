@@ -702,3 +702,14 @@ td.mejor{color:var(--good);font-weight:700}
 .afiliado > a:hover{border-color:var(--accent)}
 .afiliado .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
 .afiliado .rotulo a{color:var(--ink-2)}
+
+/* ---- Precio por tienda: el mismo modelo en cada comercio (js/analisis.js, tablaTiendasHtml) ---- */
+.pt-titulo{margin:18px 0 8px;font-size:.95rem}
+table.pt-tabla{min-width:0}
+table.pt-tabla caption{text-align:left;font:600 .78rem var(--font-mono);color:var(--ink-3);padding:10px 16px 0}
+table.pt-tabla th.num,table.pt-tabla td.num{text-align:right}
+table.pt-tabla thead th:nth-child(3){text-align:left}
+table.pt-tabla td{white-space:nowrap}
+table.pt-tabla td a{color:var(--accent);font-weight:600}
+.pt-ahorro{margin:8px 2px 0;color:var(--ink-2);font-size:.88rem}
+.pt-nota{margin:6px 2px 0}

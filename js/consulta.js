@@ -23,7 +23,8 @@ function marcaDe(nombre) { return Buscador.marcaDe(nombre, MARCAS_RE); }
 
 /* La logica vive en js/analisis.js: la comparten esta pagina y las paginas por busqueda. */
 function analizarConsulta(q) {
-  return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos });
+  return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe: f => OTRAS.get(f) || [],
+    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "" });
 }
 
 function fijarConsulta(q) {
@@ -107,6 +108,15 @@ function tablaPicks(picks) {
     ? `<p class="sub">«—» no es que no lo tenga: la fuente no lo informa (envío y cuotas por aviso solo los publican ComparaYa y sus comercios).</p>` : "");
 }
 
+/* Precio por tienda de cada opcion (js/analisis.js): el mismo modelo en cada comercio, con el porcentaje contra la mas
+   barata y lo que se ahorra contra la mas cara. El orden es el de las opciones, nunca el de una comision. */
+function seccionPrecioPorTienda(picks) {
+  const h = { esc, pesos, enlace: (f, texto, etiqueta) =>
+    `<a href="${enlace(f[2])}" target="_blank" rel="noopener" aria-label="${esc(etiqueta)}">${texto}</a>` };
+  return picks.filter(p => p.porTienda).map((p, i) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
+    + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
+}
+
 function vistaComparativaDin() {
   const A = ANALISIS;
   setTimeout(pintarTira, 0);
@@ -118,7 +128,10 @@ function vistaComparativaDin() {
     ${franja(A.picks)}
     <div class="panel-head" style="margin-top:26px"><h2>${icono("chip")} En qué se diferencian</h2>
       <p class="sub">Las especificaciones se leen del texto del aviso, así que algunas pueden faltar: abrí la ficha para confirmarlas.</p></div>
-    ${tablaPicks(A.picks)}</div>`;
+    ${tablaPicks(A.picks)}
+    <div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
+      <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>
+    ${seccionPrecioPorTienda(A.picks)}</div>`;
 }
 
 function vistaTiendasDin() {

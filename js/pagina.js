@@ -70,6 +70,14 @@
     return a && r && a.n < r.n ? `precio del ${a.dia}/${a.mes}` : "";
   }
 
+  /* La fecha del precio de un aviso, para decirla siempre: "precio de hoy" si la fuente se releyo el dia del indice,
+     "precio del 7/10" si no, y nada si no sabemos cuando se relevo (no se afirma que es de hoy). */
+  function precioFecha(relevado, referencia) {
+    const a = diaAr(relevado), r = diaAr(referencia);
+    if (!a || !r) return "";
+    return a.n < r.n ? `precio del ${a.dia}/${a.mes}` : "precio de hoy";
+  }
+
   /* La comparativa curada guarda desde cuando falla cada producto (ver
      actualizar.relevar): "sin verificar hoy" o "sin verificar desde el 8/10". */
   function sinVerificar(desde, referencia) {
@@ -126,7 +134,7 @@
     return t ? "https://www.amazon.com/s?" + new URLSearchParams({ k: t, tag: AMAZON_TAG }) : null;
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);
