@@ -27,7 +27,7 @@ flowchart TD
         SA --> PS["armar _sitio: index.html, img, js, css, indice.json (L124)"]
         PS --> PO["node generar_portada.js (L139)"]
         PO --> GP["python generar_paginas.py (L142)"]
-        GP --> GS["python generar_series.py (L182): _sitio/series/NN.json"]
+        GP --> GS["python generar_series.py (L185): _sitio/series/NN.json"]
         GS --> PA["python publicar_app.py (L190)"]
         PA --> FE["node generar_feed.js (L200)"]
         FE --> VO["python verificar_ofertas.py (ML por su API, WooCommerce por su API, agregador por la tienda)"]
