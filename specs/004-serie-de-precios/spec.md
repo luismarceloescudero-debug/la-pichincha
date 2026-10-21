@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-09
 
-**Status**: Draft
+**Status**: Implementada
 
 **Input**: User description: "Serie de precios por producto (Fase 2, F2.2 de docs/plan-de-escalado.md). Con el historial de precios que ya se guarda, cada aviso puede decir si hoy esta en su precio minimo de 30 o de 90 dias, y se marca con un sello 'subio antes de la oferta' a las rebajas infladas, las que suben el precio y despues lo bajan casi al nivel de antes. Es el dato que nadie muestra para hardware en 5 tiendas. Sin pantallas nuevas: son sellos en los resultados, las ofertas y las paginas por busqueda. Dato honesto (principio II): solo se afirma lo que el historial alcanza a probar; con menos de 30 dias de historia no hay sello de minimo de 30 dias."
 
