@@ -39,15 +39,17 @@
     function ocultarAviso() { const el = aviso(); if (el) el.hidden = true; }
 
     /* Un HEAD sin cache al manifiesto: el service worker solo atiende GET, asi que llega a la red de
-       verdad y dice si hay conexion. navigator.onLine miente con redes que no salen a internet. */
+       verdad y dice si hay conexion. navigator.onLine miente con redes que no salen a internet.
+       Un 4xx (por ejemplo 404 si la carpeta servida no trae el manifiesto) llego de la red: hay
+       conexion. Un 5xx puede ser un proxy o un portal cautivo: no prueba nada. */
     async function comprobar() {
       let reloj;
       const limite = new Promise((_, rechazar) => { reloj = ventana.setTimeout(() => rechazar(new Error("sin respuesta")), LIMITE_SONDA_MS); });
       try {
         const r = await Promise.race([ventana.fetch(opc.sonda, { method: "HEAD", cache: "no-store" }), limite]);
         ventana.clearTimeout(reloj);
-        if (r && r.ok === false) mostrarAviso();    // un 503 de un proxy o de un portal no prueba que haya internet
-        else ocultarAviso();
+        const respondio = r && (r.ok || (r.status >= 400 && r.status < 500));
+        if (respondio) ocultarAviso(); else mostrarAviso();    // un 503 de un proxy o de un portal no prueba que haya internet
       } catch (e) {
         mostrarAviso();
       }

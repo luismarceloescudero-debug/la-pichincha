@@ -50,6 +50,7 @@ function entorno({ serviceWorker = true, sonda = "ok", standalone = false, goatc
       if (sonda === "falla") throw new TypeError("sin red");
       if (sonda === "cuelga") return new Promise(() => {});
       if (sonda === "503") return { ok: false, status: 503 };
+      if (sonda === "404") return { ok: false, status: 404 };
       return { ok: true };
     },
     pedidos: [],
@@ -198,4 +199,13 @@ test("una respuesta que no es OK (por ejemplo un 503) no prueba que haya conexio
   escuchasDoc.DOMContentLoaded();
   await esperar(); await esperar();
   assert.equal(aviso.hidden, false);
+});
+
+test("un 404 del archivo de la sonda prueba que hubo red: no muestra el aviso", async () => {
+  // Pasa sirviendo la app desde una carpeta sin manifest.webmanifest (python -m http.server a mano)
+  // o publicando en un host que no lo sirve: el 404 llega de la red, no es una falla de conexion.
+  const { escuchasDoc, aviso } = entorno({ sonda: "404" });
+  escuchasDoc.DOMContentLoaded();
+  await esperar(); await esperar();
+  assert.equal(aviso.hidden, true);
 });

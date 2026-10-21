@@ -646,7 +646,10 @@ propio) y, despues de la primera visita, abre sin conexion.
 - **El aviso.** Sin conexion, `js/app.js` muestra arriba "Sin conexion: estas viendo los ultimos
   precios que bajaste (hoy 08:12)"; pasados 7 dias agrega que pueden estar viejos. La sonda es un
   `HEAD` al manifiesto sin cache (el service worker solo atiende `GET`, asi que llega a la red de
-  verdad) y corre al leer la pagina, sin esperar a las fuentes ni a la analitica.
+  verdad) y corre al leer la pagina, sin esperar a las fuentes ni a la analitica. Cuenta como "hay
+  conexion" cualquier respuesta de la red, incluido un `404` (por ejemplo sirviendo la app desde
+  una carpeta sin el manifiesto); solo una falla de red, un 5xx o 5 segundos sin respuesta muestran
+  el aviso.
 - **Que se guarda:** la cascara (principal, estilos, scripts, iconos, manifiesto), la pagina de
   "no disponible sin conexion" y el ultimo indice: unos 250 KB mas el indice. Tambien las paginas
   de `/precios/` que se visitan, y una navegacion se guarda sin su `?q=`, asi un link compartido
