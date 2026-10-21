@@ -14,7 +14,9 @@
   /* "1 TB" y "1TB" son lo mismo, y tambien "16G" y "16GB", y "1000GB" y "1024GB" con "1TB". */
   const pegarUnidades = t => t.replace(/(\d)\s+(gb|tb|mb|mhz|ghz|hz|w)\b/g, "$1$2").replace(/\b(?![345]g\b)(\d{1,3})g\b/g, "$1gb")    // 16G es 16GB; 4G y 5G son la red de un celular
     .replace(/\b(\d{4,5})gb\b/g, (m, n) => +n % 1000 === 0 ? +n / 1000 + "tb" : +n % 1024 === 0 ? +n / 1024 + "tb" : m);
-  const normalBusq = t => pegarUnidades(tipografia(normal(t)));
+  const normalBusq = t => pegarUnidades(tipografia(normal(t)))
+    .replace(/\bfull\s?hd\b|\b1080p\b/g, "fhd").replace(/\buhd\b|\b2160p\b/g, "4k")
+    .replace(/\bwqhd\b|\b2k\b|\b1440p\b/g, "qhd");
   const esMedida = t => /^\d+(?:gb|tb|mb|mhz|ghz|hz|w|v)?$/.test(t);
   const escaparRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -132,13 +134,36 @@
   }
 
   /* La consulta con la que "Comparar" abre una oferta. Con marca y submarca, la primera de la cadena que encuentra
-     algo (`hay(q)` dice si una consulta tiene resultados); sin ellas, la marca y las palabras sin cifras, sin el
-     codigo de modelo, para que traiga competencia y no ese producto solo. */
+     algo (`hay(q)` dice si una consulta tiene resultados); sin ellas conserva categoria y especificaciones que definen
+     comparabilidad. Si la combinacion completa no existe, afloja las ultimas especificaciones, no tamaño ni categoria. */
   function consultaDeOferta(nombre, hay) {
     const info = consultasDe(nombre);
     if (info) return info.consultas.find(hay) || info.consultas[0];
-    const palabras = String(nombre).split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
-    return palabras.slice(0, 3).join(" ") || String(nombre).split(/\s+/).slice(0, 2).join(" ");
+    const n = normalBusq(nombre), s = specsDe(nombre), base = [];
+    if (/\bmonitor\b/.test(n)) {
+      base.push("monitor");
+      if (s["Pantalla"]) base.push(s["Pantalla"].replace('"', ""));
+      if (s["Resolución"]) base.push(normalBusq(s["Resolución"]));
+      if (s["Refresco"]) base.push(normalBusq(s["Refresco"]));
+    } else if (/\b(memoria|ram)\b/.test(n)) {
+      base.push("memoria");
+      if (s["Tipo"]) base.push(normalBusq(s["Tipo"]));
+      if (s["Capacidad"]) base.push(normalBusq(s["Capacidad"]).split(" + ")[0]);
+      if (s["Velocidad"]) base.push(normalBusq(s["Velocidad"]));
+    } else if (/\bssd\b/.test(n)) {
+      base.push("ssd");
+      if (s["Capacidad"]) base.push(normalBusq(s["Capacidad"]).split(" + ")[0]);
+      if (s["Formato"]) base.push(normalBusq(s["Formato"]));
+    }
+    if (!base.length) {
+      const palabras = String(nombre).split(/\s+/).filter(w => w.length >= 2 && !/\d/.test(w));
+      return palabras.slice(0, 3).join(" ") || String(nombre).split(/\s+/).slice(0, 2).join(" ");
+    }
+    for (let i = base.length; i > 1; i--) {
+      const q = base.slice(0, i).join(" ");
+      if (hay(q)) return q;
+    }
+    return base.join(" ");
   }
 
   const ALIAS_MARCA = { xpg: "adata", gskill: "g.skill", tplink: "tp-link", "western digital": "wd" };
