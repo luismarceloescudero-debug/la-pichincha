@@ -98,6 +98,16 @@ class Generar(unittest.TestCase):
         fina = (self.salida / "precios" / "placa-inexistente" / "index.html").read_text(encoding="utf-8")
         self.assertIn("noindex", fina)
 
+    def test_cada_pagina_indexable_publica_su_feed_bien_formado(self):
+        from xml.etree import ElementTree
+        self.assertEqual(self.correr(), 0)
+        feed = self.salida / "precios" / "ddr4-16gb" / "feed.xml"
+        raiz = ElementTree.fromstring(feed.read_text(encoding="utf-8"))       # XML valido
+        self.assertEqual(raiz.tag, "rss")
+        self.assertEqual(len(raiz.findall("./channel/item")), 6)
+        self.assertIn("/precios/ddr4-16gb/feed.xml", (self.salida / "precios" / "ddr4-16gb" / "index.html").read_text(encoding="utf-8"))
+        self.assertFalse((self.salida / "precios" / "placa-inexistente" / "feed.xml").exists())
+
     def test_sin_indice_no_hay_paginas_y_no_falla(self):
         self.assertEqual(self.correr(self.dir / "no-esta.json"), 0)
         self.assertFalse((self.salida / "precios").exists())
