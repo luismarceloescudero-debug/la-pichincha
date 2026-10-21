@@ -9,6 +9,9 @@
 - [x] T005 [P] [US1] Tests que fallan en `tests/js/buscador.test.js` para `sellosDe("m")`, `("h")`, `("x")` y su combinacion con los de siempre; luego agregar las tres entradas a `SELLOS` en `js/buscador.js`
 - [x] T006 [P] [US3] Tests que fallan en `tests/test_cobertura.py` y luego `cobertura.py`: `serie` en `cobertura.json` con cuantos avisos tienen `m`, `h`, `x`, y en el resumen de la Action; los dias de historia salen del indice (`generado` y el primer dia del historial se pasan como argumento opcional `--historial`)
 - [x] T007 [P] README (seccion de la serie de precios, la fecha desde la que aparecen los sellos) y marcar F2.2 en `docs/plan-de-escalado.md`
+- [x] T009 [D2] Tests que fallan en `tests/js/serie-precios.test.js` (clave y fragmento con los vectores de Python, lectura del fragmento, puntos, cifras, ventana por rango, SVG accesible, tabla, vacio honesto, escapado) y en `tests/test_generar_series.py` (clave, recorte, compactar, generacion, encabezado, precio desparejo, sin historial, corridas iguales, limpieza); luego `js/serie-precios.js` y `generar_series.py`
+- [x] T010 [D2] Boton "Historial de precio" en las filas de la busqueda y las tarjetas de ofertas (`js/vista-historial.js`, que baja el fragmento una vez), estilos en `css/sitio.css`, scripts en `index.html` y `sw.js`, paso "Armar las series de precio" en `actualizar.yml`
+- [x] T011 [D2] README (seccion del grafico, con las cifras medidas), `docs/mapa.md`, `specs/004` y D2 marcado en `docs/plan-v2.md`
 - [ ] T008 Ambas suites, PR contra `main`, CI en verde, merge (rebase), deploy y aviso
 
 ## Dependencias

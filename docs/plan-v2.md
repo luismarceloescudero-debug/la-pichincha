@@ -141,7 +141,11 @@ Sale cuando: 200 productos con veredicto local contra importado, reglas con fech
 - D1 **Alertas de precio** por email y Telegram: precio objetivo, baja porcentual o "minimo historico".
   Primer backend: Cloudflare Workers + D1 (plan gratis; la cuenta ya existe). **Requiere enmendar la
   constitucion** (principio I, gatillo de la F4), decision del dueño.
-- D2 **Grafico de historial** por producto cuando haya 30 dias (6/11).
+- D2 **Grafico de historial** por producto cuando haya 30 dias (6/11). **Hecho el 21/10, antes de los 30 dias y sin afirmar
+  de mas**: `generar_series.py` deja la serie de cada aviso en 64 fragmentos (`series/NN.json`) y la busqueda y las ofertas
+  abren el grafico de su aviso con el boton "Historial de precio". Dice "N dias de datos" y desde cuando se sigue el aviso;
+  los rangos de 30 y 90 dias aparecen solos cuando el historial los cubra (hoy, 14: solo 7 dias y todo). Con menos de dos
+  puntos no se dibuja nada. Detalle y cifras en el README, seccion "Grafico del historial de un aviso".
 - D3 **Carrito comparador** de ComparaYa: armar una PC o una compra de varios productos y que proponga
   "todo en una tienda", "hasta dos tiendas" o "maximo ahorro", con envio al codigo postal.
 - D4 **Reputacion de tiendas**: tiempo real de entrega, garantia y reclamos publicos, con fuente.

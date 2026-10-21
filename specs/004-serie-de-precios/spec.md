@@ -113,7 +113,45 @@ saber cuando empiezan a aparecer y si algo anda mal.
 
 - El historial empezo el 2026-10-07: los sellos de 30 dias recien pueden aparecer desde el 2026-11-06 y los de 90 desde
   el 2027-01-05. Hasta entonces la feature esta lista pero no muestra nada, a proposito.
-- El grafico de la serie (una linea con el recorrido del precio) queda fuera: seria una vista nueva y el principio V pide
-  medir primero si los sellos se usan.
+- El grafico de la serie se hizo despues, en D2 de `docs/plan-v2.md`, como una ampliacion de esta spec (ver abajo): no es
+  una vista nueva, se abre en la misma fila del aviso con un boton.
 - Los sellos viajan en la columna `sellos` del indice (una letra por sello), sin columnas nuevas.
 - La rebaja inflada se evalua sobre el ultimo cambio de cada producto: una baja anterior ya absorbida no se marca.
+
+## Ampliacion: grafico del historial de un aviso (D2 de `docs/plan-v2.md`, 21/10/2026)
+
+Es el feature mas pedido entre los referentes (ComparaYa, Solotodo, Keepa, PCPartPicker): ver el recorrido del
+precio, no solo el sello.
+
+### Historias
+
+1. **Ver el recorrido del precio de un aviso**: en cada fila de la busqueda y en cada tarjeta de ofertas, el boton
+   "Historial de precio" abre un SVG inline con la serie y cuatro cifras: hoy, minimo (con la fecha en que rigio),
+   maximo (con fecha) y variacion contra el primer dia del tramo.
+2. **Saber de cuanto es la historia**: el panel dice en letras "N dias de datos" y desde que dia se sigue ese aviso. No
+   afirma nada de antes de ese dia ni un "minimo historico" que los datos no prueban.
+3. **Acotar el rango cuando se puede**: con datos suficientes ofrece 7, 30 y 90 dias y "todo". Un rango cuya fecha de
+   inicio no esta cubierta no se ofrece (con 14 dias de historia: 7 dias y todo).
+4. **Sin historia, decirlo**: con menos de dos puntos el panel dice "Todavia no hay historia suficiente" y no dibuja nada.
+
+### Requisitos
+
+- **FR-101**: La serie NO DEBE viajar en `indice.json`: `generar_series.py` deja `<salida>/series/NN.json` en 64
+  fragmentos y la pagina baja solo el del aviso que se abre (medido el 21/10: 931 KB crudos y 444 KB gzip en total; el
+  fragmento mas grande, 17 KB crudos).
+- **FR-102**: La clave del aviso (`cyrb53` sobre tienda, salto de linea y url) y el fragmento DEBEN calcularse igual en
+  Python y en JS, con los mismos vectores de prueba en las dos suites.
+- **FR-103**: Un aviso cuyo precio de hoy en el indice no coincide con el ultimo del historial, que ya no se publica o
+  que tiene un solo punto NO DEBE tener serie.
+- **FR-104**: El grafico DEBE ser `role="img"` con el resumen textual en el `aria-label`, llevar una tabla alternativa con
+  el precio de cada fecha y funcionar sin color.
+- **FR-105**: `generar_series.py` DEBE quitar los fragmentos que ya no corresponden en cada corrida y no escribir nada si
+  falta el historial.
+
+### Criterios medibles
+
+- **SC-101**: `node --test` y `unittest` cubren: serie valida, un solo punto, aviso que dejo de publicarse y volvio,
+  varias corridas el mismo dia, precio plano (sin division por cero), rangos que los datos no cubren, escapado de texto
+  y error de red distinto de falta de historia.
+- **SC-102**: El fragmento que baja el navegador es de decenas de KB, nunca el CSV del historial (14,2 MB) ni el indice
+  (1,5 MB gzip).

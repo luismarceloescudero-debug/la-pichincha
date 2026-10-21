@@ -176,6 +176,15 @@ jobs:
             python generar_paginas.py --indice indice.json --salida _sitio
           fi
 
+      # Las series de precio por aviso (plan v2, D2): un fragmento chico por cada 1/64 de los avisos, que la pagina baja solo al
+      # abrir el historial de uno. Salen del historial y del indice final (ya sin las ofertas caidas). Si falla, el sitio sale
+      # igual y el boton dice que no pudo cargar.
+      - name: Armar las series de precio
+        run: |
+          if [ -f indice.json ]; then
+            python generar_series.py --indice indice.json --historial historial --salida _sitio || echo "::warning::No se armaron las series de precio"
+          fi
+
       # La app instalable: estampa la version en sw.js (una cache nueva por publicacion, la anterior se
       # descarta) y copia el manifiesto, la pagina de sin conexion y los iconos. Si falla, el sitio sale igual.
       - name: Dejar lista la app instalable
