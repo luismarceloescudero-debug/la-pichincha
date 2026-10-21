@@ -100,11 +100,13 @@ function enlaceTienda(f, texto, etiqueta) {
 function precioPorTiendaHtml(analisis, ctx) {
   const h = { esc, pesos, enlace: enlaceTienda };
   const hay = analisis.picks.some(p => p.porTienda && !p.porTienda.unico);
-  const bloques = analisis.picks.filter(p => p.porTienda).map(p =>
-    `    <h3>${esc(p.rol)}: ${esc(p.m.f[0])}</h3>\n    ${A.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rol}: ${p.m.f[0]}` })}`).join("\n");
+  // Si ninguna opcion esta en mas de un comercio no se repite la misma nota cuatro veces: una sola frase.
+  const bloques = hay ? analisis.picks.filter(p => p.porTienda).map(p =>
+    `    <h3>${esc(p.rol)}: ${esc(p.m.f[0])}</h3>\n    ${A.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rol}: ${p.m.f[0]}` })}`).join("\n")
+    : `    <p class="sub pt-nota">Estas opciones están cada una en un solo comercio: no hay con qué comparar.</p>`;
   return `  <section>
     <h2>Precio por tienda</h2>
-    <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.${hay ? "" : " Ninguna de estas opciones está en más de un comercio."}</p>
+    <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p>
 ${bloques}
   </section>
 `;

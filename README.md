@@ -595,6 +595,17 @@ dan siempre la misma mejor compra y la misma mediana. `generar_paginas.js` (Node
 dependencias) las escribe y `generar_paginas.py` orquesta, valida la lista y arma el mapa del
 sitio. Una fuente que no se relevo ese dia muestra "precio del D/M", igual que el sitio.
 
+**Precio por tienda.** Debajo de la mejor compra y de cada opcion (en la Comparativa y en las paginas por
+busqueda) hay una tabla con el mismo modelo en cada comercio, de menor a mayor precio, con el porcentaje contra la
+tienda mas barata ("+8%", "+22%"), cuanto se ahorra contra la mas cara, la fecha real del precio de cada aviso
+("precio del 20/10") y el enlace al aviso. A diferencia de un comparador de promedios, solo entran avisos
+comparables del mismo modelo: mismo codigo, misma capacidad, OC contra OC, misma configuracion en un equipo, y nada
+de internacionales, usados ni accesorios. Varios avisos de un comercio cuentan como uno (queda el mas barato). Con un
+solo comercio no se inventa nada: "un solo comercio: no hay con que comparar". Las comisiones nunca cambian el orden.
+Vive en `precioPorTienda` y `tablaTiendasHtml` de `js/analisis.js`. Medido el 21/10 con el indice publicado: 121 de
+667 opciones tienen tabla (el resto esta en un solo comercio o sin codigo de modelo), el maximo de diferencia es
++112% y las 200 paginas se generan en 14 s, igual que antes.
+
 **Consultas automaticas.** Ademas de `consultas.json` (curado a mano, siempre primero), cada
 publicacion suma las que descubre `generar_consultas.js` en el indice: las mismas que arma
 "Comparar" con cada oferta (`Buscador.consultaDeOferta`), de mas a menos comparables, con al

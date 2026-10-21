@@ -58,7 +58,8 @@
       + `<td>${h.esc(t.fecha || "sin fecha")}</td>`
       + `<td>${h.enlace(t.f, "Ver aviso", `Abrir el aviso de ${t.comercio}`)}</td></tr>`;
     const ahorro = pt.ahorro > 0 ? ` (${pt.ahorroPct}%)` : "";
-    return `<div class="scroll"><table class="pt-tabla">${h.titulo ? `<caption>${h.esc(h.titulo)}</caption>` : ""}`
+    // el titulo ya esta escrito arriba como encabezado: aca es solo el nombre accesible de la tabla
+    return `<div class="scroll"><table class="pt-tabla"${h.titulo ? ` aria-label="${h.esc("Precio por tienda: " + h.titulo)}"` : ""}>`
       + `<thead><tr><th scope="col">Tienda</th><th scope="col" class="num">Precio</th><th scope="col">Contra la más barata</th>`
       + `<th scope="col">Fecha del precio</th><th scope="col">Aviso</th></tr></thead>`
       + `<tbody>${pt.tiendas.map(fila).join("")}</tbody></table></div>`

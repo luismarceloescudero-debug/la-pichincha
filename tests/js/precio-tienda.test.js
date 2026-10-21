@@ -260,6 +260,7 @@ test("sin ningun modelo repetido en dos tiendas la pagina no inventa porcentajes
   const sec = html.split("<h2>Precio por tienda</h2>")[1].split("</section>")[0];
   assert.doesNotMatch(sec, /<table/);
   assert.doesNotMatch(sec, /menos que en la más cara/);
+  assert.equal((sec.match(/un solo comercio: no hay con qué comparar/g) || []).length, 1, "una sola frase, no una nota por opcion");
 });
 
 // ---------- la Comparativa de la app ----------
