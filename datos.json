@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-19",
+  "actualizado": "2026-10-21",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -64,9 +64,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
       "img": "img/adata-d35.jpg",
-      "precio": 220700,
-      "precio_lista": 245222,
-      "sin_impuestos": 199729,
+      "precio": 221450,
+      "precio_lista": 246056,
+      "sin_impuestos": 200407,
       "stock": "en stock",
       "titular": "El mejor equilibrio de marca, latencia y garantía",
       "specs": {
@@ -154,9 +154,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
       "img": "img/corsair-lpx.jpg",
-      "precio": 250800,
-      "precio_lista": 278667,
-      "sin_impuestos": 226968,
+      "precio": 251600,
+      "precio_lista": 279556,
+      "sin_impuestos": 227692,
       "stock": "en stock",
       "titular": "La marca más probada, por treinta mil pesos más",
       "specs": {
@@ -200,7 +200,8 @@
       "precio": 214989,
       "precio_lista": 241561,
       "sin_impuestos": 194560,
-      "stock": "en stock"
+      "stock": "en stock",
+      "falla_desde": "2026-10-21"
     },
     {
       "id": "hiksemi-hiker",
@@ -318,9 +319,9 @@
       },
       "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
       "img": "img/brio4k.jpg",
-      "precio": 258600,
-      "precio_lista": 287333,
-      "sin_impuestos": 213719,
+      "precio": 259400,
+      "precio_lista": 288222,
+      "sin_impuestos": 214380,
       "stock": "en stock",
       "titular": "Lo que no compraría",
       "specs": {
@@ -388,11 +389,10 @@
       },
       "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_505_Black_FHD_Rightlight1080p_30fps_720_60fps_20149",
       "img": "img/brio505.jpg",
-      "precio": 184500,
-      "precio_lista": 205000,
+      "precio": 185100,
+      "precio_lista": 205667,
       "stock": "en stock",
-      "sin_impuestos": 152479,
-      "falla_desde": "2026-10-20"
+      "sin_impuestos": 152975
     },
     {
       "id": "genius1000x",
@@ -471,6 +471,31 @@
           "ahora": 184500
         }
       ]
+    },
+    {
+      "fecha": "2026-10-21",
+      "cambios": [
+        {
+          "id": "adata-d35",
+          "antes": 220700,
+          "ahora": 221450
+        },
+        {
+          "id": "corsair-lpx",
+          "antes": 250800,
+          "ahora": 251600
+        },
+        {
+          "id": "brio4k",
+          "antes": 258600,
+          "ahora": 259400
+        },
+        {
+          "id": "brio505",
+          "antes": 184500,
+          "ahora": 185100
+        }
+      ]
     }
   ],
   "veredicto": [
@@ -492,12 +517,12 @@
     }
   ],
   "calculado": {
-    "adata_punto": 227339,
-    "adata_domicilio": 232358,
+    "adata_punto": 228089,
+    "adata_domicilio": 233108,
     "kingston_retiro": 299249,
     "combo_gc": 460748,
-    "combo_partido": 363338,
-    "ram_mas_barata": "hiksemi-armor",
+    "combo_partido": 364088,
+    "ram_mas_barata": "adata-d35",
     "webcam_mas_barata": "brio100"
   },
   "marcas": {
