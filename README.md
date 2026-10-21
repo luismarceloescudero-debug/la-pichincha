@@ -34,7 +34,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
-| `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular, el indice `/precios/`, `sitemap.xml` y `robots.txt` |
+| `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular (con su `feed.xml`), el indice `/precios/`, `sitemap.xml` y `robots.txt` |
 | `manifest.webmanifest`, `sw.js`, `sin-red.html`, `js/app.js`, `publicar_app.py` | La app instalable: manifiesto, service worker (red primero), pagina de sin conexion, aviso y medicion, y el script que estampa la version al publicar |
 | `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
@@ -579,6 +579,16 @@ popular: `/precios/ssd-1tb/`, `/precios/rtx-5060/`, etc., mas un indice en `/pre
 con su razon, la mediana, una tabla de hasta 20 opciones, lo que quedo afuera y por que, y
 datos estructurados (`ItemList`, `AggregateOffer` en pesos y migas). El boton "Ver la
 comparativa completa" abre la Comparativa con esa busqueda ya armada.
+
+**Un feed RSS por pagina.** Cada pagina indexable publica `feed.xml` en su carpeta
+(`/precios/rtx-5060-ti-16gb/feed.xml`) y lo anuncia en el `<head>` con `rel="alternate"`, ademas del
+`ofertas.xml` global: sirve para suscribirse a una busqueda y enterarse cuando cambian los precios.
+Son hasta 10 entradas, la mejor compra primero y despues el mismo orden de la tabla, cada una con su
+precio, comercio y enlace al aviso real (`renderFeedPagina` en `generar_paginas.js`, sobre el mismo
+analisis; no hay una segunda logica). El `guid` lleva el precio: el lector solo marca una entrada como
+nueva si el precio se movio. Las paginas finas (`noindex`) no tienen feed. Medido el 21/10 con el indice
+publicado: 200 feeds, 1,3 MB (290 KB comprimidos) y la generacion de las 200 paginas sigue igual o mas
+rapida (14 s contra 75 s antes, porque ahora se prepara una sola vez el modelo de modos del indice y no por pagina).
 
 **Una sola logica.** Las paginas y la Comparativa usan el mismo modulo, `js/analisis.js`, asi que
 dan siempre la misma mejor compra y la misma mediana. `generar_paginas.js` (Node, sin

@@ -52,7 +52,7 @@ flowchart TD
     GP -- "subprocess node generar_paginas.js (generar_paginas.py:89)" --> GPJ["generar_paginas.js"]
     IJ --> GPJ
     DJ --> GPJ
-    GPJ --> PR["_sitio/precios/, sitemap.xml, robots.txt"]
+    GPJ --> PR["_sitio/precios/ (index.html y feed.xml por pagina), sitemap.xml, robots.txt"]
     PA -- "subprocess git rev-parse (publicar_app.py:34)" --> SW["_sitio/sw.js con __VERSION__ estampada"]
     IJ --> FE
     FE --> OF["_sitio/ofertas.xml, ofertas.json, hoy/"]
@@ -110,7 +110,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Portada** | `index.html` (estructura) + `js/` (modulos) + `css/sitio.css`; categorias curadas en `js/base.js:17` | `generar_portada.js` la pre-renderiza en `_sitio/` | `tests/js/portada.test.js`, `tests/js/app.test.js`, `tests/test_sitio.py`, `tests/test_contraste.py` |
 | **Paginas por busqueda** | `generar_consultas.js` (descubre consultas en el indice), `consultas.json` + `generar_paginas.py` (valida y orquesta) + `generar_paginas.js` (escribe) | `js/analisis.js`, compartido con la Comparativa | `tests/test_generar_paginas.py`, `tests/js/generador.test.js`, `tests/js/consultas-auto.test.js`, `tests/js/pagina.test.js` |
 | **PWA** | `sw.js` (marcador `__VERSION__`), `manifest.webmanifest`, `sin-red.html`, `js/app.js`, `publicar_app.py` | el workflow (L153) | `tests/js/sw.test.js`, `tests/test_publicar_app.py` |
-| **Telegram y RSS** | `publicar_telegram.py` (lee `_sitio/ofertas.json`), `generar_feed.js` | secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` (L169-175) | `tests/test_publicar_telegram.py`, `tests/test_canal.py`, `tests/js/feed.test.js` |
+| **Telegram y RSS** | `publicar_telegram.py` (lee `_sitio/ofertas.json`), `generar_feed.js` (`ofertas.xml`); el feed por busqueda (`/precios/<slug>/feed.xml`) lo arma `renderFeedPagina` en `generar_paginas.js` | secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` (L169-175) | `tests/test_publicar_telegram.py`, `tests/test_canal.py`, `tests/js/feed.test.js` |
 | **Afiliados** (Amazon, E1) | `Pagina.enlaceAmazon` y `AMAZON_TAG` (`js/pagina.js`), `amazonHtml` (`js/vistas.js`) con el rotulo «enlace de afiliado» y `rel="sponsored"`; aviso en `/legal/#afiliados` (`generar_info.js`) | la busqueda sin resultados y el analisis de cada producto curado; el clic se mide como `clic_saliente/amazon.com` | `tests/js/pagina.test.js`, `tests/js/plus-ui.test.js` |
 | **Direccion publica y CSP** | `sitio.json` | todos los generadores y `index.html` | `tests/test_sitio.py` |
 | **Umbrales de calidad** | `CONSTRAINTS.md` | `tests.yml` (cobertura 85% Python; 90/85/85 JS; Lighthouse 90) | `.github/lighthouse.js`, `tests/js/lighthouse.test.js`, `tests/test_rendimiento.py` |
@@ -167,7 +167,8 @@ node --test "tests/js/*.test.js"
   `_RUBRO_POR_INICIO` (L21) y su forma de part number a `_FORMAS` (L32), con nombres reales en
   `tests/test_modelo.py`. `cobertura.py` lo empieza a medir solo. Precision antes que cobertura.
 - **Una pagina por busqueda** (`/precios/<slug>/`): una entrada en `consultas.json`; ver
-  "Agregar una busqueda" en el README. Tests: `tests/test_generar_paginas.py`.
+  "Agregar una busqueda" en el README. Cada pagina indexable publica tambien su `feed.xml` (RSS, `renderFeedPagina`
+  en `generar_paginas.js`; sin cambios extra al sumar la consulta). Tests: `tests/test_generar_paginas.py`, `tests/js/feed-pagina.test.js`.
 
 Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
 

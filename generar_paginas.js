@@ -53,6 +53,17 @@ function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {
 
 const esIndexable = analisis => !!analisis && analisis.base.length >= MIN_COMPARABLES;
 
+/* Los comparables en el orden de la pagina: primero lo que da el modo Recomendacion de la busqueda (precio-calidad, de
+   menor a mayor precio) y despues el resto, en el mismo orden: la pagina estatica no esconde ningun comparable, que si
+   cuenta para el rango y la mediana. La pagina y su feed.xml leen esta misma lista. */
+function filasOrdenadas(analisis, ctx) {
+  const comparables = analisis.base.map(m => m.f);
+  const cm = ctx.modos || (ctx.modos = Modos.preparar(ctx.idx, ctx.nivelMarca));
+  const recomendadas = new Set(Modos.filtrar(comparables, "recomendacion", cm, analisis.med));
+  return [...Modos.ordenar(comparables.filter(f => recomendadas.has(f)), "precio", cm),
+          ...Modos.ordenar(comparables.filter(f => !recomendadas.has(f)), "precio", cm)];
+}
+
 /* "precio del 8/10" si la fuente no se releva el dia de los precios (principio II). */
 const viejoDe = (f, ctx) => P.precioDel((ctx.idx.tiendas[f[3]] || {}).relevado, ctx.idx.generado);
 
@@ -126,7 +137,7 @@ function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
   ] };
 }
 
-function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, rel = "../../" }) {
+function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, feed, rel = "../../" }) {
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -137,7 +148,8 @@ function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, rel = 
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${esc(canonica)}">
 <link rel="alternate" type="application/rss+xml" title="Ofertas de La Pichincha" href="${esc(baseUrl)}/ofertas.xml">
-${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta property="og:type" content="website">
+${feed ? `<link rel="alternate" type="application/rss+xml" title="${esc(feed.titulo)}" href="${esc(feed.href)}">
+` : ""}${noindex ? '<meta name="robots" content="noindex,follow">\n' : ""}<meta property="og:type" content="website">
 <meta property="og:site_name" content="La Pichincha">
 <meta property="og:locale" content="es_AR">
 <meta property="og:title" content="${esc(titulo)}">
@@ -218,13 +230,8 @@ function renderPagina(consulta, analisis, ctx) {
 `;
   }
 
-  // Primero lo que da el modo Recomendacion de la busqueda (precio-calidad, de mayor a menor precio) y despues el resto, en el
-  // mismo orden: la pagina estatica no esconde ningun comparable, que si cuenta para el rango y la mediana.
   const comparables = analisis.base.map(m => m.f);
-  const cm = Modos.preparar(ctx.idx, ctx.nivelMarca);
-  const recomendadas = new Set(Modos.filtrar(comparables, "recomendacion", cm, analisis.med));
-  const filas = [...Modos.ordenar(comparables.filter(f => recomendadas.has(f)), "precio", cm),
-                 ...Modos.ordenar(comparables.filter(f => !recomendadas.has(f)), "precio", cm)];
+  const filas = filasOrdenadas(analisis, ctx);
   const mostrar = filas.slice(0, MAX_FILAS);
   const resto = filas.length - mostrar.length;
   const precios = comparables.map(f => f[1]);   // el rango es el de todo lo comparable, no solo de lo recomendado
@@ -242,6 +249,7 @@ function renderPagina(consulta, analisis, ctx) {
     `mediana ${pesos(analisis.med)}. Mejor compra y precios del ${cuando}.`;
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
+    feed: { titulo: `Precios de ${q} en La Pichincha`, href: `${canonica}${FEED_ARCHIVO}` },
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
@@ -290,6 +298,52 @@ ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).joi
 <script>${SCRIPT_MEDICION}</script>
 </body>
 </html>
+`;
+}
+
+const FEED_ARCHIVO = "feed.xml";
+const MAX_FEED_PAGINA = 10;
+
+/* feed.xml de una pagina (RSS 2.0): las mejores comparables de la consulta, la mejor compra primero y despues en el orden
+   de la pagina. Sale del mismo analisis y la misma lista que la tabla, asi que nunca dice otra cosa que la pagina: solo
+   avisos comparables (sin internacionales ni usados), con su precio, comercio y enlace a la tienda. Una pagina que no es
+   indexable no tiene feed (devuelve null). El guid lleva el precio: el lector marca una entrada como nueva solo si cambio. */
+function renderFeedPagina(consulta, analisis, ctx) {
+  if (!esIndexable(analisis)) return null;
+  const { q, slug } = consulta;
+  const canonica = `${ctx.baseUrl}/precios/${slug}/`;
+  const fecha = new Date(ctx.idx.generado);
+  const rfc = isNaN(fecha) ? new Date().toUTCString() : fecha.toUTCString();
+  const cuando = P.fechaHora(ctx.idx.generado);
+  const mejor = analisis.picks[0].m.f;
+  const lista = [mejor, ...filasOrdenadas(analisis, ctx).filter(f => f !== mejor)].filter(f => esUrl(f[2])).slice(0, MAX_FEED_PAGINA);
+  const items = lista.map(f => {
+    const baja = f[6] > f[1] ? Math.round((1 - f[1] / f[6]) * 100) : 0;
+    const titulo = `${f[0]}: ${pesos(f[1])}${baja ? ` (−${baja}%)` : ""} en ${ctx.comercioDe(f)}`;
+    const desc = (f === mejor ? `Mejor compra. ${analisis.picks[0].razon} ` : "") +
+      (baja ? `Antes ${pesos(f[6])}, hoy ${pesos(f[1])}. ` : "") +
+      (viejoDe(f, ctx) ? `Ojo: ${viejoDe(f, ctx)}. ` : "") +
+      `Precios del ${cuando}. Verificá en la tienda antes de comprar.`;   // la mediana ya va en la razon de la mejor compra
+    return `    <item>
+      <title>${esc(titulo)}</title>
+      <link>${esc(f[2])}</link>
+      <guid isPermaLink="false">${esc(f[2])}#${esc(f[1])}</guid>
+      <pubDate>${rfc}</pubDate>
+      <description>${esc(desc)}</description>
+    </item>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${esc(`La Pichincha: ${q}`)}</title>
+    <link>${esc(canonica)}</link>
+    <atom:link href="${esc(canonica + FEED_ARCHIVO)}" rel="self" type="application/rss+xml"/>
+    <description>${esc(`Los mejores precios de ${q} en tiendas de Argentina, con el precio, el comercio y el enlace a cada aviso.`)}</description>
+    <language>es-AR</language>
+    <lastBuildDate>${rfc}</lastBuildDate>
+${items.join("\n")}
+  </channel>
+</rss>
 `;
 }
 
@@ -359,6 +413,8 @@ function main(argv) {
     const dir = path.join(salida, "precios", c.slug);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "index.html"), renderPagina(c, analisis, ctx), "utf8");
+    const feed = renderFeedPagina(c, analisis, ctx);
+    if (feed) fs.writeFileSync(path.join(dir, FEED_ARCHIVO), feed, "utf8");
     const indexable = esIndexable(analisis);
     paginas.push({ slug: c.slug, q: c.q, indexable });
     if (indexable) entradas.push({ q: c.q, slug: c.slug, grupo: (c.nota || "").split(":")[0] || "Otros",
@@ -372,5 +428,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, renderIndice, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
+module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

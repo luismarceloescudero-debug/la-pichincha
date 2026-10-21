@@ -160,6 +160,11 @@ figura en el mapa del sitio.
 - **FR-017**: Un producto cuya fuente no se pudo relevar el dia de los precios MUST mostrar la fecha
   de su ultimo precio verificado (por ejemplo "precio del 7/10") con el mismo criterio que el sitio
   principal, y esa fecha MUST figurar tambien en los datos estructurados cuando corresponda.
+- **FR-018**: Cada pagina indexable MUST publicar un feed RSS 2.0 propio (`/precios/<slug>/feed.xml`) con
+  hasta 10 entradas, que salen del mismo analisis y de la misma lista que la tabla de la pagina (la mejor
+  compra primero): precio, comercio y enlace http(s) al aviso, con el mismo "precio del D/M" de una fuente
+  sin relevar. MUST anunciarse en el `<head>` con `rel="alternate"`. Una pagina que no es indexable no lo
+  tiene. Sin logica duplicada ni ofertas inventadas: nada que la pagina no diga.
 - **FR-016**: Si la publicacion no tiene indice de precios, MUST omitir las paginas de consulta,
   dejar un aviso en la corrida y publicar el mapa del sitio solo con la pagina principal.
 
