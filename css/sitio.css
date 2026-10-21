@@ -713,3 +713,30 @@ table.pt-tabla td{white-space:nowrap}
 table.pt-tabla td a{color:var(--accent);font-weight:600}
 .pt-ahorro{margin:8px 2px 0;color:var(--ink-2);font-size:.88rem}
 .pt-nota{margin:6px 2px 0}
+/* ---- Historial de precio de un aviso (js/serie-precios.js) ---- */
+.hp{margin:-4px 0 10px 14px}
+.hp-abrir{padding:6px 12px;font-size:.78rem}
+.ocard .hp{margin:0}
+.hp-abrir[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.hp-cuerpo{margin-top:8px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.hp-panel{display:grid;gap:10px}
+.hp-dias,.hp-nota,.hp-vacio{margin:0;font-size:.82rem;color:var(--ink-2)}
+.hp-nota{font-size:.76rem}
+.hp-rangos{display:flex;flex-wrap:wrap;gap:6px}
+.hp-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:0}
+.hp-cifra{padding:8px 10px;background:var(--surface-2);border-radius:8px}
+.hp-cifra dt{font-size:.72rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.hp-cifra dd{margin:2px 0 0;display:grid}
+.hp-cifra b{font:600 .95rem var(--font-mono);color:var(--ink)}
+.hp-cifra small{font-size:.74rem;color:var(--ink-2)}
+.hp-svg{width:100%;height:auto;max-width:560px;display:block}
+.hp-linea{fill:none;stroke:var(--accent);stroke-width:2.25;stroke-linejoin:round}
+.hp-punto{fill:var(--surface);stroke:var(--accent);stroke-width:2}
+.hp-eje{stroke:var(--line);stroke-width:1;stroke-dasharray:3 3}
+.hp-txt{fill:var(--ink-2);font:11px var(--font-mono)}
+.hp-tabla summary{cursor:pointer;font-size:.8rem;color:var(--accent)}
+.hp-tabla table{border-collapse:collapse;margin-top:6px;font-size:.8rem;width:100%;max-width:420px}
+.hp-tabla caption{text-align:left;color:var(--ink-2);padding-bottom:4px}
+.hp-tabla th,.hp-tabla td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+.hp-tabla td{font-family:var(--font-mono)}
+@media (max-width:520px){.hp{margin-left:0}}

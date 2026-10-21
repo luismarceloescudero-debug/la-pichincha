@@ -129,6 +129,7 @@ function cardOferta(o, i, desde) {
     ${o.contra ? `<p class="o-contra">Cruza contra la ${esc(Ofertas.textoContra(o.contra, pesos))}</p>` : ""}
     ${o.nota ? `<p class="o-contra">${esc(o.nota[0].toUpperCase() + o.nota.slice(1))}.</p>` : ""}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
+    ${historialHtml(f)}
     <div class="o-detalle"><div class="o-in">
       <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>

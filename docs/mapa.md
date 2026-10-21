@@ -27,8 +27,9 @@ flowchart TD
         SA --> PS["armar _sitio: index.html, img, js, css, indice.json (L124)"]
         PS --> PO["node generar_portada.js (L139)"]
         PO --> GP["python generar_paginas.py (L142)"]
-        GP --> PA["python publicar_app.py (L153)"]
-        PA --> FE["node generar_feed.js (L156)"]
+        GP --> GS["python generar_series.py (L182): _sitio/series/NN.json"]
+        GS --> PA["python publicar_app.py (L190)"]
+        PA --> FE["node generar_feed.js (L200)"]
         FE --> VO["python verificar_ofertas.py (ML por su API, WooCommerce por su API, agregador por la tienda)"]
         VO --> FI["python fiabilidad.py (historial/verificacion + _sitio/fiabilidad.json, no en push)"]
         FI --> IN["node generar_info.js (L164)"]
@@ -55,6 +56,8 @@ flowchart TD
     DJ --> GPJ
     GPJ --> PR["_sitio/precios/ (index.html y feed.xml por pagina), sitemap.xml, robots.txt"]
     PA -- "subprocess git rev-parse (publicar_app.py:34)" --> SW["_sitio/sw.js con __VERSION__ estampada"]
+    IJ --> GS
+    HC --> GS
     IJ --> FE
     FE --> OF["_sitio/ofertas.xml, ofertas.json, hoy/"]
     OF --> TG
@@ -79,6 +82,9 @@ Puntos que no se ven en el codigo Python ni JS:
   Se trae con un segundo checkout (L47) y se commitea desde ese directorio (L104). Ahi tambien
   `verificacion/AAAA-MM.csv`: una fila por comercio y dia con lo que reviso la verificacion de ofertas
   (`fiabilidad.py`), que se commitea en su propio paso despues de la segunda verificacion.
+- **Las series del grafico (D2) no viajan en el indice**: `generar_series.py` (L182) lee el historial ya commiteado y el
+  indice final, y deja `_sitio/series/NN.json` en 64 fragmentos; la pagina baja solo el de un aviso cuando se abre su
+  historial (`js/vista-historial.js`).
 - **Tres llamadas por `subprocess`**: `generar_paginas.py:89` corre `node generar_paginas.js`,
   `publicar_app.py:34` pide el commit con `git rev-parse` y `salud.py:86` abre issues con `gh`.
 - **Los generadores de Node reusan los modulos del navegador** con `require`: `generar_paginas.js:14-16`
@@ -100,6 +106,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Indice del buscador** | `indexar.py` (`sin_repetir_agregador`: lo de ComparaYa que repite la URL de una tienda directa no entra) | `js/buscador.js`, `js/indice-ofertas.js`, los generadores de Node. Desde una oferta, `consultaDeOferta` conserva categoria y specs comparables (monitor: pulgadas/resolucion/Hz; memoria: DDR/capacidad/velocidad; SSD: capacidad/formato; placa de video: chip/memoria; procesador: familia/modelo; notebook: gama de CPU/RAM/disco). | `tests/test_indexar*.py`, `tests/js/buscador.test.js`, `tests/js/submarcas.test.js` |
 | **Modos de busqueda** (Recomendacion, Super Oferta, Primera Linea; orden Precio, Novedades, Premium) | `js/modos.js` (`filtrar`, `ordenar`, `preparar`, `notaDe`; ordenes Mejor oferta, Mayor baja, Precio, Novedades, Premium), `js/ofertas.js` (`contraModelo`, `cruceGen`, `textoContraModelo`, `textoCruceGen`: Super Oferta), `js/premium.js` (`puntaje`, `UMBRAL`, `ganadorDe`: Primera Linea y orden Premium; lee `datos/ganadores.json`, que `publicar_app.py` publica), `specs/013-filtros-de-busqueda/spec.md`, `specs/014-ofertas-y-premium/spec.md`, tablero `docs/plan-buscador.md` | `js/busqueda.js` (`elegirOrden`, `ordenesHtml`, `vacioHtml`), `js/arranque.js`, `generar_paginas.js`; usa `js/categorias.js` (`evaluar().puntos`, `generacionesDe`, `aniosDe`) y `js/ofertas.js` | `tests/js/buscador.test.js`, `tests/js/premium.test.js`, `tests/js/filtros-ui.test.js` |
 | **Historial y sellos de serie** | `historial.py`, `serie.py` (rama `historial`) | `indexar.py:424-425`, `cobertura.py` | `tests/test_historial.py`, `tests/test_serie.py` |
+| **Grafico del historial de un aviso** (D2) | `generar_series.py` (deja `_sitio/series/NN.json`: 64 fragmentos por `clave(tienda, url)`) + `js/serie-precios.js` (puro: serie, cifras, SVG, tabla, panel; la clave y el fragmento, iguales que en Python) + `js/vista-historial.js` (el boton y la descarga del fragmento) | el boton `historialHtml` en las filas de la busqueda (`js/busqueda.js`) y en las tarjetas de ofertas (`js/indice-ofertas.js`); el paso "Armar las series de precio" del workflow | `tests/test_generar_series.py`, `tests/js/serie-precios.test.js` |
 | **Identidad por codigo** | `modelo.py` (`RUBROS` L14, `_FORMAS` L32, `mpn_de_ficha` L116) | `indexar.py`, `cobertura.py`, `js/buscador.js` (`agruparPorModelo`) | `tests/test_modelo.py`, `tests/test_cobertura.py`, `tests/js/agrupado.test.js` |
 | **Ganadores por pruebas de laboratorio** | `datos/ganadores.json`, `docs/ganadores-referencia.md` | `generar_ganadores.py` (valida el esquema y mide cobertura contra el indice; no lee sitios) | `tests/test_ganadores.py` |
 | **Fichas** (part number de Venex y Mexx) | `ficha` en `tiendas.json` + `modelo.mpn_de_ficha`; cache en `fichas.json` de la rama `historial` | `indexar.py:276-340` | `tests/test_fichas.py`, fixtures `venex/ficha.html`, `mexx/ficha-pn.html` |

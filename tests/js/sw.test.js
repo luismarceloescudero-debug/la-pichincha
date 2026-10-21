@@ -91,7 +91,7 @@ test("no toca otros origenes ni pedidos que no son GET", async () => {
 test("la cascara trae lo necesario y no pasa de un tamano razonable de archivos", () => {
   for (const f of ["./", "index.html", "css/sitio.css", "js/app.js", "js/analisis.js", "manifest.webmanifest", "sin-red.html", "indice.json"])
     assert.ok(SW.CASCARA.includes(f), f);
-  assert.ok(SW.CASCARA.length < 35);
+  assert.ok(SW.CASCARA.length < 40);
   assert.ok(SW.CASCARA.every(f => !/^https?:/.test(f)), "nada de otros origenes");
 });
 

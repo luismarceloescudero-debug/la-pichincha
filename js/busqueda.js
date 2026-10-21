@@ -266,7 +266,8 @@ function pintarResultados(q) {
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
     </a>` + (otras.length ? `<div class="mismo"><span>También en</span>${otras.map(o =>
-      `<a href="${enlace(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "");
+      `<a href="${enlace(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "")
+      + historialHtml(f);
   }).join("");
 }
 

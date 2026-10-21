@@ -30,7 +30,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
@@ -38,6 +38,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `manifest.webmanifest`, `sw.js`, `sin-red.html`, `js/app.js`, `publicar_app.py` | La app instalable: manifiesto, service worker (red primero), pagina de sin conexion, aviso y medicion, y el script que estampa la version al publicar |
 | `comparativa-ram-ddr4-16gb.html` | Copia para el artifact, sin `<head>` y en un solo archivo. La arma `python actualizar.py --build` y no se versiona |
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
+| `historial.py`, `serie.py`, `generar_series.py` | El historial (rama `historial`), los sellos de minimo y el grafico del detalle: `generar_series.py` deja `_sitio/series/NN.json`, la serie de cada aviso en 64 fragmentos que la pagina baja solo al abrir su historial |
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `guardia.js` | Guardia del indice: mide bajas propias y, por categoria, avisos, "sin datos" y ofertas sobre el indice real, lo compara con la `guardia.json` publicada de la corrida anterior y con una alarma (0 bajas propias con historial, una categoria que se queda sin ofertas, un salto de mas de 10 puntos en "sin datos", menos de 10 ofertas para el resumen) la corrida no manda Telegram y abre un issue `guardia` |
@@ -469,8 +470,32 @@ Sin historia suficiente no se afirma nada. El historial empezo el 2026-10-07,
 asi que el sello de 30 dias recien aparece desde el 2026-11-06 y el de 90 desde
 el 2027-01-05; hasta entonces la funcion esta lista y no muestra nada, a
 proposito. `cobertura.json` dice cuantos avisos llevan cada sello y cuantos dias
-de historia hay. No hay grafico: seria una vista nueva y primero se mide si los
-sellos se usan.
+de historia hay.
+
+### Grafico del historial de un aviso (D2 de `docs/plan-v2.md`)
+
+Cada fila de la busqueda y cada tarjeta de ofertas tiene un boton **Historial de precio** que abre,
+en el lugar, un SVG inline sin dependencias con la serie del aviso y cuatro cifras: **hoy**, **minimo**
+y **maximo** (con la fecha en que rigieron) y la **variacion** contra el primer dia. Arriba dice en
+letras **"N dias de datos"** y desde que dia seguimos ese aviso; nunca afirma mas que eso, asi que
+con los 14 dias de historia de hoy solo ofrece los rangos de 7 dias y todo (30 y 90 aparecen solos
+cuando los datos los cubran). Con menos de dos puntos, el panel dice "Todavia no hay historia
+suficiente" y no dibuja nada.
+
+La serie no viaja en el indice. `generar_series.py` deja `_sitio/series/NN.json` (64 fragmentos):
+cada aviso cae en uno por `clave(tienda, url)` y la pagina baja solo `series/NN.json` cuando se
+abre su detalle. Medido con el historial del 21/10 y el indice publicado: 23.484 avisos con serie en
+64 fragmentos, **931 KB sin comprimir y 444 KB gzip** en total; el fragmento mas grande, 17 KB
+crudos / 7,6 KB gzip. El CSV del historial entero son 14,2 MB (2,7 MB gzip) y el `indice.json`, 1,5 MB
+gzip: el detalle baja un fragmento, no la historia.
+
+Cada fragmento es `{"v":1,"base":"2026-10-07","hasta":"2026-10-21","s":{"<clave>":[dia,precio,...]}}`:
+dias desde `base` y un par por cambio de precio, como el CSV. La clave (`cyrb53` sobre
+`tienda+"\n"+url`) y el fragmento estan en `generar_series.py` y en `js/serie-precios.js`, con los
+mismos vectores en los tests de los dos lados. Un aviso cuyo precio de hoy no coincide con el ultimo
+del historial, o que ya no se publica, no lleva serie: no se afirma nada. El grafico es
+`role="img"` con el resumen en el `aria-label`, lleva una tabla alternativa con los precios de cada
+fecha y no depende del color (la linea y las guias alcanzan).
 
 ## Identidad por codigo de modelo
 
