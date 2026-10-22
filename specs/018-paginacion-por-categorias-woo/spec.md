@@ -34,9 +34,10 @@ es una restriccion de la tienda, que explicita la via que si permite (categorias
 - La version por categorias (`indexar_woocommerce_categorias`) recorre
   `/products/categories` paginada, y por cada categoria con `count > 0` pagina
   `?category=<id>` hasta que vuelve vacia.
-- Las hojas de mas de 200 productos quedan truncadas en 200 (tope duro de la tienda):
-  aceptado, porque cubre el 98% del catalogo y lo que se pierde son hojas chicas de
-  accesorios y los items de la cola de orden del listado de cada hoja grande.
+- Una categoria cuya primera pasada queda **cortada** (el 400 de la tienda o el tope de paginas,
+  no una pagina vacia) se recorre otra vez ordenada por precio desde cada punta
+  (`orderby=price&order=asc` y `desc`): asi se cubren las hojas de hasta 400 productos, que es
+  como se midio el 98,4% de la sonda. Las que terminan en una pagina vacia no piden mas.
 - El 400 de la tienda (y cualquier otro error) corta esa categoria, no la corrida, y
   lo ya leido no se descarta (igual que la version plana).
 
@@ -53,5 +54,15 @@ es una restriccion de la tienda, que explicita la via que si permite (categorias
 
 - `test_paginacion_por_categorias_cuando_la_tienda_la_pide`: con `"paginacion": "categorias"`,
   baja `/products/categories` y pagina `?category=<id>`; sin la clave, sigue igual que antes.
+- `test_una_hoja_mas_grande_que_el_tope_se_completa_por_precio_desde_cada_punta`: con el 400 desde
+  la pagina 3, la segunda y la tercera pasada (precio asc y desc) traen lo que faltaba, sin repetir.
 - `test_el_json_real_guardado_de_cada_tienda_woocommerce` ahora entrega tambien
   `categorias.json` para las tiendas con esa paginacion (fixture capturada real).
+
+## Medido en la CI
+
+- 22/10, corrida 133 (solo la primera pasada, PR #112): **3.309 productos** (antes del corte eran
+  3.343). Las categorias padre repiten productos de sus hojas, por eso la sola pasada ya cubria
+  mas del 93%.
+- La segunda pasada por precio (este cambio) se mide en la proxima corrida: sale el conteo en el
+  log del paso «Armar el indice de busqueda» (`The Gamer Shop  N productos`).

@@ -389,20 +389,34 @@ def indexar_woocommerce_categorias(tienda):
             cid = c.get("id")
             if not cid or not c.get("count"):
                 continue
-            plantilla = f"{base}/wp-json/wc/store/v1/products?category={cid}&per_page={por_pagina}&page={{n}}"
-            for np in range(1, limite + 1):
-                try:
-                    filas = json.loads(bajar(plantilla.format(n=np)).lstrip("\ufeff"))
-                except (urllib.error.URLError, OSError, ValueError):
-                    break
-                if not filas:
-                    break
-                for f in filas:
-                    it = _fila_woocommerce(f, vistos)
-                    if it:
-                        items.append(it)
-                time.sleep(PAUSA)
+            listado = f"{base}/wp-json/wc/store/v1/products?category={cid}&per_page={por_pagina}"
+            filas, cortado = _paginar_woocommerce(listado + "&page={n}", limite)
+            if filas and cortado:
+                # Una hoja mas grande que el tope de la tienda (10 paginas de 20): la misma hoja ordenada por precio
+                # desde cada punta trae lo que la primera pasada no alcanzo (sonda del 22/10: 98,4% del catalogo).
+                for orden in ("asc", "desc"):
+                    filas += _paginar_woocommerce(listado + f"&orderby=price&order={orden}&page={{n}}", limite)[0]
+            for f in filas:
+                it = _fila_woocommerce(f, vistos)
+                if it:
+                    items.append(it)
     return items
+
+
+def _paginar_woocommerce(plantilla, limite):
+    """Las filas de un listado de la Store API y si quedo cortado (error de la tienda o tope de paginas) en vez de
+    terminar en una pagina vacia."""
+    filas = []
+    for n in range(1, limite + 1):
+        try:
+            pagina = json.loads(bajar(plantilla.format(n=n)).lstrip("\ufeff"))
+        except (urllib.error.URLError, OSError, ValueError):
+            return filas, True
+        if not pagina:
+            return filas, False
+        filas += pagina
+        time.sleep(PAUSA)
+    return filas, True
 
 
 def robots_permite(texto, ruta):

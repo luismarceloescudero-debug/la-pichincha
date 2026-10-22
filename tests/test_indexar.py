@@ -369,6 +369,33 @@ class Woocommerce(unittest.TestCase):
                           "https://t.test/wp-json/wc/store/v1/products?category=7&per_page=2&page=2"])
         self.assertTrue(any("categories" in u for u in pedidas), "hay que leer las categorias de la API")
 
+    def test_una_hoja_mas_grande_que_el_tope_se_completa_por_precio_desde_cada_punta(self):
+        # The Gamer Shop corta tambien dentro de una categoria desde la pagina 11 (400 tgs_paginacion): Mouse
+        # tiene 292 productos y una pasada trae 200. Ordenada por precio de cada punta trae lo que faltaba.
+        TIENDA = {"nombre": "Test", "base": "https://t.test",
+                  "catalogo": {"tipo": "woocommerce", "por_pagina": 1, "tope_paginas": 10,
+                               "paginacion": "categorias"}}
+        orden = {"": [3, 1, 4], "asc": [1, 2, 3], "desc": [6, 5, 4]}   # la tienda deja ver 2 por listado
+        pedidas = []
+
+        def bajar(url):
+            pedidas.append(url)
+            if "categories" in url:
+                return json.dumps([{"id": 7, "name": "Mouse", "count": 6}] if url.endswith("page=1") else [])
+            n = int(url.rsplit("=", 1)[1])
+            if n > 2:
+                raise urllib.error.HTTPError(url, 400, "tgs_paginacion", {}, None)
+            clave = url.split("order=")[1].split("&")[0] if "order=" in url else ""
+            return json.dumps([self.producto(orden[clave][n - 1])])
+
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_woocommerce(TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual(sorted(it["url"] for it in items),
+                         [f"https://t.test/producto/mem-{i}/" for i in (1, 2, 3, 5, 6)])
+        self.assertEqual(len(items), 5, "un producto visto en dos pasadas va una sola vez")
+        self.assertIn("https://t.test/wp-json/wc/store/v1/products?category=7&per_page=1&orderby=price&order=desc&page=1",
+                      pedidas)
+
     def test_el_sku_con_prefijo_de_mayorista_del_json_real(self):
         # GoldenTech publica "IC_RE305" (TP-Link RE305); Katech, codigos internos ("CM5012") que no son part number
         for clave, esperado in (("goldentech", "RE305"), ("katech", None)):
