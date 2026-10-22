@@ -76,6 +76,8 @@ function arrancar() {
 
     const comparar = ev.target.closest("[data-comparar]");
     if (comparar) return compararConsulta(comparar.dataset.comparar);
+    const compararEnFila = ev.target.closest("[data-comparar-fila]");
+    if (compararEnFila) return compararFila(compararEnFila.dataset.compararFila);
 
     // ---- Ofertas ----
     const ofe = ev.target.closest("[data-of]");

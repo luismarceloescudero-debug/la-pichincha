@@ -261,12 +261,15 @@ function pintarResultados(q) {
     if (otras.length) marcas.push(`<span class="sello conocida">mismo modelo en ${otras.length + 1} tiendas</span>`);
     // Sin baja ni rebaja, lo que sirve saber es desde cuando esta en este precio (no hace falta que sea una oferta para verlo).
     const quieto = !bajo && !off ? Pagina.cambioDe(f[10], (IDX.historial || {}).inicio) : "";
+    // «Comparar» por fila (spec 017): solo si el titulo dice las especificaciones suficientes para una comparacion justa.
+    const compara = Especificaciones.mismas(f, f).aplica
+      ? `<button class="acc" data-comparar-fila="${esc(f[2])}" title="Compara solo con avisos de las mismas especificaciones">${icono("balanza")} Comparar con las mismas especificaciones</button>` : "";
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${enlace(f[2])}" target="_blank" rel="noopener">
       <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
-    </a>` + (otras.length ? `<div class="mismo"><span>También en</span>${otras.map(o =>
-      `<a href="${enlace(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}</div>` : "")
+    </a>` + (otras.length || compara ? `<div class="mismo">${otras.length ? `<span>También en</span>${otras.map(o =>
+      `<a href="${enlace(o[2])}" target="_blank" rel="noopener">${esc(comercioDe(o))} ${pesos(o[1])}</a>`).join("")}` : ""}${compara}</div>` : "")
       + historialHtml(f);
   }).join("");
 }

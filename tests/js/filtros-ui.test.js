@@ -258,3 +258,31 @@ test("los ganadores en pruebas (datos/ganadores.json) llegan a la fila como sell
   correr('pintarResultados("ssd 1tb")');
   assert.match(els["#res"].innerHTML, /ganador en pruebas: PassMark Disk Rating/);
 });
+
+/* --- «Comparar» por fila (spec 017) --- */
+test("cada fila con especificaciones suficientes trae su «Comparar», fuera del enlace del aviso", () => {
+  const { correr, els } = pagina();
+  correr('pintarResultados("ssd 1tb")');
+  const html = els["#res"].innerHTML;
+  assert.match(html, /data-comparar-fila="https:\/\/gc\.test\//);
+  assert.match(html, /Comparar con las mismas especificaciones/);
+  assert.doesNotMatch(html, /<a class="fila[^>]*>(?:(?!<\/a>)[\s\S])*data-comparar-fila/, "tocar el boton no tiene que abrir la tienda");
+});
+
+test("una fila cuyo título no dice sus especificaciones no tiene el botón", () => {
+  const { correr, els } = pagina();
+  correr('IDX.productos.push(["Disco Solido SSD Hiksemi generico", 65000, "https://mx.test/generico", "mx", "", 0, 0, "", "", ""])');
+  correr('pintarResultados("ssd")');
+  const html = els["#res"].innerHTML;
+  assert.ok(html.includes("Hiksemi generico"));
+  assert.doesNotMatch(html, /data-comparar-fila="https:\/\/mx\.test\/generico"/);
+});
+
+test("compararFila abre la comparativa con esa fila de referencia", async () => {
+  const { correr } = pagina();
+  correr("this.ir = () => {}");                       // arranque.js no se carga en este arnes
+  const url = correr("IDX.productos[0][2]");
+  await correr(`compararFila(${JSON.stringify(url)})`);
+  assert.equal(correr("REFERENCIA[2]"), url);
+  assert.equal(correr("ANALISIS.espec.aplica"), true);
+});
