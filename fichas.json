@@ -215,6 +215,10 @@
 "dia": "2026-10-15",
 "mpn": "AD4U320016G22-SGN"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/47851-memoria-ram-ddr4-32gb-3200-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-22",
+"mpn": "KF432C16BB2A/32"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/47993-memoria-ram-ddr4-32gb-3200-mhz-kingston-value.html": {
 "dia": "2026-10-15",
 "mpn": "KVR32N22D8/32"
@@ -222,6 +226,10 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/48033-memoria-ram-ddr4-16gb-3200-mhz-xpg-d35-negro.html": {
 "dia": "2026-10-15",
 "mpn": "AX4U320016G16A-SBKD35"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/48231-memoria-ram-ddr5-32gb-5600-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-22",
+"mpn": "KF556C40BBA-32"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/48722-memoria-ram-ddr5-16gb-6000-mhz-xpg-lancer-blade-rgb.html": {
 "dia": "2026-10-15",
@@ -251,6 +259,14 @@
 "dia": "2026-10-15",
 "mpn": "KF560C36BBE-8"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50229-memoria-ram-ddr4-32gb-3200-mhz-kingston-fury-beast.html": {
+"dia": "2026-10-22",
+"mpn": "KF432C16BB/32"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50348-memoria-ram-ddr4-8gb-3200-mhz-kingston-value.html": {
+"dia": "2026-10-22",
+"mpn": "KVR32N22S8/8WP"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50381-memoria-ram-ddr5-32gb-6400-mhz-kingston-fury-beast-rgb.html": {
 "dia": "2026-10-16",
 "mpn": null
@@ -262,6 +278,10 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50390-memoria-ram-ddr5-16gb-6800-mhz-kingston-fury-beast.html": {
 "dia": "2026-10-16",
 "mpn": "KF568C34BBE-16"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50473-memoria-ram-ddr4-16gb-3200-mhz-kingston-value.html": {
+"dia": "2026-10-22",
+"mpn": "KVR32N22D8/16WP"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50477-memoria-ram-ddr4-8gb-3200-mhz-xpg-d35-negro.html": {
 "dia": "2026-10-15",
@@ -630,6 +650,10 @@
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kimota-ddr4-16gb-3200mhz.html": {
 "dia": "2026-10-15",
 "mpn": "D4LD16G32-KIM"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kimota-ddr4-8gb-3200mhz.html": {
+"dia": "2026-10-22",
+"mpn": "D4LD8G32-KIM"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingdian-ddr3-4gb-1600mhz.html": {
 "dia": "2026-10-15",
