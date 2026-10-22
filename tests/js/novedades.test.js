@@ -95,3 +95,78 @@ test("«Lo más buscado» muestra solo los términos, cada uno con su comparativ
   assert.equal(N.masBuscadasHtml([], h), "");
   assert.equal(N.masBuscadasHtml(null, h), "");
 });
+
+// ---- Lo mas vendido en las tiendas (spec 019) ----
+
+// La columna 13 del indice es el puesto del aviso en el orden «mas vendidos» de su tienda (0: sin puesto).
+const vendida = (nombre, precio, tienda, puesto, extra = {}) => {
+  const f = fila(nombre, precio, tienda, extra);
+  return [...f, "", "", "", puesto];
+};
+const NITRO = "Notebook Gamer Acer Nitro V15 Intel Core i7 13620H 16GB 1TB RTX 4060";
+const IDX_V = {
+  tiendas: TIENDAS,
+  productos: [
+    vendida(OMEN, 3400000, "cg", 7),            // el puesto es de toda la tienda: 7, pero es su notebook mas vendida
+    vendida(ASUS, 4900000, "cg", 9, { modelo: "G16-9955" }),
+    vendida(ASUS, 4800000, "mx", 1, { modelo: "G16-9955" }),   // la mas vendida de Mexx, y tambien entre las de CompraGamer
+    vendida(NITRO, 2100000, "mx", 2),
+    vendida(BASICA, 400000, "cg", 1),            // la mas vendida de la tienda, pero no llega al minimo de su gama
+    vendida(LAPTOP, 5200000, "mx", 0),           // sin puesto: no entra
+    vendida(OMEN + " usado", 900000, "mx", 3, { sellos: "u" }),
+    vendida("Mouse Logitech G203 Lightsync", 20000, "cg", 2),
+  ],
+};
+
+test("lo más vendido sale del orden de cada tienda: su primera de la categoría, sin usados ni lo que no llega al mínimo", () => {
+  const g = N.masVendidosPorCategoria(IDX_V, null);
+  const notebooks = g.find(x => x.categoria === "notebook");
+  assert.ok(notebooks, "hay notebooks con puesto");
+  const nombres = notebooks.items.map(i => i.nombre);
+  assert.ok(!nombres.includes(BASICA), "lo que no llega al mínimo de su gama no entra");
+  assert.ok(!nombres.includes(LAPTOP), "sin puesto no entra");
+  assert.ok(!nombres.some(n => /usado/.test(n)), "sin usados");
+  assert.equal(nombres.filter(n => n === ASUS).length, 1, "el mismo modelo en dos tiendas es uno solo");
+  assert.ok(notebooks.items.length <= N.POR_CATEGORIA);
+});
+
+test("primero las que encabezan su tienda, y a igual puesto la que se vende en más tiendas", () => {
+  const notebooks = N.masVendidosPorCategoria(IDX_V, null).find(x => x.categoria === "notebook");
+  const [primera, segunda] = notebooks.items;
+  assert.equal(primera.nombre, ASUS, "encabeza Mexx y está entre las de CompraGamer");
+  assert.equal(primera.puesto, 1);
+  assert.equal(primera.tiendas, 2);
+  assert.equal(segunda.nombre, OMEN, "la primera de CompraGamer en notebooks, aunque en toda la tienda sea la 7");
+  assert.equal(segunda.puesto, 1);
+  assert.equal(segunda.tienda, "CompraGamer");
+});
+
+test("sin puestos en el índice no hay panel de lo más vendido", () => {
+  assert.deepEqual(N.masVendidosPorCategoria(IDX, null), [], "un índice sin la columna");
+  assert.equal(N.masVendidosHtml([], { esc: String, pesos: String, enlace: String, icono: () => "" }), "");
+});
+
+test("el panel dice de dónde sale el orden, sin inventar cantidades", () => {
+  const g = N.masVendidosPorCategoria(IDX_V, null);
+  const html = N.masVendidosHtml(g, { esc: s => String(s), pesos: n => "$" + n, enlace: u => u, icono: () => "" });
+  assert.match(html, /id="mas-vendido"/);
+  assert.match(html, /Lo más vendido en las tiendas/);
+  assert.match(html, /n\.º 1 en Mexx/);
+  assert.match(html, /entre las más vendidas de 2 tiendas/);
+  assert.match(html, /no publican cuántas unidades/);
+  assert.match(html, /data-comparar-fila="https:\/\/t\.test\//);
+  assert.ok(!/\d+ (unidades|ventas)/.test(html), "sin cantidades inventadas");
+});
+
+test("un aviso sin código de modelo que nombra el código de otro es el mismo modelo", () => {
+  // Medido el 22/10: el LG 24GS60F salía dos veces porque GoldenTech no trae el código y The Gamer Shop sí (24GS60F-B).
+  const LG = "Monitor LG UltraGear 24GS60F 24\" IPS 180Hz Full HD";
+  const idx = { tiendas: { tg: { nombre: "The Gamer Shop" }, gt: { nombre: "GoldenTech" }, mx: { nombre: "Mexx" } }, productos: [
+    vendida(LG, 217600, "tg", 4, { modelo: "24GS60F-B" }),
+    vendida("MONITOR GAMER 24 LG ULTRAGEAR 24GS60F 180HZ IPS 1MS FHD", 226861, "gt", 6),
+    vendida("Monitor Samsung Odyssey G5 27\" VA 165Hz QHD", 300000, "mx", 1),
+  ] };
+  const monitores = N.masVendidosPorCategoria(idx, null).find(x => x.categoria === "monitor");
+  assert.equal(monitores.items.filter(i => /24GS60F/i.test(i.nombre)).length, 1);
+  assert.equal(monitores.items.find(i => /24GS60F/i.test(i.nombre)).tiendas, 2);
+});

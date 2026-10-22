@@ -396,6 +396,29 @@ class Woocommerce(unittest.TestCase):
         self.assertIn("https://t.test/wp-json/wc/store/v1/products?category=7&per_page=1&orderby=price&order=desc&page=1",
                       pedidas)
 
+    def test_lo_mas_vendido_sale_del_orden_por_popularidad_de_la_tienda(self):
+        # Spec 019: el puesto de cada aviso en el orden «mas vendidos» de la propia tienda (orderby=popularity, ventas
+        # totales). Solo los primeros TOPE_VENDIDOS: mas abajo el orden ya no dice nada.
+        pedidas = []
+
+        def bajar(url):
+            pedidas.append(url)
+            n = int(url.rsplit("=", 1)[1])
+            return json.dumps([self.producto(10 * n + i) for i in range(2)] if n <= 2 else [])
+
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"), \
+                mock.patch.object(indexar, "TOPE_VENDIDOS", 3):
+            puestos = indexar.vendidos(dict(self.TIENDA, catalogo={"tipo": "woocommerce", "por_pagina": 2}))
+        self.assertEqual(puestos, {"https://t.test/producto/mem-10/": 1, "https://t.test/producto/mem-11/": 2,
+                                   "https://t.test/producto/mem-20/": 3})
+        self.assertEqual(pedidas[0], "https://t.test/wp-json/wc/store/v1/products?orderby=popularity&per_page=2&page=1")
+        self.assertEqual(len(pedidas), 2, "con el tope cubierto no se piden mas paginas")
+
+    def test_sin_orden_de_mas_vendidos_no_hay_puestos(self):
+        with mock.patch.object(indexar, "bajar", side_effect=urllib.error.HTTPError("u", 400, "no", {}, None)):
+            self.assertEqual(indexar.vendidos(self.TIENDA), {})
+        self.assertEqual(indexar.vendidos({"nombre": "X", "base": "https://x.test", "catalogo": {"tipo": "json"}}), {})
+
     def test_el_sku_con_prefijo_de_mayorista_del_json_real(self):
         # GoldenTech publica "IC_RE305" (TP-Link RE305); Katech, codigos internos ("CM5012") que no son part number
         for clave, esperado in (("goldentech", "RE305"), ("katech", None)):
@@ -550,6 +573,28 @@ class Vtex(unittest.TestCase):
         self.assertEqual(items[2]["precio"], 4149999)
         for it in items:
             self.assertTrue(indexar.url_valida(it["url"]))
+
+    def test_lo_mas_vendido_de_cada_categoria_vtex(self):
+        # Spec 019: en VTEX el orden «mas vendidos» (O=OrderByTopSaleDESC) es por categoria; un aviso en dos categorias
+        # se queda con su mejor puesto. Cuenta el puesto aunque el aviso no tenga stock: es el orden de la tienda.
+        por_categoria = {"/14/100/481/": [{"link": "/celu-a/p"}, {"link": "/celu-b/p"}],
+                         "/14/102/484/": [{"link": "/note-a/p"}, {"link": "/celu-b/p"}]}
+        pedidas = []
+
+        def bajar(url):
+            pedidas.append(url)
+            if "/category/tree/" in url:
+                return leer("oncity", "arbol.json")
+            if url.endswith("/robots.txt"):
+                return ""
+            return json.dumps(por_categoria.get(url.split("fq=C:")[1].split("&")[0], []))
+
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            puestos = indexar.vendidos(self.TIENDA)
+        self.assertEqual(puestos, {"https://www.oncity.com/celu-a/p": 1, "https://www.oncity.com/celu-b/p": 2,
+                                   "https://www.oncity.com/note-a/p": 1})
+        self.assertIn("https://www.oncity.com/api/catalog_system/pub/products/search?fq=C:/14/100/481/&O=OrderByTopSaleDESC"
+                      f"&_from=0&_to={indexar.POR_PEDIDO_VTEX - 1}", pedidas)
 
     def test_el_json_real_guardado_de_cada_tienda_vtex(self):
         """robots.txt, arbol y primera busqueda tal como los vio GitHub el 19/10 (diagnostico --vtex-catalogo)."""

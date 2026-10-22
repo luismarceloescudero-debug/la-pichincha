@@ -108,7 +108,9 @@ function vistaComparativa() {
   const novedades = typeof NOVEDADES !== "undefined" ? Novedades.novedadesHtml(NOVEDADES, { esc, pesos, enlace, icono }) : "";
   // Lo mas buscado (fase 3): terminos agregados y filtrados por el build (BUSCADAS, js/buscadas.js). Primero, antes de las novedades.
   const buscado = typeof BUSCADAS !== "undefined" ? Novedades.masBuscadasHtml(BUSCADAS, { esc }) : "";
-  return buscado + novedades + `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
+  // Lo mas vendido en las tiendas (spec 019): lo calcula el build (VENDIDOS) con el orden de cada tienda. Despues de lo mas buscado.
+  const vendido = typeof VENDIDOS !== "undefined" ? Novedades.masVendidosHtml(VENDIDOS, { esc, pesos, enlace, icono }) : "";
+  return buscado + vendido + novedades + `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
     <div class="ultimas" id="ultimas">${tiraHtml(false)}</div>
     ${barraAcciones("comparativa")}
     <div class="grid">${c.lista.map(tarjeta).join("")}</div></div>`;

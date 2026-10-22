@@ -145,10 +145,30 @@ class Corrida(unittest.TestCase):
             indexar.main(["--historial", str(self.hist)])
         indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
         # Las bajas de 7 y 31 dias van vacias: el historial de la prueba no tiene dias suficientes (principio II).
-        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", "", "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[7:], ["https://img.test/1.jpg", "i", "", "", "", "", 0])
         self.assertEqual(self.fila(indice, "dos", 101)[8], "")
-        self.assertTrue(all(len(f) == 13 for f in indice["productos"]))
-        self.assertEqual(indice["campos"][-5:], ["sellos", "modelo", "desde", "baja7", "baja31"])
+        self.assertTrue(all(len(f) == 14 for f in indice["productos"]))
+        self.assertEqual(indice["campos"][-6:], ["sellos", "modelo", "desde", "baja7", "baja31", "vendido"])
+
+    def test_el_puesto_en_lo_mas_vendido_va_en_la_ultima_columna(self):
+        # Spec 019: el puesto de cada aviso en el orden «mas vendidos» de su tienda (0: sin puesto). Si el orden no se
+        # puede leer, la tienda entra igual, sin puestos.
+        self.catalogos = {"https://uno.test/cat": [{"id": 1, "nombre": "Producto 1", "precio": 1000},
+                                                   {"id": 2, "nombre": "Producto 2", "precio": 2000}],
+                          "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
+
+        def vendidos(fuente):
+            if fuente["nombre"] == "Dos":
+                raise OSError("sin conexion")
+            return {url(2): 1}
+
+        with redirect_stdout(io.StringIO()), mock.patch.object(indexar, "vendidos", side_effect=vendidos):
+            indexar.main(["--historial", str(self.hist)])
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        self.assertEqual(self.fila(indice, "uno", 2)[13], 1)
+        self.assertEqual(self.fila(indice, "uno", 1)[13], 0)
+        self.assertEqual(self.fila(indice, "dos", 101)[13], 0)
+        self.assertEqual(indice["campos"][13], "vendido")
 
     def test_el_codigo_de_modelo_se_guarda_en_la_ultima_columna_tambien_en_filas_reusadas(self):
         nombre = "Disco Ssd 480Gb Kingston Sedc600M/480G"
@@ -234,8 +254,8 @@ class Corrida(unittest.TestCase):
                                ["Producto 2", 2000, url(2), "uno", "", 0]]}
         (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
         indice, _ = self.correr(None, [(101, 500)])              # uno se cae y se reusa lo viejo
-        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", "", "", "", ""])
-        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", "", "", "", ""])
+        self.assertEqual(self.fila(indice, "uno", 1)[4:], ["", 0, 900, "", "", "", "", "", "", 0])
+        self.assertEqual(self.fila(indice, "uno", 2)[4:], ["", 0, 0, "", "", "", "", "", "", 0])
 
     def previo(self, tiendas, generado="2026-10-07T15:25-03:00"):
         """Un indice anterior con un producto de uno, como lo dejo otra corrida."""
