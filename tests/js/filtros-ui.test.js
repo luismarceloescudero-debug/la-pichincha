@@ -286,3 +286,16 @@ test("compararFila abre la comparativa con esa fila de referencia", async () => 
   assert.equal(correr("REFERENCIA[2]"), url);
   assert.equal(correr("ANALISIS.espec.aplica"), true);
 });
+
+/* --- Las sugerencias de Buscar: lo más buscado si el build lo trajo (spec 017, fase 3) --- */
+test("las sugerencias de Buscar son las fijas, o lo más buscado si el build lo trajo, escapado", () => {
+  const { correr } = pagina();
+  assert.match(correr("vistaBuscar()"), /<button class="sug">ddr4 16gb<\/button>/);
+  correr('var BUSCADAS = ["ssd 1tb", "a<b"]');
+  const html = correr("vistaBuscar()");
+  assert.match(html, /<button class="sug">ssd 1tb<\/button>/);
+  assert.match(html, /<button class="sug">a&lt;b<\/button>/);
+  assert.doesNotMatch(html, /ddr4 16gb<\/button>/);
+  correr("var BUSCADAS = []");
+  assert.match(correr("vistaBuscar()"), /<button class="sug">ddr4 16gb<\/button>/, "lista vacia: las de siempre");
+});

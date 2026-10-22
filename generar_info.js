@@ -14,6 +14,7 @@ const fs = require("fs");
 const path = require("path");
 const G = require("./generar_paginas.js");
 const P = require("./js/pagina.js");
+const Buscadas = require("./js/buscadas.js");   // el minimo y la ventana de «lo mas buscado»: la politica y el codigo dicen lo mismo
 
 const BASE_URL = G.BASE_URL;
 const esc = G.esc;
@@ -148,6 +149,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
   <section>
     <h2 id="privacidad">Privacidad</h2>
     <p>El sitio no tiene cuentas ni formularios y no guarda datos personales. Las visitas, las búsquedas y los clics a tiendas se miden con GoatCounter, sin cookies y sin identificar a nadie, para saber qué se busca y qué sirve.</p>
+    <p><b>Lo más buscado.</b> La portada muestra las búsquedas más frecuentes. Se calculan con conteos agregados de GoatCounter de los últimos ${Buscadas.VENTANA_DIAS} días (cuántas personas distintas hicieron cada búsqueda). Una búsqueda solo se publica si la hicieron al menos ${Buscadas.MINIMO_VISITANTES} personas distintas y corresponde a un producto del catálogo; se descartan las que parecen datos personales (mails, teléfonos, números largos o direcciones web). Se publica solo la lista, sin conteos, sin fechas y sin nada de quién buscó.</p>
     <p>Las preferencias (por ejemplo, el tema claro u oscuro) quedan solo en tu navegador.</p>
   </section>
   <section>

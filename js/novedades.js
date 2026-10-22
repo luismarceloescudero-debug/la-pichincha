@@ -68,7 +68,17 @@
       + `elegidos por especificaciones y no por marca. Revisá el aviso antes de comprar.</p></div>${grupos.map(tabla).join("")}</div>`;
   }
 
-  const api = { CATEGORIAS, POR_CATEGORIA, MIN_PARA_COMPARAR, novedadesPorCategoria, novedadesHtml };
+  /* «Lo mas buscado» (fase 3): los terminos que mas buscan otras personas, cada uno con su comparativa. Sin terminos no sale
+     nada. h = { esc }. Solo la lista: el panel no muestra conteos ni nada de quien busco. */
+  function masBuscadasHtml(terminos, h) {
+    if (!Array.isArray(terminos) || !terminos.length) return "";
+    return `<div class="panel" id="mas-buscado"><div class="panel-head"><h2>Lo más buscado</h2>`
+      + `<p class="sub">Lo que más buscan otras personas en La Pichincha, de los últimos 30 días. Tocá uno para ver su comparativa. `
+      + `Solo se publican búsquedas de productos hechas por varias personas distintas.</p></div>`
+      + `<div class="sugeridas">${terminos.map(t => `<button class="sug" data-comparar="${h.esc(t)}">${h.esc(t)}</button>`).join("")}</div></div>`;
+  }
+
+  const api = { CATEGORIAS, POR_CATEGORIA, MIN_PARA_COMPARAR, novedadesPorCategoria, novedadesHtml, masBuscadasHtml };
   if (nodo) module.exports = api;
   else raiz.Novedades = api;
 })(this);

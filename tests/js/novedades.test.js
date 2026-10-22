@@ -84,3 +84,14 @@ test("los nombres largos se acortan en la tabla y el texto se escapa", () => {
   assert.match(html, /lo último/);
   assert.match(html, /\+50%/);
 });
+
+test("«Lo más buscado» muestra solo los términos, cada uno con su comparativa, y escapa el texto", () => {
+  const h = { esc: s => String(s).replace(/</g, "&lt;").replace(/"/g, "&quot;") };
+  const html = N.masBuscadasHtml(["ssd 1tb", 'a<b"'], h);
+  assert.match(html, /<h2>Lo más buscado<\/h2>/);
+  assert.match(html, /<button class="sug" data-comparar="ssd 1tb">ssd 1tb<\/button>/);
+  assert.ok(html.includes("a&lt;b&quot;") && !html.includes("a<b"), "el texto se escapa");
+  assert.ok(!/\d+ (personas|búsquedas)/.test(html), "sin conteos");
+  assert.equal(N.masBuscadasHtml([], h), "");
+  assert.equal(N.masBuscadasHtml(null, h), "");
+});

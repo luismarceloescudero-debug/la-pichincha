@@ -162,6 +162,14 @@ jobs:
             echo "::warning::Sin indice.json: el buscador va a quedar vacio en esta publicacion"
           fi
 
+      # Lo mas buscado de la portada (spec 017, fase 3): conteos AGREGADOS de GoatCounter (personas distintas por busqueda, ultimos
+      # 30 dias), con el minimo de personas y el filtro de datos personales de js/buscadas.js. Solo se escribe la lista de terminos.
+      # El token es de solo lectura (GOATCOUNTER_TOKEN); sin el, o si algo falla, la portada sigue con las sugerencias fijas.
+      - name: Armar lo mas buscado
+        env:
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+        run: node generar_buscadas.js --salida _sitio || echo "::warning::No se armo lo mas buscado"
+
       # La portada sale con las pestañas, el sello y la Comparativa ya escritas, para que no espere al JS
       # (A3, CONSTRAINTS.md). Si falla, sale como antes y el JS la arma al abrir.
       - name: Pre-renderizar la portada

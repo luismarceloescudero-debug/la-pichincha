@@ -53,12 +53,15 @@ function contexto(html, leer, entorno = {}, { conArranque = false, suelta = true
 
 /* La portada con su vista inicial escrita. Sin los marcadores (ya pre-renderizada, u otra pagina) o
    sin productos, devuelve el HTML tal cual. */
-function prerender(html, leer, novedades = null) {
+function prerender(html, leer, novedades = null, buscadas = null) {
   if (!html.includes(TABLIST) || !html.includes(VISTA) || !SELLO.test(html)) return html;
-  // Las novedades premium (spec 017, fase 2) viajan en la pagina como NOVEDADES: las usa vistaComparativa aca y tambien
-  // cuando la persona vuelve a la pestaña, para que el panel no desaparezca. `<` escapado: nada cierra el script.
-  if (novedades && novedades.length) {
-    html = html.replace(FINAL, () => `const NOVEDADES = ${JSON.stringify(novedades).replace(/</g, "\\u003c")};\n${FINAL}`);
+  // Las novedades premium (spec 017, fase 2) y lo mas buscado (fase 3) viajan en la pagina como NOVEDADES y BUSCADAS: las usa
+  // vistaComparativa aca y tambien cuando la persona vuelve a la pestaña, y BUSCADAS son las sugerencias de Buscar.
+  // `<` escapado: nada cierra el script.
+  const constantes = [["NOVEDADES", novedades], ["BUSCADAS", buscadas]].filter(([, v]) => v && v.length);
+  if (constantes.length) {
+    const texto = constantes.map(([n, v]) => `const ${n} = ${JSON.stringify(v).replace(/</g, "\\u003c")};\n`).join("");
+    html = html.replace(FINAL, () => texto + FINAL);
   }
   const ctx = contexto(html, leer);
   if (!vm.runInContext("P.length", ctx)) return html;
@@ -81,11 +84,29 @@ function novedadesDe(salida, argv) {
   if (!fs.existsSync(ruta)) return null;
   try {
     const idx = JSON.parse(fs.readFileSync(ruta, "utf8"));
-    const archivo = path.join(salida, "datos", "ganadores.json");
-    const ganadores = fs.existsSync(archivo) ? JSON.parse(fs.readFileSync(archivo, "utf8")) : null;
+    // Los ganadores en pruebas: los de la carpeta de salida o, si todavia no se copiaron (la portada se arma antes que la
+    // app instalable), los del repo. Sin ellos las novedades no sumarian el bonus que si tiene el buscador.
+    const archivo = [path.join(salida, "datos", "ganadores.json"), path.join(__dirname, "datos", "ganadores.json")].find(fs.existsSync);
+    const ganadores = archivo ? JSON.parse(fs.readFileSync(archivo, "utf8")) : null;
     return require("./js/novedades.js").novedadesPorCategoria(idx, ganadores);
   } catch (e) {
     console.warn("Portada sin novedades: " + e.message);
+    return null;
+  }
+}
+
+/* Lo mas buscado que dejo generar_buscadas.js (buscadas.json en la carpeta de salida). Cada termino se vuelve a pasar por el
+   filtro de privacidad antes de ir a la pagina: aunque el archivo se hubiera editado a mano, no sale nada que parezca un dato
+   personal. Sin archivo, la portada sigue con las sugerencias fijas. */
+function buscadasDe(salida) {
+  const ruta = path.join(salida, "buscadas.json");
+  if (!fs.existsSync(ruta)) return null;
+  try {
+    const B = require("./js/buscadas.js");
+    const { terminos } = JSON.parse(fs.readFileSync(ruta, "utf8"));
+    return (Array.isArray(terminos) ? terminos : []).map(B.terminoLimpio).filter(Boolean).slice(0, B.MAX_TERMINOS);
+  } catch (e) {
+    console.warn("Portada sin lo mas buscado: " + e.message);
     return null;
   }
 }
@@ -99,12 +120,12 @@ function main(argv) {
   const salida = argv[i + 1];
   const pagina = path.join(salida, "index.html");
   const html = fs.readFileSync(pagina, "utf8");
-  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv));
+  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv), buscadasDe(salida));
   fs.writeFileSync(pagina, nuevo, "utf8");
   console.log(nuevo === html ? "Portada sin cambios" : "Portada pre-renderizada");
   return 0;
 }
 
-module.exports = { prerender, contexto, main, novedadesDe, INICIO, FINAL };
+module.exports = { prerender, contexto, main, novedadesDe, buscadasDe, INICIO, FINAL };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

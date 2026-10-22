@@ -309,7 +309,7 @@ function vistaBuscar() {
     <p class="sub">Un solo cuadro sobre los catálogos de 12 tiendas de hardware (CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus, Katech, Max Tecno, The Gamer Shop, SCP Hardstore, Click Gaming y GoldenTech), más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados se ven en tres modos (Recomendación, Súper Oferta y Primera Línea) y se ordenan por precio, novedades o gama premium; con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
     <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
-    <div class="sugeridas">${SUGERIDAS.map(x => `<button class="sug">${x}</button>`).join("")}</div>
+    <div class="sugeridas">${sugeridas().map(x => `<button class="sug">${esc(x)}</button>`).join("")}</div>
     ${ordenesHtml()}
     <details class="filtros" id="filtros"><summary>Filtros</summary><div class="filtros-cuerpo">${filtrosHtml()}</div></details>
     <div id="puente"></div>
