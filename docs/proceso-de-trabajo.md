@@ -5,12 +5,12 @@ y todo cambio del proceso se hace en este archivo, en un PR propio. Las reglas d
 
 ## 1. Arranque fijo
 
-**OmniRoute se desecho el 22/10/2026.** La idea era usar solo modelos open source gratis, pero por su conexion de OpenRouter contestaban modelos **pagos** (se probo: `openrouter/anthropic/claude-sonnet-4.5` respondio). El reporte de costos de OmniRoute decia US$ 47,78 en una semana, pero no descuenta la cache: el cobro real que muestra OpenRouter (pagina Activity) fue de unos pocos dolares. Para medir gasto se mira el panel del proveedor, no OmniRoute. No se levanta ni se usa; las secciones 1.1 y 1.1.1 quedan como historia. Para delegar se usa **OpenCode con modelos `opencode/*-free`** (1.1.2 y 1.3).
+**Solo modelos gratis (decision del dueño, 22/10/2026).** Por la conexion de OpenRouter de OmniRoute contestaban modelos **pagos** (se probo: `openrouter/anthropic/claude-sonnet-4.5` respondio). El reporte de costos de OmniRoute decia US$ 47,78 en una semana, pero no descuenta la cache: el cobro real que muestra OpenRouter (pagina Activity) fue de unos pocos dolares. Para medir gasto se mira el panel del proveedor, no OmniRoute. Desde entonces: **OpenCode** es el principal para delegar, con `openai` y `openrouter` apagados (`disabled_providers` en `~/.config/opencode/opencode.jsonc`); **OmniRoute** sigue como complemento, con la conexion `openrouter` inactiva y sin modelos pagos en los combos (gemini, groq y las suscripciones codex y claude).
 
 1. `git pull --ff-only origin main` y las lecturas del punto 1 de la seccion 4.
-2. **Delegar** (revisar, resumir, borradores): OpenCode con un modelo `opencode/*-free`. **Nunca** `openrouter/...` sin `:free` ni `openai/...`: esas claves cobran.
+2. **Delegar** (revisar, resumir, borradores): OpenCode con un modelo `opencode/*-free`, o un combo gratis de OmniRoute (`revision`, `rapido`). Si OmniRoute no responde: `C:\Users\Usuario\tools\OmniRoute\iniciar.cmd`.
 
-### 1.1 Mapa de modelos (historia: medido el 15/10/2026 por OmniRoute, desechado el 22/10)
+### 1.1 Mapa de modelos (medido el 15/10/2026 por OmniRoute; desde el 22/10 sin OpenRouter)
 
 | Modelo (por OmniRoute) | Estado | Latencia | Para que se usa |
 | --- | --- | ---: | --- |
@@ -107,7 +107,7 @@ gh api repos/<dueño>/<repo>/releases/tags/<tag> --jq .body
 | **agent-skills** (`addyosmani/agent-skills`) | **0.6.13** (16/10, respaldo de la anterior en `~/.claude/backups/skills-antes-0.6.13`) | 0.6.13 (13/10) | **Al dia** (refrescada el 16/10): corrige tres ejemplos que fallaban (`shipping-and-launch`, `frontend-ui-engineering`, `security-and-hardening`), hace que `test-driven-development` se dispare con codigo pegado y aclara que `/review` y `/test` corren en la sesion principal |
 | **ui-ux-pro-max** (`nextlevelbuilder/ui-ux-pro-max-skill`, plugin) | 2.13.0 | v2.15.0 (13/08) | Actualizar cuando se toque UI nueva (K3) |
 | **marketingskills** (`coreyhaines31/marketingskills`) | 4 skills copiadas | v2.11.37 (15/10) | Sin urgencia; solo se usan 4 (`seo-audit`, `schema`, `programmatic-seo`, `site-architecture`) |
-| **OmniRoute** | 3.8.51 | 3.8.51 | Desechado el 22/10/2026 (seccion 1) |
+| **OmniRoute** | 3.8.51 | 3.8.51 | Al dia; solo modelos gratis desde el 22/10/2026 (seccion 1) |
 | **instagram-skills** (`sergebulaev/instagram-skills`, plugin) | la instala el dueño (16/10) | v1.0.32 (15/10) | **Se usa sin claves**: solo las 9 skills de escritura y planificacion (captions, ganchos, carruseles, hashtags, plan semanal, perfil, humanizar). No se cargan `PUBLORA_API_KEY`, `APIFY_TOKEN` ni `PIXFARO_TOKEN` sin decision del dueño: con la de Publora un tercero puede publicar en la cuenta, y el autor es dueño de Publora. En cada auditoria: leer el changelog y confirmar que no se conecta a servicios nuevos ni publica sin aprobacion; si cambia eso, se desinstala y se pasa a las skills `social` y `content-strategy` de marketingskills |
 
 Busque tambien alternativas en GitHub (`gh search repos`): no aparecio ninguna con trayectoria comparable a las tres de arriba; las que salen por estrellas son personales y casi sin uso. **No se instala nada nuevo sin medirlo en una sesion aparte.**

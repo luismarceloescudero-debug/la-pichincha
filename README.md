@@ -50,7 +50,7 @@ publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
 | `docs/mapa.md` | El mapa del repo para arrancar una sesion: el flujo de cada publicacion (pasos del workflow, scripts, `subprocess` y JSON) como diagrama, que archivo es dueño de que, y que tocar para sumar una fuente, una regla de importacion, un rubro o una moneda |
-| `docs/proceso-de-trabajo.md` | Como se trabaja con Claude Code en este repo: arranque, delegacion a OpenCode con modelos gratis (OmniRoute desechado el 22/10/2026), que skill usar en cada escenario, auditoria de skills y plugins contra GitHub, ciclo de cada pedido, merge y limpieza, y la cola de pendientes |
+| `docs/proceso-de-trabajo.md` | Como se trabaja con Claude Code en este repo: arranque, delegacion con modelos gratis (OpenCode y OmniRoute, sin modelos pagos desde el 22/10/2026), que skill usar en cada escenario, auditoria de skills y plugins contra GitHub, ciclo de cada pedido, merge y limpieza, y la cola de pendientes |
 | `docs/delegacion-modelos.md` | La tanda del 19/10/2026 con un modelo asignado por tarea: quien hizo cada una, cuanto tardo, y cuantos hallazgos reales y falsos dio cada modelo |
 | `docs/seguridad-zap.md` | Analisis pasivo del sitio publicado con OWASP ZAP (19/10/2026): cada alerta con su veredicto verificado, lo que no se puede arreglar en GitHub Pages y cuanto acertaron los modelos al clasificarlas |
 | `docs/og-imagen.html` | Fuente de `img/og.png` |
