@@ -88,3 +88,11 @@ async function compararConsulta(q, referencia = null) {
   registrarBusqueda(q);
   ir("comparativa", true);
 }
+
+/* «Comparar» desde una fila de la lista de Buscar (o de la portada): esa fila es la tarjeta de referencia y la comparativa
+   queda con sus mismas especificaciones. Se busca por la URL del aviso, que es lo unico que lleva el boton. */
+async function compararFila(url) {
+  try { await asegurarIndice(); } catch (e) { return; }
+  const f = IDX.productos.find(p => p[2] === url);
+  if (f) return compararConsulta(Buscador.consultaDeOferta(f[0], hayResultados), f);
+}
