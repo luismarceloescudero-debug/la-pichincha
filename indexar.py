@@ -315,7 +315,39 @@ def indexar_woocommerce(tienda, max_paginas):
     """Tienda WooCommerce por su Store API publica, la que usa el propio carrito del sitio:
     /wp-json/wc/store/v1/products, de a 'por_pagina' (hasta 100) y en orden, hasta que vuelve vacia.
     Una sola lectura para todas: sumar una tienda es configuracion. Solo lo que esta en stock; los
-    precios vienen en centavos ('currency_minor_unit'). Se usa solo donde robots.txt no prohibe /wp-json/wc/."""
+    precios vienen en centavos ('currency_minor_unit'). Se usa solo donde robots.txt no prohibe /wp-json/wc/.
+    Con 'paginacion': 'categorias' (The Gamer Shop la pide: su plugin corta la paginacion plana con
+    un 400 "us\u00e1 la b\u00fasqueda o las categor\u00edas" desde la pagina 11), se recorren las categorias de la
+    misma API (/products/categories) y se pagina dentro de cada una hasta que vuelve vacia."""
+    cfg = tienda["catalogo"]
+    if cfg.get("paginacion") == "categorias":
+        return indexar_woocommerce_categorias(tienda)
+    return indexar_woocommerce_plana(tienda)
+
+
+def _fila_woocommerce(f, vistos):
+    """Un producto de la Store API como fila del indice, o None si no sirve."""
+    precios = f.get("prices") or {}
+    divisor = 10 ** int(precios.get("currency_minor_unit") or 0)
+    try:
+        precio = int(precios.get("price") or 0) // divisor
+        regular = int(precios.get("regular_price") or 0) // divisor
+    except (TypeError, ValueError):
+        return None
+    url, nombre = f.get("permalink"), f.get("name")
+    if not f.get("is_in_stock") or precio <= 0 or not url or not nombre or url in vistos:
+        return None
+    vistos.add(url)
+    foto = (f.get("images") or [{}])[0]
+    return {"nombre": limpio(nombre), "precio": precio, "lista": regular if regular > precio else None,
+            "url": url, "imagen": foto.get("thumbnail") or foto.get("src") or "", "sellos": "",
+            "sku": modelo.sku_de(f.get("sku")) if f.get("sku") else None,
+            # el part number con el prefijo del mayorista (IC_83K101GTAR): vale si otra tienda lo nombra
+            "sku_tienda": modelo.sku_de_tienda(f.get("sku"))}
+
+
+def indexar_woocommerce_plana(tienda):
+    """El catalogo entero en una sola corrida de paginas (las tiendas que lo permiten)."""
     cfg = tienda["catalogo"]
     por_pagina = cfg.get("por_pagina", 100)
     # El tope es el de la tienda: --max-paginas es por categoria de los listados (el workflow usa 12) y aca
@@ -331,26 +363,45 @@ def indexar_woocommerce(tienda, max_paginas):
         if not filas:
             break
         for f in filas:
-            precios = f.get("prices") or {}
-            divisor = 10 ** int(precios.get("currency_minor_unit") or 0)
-            try:
-                precio = int(precios.get("price") or 0) // divisor
-                regular = int(precios.get("regular_price") or 0) // divisor
-            except (TypeError, ValueError):
-                continue
-            url, nombre = f.get("permalink"), f.get("name")
-            if not f.get("is_in_stock") or precio <= 0 or not url or not nombre or url in vistos:
-                continue
-            vistos.add(url)
-            foto = (f.get("images") or [{}])[0]
-            items.append({"nombre": limpio(nombre), "precio": precio, "lista": regular if regular > precio else None,
-                          "url": url, "imagen": foto.get("thumbnail") or foto.get("src") or "", "sellos": "",
-                          "sku": modelo.sku_de(f.get("sku")) if f.get("sku") else None,
-                          # el part number con el prefijo del mayorista (IC_83K101GTAR): vale si otra tienda lo nombra
-                          "sku_tienda": modelo.sku_de_tienda(f.get("sku"))})
+            it = _fila_woocommerce(f, vistos)
+            if it:
+                items.append(it)
         if n % 10 == 0:
             print("    pagina " + str(n) + " " + PUNTO + " " + str(len(items)) + " productos")
         time.sleep(PAUSA)
+    return items
+
+
+def indexar_woocommerce_categorias(tienda):
+    """El catalogo por categorias de la Store API, cuando la tienda corta la paginacion plana."""
+    base = tienda["base"].rstrip("/")
+    por_pagina = min(tienda["catalogo"].get("por_pagina", 100), 100)
+    limite = tienda["catalogo"].get("tope_paginas", TOPE_PAGINAS)
+    vistos, items = set(), []
+    for n in range(1, limite + 1):                       # las categorias tambien se paginan
+        try:
+            cats = json.loads(bajar(f"{base}/wp-json/wc/store/v1/products/categories?per_page=100&page={n}"))
+        except (urllib.error.URLError, OSError, ValueError):
+            break
+        if not cats:
+            break
+        for c in cats:
+            cid = c.get("id")
+            if not cid or not c.get("count"):
+                continue
+            plantilla = f"{base}/wp-json/wc/store/v1/products?category={cid}&per_page={por_pagina}&page={{n}}"
+            for np in range(1, limite + 1):
+                try:
+                    filas = json.loads(bajar(plantilla.format(n=np)).lstrip("\ufeff"))
+                except (urllib.error.URLError, OSError, ValueError):
+                    break
+                if not filas:
+                    break
+                for f in filas:
+                    it = _fila_woocommerce(f, vistos)
+                    if it:
+                        items.append(it)
+                time.sleep(PAUSA)
     return items
 
 

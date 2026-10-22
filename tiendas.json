@@ -249,7 +249,8 @@
     "catalogo": {
       "tipo": "woocommerce",
       "por_pagina": 100,
-      "tope_paginas": 80
+      "tope_paginas": 80,
+      "paginacion": "categorias"
     },
     "lista_es_oferta": false
   },

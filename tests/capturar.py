@@ -99,6 +99,12 @@ def woocommerce(clave, tienda):
     campos = ("id", "name", "permalink", "sku", "is_in_stock", "is_purchasable", "prices", "images")
     filas = [{k: (f[k][:1] if k == "images" else f[k]) for k in campos if k in f} for f in filas]   # sin descripciones
     guardar(clave, "store-api.json", json.dumps(filas, ensure_ascii=False, indent=1))
+    if tienda["catalogo"].get("paginacion") == "categorias":
+        url = tienda["base"].rstrip("/") + "/wp-json/wc/store/v1/products/categories?per_page=100&page=1"
+        cats = json.loads(indexar.bajar(url).lstrip("﻿"))
+        campos_cat = ("id", "name", "count", "parent")
+        cats = [{k: c[k] for k in campos_cat if k in c} for c in cats][:FILAS]
+        guardar(clave, "categorias.json", json.dumps(cats, ensure_ascii=False, indent=1))
 
 
 def main(argv):

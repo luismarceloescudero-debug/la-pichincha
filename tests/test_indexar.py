@@ -342,6 +342,33 @@ class Woocommerce(unittest.TestCase):
         with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
             self.assertEqual(len(indexar.indexar_woocommerce(self.TIENDA, indexar.TOPE_PAGINAS)), 1)
 
+    def test_paginacion_por_categorias_cuando_la_tienda_la_pide(self):
+        # The Gamer Shop corta la paginacion plana con un 400 propio ("usá la búsqueda o las
+        # categorías"): con paginacion=categorias se recorren las categorias de la Store API.
+        TIENDA = {"nombre": "Test", "base": "https://t.test",
+                  "catalogo": {"tipo": "woocommerce", "por_pagina": 2, "tope_paginas": 10,
+                               "paginacion": "categorias"}}
+        categorias = [{"id": 7, "name": "Memorias", "count": 4},
+                      {"id": 9, "name": "Vacia", "count": 0}]
+        pedidas = []
+
+        def bajar(url):
+            pedidas.append(url)
+            if "categories" in url:
+                return json.dumps(categorias if url.endswith("page=1") else [])
+            cat = int(url.split("category=")[1].split("&")[0])
+            n = int(url.rsplit("=", 1)[1])
+            return json.dumps([self.producto(10 * cat + n)] if n == 1 else [])
+
+        with mock.patch.object(indexar, "bajar", side_effect=bajar), mock.patch.object(indexar.time, "sleep"):
+            items = indexar.indexar_woocommerce(TIENDA, indexar.TOPE_PAGINAS)
+        self.assertEqual({it["url"] for it in items},
+                         {f"https://t.test/producto/mem-{10 * 7 + 1}/"})
+        self.assertEqual([u for u in pedidas if "category=" in u],
+                         ["https://t.test/wp-json/wc/store/v1/products?category=7&per_page=2&page=1",
+                          "https://t.test/wp-json/wc/store/v1/products?category=7&per_page=2&page=2"])
+        self.assertTrue(any("categories" in u for u in pedidas), "hay que leer las categorias de la API")
+
     def test_el_sku_con_prefijo_de_mayorista_del_json_real(self):
         # GoldenTech publica "IC_RE305" (TP-Link RE305); Katech, codigos internos ("CM5012") que no son part number
         for clave, esperado in (("goldentech", "RE305"), ("katech", None)):
@@ -356,7 +383,13 @@ class Woocommerce(unittest.TestCase):
                 continue
             with self.subTest(clave):
                 crudo = leer(clave, "store-api.json")
-                with mock.patch.object(indexar, "bajar", side_effect=[crudo, "[]"]), mock.patch.object(indexar.time, "sleep"):
+                if t["catalogo"].get("paginacion") == "categorias":
+                    # con paginacion por categorias, la primera lectura es la de las categorias;
+                    # despues cada categoria pide su pagina 1 (el crudo) y mas paginas que vuelven vacias
+                    effects = [leer(clave, "categorias.json"), crudo] + ["[]"] * 50
+                else:
+                    effects = [crudo, "[]"]
+                with mock.patch.object(indexar, "bajar", side_effect=effects), mock.patch.object(indexar.time, "sleep"):
                     items = indexar.indexar_woocommerce(t, indexar.TOPE_PAGINAS)
                 self.assertGreaterEqual(len(items), 3)
                 for it in items:
