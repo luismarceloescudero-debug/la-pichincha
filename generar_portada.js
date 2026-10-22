@@ -53,14 +53,19 @@ function contexto(html, leer, entorno = {}, { conArranque = false, suelta = true
 
 /* La portada con su vista inicial escrita. Sin los marcadores (ya pre-renderizada, u otra pagina) o
    sin productos, devuelve el HTML tal cual. */
-function prerender(html, leer) {
+function prerender(html, leer, novedades = null) {
   if (!html.includes(TABLIST) || !html.includes(VISTA) || !SELLO.test(html)) return html;
+  // Las novedades premium (spec 017, fase 2) viajan en la pagina como NOVEDADES: las usa vistaComparativa aca y tambien
+  // cuando la persona vuelve a la pestaña, para que el panel no desaparezca. `<` escapado: nada cierra el script.
+  if (novedades && novedades.length) {
+    html = html.replace(FINAL, () => `const NOVEDADES = ${JSON.stringify(novedades).replace(/</g, "\\u003c")};\n${FINAL}`);
+  }
   const ctx = contexto(html, leer);
   if (!vm.runInContext("P.length", ctx)) return html;
   const pestanas = vm.runInContext('pestanasHtml("comparativa")', ctx);
   const sello = vm.runInContext("selloTexto()", ctx);
-  // Sin animacion de entrada: ya esta al pintar (.panel.quieta en css/sitio.css).
-  const vista = vm.runInContext("vistaComparativa()", ctx).replace('<div class="panel">', '<div class="panel quieta">');
+  // Sin animacion de entrada: ya esta al pintar (.panel.quieta en css/sitio.css), en cada panel de la vista.
+  const vista = vm.runInContext("vistaComparativa()", ctx).replace(/<div class="panel"(?=[\s>])/g, '<div class="panel quieta"');
   const cat = vm.runInContext("CAT", ctx);
   return html
     .replace(TABLIST, () => TABLIST.replace("></div>", `>${pestanas}</div>`))
@@ -68,21 +73,38 @@ function prerender(html, leer) {
     .replace(VISTA, () => `<div id="vista" data-pre="comparativa:${cat}">${vista}</div>`);
 }
 
+/* Lo ultimo en tecnologia por categoria, calculado sobre el indice de la carpeta de salida (o el de --indice) con las
+   mismas funciones de js/ que usa la pagina. Sin indice, o si algo falla, la portada sale sin ese panel y avisa. */
+function novedadesDe(salida, argv) {
+  const j = argv.indexOf("--indice");
+  const ruta = j >= 0 && argv[j + 1] ? argv[j + 1] : path.join(salida, "indice.json");
+  if (!fs.existsSync(ruta)) return null;
+  try {
+    const idx = JSON.parse(fs.readFileSync(ruta, "utf8"));
+    const archivo = path.join(salida, "datos", "ganadores.json");
+    const ganadores = fs.existsSync(archivo) ? JSON.parse(fs.readFileSync(archivo, "utf8")) : null;
+    return require("./js/novedades.js").novedadesPorCategoria(idx, ganadores);
+  } catch (e) {
+    console.warn("Portada sin novedades: " + e.message);
+    return null;
+  }
+}
+
 function main(argv) {
   const i = argv.indexOf("--salida");
   if (i < 0 || !argv[i + 1]) {
-    console.error("Uso: node generar_portada.js --salida _sitio");
+    console.error("Uso: node generar_portada.js --salida _sitio [--indice _sitio/indice.json]");
     return 2;
   }
   const salida = argv[i + 1];
   const pagina = path.join(salida, "index.html");
   const html = fs.readFileSync(pagina, "utf8");
-  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"));
+  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv));
   fs.writeFileSync(pagina, nuevo, "utf8");
   console.log(nuevo === html ? "Portada sin cambios" : "Portada pre-renderizada");
   return 0;
 }
 
-module.exports = { prerender, contexto, main, INICIO, FINAL };
+module.exports = { prerender, contexto, main, novedadesDe, INICIO, FINAL };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

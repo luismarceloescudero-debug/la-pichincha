@@ -159,3 +159,48 @@ test("sin --salida explica el uso y sale con error", () => {
   const err = console.error; console.error = () => {};
   try { assert.strictEqual(G.main([]), 2); } finally { console.error = err; }
 });
+
+// ---- Lo ultimo en tecnologia en la portada (spec 017, fase 2) ----
+
+const NOVEDADES_EJ = [{ categoria: "notebook", etiqueta: "Notebooks", items: [
+  { nombre: "Notebook Gamer ASUS ROG Strix G16 Ryzen 9 9955HX 32GB 1TB RTX 5070", precio: 4900000, url: "https://t.test/a", tienda: "CompraGamer", resumen: "Ryzen 9 serie 9000 · 32 GB de RAM · 1 TB · RTX 5070", ultimo: true },
+  { nombre: "Notebook Gamer HP OMEN Core i7 14650HX 16GB 1TB RTX 5060", precio: 3400000, url: "https://t.test/b", tienda: "Mexx", resumen: "Core i7 14ª gen · 16 GB de RAM · 1 TB · RTX 5060", ultimo: false }] }];
+
+test("con novedades, la portada trae «Lo último en tecnología» antes de la comparativa curada, sin animación", () => {
+  const pre = G.prerender(HTML, leer, NOVEDADES_EJ);
+  const vista = pre.slice(pre.indexOf('id="vista"'), pre.indexOf("<noscript>", pre.indexOf('id="vista"')));
+  assert.ok(vista.indexOf('id="novedades"') > 0, "el panel de novedades esta");
+  assert.ok(vista.indexOf('id="novedades"') < vista.indexOf("<h2>Memorias DDR4 16GB"), "va primero");
+  assert.strictEqual(cuantas(vista, /<div class="panel quieta"/g), 2, "los dos paneles entran sin animacion");
+  assert.match(vista, /data-comparar-fila="https:\/\/t\.test\/a"/);
+});
+
+test("las novedades viajan en la pagina como NOVEDADES, sin cerrar el script", () => {
+  const pre = G.prerender(HTML, leer, [{ ...NOVEDADES_EJ[0], etiqueta: "</script><b>" }]);
+  assert.match(pre, /const NOVEDADES = \[/);
+  assert.ok(!pre.includes('"etiqueta":"</script>'), "el < se escapa");
+  assert.ok(pre.includes("\u003c/script>"));
+});
+
+test("sin novedades la portada es la de siempre", () => {
+  assert.ok(!G.prerender(HTML, leer, []).includes('id="novedades"'));
+  assert.ok(!PRE.includes("const NOVEDADES"));
+});
+
+test("novedadesDe lee el indice de la carpeta de salida, y sin indice o con uno roto no rompe", () => {
+  const os = require("os");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "portada-"));
+  try {
+    assert.strictEqual(G.novedadesDe(dir, []), null, "sin indice.json");
+    fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ tiendas: {}, productos: [] }));
+    assert.deepStrictEqual(G.novedadesDe(dir, []), [], "un indice vacio no tiene novedades");
+    fs.writeFileSync(path.join(dir, "indice.json"), "{ roto");
+    const avisos = [], aviso = console.warn;
+    console.warn = m => avisos.push(m);
+    try { assert.strictEqual(G.novedadesDe(dir, []), null); } finally { console.warn = aviso; }
+    assert.match(avisos[0], /Portada sin novedades/);
+    const otro = path.join(dir, "otro.json");
+    fs.writeFileSync(otro, JSON.stringify({ tiendas: {}, productos: [] }));
+    assert.deepStrictEqual(G.novedadesDe(dir, ["--indice", otro]), [], "--indice manda sobre la carpeta de salida");
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

@@ -104,7 +104,9 @@ function vistaComparativa() {
   const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
   // Los precios de la tira necesitan el indice; solo se baja si hay busquedas guardadas.
   setTimeout(() => { if (leerHistCompleto().length) asegurarIndice().then(pintarTira).catch(() => {}); }, 0);
-  return `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
+  // Lo ultimo en tecnologia (spec 017, fase 2): lo calcula el build (NOVEDADES) y va primero. Sin esos datos no hay panel.
+  const novedades = typeof NOVEDADES !== "undefined" ? Novedades.novedadesHtml(NOVEDADES, { esc, pesos, enlace, icono }) : "";
+  return novedades + `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
     <div class="ultimas" id="ultimas">${tiraHtml(false)}</div>
     ${barraAcciones("comparativa")}
     <div class="grid">${c.lista.map(tarjeta).join("")}</div></div>`;
