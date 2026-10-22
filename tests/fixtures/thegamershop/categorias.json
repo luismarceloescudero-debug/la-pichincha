@@ -1,0 +1,32 @@
+[
+ {
+  "id": 284,
+  "name": "Accesorios",
+  "count": 321,
+  "parent": 51
+ },
+ {
+  "id": 12439,
+  "name": "Access points y extensores",
+  "count": 27,
+  "parent": 12430
+ },
+ {
+  "id": 12450,
+  "name": "All in One y Mini PC",
+  "count": 11,
+  "parent": 12429
+ },
+ {
+  "id": 11900,
+  "name": "Almacenamiento",
+  "count": 181,
+  "parent": 16
+ },
+ {
+  "id": 52,
+  "name": "Auriculares",
+  "count": 237,
+  "parent": 51
+ }
+]
