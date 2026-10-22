@@ -63,7 +63,7 @@ test("el panel compara de frente: el más barato y cuánto más caro es cada uno
   assert.match(html, /el más barato/);
   assert.match(html, /\+\d+%/);
   assert.match(html, /data-comparar-fila="https:\/\/t\.test\//);
-  assert.match(html, /<table class="pt-tabla"/);
+  assert.match(html, /<table class="pt-tabla nov-tabla"/);
 });
 
 test("sin grupos no hay panel", () => {

@@ -39,6 +39,13 @@
     return m ? [m[1], m[2], (m[3] || "").replace(/\s+/g, " ")].filter(Boolean).join(" ") : "";
   }
 
+  /* Los Hz del titulo. Con mas de una frecuencia (monitores de modo dual: «4K 160Hz, Dual Mode FHD 320Hz») se devuelven todas, "160/320":
+     mostrar solo la mayor diria «320 Hz · 4K», que no es lo que ese monitor hace. Con una sola, el numero de siempre. */
+  function hzDe(nombre) {
+    const todos = [...new Set([...String(nombre).matchAll(/\b(\d{2,3})\s?hz(?![a-z])/gi)].map(x => +x[1]))].sort((a, b) => a - b);
+    return todos.length > 1 ? todos.join("/") : todos.length ? todos[0] : 0;
+  }
+
   const ddrDe = n => { const m = String(n).match(/\bddr\s?([345])\b/i); return m ? `ddr${m[1]}` : ""; };
   const interfazDe = n => /\bnvme\b|\bm\.?2\b/i.test(n) ? "nvme" : /\bsata\b/i.test(n) ? "sata" : "";
 
@@ -48,7 +55,7 @@
     const nombres = CLAVES[categoria] || [];
     const mem = C.memoriaDe(nombre);
     const lectores = {
-      pulgadas: () => C.pulgadasDe(nombre), panel: () => C.panelDe(nombre), hz: () => C.hzDe(nombre),
+      pulgadas: () => C.pulgadasDe(nombre), panel: () => C.panelDe(nombre), hz: () => hzDe(nombre),
       resolucion: () => resolucionDe(nombre), cpu: () => cpuDe(nombre), gpu: () => gpuDe(nombre),
       ram: () => mem.ram, rom: () => mem.rom, capacidad: () => Math.max(mem.ram, mem.rom),
       ddr: () => ddrDe(nombre), interfaz: () => interfazDe(nombre),
@@ -82,7 +89,7 @@
   const textoCpu = c => { const [fam, gen] = c.split("-");
     return fam[0] === "u" ? `Core Ultra ${fam[1]} serie ${gen}` : fam[0] === "i" ? `Core i${fam[1]} ${gen}ª gen` : `Ryzen ${fam[1]} serie ${gen}000`; };
   const TEXTO = {
-    pulgadas: v => `${v}"`, panel: v => v.toUpperCase(), hz: v => `${v} Hz`, resolucion: v => RESOLUCION[v] || v,
+    pulgadas: v => `${v}"`, panel: v => v.toUpperCase(), hz: v => `${String(v).replace("/", " / ")} Hz`, resolucion: v => RESOLUCION[v] || v,
     cpu: textoCpu, ram: v => `${v} GB de RAM`, rom: gb, gpu: v => v.toUpperCase(), capacidad: gb,
     ddr: v => v.toUpperCase(), interfaz: v => (v === "nvme" ? "NVMe" : "SATA"),
   };
