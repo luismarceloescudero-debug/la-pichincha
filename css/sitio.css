@@ -711,6 +711,19 @@ table.pt-tabla th.num,table.pt-tabla td.num{text-align:right}
 table.pt-tabla thead th:nth-child(3){text-align:left}
 table.pt-tabla td{white-space:nowrap}
 table.pt-tabla td a{color:var(--accent);font-weight:600}
+/* Lo ultimo en tecnologia (portada): las especificaciones se parten en lineas para que entren en el celular. */
+table.nov-tabla td{white-space:normal}
+table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight:400}
+@media (max-width:620px){
+  /* En el celular cada fila es una ficha apilada: nombre, especificaciones, precio y boton, sin scroll horizontal. */
+  table.nov-tabla{min-width:0}
+  table.nov-tabla thead{position:absolute;left:-9999px}
+  table.nov-tabla tr{display:block;padding:10px 4px;border-bottom:1px solid var(--line)}
+  table.nov-tabla th,table.nov-tabla td{display:block;border:0;padding:3px 12px;text-align:left}
+  table.nov-tabla td.num{text-align:left;font-weight:600}
+  table.nov-tabla th{white-space:normal}
+  table.nov-tabla a{overflow-wrap:anywhere}
+}
 .pt-ahorro{margin:8px 2px 0;color:var(--ink-2);font-size:.88rem}
 .pt-nota{margin:6px 2px 0}
 /* ---- Historial de precio de un aviso (js/serie-precios.js) ---- */
