@@ -41,8 +41,8 @@ HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los 
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 # Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
-# url, tienda, via, lista, antes, imagen, sellos, modelo, desde, baja7, baja31. Completa filas de indices viejos.
-FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", "", "", "", ""]
+# url, tienda, via, lista, antes, imagen, sellos, modelo, desde, baja7, baja31, vendido. Completa filas de indices viejos.
+FILA_VACIA = ["", 0, "", "", "", 0, 0, "", "", "", "", "", "", 0]
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 PAUSA = 0.35          # segundos entre pedidos, para no castigar a las tiendas
@@ -52,6 +52,7 @@ REINTENTO_DIAS = 30   # una ficha que no trajo codigo se vuelve a mirar pasado e
 PODA_DIAS = 60        # lo guardado de un aviso que ya no se publica se descarta pasado este tiempo
 BLOQUEOS = (403, 429, 503)   # un bloqueo no se esquiva: se corta y se retoma otro dia (principio III)
 FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
+TOPE_VENDIDOS = 100   # puestos del orden «mas vendidos» de cada tienda que se guardan: mas abajo ya no dice nada (spec 019)
 
 for flujo in (sys.stdout, sys.stderr):
     try:
@@ -419,6 +420,48 @@ def _paginar_woocommerce(plantilla, limite):
     return filas, True
 
 
+def vendidos(tienda):
+    """{url: puesto} de lo mas vendido segun el orden que publica la propia tienda (spec 019): en WooCommerce, el de su
+    Store API por ventas totales (orderby=popularity), de toda la tienda; en VTEX, el de su busqueda (OrderByTopSaleDESC),
+    por categoria, y un aviso en dos categorias se queda con su mejor puesto. Son puestos, no cantidades: la tienda no
+    dice cuanto vendio. Otros catalogos no publican ese orden: nada."""
+    cfg, base = tienda["catalogo"], tienda["base"].rstrip("/")
+    if cfg["tipo"] == "woocommerce":
+        por_pagina = min(cfg.get("por_pagina", 100), 100)
+        plantilla = f"{base}/wp-json/wc/store/v1/products?orderby=popularity&per_page={por_pagina}&page={{n}}"
+        filas = []
+        for n in range(1, TOPE_PAGINAS + 1):
+            try:
+                pagina = json.loads(bajar(plantilla.format(n=n)).lstrip("\ufeff"))
+            except (urllib.error.URLError, OSError, ValueError):
+                break
+            filas += pagina if isinstance(pagina, list) else []
+            if not pagina or len(filas) >= TOPE_VENDIDOS:
+                break
+            time.sleep(PAUSA)
+        puestos = {}
+        for f in filas[:TOPE_VENDIDOS]:
+            if f.get("permalink"):
+                puestos.setdefault(f["permalink"], len(puestos) + 1)
+        return puestos
+    if cfg["tipo"] == "vtex":
+        arbol = json_vtex(bajar(base + API_VTEX + "category/tree/3"))
+        puestos = {}
+        for cat in categorias_vtex(arbol, tuple(cfg["rubros"]), ()) if cfg.get("rubros") else categorias_vtex(arbol):
+            url = f"{base}{API_VTEX}products/search?fq=C:{cat}&O=OrderByTopSaleDESC&_from=0&_to={POR_PEDIDO_VTEX - 1}"
+            try:
+                filas = json_vtex(bajar(url))
+            except (urllib.error.URLError, OSError, ValueError):
+                continue
+            links = [p.get("link") for p in (filas if isinstance(filas, list) else []) if isinstance(p, dict)]
+            for n, link in enumerate([l for l in links if isinstance(l, str)][:TOPE_VENDIDOS], 1):
+                u = absoluta(base, link)
+                puestos[u] = min(puestos.get(u, n), n)
+            time.sleep(PAUSA)
+        return puestos
+    return {}
+
+
 def robots_permite(texto, ruta):
     """Si robots.txt deja a cualquier robot (el grupo `User-agent: *`) pedir `ruta`. Gana la regla mas larga que
     coincide y, a igual largo, Allow; entiende `*` y `$`. Los grupos con nombre (Googlebot, ClaudeBot) no cuentan:
@@ -774,7 +817,7 @@ def main(argv=None):
     if INDICE.exists():
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
         for fila in anterior.get("productos", []):
-            fila = list(fila)[:13] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor (las bajas, vacias)
+            fila = list(fila)[:14] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor (las bajas, vacias)
             if not url_valida(fila[2]):                       # un indice viejo no reintroduce una URL que hoy no pasa
                 continue
             fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
@@ -854,6 +897,13 @@ def main(argv=None):
                   + str(f["pendientes"]) + " pendientes para otra corrida")
             if f["bloqueada"]:
                 print("  " + AMAR + "! la tienda bloqueo las fichas: no se insiste hoy" + FIN)
+        try:
+            puestos = vendidos(fuente)
+        except Exception as e:                       # sin el orden de la tienda, la tienda entra igual, sin puestos
+            print("  " + AMAR + "! sin lo mas vendido: " + type(e).__name__ + FIN)
+            puestos = {}
+        if puestos:
+            print("  " + VERDE + OK + FIN + " lo mas vendido " + PUNTO + " " + str(len(puestos)) + " puestos")
         rebaja_real = bool(fuente.get("lista_es_oferta"))
         relevados[clave] = len(items)
         frescas.add(clave)
@@ -884,7 +934,8 @@ def main(argv=None):
                     modelo.modelo_de(it["nombre"], it.get("sku")),
                     desde.isoformat() if desde else "",
                     "" if b7 is None else b7,
-                    "" if b31 is None else b31]
+                    "" if b31 is None else b31,
+                    puestos.get(it["url"], 0)]
             salida.append(fila)
             if it.get("sku_tienda") and not fila[9]:
                 por_confirmar.append((fila, it["sku_tienda"]))
@@ -915,7 +966,7 @@ def main(argv=None):
                              "segunda": bool(v.get("segunda_opinion"))},
                             **({"relevado": relevado[k]} if relevado.get(k) else {}))
                     for k, v in fuentes.items()},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31"],
+        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31", "vendido"],
         # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
         "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
         "productos": salida,

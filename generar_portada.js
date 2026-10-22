@@ -53,12 +53,13 @@ function contexto(html, leer, entorno = {}, { conArranque = false, suelta = true
 
 /* La portada con su vista inicial escrita. Sin los marcadores (ya pre-renderizada, u otra pagina) o
    sin productos, devuelve el HTML tal cual. */
-function prerender(html, leer, novedades = null, buscadas = null) {
+function prerender(html, leer, novedades = null, buscadas = null, vendidos = null) {
   if (!html.includes(TABLIST) || !html.includes(VISTA) || !SELLO.test(html)) return html;
-  // Las novedades premium (spec 017, fase 2) y lo mas buscado (fase 3) viajan en la pagina como NOVEDADES y BUSCADAS: las usa
-  // vistaComparativa aca y tambien cuando la persona vuelve a la pestaña, y BUSCADAS son las sugerencias de Buscar.
+  // Las novedades premium (spec 017, fase 2), lo mas buscado (fase 3) y lo mas vendido (spec 019) viajan en la pagina como
+  // NOVEDADES, BUSCADAS y VENDIDOS: las usa vistaComparativa aca y tambien cuando la persona vuelve a la pestaña, y BUSCADAS son
+  // las sugerencias de Buscar.
   // `<` escapado: nada cierra el script.
-  const constantes = [["NOVEDADES", novedades], ["BUSCADAS", buscadas]].filter(([, v]) => v && v.length);
+  const constantes = [["NOVEDADES", novedades], ["BUSCADAS", buscadas], ["VENDIDOS", vendidos]].filter(([, v]) => v && v.length);
   if (constantes.length) {
     const texto = constantes.map(([n, v]) => `const ${n} = ${JSON.stringify(v).replace(/</g, "\\u003c")};\n`).join("");
     html = html.replace(FINAL, () => texto + FINAL);
@@ -76,9 +77,9 @@ function prerender(html, leer, novedades = null, buscadas = null) {
     .replace(VISTA, () => `<div id="vista" data-pre="comparativa:${cat}">${vista}</div>`);
 }
 
-/* Lo ultimo en tecnologia por categoria, calculado sobre el indice de la carpeta de salida (o el de --indice) con las
-   mismas funciones de js/ que usa la pagina. Sin indice, o si algo falla, la portada sale sin ese panel y avisa. */
-function novedadesDe(salida, argv) {
+/* Un panel calculado sobre el indice de la carpeta de salida (o el de --indice) con las mismas funciones de js/ que usa la
+   pagina. Sin indice, o si algo falla, la portada sale sin ese panel y avisa. */
+function delIndice(salida, argv, calcular, aviso) {
   const j = argv.indexOf("--indice");
   const ruta = j >= 0 && argv[j + 1] ? argv[j + 1] : path.join(salida, "indice.json");
   if (!fs.existsSync(ruta)) return null;
@@ -88,12 +89,16 @@ function novedadesDe(salida, argv) {
     // app instalable), los del repo. Sin ellos las novedades no sumarian el bonus que si tiene el buscador.
     const archivo = [path.join(salida, "datos", "ganadores.json"), path.join(__dirname, "datos", "ganadores.json")].find(fs.existsSync);
     const ganadores = archivo ? JSON.parse(fs.readFileSync(archivo, "utf8")) : null;
-    return require("./js/novedades.js").novedadesPorCategoria(idx, ganadores);
+    return calcular(require("./js/novedades.js"), idx, ganadores);
   } catch (e) {
-    console.warn("Portada sin novedades: " + e.message);
+    console.warn(aviso + ": " + e.message);
     return null;
   }
 }
+
+/* Lo ultimo en tecnologia por categoria (spec 017, fase 2) y lo mas vendido en las tiendas (spec 019). */
+const novedadesDe = (salida, argv) => delIndice(salida, argv, (N, idx, g) => N.novedadesPorCategoria(idx, g), "Portada sin novedades");
+const vendidosDe = (salida, argv) => delIndice(salida, argv, (N, idx, g) => N.masVendidosPorCategoria(idx, g), "Portada sin lo mas vendido");
 
 /* Lo mas buscado que dejo generar_buscadas.js (buscadas.json en la carpeta de salida). Cada termino se vuelve a pasar por el
    filtro de privacidad antes de ir a la pagina: aunque el archivo se hubiera editado a mano, no sale nada que parezca un dato
@@ -120,12 +125,13 @@ function main(argv) {
   const salida = argv[i + 1];
   const pagina = path.join(salida, "index.html");
   const html = fs.readFileSync(pagina, "utf8");
-  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv), buscadasDe(salida));
+  const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv), buscadasDe(salida),
+    vendidosDe(salida, argv));
   fs.writeFileSync(pagina, nuevo, "utf8");
   console.log(nuevo === html ? "Portada sin cambios" : "Portada pre-renderizada");
   return 0;
 }
 
-module.exports = { prerender, contexto, main, novedadesDe, buscadasDe, INICIO, FINAL };
+module.exports = { prerender, contexto, main, novedadesDe, vendidosDe, buscadasDe, INICIO, FINAL };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

@@ -257,3 +257,33 @@ test("main escribe la portada con las novedades y lo más buscado de la carpeta 
     assert.ok(salida.includes('id="mas-buscado"'));
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+// ---- Lo mas vendido en las tiendas (spec 019) ----
+
+const VENDIDOS_EJ = [{ categoria: "notebook", etiqueta: "Notebooks", items: [
+  { nombre: "Notebook Gamer ASUS ROG Strix G16", precio: 4800000, url: "https://t.test/v", tienda: "Mexx", resumen: "32 GB de RAM", puesto: 1, tiendas: 2 },
+  { nombre: "Notebook Gamer HP OMEN", precio: 3400000, url: "https://t.test/w", tienda: "CompraGamer", resumen: "16 GB de RAM", puesto: 1, tiendas: 1 }] }];
+
+test("lo más vendido va después de lo más buscado y antes de las novedades, y viaja como VENDIDOS", () => {
+  const pre = G.prerender(HTML, leer, NOVEDADES_EJ, ["ssd 1tb"], VENDIDOS_EJ);
+  const vista = pre.slice(pre.indexOf('id="vista"'));
+  assert.ok(vista.indexOf('id="mas-buscado"') < vista.indexOf('id="mas-vendido"'));
+  assert.ok(vista.indexOf('id="mas-vendido"') < vista.indexOf('id="novedades"'));
+  assert.match(pre, /const VENDIDOS = \[/);
+  assert.ok(!PRE.includes("const VENDIDOS") && !PRE.includes('id="mas-vendido"'));
+});
+
+test("vendidosDe lee el indice de la carpeta de salida, y sin indice o con uno roto no rompe", () => {
+  const os = require("os");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "vendidos-"));
+  try {
+    assert.strictEqual(G.vendidosDe(dir, []), null, "sin indice.json");
+    fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ tiendas: {}, productos: [] }));
+    assert.deepStrictEqual(G.vendidosDe(dir, []), []);
+    fs.writeFileSync(path.join(dir, "indice.json"), "{ roto");
+    const avisos = [], aviso = console.warn;
+    console.warn = m => avisos.push(m);
+    try { assert.strictEqual(G.vendidosDe(dir, []), null); } finally { console.warn = aviso; }
+    assert.match(avisos[0], /Portada sin lo mas vendido/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
