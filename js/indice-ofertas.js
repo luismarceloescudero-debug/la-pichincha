@@ -2,6 +2,9 @@
    Se baja una sola vez, recien cuando abris alguna de las dos. */
 let IDX = null, pidiendo = null, OFERTAS = null;
 const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "fuente 650w", "webcam logitech"];
+/* Lo mas buscado, si el build lo trajo (BUSCADAS: agregado, con minimo de personas distintas y sin datos personales, spec 017
+   fase 3); si no, las de siempre. Se pide al pintar: BUSCADAS lo define el bloque de datos, que carga despues de este script. */
+const sugeridas = () => (typeof BUSCADAS !== "undefined" && Array.isArray(BUSCADAS) && BUSCADAS.length ? BUSCADAS : SUGERIDAS);
 
 function asegurarIndice(forzar) {
   if (IDX && !forzar) return Promise.resolve(IDX);

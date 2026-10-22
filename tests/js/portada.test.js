@@ -204,3 +204,56 @@ test("novedadesDe lee el indice de la carpeta de salida, y sin indice o con uno 
     assert.deepStrictEqual(G.novedadesDe(dir, ["--indice", otro]), [], "--indice manda sobre la carpeta de salida");
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+// ---- Lo mas buscado en la portada (spec 017, fase 3) ----
+
+test("con lo más buscado, la portada lo trae primero, sin animación, y lo deja disponible para Buscar", () => {
+  const pre = G.prerender(HTML, leer, null, ["ssd 1tb", "monitor 27 oled"]);
+  const vista = pre.slice(pre.indexOf('id="vista"'), pre.indexOf("<noscript>", pre.indexOf('id="vista"')));
+  assert.ok(vista.indexOf('id="mas-buscado"') > 0);
+  assert.ok(vista.indexOf('id="mas-buscado"') < vista.indexOf("<h2>Memorias DDR4 16GB"));
+  assert.match(vista, /data-comparar="ssd 1tb"/);
+  assert.strictEqual(cuantas(vista, /<div class="panel quieta"/g), 2);
+  assert.match(pre, /const BUSCADAS = \["ssd 1tb","monitor 27 oled"\];/);
+});
+
+test("novedades y lo más buscado viajan juntos, y sin ninguno la portada es la de siempre", () => {
+  const pre = G.prerender(HTML, leer, NOVEDADES_EJ, ["ssd 1tb"]);
+  const vista = pre.slice(pre.indexOf('id="vista"'));
+  assert.ok(vista.indexOf('id="mas-buscado"') < vista.indexOf('id="novedades"'), "primero lo mas buscado, despues las novedades");
+  assert.ok(!PRE.includes("const BUSCADAS") && !PRE.includes('id="mas-buscado"'));
+});
+
+test("buscadasDe vuelve a filtrar: un dato personal no llega a la página aunque el archivo se haya editado a mano", () => {
+  const os = require("os");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "buscadas-portada-"));
+  try {
+    assert.strictEqual(G.buscadasDe(dir), null, "sin archivo");
+    fs.writeFileSync(path.join(dir, "buscadas.json"), JSON.stringify({ terminos: ["ssd 1tb", "juan@x.com", "11 5555 1234", "  Monitor  27 ", "a".repeat(80)] }));
+    assert.deepStrictEqual(G.buscadasDe(dir), ["ssd 1tb", "monitor 27"]);
+    fs.writeFileSync(path.join(dir, "buscadas.json"), JSON.stringify({ terminos: Array.from({ length: 20 }, (_, i) => `memoria ${i}gb`) }));
+    assert.strictEqual(G.buscadasDe(dir).length, 8, "con tope");
+    fs.writeFileSync(path.join(dir, "buscadas.json"), "{ roto");
+    const aviso = console.warn, avisos = [];
+    console.warn = m => avisos.push(m);
+    try { assert.strictEqual(G.buscadasDe(dir), null); } finally { console.warn = aviso; }
+    assert.match(avisos[0], /Portada sin lo mas buscado/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("main escribe la portada con las novedades y lo más buscado de la carpeta de salida", () => {
+  const os = require("os");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "portada-main-"));
+  try {
+    fs.mkdirSync(path.join(dir, "datos"));
+    for (const f of ["js", "css", "img"]) fs.cpSync(path.join(RAIZ, f), path.join(dir, f), { recursive: true });
+    fs.writeFileSync(path.join(dir, "index.html"), HTML);
+    fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ tiendas: {}, productos: [] }));
+    fs.writeFileSync(path.join(dir, "buscadas.json"), JSON.stringify({ terminos: ["ssd 1tb"] }));
+    const log = console.log; console.log = () => {};
+    try { assert.strictEqual(G.main(["--salida", dir], ), 0); } finally { console.log = log; }
+    const salida = fs.readFileSync(path.join(dir, "index.html"), "utf8");
+    assert.match(salida, /const BUSCADAS = \["ssd 1tb"\];/);
+    assert.ok(salida.includes('id="mas-buscado"'));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

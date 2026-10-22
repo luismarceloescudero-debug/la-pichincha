@@ -101,3 +101,13 @@ test("main escribe /estado/ y /legal/; sin indice escribe solo /legal/", () => {
   assert.ok(!fs.existsSync(path.join(solo, "estado")));
   assert.ok(fs.existsSync(path.join(solo, "legal", "index.html")));
 });
+
+test("la privacidad explica lo más buscado con el mismo mínimo y la misma ventana que usa el código", () => {
+  const Buscadas = require("../../js/buscadas.js");
+  const html = I.renderLegal({ baseUrl: BASE });
+  assert.match(html, /Lo más buscado/);
+  assert.ok(html.includes(`al menos ${Buscadas.MINIMO_VISITANTES} personas distintas`));
+  assert.ok(html.includes(`últimos ${Buscadas.VENTANA_DIAS} días`));
+  assert.match(html, /sin conteos, sin fechas y sin nada de quién buscó/);
+  assert.match(html, /datos personales/);
+});
