@@ -115,3 +115,12 @@ test("si la tarjeta no dice sus especificaciones, no se filtra y se avisa", () =
   assert.equal(r.excl.especificaciones, 0);
   assert.ok(r.base.length >= 6);
 });
+
+test("un monitor de modo dual muestra y compara todas sus frecuencias, no solo la mayor", () => {
+  const dual = 'Monitor Gamer KTC 27" 4K UHD Fast IPS Mini LED 160Hz Dual Mode FHD 320Hz';
+  assert.equal(E.clavesDe(dual).valores.hz, "160/320");
+  assert.match(E.resumen([dual]), /160 \/ 320 Hz/);
+  assert.equal(E.mismas([dual], ['Monitor Acer Nitro 27" 4K UHD IPS Mini LED 160Hz Dual Mode FHD 320Hz']).coincide, true);
+  assert.equal(E.mismas([dual], ['Monitor Otra Marca 27" 4K UHD IPS Mini LED 160Hz']).coincide, false, "uno de 160 Hz solo no es el mismo");
+  assert.equal(E.clavesDe('Monitor Gamer 27" IPS FHD 144Hz').valores.hz, 144, "con una sola frecuencia, el numero de siempre");
+});
