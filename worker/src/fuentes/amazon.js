@@ -21,16 +21,35 @@ export function pedidoAmazon(q, env, token) {
       resources: ["itemInfo.title", "images.primary.medium", "offersV2.listings.price"] }) };
 }
 
+/* Un item de SearchItems o de GetItems (mismos campos), como aviso. Se rotula afiliado solo si el link lleva el tag. */
+function deItem(it, fecha) {
+  const m = it.offersV2 && it.offersV2.listings && it.offersV2.listings[0] && it.offersV2.listings[0].price
+    && it.offersV2.listings[0].price.money || {};
+  const img = it.images && it.images.primary && it.images.primary.medium;
+  return aviso({ fuente: "amazon", nombre: it.itemInfo && it.itemInfo.title && it.itemInfo.title.displayValue, precio: m.amount,
+    moneda: m.currency, envio: null, url: it.detailPageURL, imagen: img && img.url,
+    afiliado: /[?&]tag=/.test(it.detailPageURL || ""), fecha });
+}
+
 export function parsearAmazon(json, fecha) {
   const items = json && json.searchResult && Array.isArray(json.searchResult.items) ? json.searchResult.items : [];
-  return sinNulos(items.map(it => {
-    const m = it.offersV2 && it.offersV2.listings && it.offersV2.listings[0] && it.offersV2.listings[0].price
-      && it.offersV2.listings[0].price.money || {};
-    const img = it.images && it.images.primary && it.images.primary.medium;
-    return aviso({ fuente: "amazon", nombre: it.itemInfo && it.itemInfo.title && it.itemInfo.title.displayValue, precio: m.amount,
-      moneda: m.currency, envio: null, url: it.detailPageURL, imagen: img && img.url,
-      afiliado: /[?&]tag=/.test(it.detailPageURL || ""), fecha });   // se rotula solo si el link lleva el tag
-  }));
+  return sinNulos(items.map(it => deItem(it, fecha)));
+}
+
+/* GetItems, el unico ejemplo con ruta documentada (catalog/v1/getItems): para un link pegado con su ASIN (spec 023).
+   La respuesta (itemsResult.items) sigue la forma de SearchItems: confirmarla con la primera llamada real. */
+export function pedidoGetItems(asin, env, token) {
+  return { url: "https://creatorsapi.amazon/catalog/v1/getItems", method: "POST",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json", "x-marketplace": "www.amazon.com" },
+    body: JSON.stringify({ itemIds: [asin], itemIdType: "ASIN", marketplace: "www.amazon.com", partnerTag: TAG,
+      resources: ["itemInfo.title", "images.primary.medium", "offersV2.listings.price"] }) };
+}
+
+export async function leerItem(asin, env, { pedir, token, fecha }) {
+  const t = await token("amazon", () => pedir({ ...pedidoTokenAmazon(env), method: "POST" }));
+  const j = await pedir(pedidoGetItems(asin, env, t));
+  const it = j && j.itemsResult && Array.isArray(j.itemsResult.items) ? j.itemsResult.items[0] : null;
+  return it ? deItem(it, fecha) : null;
 }
 
 export async function buscar(q, env, { pedir, token, fecha }) {
