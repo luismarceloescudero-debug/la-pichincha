@@ -1,0 +1,83 @@
+name: Desplegar el Worker Afuera
+
+# Spec 022. Despliega worker/ en Cloudflare Workers (plan gratis) solo si el dueño cargo CLOUDFLARE_API_TOKEN y
+# CLOUDFLARE_ACCOUNT_ID; sin ellos el job termina en verde sin hacer nada. Los secretos de las APIs (eBay, AliExpress,
+# Amazon) se pasan al Worker con `wrangler secret put` solo si existen. Despues del primer despliegue, la direccion
+# *.workers.dev va en sitio.json (afuera_url), en el meta de index.html y en connect-src de la csp.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - "js/buscadas.js"
+      - "js/buscador.js"
+      - ".github/workflows/worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker-afuera
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER: npx --yes wrangler@4.146.0
+    steps:
+      - name: Ver si hay cuenta de Cloudflare
+        id: cuenta
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "lista=si" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Faltan CLOUDFLARE_API_TOKEN o CLOUDFLARE_ACCOUNT_ID: el Worker no se despliega (la pagina sigue como en la spec 020)."
+            echo "lista=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.cuenta.outputs.lista == 'si'
+
+      - uses: actions/setup-node@v7
+        if: steps.cuenta.outputs.lista == 'si'
+        with:
+          node-version: "22"
+
+      - name: Tests del Worker
+        if: steps.cuenta.outputs.lista == 'si'
+        run: node --test tests/js/worker.test.js
+
+      - name: Desplegar
+        if: steps.cuenta.outputs.lista == 'si'
+        working-directory: worker
+        run: $WRANGLER deploy
+
+      # Cada secreto se carga solo si el dueño lo creo en GitHub; los que faltan dejan esa fuente apagada.
+      - name: Pasar los secretos de las APIs
+        if: steps.cuenta.outputs.lista == 'si'
+        working-directory: worker
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          EBAY_CAMPAIGN_ID: ${{ secrets.EBAY_CAMPAIGN_ID }}
+          ALIEXPRESS_APP_KEY: ${{ secrets.ALIEXPRESS_APP_KEY }}
+          ALIEXPRESS_APP_SECRET: ${{ secrets.ALIEXPRESS_APP_SECRET }}
+          ALIEXPRESS_TRACKING_ID: ${{ secrets.ALIEXPRESS_TRACKING_ID }}
+          AMAZON_CREATORS_ID: ${{ secrets.AMAZON_CREATORS_ID }}
+          AMAZON_CREATORS_SECRET: ${{ secrets.AMAZON_CREATORS_SECRET }}
+        run: |
+          for nombre in EBAY_CLIENT_ID EBAY_CLIENT_SECRET EBAY_CAMPAIGN_ID ALIEXPRESS_APP_KEY ALIEXPRESS_APP_SECRET \
+                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET; do
+            valor="${!nombre}"
+            if [ -n "$valor" ]; then
+              printf '%s' "$valor" | $WRANGLER secret put "$nombre" >/dev/null
+              echo "cargado: $nombre"
+            else
+              echo "falta: $nombre"
+            fi
+          done
