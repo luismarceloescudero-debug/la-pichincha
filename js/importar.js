@@ -182,6 +182,35 @@
     return { ...C.POR_DEFECTO, valor: normalTermino(precio), moneda: e.dominio ? AMAZON_PAISES[e.dominio] : "USD", cobro: "checkout" };
   }
 
+  /* --- Lo que el Worker lee del link pegado (spec 023, GET /enlace) --- */
+  const usdTexto = n => "US$ " + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pesosTexto = n => "$" + Math.round(n).toLocaleString("es-AR");
+  const POR_API = { amazon: "Amazon", ebay: "eBay" };
+
+  /* La consulta al Worker; "" sin Worker configurado (sitio.json afuera_url) o sin link. */
+  function urlLeerEnlace(base, texto) {
+    const t = String(texto === undefined || texto === null ? "" : texto).trim();
+    return base && t ? base + "/enlace?url=" + encodeURIComponent(t) : "";
+  }
+
+  /* La respuesta de /enlace -> { precio (texto para el campo, en dolares) o null, ars, nombre, linea } o null si no hay que mostrar
+     nada. Loquieroaca da el precio final en pesos: no va a la calculadora. Lo leido se puede cambiar a mano. */
+  function leidoDeEnlace(r) {
+    if (!r || !r.enlace) return null;
+    if (!r.leido) return r.motivo ? { precio: null, ars: false, nombre: "", linea: r.motivo } : null;
+    const it = r.item;
+    if (!it || !(it.precio > 0)) return null;
+    if (it.moneda === "ARS") {
+      return { precio: null, ars: true, nombre: it.nombre || "", linea: `Loquieroacá: ${pesosTexto(it.precioArs || it.precio)} en un pago`
+        + (it.precioCuotas > 0 ? ` o ${pesosTexto(it.precioCuotas)} en cuotas` : "") + ", ya puesto en casa (impuestos y envío incluidos)." };
+    }
+    const tienda = r.enlace.tienda;
+    const linea = tienda === "tiendamia"
+      ? `Precio leído en Tiendamia: ${usdTexto(it.precio)}, con el envío incluido. Revisalo antes de pagar: puede cambiar.`
+      : `Precio leído por la API de ${POR_API[tienda] || tienda}: ${usdTexto(it.precio)}.`;
+    return { precio: String(it.precio), ars: false, nombre: it.nombre || "", linea };
+  }
+
   /* --- Buscar afuera (spec 020): cuando ninguna tienda del indice tiene el termino --- */
   const normalMarca = t => normalTermino(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   const verificada = o => /^https:\/\//.test(o.url || "") && /^https:\/\//.test(o.envios || "") && /^\d{4}-\d{2}-\d{2}$/.test(o.verificado || "");
@@ -210,7 +239,7 @@
   }
 
   const api = { PESO_TIPICO, FUENTES, OFICIALES, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente, urlBusqueda,
-    parsearEnlace, datosDeEnlace, estadoDeEnlace, oficialesPara, buscarAfueraHtml };
+    parsearEnlace, datosDeEnlace, estadoDeEnlace, oficialesPara, buscarAfueraHtml, urlLeerEnlace, leidoDeEnlace };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
 })(this);
