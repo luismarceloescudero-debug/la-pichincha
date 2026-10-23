@@ -85,8 +85,8 @@ jobs:
         uses: actions/cache@v6
         with:
           path: indice.json
-          key: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-${{ github.run_id }}
-          restore-keys: indice-${{ hashFiles('indexar.py', 'tiendas.json') }}-
+          key: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-${{ github.run_id }}
+          restore-keys: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-
 
       # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
       # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
@@ -97,8 +97,12 @@ jobs:
           (github.event_name == 'workflow_dispatch' && inputs.indexar) ||
           (github.event_name == 'push' && hashFiles('indice.json') == '')
         # El valor del formulario va por el entorno y se valida: interpolado en el comando, "12; algo" correria en el job.
+        # Mercado Libre (spec 026) se lee por su API oficial con el token de aplicacion; sin los secretos esa fuente falla
+        # sola y queda la de la corrida anterior.
         env:
           PAGINAS: ${{ inputs.paginas || '12' }}
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
         run: |
           case "$PAGINAS" in ''|*[!0-9]*) echo "::error::paginas tiene que ser un numero"; exit 1 ;; esac
           python indexar.py --max-paginas "$PAGINAS" --historial historial
