@@ -85,6 +85,44 @@ test("parsearEnlace reconoce Amazon por /dp/, /gp/product/ y /gp/aw/d/, con el A
   assert.equal(I.parsearEnlace("  https://smile.amazon.com/dp/B0DLGCHL8M  ").tienda, "amazon");
 });
 
+/* Spec 023: las formas que el dueño pego y no se reconocian (medidas en el sitio publicado el 23/10/2026). */
+test("Amazon en español (/-/es/...) y con varios segmentos antes de /dp/: el slug es el que va justo antes", () => {
+  const a = I.parsearEnlace("https://www.amazon.com/-/es/Soundcore-AeroClip-auriculares/dp/B0HFJ7NVPB/ref=sr_1_1?crid=2X");
+  assert.deepEqual(a, { tienda: "amazon", id: "B0HFJ7NVPB", nombre: "Soundcore AeroClip auriculares", url: "https://www.amazon.com/dp/B0HFJ7NVPB" });
+  assert.equal(I.parsearEnlace("https://www.amazon.com/-/es/dp/B0HFJ7NVPB").nombre, "", "el idioma no es un nombre");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/-/en_US/dp/B0HFJ7NVPB").nombre, "");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/-/es/gp/product/B0HFJ7NVPB?th=1").id, "B0HFJ7NVPB");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/-/es/gp/aw/d/B0HFJ7NVPB").id, "B0HFJ7NVPB");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/a/b/c/Nombre-Largo/dp/B0HFJ7NVPB").nombre, "Nombre Largo");
+});
+
+test("un patrocinado de Amazon (/sspa/click) lleva el producto en el parametro url", () => {
+  const p = I.parsearEnlace("https://www.amazon.com/sspa/click?ie=UTF8&spc=MT&url=%2FSoundcore-AeroClip%2Fdp%2FB0HFJ7NVPB%2Fref%3Dsr");
+  assert.deepEqual(p, { tienda: "amazon", id: "B0HFJ7NVPB", nombre: "Soundcore AeroClip", url: "https://www.amazon.com/dp/B0HFJ7NVPB" });
+  assert.equal(I.parsearEnlace("https://www.amazon.com/sspa/click?url=%2F-%2Fes%2FX%2Fdp%2FB0HFJ7NVPB").id, "B0HFJ7NVPB");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/sspa/click?ie=UTF8"), null, "sin url no hay producto");
+  assert.equal(I.parsearEnlace("https://www.amazon.com/sspa/click?url=https%3A%2F%2Fevil.com%2Fdp%2FB0HFJ7NVPB"), null,
+    "el parametro url solo vale como ruta dentro de Amazon");
+});
+
+test("Amazon de otro pais se reconoce con su dominio y su moneda, sin el tag de EE.UU.", () => {
+  const es = I.parsearEnlace("https://www.amazon.es/Soundcore-AeroClip/dp/B0HFJ7NVPB");
+  assert.deepEqual(es, { tienda: "amazon", id: "B0HFJ7NVPB", nombre: "Soundcore AeroClip", url: "https://www.amazon.es/dp/B0HFJ7NVPB", dominio: "amazon.es" });
+  assert.equal(I.parsearEnlace("https://www.amazon.com.mx/dp/B0HFJ7NVPB").dominio, "amazon.com.mx");
+  const d = I.datosDeEnlace(es);
+  assert.equal(d.tiendaNombre, "Amazon (amazon.es)");
+  assert.equal(d.afiliado, false);
+  assert.equal(d.abrir, "https://www.amazon.es/dp/B0HFJ7NVPB");
+  assert.equal(I.estadoDeEnlace(es, "50").moneda, "EUR");
+  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.com.mx/dp/B0HFJ7NVPB"), "900").moneda, "MXN");
+  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.co.uk/dp/B0HFJ7NVPB"), "9").moneda, "GBP");
+  assert.equal(I.parsearEnlace("https://www.amazon.evil.com/dp/B0HFJ7NVPB"), null);
+});
+
+test("una imagen de Amazon (m.media-amazon.com) no es un producto", () => {
+  assert.equal(I.parsearEnlace("https://m.media-amazon.com/images/I/61fC4WN2xvL._AC_SL1500_.jpg"), null);
+});
+
 test("un link corto de Amazon (amzn.to) se reconoce, pero sin ASIN: no se puede saber sin abrirlo", () => {
   assert.deepEqual(I.parsearEnlace("https://amzn.to/3AbCdEf"), { tienda: "amazon", id: null, nombre: "", url: "https://amzn.to/3AbCdEf" });
   // El «Compartir» de la app de Amazon da a.co/d/...
