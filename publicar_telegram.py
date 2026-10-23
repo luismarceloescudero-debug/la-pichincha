@@ -50,8 +50,10 @@ def mensaje(datos):
     lineas = []
     for i, o in enumerate(ofertas, 1):
         categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
-        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o['url'], quote=True)}\">{html.escape(acortar(o['nombre']))}</a>: "
+        # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
+        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(o['nombre']))}</a>: "
                       f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}"
+                      + (" (enlace de afiliado)" if o.get("afiliado") else "")
                       + (f"\n   <i>{html.escape(o['puesto'])}</i>" if o.get("puesto") else ""))
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
         lineas.pop()

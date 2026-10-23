@@ -60,10 +60,11 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED, costo = null } = 
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
       (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
       (o.puesto ? o.puesto.texto + " " + (o.puesto.comparacion ? o.puesto.comparacion + " " : "") : "") +
+      (P.enlaceTienda(f[2]).afiliado ? "Enlace de afiliado. " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
     return `    <item>
       <title>${xml(titulo)}</title>
-      <link>${xml(f[2])}</link>
+      <link>${xml(P.enlaceTienda(f[2]).url)}</link>
       <guid isPermaLink="false">${xml(f[2])}#${xml(dia)}</guid>
       <pubDate>${rfc}</pubDate>
       <description>${xml(desc)}</description>
@@ -95,7 +96,11 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
   const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
   const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
     `<span class="h-nom">${esc(o.f[0])}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
-  const lista = ofertas.map(o => `    <li><a class="oferta" data-rubro="ofertas" href="${esc(o.f[2])}" rel="noopener">${esc(o.f[0])}</a>` +
+  // Los enlaces de afiliado (P.enlaceTienda) llevan su rotulo y rel="sponsored"; el orden no cambia (principio II).
+  const enlace = o => { const e = P.enlaceTienda(o.f[2]);
+    return `<a class="oferta" data-rubro="ofertas" href="${esc(e.url)}" rel="${e.afiliado ? "sponsored noopener" : "noopener"}">${esc(o.f[0])}</a>` +
+      (e.afiliado ? ' <span class="rotulo">enlace de afiliado</span>' : ""); };
+  const lista = ofertas.map(o => `    <li>${enlace(o)}` +
     `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.f[o.ref]))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span>` +
     (o.puesto ? `<span class="det">${esc(o.puesto.texto)}${o.puesto.comparacion ? " " + esc(o.puesto.comparacion) : ""}</span>` : "") + `</li>`).join("\n");
   const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
@@ -119,6 +124,7 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
 .hoy ol.todas li{margin:0 0 12px}
 .hoy .det{display:block;font:500 .82rem var(--font-mono);color:var(--ink-2)}
 .hoy .det s{color:var(--ink-3)}
+.hoy .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
 </style>
 <body>
 <div class="wrap hoy">
@@ -148,7 +154,9 @@ function listaParaCanal(idx, max = 10, costo = null) {
   return O.destacadas(idx, max, { costo }).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: o.f[o.ref], descuento: Math.round(o.off * 100),
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
-    tienda: o.f[3], ...(puestoCorto(o.puesto) ? { puesto: puestoCorto(o.puesto) } : {}) }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera
+    tienda: o.f[3], ...(puestoCorto(o.puesto) ? { puesto: puestoCorto(o.puesto) } : {}),
+    // `url` queda como esta en el indice (verificar_ofertas.py la busca por ese valor); el canal abre `enlace`, con el afiliado.
+    ...(P.enlaceTienda(o.f[2]).afiliado ? { enlace: P.enlaceTienda(o.f[2]).url, afiliado: true } : {}) }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera
 }
 
 /* Las reglas de importacion y la copia de las cotizaciones del build. Si falta cualquiera de las dos no se dice nada del costo

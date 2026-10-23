@@ -137,6 +137,28 @@ test("enlaceAmazon recorta el termino y no arma nada si esta vacio", () => {
   assert.ok(new URL(P.enlaceAmazon("x".repeat(500))).searchParams.get("k").length <= 100);
 });
 
+// ---- Afiliado de Mercado Libre (spec 027): el usuario y la herramienta del programa, solo en mercadolibre.com.ar ----
+test("enlaceTienda suma el codigo de afiliado a una pagina de Mercado Libre y conserva lo demas", () => {
+  const e = P.enlaceTienda("https://www.mercadolibre.com.ar/notebook-acer/p/MLA67221216?pdp_filters=item_id#reco");
+  const u = new URL(e.url);
+  assert.strictEqual(e.afiliado, true);
+  assert.strictEqual(u.pathname, "/notebook-acer/p/MLA67221216");
+  assert.strictEqual(u.searchParams.get("pdp_filters"), "item_id");
+  assert.strictEqual(u.searchParams.get("matt_word"), "chococuyano");
+  assert.strictEqual(u.searchParams.get("matt_tool"), "31231658");
+  assert.strictEqual(u.hash, "#reco");
+  assert.strictEqual(P.enlaceTienda("https://articulo.mercadolibre.com.ar/MLA-123-x").afiliado, true);
+  const repetido = new URL(P.enlaceTienda("https://www.mercadolibre.com.ar/x?matt_word=otro").url);
+  assert.deepStrictEqual(repetido.searchParams.getAll("matt_word"), ["chococuyano"]);
+});
+
+test("enlaceTienda deja igual cualquier otro enlace", () => {
+  for (const url of ["https://www.oncity.com/redmi/p", "http://www.mercadolibre.com.ar/x", "https://mercadolibre.com.ar.otro.test/x",
+                     "https://falsomercadolibre.com.ar/x", "https://www.mercadolibre.com/x", "javascript:alert(1)", "no es url", ""]) {
+    assert.deepStrictEqual(P.enlaceTienda(url), { url, afiliado: false });
+  }
+});
+
 test("cambioDe: desde cuando tiene el aviso su precio, y que el historial empezo en una fecha", () => {
   assert.equal(P.cambioDe("2026-10-12", "2026-10-07"), "precio sin cambios desde el 12/10/2026");
   assert.equal(P.cambioDe("2026-10-07", "2026-10-07"), "precio sin cambios desde el 7/10/2026 (cuando empezamos a seguirlo; puede ser más antiguo)");

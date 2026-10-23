@@ -134,7 +134,19 @@
     return t ? "https://www.amazon.com/s?" + new URLSearchParams({ k: t, tag: AMAZON_TAG }) : null;
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  /* Afiliado de Mercado Libre (E1, spec 027): el usuario y la herramienta que el programa de afiliados pone en sus links
+     (meli.la/1hunncE redirige a mercadolibre.com.ar con matt_word y matt_tool, medido el 23/10). Solo se suman a una
+     pagina de mercadolibre.com.ar por https; cualquier otro enlace vuelve igual. No es secreto: va en cada link. */
+  const MERCADO_LIBRE_AFILIADO = { matt_word: "chococuyano", matt_tool: "31231658" };
+  function enlaceTienda(url) {
+    let u;
+    try { u = new URL(url); } catch (e) { return { url, afiliado: false }; }
+    if (u.protocol !== "https:" || !/(^|\.)mercadolibre\.com\.ar$/.test(u.hostname)) return { url, afiliado: false };
+    for (const [k, v] of Object.entries(MERCADO_LIBRE_AFILIADO)) u.searchParams.set(k, v);
+    return { url: u.toString(), afiliado: true };
+  }
+
+  const api = { AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);
