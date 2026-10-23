@@ -54,7 +54,7 @@ Después del primer despliegue, la dirección `https://pichincha-afuera.<cuenta>
 
 ## Pruebas
 
-- `tests/js/worker.test.js` (21): normalizar eBay, AliExpress y Amazon con fixtures armados con los campos de cada doc oficial (no son respuestas reales: no hay credenciales); los pedidos de cada API; la firma de AliExpress contra `node:crypto`; validación de la consulta, CORS, caché de 8 h, tope por IP, fuente lenta o caída, reuso del token y el `export default` del Worker.
+- `tests/js/worker.test.js` (20): normalizar eBay, AliExpress y Amazon con fixtures armados con los campos de cada doc oficial (no son respuestas reales: no hay credenciales); los pedidos de cada API; la firma de AliExpress contra `node:crypto`; validación de la consulta, CORS, caché de 8 h, tope por IP, fuente lenta o caída, reuso del token y el `export default` del Worker.
 - `tests/js/afuera.test.js` (11) y `tests/test_sitio.py` (dirección del Worker, meta y CSP).
 - `wrangler deploy --dry-run` empaqueta el Worker (38 KB) y el paquete responde en Node.
 - En el navegador, con la respuesta armada por el Worker real a partir de los fixtures y servida desde el mismo origen: oscuro, claro y móvil a 375 px sin scroll horizontal; con y sin resultados de acá; fuentes sin avisos y caídas; Worker caído (queda la spec 020); «Calcular puesto en casa» abre la calculadora con 89,99 + 24,50 de envío.
