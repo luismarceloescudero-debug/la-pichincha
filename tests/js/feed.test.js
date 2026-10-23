@@ -67,6 +67,32 @@ test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", (
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
 });
 
+// ---- Afiliado de Mercado Libre (spec 027): el link lleva el codigo y el rotulo; `url` queda como en el indice ----
+const ML = "https://www.mercadolibre.com.ar/notebook-acer/p/MLA67221216";
+const IDX_ML = { ...IDX, tiendas: { ...IDX.tiendas, ml: { nombre: "Mercado Libre" } },
+  productos: [fila("SSD Samsung 990 2TB", 100000, { antes: 150000, tienda: "ml", url: ML }), ...IDX.productos] };
+
+test("en el canal, una oferta de Mercado Libre trae el enlace de afiliado aparte y la url del indice intacta", () => {
+  const lista = F.listaParaCanal(IDX_ML, 10);
+  const ml = lista.find(o => o.nombre === "SSD Samsung 990 2TB");
+  assert.equal(ml.url, ML);
+  assert.equal(ml.afiliado, true);
+  assert.equal(new URL(ml.enlace).searchParams.get("matt_word"), "chococuyano");
+  const otra = lista.find(o => o.nombre === "SSD Kingston 1TB");
+  assert.equal("enlace" in otra || "afiliado" in otra, false);
+});
+
+test("en /hoy/ y el feed el enlace de Mercado Libre lleva el codigo, rel sponsored y el rotulo", () => {
+  const html = F.renderHoy(IDX_ML, { baseUrl: BASE });
+  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658" rel="sponsored noopener">SSD Samsung 990 2TB<\/a> <span class="rotulo">enlace de afiliado<\/span>/);
+  assert.equal((html.match(/enlace de afiliado/g) || []).length, 1);
+  assert.match(html, /href="https:\/\/t\.test\/SSD%20Kingston%201TB" rel="noopener">/);
+  const item = F.renderFeed(IDX_ML, { baseUrl: BASE }).match(/<item>[\s\S]*?<\/item>/g).find(i => i.includes("SSD Samsung 990 2TB"));
+  assert.match(item, /<link>https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658<\/link>/);
+  assert.match(item, /Enlace de afiliado\./);
+  assert.match(item, /<guid isPermaLink="false">https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216#/);
+});
+
 test("main escribe ofertas.xml y ofertas.json en la carpeta de salida", () => {
   const fs = require("fs"), os = require("os"), path = require("path");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));

@@ -157,6 +157,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     <p>Algunos enlaces a tiendas pueden ser de afiliado: si comprás, la tienda le paga una comisión a La Pichincha, sin costo extra para vos. Cada uno de esos enlaces va rotulado.</p>
     <p>El orden de los resultados nunca depende de una comisión: sale solo del modo que elegís (Recomendación, Súper Oferta o Primera Línea), del precio y de las reglas de comparación.</p>
     <p><b>Amazon:</b> como Asociado de Amazon, La Pichincha gana una comisión con las compras que califican hechas desde sus enlaces a amazon.com. Esos enlaces llevan el rótulo «enlace de afiliado».</p>
+    <p><b>Mercado Libre:</b> La Pichincha es parte del Programa de Afiliados de Mercado Libre. En las ofertas del día (la página /hoy/, el feed y el canal de Telegram) los enlaces a mercadolibre.com.ar llevan su código de afiliado y el rótulo «enlace de afiliado».</p>
   </section>
   ${pie}
 </div>

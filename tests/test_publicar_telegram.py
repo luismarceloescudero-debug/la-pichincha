@@ -45,6 +45,14 @@ class Mensaje(unittest.TestCase):
         self.assertIn("Local &lt;b&gt;más&lt;/b&gt; barato", texto)
         self.assertEqual(texto.count("costo puesto en casa"), 1)      # la oferta local no lo trae
 
+    def test_el_enlace_de_afiliado_se_abre_y_se_rotula(self):
+        ml = {**OFERTAS["ofertas"][0], "comercio": "Mercado Libre", "url": "https://www.mercadolibre.com.ar/x",
+              "enlace": "https://www.mercadolibre.com.ar/x?matt_word=u&matt_tool=1", "afiliado": True}
+        texto = telegram.mensaje({**OFERTAS, "ofertas": [ml, OFERTAS["ofertas"][1]]})
+        self.assertIn('<a href="https://www.mercadolibre.com.ar/x?matt_word=u&amp;matt_tool=1">', texto)
+        self.assertIn("en Mercado Libre (enlace de afiliado)", texto)
+        self.assertEqual(texto.count("enlace de afiliado"), 1)
+
     def test_sin_ofertas_no_hay_mensaje(self):
         self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
 
