@@ -73,6 +73,36 @@
     return t.replace(/[-_]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120).trim();
   }
 
+  /* ASIN y slug de una ruta de Amazon: con idioma (/-/es/...), varios segmentos antes de /dp/, /gp/product/, /gp/aw/d/ y los
+     patrocinados (/sspa/click?url=/.../dp/ASIN, solo como ruta dentro de Amazon). Spec 023; primera version de OmniRoute
+     `revision` (gpt-oss-120b), 16/16 casos. */
+  function amazonDeRuta(ruta, busqueda, profundidad = 0) {
+    const s = ruta.split("/").filter(Boolean), asin = x => /^[a-z0-9]{10}$/i.test(x || "");
+    for (let i = 0; i < s.length - 1; i++) {
+      if (s[i].toLowerCase() === "dp" && asin(s[i + 1])) {
+        const previo = s[i - 1];
+        return { asin: s[i + 1].toUpperCase(), slug: previo && previo !== "-" && !/^[a-z]{2}(?:[_-][a-z]{2})?$/i.test(previo) ? previo : "" };
+      }
+    }
+    for (let i = 0; i < s.length; i++) {
+      if (s[i].toLowerCase() !== "gp") continue;
+      const sig = (s[i + 1] || "").toLowerCase();
+      if (sig === "product" && asin(s[i + 2])) return { asin: s[i + 2].toUpperCase(), slug: "" };
+      if (sig === "aw" && (s[i + 2] || "").toLowerCase() === "d" && asin(s[i + 3])) return { asin: s[i + 3].toUpperCase(), slug: "" };
+    }
+    if ((s[0] || "").toLowerCase() === "sspa" && (s[1] || "").toLowerCase() === "click" && profundidad < 2) {
+      const destino = new URLSearchParams(busqueda || "").get("url") || "";
+      if (!destino.startsWith("/") || destino.startsWith("//")) return null;
+      const [camino, resto] = destino.split("?", 2);
+      return amazonDeRuta(camino, resto ? "?" + resto : "", profundidad + 1);
+    }
+    return null;
+  }
+
+  /* Amazon de otros paises: se reconoce con su dominio y su moneda; el tag de afiliado es solo de amazon.com. */
+  const AMAZON_PAISES = { "amazon.es": "EUR", "amazon.de": "EUR", "amazon.fr": "EUR", "amazon.it": "EUR", "amazon.co.uk": "GBP",
+    "amazon.com.mx": "MXN", "amazon.com.br": "BRL", "amazon.co.jp": "JPY" };
+
   const HOSTS = {
     amazon: ["amazon.com", "www.amazon.com", "smile.amazon.com"],
     tiendamia: ["tiendamia.com.ar", "www.tiendamia.com.ar", "tiendamia.com", "www.tiendamia.com"],
@@ -93,11 +123,12 @@
     const host = u.hostname.toLowerCase(), ruta = u.pathname;
     const es = tienda => HOSTS[tienda].includes(host);
     let m;
-    if (es("amazon")) {
-      m = ruta.match(/^\/(?:([^/]+)\/)?dp\/([a-z0-9]{10})(?:\/|$)/i) || ruta.match(/^\/gp\/(?:product|aw\/d)\/()([a-z0-9]{10})(?:\/|$)/i);
-      if (!m) return null;
-      const asin = m[2].toUpperCase();
-      return { tienda: "amazon", id: asin, nombre: nombreDeSlug(m[1]), url: "https://www.amazon.com/dp/" + asin };
+    const pais = host.replace(/^www\./, "");
+    if (es("amazon") || AMAZON_PAISES[pais]) {
+      const a = amazonDeRuta(ruta, u.search);
+      if (!a) return null;
+      if (es("amazon")) return { tienda: "amazon", id: a.asin, nombre: nombreDeSlug(a.slug), url: "https://www.amazon.com/dp/" + a.asin };
+      return { tienda: "amazon", id: a.asin, nombre: nombreDeSlug(a.slug), url: `https://www.${pais}/dp/${a.asin}`, dominio: pais };
     }
     // Links cortos (amzn.to, y a.co del «Compartir» de la app): sin abrirlos no se sabe el producto.
     if (host === "amzn.to" || host === "a.co") return ruta.length > 1 ? { tienda: "amazon", id: null, nombre: "", url: u.href } : null;
@@ -130,6 +161,8 @@
     if (!e) return null;
     const base = { tiendaNombre: "", ayuda: "", abrir: e.url, afiliado: false, calcula: true, mismoEnAmazon: null,
       pisar: ["valor", "moneda", "cobro"] };
+    if (e.tienda === "amazon" && e.dominio) return { ...base, tiendaNombre: `Amazon (${e.dominio})`,
+      ayuda: `Escribí el precio del producto en ${AMAZON_PAISES[e.dominio]}, como lo muestra ${e.dominio}, sin el envío: el envío va en su campo.` };
     if (e.tienda === "amazon") return { ...base, tiendaNombre: "Amazon (EE.UU.)", abrir: e.id ? amazonDp(e.id) : e.url, afiliado: !!e.id,
       ayuda: "Escribí el precio del producto que muestra Amazon, sin el envío ni el depósito de impuestos («Import Fees Deposit»): el envío va en su campo." };
     if (e.tienda === "tiendamia") return { ...base, tiendaNombre: "Tiendamia", mismoEnAmazon: e.origen === "amz" ? amazonDp(e.id) : null,
@@ -146,7 +179,7 @@
   function estadoDeEnlace(e, precio) {
     const d = datosDeEnlace(e);
     if (!d || !d.calcula) return null;
-    return { ...C.POR_DEFECTO, valor: normalTermino(precio), moneda: "USD", cobro: "checkout" };
+    return { ...C.POR_DEFECTO, valor: normalTermino(precio), moneda: e.dominio ? AMAZON_PAISES[e.dominio] : "USD", cobro: "checkout" };
   }
 
   /* --- Buscar afuera (spec 020): cuando ninguna tienda del indice tiene el termino --- */

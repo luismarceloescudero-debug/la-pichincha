@@ -23,7 +23,7 @@
   };
   // Las monedas de las tiendas del exterior mas comunes; cualquiera que traigan las cotizaciones sirve.
   const MONEDAS = [["USD", "Dólares (USD)"], ["EUR", "Euros (EUR)"], ["GBP", "Libras (GBP)"], ["CNY", "Yuanes (CNY)"],
-    ["BRL", "Reales (BRL)"], ["CLP", "Pesos chilenos (CLP)"], ["JPY", "Yenes (JPY)"]];
+    ["BRL", "Reales (BRL)"], ["CLP", "Pesos chilenos (CLP)"], ["JPY", "Yenes (JPY)"], ["MXN", "Pesos mexicanos (MXN)"]];
   const MONTOS = ["valor", "flete", "seguro", "honorarios", "internoMonto"];   // en la moneda elegida
   const TOPE = 20;                     // caracteres por parametro: un monto no necesita mas
   const NIVELES = { oficial: "oficial", dato: "dato tuyo", pendiente: "sin dato", dudoso: "dudoso", prensa: "prensa" };
