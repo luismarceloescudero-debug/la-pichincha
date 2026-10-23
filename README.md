@@ -136,12 +136,14 @@ una fuente dada de baja con `"activa": false`.
 | The Gamer Shop, Max Tecno, Katech, SCP Hardstore, Click Gaming, GoldenTech | la Store API publica de WooCommerce (`/wp-json/wc/store/v1/products`), de a 100 y solo lo que esta en stock | la misma API: el precio especial por efectivo o transferencia (verificado en la pagina de un producto de cada una) |
 | OnCity, Carrefour, Naldo, Authogar, Pardo, Bringeri, Motorola, D'Ricco, Nuevas Hogar, Coppel, Compra Cierta, LG Shop, BGH | la API publica de catalogo de VTEX (`/api/catalog_system/pub/`): el arbol de categorias y la busqueda por cada categoria de tecnologia, de a 50, solo si su `robots.txt` no prohibe `/api/` | la misma API: el precio del vendedor por defecto, solo lo que tiene stock (`AvailableQuantity > 0`) |
 | ComparaYa | API publica por categoria | la misma API |
+| Mercado Libre ([spec 026](specs/026-mercado-libre-api/spec.md)) | su API oficial con el token de aplicacion (`ML_CLIENT_ID`, `ML_CLIENT_SECRET`): la busqueda del catalogo (`/products/search`) por 14 rubros de hardware, cada uno con su dominio, hasta 200 productos por rubro | `/products/{id}/items`: el vendedor mas barato que lo vende nuevo, en pesos y desde Argentina, y su `original_price` |
 
 ComparaYa no es una tienda sino un comparador que agrega otros 50 comercios
 (Mercado Libre, Fravega, OnCity, Carrefour). Entra como segunda opinion y cada
 resultado aclara de que comercio sale. Un aviso que llega directo de la tienda y
 tambien por ComparaYa (la misma URL) va una sola vez al indice, con el precio de
-la tienda (`indexar.sin_repetir_agregador`; en la pagina, `unaPorUrl`).
+la tienda (`indexar.sin_repetir_agregador`; en la pagina, `unaPorUrl`). Un producto de catalogo de Mercado
+Libre se reconoce por su numero (`/p/MLA...`, `indexar.clave_aviso`), aunque ComparaYa escriba otra direccion.
 
 **Tiendas VTEX** (desde el 19/10/2026). Antes llegaban solo por ComparaYa, con
 precios que a veces eran viejos. Medido desde GitHub Actions
