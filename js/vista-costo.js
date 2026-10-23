@@ -30,6 +30,13 @@ function vistaCosto() {
           <li><a href="#k-sec-2" data-k-ir="k-sec-2"><span>2</span> Tu situación</a></li>
           <li><a href="#k-sec-3" data-k-ir="k-sec-3"><span>3</span> Lo que no publica ARCA</a></li>
         </ol></div></div>
+    <section class="k-link" aria-labelledby="k-link-tit">
+      <h3 id="k-link-tit">¿Ya lo encontraste afuera? Pegá el link</h3>
+      <div class="k-campo"><label for="k-link">Link del producto en Amazon (EE.UU.), Tiendamia, Loquieroaca o eBay</label>
+        <input id="k-link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://www.amazon.com/…/dp/B0…" aria-describedby="k-link-ayuda">
+        <small id="k-link-ayuda">Del link sacamos la tienda y el producto; la página no la leemos (las tiendas no lo permiten), así que el precio lo escribís vos.</small></div>
+      <div id="k-link-res" aria-live="polite"></div>
+    </section>
     <div class="k-grid">
       ${Calculadora.formularioHtml(estado, { esc, tiposDolar: Monedas.TIPOS_DOLAR, icono })}
       <section class="k-salida" aria-labelledby="k-titulo">
@@ -125,6 +132,47 @@ async function compartirCosto(boton) {
   setTimeout(() => { boton.innerHTML = previo; }, 2500);
 }
 
+/* --- Pegar un link (spec 020): js/importar.js reconoce la tienda y el producto; aca se muestra y se precarga la calculadora --- */
+function fichaEnlace(e) {
+  const d = Importar.datosDeEnlace(e);
+  const abrir = `<a class="acc" href="${esc(d.abrir)}" target="_blank" rel="${d.afiliado ? "sponsored noopener" : "noopener"}">${icono("fuera")} Abrir en ${esc(d.tiendaNombre)}</a>`
+    + (d.afiliado ? ' <span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span>' : "")
+    + (d.mismoEnAmazon ? ` <a class="acc" href="${esc(d.mismoEnAmazon)}" target="_blank" rel="sponsored noopener">El mismo en Amazon</a> <span class="rotulo">enlace de afiliado</span>` : "");
+  const precio = !d.calcula ? "" : `<div class="k-campo"><label for="k-link-precio">Precio que ves en la página (US$)</label>
+      <div class="k-entrada con-prefijo"><span class="k-prefijo" aria-hidden="true">USD</span><input id="k-link-precio" type="text" inputmode="decimal" autocomplete="off" aria-describedby="k-link-precio-ayuda"></div>
+      <small id="k-link-precio-ayuda">${esc(d.ayuda)}</small></div>`;
+  return `<div class="k-link-ficha">
+      <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
+      <p class="k-link-acciones">${abrir}</p>
+      ${precio || `<p class="sub chico">${esc(d.ayuda)}</p>`}</div>`;
+}
+
+/* Pisa en el formulario solo los campos que el link decide (moneda, donde se cobra, el envio en Tiendamia) y el precio cuando hay. */
+function aplicarEnlace(raiz, e, precio) {
+  const form = $("#k-form", raiz), estado = Importar.estadoDeEnlace(e, precio);
+  if (!form || !estado) return;
+  for (const campo of Importar.datosDeEnlace(e).pisar) {
+    if (campo === "valor" && !estado.valor) continue;
+    if (form.elements[campo]) form.elements[campo].value = estado[campo];
+  }
+  recalcularCosto(raiz);
+}
+
+function leerEnlace(raiz, texto) {
+  const res = $("#k-link-res", raiz), e = Importar.parsearEnlace(texto);
+  if (!texto.trim()) { res.innerHTML = ""; return; }
+  if (!e) {
+    res.innerHTML = '<p class="sub chico">No reconozco ese link. Por ahora leo los de Amazon (EE.UU.), Tiendamia, Loquieroaca y eBay: escribí el precio abajo, en «Precio del producto».</p>';
+    return;
+  }
+  res.innerHTML = fichaEnlace(e);
+  aplicarEnlace(raiz, e, "");
+  const precio = $("#k-link-precio", res), valor = ($("#k-form", raiz) || { elements: {} }).elements.valor;
+  if (!precio) return;
+  if (valor) precio.value = valor.value;    // el precio que ya estaba en la calculadora, para que los dos campos digan lo mismo
+  precio.addEventListener("input", () => aplicarEnlace(raiz, e, precio.value));
+}
+
 function activarCosto(raiz) {
   const form = $("#k-form", raiz);
   if (!form) return;
@@ -140,5 +188,7 @@ function activarCosto(raiz) {
     if (primero) primero.focus({ preventScroll: true });
   }));
   $("#k-compartir", raiz).addEventListener("click", ev => compartirCosto(ev.currentTarget));
+  const link = $("#k-link", raiz);
+  if (link) link.addEventListener("input", () => leerEnlace(raiz, link.value));
   cargarCosto().then(() => recalcularCosto(raiz));
 }
