@@ -30,6 +30,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import historial
+import mercadolibre
 import modelo
 import salud
 import serie
@@ -666,11 +667,22 @@ def url_clave(url):
     return m.group(1).lower() + re.sub(r"/+$", "", m.group(2)) + ("?" + "&".join(params) if params else "")
 
 
+_PRODUCTO_ML = re.compile(r"^https?://(?:www\.)?mercadolibre\.com\.ar/(?:[^/?#]*/)?p/(MLA\d+)", re.I)
+
+
+def clave_aviso(url):
+    """url_clave, salvo un producto de catalogo de Mercado Libre: lo identifica su numero (/p/MLA...), no el texto de la
+    direccion, que cambia entre quien lo publica (ComparaYa, la API)."""
+    m = _PRODUCTO_ML.match(str(url))
+    return "mercadolibre.com.ar/p/" + m.group(1).upper() if m else url_clave(url)
+
+
 def sin_repetir_agregador(filas, agregadores):
-    """Las filas del indice sin las de un agregador (ComparaYa) que repiten la URL de un aviso que llega directo de la
-    tienda: el directo trae el precio y el stock del dia; el del agregador puede ser viejo. Conserva el orden."""
-    directas = {url_clave(f[2]) for f in filas if f[3] not in agregadores}
-    return [f for f in filas if f[3] not in agregadores or url_clave(f[2]) not in directas]
+    """Las filas del indice sin las de un agregador (ComparaYa) que repiten un aviso que llega directo de la tienda
+    (Mercado Libre por su API incluido): el directo trae el precio y el stock del dia; el del agregador puede ser viejo.
+    Conserva el orden."""
+    directas = {clave_aviso(f[2]) for f in filas if f[3] not in agregadores}
+    return [f for f in filas if f[3] not in agregadores or clave_aviso(f[2]) not in directas]
 
 
 # --- Part number desde la ficha del producto (B3-bis) ----------------------------------------------------------
@@ -863,6 +875,9 @@ def main(argv=None):
                 items = indexar_woocommerce(fuente, args.max_paginas)
             elif tipo == "vtex":
                 items = indexar_vtex(fuente, args.max_paginas)
+            elif tipo == "mercadolibre":
+                items = [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
+                         for it in mercadolibre.indexar(fuente, args.max_paginas)]
             else:
                 items = indexar_listados(fuente, args.max_paginas)
         except Exception as e:                       # una fuente caida no voltea el indice

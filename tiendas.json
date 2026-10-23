@@ -456,5 +456,75 @@
       "tope_paginas": 50
     },
     "lista_es_oferta": false
+  },
+  "mercadolibre": {
+    "nombre": "Mercado Libre",
+    "color": "vt",
+    "activa": true,
+    "_nota": "Por su API oficial con el token de aplicacion (spec 026): busqueda del catalogo por rubro y el vendedor mas barato de cada producto. Los dominios salen de /sites/MLA/domain_discovery (23/10).",
+    "base": "https://www.mercadolibre.com.ar",
+    "catalogo": {
+      "tipo": "mercadolibre",
+      "por_rubro": 100,
+      "rubros": [
+        {
+          "q": "notebook",
+          "dominio": "MLA-NOTEBOOKS"
+        },
+        {
+          "q": "monitor",
+          "dominio": "MLA-COMPUTER_MONITORS"
+        },
+        {
+          "q": "placa de video",
+          "dominio": "MLA-GRAPHICS_CARDS"
+        },
+        {
+          "q": "procesador",
+          "dominio": "MLA-COMPUTER_PROCESSORS"
+        },
+        {
+          "q": "memoria ram",
+          "dominio": "MLA-RAM_MEMORY_MODULES"
+        },
+        {
+          "q": "ssd",
+          "dominio": "MLA-HARD_DRIVES_AND_SSDS"
+        },
+        {
+          "q": "motherboard",
+          "dominio": "MLA-COMPUTER_MOTHERBOARDS"
+        },
+        {
+          "q": "fuente de alimentacion pc",
+          "dominio": "MLA-DESKTOP_COMPUTER_POWER_SUPPLIES"
+        },
+        {
+          "q": "gabinete pc",
+          "dominio": "MLA-DESKTOP_COMPUTER_CASES"
+        },
+        {
+          "q": "celular",
+          "dominio": "MLA-CELLPHONES"
+        },
+        {
+          "q": "teclado mecanico",
+          "dominio": "MLA-PC_KEYBOARDS"
+        },
+        {
+          "q": "mouse gamer",
+          "dominio": "MLA-COMPUTER_MICE"
+        },
+        {
+          "q": "auriculares gamer",
+          "dominio": "MLA-HEADPHONES"
+        },
+        {
+          "q": "webcam",
+          "dominio": "MLA-WEBCAMS"
+        }
+      ]
+    },
+    "lista_es_oferta": true
   }
 }
