@@ -4,7 +4,6 @@ function pintar(id) {
   if (CONSULTA && ANALISIS && DINAMICAS.includes(id)) v.innerHTML = vistaDinamica(id);
   else if (id === "comparativa") { if (!pre) v.innerHTML = vistaComparativa(); }
   else if (id === "ofertas") v.innerHTML = vistaOfertas();
-  else if (id === "tiendas") v.innerHTML = vistaTiendas();
   else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
   else if (id === "costo") { v.innerHTML = vistaCosto(); activarCosto(v); }
@@ -15,18 +14,20 @@ function pintar(id) {
 
 /* La primera vista puede venir escrita desde el build (generar_portada.js, data-pre): si es la que toca
    se deja como esta, sin rearmarla. Sirve una sola vez, sea cual sea la primera vista; con busquedas guardadas o dentro de un marco
-   cambia la tira o la barra de acciones, y se arma como siempre. */
+   cambia la tira o la barra de acciones, y se arma como siempre. Desde la spec 021 la portada ya no depende de la categoria curada. */
 function usarPrerender() {
   const v = $("#vista"), pre = v.dataset.pre;
   delete v.dataset.pre;
-  return pre === `comparativa:${CAT}` && SUELTA && !leerHistCompleto().length;
+  return !!pre && pre.startsWith("comparativa") && SUELTA && !leerHistCompleto().length;
 }
 
 /* El hash es la unica fuente de verdad: asi andan el boton Atras del
    navegador, los enlaces directos a una tarjeta y recargar la pagina. */
 let subirAlPintar = false;
 
-const ALIAS = { memorias: "comparativa", webcams: "comparativa" };  // enlaces viejos que siguen andando
+// Enlaces viejos que siguen andando. Tiendas es una seccion de la Comparativa desde la spec 021: #tiendas baja hasta ella.
+const ALIAS = { memorias: "comparativa", webcams: "comparativa", tiendas: "comparativa" };
+const ANCLAS = { tiendas: "donde-comprar" };
 
 function elegirCategoria(cat) {
   CAT = cat;
@@ -36,9 +37,12 @@ function elegirCategoria(cat) {
 function aplicar(id) {
   if (id === "webcams") elegirCategoria("webcam");
   if (porId[id]) elegirCategoria(catDe(porId[id]));
+  const ancla = ANCLAS[id];
   id = ALIAS[id] || id;
   pintar(VISTAS.some(v => v.id === id) || porId[id] ? id : "comparativa");
-  if (subirAlPintar) $(".tabs").scrollIntoView({ behavior: "smooth", block: "start" });
+  const destino = ancla && document.getElementById(ancla);
+  if (destino) destino.scrollIntoView({ behavior: "smooth", block: "start" });
+  else if (subirAlPintar) $(".tabs").scrollIntoView({ behavior: "smooth", block: "start" });
   subirAlPintar = false;
 }
 
@@ -69,6 +73,9 @@ function arrancar() {
     const seg = ev.target.closest("[data-cat]");
     if (seg) { limpiarConsulta(); elegirCategoria(seg.dataset.cat); return ir("comparativa", false); }
     if (ev.target.closest("[data-volver]")) return ir("comparativa", true);
+
+    const borrar = ev.target.closest("[data-borrar-hist]");
+    if (borrar) return borrarConAnimacion(borrar, () => aplicar(location.hash.slice(1)));
 
     // quitar del historial: se maneja antes que repetir, porque la x vive adentro
     const quitar = ev.target.closest("[data-olvidar]");
@@ -105,11 +112,6 @@ function arrancar() {
     if (irVista) return ir(irVista.dataset.irVista, true);
 
     if (ev.target.closest("[data-cambiar-consulta]")) return ir("buscar", true);
-
-    if (ev.target.closest("[data-quitar-consulta]")) {
-      limpiarConsulta();
-      return aplicar(location.hash.slice(1));
-    }
 
     const sugerida = ev.target.closest(".sug");
     if (sugerida) return consultar(sugerida.textContent.trim());

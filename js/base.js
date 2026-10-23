@@ -38,7 +38,6 @@ if (!CATEGORIAS.some(c => c.id === CAT)) CAT = "ram";
 
 const VISTAS = [
   { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => CATEGORIAS.length },
-  { id: "tiendas", eti: "Tiendas", ico: "store", n: () => 3 },
   { id: "ofertas", eti: "Ofertas", ico: "fuego",
     n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },

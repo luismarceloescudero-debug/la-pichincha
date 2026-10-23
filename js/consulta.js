@@ -2,9 +2,12 @@
    Antes la busqueda era una lista y las otras pestañas mostraban siempre lo
    mismo. Ahora lo que buscas gobierna las tres: la comparativa sale de los
    resultados, el ranking de comercios sale de los resultados y el veredicto
-   lo escribe la propia busqueda. Sin consulta vuelve el contenido curado. */
+   lo escribe la propia busqueda. Sin consulta, Comparativa y Veredicto usan la
+   busqueda mas reciente (spec 021, js/historial.js): ya no vuelve el analisis
+   curado del primer relevamiento. Tiendas es una seccion de la Comparativa. */
 let CONSULTA = "", ANALISIS = null, REFERENCIA = null;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
-const DINAMICAS = ["comparativa", "tiendas", "veredicto"];
+const DINAMICAS = ["comparativa", "veredicto"];
+let RECIENTE_DE_BUSCADAS = false;   // la consulta la puso el Veredicto con «Lo mas buscado», no la persona (js/historial.js)
 const LETRAS = ["A", "B", "C", "D"];
 const MARCAS_RE = Buscador.armarMarcasRe([...(MARCAS.primera || []), ...(MARCAS.conocida || [])]);
 
@@ -33,11 +36,12 @@ function fijarConsulta(q, referencia = null) {
   if (t.length < 2) return limpiarConsulta();
   CONSULTA = t;
   REFERENCIA = referencia;
+  RECIENTE_DE_BUSCADAS = false;
   ANALISIS = analizarConsulta(t);
   if (!ANALISIS) { CONSULTA = ""; REFERENCIA = null; }
   marcarConsulta();
 }
-function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; marcarConsulta(); }
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
 function marcarConsulta() {
   const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
   sincronizarUrl();
@@ -55,10 +59,9 @@ function notaEspecificaciones(A) {
 
 function bannerConsulta() {
   const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
-  return `<div class="consulta-activa"><span class="txt">${icono("lupa")} Armado para tu búsqueda <b>«${esc(CONSULTA)}»</b>:
+  return `<div class="consulta-activa"><span class="txt">${icono("lupa")} ${RECIENTE_DE_BUSCADAS ? "Armado con lo más buscado" : "Armado para tu búsqueda"} <b>«${esc(CONSULTA)}»</b>:
     ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
-    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button>
-    <button class="acc" data-quitar-consulta>Ver el análisis curado</button></div>`;
+    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
 }
 
 function cardPick(p, i) {
@@ -142,10 +145,13 @@ function vistaComparativaDin() {
     ${tablaPicks(A.picks)}
     <div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
       <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>
-    ${seccionPrecioPorTienda(A.picks)}</div>`;
+    ${seccionPrecioPorTienda(A.picks)}
+    ${seccionComercios()}</div>`;
 }
 
-function vistaTiendasDin() {
+/* Donde conviene comprar: el ranking de comercios de la busqueda. Era la pestaña Tiendas; ahora cierra la Comparativa
+   (el enlace viejo #tiendas sigue andando: js/arranque.js lo lleva hasta aca). */
+function seccionComercios() {
   const A = ANALISIS, top = A.comercios.slice(0, 6), resto = A.comercios.length - top.length;
   const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${enlace(c.mejorItem.f[2])}" target="_blank" rel="noopener">
     <span class="rol"><b class="letra">${i + 1}</b> ${icono("store")} ${i === 0 ? "Más barata en primera línea" : "Comercio"}</span>
@@ -155,11 +161,9 @@ function vistaTiendasDin() {
     <dl><dt>Avisos comparables</dt><dd>${c.n}</dd><dt>Precio típico</dt><dd>${pesos(c.med)}</dd>
       <dt>De primera línea</dt><dd>${Math.round(c.pctPrimera * 100)}%</dd><dt>Bajaron de precio</dt><dd>${c.bajas}</dd></dl>
     <span class="ver">Abrir ${icono("fuera")}</span></a>`).join("");
-  return `<div class="panel">${bannerConsulta()}
-    <div class="panel-head"><h2>${icono("store")} Dónde conviene comprar: ${esc(CONSULTA)}</h2>
+  return `<div class="panel-head" id="donde-comprar" style="margin-top:26px"><h2>${icono("store")} Dónde conviene comprar</h2>
       <p class="sub">Ranking de comercios con lo que realmente vende cada uno de esta búsqueda. Gana quien tiene la marca más confiable al menor precio; el precio típico y la cantidad de avisos muestran cuánto margen de elección da.${resto > 0 ? ` Hay ${resto} comercio${resto > 1 ? "s" : ""} más con menos opciones.` : ""}</p></div>
-    ${barraAcciones("tiendas")}
-    <div class="dgrid">${cards}</div></div>`;
+    <div class="dgrid">${cards}</div>`;
 }
 
 function vistaVeredictoDin() {
@@ -209,8 +213,7 @@ function vistaVeredictoDin() {
 }
 
 function vistaDinamica(id) {
-  return id === "comparativa" ? vistaComparativaDin()
-       : id === "tiendas" ? vistaTiendasDin() : vistaVeredictoDin();
+  return id === "comparativa" ? vistaComparativaDin() : vistaVeredictoDin();
 }
 
 /* --- La busqueda va a la URL ---------------------------------------------

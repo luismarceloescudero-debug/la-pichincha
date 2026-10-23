@@ -37,7 +37,8 @@ function pintarHist() {
   caja.innerHTML = !h.length ? "" :
     `<span class="et">${icono("reloj")} tus búsquedas</span>` + h.map(q =>
       `<button class="hist" data-rep="${esc(q)}">${esc(q)}<span class="x" data-olvidar="${esc(q)}" title="Quitar">×</span></button>`).join("") +
-    `<button class="hist" data-refrescar="1">${icono("refrescar")} actualizar precios</button>`;
+    `<button class="hist" data-refrescar="1">${icono("refrescar")} actualizar precios</button>` +
+    `<button class="hist borrar" data-borrar-hist>borrar búsquedas</button>`;
 }
 
 /* Precio de hoy de la mejor compra de una busqueda guardada. */
@@ -52,12 +53,9 @@ function fotoVivaDe(q) {
   return IDX._h[q];
 }
 
-/* La tira de la pestaña Comparativa: las curadas y tus ultimas busquedas. */
+/* La tira de la pestaña Comparativa: tus ultimas busquedas. Las comparaciones curadas del primer relevamiento ya no van (spec 021). */
 function tiraHtml(conPrecios) {
   const hist = leerHistCompleto();
-  const curadas = CATEGORIAS.map(c =>
-    `<button class="ult curada${!CONSULTA && c.id === CAT ? " activa" : ""}" data-cat="${c.id}">
-      <span class="ult-q">${icono(c.ico)} ${esc(c.eti)}</span><span class="ult-sub">análisis a fondo</span></button>`).join("");
   const buscadas = hist.map(h => {
     const vivo = conPrecios ? fotoVivaDe(h.q) : null;
     let delta = "";
@@ -71,12 +69,98 @@ function tiraHtml(conPrecios) {
       <span class="ult-sub">${esc(((vivo && vivo.n) || h.n || "").slice(0, 38))}</span>
       <span class="ult-x" data-olvidar="${esc(h.q)}" title="Quitar">×</span></button>`;
   }).join("");
-  return `<div class="ult-cab">${icono("reloj")} ${hist.length ? "Comparaciones: curadas y tus últimas búsquedas" : "Comparaciones curadas. Tus búsquedas van a aparecer acá"}</div>
-    <div class="ult-fila">${curadas}${buscadas}</div>`;
+  if (!hist.length) return `<div class="ult-cab">${icono("reloj")} Tus búsquedas van a aparecer acá, con la comparativa y el precio de hoy.
+    <button class="acc" data-ir-vista="buscar">${icono("lupa")} Buscar un producto</button></div>`;
+  return `<div class="ult-cab">${icono("reloj")} Tus últimas búsquedas
+    <button class="acc borrar-hist" data-borrar-hist>Borrar búsquedas</button></div>
+    <div class="ult-fila">${buscadas}</div>`;
 }
 function pintarTira() {
   const c = $("#ultimas");
   if (c) c.innerHTML = tiraHtml(true);
+}
+
+/* ---- Lo reciente gobierna las pestañas (spec 021) ----
+   Sin una consulta activa, la Comparativa termina con tu ultima busqueda y el Veredicto se escribe con ella. Sin historial,
+   el Veredicto usa la primera de «Lo mas buscado» que tenga resultados. Hace falta el indice: sin el, no hay nada reciente. */
+function consultaReciente() {
+  if (!IDX) return "";
+  const buscadas = typeof BUSCADAS !== "undefined" && Array.isArray(BUSCADAS) ? BUSCADAS : [];
+  return [...leerHist(), ...buscadas].find(q => hayResultados(q)) || "";
+}
+
+/* La comparativa corta de tu ultima busqueda, al final de la portada: sus opciones y el boton a la completa. Se calcula
+   aparte, sin fijar la consulta: mirar la portada no cambia las pestañas ni la URL. */
+function recienteHtml(q) {
+  const A = q ? analizarConsulta(q) : null;
+  if (!A) return "";
+  return `<div class="panel-head" style="margin-top:6px"><h2>${icono("balanza")} Tu última búsqueda: ${esc(q)}</h2>
+      <p class="sub">De ${A.total} avisos, ${A.base.length} son comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}. Precios de hoy.</p></div>
+    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    <p class="mas-reciente"><button class="acc" data-comparar="${esc(q)}">${icono("balanza")} Ver la comparativa completa, dónde comprar y el veredicto</button></p>`;
+}
+function pintarReciente() {
+  const c = $("#reciente");
+  if (!c) return;
+  const q = !CONSULTA && IDX ? leerHist().find(x => hayResultados(x)) : "";   // en la portada, solo lo que buscaste vos
+  c.innerHTML = q ? recienteHtml(q) : "";
+}
+
+/* El Veredicto sin consulta activa: espera el indice y se escribe con lo reciente. Si mientras tanto la persona busco otra
+   cosa o se fue de la pestaña, no pisa nada. */
+function abrirReciente(id) {
+  const sigueAca = () => (location.hash.slice(1) || "comparativa") === id;
+  asegurarIndice().then(() => {
+    if (!(CONSULTA && ANALISIS)) {
+      const q = consultaReciente();
+      if (q) { fijarConsulta(q); RECIENTE_DE_BUSCADAS = !leerHist().includes(q); }
+    }
+    if (sigueAca()) $("#vista").innerHTML = CONSULTA && ANALISIS ? vistaDinamica(id) : veredictoVacio("");
+  }).catch(() => { if (sigueAca()) $("#vista").innerHTML = veredictoVacio(""); });
+}
+
+/* ---- Borrar tus busquedas ----
+   Un bicho cruza la fila y se las va comiendo; despues se borran. Cada vez sale otro. Con «reducir movimiento» se borran sin
+   animacion. El torbellino es un homenaje al demonio de Tasmania, sin el personaje. */
+const COMILONES = [
+  { clase: "pacman", eti: "Pac-Man" },
+  { clase: "torbellino", eti: "un torbellino" },
+  { clase: "escoba", eti: "una escoba" },
+];
+const comilonDe = i => COMILONES[i % COMILONES.length];
+const DURACION_COMILON = 1300;
+let comilonesUsados = 0;
+
+function borrarHistorial() {
+  escribirHist([]);
+  limpiarConsulta();
+  pintarHist();
+  pintarTira();
+  pintarReciente();
+}
+
+function borrarConAnimacion(boton, despues) {
+  const fin = () => { borrarHistorial(); if (despues) despues(); };
+  const caja = boton.closest(".ultimas, .historial");
+  const quieto = !caja || !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (quieto) return fin();
+  const c = comilonDe(comilonesUsados++), ancho = caja.clientWidth, base = caja.getBoundingClientRect().left;
+  const bicho = document.createElement("span");
+  bicho.className = "comilon " + c.clase;
+  bicho.setAttribute("aria-hidden", "true");
+  bicho.style.setProperty("--hasta", ancho + "px");
+  bicho.style.setProperty("--dur", DURACION_COMILON + "ms");
+  // cada boton desaparece cuando el bicho pasa por encima
+  caja.querySelectorAll(".ult, .hist, [data-borrar-hist]").forEach(el => {
+    const x = (el.getBoundingClientRect().left - base + 34) / (ancho + 34);
+    el.style.setProperty("--d", Math.round(Math.max(0, Math.min(1, x)) * DURACION_COMILON) + "ms");
+    el.classList.add("comida");
+  });
+  boton.disabled = true;
+  caja.classList.add("comiendo");
+  caja.appendChild(bicho);
+  requestAnimationFrame(() => caja.querySelectorAll(".comida").forEach(el => el.classList.add("comido")));
+  setTimeout(() => { caja.classList.remove("comiendo"); fin(); }, DURACION_COMILON + 150);
 }
 /* Abre la comparativa de una busqueda guardada sin pasar por el buscador. `referencia` (opcional): la fila de la tarjeta
    desde la que se compara; la comparativa queda con sus mismas especificaciones (spec 017). */

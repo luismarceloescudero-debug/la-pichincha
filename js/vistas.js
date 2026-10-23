@@ -87,7 +87,7 @@ function detalle(p) {
 function pestanasHtml(activa) {
   return VISTAS.map(v => {
     const n = v.n();
-    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${["comparativa", "tiendas", "veredicto"].includes(v.id) ? 1 : 0}" aria-selected="${v.id === activa}">
+    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${DINAMICAS.includes(v.id) ? 1 : 0}" aria-selected="${v.id === activa}">
       ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
   }).join("");
 }
@@ -101,72 +101,29 @@ function selloTexto() {
 
 /* --- Vistas --- */
 function vistaComparativa() {
-  const c = CATEGORIAS.find(x => x.id === CAT) || CATEGORIAS[0];
-  // Los precios de la tira necesitan el indice; solo se baja si hay busquedas guardadas.
-  setTimeout(() => { if (leerHistCompleto().length) asegurarIndice().then(pintarTira).catch(() => {}); }, 0);
+  // Tu ultima busqueda (spec 021) necesita el indice: solo se baja si hay busquedas guardadas (la portada no lo espera).
+  setTimeout(() => { if (leerHistCompleto().length) asegurarIndice().then(() => { pintarTira(); pintarReciente(); }).catch(() => {}); }, 0);
   // Lo ultimo en tecnologia (spec 017, fase 2): lo calcula el build (NOVEDADES) y va primero. Sin esos datos no hay panel.
   const novedades = typeof NOVEDADES !== "undefined" ? Novedades.novedadesHtml(NOVEDADES, { esc, pesos, enlace, icono }) : "";
   // Lo mas buscado (fase 3): terminos agregados y filtrados por el build (BUSCADAS, js/buscadas.js). Primero, antes de las novedades.
   const buscado = typeof BUSCADAS !== "undefined" ? Novedades.masBuscadasHtml(BUSCADAS, { esc }) : "";
   // Lo mas vendido en las tiendas (spec 019): lo calcula el build (VENDIDOS) con el orden de cada tienda. Despues de lo mas buscado.
   const vendido = typeof VENDIDOS !== "undefined" ? Novedades.masVendidosHtml(VENDIDOS, { esc, pesos, enlace, icono }) : "";
-  return buscado + vendido + novedades + `<div class="panel"><div class="panel-head"><h2>${esc(c.titulo)}</h2><p class="sub">${esc(c.sub)}</p></div>
-    <div class="ultimas" id="ultimas">${tiraHtml(false)}</div>
-    ${barraAcciones("comparativa")}
-    <div class="grid">${c.lista.map(tarjeta).join("")}</div></div>`;
+  // Al final, lo tuyo: la tira de tus busquedas y la comparativa de la mas reciente. El analisis curado del primer relevamiento
+  // (memorias DDR4 y webcams) ya no se muestra: quedaba fijo y parecia una busqueda tuya.
+  return buscado + vendido + novedades + `<div class="panel"><div class="ultimas" id="ultimas">${tiraHtml(false)}</div>
+    <div id="reciente"></div></div>`;
 }
 
-function vistaTiendas() {
-  const ganadores = {
-    compragamer: ["corsair-lpx", "brio4k", "brio505", "adata-d35"],
-    gamingcity: ["kingston-kvr", "c922", "genius1000x"],
-    mexx: ["hiksemi-armor", "brio100", "gw911"]
-  };
-  const flaco = {
-    compragamer: "Catálogo chico: cuatro webcams en total y no vende módulos Kingston ValueRAM sueltos.",
-    gamingcity: "Cuando pierde, pierde feo: la Fury Beast RGB y la MX Brio son los peores precios del relevamiento.",
-    mexx: "El catálogo tira a segunda línea y en gama alta se dispara."
-  };
-  const cards = Object.keys(ganadores).map((k, i) => {
-    const t = T[k];
-    return `<div class="card c-${t.color}" style="--i:${i};cursor:default">
-      <div class="barra"></div>
-      <span class="rank">${i + 1}</span>
-      <div class="cuerpo" style="padding-top:20px">
-        <h3 style="color:var(--c)">${icono("store")} ${esc(t.nombre)}</h3>
-        <p class="titular" style="font-family:var(--font-mono);font-size:.8rem">${esc(t.rol)}</p>
-        <ul class="wins">${ganadores[k].map(id => {
-          const p = porId[id]; if (!p) return "";
-          return `<li><a href="${enlace(p.url)}" target="_blank" rel="noopener">
-            <span class="mini"><img src="${esc(p.img)}" alt="" loading="lazy"></span>
-            <span class="txt">${esc(p.nombre)}${avisoDe(p) ? ` ${selloOjo(avisoDe(p))}` : ""}</span><b>${pesos(p.precio)}</b></a></li>`;
-        }).join("")}</ul>
-        <p class="flaco">${icono("aviso")} ${esc(flaco[k])}</p>
-      </div></div>`;
-  }).join("");
-  return `<div class="panel"><div class="panel-head"><h2>Las 3 webs que mejor pagan la calidad</h2>
-    <p class="sub">Ninguna gana en todo. Esto es lo que cada una tiene más barato que las demás; cada línea abre el producto.</p></div>
-    <div class="grid">${cards}</div>
-    <p class="flaco" style="margin-top:18px">${icono("aviso")} <span><b>FullH4rd</b> queda afuera del podio pero es imbatible en Hiksemi:
-    <a href="${enlace(porId["hiksemi-hiker"].url)}" target="_blank" rel="noopener">el Hiker a ${pesos(porId["hiksemi-hiker"].precio)}</a>${avisoDe(porId["hiksemi-hiker"]) ? ` ${selloOjo(avisoDe(porId["hiksemi-hiker"]))}` : ""}.</span></p></div>`;
-}
-
+/* Veredicto sin una busqueda activa (spec 021): se escribe con la busqueda mas reciente. Mientras llega el indice avisa; si no hay
+   ninguna busqueda con resultados, invita a buscar. Ya no repite el veredicto fijo del primer relevamiento. */
 function vistaVeredicto() {
-  const c = DATOS.calculado || {}, e = DATOS.envio || {};
-  const tiles = [
-    { k: "Mejor compra", v: pesos(porId["adata-d35"].precio), d: "ADATA XPG D35 · CompraGamer" + (avisoDe(porId["adata-d35"]) ? ` · ${avisoDe(porId["adata-d35"])}` : ""), ok: true },
-    { k: `Puesto en ${e.zona}, punto`, v: pesos(c.adata_punto), d: `envío OCA ${pesos(e.punto)}`, ok: true },
-    { k: `Puesto en ${e.zona}, domicilio`, v: pesos(c.adata_domicilio), d: `envío OCA ${pesos(e.domicilio)}` },
-    { k: "Kingston, retiro gratis", v: pesos(c.kingston_retiro), d: `${pesos(c.kingston_retiro - c.adata_domicilio)} más caro` }
-  ];
-  return `<div class="panel"><div class="panel-head"><h2>Veredicto</h2>
-    <p class="sub">Todo recalculado con los precios de hoy, envío a CP ${esc(e.cp)} incluido.</p></div>
-    <div class="tiles">${tiles.map((t, i) => `<div class="tile${t.ok ? " ok" : ""}" style="--i:${i}">
-      <div class="k">${esc(t.k)}</div><div class="v">${t.v}</div><div class="d">${esc(t.d)}</div></div>`).join("")}</div>
-    <div class="tiles"><div class="tile" style="--i:0"><div class="k">${icono("camion")} Combo RAM + webcam, todo en Gaming City</div>
-      <div class="v">${pesos(c.combo_gc)}</div><div class="d">una sola compra, retiro gratis</div></div>
-      <div class="tile ok" style="--i:1"><div class="k">${icono("camion")} Combo partido entre dos tiendas</div>
-      <div class="v">${pesos(c.combo_partido)}</div><div class="d">${pesos(c.combo_gc - c.combo_partido)} menos, y la RAM mejora</div></div></div>
-    ${(DATOS.veredicto || []).map((v, i) => `<div class="ver-item" style="--i:${i}">
-      <b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
+  setTimeout(() => abrirReciente("veredicto"), 0);
+  return veredictoVacio(IDX ? "" : "Armando el veredicto de tu última búsqueda…");
+}
+
+function veredictoVacio(aviso) {
+  return `<div class="panel"><div class="panel-head"><h2>${icono("trofeo")} Veredicto</h2>
+    <p class="sub">${esc(aviso || "Buscá un producto y el veredicto se escribe solo con los precios de hoy: qué comprar, dónde y qué descartar.")}</p></div>
+    ${aviso ? "" : `<button class="acc" data-ir-vista="buscar">${icono("lupa")} Buscar un producto</button>`}</div>`;
 }
