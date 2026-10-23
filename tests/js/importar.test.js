@@ -113,6 +113,8 @@ test("Amazon de otro pais se reconoce con su dominio y su moneda, sin el tag de 
   assert.equal(d.tiendaNombre, "Amazon (amazon.es)");
   assert.equal(d.afiliado, false);
   assert.equal(d.abrir, "https://www.amazon.es/dp/B0HFJ7NVPB");
+  assert.equal(d.moneda, "EUR", "el campo del precio dice la moneda de esa tienda");
+  assert.equal(I.datosDeEnlace(I.parsearEnlace("https://www.amazon.com/dp/B0HFJ7NVPB")).moneda, "USD");
   assert.equal(I.estadoDeEnlace(es, "50").moneda, "EUR");
   assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.com.mx/dp/B0HFJ7NVPB"), "900").moneda, "MXN");
   assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.co.uk/dp/B0HFJ7NVPB"), "9").moneda, "GBP");

@@ -289,8 +289,8 @@ test("AliExpress y eBay juntos: se mezclan por precio", async () => {
   const f = fetchFalso([["oauth2/token", { access_token: "TOK", expires_in: 7200 }], ["item_summary/search", fixture("ebay-search.json")],
     ["api-sg.aliexpress.com", fixture("aliexpress-query.json")]]);
   const atender = crearAtender({ fetch: f, cache: cacheFalsa(), ahora: () => AHORA });
-  const j = await (await atender(pedido("auriculares clip"), env)).json();
-  assert.deepEqual(j.items.map(i => i.fuente), ["aliexpress", "aliexpress", "ebay", "ebay"]);
+  const j = await (await atender(pedido("aeroclip 2"), env)).json();
+  assert.deepEqual(j.items.map(i => i.fuente), ["aliexpress", "ebay", "ebay"], "por precio y solo lo que nombra «aeroclip 2»");
 });
 
 test("Amazon solo se consulta con sus dos secretos", async () => {
@@ -298,8 +298,8 @@ test("Amazon solo se consulta con sus dos secretos", async () => {
   const llamadas = [];
   const f = fetchFalso([["auth/o2/token", { access_token: "A", expires_in: 3600 }], ["creatorsapi.amazon", fixture("amazon-search.json")]], llamadas);
   const atender = crearAtender({ fetch: f, cache: cacheFalsa(), ahora: () => AHORA });
-  assert.deepEqual((await (await atender(pedido("x1 soundcore"), { ...SIN_TM, AMAZON_CREATORS_ID: "id" })).json()).fuentes, []);
-  const j = await (await atender(pedido("x2 soundcore"), { ...SIN_TM, AMAZON_CREATORS_ID: "id", AMAZON_CREATORS_SECRET: "s" })).json();
+  assert.deepEqual((await (await atender(pedido("soundcore aeroclip"), { ...SIN_TM, AMAZON_CREATORS_ID: "id" })).json()).fuentes, []);
+  const j = await (await atender(pedido("aeroclip soundcore"), { ...SIN_TM, AMAZON_CREATORS_ID: "id", AMAZON_CREATORS_SECRET: "s" })).json();
   assert.deepEqual(j.fuentes, [{ id: "amazon", ok: true, n: 1 }]);
   assert.equal(llamadas.filter(l => l.url.includes("auth/o2/token")).length, 1);
 });
@@ -466,4 +466,39 @@ test("/enlace: un link que no es de una tienda conocida da 400 y no se pide nada
   const caida = await (await atender(pedidoEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), {})).json();
   assert.equal(caida.leido, false);
   assert.match(caida.motivo, /no respondió|no se pudo/);
+});
+
+test("relevancia: entra el aviso que nombra todas las palabras de la consulta, sin contar conectores como «by»", async () => {
+  const { relevantes } = await cargar("fuentes/comun.js");
+  const n = nombre => ({ nombre, precio: 1 });
+  const items = [n("Soundcore Anker AeroClip 2 - Auriculares con clip"), n("Soundcore C50i by Anker - Auriculares de oreja abierta"),
+    n("Soundcore AeroClip by Anker - Auriculares abiertos"), n("UGREEN ClipBuds Pro 2"), n("Anker Soundcore AeroClip 2, color rosa")];
+  assert.deepEqual(relevantes(items, "soundcore aeroclip 2 by anker").map(i => i.nombre),
+    ["Soundcore Anker AeroClip 2 - Auriculares con clip", "Anker Soundcore AeroClip 2, color rosa"]);
+  assert.equal(relevantes(items, "aeroclip").length, 3);
+  assert.equal(relevantes([n("Auriculares Inalámbricos")], "auriculares inalambricos").length, 1, "sin tildes ni mayusculas");
+  assert.deepEqual(relevantes(items, "de by con"), items, "sin palabras significativas no se filtra");
+});
+
+test("/buscar deja solo lo relevante de cada fuente", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const atender = crearAtender({ fetch: fetchFalso([["tiendamia.com.ar/search/amazon/", conHtml("tiendamia-busqueda.html")]]),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedido("soundcore aeroclip 2 by anker"), {})).json();
+  assert.ok(j.items.length > 0);
+  assert.ok(j.items.every(i => /aeroclip 2/i.test(i.nombre)), j.items.map(i => i.nombre).join(" | "));
+});
+
+test("relevancia: fundas y estuches «para» el producto no pasan como el producto (nombres reales de Tiendamia, 23/10)", async () => {
+  const { relevantes } = await cargar("fuentes/comun.js");
+  const n = nombre => ({ nombre, precio: 1 });
+  const reales = [
+    "FJIASTB Funda de silicona para auriculares Anker Soundcore AeroClip 2 | Funda protectora suave con mosquetón y cordón",
+    "Anker Soundcore - Funda de viaje para auriculares AeroClip 2 | Antiarañazos, correa de muñeca",
+    "Soundcore Anker AeroClip 2 - Auriculares con clip para llamadas nítidas | Chip AI ANKER ThusTM",
+    "Soundcore Anker Aeroclip 2 y estuche de viaje para auriculares (paquete)",
+    "Anker Soundcore Estuche de viaje Aeroclip 2 y auriculares (paquete)"].map(n);
+  assert.deepEqual(relevantes(reales, "soundcore aeroclip 2 anker").map(i => i.nombre.slice(0, 30)),
+    ["Soundcore Anker AeroClip 2 - A", "Soundcore Anker Aeroclip 2 y e"]);
+  assert.equal(relevantes(reales, "funda aeroclip 2").length, 2, "si se busca la funda, la funda vale");
 });

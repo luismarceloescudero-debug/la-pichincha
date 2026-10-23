@@ -32,10 +32,10 @@ export function parsearFichaTiendamia(html, url, fecha) {
 }
 
 /* La busqueda /search/amazon/<palabras>: una tarjeta por producto, sin repetir el mismo producto en otro color. */
-export function parsearBusquedaTiendamia(html, fecha) {
+export function parsearBusquedaTiendamia(html, fecha, max = POR_FUENTE) {
   const vistos = new Set(), salida = [];
   for (const t of String(html).split('<div class="product-card"').slice(1)) {
-    if (salida.length >= POR_FUENTE) break;
+    if (salida.length >= max) break;
     const precio = t.match(/data-price\s*=\s*"([^"]*)"/i), nombre = t.match(/data-name\s*=\s*"([^"]*)"/i);
     const enlace = t.match(/<a[^>]*href=["']([^"']+)["'][^>]*class=["'][^"']*product-card__link/i);
     if (!precio || !nombre || !enlace) continue;
@@ -52,5 +52,5 @@ export function parsearBusquedaTiendamia(html, fecha) {
 export const urlBusqueda = q => "https://tiendamia.com.ar/search/amazon/" + q.split(" ").map(encodeURIComponent).join("+");
 
 export async function buscar(q, env, { pedirTexto, fecha }) {
-  return parsearBusquedaTiendamia(await pedirTexto(urlBusqueda(q)), fecha);
+  return parsearBusquedaTiendamia(await pedirTexto(urlBusqueda(q)), fecha, 40);   // toda la pagina: index.js filtra y recorta
 }

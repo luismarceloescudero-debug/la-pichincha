@@ -10,7 +10,7 @@
    - CORS solo para el sitio y localhost; cache de 8 horas por consulta o por enlace; tope de 30 pedidos por minuto por IP. */
 import Buscadas from "../../js/buscadas.js";
 import Importar from "../../js/importar.js";
-import { AGENTE } from "./fuentes/comun.js";
+import { AGENTE, POR_FUENTE, relevantes } from "./fuentes/comun.js";
 import * as ebay from "./fuentes/ebay.js";
 import * as aliexpress from "./fuentes/aliexpress.js";
 import * as amazon from "./fuentes/amazon.js";
@@ -19,6 +19,7 @@ import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
 
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
+const CACHE_VERSION = "023";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 
@@ -29,7 +30,7 @@ function cors(origen) {
 }
 
 const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { status: estado,
-  headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=3600", ...extra } });
+  headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=900", ...extra } });
 
 /* Atiende un pedido. deps: fetch, cache (con match/put, la Cache API), ahora() en ISO y tiempoMaximo por fuente en ms.
    El tope por IP y los tokens viven en esta instancia (un isolate del Worker). */
@@ -84,11 +85,12 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
   async function buscar(url, env, h, fecha, ms) {
     const q = Buscadas.terminoLimpio(url.searchParams.get("q") || "");
     if (!q) return json({ error: "consulta no valida" }, 400, h);
-    const clave = "https://afuera.cache/buscar?q=" + encodeURIComponent(q);
+    const clave = `https://afuera.cache/${CACHE_VERSION}/buscar?q=` + encodeURIComponent(q);
     const guardada = await desdeCache(clave, h);
     if (guardada) return guardada;
     const activas = FUENTES.filter(([, f]) => f.activa(env));
-    const res = await Promise.allSettled(activas.map(([, f]) => f.buscar(q, env, { pedir, pedirTexto, token, fecha, ahoraMs: ms })));
+    const res = await Promise.allSettled(activas.map(([, f]) => f.buscar(q, env, { pedir, pedirTexto, token, fecha, ahoraMs: ms })
+      .then(items => relevantes(items, q).slice(0, POR_FUENTE))));
     const fuentes = activas.map(([id], i) => ({ id, ok: res[i].status === "fulfilled", n: res[i].status === "fulfilled" ? res[i].value.length : 0 }));
     const items = res.flatMap(r => (r.status === "fulfilled" ? r.value : [])).sort((a, z) => a.precio - z.precio);
     return responder({ consulta: q, fecha, fuentes, items }, clave, fuentes.some(f => f.ok), h);
@@ -110,7 +112,7 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
   async function enlace(url, env, h, fecha) {
     const e = Importar.parsearEnlace(url.searchParams.get("url") || "");
     if (!e) return json({ error: "enlace no reconocido" }, 400, h);
-    const clave = "https://afuera.cache/enlace?u=" + encodeURIComponent(e.url);
+    const clave = `https://afuera.cache/${CACHE_VERSION}/enlace?u=` + encodeURIComponent(e.url);
     const guardada = await desdeCache(clave, h);
     if (guardada) return guardada;
     let r;
