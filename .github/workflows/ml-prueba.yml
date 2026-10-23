@@ -48,29 +48,24 @@ jobs:
               c2, b2 = get(f"/products/search?status=active&site_id=MLA&limit=50&q=" + up.quote(t))
               d2 = json.loads(b2) if c2 == 200 else {}
               res = d2.get("results", [])
-              print(f"
-## {t}: dominios {doms} | search {c2} total {d2.get('paging')} n={len(res)} dominios_res {sorted(set(r.get('domain_id') for r in res))[:6]}")
+              print(f"## {t}: dominios {doms} | search {c2} total {d2.get('paging')} n={len(res)} dominios_res {sorted(set(r.get('domain_id') for r in res))[:6]}")
           for ruta in ["/products/search?status=active&site_id=MLA&limit=50&offset=50&q=ssd",
                        "/products/search?status=active&site_id=MLA&limit=50&offset=950&q=ssd",
                        "/products/search?status=active&site_id=MLA&limit=100&q=ssd",
                        "/products/search?status=active&site_id=MLA&limit=10&domain_id=MLA-HARD_DRIVES_AND_SSDS&q=ssd"]:
               c, b = get(ruta)
               d = json.loads(b) if c == 200 else {}
-              print(f"
-=== {c} {ruta} paging {d.get('paging')} n={len(d.get('results', []))} {'' if c == 200 else b[:200]}")
+              print(f"=== {c} {ruta} paging {d.get('paging')} n={len(d.get('results', []))} {'' if c == 200 else b[:200]}")
           c, b = get("/products/search?status=active&site_id=MLA&limit=1&q=ssd%20kingston%20nv3%201tb")
           prod = json.loads(b)["results"][0]
-          print("
-=== producto ejemplo", json.dumps({k: prod.get(k) for k in ("id", "name", "domain_id", "status", "pictures", "main_features")}, ensure_ascii=False)[:900])
+          print("=== producto ejemplo", json.dumps({k: prod.get(k) for k in ("id", "name", "domain_id", "status", "pictures", "main_features")}, ensure_ascii=False)[:900])
           c, b = get(f"/products/{prod['id']}/items?limit=100")
           d = json.loads(b)
-          print(f"
-=== items {c} paging {d.get('paging')}")
+          print(f"=== items {c} paging {d.get('paging')}")
           for it in d.get("results", [])[:6]:
               print(json.dumps({k: it.get(k) for k in ("item_id", "price", "original_price", "currency_id", "condition", "international_delivery_mode", "listing_type_id", "official_store_id", "tags", "deal_ids", "shipping")}, ensure_ascii=False)[:600])
           c, b = get(f"/products/{prod['id']}")
           d = json.loads(b)
-          print("
-=== producto detalle claves", sorted(d.keys()))
+          print("=== producto detalle claves", sorted(d.keys()))
           print(json.dumps({k: d.get(k) for k in ("buy_box_winner", "pictures", "short_description", "permalink")}, ensure_ascii=False)[:700])
           PY
