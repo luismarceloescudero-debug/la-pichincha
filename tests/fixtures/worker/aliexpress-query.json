@@ -1,0 +1,37 @@
+{
+  "_nota": "Armado con los campos de la doc de aliexpress.affiliate.product.query (23/10/2026), envuelto como responde /sync: no es una respuesta real, todavia no hay credenciales.",
+  "aliexpress_affiliate_product_query_response": {
+    "resp_result": {
+      "resp_code": 200,
+      "resp_msg": "Call succeeds",
+      "result": {
+        "current_record_count": 2,
+        "products": {
+          "product": [
+            {
+              "product_id": "1005001234567890",
+              "product_title": "Auriculares de clip abiertos Bluetooth 5.4",
+              "product_main_image_url": "http://ae01.alicdn.com/kf/S1234.jpg",
+              "product_detail_url": "https://www.aliexpress.com/item/1005001234567890.html",
+              "promotion_link": "http://s.click.aliexpress.com/e/_abc123",
+              "target_sale_price": "23.47",
+              "target_sale_price_currency": "USD",
+              "sale_price": "25.10",
+              "sale_price_currency": "USD",
+              "ship_to_days": "ship to AR in 15 days"
+            },
+            {
+              "product_id": "1005009999999999",
+              "product_title": "Sin link de afiliado",
+              "product_main_image_url": "https://ae01.alicdn.com/kf/S9999.jpg",
+              "product_detail_url": "https://www.aliexpress.com/item/1005009999999999.html",
+              "sale_price": "12.00",
+              "sale_price_currency": "USD"
+            }
+          ]
+        }
+      }
+    },
+    "request_id": "0ba2887315178178017221014"
+  }
+}

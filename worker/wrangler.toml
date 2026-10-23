@@ -1,0 +1,6 @@
+# Worker «Afuera» (spec 022). Lo despliega .github/workflows/worker.yml solo si existen CLOUDFLARE_API_TOKEN y
+# CLOUDFLARE_ACCOUNT_ID; los secretos de las APIs se cargan con `wrangler secret put` (nunca aca).
+name = "pichincha-afuera"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
