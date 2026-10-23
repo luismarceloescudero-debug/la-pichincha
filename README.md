@@ -9,21 +9,24 @@ garantia real, stock y el costo puesto en tu casa con el envio adentro.
 
 ## Que contiene
 
-- **Comparativa**: las categorias analizadas a fondo, con un selector arriba.
-  Hoy son memorias DDR4 16GB y webcams, con specs de fabrica y precio puesto en
-  Mendoza con el envio incluido. Sumar una categoria es agregar una entrada en
-  la lista CATEGORIAS del HTML y sus productos en datos.json.
+- **Comparativa**: lo mas buscado, lo mas vendido y lo ultimo en tecnologia, y al
+  final tus ultimas busquedas con la comparativa de la mas reciente. Con una
+  busqueda activa, la comparativa de esa busqueda, el precio por tienda y
+  «Donde conviene comprar» (lo que antes era la pestaña Tiendas). Desde la
+  spec 021 ya no vuelve al analisis curado del primer relevamiento.
 - **Ofertas**: rebajas reales detectadas en el indice.
-- Las 3 tiendas que mejor pagan la calidad, cruzando el mismo producto entre
-  CompraGamer, Gaming City, Mexx, FullH4rd y Venex.
+- **Veredicto**: se escribe solo con la busqueda activa o, si no hay, con la mas
+  reciente (o la primera de lo mas buscado).
+- **Borrar busquedas**: un Pac-Man, un torbellino o una escoba se las come.
 
 Cada foto, nombre y precio enlaza al producto en la web de la tienda.
 
 ## Fuentes
 
-Precios: CompraGamer, Gaming City, Mexx, FullH4rd y Venex. Specs tecnicas: webs
-oficiales de ADATA, Corsair y Kingston, no las fichas de las tiendas (varias
-publican el voltaje SPD en lugar del XMP y marcan mal el tipo de disipador).
+Precios: las tiendas de `tiendas.json` (ver la tabla de fuentes mas abajo). Los
+productos curados del primer relevamiento (CompraGamer, Gaming City, Mexx,
+FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
+`datos.json`, pero la portada ya no los muestra (spec 021).
 
 ## Archivos
 

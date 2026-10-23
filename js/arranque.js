@@ -74,7 +74,8 @@ function arrancar() {
     if (ev.target.closest("[data-volver]")) return ir("comparativa", true);
 
     const borrar = ev.target.closest("[data-borrar-hist]");
-    if (borrar) return borrarConAnimacion(borrar, () => aplicar(location.hash.slice(1)));
+    // en Buscar no se rearma la vista: se perderia lo escrito y los resultados; el historial ya se repinto
+    if (borrar) return borrarConAnimacion(borrar, () => { if (location.hash.slice(1) !== "buscar") aplicar(location.hash.slice(1)); });
 
     // quitar del historial: se maneja antes que repetir, porque la x vive adentro
     const quitar = ev.target.closest("[data-olvidar]");

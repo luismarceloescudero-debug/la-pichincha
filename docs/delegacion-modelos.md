@@ -90,3 +90,13 @@ Revision cruzada de cada PR con dos modelos distintos (uno de OmniRoute y otro d
 | Mediciones, tablas y revision a mano de 14 «contra el mismo modelo» | **Claude** (scripts `specs/014-ofertas-y-premium/medir.js`) | — | En la spec | — |
 
 **Lo aprendido**: en una tanda con la CI en verde y 440 tests, la revision cruzada con modelos gratis no aporto ningun hallazgo real (0 de 4 con respuesta, 3 corridas sin contenido); lo que si encontro bugs fue medir contra el indice publicado (falsos premium por la memoria, coolers a 59% bajo el resto). Con `opencode run` hay que pasar el mensaje ANTES de `-f` (si no, trata el mensaje como un archivo) y pedirle que no ejecute comandos.
+
+# Revisión de pestañas por lo reciente (spec 021, 23/10/2026)
+
+Pedido del dueño: «delegá a los modelos de OmniRoute». Por el endpoint (`revision`), desde localhost y sin clave. Lo devuelto se contrastó con el código y con el sitio publicado.
+
+| Tarea | Modelo que la hizo (cabecera) | Tiempo | Resultado | Hallazgos reales / falsos |
+| --- | --- | ---: | --- | --- |
+| 6 mejoras para la pestaña Ofertas (texto en vivo + `js/ofertas.js`) | Gemini 2.5 Flash | 63 s | Ninguna aplicada | 0 / **6 falsos o ya hechos**: las bajas propias ya van primero; cada tarjeta ya dice el motivo («bajó de precio», «rebaja publicada», «gama alta al precio de media»); «Marcadas» son las estrellas de la persona; «vía ComparaYa» ya se ve; esconder los 6122 descartados va contra la transparencia |
+| 5 mejoras para el Veredicto (`vistaVeredictoDin`) | gpt-oss-120b | 5 s | 1 aplicada | **1 real** (un botón a «Dónde conviene comprar», útil ahora que Tiendas está dentro de la Comparativa) / 4 de poco valor (repetir en baldosas lo que el texto ya dice; mostrar el tachado del comercio como dato, que es referencia y no verdad) |
+| Revisión del diff de `js/` (26 mil caracteres) | Gemini 2.5 Flash | 65 s | «Sin hallazgos» | 0 / 0. Un borde lo encontró Claude al probar: borrar el historial desde Buscar rearmaba la vista y perdía los resultados |
