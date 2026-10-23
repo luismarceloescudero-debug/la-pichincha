@@ -111,6 +111,23 @@ class Indexar(unittest.TestCase):
         self.assertIn("domain_id=MLA-HARD_DRIVES_AND_SSDS", busquedas[0])
         self.assertIn("limit=100&offset=0", busquedas[0])
 
+    def test_si_la_api_no_deja_paginar_mas_hondo_queda_lo_leido_y_otro_error_corta(self):
+        llenos = [{"id": f"MLA{i}", "name": f"SSD {i}", "domain_id": "MLA-HARD_DRIVES_AND_SSDS"} for i in range(100)]
+        tienda = {"catalogo": {**TIENDA["catalogo"], "por_rubro": 300, "rubros": TIENDA["catalogo"]["rubros"][:1]}}
+
+        def con_tope(codigo):
+            base = api_falsa({("ssd", 0): llenos}, {"MLA1": [VENDEDOR]})
+
+            def pedir(ruta):
+                if "offset=100" in ruta:
+                    raise urllib.error.HTTPError("u", codigo, "x", {}, None)
+                return base(ruta)
+            return pedir
+        items, _ = self.correr(con_tope(400), tienda=tienda)
+        self.assertEqual([i["nombre"] for i in items], ["SSD 1"])
+        with self.assertRaises(urllib.error.HTTPError):
+            self.correr(con_tope(500), tienda=tienda)
+
     def test_max_paginas_achica_el_recorrido_para_probar(self):
         pedidos = []
         self.correr(api_falsa({}, {}, pedidos), max_paginas=1)

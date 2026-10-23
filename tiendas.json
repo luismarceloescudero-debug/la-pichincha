@@ -465,7 +465,7 @@
     "base": "https://www.mercadolibre.com.ar",
     "catalogo": {
       "tipo": "mercadolibre",
-      "por_rubro": 100,
+      "por_rubro": 300,
       "rubros": [
         {
           "q": "notebook",
