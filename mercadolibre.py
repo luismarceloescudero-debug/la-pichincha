@@ -13,6 +13,7 @@ reusa lo de la corrida anterior.
 import json
 import os
 import re
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -24,8 +25,10 @@ import modelo
 API = "https://api.mercadolibre.com"
 SITIO = "https://www.mercadolibre.com.ar"
 POR_PEDIDO = 100      # lo maximo que acepta /products/search por pedido
-POR_RUBRO = 300       # productos por rubro: los primeros de la busqueda del catalogo (de cada 100, 5 a 30 tienen vendedor)
+POR_RUBRO = 200       # productos por rubro: la busqueda del catalogo no pagina mas alla de 200 (23/10); de cada 100, 5 a 35 tienen vendedor
 HILOS = 4             # pedidos de vendedores en paralelo
+PAUSA = 0.2           # segundos entre pedidos de cada hilo: a ~4.000 pedidos por minuto la API respondio 429 (23/10)
+ESPERA_429 = 30       # ante un 429 se espera y se reintenta una vez; si se repite, se corta
 TIMEOUT = 30
 BLOQUEOS = (403, 429)
 UA = "Mozilla/5.0 (compatible; LaPichincha-indexador/1.0; +https://pichinchadeldia.com.ar)"
@@ -49,20 +52,26 @@ def token(entorno=None, abrir=None):
     return valor
 
 
-def pedidor(clave, abrir=None):
-    """Una funcion que pide una ruta de la API con el token y devuelve el JSON. Un bloqueo corta la fuente."""
+def pedidor(clave, abrir=None, dormir=time.sleep):
+    """Una funcion que pide una ruta de la API con el token y devuelve el JSON, a un ritmo que la API acepta. Un 429
+    (demasiados pedidos) se espera y se reintenta una vez; un 403 o un segundo 429 cortan la fuente."""
     abrir = abrir or urllib.request.urlopen
 
     def pedir(ruta):
         pedido = urllib.request.Request(API + ruta, headers={"Authorization": f"Bearer {clave}",
                                                              "Accept": "application/json", "User-Agent": UA})
-        try:
-            with abrir(pedido, timeout=TIMEOUT) as r:
-                return json.loads(r.read().decode("utf-8"))
-        except urllib.error.HTTPError as e:
-            if e.code in BLOQUEOS:
-                raise RuntimeError(f"Mercado Libre respondio {e.code}: no se insiste hoy") from e
-            raise
+        for intento in (1, 2):
+            dormir(PAUSA)
+            try:
+                with abrir(pedido, timeout=TIMEOUT) as r:
+                    return json.loads(r.read().decode("utf-8"))
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and intento == 1:
+                    dormir(ESPERA_429)
+                    continue
+                if e.code in BLOQUEOS:
+                    raise RuntimeError(f"Mercado Libre respondio {e.code}: no se insiste hoy") from e
+                raise
     return pedir
 
 
