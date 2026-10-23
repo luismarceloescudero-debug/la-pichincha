@@ -2,7 +2,7 @@
 
 **Created**: 2026-10-23
 
-**Status**: Implementada sin desplegar. El Worker (`worker/`) y la sección de la página están en `main`; se activan cuando el dueño cargue las cuentas (ver «Qué falta»). Hasta entonces la página queda como en la spec 020.
+**Status**: Desplegada el 23/10/2026 en `https://pichincha-afuera.mescudero-remitos-internos.workers.dev` (token de Cloudflare con la plantilla «Editar Cloudflare Workers»; uno con «Workers especificados» da «No access to the specified resource»). La página ya la llama; cada fuente se prende cuando el dueño cargue sus credenciales (ver «Qué falta»): eBay y AliExpress esperan aprobación, Amazon espera 10 ventas en 30 días. Sin fuentes, el Worker responde `items: []` y la página queda como en la spec 020.
 
 **Input**: Que la búsqueda afuera sea automática, en vivo, con la primera búsqueda, sin botones de «buscalo vos». Decisión del dueño (23/10/2026): «Servidor gratis + APIs».
 

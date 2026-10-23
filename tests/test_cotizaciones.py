@@ -151,7 +151,11 @@ class Csp(unittest.TestCase):
             self.assertIn(origen, permitidos)
         self.assertIn("'self'", permitidos)
         self.assertIn("https://mescudero.goatcounter.com", permitidos)
-        self.assertEqual(len(permitidos), 5, "no se suma ningun otro dominio de conexion")
+        # el unico dominio que se suma es el del Worker «Afuera» (spec 022), cuando sitio.json lo tiene
+        afuera = [sitio["afuera_url"]] if sitio.get("afuera_url") else []
+        for origen in afuera:
+            self.assertIn(origen, permitidos)
+        self.assertEqual(len(permitidos), 5 + len(afuera), "no se suma ningun otro dominio de conexion")
 
     def test_las_url_de_js_monedas_estan_dentro_de_esa_politica(self):
         sitio = json.loads((RAIZ / "sitio.json").read_text(encoding="utf-8"))
