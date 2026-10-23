@@ -169,9 +169,11 @@ class Token(unittest.TestCase):
 
 
 class Pedidor(unittest.TestCase):
-    def test_manda_el_token_y_devuelve_el_json(self):
+    def test_manda_el_token_y_devuelve_el_json_con_una_pausa(self):
         abrir = mock.Mock(return_value=Respuesta(b'{"results": []}'))
-        self.assertEqual(ml.pedidor("t", abrir)("/products/x"), {"results": []})
+        dormir = mock.Mock()
+        self.assertEqual(ml.pedidor("t", abrir, dormir)("/products/x"), {"results": []})
+        dormir.assert_called_once_with(ml.PAUSA)
         pedido = abrir.call_args.args[0]
         self.assertEqual(pedido.full_url, "https://api.mercadolibre.com/products/x")
         self.assertEqual(pedido.get_header("Authorization"), "Bearer t")
@@ -180,7 +182,14 @@ class Pedidor(unittest.TestCase):
         for codigo, error in ((429, RuntimeError), (403, RuntimeError), (404, urllib.error.HTTPError)):
             abrir = mock.Mock(side_effect=urllib.error.HTTPError("u", codigo, "x", {}, None))
             with self.assertRaises(error):
-                ml.pedidor("t", abrir)("/products/x")
+                ml.pedidor("t", abrir, mock.Mock())("/products/x")
+
+    def test_un_429_se_espera_y_se_reintenta_una_vez(self):
+        abrir = mock.Mock(side_effect=[urllib.error.HTTPError("u", 429, "x", {}, None), Respuesta(b'{"ok": 1}')])
+        dormir = mock.Mock()
+        self.assertEqual(ml.pedidor("t", abrir, dormir)("/products/x"), {"ok": 1})
+        self.assertIn(mock.call(ml.ESPERA_429), dormir.call_args_list)
+        self.assertEqual(abrir.call_count, 2)
 
 
 class SinRepetirAgregador(unittest.TestCase):
