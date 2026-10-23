@@ -502,3 +502,11 @@ test("relevancia: fundas y estuches «para» el producto no pasan como el produc
     ["Soundcore Anker AeroClip 2 - A", "Soundcore Anker Aeroclip 2 y e"]);
   assert.equal(relevantes(reales, "funda aeroclip 2").length, 2, "si se busca la funda, la funda vale");
 });
+
+test("defensa propia: el Worker solo lee paginas de tiendamia.com.ar y www.loquieroaca.com por https", async () => {
+  const { paginaPermitida } = await cargar("index.js");
+  assert.equal(paginaPermitida("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), true);
+  assert.equal(paginaPermitida("https://www.loquieroaca.com/products/1589074"), true);
+  for (const malo of ["http://tiendamia.com.ar/p/x", "https://localhost:8080/admin", "https://tiendamia.com.ar.evil.com/p/x", "nada", ""])
+    assert.equal(paginaPermitida(malo), false, malo);
+});
