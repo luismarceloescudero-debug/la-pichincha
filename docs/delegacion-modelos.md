@@ -100,3 +100,16 @@ Pedido del dueño: «delegá a los modelos de OmniRoute». Por el endpoint (`rev
 | 6 mejoras para la pestaña Ofertas (texto en vivo + `js/ofertas.js`) | Gemini 2.5 Flash | 63 s | Ninguna aplicada | 0 / **6 falsos o ya hechos**: las bajas propias ya van primero; cada tarjeta ya dice el motivo («bajó de precio», «rebaja publicada», «gama alta al precio de media»); «Marcadas» son las estrellas de la persona; «vía ComparaYa» ya se ve; esconder los 6122 descartados va contra la transparencia |
 | 5 mejoras para el Veredicto (`vistaVeredictoDin`) | gpt-oss-120b | 5 s | 1 aplicada | **1 real** (un botón a «Dónde conviene comprar», útil ahora que Tiendas está dentro de la Comparativa) / 4 de poco valor (repetir en baldosas lo que el texto ya dice; mostrar el tachado del comercio como dato, que es referencia y no verdad) |
 | Revisión del diff de `js/` (26 mil caracteres) | Gemini 2.5 Flash | 65 s | «Sin hallazgos» | 0 / 0. Un borde lo encontró Claude al probar: borrar el historial desde Buscar rearmaba la vista y perdía los resultados |
+
+---
+
+# Spec 020: buscar afuera y pegar un link (23/10/2026)
+
+Funciones puras pedidas primero a OmniRoute por el endpoint (`"model": "revision"`, `User-Agent: curl/8`); lo devuelto se corrio contra los tests antes de usarlo. El primer pedido fallo: gpt-oss-120b se corto por el limite de tokens («reasoning truncated», 502), la conexion de Claude esta vencida y Gemini figuraba agotado; con `max_tokens: 16000` contesto.
+
+| Tarea | Modelo (cabecera `x-omniroute-model`) | Tiempo | Tests que paso | Que se cambio a mano |
+| --- | --- | ---: | --- | --- |
+| `parsearEnlace(url)` y `urlBusqueda(fuente, termino)` (`js/importar.js`) | `openai/gpt-oss-120b` | 8,8 s | **11 de 11** (los 10 de la spec 020 sobre esas dos funciones y el de `enlaceFuente`) | Estilo del archivo (compacto, comentarios en español); la busqueda pasa a ser un dato de cada fuente (`busqueda`) en lugar de un `switch`; el slug de Amazon en un solo segmento (`[^/]+`); Loquieroaca acepta la barra final; despues se sumo `a.co` |
+| Revision del diff final (`js/importar.js` completo y el diff de `js/vista-costo.js` y `js/busqueda.js`) | `openai/gpt-oss-120b` | 23,9 s | 3 hallazgos | **0 reales / 3 falsos**, ejecutados: `www.amzn.to` no es una forma real de link; `estadoImportar("12,34")` no pasa (el precio llega siempre como numero de `js/puesto.js` y la funcion no esta en el diff); el «`&&`» en la busqueda de una tienda oficial no aparece (`&term=audio%20headphones`). Pero el primero hizo ver un hueco real: los links `a.co/d/...` del «Compartir» de la app de Amazon; se agrego con su test |
+
+Lo que verifico Claude en la fuente (los modelos externos no navegan): las URLs de busqueda de Tiendamia y Loquieroaca (las dos devolvieron el AeroClip 2), la forma de sus links de producto, que Loquieroaca publica el precio final en pesos y que Soundcore/Anker y Keychron no dicen que envien a Argentina.

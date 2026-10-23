@@ -117,6 +117,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Ofertas** (que es una) | `js/ofertas.js` | la pestaña Ofertas, `generar_feed.js`, `publicar_telegram.py` | `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
 | **Costo puesto en casa de lo internacional** | `js/puesto.js` (rango y comparacion, puro) + `equivalente` de `calcularOfertas` en `js/ofertas.js` | tarjeta de Ofertas (`bloquePuesto` en `js/indice-ofertas.js`), `generar_feed.js` (RSS, /hoy/, `ofertas.json`), `publicar_telegram.py` | `tests/js/puesto.test.js`, `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
 | **Calculadora de costos** | `js/costos.js` (el motor, sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) + `js/calculadora.js` (formulario, desglose y URL, puro) + `js/vista-costo.js` (pegamento con la pagina) | la pestaña Costo de importar (`#costo`, `js/arranque.js` la pinta); `publicar_app.py` publica las reglas | `tests/js/costos.test.js`, `tests/js/calculadora.test.js`, `tests/test_importacion.py` |
+| **Comprar afuera: fuentes, buscar afuera y pegar un link** (specs 015 y 020) | `js/importar.js` (puro: `FUENTES` con la busqueda de cada tienda, `OFICIALES` verificadas, `urlBusqueda`, `buscarAfueraHtml`, `parsearEnlace`, `datosDeEnlace`, `estadoDeEnlace`, `hrefCalculadora`) | el bloque sin resultados de `pintarResultados` (`js/busqueda.js`); el cuadro «Pegá el link» y la seccion «Importando» de `js/vista-costo.js`; «Calcular con este precio» en `js/indice-ofertas.js` | `tests/js/importar.test.js` |
 | **Monedas** | `js/monedas.js` (en vivo, `URLS` L10, `TIPOS_DOLAR` L16) + `generar_cotizaciones.py` (copia del build, `URLS` L21) | el workflow (L180) escribe `_sitio/cotizaciones.json`; `sitio.json` habilita las tres APIs en `connect-src` | `tests/js/monedas.test.js`, `tests/test_cotizaciones.py`, fixtures en `tests/fixtures/monedas/` |
 | **Portada** | `index.html` (estructura) + `js/` (modulos) + `css/sitio.css`; categorias curadas en `js/base.js:17` (ya sin uso en la portada); tus ultimas busquedas, la comparativa de la mas reciente y el borrado animado en `js/historial.js` (`consultaReciente`, `recienteHtml`, `COMILONES`, spec 021); Tiendas como seccion de la Comparativa (`seccionComercios` en `js/consulta.js`); paneles de lo mas buscado, lo mas vendido (`masVendidosPorCategoria`, columna `vendido` del indice que llena `indexar.vendidos`, spec 019) y lo ultimo en `js/novedades.js` | `generar_portada.js` la pre-renderiza en `_sitio/` | `tests/js/portada.test.js`, `tests/js/pestanas-recientes.test.js`, `tests/js/app.test.js`, `tests/test_sitio.py`, `tests/test_contraste.py` |
 | **Paginas por busqueda** | `generar_consultas.js` (descubre consultas en el indice), `consultas.json` + `generar_paginas.py` (valida y orquesta) + `generar_paginas.js` (escribe) | `js/analisis.js` (analisis y tabla "Precio por tienda": `precioPorTienda`, `tablaTiendasHtml`), compartido con la Comparativa (`js/consulta.js`) | `tests/test_generar_paginas.py`, `tests/js/generador.test.js`, `tests/js/consultas-auto.test.js`, `tests/js/pagina.test.js` |
@@ -194,6 +195,11 @@ Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
   pone el nombre con tildes en `CONCEPTOS`.
 - Tests: `tests/js/calculadora.test.js` (incluye los casos de referencia de la spec de punta a punta) y,
   si cambia la cuenta, `tests/js/costos.test.js`. Probarla en el navegador con `?v=800&d=20#costo`.
+- **Una tienda nueva para «Pegá el link»**: su host en `HOSTS` y su forma de link en `parsearEnlace`, y su
+  ayuda y campos a pisar en `datosDeEnlace` (`js/importar.js`), con sus casos en `tests/js/importar.test.js`.
+  Nada de leer la pagina: solo la direccion (spec 020).
+- **Una tienda oficial que envia a Argentina**: una entrada en `OFICIALES` (`js/importar.js`) con la pagina
+  de envios que lo dice y la fecha en que se leyo. Sin eso no se muestra.
 
 ### Agregar una moneda o un tipo de dolar
 
