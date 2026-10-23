@@ -122,6 +122,12 @@ test("despues de abrir otra vista, volver a la Comparativa la arma", () => {
   assert.match(els["#vista"].innerHTML, /id="ultimas"/);
 });
 
+test("el enlace viejo #tiendas abre la Comparativa (Tiendas es una sección de ella desde la spec 021)", () => {
+  const { els, ctx } = arrancar(PRE, { hash: "#tiendas" });
+  assert.strictEqual(els["#vista"].escrituras, 0);             // es la portada: sirve la pre-renderizada
+  assert.strictEqual(require("vm").runInContext("ALIAS.tiendas + ' ' + ANCLAS.tiendas", ctx), "comparativa donde-comprar");
+});
+
 test("dentro de un marco (sin boton Imprimir) se arma la vista", () => {
   const { els } = arrancar(PRE, { suelta: false });
   assert.strictEqual(els["#vista"].escrituras, 1);

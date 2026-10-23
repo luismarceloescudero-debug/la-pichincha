@@ -159,7 +159,8 @@ function borrarConAnimacion(boton, despues) {
   boton.disabled = true;
   caja.classList.add("comiendo");
   caja.appendChild(bicho);
-  requestAnimationFrame(() => caja.querySelectorAll(".comida").forEach(el => el.classList.add("comido")));
+  void caja.offsetWidth;          // fija el estado inicial para que la transicion arranque aunque no haya un cuadro de por medio
+  caja.querySelectorAll(".comida").forEach(el => el.classList.add("comido"));
   setTimeout(() => { caja.classList.remove("comiendo"); fin(); }, DURACION_COMILON + 150);
 }
 /* Abre la comparativa de una busqueda guardada sin pasar por el buscador. `referencia` (opcional): la fila de la tarjeta

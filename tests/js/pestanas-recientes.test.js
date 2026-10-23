@@ -128,3 +128,9 @@ test("el animalito que se come las búsquedas sale de una lista y respeta el mov
   assert.equal(correr("comilonDe(0).clase"), comilones[0].clase);
   assert.equal(correr(`comilonDe(${comilones.length})`).clase, comilones[0].clase);   // da la vuelta
 });
+
+test("el Veredicto de una búsqueda lleva a dónde conviene comprar, dentro de la Comparativa", () => {
+  const { correr } = app();
+  correr('fijarConsulta("ssd 1tb")');
+  assert.match(correr("vistaVeredictoDin()"), /data-ir-vista="tiendas"/);   // #tiendas: js/arranque.js lo lleva a la Comparativa
+});
