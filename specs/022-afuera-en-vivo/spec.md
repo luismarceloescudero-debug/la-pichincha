@@ -39,7 +39,7 @@ El pedido traía un adaptador para Loquieroacá: repetir la llamada Livewire `lo
 - El componente de búsqueda de Loquieroacá tiene **un cupo de búsquedas** (`searchQuotaExceeded`, `searchLimitMessage`, `redirectToLoginOnQuota` en su estado) y cada búsqueda **les cuesta una llamada paga** (`asinFinderApi: "rainforest"`). Un Worker que abre una sesión nueva por consulta estaría esquivando ese cupo: va contra la regla del proyecto («se espera, no se esquiva»).
 - `robots.txt` permite todo y la página `/info` no prohíbe el acceso automatizado, pero eso no cambia lo anterior.
 
-El camino legítimo sigue siendo el que el dueño ya pidió por mail el 16/10: un feed, una API o un acuerdo con Loquieroacá. Con eso, el adaptador entra como una fuente más (`worker/src/fuentes/`) y su precio final en pesos va en `precioArs`, que la página ya muestra como «puesto en casa». Tiendamia sigue en 403 para servidores y queda el enlace de búsqueda de la spec 020.
+El camino legítimo sigue siendo el que el dueño ya pidió por mail el 16/10: un feed, una API o un acuerdo con Loquieroacá. Con eso, el adaptador entra como una fuente más (`worker/src/fuentes/`) y su precio final en pesos va en `precioArs`, que la página ya muestra como «puesto en casa». Tiendamia: **corregido el 23/10/2026 (spec 023)**. El 403 era de `www.tiendamia.com`; `tiendamia.com.ar` responde y su `robots.txt` permite `/p/` y `/search/`, así que entró como fuente sin credenciales en `/buscar` y su ficha se lee en `/enlace`.
 
 ## Qué falta (lo crea el dueño)
 
