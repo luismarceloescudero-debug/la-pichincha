@@ -209,7 +209,8 @@ function vistaVeredictoDin() {
     ${barraAcciones("veredicto")}
     <div class="tiles">${tiles.map((t, i) => `<div class="tile${t.ok ? " ok" : ""}" style="--i:${i}">
       <div class="k">${esc(t.k)}</div><div class="v">${t.v}</div><div class="d">${esc(t.d)}</div></div>`).join("")}</div>
-    ${items.map((v, i) => `<div class="ver-item" style="--i:${i}"><b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}</div>`;
+    ${items.map((v, i) => `<div class="ver-item" style="--i:${i}"><b>${esc(v.t)}</b><p>${esc(v.d)}</p></div>`).join("")}
+    <p class="mas-reciente"><button class="acc" data-ir-vista="tiendas">${icono("store")} Ver dónde conviene comprar y el precio por tienda</button></p></div>`;
 }
 
 function vistaDinamica(id) {

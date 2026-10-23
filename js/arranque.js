@@ -60,10 +60,9 @@ function arrancar() {
   // La portada publicada ya trae las pestañas y la comparativa, escritas por generar_portada.js.
   if (!$("#tablist").children.length) $("#tablist").innerHTML = pestanasHtml("");
   $("#sello").textContent = selloTexto();
-  $("#nota").innerHTML = `Precios con IVA tomados de CompraGamer, Gaming City, Mexx, FullH4rd y Venex, con el precio de
-    transferencia o depósito de cada una. Las specs salen de las webs de ADATA, Corsair y Kingston, no de las fichas
-    de las tiendas. Para refrescar todo: <code>python actualizar.py</code>. El stock y los precios de hardware se
-    mueven rápido: confirmá antes de pagar.`;
+  $("#nota").innerHTML = `Precios con IVA tomados de cada tienda del índice, con el precio de transferencia o depósito
+    cuando la tienda lo publica. Las especificaciones se leen del título de cada aviso: abrí la ficha para confirmarlas.
+    El stock y los precios de hardware se mueven rápido: confirmá antes de pagar.`;
 
   document.addEventListener("click", ev => {
     const tab = ev.target.closest(".tab");

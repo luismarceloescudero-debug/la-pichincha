@@ -81,7 +81,8 @@ class SitioArmado(unittest.TestCase):
     def test_la_portada_publicada_trae_la_vista_inicial(self):
         portada = (self.sitio / "index.html").read_text(encoding="utf-8")
         self.assertIn('<div id="vista" data-pre="comparativa:ram">', portada)
-        self.assertIn('class="card ', portada)
+        self.assertIn('id="ultimas"', portada)          # spec 021: la portada termina con tus busquedas, sin lo curado
+        self.assertNotIn('Memorias DDR4 16GB', portada)
         self.assertNotIn('id="tablist"></div>', portada)
 
     def test_el_repo_y_la_copia_del_artifact_quedan_sin_pre_renderizar(self):

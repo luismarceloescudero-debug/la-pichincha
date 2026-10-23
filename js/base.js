@@ -37,7 +37,7 @@ let CAT = (() => { try { return localStorage.getItem("cat") || "ram"; } catch (e
 if (!CATEGORIAS.some(c => c.id === CAT)) CAT = "ram";
 
 const VISTAS = [
-  { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => CATEGORIAS.length },
+  { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => null },
   { id: "ofertas", eti: "Ofertas", ico: "fuego",
     n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
