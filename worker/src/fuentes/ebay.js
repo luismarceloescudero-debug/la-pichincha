@@ -19,14 +19,28 @@ export function pedidoEbay(q, env, token) {
     headers: { Authorization: "Bearer " + token, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US", "X-EBAY-C-ENDUSERCTX": ctx } };
 }
 
+/* Un item de la Browse API (de search o de getItem: mismos campos) como aviso. */
+function deItem(it, fecha) {
+  const moneda = it.price && it.price.currency;
+  const op = (it.shippingOptions || []).find(s => s.shippingCost && s.shippingCost.currency === moneda && s.shippingCost.value !== undefined);
+  return aviso({ fuente: "ebay", nombre: it.title, precio: it.price && it.price.value, moneda, envio: op ? op.shippingCost.value : null,
+    url: it.itemAffiliateWebUrl || it.itemWebUrl, imagen: it.image && it.image.imageUrl, afiliado: Boolean(it.itemAffiliateWebUrl), fecha });
+}
+
 export function parsearEbay(json, fecha) {
   const items = json && Array.isArray(json.itemSummaries) ? json.itemSummaries : [];
-  return sinNulos(items.map(it => {
-    const moneda = it.price && it.price.currency;
-    const op = (it.shippingOptions || []).find(s => s.shippingCost && s.shippingCost.currency === moneda && s.shippingCost.value !== undefined);
-    return aviso({ fuente: "ebay", nombre: it.title, precio: it.price && it.price.value, moneda, envio: op ? op.shippingCost.value : null,
-      url: it.itemAffiliateWebUrl || it.itemWebUrl, imagen: it.image && it.image.imageUrl, afiliado: Boolean(it.itemAffiliateWebUrl), fecha });
-  }));
+  return sinNulos(items.map(it => deItem(it, fecha)));
+}
+
+/* Un link pegado (/itm/<id>): getItem por el id de siempre (get_item_by_legacy_id), con el mismo contexto de envio a AR. */
+export function pedidoItemEbay(id, env, token) {
+  const p = pedidoEbay("", env, token);
+  return { url: "https://api.ebay.com/buy/browse/v1/item/get_item_by_legacy_id?legacy_item_id=" + encodeURIComponent(id), headers: p.headers };
+}
+
+export async function leerItem(id, env, { pedir, token, fecha }) {
+  const t = await token("ebay", () => pedir({ ...pedidoTokenEbay(env), method: "POST" }));
+  return deItem(await pedir(pedidoItemEbay(id, env, t)), fecha);
 }
 
 /* La busqueda completa. `pedir(pedido)` hace el fetch con el user-agent y el tiempo maximo; `token(clave, pedirToken)` lo reusa. */
