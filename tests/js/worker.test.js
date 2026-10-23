@@ -71,6 +71,76 @@ test("un aviso con url que no es https o con precio raro no entra", async () => 
   assert.equal(aviso({ ...base, nombre: "a".repeat(300) }).nombre.length, 160);
 });
 
+/* --- Spec 023: paginas leidas dentro del robots.txt de cada tienda (fixtures reales del 23/10/2026) --- */
+const html = n => fs.readFileSync(path.join(__dirname, "..", "fixtures", "worker", n), "utf8");
+
+test("ficha de Tiendamia: nombre completo, precio en dolares con envio (198,88) e imagen", async () => {
+  const { parsearFichaTiendamia } = await cargar("fuentes/tiendamia.js");
+  const url = "https://tiendamia.com.ar/p/amz/b0hfj7nvpb/soundcore-anker-aeroclip-2-auriculares-con-clip-para-llamadas";
+  const a = parsearFichaTiendamia(html("tiendamia-ficha.html"), url, AHORA);
+  assert.equal(a.fuente, "tiendamia");
+  assert.match(a.nombre, /^Soundcore Anker AeroClip 2 - Auriculares con clip para llamadas nítidas \| Chip AI ANKER Thus™/);
+  assert.equal(a.precio, 198.88);
+  assert.equal(a.moneda, "USD");
+  assert.equal(a.envio, 0, "el precio de Tiendamia ya trae el envio");
+  assert.equal(a.url, url);
+  assert.equal(a.imagen, "https://m.media-amazon.com/images/I/61fC4WN2xvL._UX438_UY408_.jpg");
+  assert.equal(a.afiliado, false);
+  assert.equal(parsearFichaTiendamia("<html>sin datos</html>", url, AHORA), null);
+});
+
+test("busqueda de Tiendamia: tarjetas con precio en dolares, sin repetir el mismo producto en otro color", async () => {
+  const { parsearBusquedaTiendamia } = await cargar("fuentes/tiendamia.js");
+  const items = parsearBusquedaTiendamia(html("tiendamia-busqueda.html"), AHORA);
+  assert.ok(items.length >= 2 && items.length <= 5, String(items.length));
+  assert.match(items[0].nombre, /^Soundcore Anker AeroClip 2 - Auriculares con clip/);
+  assert.equal(items[0].precio, 216.24);
+  assert.equal(items[0].url, "https://tiendamia.com.ar/p/amz/b0hfj7nvpb/soundcore-anker-aeroclip-2-auriculares-con-clip-para-llamadas");
+  assert.equal(items[0].imagen, "https://m.media-amazon.com/images/I/61fC4WN2xvL._UX438_UY408_.jpg");
+  const claves = items.map(i => i.nombre + i.precio);
+  assert.equal(new Set(claves).size, claves.length, "las variantes de color iguales no se repiten");
+  for (const i of items) {
+    assert.equal(i.fuente, "tiendamia");
+    assert.equal(i.envio, 0);
+    assert.equal(i.moneda, "USD");
+    assert.match(i.url, /^https:\/\/tiendamia\.com\.ar\/p\//);
+  }
+  assert.deepEqual(parsearBusquedaTiendamia("", AHORA), []);
+});
+
+test("ficha de Loquieroaca: nombre del h1, precio en un pago como puesto en casa y el de cuotas aparte; el tachado no se usa", async () => {
+  const { parsearFichaLoquieroaca } = await cargar("fuentes/loquieroaca.js");
+  const url = "https://www.loquieroaca.com/products/1589074";
+  const a = parsearFichaLoquieroaca(html("loquieroaca-ficha.html"), url, AHORA);
+  assert.equal(a.nombre, "Soundcore Anker AeroClip 2 Open-Ear Clip-On Earbuds for Crystal-Clear Calls");
+  assert.equal(a.precio, 538616.1);
+  assert.equal(a.moneda, "ARS");
+  assert.equal(a.precioArs, 538616.1, "en un pago, como el precio de transferencia del indice");
+  assert.equal(a.precioCuotas, 598462.33);
+  assert.equal(a.imagen, "https://images-na.ssl-images-amazon.com/images/I/31lfBCzCuLL.jpg");
+  assert.equal(a.url, url);
+  assert.ok(!JSON.stringify(a).includes("946999"), "el precio tachado no es un precio real");
+  assert.equal(parsearFichaLoquieroaca("<h1>x</h1>", url, AHORA), null);
+  // «en un pago» tiene que estar escrito: otro «o $» de la pagina no es ese precio
+  const sinUnPago = `<h1>Algo</h1><p>Envio gratis a todo $ 5.000</p><p class="font-bold text-3xl">$ 100.000,00</p>`;
+  assert.equal(parsearFichaLoquieroaca(sinUnPago, url, AHORA).precio, 100000);
+});
+
+test("las entidades HTML fuera del plano basico y los textos vacios no rompen nada", async () => {
+  const { decodificar } = await cargar("fuentes/tiendamia.js");
+  const { pesosDe } = await cargar("fuentes/loquieroaca.js");
+  assert.equal(decodificar("A&#x1F3A7;B&#128266;"), "A🎧B🔊");
+  assert.equal(pesosDe(undefined), null);
+});
+
+test("los precios argentinos se leen con punto de miles y coma decimal", async () => {
+  const { pesosDe } = await cargar("fuentes/loquieroaca.js");
+  assert.equal(pesosDe("$ 598.462,33"), 598462.33);
+  assert.equal(pesosDe("$ 1.000"), 1000);
+  assert.equal(pesosDe("$99.743,72"), 99743.72);
+  assert.equal(pesosDe("sin precio"), null);
+});
+
 /* --- Pedidos a cada API --- */
 
 test("eBay: busca con envio a Argentina, el contexto de ubicacion AR y la campaña de afiliado si esta", async () => {
