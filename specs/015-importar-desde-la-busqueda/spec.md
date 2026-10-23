@@ -19,7 +19,7 @@
 ### 2. La pestaña «Costo de importar» dice dónde comprar afuera
 
 1. Debajo de la calculadora hay una sección **«Importando: dónde comprar afuera»** con tres enlaces (`Importar.FUENTES`): Amazon (EE.UU.), Tiendamia y Loquieroaca. Cada uno con una línea de qué esperar.
-2. **Solo son enlaces.** No leemos esas tiendas ni sacamos precios de ellas: Tiendamia y Loquieroaca bloquean al lector (403) y no se esquiva (ver `docs/referencias.md`). La sección lo dice en el texto.
+2. **Solo son enlaces.** No leemos esas tiendas ni sacamos precios de ellas: Tiendamia y Loquieroaca bloquean al lector (403) y no se esquiva (ver `docs/referencias.md`). *Corrección del 23/10/2026 (spec 023): el 403 era de `www.tiendamia.com`; `tiendamia.com.ar` y `www.loquieroaca.com` se leen dentro de su `robots.txt`.* La sección lo dice en el texto.
 3. **Amazon** es el único enlace de afiliado: lleva `tag=lapichincha-20`, se rotula «(enlace de afiliado)» y tiene `rel="sponsored"`. Sin scraping de Amazon.
 4. Tiendamia y Loquieroaca se enlazan **sin tag** y sin prometer cómo cobran impuestos: la línea pide revisar el resumen de compra antes de pagar.
 

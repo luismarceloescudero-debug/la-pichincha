@@ -6,7 +6,7 @@ Relevamiento por **ingenieria inversa pasiva** (documentacion oficial, ayudas pu
 
 | Sitio | Que paso | Que se hizo |
 |---|---|---|
-| Idealo, CamelCamelCamel, PCPartPicker, Tiendamia | Devolvieron 403 al lector, o el dominio no es accesible para el buscador | No se insistio ni se esquivo: solo notas de terceros, marcadas **sin confirmar** |
+| Idealo, CamelCamelCamel, PCPartPicker, Tiendamia (el 403 era de `www.tiendamia.com`; `tiendamia.com.ar` se lee desde la spec 023) | Devolvieron 403 al lector, o el dominio no es accesible para el buscador | No se insistio ni se esquivo: solo notas de terceros, marcadas **sin confirmar** |
 | Mercado Libre | `robots.txt` de `listado.mercadolibre.com.ar` prohibe `/` a algunos agentes y muchos filtros por patron; la pagina de desarrolladores en ingles dio 403 | No se leyo su HTML; solo la documentacion en español de la API |
 | Fravega | `robots.txt` prohibe `/Busca/` y `/busca/` | No se miro su busqueda; su API ya esta documentada como bloqueada para GitHub (`docs/ingenieria-inversa.md`) |
 | ComparaYa | `comparaya.com.ar` no resolvio (`ENOTFOUND`) desde esta PC el 20/10 | Nada que relevar hoy; lo medido antes esta en `docs/referencias.md` |

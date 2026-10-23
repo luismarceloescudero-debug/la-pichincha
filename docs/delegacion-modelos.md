@@ -127,3 +127,16 @@ Mismo metodo que la spec 020: funciones puras pedidas primero a OmniRoute (`revi
 | Revision del diff (Worker completo, `js/afuera.js`, workflow y diff de `js/busqueda.js`) | `openai/gpt-oss-120b` | 15 s | 5 hallazgos | **2 reales / 3 falsos**. Reales: una consulta que fallo no se reintentaba en la sesion (ahora espera un minuto) y Amazon se rotulaba afiliado aunque el link no tuviera `tag=` (test nuevo). Falsos: la cache del navegador de 1 h contra 8 h en el Worker es a proposito; el tope «global» sin `CF-Connecting-IP` no pasa en Cloudflare; `precioArs` vacio es esperado hasta que una fuente lo de |
 
 Lo que verifico Claude en la fuente (los modelos externos no navegan): la doc de eBay (filtro `deliveryCountry`, `X-EBAY-C-ENDUSERCTX`, scope), la de AliExpress (`ship_to_country`, endpoint `/sync`, firma) y la de la Creators API (requisito de ventas, token, cabeceras). Loquieroaca: `robots.txt` y `/info`; la llamada de prueba a su Livewire la bloqueo la clasificacion de permisos y no se hizo (ver la spec 022).
+
+---
+
+# Spec 023: leer el link pegado y Tiendamia en vivo (23/10/2026)
+
+| Tarea | Modelo (cabecera `x-omniroute-model`) | Tiempo | Tests que paso | Que se cambio a mano |
+| --- | --- | ---: | --- | --- |
+| `amazonDeRuta` (ASIN con idioma, `/gp/`, patrocinados) | `openai/gpt-oss-120b` | 6,0 s | **16 de 16** casos | Estilo compacto; integrada en `parsearEnlace` con los dominios de otros paises |
+| Parsers de la ficha y la busqueda de Tiendamia y de la ficha de Loquieroaca (con fragmentos reales del HTML en el pedido) | `openai/gpt-oss-120b` | 7,2 s | **24 de 24** contra los fixtures reales completos | Al leerlos: «en un pago» se tomaba de cualquier «o $» de la pagina (ahora tiene que decir «en un pago»), `fromCharCode` no servia fuera del plano basico y `pesosDe` se rompia sin texto; los tres con su test |
+| `urlLeerEnlace`, `leidoDeEnlace`, `relevantes` y el ruteo de `/enlace` | **Claude** | — | — | Chicas y atadas al resto; `relevantes` salio de probar en el navegador con el Worker local (fundas arriba por precio) |
+| Revision del diff, en dos mitades (Groq corta a 8.000 tokens por minuto: el pedido entero dio 413) | `gemini-2.5-flash` y `openai/gpt-oss-120b` | 19 s y 8 s | 4 + 2 hallazgos | **0 reales / 6 falsos**, ejecutados: `expires_in` negativo (ninguna API lo da); `precioArs` 0 es nulo a proposito; «funda iphone» si pasa (`relevantes` devuelve 1); `sspa/click` con un ASIN valido si se reconoce (`URLSearchParams` saca el «?») y su ejemplo no era un ASIN; el precio de la busqueda es numero. Del SSRF hipotetico quedo una defensa propia: `paginaPermitida` |
+
+Lo que verifico Claude en la fuente: `robots.txt` y terminos de Tiendamia, los precios de su ficha y su busqueda (en el navegador, con la moneda en U$S) y los cuatro precios de la ficha de Loquieroaca (cual es tachado, cuotas y un pago).
