@@ -15,6 +15,10 @@
 "dia": "2026-10-15",
 "mpn": "SKC600/512G"
 },
+"https://www.mexx.com.ar/productos-rubro/almacenamiento/37597-disco-solido-ssd-1tb-kingston-kc600.html": {
+"dia": "2026-10-23",
+"mpn": "SKC600/1024G"
+},
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/46032-disco-solido-ssd-256gb-lexar-nq100.html": {
 "dia": "2026-10-15",
 "mpn": "LNQ100X256G-RNNNG"
@@ -50,6 +54,10 @@
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/48363-disco-solido-ssd-m2-pci-e-nvme-500gb-kingston-nv3.html": {
 "dia": "2026-10-15",
 "mpn": "SNV3S/500G"
+},
+"https://www.mexx.com.ar/productos-rubro/almacenamiento/48446-disco-solido-ssd-m2-pci-e-nvme-2tb-kingston-nv3.html": {
+"dia": "2026-10-23",
+"mpn": "SNV3S/2000G"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/49379-disco-solido-ssd-1tb-aimerican-immortality.html": {
 "dia": "2026-10-15",
@@ -199,9 +207,17 @@
 "dia": "2026-10-15",
 "mpn": "KF436C18BB/16"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/42921-memoria-ram-ddr5-16gb-5200-mhz-kingston-fury-beast.html": {
+"dia": "2026-10-23",
+"mpn": "KF552C40BB-16"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/43525-memoria-ram-sodimm-ddr4-8gb-3200-mhz-lexar-value.html": {
 "dia": "2026-10-16",
 "mpn": "LD4AS008G-B3200GSST"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/45958-memoria-ram-ddr5-16gb-5200-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-23",
+"mpn": "KF552C40BBA-16"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/46659-memoria-ram-sodimm-ddr4-16gb-3200-mhz-kingston.html": {
 "dia": "2026-10-16",
@@ -226,6 +242,10 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/48033-memoria-ram-ddr4-16gb-3200-mhz-xpg-d35-negro.html": {
 "dia": "2026-10-15",
 "mpn": "AX4U320016G16A-SBKD35"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/48226-memoria-ram-ddr5-16gb-5600-mhz-kingston-fury-beast.html": {
+"dia": "2026-10-23",
+"mpn": "KF556C40BB-16"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/48231-memoria-ram-ddr5-32gb-5600-mhz-kingston-fury-beast-rgb.html": {
 "dia": "2026-10-22",
@@ -263,6 +283,10 @@
 "dia": "2026-10-22",
 "mpn": "KF432C16BB/32"
 },
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50323-memoria-ram-ddr5-16gb-6000-mhz-kingston-fury-beast-rgb.html": {
+"dia": "2026-10-23",
+"mpn": "KF560C36BBE2A-16"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50348-memoria-ram-ddr4-8gb-3200-mhz-kingston-value.html": {
 "dia": "2026-10-22",
 "mpn": "KVR32N22S8/8WP"
@@ -294,6 +318,10 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50489-memoria-ram-ddr5-16gb-6000-mhz-kingston-fury-beast.html": {
 "dia": "2026-10-16",
 "mpn": "KF560C36BBE2-16"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/50540-memoria-ram-ddr5-8gb-5600-mhz-kingston-value.html": {
+"dia": "2026-10-23",
+"mpn": "KCP556US6-8"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/50601-memoria-ram-ddr5-32gb-5600-mhz-adata.html": {
 "dia": "2026-10-16",
@@ -390,6 +418,10 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/52437-memoria-ram-ddr4-16gb-3200-mhz-raptor-value.html": {
 "dia": "2026-10-15",
 "mpn": "RAP-UD4-16G-3200"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/52551-memoria-ram-ddr5-32gb-2x16-6000-mhz-corsair-vengeance-rgb.html": {
+"dia": "2026-10-23",
+"mpn": "CMH32GX5M2B6000Z30K"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/52559-memoria-ram-sodimm-ddr5-16gb-4800-mhz-corsair.html": {
 "dia": "2026-10-16",
