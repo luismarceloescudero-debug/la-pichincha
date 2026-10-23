@@ -1,0 +1,59 @@
+name: Mercado Libre prueba de la API
+
+# Temporal (spec 026): mide que endpoints responden con el token de aplicacion. Solo lee. Se borra antes del PR.
+on:
+  push:
+    branches: [claude/ml-api-directo]
+    paths: [.github/workflows/ml-prueba.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Endpoints
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request, urllib.error
+          API = "https://api.mercadolibre.com"
+          datos = urllib.parse.urlencode({"grant_type": "client_credentials", "client_id": os.environ["ML_CLIENT_ID"],
+                                          "client_secret": os.environ["ML_CLIENT_SECRET"]}).encode()
+          with urllib.request.urlopen(urllib.request.Request(f"{API}/oauth/token", data=datos, method="POST",
+                                      headers={"Content-Type": "application/x-www-form-urlencoded"}), timeout=30) as r:
+              t = json.loads(r.read())
+          token = t["access_token"]
+          print("token: scope", t.get("scope"), "expira", t.get("expires_in"))
+          def get(ruta, con=True):
+              h = {"Accept": "application/json", **({"Authorization": f"Bearer {token}"} if con else {})}
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(API + ruta, headers=h), timeout=30) as r:
+                      return r.status, r.read().decode("utf-8", "replace")
+              except urllib.error.HTTPError as e:
+                  return e.code, e.read().decode("utf-8", "replace")
+          rutas = [
+              "/sites/MLA/categories",
+              "/categories/MLA1648",
+              "/sites/MLA/search?category=MLA1648&limit=2",
+              "/sites/MLA/search?q=ssd%201tb&limit=2",
+              "/products/search?status=active&site_id=MLA&q=ssd%201tb&limit=3",
+              "/products/MLA67221216",
+              "/products/MLA67221216/items?limit=2",
+              "/highlights/MLA/category/MLA1648",
+              "/highlights/MLA/category/MLA1672",
+              "/sites/MLA/domain_discovery/search?q=ssd%201tb&limit=2",
+              "/trends/MLA/MLA1648",
+              "/items?ids=MLA1404620425",
+          ]
+          for ruta in rutas:
+              for con in (True, False):
+                  c, cuerpo = get(ruta, con)
+                  print(f"\n=== {c} {'con' if con else 'sin'} token {ruta}\n{cuerpo[:700].replace(token, '***')}")
+          PY
