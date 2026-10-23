@@ -29,15 +29,32 @@ y todo cambio del proceso se hace en este archivo, en un PR propio. Las reglas d
 
 | Combo | Estrategia | Orden | Para que |
 | --- | --- | --- | --- |
-| `revision` | prioridad | Groq `openai/gpt-oss-120b` → Gemini `gemini-2.5-flash` → Claude `claude-sonnet-5-5` | Triaje y segunda opinion corta. Para plata, normativa o seguridad el revisor externo sigue siendo Claude con el archivo completo (seccion 1.2) |
+| `revision` | prioridad | Groq `openai/gpt-oss-120b` → Gemini `gemini-3-flash-preview` → Gemini `gemini-2.5-flash` → Claude `claude-sonnet-5-5` | Revision de codigo, triaje y segunda opinion corta. Para plata, normativa o seguridad el revisor externo sigue siendo Claude con el archivo completo (seccion 1.2) |
 | `colchon-sin-pago` | prioridad | Codex `gpt-5.6-terra-low` → Gemini `gemini-3-flash-preview` → Gemini `gemini-2.5-flash` | Claude Code por OmniRoute cuando se agota la suscripcion (seccion 1.3). Sin OpenRouter |
-| `rapido` | prioridad | Groq `qwen/qwen3.8-27b` → Gemini `gemini-2.5-flash` (cambiado el 23/10: el `-lite` lo retiro Google) → Groq `openai/gpt-oss-20b` | Clasificar, resumir, extraer. Solo triaje |
+| `rapido` | prioridad | Groq `openai/gpt-oss-120b` → Gemini `gemini-2.5-flash` → Groq `openai/gpt-oss-20b` | Codigo chico, clasificar, resumir, extraer. Desde el 23/10 sin `qwen3.8-27b` (9/14 en la prueba de codigo) |
 
 **Como se usan.** Por el endpoint del servidor, con el nombre del combo como modelo: `POST http://127.0.0.1:20128/v1/chat/completions` con `{"model": "revision", ...}`. Las cabeceras `x-omniroute-decision` y `x-omniroute-model` dicen quien respondio. Prueba del 19/10: `revision` respondio con gpt-oss-120b en 850 ms y `rapido` con qwen3.8-27b en 884 ms. **Ojo**: la herramienta MCP `omniroute_route_request` **no respeta** el nombre del combo (el 19/10 mando una revision a Gemini, el segundo del combo, con `combo: null`); para los combos se usa el endpoint.
 
 **Como se editan sin el panel** (23/10/2026): los combos viven en la tabla `combos` de `~/.omniroute/storage.sqlite` (columna `data`, JSON con la lista `models`). Se para OmniRoute (`parar.cmd`), se hace un backup en `~/.omniroute/db_backups/`, se edita y se vuelve a levantar (`iniciar.cmd`). Asi se borro `claude-primero` y se cambio el Gemini de `rapido` el 23/10. La conexion `openrouter` ya no existe.
 
 **Prueba del 23/10** por el endpoint: `colchon-sin-pago` respondio con `gemini-3-flash-preview` (Codex sin cuota, salto al segundo: el salto automatico anda) y `rapido` con `gemini-2.5-flash`; ninguno por OpenRouter.
+
+**Prueba de codigo del 23/10** (la misma tarea a cada modelo por OmniRoute: escribir `parsePrecio` para precios argentinos, corregida con 14 casos ocultos en `node`; el panel con «Probar todo» dio las 5 conexiones activas en verde):
+
+| Modelo | Resultado | Tiempo | Queda en |
+| --- | --- | --- | --- |
+| Groq `openai/gpt-oss-120b` | 14/14 (cuatro de cuatro veces) | 4 s | primero en `revision` y `rapido` |
+| Gemini `gemini-3-flash-preview` | 14/14 | 16 s | `revision` y `colchon-sin-pago`; a veces satura (429, 502, 503) y el combo salta |
+| Gemini `gemini-2.5-flash` | 14/14 y 13/14 | 14 s | respaldo en los tres combos |
+| Groq `openai/gpt-oss-20b` | 14, 13 y 0 de 14 | 3 a 21 s | ultimo de `rapido`: irregular |
+| Groq `qwen/qwen3.8-27b` | 9/14 | 2 s | **sacado** de `rapido` |
+| Mistral `codestral-latest` (clave gratis) | 13/14 | 4 s | sin usar: Mistral no esta en la lista de proveedores permitidos |
+| xAI `grok-4.7` (OAuth de la cuenta) | 14/14 | 33 s | sin usar hasta confirmar que no cobra |
+| Gemini `2.5-pro`, `3.1-pro-preview`, `3.8-flash`; Codex; Mistral `devstral` | sin respuesta | — | 404 (retirado), 429 (sin cuota) o 503 (saturado) ese dia |
+
+Codigo de la prueba: un `python` que lee la clave de `api_keys` y llama al endpoint con `User-Agent: curl/8` (sin eso Groq da 403).
+
+**Cambio de sesion probado (23/10)**: una conversacion empezada con la suscripcion (`claude -p`, Haiku) siguio por el colchon con `--resume <id>` y recordo lo pedido antes. Con herramientas, el colchon arreglo un `precio.js` con bugs hasta 14/14 en 130 s y 8 turnos (verificado aparte con `node`).
 
 **Pendiente del dueño en el panel de OmniRoute**: **reconectar Claude** (la conexion `claude` figura vencida). Hasta entonces el respaldo de `revision` es solo Gemini.
 
