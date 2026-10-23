@@ -62,7 +62,7 @@ El Worker lee **una** página por pegada, con caché de 8 horas por link.
 ## Pruebas
 
 - **Fixtures reales del 23/10/2026**, leídos con el user-agent del sitio: ficha y búsqueda de Tiendamia y ficha de Loquieroacá (`tests/fixtures/worker/`).
-- `tests/js/worker.test.js` (36):
+- `tests/js/worker.test.js` (35):
   - parsers de las tres páginas;
   - Tiendamia en `/buscar`;
   - `/enlace` para las cuatro tiendas, con y sin credenciales;
