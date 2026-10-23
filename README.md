@@ -48,7 +48,8 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
 | `generar_cotizaciones.py`, `js/monedas.js` | Las monedas de la calculadora: la copia de las cotizaciones que escribe el build (`cotizaciones.json`, de dolarapi.com, open.er-api.com y frankfurter.dev) y el modulo que convierte en vivo, con la copia de reserva y la hora de cada cotizacion (plan v3, K2) |
 | `importacion.json` | Reglas de importacion de la calculadora de costos (plan v3), cada una con su norma, fuente oficial, fecha de verificacion y nivel de confianza; lo que no se pudo confirmar va como pendiente y sin numero (`specs/010-costos/spec.md`). Se publica con la app (`publicar_app.py`) y la pestaña **Costo de importar** lo lee al abrirse |
-| `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas |
+| `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas; tambien `afuera_url`, la direccion del Worker de la spec 022 (vacia hasta el primer despliegue) |
+| `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos), con cache de 8 h, CORS solo para el sitio y tope por IP. Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |

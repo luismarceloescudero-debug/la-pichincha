@@ -113,3 +113,17 @@ Funciones puras pedidas primero a OmniRoute por el endpoint (`"model": "revision
 | Revision del diff final (`js/importar.js` completo y el diff de `js/vista-costo.js` y `js/busqueda.js`) | `openai/gpt-oss-120b` | 23,9 s | 3 hallazgos | **0 reales / 3 falsos**, ejecutados: `www.amzn.to` no es una forma real de link; `estadoImportar("12,34")` no pasa (el precio llega siempre como numero de `js/puesto.js` y la funcion no esta en el diff); el «`&&`» en la busqueda de una tienda oficial no aparece (`&term=audio%20headphones`). Pero el primero hizo ver un hueco real: los links `a.co/d/...` del «Compartir» de la app de Amazon; se agrego con su test |
 
 Lo que verifico Claude en la fuente (los modelos externos no navegan): las URLs de busqueda de Tiendamia y Loquieroaca (las dos devolvieron el AeroClip 2), la forma de sus links de producto, que Loquieroaca publica el precio final en pesos y que Soundcore/Anker y Keychron no dicen que envien a Argentina.
+
+---
+
+# Spec 022: Afuera en vivo (23/10/2026)
+
+Mismo metodo que la spec 020: funciones puras pedidas primero a OmniRoute (`revision`, por el endpoint, `max_tokens: 16000`), corridas contra los tests antes de usarlas.
+
+| Tarea | Modelo (cabecera `x-omniroute-model`) | Tiempo | Tests que paso | Que se cambio a mano |
+| --- | --- | ---: | --- | --- |
+| `aviso`, `parsearEbay`, `parsearAliexpress`, `parsearAmazon` y `firmar` (HMAC-SHA256 de AliExpress) del Worker | `openai/gpt-oss-120b` | 7,8 s | **5 de 5** (despues de sacar del arnes los `import` repetidos que traia el archivo unico) | Partido en un modulo por fuente, estilo compacto y comentarios con la fuente de cada dato |
+| `js/afuera.js` (lo que pinta la seccion) | `openai/gpt-oss-120b` | 8,9 s | **10 de 10** | Al leerlo: el mensaje sin avisos nombraba tambien las fuentes caidas y un precio no numerico rompia el formato; los dos con su test |
+| Revision del diff (Worker completo, `js/afuera.js`, workflow y diff de `js/busqueda.js`) | `openai/gpt-oss-120b` | 15 s | 5 hallazgos | **2 reales / 3 falsos**. Reales: una consulta que fallo no se reintentaba en la sesion (ahora espera un minuto) y Amazon se rotulaba afiliado aunque el link no tuviera `tag=` (test nuevo). Falsos: la cache del navegador de 1 h contra 8 h en el Worker es a proposito; el tope «global» sin `CF-Connecting-IP` no pasa en Cloudflare; `precioArs` vacio es esperado hasta que una fuente lo de |
+
+Lo que verifico Claude en la fuente (los modelos externos no navegan): la doc de eBay (filtro `deliveryCountry`, `X-EBAY-C-ENDUSERCTX`, scope), la de AliExpress (`ship_to_country`, endpoint `/sync`, firma) y la de la Creators API (requisito de ventas, token, cabeceras). Loquieroaca: `robots.txt` y `/info`; la llamada de prueba a su Livewire la bloqueo la clasificacion de permisos y no se hizo (ver la spec 022).
