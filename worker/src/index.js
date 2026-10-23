@@ -23,6 +23,12 @@ const CACHE_VERSION = "023";                   // cambia cuando cambian las regl
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 
+/* Defensa propia, ademas de la URL canonica de js/importar.js: solo se leen paginas de estos dos hosts y por https. */
+const PAGINAS = new Set(["tiendamia.com.ar", "www.loquieroaca.com"]);
+export function paginaPermitida(url) {
+  try { const u = new URL(url); return u.protocol === "https:" && PAGINAS.has(u.hostname); } catch (e) { return false; }
+}
+
 function cors(origen) {
   const h = { Vary: "Origin" };
   if (ORIGEN_OK.test(origen || "")) Object.assign(h, { "Access-Control-Allow-Origin": origen, "Access-Control-Allow-Methods": "GET, OPTIONS" });
@@ -99,6 +105,7 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
   /* Un link pegado: que se puede leer de cada tienda y con que. Devuelve el aviso, o un motivo si no se lee. */
   async function leer(e, env, fecha) {
     const deps = { pedir, token, fecha };
+    if ((e.tienda === "tiendamia" || e.tienda === "loquieroaca") && !paginaPermitida(e.url)) return { motivo: "Ese link no se puede leer." };
     if (e.tienda === "tiendamia") return { item: tiendamia.parsearFichaTiendamia(await pedirTexto(e.url), e.url, fecha) };
     if (e.tienda === "loquieroaca") return { item: parsearFichaLoquieroaca(await pedirTexto(e.url), e.url, fecha) };
     if (e.tienda === "amazon") {
