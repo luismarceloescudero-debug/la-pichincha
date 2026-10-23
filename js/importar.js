@@ -13,15 +13,26 @@
      de 50 kg por paquete (peso_max_kg). Las dimensiones no entran al calculo, asi que no se precargan. */
   const PESO_TIPICO = { smartphone: 0.3, notebook: 2.5, pc: 8, monitor: 6, componente: 1, periferico: 0.5, otro: 1 };
 
-  /* Donde comprar afuera. `afiliado` marca el enlace que cobra comision (se rotula en la pagina, rel=sponsored). */
+  /* Donde comprar afuera. `afiliado` marca el enlace que cobra comision (se rotula en la pagina, rel=sponsored). `busqueda`: la
+     URL de busqueda de cada tienda, a la que se le pegan las palabras unidas con "+" (verificadas en la fuente el 23/10/2026:
+     las dos devolvieron el Soundcore AeroClip 2; www.tiendamia.com da 403, tiendamia.com.ar responde). */
   const FUENTES = [
     { id: "amazon", nombre: "Amazon (EE.UU.)", url: "https://www.amazon.com/", afiliado: true,
       texto: "Compra directa en la tienda de EE.UU. El envío y los impuestos los pagás vos o el courier: calculalos acá antes de comprar." },
-    { id: "tiendamia", nombre: "Tiendamia", url: "https://www.tiendamia.com/", afiliado: false,
+    { id: "tiendamia", nombre: "Tiendamia", url: "https://tiendamia.com.ar/", afiliado: false,
+      busqueda: "https://tiendamia.com.ar/search/amazon/",
       texto: "Intermediario: compra en tiendas del exterior por vos. Antes de pagar, revisá en el resumen qué impuestos suma y si ya vienen incluidos." },
     { id: "loquieroaca", nombre: "Loquieroaca", url: "https://www.loquieroaca.com/", afiliado: false,
+      busqueda: "https://www.loquieroaca.com/products?search=",
       texto: "Intermediario argentino para comprar en tiendas del exterior. Mismo chequeo: el resumen dice qué impuestos y cargos suma." },
   ];
+
+  /* Tiendas oficiales de una marca, solo si su propia pagina de envios dice que manda a Argentina: cada entrada lleva esa
+     pagina (`envios`) y la fecha en que se leyo (`verificado`). Lo no confirmado no se muestra. Forma de una entrada:
+     { marca, claves: ["palabra en minusculas"], nombre, url, busqueda (opcional, se le pega el termino), envios, verificado }.
+     Vacia el 23/10/2026: Soundcore/Anker (soundcore.com/policies/shipping-policy) y Keychron (keychron.com/pages/where-to-buy)
+     no nombran a Argentina. */
+  const OFICIALES = [];
 
   const redondear = n => Math.round(n * 100) / 100;
 
@@ -36,14 +47,136 @@
     return C.urlDeEstado(pathname || "/", estadoImportar(fobUsd, categoria));
   }
 
-  /* Enlace de una fuente. Amazon lleva el tag de afiliado y, si hay termino, la busqueda de ese producto. */
-  function enlaceFuente(fuente, termino) {
-    if (!fuente.afiliado) return fuente.url;
-    const q = termino ? `s?k=${encodeURIComponent(termino)}&` : "?";
-    return `${fuente.url}${q}tag=${AMAZON_TAG}`;
+  const normalTermino = t => String(t === undefined || t === null ? "" : t).trim().replace(/\s+/g, " ");
+
+  /* La busqueda de un termino en una fuente; sin termino (o sin busqueda conocida), su portada. Amazon, con el tag. */
+  function urlBusqueda(fuente, termino) {
+    const t = normalTermino(termino);
+    if (fuente.afiliado) return `${fuente.url}${t ? `s?k=${encodeURIComponent(t)}&` : "?"}tag=${AMAZON_TAG}`;
+    if (!t || !fuente.busqueda) return fuente.url;
+    return fuente.busqueda + t.split(" ").map(encodeURIComponent).join("+");
   }
 
-  const api = { PESO_TIPICO, FUENTES, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente };
+  /* Enlace de una fuente. Amazon lleva el tag de afiliado y, si hay termino, la busqueda de ese producto. */
+  function enlaceFuente(fuente, termino) {
+    return fuente.afiliado ? urlBusqueda(fuente, termino) : fuente.url;
+  }
+
+  /* --- Pegar un link (spec 020) ---
+     Del link sale lo que dice la propia direccion: la tienda, el codigo del producto y un nombre legible del slug. La pagina no
+     se lee: el navegador no puede (las tiendas no lo permiten) y no copiamos precios ajenos. El precio lo escribe la persona.
+     Primera version de parsearEnlace y urlBusqueda: OmniRoute `revision` (gpt-oss-120b), corrida contra los tests antes de usarla. */
+  function nombreDeSlug(slug) {
+    if (!slug) return "";
+    let t;
+    try { t = decodeURIComponent(slug); } catch (e) { t = slug; }
+    return t.replace(/[-_]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120).trim();
+  }
+
+  const HOSTS = {
+    amazon: ["amazon.com", "www.amazon.com", "smile.amazon.com"],
+    tiendamia: ["tiendamia.com.ar", "www.tiendamia.com.ar", "tiendamia.com", "www.tiendamia.com"],
+    loquieroaca: ["loquieroaca.com", "www.loquieroaca.com"],
+    ebay: ["ebay.com", "www.ebay.com"],
+  };
+
+  /* Lo que se pego -> { tienda, id, nombre, url } (Tiendamia suma `origen`: amz, ebay...), o null si no es un link conocido.
+     El host tiene que ser exacto: amazon.com.otro.com no es Amazon. */
+  function parsearEnlace(texto) {
+    if (texto === undefined || texto === null) return null;
+    let s = String(texto).trim();
+    if (!s) return null;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) s = "https://" + s;
+    let u;
+    try { u = new URL(s); } catch (e) { return null; }
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    const host = u.hostname.toLowerCase(), ruta = u.pathname;
+    const es = tienda => HOSTS[tienda].includes(host);
+    let m;
+    if (es("amazon")) {
+      m = ruta.match(/^\/(?:([^/]+)\/)?dp\/([a-z0-9]{10})(?:\/|$)/i) || ruta.match(/^\/gp\/(?:product|aw\/d)\/()([a-z0-9]{10})(?:\/|$)/i);
+      if (!m) return null;
+      const asin = m[2].toUpperCase();
+      return { tienda: "amazon", id: asin, nombre: nombreDeSlug(m[1]), url: "https://www.amazon.com/dp/" + asin };
+    }
+    if (host === "amzn.to") return ruta.length > 1 ? { tienda: "amazon", id: null, nombre: "", url: u.href } : null;
+    if (es("tiendamia")) {
+      m = ruta.match(/^\/p\/([a-z]+)\/([a-z0-9]+)(?:\/([^/]+))?/i);
+      if (!m) return null;
+      const origen = m[1].toLowerCase();
+      return { tienda: "tiendamia", id: origen === "amz" ? m[2].toUpperCase() : m[2], origen, nombre: nombreDeSlug(m[3]),
+        url: `https://tiendamia.com.ar/p/${origen}/${m[2]}${m[3] ? "/" + m[3] : ""}` };
+    }
+    if (es("loquieroaca")) {
+      m = ruta.match(/^\/products\/(?:([^/]+)-)?(\d+)\/?$/i);
+      if (!m) return null;
+      return { tienda: "loquieroaca", id: m[2], nombre: nombreDeSlug(m[1]),
+        url: `https://www.loquieroaca.com/products/${m[1] ? m[1] + "-" : ""}${m[2]}` };
+    }
+    if (es("ebay")) {
+      m = ruta.match(/^\/itm\/(?:([^/]+)\/)?(\d{9,15})(?:\/|$)/i);
+      if (!m) return null;
+      return { tienda: "ebay", id: m[2], nombre: nombreDeSlug(m[1]), url: "https://www.ebay.com/itm/" + m[2] };
+    }
+    return null;
+  }
+
+  const amazonDp = asin => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
+
+  /* Lo que la pestaña muestra de un link reconocido: a donde abrirlo, una ayuda de una linea sobre que precio escribir y que
+     campos de la calculadora pisa. `calcula: false` cuando la tienda ya publica el precio final (Loquieroaca, en pesos). */
+  function datosDeEnlace(e) {
+    if (!e) return null;
+    const base = { tiendaNombre: "", ayuda: "", abrir: e.url, afiliado: false, calcula: true, mismoEnAmazon: null,
+      pisar: ["valor", "moneda", "cobro"] };
+    if (e.tienda === "amazon") return { ...base, tiendaNombre: "Amazon (EE.UU.)", abrir: e.id ? amazonDp(e.id) : e.url, afiliado: !!e.id,
+      ayuda: "Escribí el precio del producto que muestra Amazon, sin el envío ni el depósito de impuestos («Import Fees Deposit»): el envío va en su campo." };
+    if (e.tienda === "tiendamia") return { ...base, tiendaNombre: "Tiendamia", mismoEnAmazon: e.origen === "amz" ? amazonDp(e.id) : null,
+      pisar: [...base.pisar, "flete"],
+      ayuda: "Tiendamia muestra el precio con el envío incluido: elegí U$S arriba de su página y escribí ese número (el envío queda vacío acá). Los impuestos los suma en el resumen de pago." };
+    if (e.tienda === "loquieroaca") return { ...base, tiendaNombre: "Loquieroaca", calcula: false, pisar: [],
+      ayuda: "Loquieroaca publica el precio final en pesos, con impuestos y envío incluidos: no hace falta calcularlo, comparalo directo con las tiendas de acá." };
+    return { ...base, tiendaNombre: "eBay (EE.UU.)",
+      ayuda: "Escribí el precio del producto en dólares; el envío que muestra eBay va en su campo." };
+  }
+
+  /* El estado de la calculadora para un link y el precio que escribio la persona: en dolares y con los impuestos cobrados en el
+     checkout (Amazon, eBay y Tiendamia los cobran ahi). null si la tienda ya da el precio final. */
+  function estadoDeEnlace(e, precio) {
+    const d = datosDeEnlace(e);
+    if (!d || !d.calcula) return null;
+    return { ...C.POR_DEFECTO, valor: normalTermino(precio), moneda: "USD", cobro: "checkout" };
+  }
+
+  /* --- Buscar afuera (spec 020): cuando ninguna tienda del indice tiene el termino --- */
+  const normalMarca = t => normalTermino(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const verificada = o => /^https:\/\//.test(o.url || "") && /^https:\/\//.test(o.envios || "") && /^\d{4}-\d{2}-\d{2}$/.test(o.verificado || "");
+
+  /* Las tiendas oficiales verificadas cuya marca nombra el termino (palabra entera). */
+  function oficialesPara(termino, lista = OFICIALES) {
+    const t = ` ${normalMarca(termino).replace(/[^a-z0-9]+/g, " ")} `;
+    if (!t.trim()) return [];
+    return lista.filter(o => verificada(o) && (o.claves || []).some(c => t.includes(` ${normalMarca(c)} `)));
+  }
+
+  const fecha = iso => iso.split("-").reverse().join("/");
+
+  /* El bloque con la busqueda ya armada en cada fuente (y en la tienda oficial verificada, si la hay). Solo enlaces. */
+  function buscarAfueraHtml(termino, { esc, icono = () => "", oficiales = OFICIALES }) {
+    const t = normalTermino(termino);
+    const fuentes = FUENTES.map(f => `<li><a href="${esc(urlBusqueda(f, t))}" target="_blank" rel="${f.afiliado ? "sponsored noopener" : "noopener"}">${icono("fuera")} ${esc(f.nombre)}</a>
+        ${f.afiliado ? '<span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span>' : ""}
+        <span class="sub chico">${esc(f.texto)}</span></li>`);
+    const propias = oficialesPara(t, oficiales).map(o => `<li><a href="${esc(o.busqueda ? o.busqueda + encodeURIComponent(t) : o.url)}" target="_blank" rel="noopener">${icono("fuera")} ${esc(o.nombre)}</a>
+        <span class="sub chico">Tienda oficial de ${esc(o.marca)}: envía a Argentina según <a href="${esc(o.envios)}" target="_blank" rel="noopener">su página de envíos</a> (verificado el ${esc(fecha(o.verificado))}).</span></li>`);
+    return `<section class="afuera" aria-labelledby="afuera-tit">
+      <h3 id="afuera-tit">Buscalo afuera: la búsqueda ya está armada</h3>
+      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda. No leemos sus páginas ni sus precios.</p>
+      <ul class="afuera-lista">${[...fuentes, ...propias].join("")}</ul></section>`;
+  }
+
+  const api = { PESO_TIPICO, FUENTES, OFICIALES, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente, urlBusqueda,
+    parsearEnlace, datosDeEnlace, estadoDeEnlace, oficialesPara, buscarAfueraHtml };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
 })(this);
