@@ -48,7 +48,7 @@ function vistaCosto() {
     </div>
     <section class="panel k-importando" aria-labelledby="k-imp-titulo">
       <h3 id="k-imp-titulo">Importando: dónde comprar afuera</h3>
-      <p class="sub">Solo son enlaces: no tenemos los precios de estas tiendas. Comparalos por tu cuenta y calculá el costo final acá.</p>
+      <p class="sub">Enlaces a cada tienda. Si pegás arriba el link de un producto, leemos su precio cuando la tienda lo permite (Tiendamia y Loquieroacá); si no, lo escribís vos y acá se calcula el costo final.</p>
       <ul class="k-fuentes-lista">
         ${Importar.FUENTES.map(f => `<li><a href="${esc(Importar.enlaceFuente(f))}" target="_blank" rel="${f.afiliado ? "sponsored noopener" : "noopener"}">${esc(f.nombre)}</a>
           ${f.afiliado ? '<small class="chico">(enlace de afiliado)</small>' : ""}
@@ -138,8 +138,8 @@ function fichaEnlace(e) {
   const abrir = `<a class="acc" href="${esc(d.abrir)}" target="_blank" rel="${d.afiliado ? "sponsored noopener" : "noopener"}">${icono("fuera")} Abrir en ${esc(d.tiendaNombre)}</a>`
     + (d.afiliado ? ' <span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span>' : "")
     + (d.mismoEnAmazon ? ` <a class="acc" href="${esc(d.mismoEnAmazon)}" target="_blank" rel="sponsored noopener">El mismo en Amazon</a> <span class="rotulo">enlace de afiliado</span>` : "");
-  const precio = !d.calcula ? "" : `<div class="k-campo"><label for="k-link-precio">Precio que ves en la página (US$)</label>
-      <div class="k-entrada con-prefijo"><span class="k-prefijo" aria-hidden="true">USD</span><input id="k-link-precio" type="text" inputmode="decimal" autocomplete="off" aria-describedby="k-link-precio-ayuda"></div>
+  const precio = !d.calcula ? "" : `<div class="k-campo"><label for="k-link-precio">Precio que ves en la página (${esc(d.moneda)})</label>
+      <div class="k-entrada con-prefijo"><span class="k-prefijo" aria-hidden="true">${esc(d.moneda)}</span><input id="k-link-precio" type="text" inputmode="decimal" autocomplete="off" aria-describedby="k-link-precio-ayuda"></div>
       <small id="k-link-precio-ayuda">${esc(d.ayuda)}</small></div>`;
   return `<div class="k-link-ficha">
       <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
@@ -177,7 +177,7 @@ function pedirPrecioEnlace(raiz, e) {
     ENLACES.get(url).then(r => {
       if (turno !== ENLACE_TURNO) return;
       const l = Importar.leidoDeEnlace(r), precio = $("#k-link-precio", raiz);
-      linea.textContent = l ? l.linea : "";
+      linea.textContent = l ? (l.nombre && !e.nombre ? `«${l.nombre}» · ` : "") + l.linea : "";   // el nombre, si el link no lo traia
       if (l && l.precio && precio && !precio.dataset.tocado) { precio.value = l.precio; aplicarEnlace(raiz, e, l.precio); }
     });
   }, 400);

@@ -160,7 +160,7 @@
   function datosDeEnlace(e) {
     if (!e) return null;
     const base = { tiendaNombre: "", ayuda: "", abrir: e.url, afiliado: false, calcula: true, mismoEnAmazon: null,
-      pisar: ["valor", "moneda", "cobro"] };
+      pisar: ["valor", "moneda", "cobro"], moneda: e.dominio ? AMAZON_PAISES[e.dominio] : "USD" };
     if (e.tienda === "amazon" && e.dominio) return { ...base, tiendaNombre: `Amazon (${e.dominio})`,
       ayuda: `Escribí el precio del producto en ${AMAZON_PAISES[e.dominio]}, como lo muestra ${e.dominio}, sin el envío: el envío va en su campo.` };
     if (e.tienda === "amazon") return { ...base, tiendaNombre: "Amazon (EE.UU.)", abrir: e.id ? amazonDp(e.id) : e.url, afiliado: !!e.id,
