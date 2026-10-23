@@ -32,9 +32,9 @@ function vistaCosto() {
         </ol></div></div>
     <section class="k-link" aria-labelledby="k-link-tit">
       <h3 id="k-link-tit">¿Ya lo encontraste afuera? Pegá el link</h3>
-      <div class="k-campo"><label for="k-link">Link del producto en Amazon (EE.UU.), Tiendamia, Loquieroaca o eBay</label>
+      <div class="k-campo"><label for="k-link">Link del producto en Amazon, Tiendamia, Loquieroacá o eBay</label>
         <input id="k-link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://www.amazon.com/…/dp/B0…" aria-describedby="k-link-ayuda">
-        <small id="k-link-ayuda">Del link sacamos la tienda y el producto; la página no la leemos (las tiendas no lo permiten), así que el precio lo escribís vos.</small></div>
+        <small id="k-link-ayuda">De Tiendamia y Loquieroacá leemos el precio de la página que pegás; de Amazon y eBay, solo por su API cuando esté activa. Si no, lo escribís vos, y siempre lo podés cambiar.</small></div>
       <div id="k-link-res" aria-live="polite"></div>
     </section>
     <div class="k-grid">
@@ -144,6 +144,7 @@ function fichaEnlace(e) {
   return `<div class="k-link-ficha">
       <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
       <p class="k-link-acciones">${abrir}</p>
+      <p class="sub chico k-link-leido" id="k-link-leido" aria-live="polite"></p>
       ${precio || `<p class="sub chico">${esc(d.ayuda)}</p>`}</div>`;
 }
 
@@ -158,19 +159,44 @@ function aplicarEnlace(raiz, e, precio) {
   recalcularCosto(raiz);
 }
 
+/* Spec 023: el Worker lee la pagina pegada (ficha de Tiendamia o de Loquieroaca) o el producto por su API (Amazon, eBay). Un pedido
+   por link y por sesion; lo leido precarga el precio, que se puede cambiar. Si falla o no hay Worker, se escribe a mano como antes. */
+const ENLACES = new Map();      // url de /enlace -> promesa de la respuesta
+let ENLACE_TURNO = 0, ENLACE_ESPERA = null;
+function pedirPrecioEnlace(raiz, e) {
+  const turno = ++ENLACE_TURNO, url = Importar.urlLeerEnlace(AFUERA_URL, e.url), linea = $("#k-link-leido", raiz);
+  clearTimeout(ENLACE_ESPERA);
+  if (!url || !linea) return;
+  linea.textContent = `Leyendo el precio en ${Importar.datosDeEnlace(e).tiendaNombre}…`;
+  ENLACE_ESPERA = setTimeout(() => {
+    if (!ENLACES.has(url)) {
+      const corte = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? { signal: AbortSignal.timeout(10000) } : {};
+      ENLACES.set(url, fetch(url, corte).then(r => (r.ok ? r.json() : null)).catch(() => null)
+        .then(r => { if (!r) ENLACES.delete(url); return r; }));       // un fallo se puede reintentar pegando de nuevo
+    }
+    ENLACES.get(url).then(r => {
+      if (turno !== ENLACE_TURNO) return;
+      const l = Importar.leidoDeEnlace(r), precio = $("#k-link-precio", raiz);
+      linea.textContent = l ? l.linea : "";
+      if (l && l.precio && precio && !precio.dataset.tocado) { precio.value = l.precio; aplicarEnlace(raiz, e, l.precio); }
+    });
+  }, 400);
+}
+
 function leerEnlace(raiz, texto) {
   const res = $("#k-link-res", raiz), e = Importar.parsearEnlace(texto);
   if (!texto.trim()) { res.innerHTML = ""; return; }
   if (!e) {
-    res.innerHTML = '<p class="sub chico">No reconozco ese link. Por ahora leo los de Amazon (EE.UU.), Tiendamia, Loquieroaca y eBay: escribí el precio abajo, en «Precio del producto».</p>';
+    res.innerHTML = '<p class="sub chico">No reconozco ese link. Por ahora leo los de Amazon, Tiendamia, Loquieroacá y eBay: escribí el precio abajo, en «Precio del producto».</p>';
     return;
   }
   res.innerHTML = fichaEnlace(e);
   aplicarEnlace(raiz, e, "");
+  pedirPrecioEnlace(raiz, e);
   const precio = $("#k-link-precio", res), valor = ($("#k-form", raiz) || { elements: {} }).elements.valor;
   if (!precio) return;
   if (valor) precio.value = valor.value;    // el precio que ya estaba en la calculadora, para que los dos campos digan lo mismo
-  precio.addEventListener("input", () => aplicarEnlace(raiz, e, precio.value));
+  precio.addEventListener("input", () => { precio.dataset.tocado = "1"; aplicarEnlace(raiz, e, precio.value); });
 }
 
 function activarCosto(raiz) {

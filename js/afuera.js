@@ -8,7 +8,7 @@
   const I = typeof module === "object" && module.exports ? require("./importar.js") : raiz.Importar;
   const C = typeof module === "object" && module.exports ? require("./calculadora.js") : raiz.Calculadora;
 
-  const NOMBRES = { ebay: "eBay (EE.UU.)", aliexpress: "AliExpress", amazon: "Amazon (EE.UU.)", loquieroaca: "Loquieroacá" };
+  const NOMBRES = { ebay: "eBay (EE.UU.)", aliexpress: "AliExpress", amazon: "Amazon (EE.UU.)", loquieroaca: "Loquieroacá", tiendamia: "Tiendamia" };
   const MAX = 8;
   const nombre = id => NOMBRES[id] || id;
   const monto = (n, moneda) => (moneda === "USD" ? "US$ " : moneda + " ")
@@ -37,7 +37,8 @@
     return `<li class="afv-item">${img}<div class="afv-txt"><a href="${esc(it.url)}" target="_blank" rel="${it.afiliado ? "sponsored noopener" : "noopener"}">${esc(it.nombre)}</a>`
       + (it.afiliado ? '<span class="rotulo">enlace de afiliado</span>' : "")
       + `<span class="afv-precio">${monto(it.precio, it.moneda)}</span>`
-      + (it.envio != null ? `<span class="sub chico">+ envío ${monto(it.envio, it.moneda)}</span>` : "")
+      + (it.envio === 0 ? '<span class="sub chico">con envío incluido</span>'      // Tiendamia: su precio ya trae el envio
+        : it.envio != null ? `<span class="sub chico">+ envío ${monto(it.envio, it.moneda)}</span>` : "")
       + `<span class="sub chico">${esc(nombre(it.fuente))}</span>${puesto}</div></li>`;
   }
 

@@ -250,3 +250,43 @@ test("el bloque suma la tienda oficial verificada con su fecha, y sin oficiales 
   assert.match(sinBusqueda, /href="https:\/\/ejemplo\.com\/"/, "sin busqueda propia, la portada");
   assert.ok(I.buscarAfueraHtml("x", { esc }).includes("tiendamia"), "sin opciones de icono ni lista, igual arma el bloque");
 });
+
+/* --- Spec 023: lo que el Worker lee del link pegado (GET /enlace) --- */
+test("la URL de /enlace lleva el link tal cual; sin Worker o sin link no hay URL", () => {
+  assert.equal(I.urlLeerEnlace("https://w.workers.dev", " https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x "),
+    "https://w.workers.dev/enlace?url=https%3A%2F%2Ftiendamia.com.ar%2Fp%2Famz%2Fb0hfj7nvpb%2Fx");
+  assert.equal(I.urlLeerEnlace("", "https://x"), "");
+  assert.equal(I.urlLeerEnlace("https://w.workers.dev", "  "), "");
+});
+
+test("Tiendamia leida: el precio en dolares va al campo y la linea dice que trae el envio", () => {
+  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" }, item: { precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2" } });
+  assert.equal(r.precio, "198.88");
+  assert.equal(r.ars, false);
+  assert.match(r.linea, /Precio leído en Tiendamia: US\$ 198,88, con el envío incluido/);
+  assert.equal(r.nombre, "AeroClip 2");
+});
+
+test("Amazon o eBay leidos por su API: el precio va al campo", () => {
+  const a = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" }, item: { precio: 79.99, moneda: "USD", envio: null, nombre: "x" } });
+  assert.equal(a.precio, "79.99");
+  assert.match(a.linea, /por la API de Amazon/);
+  assert.match(I.leidoDeEnlace({ leido: true, enlace: { tienda: "ebay" }, item: { precio: 5, moneda: "USD", nombre: "x" } }).linea, /eBay/);
+});
+
+test("Loquieroaca leida: el precio en pesos ya puesto en casa, en un pago y en cuotas; no va a la calculadora", () => {
+  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "loquieroaca" },
+    item: { precio: 538616.1, moneda: "ARS", precioArs: 538616.1, precioCuotas: 598462.33, nombre: "AeroClip 2" } });
+  assert.equal(r.precio, null);
+  assert.equal(r.ars, true);
+  assert.match(r.linea, /\$538\.616 en un pago o \$598\.462 en cuotas, ya puesto en casa/);
+});
+
+test("sin leer: se muestra el motivo; una respuesta rara no muestra nada", () => {
+  const r = I.leidoDeEnlace({ leido: false, enlace: { tienda: "amazon" }, motivo: "Amazon no se lee sin su API" });
+  assert.equal(r.precio, null);
+  assert.equal(r.linea, "Amazon no se lee sin su API");
+  assert.equal(I.leidoDeEnlace(null), null);
+  assert.equal(I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" }, item: null }), null);
+  assert.equal(I.leidoDeEnlace({ leido: false }), null);
+});

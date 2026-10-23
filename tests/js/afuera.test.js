@@ -98,3 +98,10 @@ test("una moneda que no es dolar se muestra con su codigo y la calculadora la re
   const href = html.match(/href="([^"]*#costo)"/)[1].replace(/&amp;/g, "&");
   assert.equal(C.estadoDeUrl(href.split("?")[1].split("#")[0]).moneda, "EUR");
 });
+
+test("Tiendamia: el precio ya trae el envio y se dice asi (no «+ envio US$ 0,00»)", () => {
+  const html = A.afueraHtml(datos([item({ fuente: "tiendamia", envio: 0, afiliado: false })], [{ id: "tiendamia", ok: true, n: 1 }]), { esc });
+  assert.match(html, /con envío incluido/);
+  assert.ok(!html.includes("+ envío"));
+  assert.match(html, />Tiendamia</);
+});
