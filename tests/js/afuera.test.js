@@ -1,0 +1,100 @@
+/* Seccion «Afuera» de la busqueda (spec 022): lo que pinta la pagina con la respuesta del Worker. Funciones puras. */
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const A = require("../../js/afuera.js");
+const C = require("../../js/calculadora.js");
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const FECHA = "2026-10-23T15:00:00.000Z";
+const item = (o = {}) => ({ fuente: "ebay", nombre: "Soundcore AeroClip 2", precio: 89.99, moneda: "USD", envio: 24.5, precioArs: null,
+  url: "https://www.ebay.com/itm/1?campid=5338", imagen: "https://i.ebayimg.com/a.jpg", afiliado: true, fecha: FECHA, ...o });
+const datos = (items, fuentes = [{ id: "ebay", ok: true, n: items.length }]) => ({ consulta: "soundcore aeroclip 2", fecha: FECHA, fuentes, items });
+
+test("la URL del Worker se arma con la consulta; sin Worker configurado no hay URL", () => {
+  assert.equal(A.urlConsulta("https://pichincha-afuera.x.workers.dev", "  soundcore aeroclip 2 "),
+    "https://pichincha-afuera.x.workers.dev/buscar?q=soundcore%20aeroclip%202");
+  assert.equal(A.urlConsulta("", "algo"), "");
+  assert.equal(A.urlConsulta("https://w.dev", "   "), "");
+});
+
+test("sin respuesta, sin fuentes configuradas o con algo raro no se pinta nada: queda lo de la spec 020", () => {
+  for (const d of [null, undefined, {}, { items: [] }, datos([], []), { fuentes: [{ id: "ebay", ok: true }], items: "x" }])
+    assert.equal(A.afueraHtml(d, { esc }), "", JSON.stringify(d));
+});
+
+test("con avisos: lista de menor a mayor, precio en dolares, envio, fuente, afiliado rotulado y sponsored", () => {
+  const html = A.afueraHtml(datos([item({ precio: 120, nombre: "Caro" }), item({ precio: 23.47, fuente: "aliexpress", envio: null,
+    afiliado: false, url: "https://www.aliexpress.com/item/1.html", nombre: "Barato" })]), { esc });
+  assert.ok(html.indexOf("Barato") < html.indexOf("Caro"), "el orden es por precio, aunque llegue desordenado");
+  assert.match(html, /US\$ 23,47/);
+  assert.match(html, /US\$ 120,00/);
+  assert.match(html, /\+ envío US\$ 24,50/);
+  assert.match(html, /AliExpress/);
+  assert.match(html, /eBay \(EE\.UU\.\)/);
+  assert.equal((html.match(/rel="sponsored noopener"/g) || []).length, 1);
+  assert.equal((html.match(/enlace de afiliado/g) || []).length, 1);
+  assert.match(html, /nunca por comisión/);
+  assert.match(html, /<img [^>]*src="https:\/\/i\.ebayimg\.com\/a\.jpg"[^>]*loading="lazy"/);
+});
+
+test("el mejor precio de aca va arriba, para comparar", () => {
+  const html = A.afueraHtml(datos([item()]), { esc, mejorAca: { precio: 150025, tienda: "Mexx" } });
+  assert.match(html, /Mejor precio acá: <b>\$150\.025<\/b> en Mexx/);
+  assert.ok(!A.afueraHtml(datos([item()]), { esc }).includes("Mejor precio acá"));
+});
+
+test("cada aviso sin precio puesto lleva «Calcular puesto en casa» con precio, envio y cobro en el checkout", () => {
+  const html = A.afueraHtml(datos([item()]), { esc, pathname: "/" });
+  const href = html.match(/href="([^"]*#costo)"/)[1].replace(/&amp;/g, "&");
+  const e = C.estadoDeUrl(href.split("?")[1].split("#")[0]);
+  assert.equal(e.valor, "89.99");
+  assert.equal(e.flete, "24.5");
+  assert.equal(e.moneda, "USD");
+  assert.equal(e.cobro, "checkout");
+  assert.match(html, /Calcular puesto en casa/);
+});
+
+test("si la fuente ya da el precio puesto en pesos, se muestra ese y no hace falta calcular", () => {
+  const html = A.afueraHtml(datos([item({ precioArs: 597646.5, moneda: "USD", fuente: "loquieroaca", afiliado: false })]), { esc });
+  assert.match(html, /\$597\.647 puesto en casa/);
+  assert.ok(!html.includes("Calcular puesto en casa"));
+});
+
+test("el nombre y la URL van escapados; una URL que no es https no se pinta", () => {
+  const html = A.afueraHtml(datos([item({ nombre: "<b>x</b>" }), item({ url: "javascript:alert(1)", nombre: "malo" }),
+    item({ imagen: "http://x/a.jpg", nombre: "sin foto" })]), { esc });
+  assert.ok(!html.includes("<b>x</b>"));
+  assert.ok(html.includes("&lt;b&gt;x&lt;/b&gt;"));
+  assert.ok(!html.includes("javascript:"));
+  assert.ok(!html.includes("malo"));
+  assert.ok(!html.includes("http://x/a.jpg"));
+});
+
+test("como mucho 8 avisos; las fuentes caidas se nombran", () => {
+  const muchos = Array.from({ length: 12 }, (_, i) => item({ precio: 10 + i, nombre: "n" + i }));
+  const html = A.afueraHtml(datos(muchos, [{ id: "ebay", ok: true, n: 12 }, { id: "aliexpress", ok: false, n: 0 }]), { esc });
+  assert.equal((html.match(/class="afv-item"/g) || []).length, 8);
+  assert.match(html, /AliExpress no respondió/);
+});
+
+test("fuentes que respondieron sin avisos: lo dice, nombrando donde se busco", () => {
+  const html = A.afueraHtml(datos([], [{ id: "ebay", ok: true, n: 0 }, { id: "aliexpress", ok: true, n: 0 }]), { esc });
+  assert.match(html, /No encontramos ofertas con envío a Argentina en eBay \(EE\.UU\.\) y AliExpress/);
+  assert.equal(A.afueraHtml(datos([], [{ id: "ebay", ok: false, n: 0 }]), { esc }), "", "si ninguna respondio, nada");
+  const mixto = A.afueraHtml(datos([], [{ id: "ebay", ok: true, n: 0 }, { id: "amazon", ok: false, n: 0 }]), { esc });
+  assert.match(mixto, /en eBay \(EE\.UU\.\)\./);
+  assert.match(mixto, /Amazon \(EE\.UU\.\) no respondió/, "la caida no se cuenta como buscada");
+});
+
+test("un aviso con precio que no es numero no se pinta", () => {
+  const html = A.afueraHtml(datos([item({ precio: "89", nombre: "texto" }), item({ nombre: "bien" })]), { esc });
+  assert.ok(!html.includes("texto"));
+  assert.ok(html.includes("bien"));
+});
+
+test("una moneda que no es dolar se muestra con su codigo y la calculadora la recibe", () => {
+  const html = A.afueraHtml(datos([item({ moneda: "EUR", precio: 50, envio: null })]), { esc });
+  assert.match(html, /EUR 50,00/);
+  const href = html.match(/href="([^"]*#costo)"/)[1].replace(/&amp;/g, "&");
+  assert.equal(C.estadoDeUrl(href.split("?")[1].split("#")[0]).moneda, "EUR");
+});

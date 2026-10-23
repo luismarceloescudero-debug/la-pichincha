@@ -796,3 +796,16 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .k-link-ficha{border-top:1px solid var(--line);padding-top:10px;margin-bottom:8px}
 .k-link-ficha p{margin:0 0 10px;overflow-wrap:anywhere}
 .k-link-acciones{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+
+/* --- Spec 022: Afuera en vivo (respuesta del Worker) --- */
+.afuera-vivo{margin:18px 0 4px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.afuera-vivo h3{margin:0 0 6px;font-size:1rem;display:flex;align-items:center;gap:6px}
+.afv-lista{list-style:none;margin:12px 0;padding:0;display:grid;gap:10px}
+.afv-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.afv-item img{flex:none;width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff}
+.afv-txt{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0}
+.afv-txt > a:first-child{flex-basis:100%;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.afv-precio{font:600 1rem var(--font-mono);color:var(--ink)}
+.afv-puesto{font:600 .9rem var(--font-mono);color:var(--good)}
+.afuera-vivo .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
+.afv-cargando{margin-top:14px}

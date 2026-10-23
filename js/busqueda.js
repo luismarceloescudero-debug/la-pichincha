@@ -154,6 +154,26 @@ function buscar(q, tope = 60) { return buscarTodo(q).slice(0, tope * 3); }
 
 let ULTIMA_BUSQUEDA = [];
 
+/* Afuera en vivo (spec 022): con cada busqueda se le pregunta al Worker (sitio.json afuera_url, en el meta de index.html) por las
+   ofertas internacionales con envio a Argentina. Lo puro esta en js/afuera.js. Una consulta se pide una sola vez por sesion y
+   recien cuando se deja de escribir; sin Worker, caido o lento, no se pinta nada y queda lo de la spec 020. */
+const AFUERA_URL = (document.querySelector('meta[name="afuera-url"]') || {}).content || "";
+const AFUERA = new Map();      // url -> respuesta del Worker (null si fallo)
+let AFUERA_TURNO = 0, AFUERA_ESPERA = null;
+function pintarAfuera(q, mejorAca) {
+  const caja = $("#afuera"), url = Afuera.urlConsulta(AFUERA_URL, q), turno = ++AFUERA_TURNO;
+  clearTimeout(AFUERA_ESPERA);
+  if (!caja) return;
+  const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, pathname: location.pathname }); };
+  if (!url) { caja.innerHTML = ""; return; }
+  if (AFUERA.has(url)) return pintar(AFUERA.get(url));
+  caja.innerHTML = `<p class="sub chico afv-cargando">${icono("fuera")} Buscando afuera…</p>`;
+  AFUERA_ESPERA = setTimeout(() => {
+    const corte = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? { signal: AbortSignal.timeout(8000) } : {};
+    fetch(url, corte).then(r => (r.ok ? r.json() : null)).catch(() => null).then(d => { AFUERA.set(url, d); pintar(d); });
+  }, 900);
+}
+
 function pintarResultados(q) {
   const caja = $("#res"), est = $("#estado");
   if (!IDX || !caja) return;
@@ -165,6 +185,7 @@ function pintarResultados(q) {
     caja.innerHTML = "";
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
+    pintarAfuera("", null);
     return;
   }
   const crudo = buscarTodo(q);   // se ordena sobre TODO el catalogo, no sobre los primeros 180
@@ -177,6 +198,7 @@ function pintarResultados(q) {
       <p class="sub chico">¿Lo encontraste afuera? <button class="acc" data-ir-vista="costo">${icono("camion")} Pegá el link y calculá cuánto te sale puesto en casa</button></p>`;
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
+    pintarAfuera(q, null);
     return;
   }
   // La busqueda arma la comparativa, el ranking de comercios y el veredicto, y la
@@ -184,6 +206,7 @@ function pintarResultados(q) {
   // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
   fijarConsulta(q);
   const A = ANALISIS;
+  pintarAfuera(q, A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null);
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.
@@ -316,5 +339,6 @@ function vistaBuscar() {
     <div id="puente"></div>
     <p class="estado" id="estado">cargando índice…</p>
     ${barraAcciones("buscar")}
-    <div class="res" id="res"></div></div>`;
+    <div class="res" id="res"></div>
+    <div id="afuera" aria-live="polite"></div></div>`;
 }

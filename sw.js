@@ -15,7 +15,7 @@
   const CACHE = PREFIJO + VERSION;
   const LIMITE_MS = 4000;
   /* La cascara y el ultimo indice: lo necesario para abrir y buscar sin conexion. */
-  const CASCARA = ["./", "index.html", "css/sitio.css", "js/buscador.js", "js/pagina.js", "js/analisis.js", "js/categorias.js", "js/especificaciones.js", "js/novedades.js", "js/ofertas.js", "js/premium.js", "js/modos.js", "js/app.js", "js/base.js", "js/vistas.js", "js/indice-ofertas.js", "js/historial.js", "js/busqueda.js", "js/exportar.js", "js/consulta.js", "js/medicion.js", "js/arranque.js", "js/costos.js", "js/puesto.js", "js/serie-precios.js", "js/monedas.js", "js/calculadora.js", "js/importar.js", "js/vista-historial.js", "js/vista-costo.js",
+  const CASCARA = ["./", "index.html", "css/sitio.css", "js/buscador.js", "js/pagina.js", "js/analisis.js", "js/categorias.js", "js/especificaciones.js", "js/novedades.js", "js/ofertas.js", "js/premium.js", "js/modos.js", "js/app.js", "js/base.js", "js/vistas.js", "js/indice-ofertas.js", "js/historial.js", "js/busqueda.js", "js/exportar.js", "js/consulta.js", "js/medicion.js", "js/arranque.js", "js/costos.js", "js/puesto.js", "js/serie-precios.js", "js/monedas.js", "js/calculadora.js", "js/importar.js", "js/afuera.js", "js/vista-historial.js", "js/vista-costo.js",
     "manifest.webmanifest", "sin-red.html", "img/icono-192.png", "img/icono-512.png", "img/apple-touch-icon.png", "indice.json", "importacion.json"];
 
   const sinBusqueda = u => { const x = new URL(u); x.search = ""; x.hash = ""; return x.href; };
