@@ -30,15 +30,16 @@ y todo cambio del proceso se hace en este archivo, en un PR propio. Las reglas d
 | Combo | Estrategia | Orden | Para que |
 | --- | --- | --- | --- |
 | `revision` | prioridad | Groq `openai/gpt-oss-120b` → Gemini `gemini-2.5-flash` → Claude `claude-sonnet-5-5` | Triaje y segunda opinion corta. Para plata, normativa o seguridad el revisor externo sigue siendo Claude con el archivo completo (seccion 1.2) |
-| `rapido` | prioridad | Groq `qwen/qwen3.8-27b` → Gemini `gemini-2.5-flash-lite` (**retirado por Google, 404**) → Groq `openai/gpt-oss-20b` | Clasificar, resumir, extraer. Solo triaje |
+| `colchon-sin-pago` | prioridad | Codex `gpt-5.6-terra-low` → Gemini `gemini-3-flash-preview` → Gemini `gemini-2.5-flash` | Claude Code por OmniRoute cuando se agota la suscripcion (seccion 1.3). Sin OpenRouter |
+| `rapido` | prioridad | Groq `qwen/qwen3.8-27b` → Gemini `gemini-2.5-flash` (cambiado el 23/10: el `-lite` lo retiro Google) → Groq `openai/gpt-oss-20b` | Clasificar, resumir, extraer. Solo triaje |
 
 **Como se usan.** Por el endpoint del servidor, con el nombre del combo como modelo: `POST http://127.0.0.1:20128/v1/chat/completions` con `{"model": "revision", ...}`. Las cabeceras `x-omniroute-decision` y `x-omniroute-model` dicen quien respondio. Prueba del 19/10: `revision` respondio con gpt-oss-120b en 850 ms y `rapido` con qwen3.8-27b en 884 ms. **Ojo**: la herramienta MCP `omniroute_route_request` **no respeta** el nombre del combo (el 19/10 mando una revision a Gemini, el segundo del combo, con `combo: null`); para los combos se usa el endpoint.
 
-**Pendiente del dueño en el panel de OmniRoute** (las herramientas MCP no editan combos y la API de gestion pide credenciales):
-1. **Reconectar Claude**: la conexion `claude` figura como vencida (`[claude] All 1 connection(s) authentication expired`); es la tercera vez desde el 16/10. Hasta entonces el respaldo de `revision` es solo Gemini.
-2. En `rapido`, cambiar `gemini-2.5-flash-lite` por `gemini-2.5-flash`. Los `gemini-3.x` estaban saturados el 19/10 (503). Hoy el combo anda igual: el segundo falla en 2 s y pasa al tercero.
+**Como se editan sin el panel** (23/10/2026): los combos viven en la tabla `combos` de `~/.omniroute/storage.sqlite` (columna `data`, JSON con la lista `models`). Se para OmniRoute (`parar.cmd`), se hace un backup en `~/.omniroute/db_backups/`, se edita y se vuelve a levantar (`iniciar.cmd`). Asi se borro `claude-primero` y se cambio el Gemini de `rapido` el 23/10. La conexion `openrouter` ya no existe.
 
-**No probado de punta a punta**: el salto automatico cuando falla el primero (cada miembro se probo por separado con `omniroute_test_combo`, y el segundo de `rapido` fallo y el combo siguio). Probarlo al reconectar Claude con un combo de prueba.
+**Prueba del 23/10** por el endpoint: `colchon-sin-pago` respondio con `gemini-3-flash-preview` (Codex sin cuota, salto al segundo: el salto automatico anda) y `rapido` con `gemini-2.5-flash`; ninguno por OpenRouter.
+
+**Pendiente del dueño en el panel de OmniRoute**: **reconectar Claude** (la conexion `claude` figura vencida). Hasta entonces el respaldo de `revision` es solo Gemini.
 
 ### 1.1.2 Modelos de OpenCode (19/10/2026)
 
@@ -58,7 +59,11 @@ OpenCode 1.19.3 esta instalado (`opencode-ai` global) con cinco proveedores list
 - **Revisor segun el riesgo**: para plata, normativa o seguridad, el revisor externo es **Claude en un contexto nuevo** (un subagente o una sesion aparte); los modelos chicos solo hacen triaje. Se les pide poco (hasta 5 hallazgos) y que cada uno traiga **una entrada numerica que lo demuestre**: lo que no se puede demostrar se descarta.
 - **Un hallazgo valido deja un test**: se escribe el test que falla, se arregla y se anota quien lo encontro (TDD).
 
-### 1.3 Colchon cuando se agota el limite de Claude: OpenCode gratis (22/10/2026)
+### 1.3 Colchon cuando se agota el limite de Claude: OpenCode gratis (22/10/2026) u OmniRoute sin pago (23/10/2026)
+
+- **Claude Code por OmniRoute, sin modelos pagos** (23/10): `privado\claude.cmd` abre Claude Code con la suscripcion y, al salir (por ejemplo porque se agoto el limite), pregunta si seguir la misma conversacion por el colchon. `privado\claude-colchon.cmd` hace eso directo: levanta OmniRoute si esta caido, lee la clave de OmniRoute de su base al arrancar (no queda escrita en ningun archivo), apunta `ANTHROPIC_BASE_URL` a `http://127.0.0.1:20128`, pone `ANTHROPIC_MODEL`, los `ANTHROPIC_DEFAULT_*_MODEL` y el de los subagentes en `colchon-sin-pago` y corre `claude --continue`.
+- **Medido el 23/10** (tarea real de lectura: «que archivo arma "Lo mas buscado" y que minimo exige», con `claude -p` y solo `Read`/`Grep`/`Glob`): **129 s, 9 turnos, respuesta correcta** (`js/buscadas.js:14`, minimo 5). Lo atendio todo Gemini: 11 llamadas a `gemini-3-flash-preview` y un 502 que salto solo a `gemini-2.5-flash`; Codex no tenia cuota. Claude Code avisa `unrecognized_model` y estima US$ 0,52, pero es una cuenta propia sin base (`costBasis: unknown`): no hubo cobro, Gemini va con clave gratis.
+- **«API Usage Billing» en `/status`**: es lo esperable en una sesion de colchon, porque Claude Code habla con un servidor propio con una clave (`ANTHROPIC_AUTH_TOKEN`), no con la cuenta de claude.ai. No es un cobro de Anthropic: lo que se gasta es la cuota gratis de Gemini o la de Codex. El 23/10 `claude auth status` fuera del colchon dio `authMethod: claude.ai`, suscripcion `pro`, y no hay `ANTHROPIC_API_KEY` en el entorno ni en los `settings`. Si aparece en una sesion abierta normal, cerrarla y abrir con `privado\claude.cmd`, que limpia esas variables.
 
 - **Como se lanza**: `privado\INICIAR.bat colchon` abre OpenCode con `opencode/deepseek-v4.1-flash-free` en la pestaña 1 (la 2 es el progreso). `privado\INICIAR.bat` sin argumento abre Claude Code normal, con la suscripcion. Desde una sesion de Claude: `opencode run -m opencode/<modelo>-free "<que hacer>"`.
 - **Medido el 22/10**: `deepseek-v4.1-flash-free` contesto en 22 s. Los gratis tardan de 1,5 a 6 minutos en una revision y a veces no cierran (ver 1.1.2 y `docs/delegacion-modelos.md`): sirven para revisar, resumir o borradores, no para el camino critico.
@@ -168,7 +173,7 @@ Se ejecuta en este orden lo que **no depende de una decision del dueño**; lo de
 | 1 | **K1**: motor de calculo de costos (`js/costos.js`) con los 4 casos de referencia y las reglas de `importacion.json` | plan v3, spec 010 | nada | **hecho el 15/10** (24 tests, mutaciones detectadas, revision multimodelo) |
 | 2 | **K2**: monedas en vivo (`js/monedas.js`, copia del build, CSP) | plan v3 | nada | **hecho el 15/10** (29 tests y 10 del generador, 4 mutaciones, revision de cinco ejes y revision externa) |
 | 3 | Actualizar spec-kit 1.2.0, Superpowers 7 y agent-skills 0.6.13 | seccion 3 | nada | **hecho el 16/10** |
-| 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1.1 | el dueño (panel de OmniRoute) | **hecho el 19/10** (creados y probados por el endpoint); falta reconectar Claude y cambiar el Gemini lite de `rapido` en el panel |
+| 4 | Crear los combos `revision` y `rapido` en OmniRoute | seccion 1.1.1 | el dueño (panel de OmniRoute) | **hecho el 19/10** (creados y probados por el endpoint); el Gemini de `rapido` se cambio el 23/10; falta reconectar Claude en el panel |
 | 5 | **K3**: la calculadora en la app | plan v3 | K1 y K2 | **hecho el 16/10** (pestaña Costo de importar, 30 tests, un bug del motor corregido) |
 | 6 | **N1 a N5**: novedades por marca | spec 011 | decisiones 1 a 4 de la spec | espera al dueño |
 | 7 | Guardar el stock de las fuentes directas (CompraGamer lo trae) | caja abierta | decision del dueño | propuesto |
