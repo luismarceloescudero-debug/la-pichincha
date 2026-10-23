@@ -24,8 +24,8 @@ import modelo
 API = "https://api.mercadolibre.com"
 SITIO = "https://www.mercadolibre.com.ar"
 POR_PEDIDO = 100      # lo maximo que acepta /products/search por pedido
-POR_RUBRO = 100       # productos por rubro: los primeros de la busqueda del catalogo
-HILOS = 6             # pedidos de vendedores en paralelo
+POR_RUBRO = 300       # productos por rubro: los primeros de la busqueda del catalogo (de cada 100, 5 a 30 tienen vendedor)
+HILOS = 4             # pedidos de vendedores en paralelo
 TIMEOUT = 30
 BLOQUEOS = (403, 429)
 UA = "Mozilla/5.0 (compatible; LaPichincha-indexador/1.0; +https://pichinchadeldia.com.ar)"
@@ -120,7 +120,12 @@ def productos(pedir, rubro, tope):
     for desde in range(0, tope, POR_PEDIDO):
         q = urllib.parse.urlencode({"status": "active", "site_id": "MLA", "domain_id": rubro["dominio"],
                                     "q": rubro["q"], "limit": min(POR_PEDIDO, tope - desde), "offset": desde})
-        filas = (pedir("/products/search?" + q) or {}).get("results") or []
+        try:
+            filas = (pedir("/products/search?" + q) or {}).get("results") or []
+        except urllib.error.HTTPError as e:
+            if e.code != 400:
+                raise
+            break       # la API no deja paginar mas hondo: queda lo que se leyo
         for p in filas:
             if isinstance(p, dict) and p.get("domain_id") == rubro["dominio"] and p.get("id") not in vistos:
                 vistos.add(p.get("id"))
