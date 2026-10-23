@@ -28,7 +28,8 @@ export function parsearAmazon(json, fecha) {
       && it.offersV2.listings[0].price.money || {};
     const img = it.images && it.images.primary && it.images.primary.medium;
     return aviso({ fuente: "amazon", nombre: it.itemInfo && it.itemInfo.title && it.itemInfo.title.displayValue, precio: m.amount,
-      moneda: m.currency, envio: null, url: it.detailPageURL, imagen: img && img.url, afiliado: true, fecha });
+      moneda: m.currency, envio: null, url: it.detailPageURL, imagen: img && img.url,
+      afiliado: /[?&]tag=/.test(it.detailPageURL || ""), fecha });   // se rotula solo si el link lleva el tag
   }));
 }
 
