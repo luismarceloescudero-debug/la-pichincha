@@ -35,10 +35,12 @@ flowchart TD
         FI --> IN["node generar_info.js (L164)"]
         IN --> GU["node guardia.js (alarma: issue 'guardia' y sin Telegram)"]
         GU --> TG["python publicar_telegram.py (schedule o manual, sin alarma de la guardia)"]
-        TG --> CO["python generar_cotizaciones.py (L180)"]
+        TG --> IG["python publicar_instagram.py armar (spec 025): _sitio/instagram/AAAA-MM-DD.jpg + artefacto instagram.json"]
+        IG --> CO["python generar_cotizaciones.py (L180)"]
         CO --> CB["python cobertura.py (L183)"]
         CB --> UP["upload-pages-artifact _sitio"]
         UP --> DP["job publicar: deploy-pages"]
+        DP --> IP["job instagram: publicar_instagram.py publicar (renueva el token, no repite el dia)"]
     end
 
     DJ[("datos.json")] --> A
@@ -62,6 +64,7 @@ flowchart TD
     FE --> OF["_sitio/ofertas.xml, ofertas.json, hoy/"]
     OF --> TG
     TG --> TEL["canal de Telegram"]
+    IP --> IGC["cuenta de Instagram @lapichinchadeldia"]
     IJ --> IN
     SJ --> IN
     IN --> EL["_sitio/estado/, legal/"]
@@ -124,6 +127,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Paginas por busqueda** | `generar_consultas.js` (descubre consultas en el indice), `consultas.json` + `generar_paginas.py` (valida y orquesta) + `generar_paginas.js` (escribe) | `js/analisis.js` (analisis y tabla "Precio por tienda": `precioPorTienda`, `tablaTiendasHtml`), compartido con la Comparativa (`js/consulta.js`) | `tests/test_generar_paginas.py`, `tests/js/generador.test.js`, `tests/js/consultas-auto.test.js`, `tests/js/pagina.test.js` |
 | **PWA** | `sw.js` (marcador `__VERSION__`), `manifest.webmanifest`, `sin-red.html`, `js/app.js`, `publicar_app.py` | el workflow (L153) | `tests/js/sw.test.js`, `tests/test_publicar_app.py` |
 | **Telegram y RSS** | `publicar_telegram.py` (lee `_sitio/ofertas.json`), `generar_feed.js` (`ofertas.xml`); el feed por busqueda (`/precios/<slug>/feed.xml`) lo arma `renderFeedPagina` en `generar_paginas.js` | secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` (L169-175) | `tests/test_publicar_telegram.py`, `tests/test_canal.py`, `tests/js/feed.test.js` |
+| **Instagram** (spec 025) | `publicar_instagram.py`: `armar` (tarjeta 1080x1350 de `_sitio/ofertas.json`, JPEG con Chrome sin interfaz) y `publicar` (renovar el token, no repetir el dia, contenedor y `media_publish`) | secreto `INSTAGRAM_TOKEN`, variable `INSTAGRAM_USER_ID`, opcional `INSTAGRAM_GH_TOKEN`; step "Armar la publicacion de Instagram" y job `instagram` de `actualizar.yml` | `tests/test_publicar_instagram.py` |
 | **Afiliados** (Amazon, E1) | `Pagina.enlaceAmazon` y `AMAZON_TAG` (`js/pagina.js`), `amazonHtml` (`js/vistas.js`) con el rotulo «enlace de afiliado» y `rel="sponsored"`; aviso en `/legal/#afiliados` (`generar_info.js`) | la busqueda sin resultados y el analisis de cada producto curado; el clic se mide como `clic_saliente/amazon.com` | `tests/js/pagina.test.js`, `tests/js/plus-ui.test.js` |
 | **Afiliados** (Mercado Libre, spec 027) | `Pagina.enlaceTienda` y `MERCADO_LIBRE_AFILIADO` (`js/pagina.js`): suma `matt_word` y `matt_tool` a un link de mercadolibre.com.ar | `generar_feed.js` (RSS, `/hoy/` con rotulo y `rel=sponsored`, `enlace` en `ofertas.json`), `publicar_telegram.py`; aviso en `/legal/#afiliados` | `tests/js/pagina.test.js`, `tests/js/feed.test.js`, `tests/test_publicar_telegram.py` |
 | **Direccion publica y CSP** | `sitio.json` | todos los generadores y `index.html` | `tests/test_sitio.py` |

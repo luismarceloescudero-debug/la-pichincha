@@ -16,6 +16,10 @@ on:
         description: "Rearmar el indice de busqueda"
         type: boolean
         default: true
+      instagram:
+        description: "Publicar tambien en Instagram (si ya hay una publicacion del dia, no se repite)"
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths-ignore:
@@ -39,6 +43,8 @@ jobs:
   construir:
     needs: tests
     runs-on: ubuntu-latest
+    outputs:
+      alarma: ${{ steps.guardia.outputs.alarma }}
     steps:
       - uses: actions/checkout@v7
 
@@ -305,6 +311,23 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python publicar_telegram.py _sitio/ofertas.json
 
+      # Instagram (spec 025): la imagen se arma aca, con las mismas ofertas ya verificadas que Telegram, y viaja con el sitio,
+      # porque Instagram la baja de una direccion publica. La publica el job `instagram`, despues del despliegue. Solo la
+      # corrida programada (o una manual que lo pida) y sin alarma de la guardia. Si falla, el sitio sale igual.
+      - name: Armar la publicacion de Instagram
+        id: instagram
+        if: (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.instagram)) && steps.guardia.outputs.alarma != 'true'
+        continue-on-error: true
+        run: python publicar_instagram.py armar _sitio/ofertas.json --salida _sitio --post instagram.json
+
+      - name: Guardar la publicacion de Instagram para despues del despliegue
+        if: steps.instagram.outcome == 'success' && hashFiles('instagram.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram
+          path: instagram.json
+          retention-days: 3
+
       # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
       - name: Medir la cobertura por codigo de modelo
         run: |
@@ -323,3 +346,35 @@ jobs:
     steps:
       - id: desplegar
         uses: actions/deploy-pages@v5
+
+  # Publica en Instagram la imagen que el despliegue acaba de poner en el sitio (spec 025). Antes renueva el token (60 dias)
+  # y no repite el dia. Sin los datos de la cuenta, sin publicacion armada o si Instagram falla, avisa y no falla.
+  instagram:
+    needs: [construir, publicar]
+    if: (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.instagram)) && needs.construir.outputs.alarma != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Traer la publicacion armada
+        id: post
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: instagram
+
+      # INSTAGRAM_GH_TOKEN es opcional: un token de GitHub con permiso de escribir los secretos de este repo, para guardar
+      # el token de Instagram si al renovarlo vuelve uno distinto.
+      - name: Publicar las pichinchas del dia en Instagram
+        if: steps.post.outcome == 'success'
+        env:
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ vars.INSTAGRAM_USER_ID }}
+          INSTAGRAM_GH_TOKEN: ${{ secrets.INSTAGRAM_GH_TOKEN }}
+        run: python publicar_instagram.py publicar instagram.json
