@@ -158,19 +158,23 @@ let ULTIMA_BUSQUEDA = [];
    ofertas internacionales con envio a Argentina. Lo puro esta en js/afuera.js. Una consulta se pide una sola vez por sesion y
    recien cuando se deja de escribir; sin Worker, caido o lento, no se pinta nada y queda lo de la spec 020. */
 const AFUERA_URL = (document.querySelector('meta[name="afuera-url"]') || {}).content || "";
-const AFUERA = new Map();      // url -> respuesta del Worker (null si fallo)
+const AFUERA = new Map();      // url -> respuesta del Worker
+const AFUERA_FALLO = new Map(); // url -> cuando fallo: no se reintenta durante un minuto (revision de OmniRoute, spec 022)
 let AFUERA_TURNO = 0, AFUERA_ESPERA = null;
 function pintarAfuera(q, mejorAca) {
   const caja = $("#afuera"), url = Afuera.urlConsulta(AFUERA_URL, q), turno = ++AFUERA_TURNO;
   clearTimeout(AFUERA_ESPERA);
   if (!caja) return;
   const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, pathname: location.pathname }); };
-  if (!url) { caja.innerHTML = ""; return; }
+  if (!url || Date.now() - (AFUERA_FALLO.get(url) || 0) < 60000) { caja.innerHTML = ""; return; }
   if (AFUERA.has(url)) return pintar(AFUERA.get(url));
   caja.innerHTML = `<p class="sub chico afv-cargando">${icono("fuera")} Buscando afuera…</p>`;
   AFUERA_ESPERA = setTimeout(() => {
     const corte = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? { signal: AbortSignal.timeout(8000) } : {};
-    fetch(url, corte).then(r => (r.ok ? r.json() : null)).catch(() => null).then(d => { AFUERA.set(url, d); pintar(d); });
+    fetch(url, corte).then(r => (r.ok ? r.json() : null)).catch(() => null).then(d => {
+      if (d) AFUERA.set(url, d); else AFUERA_FALLO.set(url, Date.now());
+      pintar(d);
+    });
   }, 900);
 }
 

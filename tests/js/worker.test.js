@@ -51,6 +51,10 @@ test("Amazon (Creators API): titulo, precio de la primera oferta y detailPageURL
     precioArs: null, url: "https://www.amazon.com/dp/B0DLGCHL8M?tag=lapichincha-20&linkCode=ogi",
     imagen: "https://m.media-amazon.com/images/I/41abc._SL160_.jpg", afiliado: true, fecha: AHORA }]);
   assert.deepEqual(parsearAmazon(undefined, AHORA), []);
+  // Hallazgo de la revision de OmniRoute: sin tag en el link no es de afiliado y no se rotula asi
+  const sinTag = { searchResult: { items: [{ detailPageURL: "https://www.amazon.com/dp/B0DLGCHL8M", itemInfo: { title: { displayValue: "x" } },
+    offersV2: { listings: [{ price: { money: { amount: 10, currency: "USD" } } }] } }] } };
+  assert.equal(parsearAmazon(sinTag, AHORA)[0].afiliado, false);
 });
 
 test("un aviso con url que no es https o con precio raro no entra", async () => {
