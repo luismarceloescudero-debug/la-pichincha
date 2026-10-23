@@ -778,3 +778,21 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .hp-tabla th,.hp-tabla td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
 .hp-tabla td{font-family:var(--font-mono)}
 @media (max-width:520px){.hp{margin-left:0}}
+
+/* --- Spec 020: buscar afuera sin resultados y pegar un link en Costo de importar --- */
+.afuera{margin:16px 0 4px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.afuera h3{margin:0 0 4px;font-size:1rem}
+.afuera-lista{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:12px}
+.afuera-lista li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.afuera-lista li > a{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:10px;
+  font:600 .9rem var(--font-sans);color:var(--ink);text-decoration:none;background:var(--surface-2);border:1px solid var(--line)}
+.afuera-lista li > a:hover{border-color:var(--accent);color:var(--accent)}
+.afuera-lista li > .sub{flex:0 0 100%;max-width:none;margin:0}
+.afuera .rotulo,.k-link .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
+.afuera .rotulo a,.k-link .rotulo a{color:var(--ink-2)}
+.k-link{--sc:var(--accent);margin:0 0 22px;padding:16px 18px 6px;border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));
+  border-radius:16px;background:var(--surface)}
+.k-link h3{margin:0 0 10px;font-size:1rem}
+.k-link-ficha{border-top:1px solid var(--line);padding-top:10px;margin-bottom:8px}
+.k-link-ficha p{margin:0 0 10px;overflow-wrap:anywhere}
+.k-link-acciones{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}

@@ -170,10 +170,11 @@ function pintarResultados(q) {
   const crudo = buscarTodo(q);   // se ordena sobre TODO el catalogo, no sobre los primeros 180
   if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
-    // Si la marca o el producto no estan en ninguna fuente, se dice asi; y se ofrece buscarlo afuera y calcular cuanto sale traerlo.
+    // Si la marca o el producto no estan en ninguna fuente, se dice asi y ya se arma la busqueda en cada tienda de afuera
+    // (spec 020: solo enlaces, js/importar.js); con el link del que encuentre, la calculadora saca cuanto sale traerlo.
     caja.innerHTML = `<p class="sub">Ninguna de las ${Object.keys(IDX.tiendas).length} tiendas del índice tiene «${esc(q)}». Si es un modelo, probá con la marca sola o con menos palabras.</p>
-      ${amazonHtml(q, `Buscar «${q}» en Amazon (EE.UU.)`)}
-      <p class="sub chico">¿Lo traerías de afuera? <button class="acc" data-ir-vista="costo">${icono("camion")} Calculá cuánto te sale puesto en casa</button></p>`;
+      ${Importar.buscarAfueraHtml(q, { esc, icono })}
+      <p class="sub chico">¿Lo encontraste afuera? <button class="acc" data-ir-vista="costo">${icono("camion")} Pegá el link y calculá cuánto te sale puesto en casa</button></p>`;
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
     return;
