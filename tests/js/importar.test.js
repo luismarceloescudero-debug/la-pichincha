@@ -87,6 +87,9 @@ test("parsearEnlace reconoce Amazon por /dp/, /gp/product/ y /gp/aw/d/, con el A
 
 test("un link corto de Amazon (amzn.to) se reconoce, pero sin ASIN: no se puede saber sin abrirlo", () => {
   assert.deepEqual(I.parsearEnlace("https://amzn.to/3AbCdEf"), { tienda: "amazon", id: null, nombre: "", url: "https://amzn.to/3AbCdEf" });
+  // El «Compartir» de la app de Amazon da a.co/d/...
+  assert.deepEqual(I.parsearEnlace("https://a.co/d/7xYzAbC"), { tienda: "amazon", id: null, nombre: "", url: "https://a.co/d/7xYzAbC" });
+  assert.equal(I.parsearEnlace("https://a.co/"), null);
 });
 
 test("parsearEnlace reconoce Tiendamia /p/<origen>/<id>/<slug> y, si viene de Amazon, el ASIN", () => {

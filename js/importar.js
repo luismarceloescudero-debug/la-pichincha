@@ -99,7 +99,8 @@
       const asin = m[2].toUpperCase();
       return { tienda: "amazon", id: asin, nombre: nombreDeSlug(m[1]), url: "https://www.amazon.com/dp/" + asin };
     }
-    if (host === "amzn.to") return ruta.length > 1 ? { tienda: "amazon", id: null, nombre: "", url: u.href } : null;
+    // Links cortos (amzn.to, y a.co del «Compartir» de la app): sin abrirlos no se sabe el producto.
+    if (host === "amzn.to" || host === "a.co") return ruta.length > 1 ? { tienda: "amazon", id: null, nombre: "", url: u.href } : null;
     if (es("tiendamia")) {
       m = ruta.match(/^\/p\/([a-z]+)\/([a-z0-9]+)(?:\/([^/]+))?/i);
       if (!m) return null;
