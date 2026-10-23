@@ -1,0 +1,20 @@
+{
+  "_nota": "Armado con la respuesta de ejemplo de SearchItems de la doc de la Creators API (23/10/2026): no es una respuesta real, la cuenta todavia no tiene acceso.",
+  "searchResult": {
+    "totalResultCount": 2,
+    "items": [
+      {
+        "asin": "B0DLGCHL8M",
+        "detailPageURL": "https://www.amazon.com/dp/B0DLGCHL8M?tag=lapichincha-20&linkCode=ogi",
+        "images": { "primary": { "medium": { "url": "https://m.media-amazon.com/images/I/41abc._SL160_.jpg" } } },
+        "itemInfo": { "title": { "displayValue": "Soundcore AeroClip Open-Ear Earbuds" } },
+        "offersV2": { "listings": [{ "price": { "money": { "amount": 79.99, "currency": "USD" } } }] }
+      },
+      {
+        "asin": "B000000000",
+        "detailPageURL": "https://www.amazon.com/dp/B000000000?tag=lapichincha-20",
+        "itemInfo": { "title": { "displayValue": "Sin oferta" } }
+      }
+    ]
+  }
+}
