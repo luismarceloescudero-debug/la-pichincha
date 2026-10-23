@@ -68,7 +68,7 @@ notebook 5, monitor 12, placa de video 19, procesador 54, memoria RAM 20, SSD 8,
 
 ## Tests
 
-`tests/test_mercadolibre.py` (21): el vendedor elegido (nuevo, pesos, Argentina, precio anterior solo si es mas alto),
+`tests/test_mercadolibre.py` (20): el vendedor elegido (nuevo, pesos, Argentina, precio anterior solo si es mas alto),
 el aviso (direccion, foto, marca, codigo), el recorrido por rubro (dominio, paginas de 100, tope, `--max-paginas`,
 corte donde la API deja de paginar), un producto que no responde, un bloqueo que corta, el token, la pausa, el
 reintento ante un 429 y la copia de ComparaYa del mismo `/p/MLA...`.
