@@ -64,6 +64,23 @@ class PoliticaDeContenido(unittest.TestCase):
                 self.assertIn(origen, csp)
 
 
+class Afuera(unittest.TestCase):
+    """El Worker «Afuera» (spec 022): su direccion vive en sitio.json, index.html la lleva en un meta y la CSP la deja pasar."""
+
+    def test_la_direccion_del_worker_esta_vacia_o_es_https_sin_ruta(self):
+        url = SITIO["afuera_url"]
+        self.assertTrue(url == "" or re.fullmatch(r"https://[a-z0-9.-]+", url), url)
+
+    def test_index_html_lleva_la_direccion_del_worker_de_sitio_json(self):
+        html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(re.findall(r'<meta name="afuera-url" content="([^"]*)">', html), [SITIO["afuera_url"]])
+
+    def test_la_politica_deja_conectar_con_el_worker(self):
+        if SITIO["afuera_url"]:
+            connect = re.search(r"connect-src ([^;]+)", SITIO["csp"]).group(1).split()
+            self.assertIn(SITIO["afuera_url"], connect)
+
+
 class Icono(unittest.TestCase):
     """Sin <link rel="icon"> el navegador pide /favicon.ico, que no existe: un 404 en cada pagina."""
 
