@@ -478,3 +478,39 @@ test("cruce por generacion: la media de la generacion anterior no es la media de
   assert.equal(O.calcularOfertas({ productos: [...mediaVieja, ...referencia, anterior] }).cruceGen.size, 0,
     "la media de la generacion anterior no es la media de hoy");
 });
+
+// ---- Una oferta por modelo y familia (23/10): Mexx publica la misma Lenovo V15 con y sin Windows 11 Pro y las dos salieron
+// en las ofertas del dia, con el nombre recortado en la imagen se veian identicas. Fixture: el indice publicado ese dia. ----
+const LENOVO = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "ofertas", "lenovo-v15-2026-10-23.json"), "utf8"));
+const lenovo = id => LENOVO.productos.find(f => f[2].includes("/" + id + "-"));
+
+test("familia: el mismo equipo con o sin sistema operativo, color o «#» es la misma familia; otra RAM no", () => {
+  assert.equal(O.familia(lenovo(50758)), O.familia(lenovo(50761)));
+  assert.notEqual(O.familia(lenovo(50758)), O.familia(lenovo(50757)));        // 32GB contra 16GB
+  for (const [a, b] of [["Notebook HP 15 i5 16GB 512GB Negro", "Notebook HP 15 i5 16GB 512GB Silver"],
+                        ["Notebook HP 15 i5 16GB 512GB FreeDOS", "Notebook HP 15 i5 16GB 512GB Windows 11 Home"],
+                        ["Notebook HP 15 i5 16GB 512GB W11 Pro", "Notebook HP 15 i5 16GB 512GB #"],
+                        ["Notebook HP 15 i5 16GB 512GB Sin Sistema Operativo", "Notebook HP 15 i5 16 GB 512 GB"]])
+    assert.equal(O.familia([a]), O.familia([b]), `${a} / ${b}`);
+  assert.notEqual(O.familia(["Notebook HP 15 i5 16GB 512GB"]), O.familia(["Notebook HP 15 i7 16GB 512GB"]));
+});
+
+test("familia: con codigo de modelo manda el codigo", () => {
+  const f = [...lenovo(50758)]; f[9] = "83CC0123AR";
+  const g = [...lenovo(50737)]; g[9] = "83CC0123AR";
+  assert.equal(O.familia(f), O.familia(g));
+});
+
+test("destacadas: la misma Lenovo con y sin Windows ocupa un solo lugar, el de la mejor oferta", () => {
+  const nombres = O.destacadas(LENOVO, 10).map(o => o.f[2]);
+  assert.equal(nombres.filter(u => /\/5075[8]-|\/50761-/.test(u)).length, 1);
+  assert.ok(nombres.some(u => u.includes("/50758-")), "queda la de mayor descuento (16,3% contra 15,9%)");
+});
+
+test("destacadas: el mismo nombre en dos tiendas, sin codigo, tambien ocupa un solo lugar", () => {
+  const a = fila("SSD Kingston NV3 1TB NVMe Gen4 Negro", 90000, { antes: 120000 });
+  const b = fila("SSD Kingston NV3 1TB NVMe Gen4", 95000, { antes: 120000 }); b[3] = "otra";
+  const lista = O.destacadas({ productos: [a, b] }, 10);
+  assert.equal(lista.length, 1);
+  assert.equal(lista[0].f, a);
+});

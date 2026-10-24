@@ -2,7 +2,7 @@
 /* Guardia del indice: mide sobre el indice real lo que tiene que dar la publicacion y avisa cuando algo no cierra.
 
    Uso: node guardia.js --indice indice.json --salida _sitio/guardia.json [--previa guardia-anterior.json]
-                        [--alarma alarma.md] [--resumen $GITHUB_STEP_SUMMARY]
+                        [--ofertas _sitio/ofertas.json] [--alarma alarma.md] [--resumen $GITHUB_STEP_SUMMARY]
 
    Nacio del 18/10/2026: el indice publicado salio con 0 bajas propias en 22.533 avisos (el historial tenia 29) y nadie
    lo vio, porque los tests pasaban con datos de mentira. Cada corrida mide bajas propias y, por categoria, avisos, cuantos
@@ -37,6 +37,18 @@ function medir(idx) {
            categorias };
 }
 
+/* Red de seguridad sobre lo que se va a publicar (23/10: la misma Lenovo con y sin Windows salio dos veces): las ofertas de
+   ofertas.json que son el mismo modelo o la misma familia (O.familia), como [primera, repetida]. */
+function repetidas(ofertas) {
+  const vistas = new Map(), pares = [];
+  for (const o of ofertas || []) {
+    const k = O.familia([o.nombre, 0, "", "", "", 0, 0, "", "", o.modelo || ""]);
+    if (vistas.has(k)) pares.push([vistas.get(k), o]);
+    else vistas.set(k, o);
+  }
+  return pares;
+}
+
 const pct = (a, b) => b ? a / b : 0;
 const p100 = x => Math.round(x * 100) + "%";
 
@@ -46,6 +58,8 @@ function alarmas(m, previa) {
   if (m.historial && dia && m.historial < dia && m.productos > 0 && m.bajasPropias === 0)
     lista.push(`0 bajas propias en todo el índice (${m.productos} avisos) con historial desde el ${m.historial}: ` +
                "la comparación contra el historial no está funcionando (18/10: una segunda corrida en el día las borraba).");
+  for (const [a, b] of m.repetidas || [])
+    lista.push(`dos ofertas del día son el mismo modelo: «${a.nombre}» y «${b.nombre}».`);
   if (m.destacadas < MIN_DESTACADAS)
     lista.push(`solo ${m.destacadas} ofertas para el resumen (mínimo ${MIN_DESTACADAS}): algo filtra de más.`);
   for (const c of C.ORDEN) {
@@ -78,7 +92,9 @@ function main(argv) {
   const arg = nombre => { const i = argv.indexOf("--" + nombre); return i >= 0 ? argv[i + 1] : ""; };
   const idx = leer(arg("indice") || "indice.json");
   if (!idx) { console.log("sin indice: no hay nada que medir"); return 0; }
-  const m = medir(idx), lista = alarmas(m, arg("previa") ? leer(arg("previa")) : null);
+  const m = medir(idx);
+  if (arg("ofertas")) m.repetidas = repetidas((leer(arg("ofertas")) || {}).ofertas);
+  const lista = alarmas(m, arg("previa") ? leer(arg("previa")) : null);
   if (arg("salida")) fs.writeFileSync(arg("salida"), JSON.stringify(m), "utf8");
   const texto = "### Guardia del índice\n\n" + tabla(m) + "\n\n" +
     (lista.length ? "**Alarmas:**\n\n" + lista.map(x => "- " + x).join("\n") : "Sin alarmas.") + "\n";
@@ -89,5 +105,5 @@ function main(argv) {
   return 3;
 }
 
-module.exports = { medir, alarmas, main, MIN_DESTACADAS };
+module.exports = { medir, alarmas, repetidas, main, MIN_DESTACADAS };
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

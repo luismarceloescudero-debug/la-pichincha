@@ -196,6 +196,16 @@
       comparacion: contra ? P.textoComparacion(contra, nombre) : "" };
   }
 
+  /* Que equipo es, para no ofrecer el mismo dos veces en el resumen del dia (23/10: Mexx publica la misma Lenovo V15 con y
+     sin Windows 11 Pro, y las dos salieron). Con codigo de modelo, el codigo. Sin codigo, el nombre normalizado como lo
+     compara el buscador, sin lo que no cambia el equipo: sistema operativo, color, «#» y «nuevo». Otra RAM, otro disco u
+     otro procesador siguen siendo otro equipo. */
+  const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna)\b/g;
+  function familia(f) {
+    if (f[9]) return "modelo:" + f[9];
+    return B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
   function destacadas(idx, max = 20, opciones) {
     const { propias, publicadas, cruces, vigentes, contra, notas, categorias, equivalente } = calcularOfertas(idx);
     const costo = opciones && opciones.costo;
@@ -207,9 +217,10 @@
     const por = (a, b) => a.internacional - b.internacional || (a.tipo === b.tipo ? 0 : a.tipo === "propia" ? -1 : 1)
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, 6, "propia")), ...publicadas.map(f => nuevo(f, 5, "publicada"))].filter(o => esUrl(o.f[2]));
-    // El mismo producto en varias tiendas (mismo codigo de modelo exacto, nunca por parecido) ocupa un solo lugar:
-    // gana el mejor ubicado.
-    const unico = lista => { const vistos = new Set(); return lista.filter(o => !o.f[9] || (!vistos.has(o.f[9]) && vistos.add(o.f[9]))); };
+    // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
+    // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
+    const unico = lista => { const vistos = new Set();
+      return lista.filter(o => { const k = familia(o.f); return !vistos.has(k) && vistos.add(k); }); };
     const grupos = new Map(C.ORDEN.map(c => [c, unico(todas.filter(o => o.categoria === c).sort(por))]));
     const elegidas = new Set(), puestos = new Map(C.ORDEN.map(c => [c, 0]));
     // Cada categoria avanza por su propia lista: "otro" no tiene lugar reservado, pero cuando entra lo hace con su mejor oferta.
@@ -227,7 +238,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, puestoDe, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, familia, puestoDe, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

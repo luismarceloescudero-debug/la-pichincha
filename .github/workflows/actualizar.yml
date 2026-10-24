@@ -278,7 +278,7 @@ jobs:
           base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
           curl -fsSL "$base/guardia.json" -o guardia-previa.json || echo '{}' > guardia-previa.json
           rc=0
-          node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json             --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" || rc=$?
+          node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json --ofertas _sitio/ofertas.json --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" || rc=$?
           if [ "$rc" -eq 3 ]; then echo "alarma=true" >> "$GITHUB_OUTPUT"; fi
 
       - name: Avisar la alarma de la guardia

@@ -155,6 +155,7 @@ function listaParaCanal(idx, max = 10, costo = null) {
     nombre: o.f[0], precio: o.f[1], antes: o.f[o.ref], descuento: Math.round(o.off * 100),
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
     tienda: o.f[3], ...(puestoCorto(o.puesto) ? { puesto: puestoCorto(o.puesto) } : {}),
+    ...(o.f[9] ? { modelo: o.f[9] } : {}),      // para que la guardia reconozca el mismo modelo en lo que se publica
     // `url` queda como esta en el indice (verificar_ofertas.py la busca por ese valor); el canal abre `enlace`, con el afiliado.
     ...(P.enlaceTienda(o.f[2]).afiliado ? { enlace: P.enlaceTienda(o.f[2]).url, afiliado: true } : {}) }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera
 }
