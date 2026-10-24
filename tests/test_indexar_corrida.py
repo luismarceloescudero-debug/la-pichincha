@@ -60,6 +60,13 @@ class Corrida(unittest.TestCase):
         salud = json.loads((self.dir / "salud.json").read_text(encoding="utf-8"))
         return indice, salud
 
+    def test_con_menos_de_una_semana_de_seguimiento_no_hay_baja_propia(self):
+        # Spec 034: un dia de historia no alcanza para decir que bajo (24/10, webcam Microsoft Studio «−53%»).
+        self.correr([(1, 1000)], [(101, 500)])
+        self.pasar_a_ayer()
+        indice, _ = self.correr([(1, 470)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 0)
+
     def pasar_a_ayer(self, dias=1):
         """Lo que se relevo hoy pasa a ser de ayer (o de hace `dias` dias): la proxima corrida es la del dia siguiente."""
         hoy = datetime.now(indexar.AR).date()
@@ -89,7 +96,7 @@ class Corrida(unittest.TestCase):
 
     def test_una_baja_de_precio_queda_en_antes_y_en_el_csv(self):
         self.correr([(1, 1000), (2, 2000)], [(101, 500)])
-        self.pasar_a_ayer()
+        self.pasar_a_ayer(8)
         indice, _ = self.correr([(1, 900), (2, 2000)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "uno", 2)[6], 0)
@@ -301,7 +308,7 @@ class Corrida(unittest.TestCase):
 
     def test_la_misma_url_en_dos_fuentes_tiene_su_propio_antes(self):
         self.correr([(1, 1000)], [(1, 1200)])
-        self.pasar_a_ayer()
+        self.pasar_a_ayer(8)
         indice, _ = self.correr([(1, 900)], [(1, 1200)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
         self.assertEqual(self.fila(indice, "dos", 1)[6], 0)
@@ -310,7 +317,7 @@ class Corrida(unittest.TestCase):
         # 18/10: la corrida manual de la tarde comparo contra el precio que la de la mañana ya habia guardado
         # y el indice publicado quedo con 0 bajas propias aunque el historial tenia 29.
         self.correr([(1, 1000), (2, 2000)], [(101, 500)])
-        self.pasar_a_ayer()
+        self.pasar_a_ayer(8)
         self.correr([(1, 900), (2, 2000)], [(101, 500)])
         indice, _ = self.correr([(1, 900), (2, 2000)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
@@ -318,7 +325,7 @@ class Corrida(unittest.TestCase):
 
     def test_una_baja_entre_dos_corridas_del_mismo_dia_tambien_cuenta(self):
         self.correr([(1, 1000)], [(101, 500)])
-        self.pasar_a_ayer()
+        self.pasar_a_ayer(8)
         self.correr([(1, 1000)], [(101, 500)])
         indice, _ = self.correr([(1, 800)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
@@ -326,7 +333,7 @@ class Corrida(unittest.TestCase):
     def test_volver_al_precio_de_siempre_despues_de_una_suba_no_es_una_baja(self):
         # Spec 029, 23/10: la MSI Z790-P de SCP valia $362.801, el 22/10 $621.600 y el 23/10 $363.975: salio «−41%».
         self.correr([(1, 1000), (2, 1000)], [(101, 500)])
-        self.pasar_a_ayer(2)
+        self.pasar_a_ayer(9)
         self.correr([(1, 1700), (2, 1700)], [(101, 500)])
         self.pasar_a_ayer()
         indice, _ = self.correr([(1, 1010), (2, 900)], [(101, 500)])

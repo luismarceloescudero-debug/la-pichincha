@@ -22,6 +22,7 @@ import historial
 DIAS_MINIMO = 30
 DIAS_MINIMO_LARGO = 90
 DIAS_MINIMOS_INFLADA = 14
+DIAS_SEGUIMIENTO_BAJA = 7     # dias que se sigue un producto antes de hablar de una baja propia (spec 034)
 VENTANA_BAJA = 30             # la baja tiene que ser de los ultimos 30 dias
 SUBA_MINIMA = 1.10            # el precio previo era 10% o mas que el piso
 TOLERANCIA_PISO = 0.97        # la baja no pasa 3% por debajo del piso
@@ -87,12 +88,17 @@ def baja_en(eventos, hoy, precio_hoy, dias):
 
 def piso_previo(eventos, hoy, dias=DIAS_MINIMO):
     """El menor precio que tuvo el producto en los `dias` dias anteriores a hoy (sin contar lo de hoy), con cada precio
-    que se registro aunque haya durado una sola corrida. None si hoy no habia un precio de antes (nuevo, o volvio hoy).
+    que se registro aunque haya durado una sola corrida. None si hoy no habia un precio de antes (nuevo, o volvio hoy) o si
+    el producto se sigue hace menos de DIAS_SEGUIMIENTO_BAJA dias.
     Es la referencia de la directiva europea Omnibus: una rebaja se mide contra el precio mas bajo de los 30 dias anteriores.
     Un precio de la ventana cuenta aunque el producto haya dejado de publicarse en el medio (24/10: la RTX 5090 de Venex
     valia $8.099.999 el 13/10, volvio el 22/10 a $13.999.999 y a $11.999.999 salia «−14%»)."""
     previos = [e for e in eventos if e[0] < hoy]
     if not _tramo_actual(previos):
+        return None
+    # Con menos de una semana de historia no se afirma una baja (24/10: la webcam Microsoft Studio de Mercado Libre, seguida
+    # desde el 23/10, salia «−53%» contra un solo dia; en Mercado Libre el precio es el del vendedor mas barato y cambia).
+    if (hoy - previos[0][0]).days < DIAS_SEGUIMIENTO_BAJA:
         return None
     desde = hoy - timedelta(days=dias)
     precios = [p for fecha, p in previos if fecha >= desde and p is not None]
