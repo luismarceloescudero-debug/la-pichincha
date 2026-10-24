@@ -19,7 +19,9 @@ para no repetir mensajes en cada merge.
   texto que hoy mandaria `sendMessage` y la misma vista previa de `/hoy/`.
 - **Mismo indice, misma lista**: no se toca, y el estado se vuelve a publicar para que no se pierda.
 - **Otro indice**: la corrida programada y la manual mandan un mensaje nuevo, como siempre.
-- **Un push** (`--solo-corregir`) nunca manda un mensaje nuevo: solo corrige el del mismo indice.
+- **Un push** (`--solo-corregir`) nunca manda un mensaje nuevo: corrige el del mismo indice o, si el push rearmo el indice (un
+  cambio en `indexar.py` cambia la clave de su cache), el del mismo dia; el estado queda con el indice nuevo (24/10: el merge
+  de la spec 035 rearmo el indice y el mensaje de las 15:36 quedaba con la lista vieja).
 - Con alarma de la guardia no se manda ni se corrige.
 - Si Telegram rechaza la correccion (por ejemplo, el mensaje se borro a mano) es una advertencia y queda el estado de
   antes; el sitio sale igual.

@@ -205,6 +205,18 @@ class UnMensajePorIndice(unittest.TestCase):
         self.assertTrue(abrir.call_args[0][0].full_url.endswith("/sendMessage"))
         self.assertEqual(self.leer_estado()["message_id"], 4322)
 
+    def test_un_push_que_rearmo_el_indice_corrige_el_mensaje_del_mismo_dia(self):
+        # 24/10: el merge que cambio indexar.py rearmo el indice (otra hora) y el mensaje de las 15:36 quedaba viejo.
+        self.previo.write_text(json.dumps({"generado": "2026-10-09T06:00-03:00", "message_id": 22, "texto": "viejo"}), encoding="utf-8")
+        abrir = respuesta(22)
+        self.correr(abrir, "--solo-corregir")
+        self.assertTrue(abrir.call_args[0][0].full_url.endswith("/editMessageText"))
+        self.assertEqual(json.loads(abrir.call_args[0][0].data.decode("utf-8"))["message_id"], 22)
+        # la programada o la manual con otro indice del mismo dia mandan uno nuevo, como siempre
+        abrir = respuesta(23)
+        self.correr(abrir)
+        self.assertTrue(abrir.call_args[0][0].full_url.endswith("/sendMessage"))
+
     def test_un_push_nunca_manda_un_mensaje_nuevo(self):
         for previo in ({}, {"generado": "2026-10-08T09:00-03:00", "message_id": 1, "texto": "x"}):
             self.previo.write_text(json.dumps(previo), encoding="utf-8")
