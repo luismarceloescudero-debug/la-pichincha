@@ -59,7 +59,9 @@ def mensaje(datos):
         categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
         # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
         lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(o['nombre']))}</a>: "
-                      f"{pesos(o['precio'])} (−{o['descuento']}%) en {html.escape(o['comercio'])}"
+                      f"{pesos(o['precio'])} (−{o['descuento']}%"
+                      # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
+                      + (f" {html.escape(o['contra'])}" if o.get("contra") else "") + f") en {html.escape(o['comercio'])}"
                       + (" (enlace de afiliado)" if o.get("afiliado") else "")
                       + (f"\n   <i>{html.escape(o['puesto'])}</i>" if o.get("puesto") else ""))
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
