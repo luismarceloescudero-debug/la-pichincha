@@ -210,6 +210,7 @@ ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 .wrap .nota{margin-top:34px;color:var(--ink-3);font-size:.82rem}
 .wrap h3{font-size:.95rem;margin:18px 0 8px}
 .wrap .mismo{display:block;margin-top:4px;font-size:.78rem;color:var(--ink-3)}
+.wrap ul.relacionadas{display:flex;flex-wrap:wrap;gap:8px 14px;list-style:none;padding:0;margin:0}
 </style>
 </head>`;
 }
@@ -226,7 +227,41 @@ function pie(ctx) {
     `<a href="../../">Volver a La Pichincha</a> · <a href="../../estado/">Estado de las fuentes</a> · <a href="../../legal/">Términos y privacidad</a>.</p>`;
 }
 
-/* Pagina de una consulta. consulta = { q, slug }; analisis = Analisis.analizarConsulta o null. */
+/* Otras paginas del mismo rubro (squirrelscan, 24/10: 24 paginas de /precios/ solo tenian un enlace interno, al indice). */
+const MAX_RELACIONADAS = 8;
+function relacionadasHtml(lista) {
+  if (!lista || !lista.length) return "";
+  return `  <section>
+    <h2>Búsquedas relacionadas</h2>
+    <ul class="relacionadas">${lista.map(r => `<li><a href="../${esc(r.slug)}/">${esc(r.q)}</a></li>`).join("")}</ul>
+  </section>
+`;
+}
+
+/* Las relacionadas de cada pagina indexable: sus vecinas de grupo (las que siguen y las que preceden, en ronda), y si no
+   alcanzan, las que siguen en la lista entera; hasta MAX_RELACIONADAS. En ronda, cada pagina recibe enlaces de sus
+   vecinas: con «las primeras del grupo» casi todas quedaban sin enlaces entrantes. */
+function vecinas(lista, i, n) {
+  const fuera = [];
+  for (let d = 1; fuera.length < n && d < lista.length; d++) {
+    fuera.push(lista[(i + d) % lista.length]);
+    if (fuera.length < n && lista.length - d > d) fuera.push(lista[(i - d + lista.length) % lista.length]);
+  }
+  return [...new Set(fuera)];
+}
+function relacionadas(entradas, slug) {
+  const propia = entradas.find(e => e.slug === slug);
+  if (!propia) return [];
+  const grupo = entradas.filter(e => e.grupo === propia.grupo);
+  const elegidas = vecinas(grupo, grupo.indexOf(propia), MAX_RELACIONADAS);
+  if (elegidas.length < MAX_RELACIONADAS) {
+    const resto = entradas.filter(e => e === propia || e.grupo !== propia.grupo);
+    elegidas.push(...vecinas(resto, resto.indexOf(propia), MAX_RELACIONADAS - elegidas.length));
+  }
+  return elegidas.map(e => ({ q: e.q, slug: e.slug }));
+}
+
+/* Pagina de una consulta. consulta = { q, slug, relacionadas? }; analisis = Analisis.analizarConsulta o null. */
 function renderPagina(consulta, analisis, ctx) {
   const { q, slug } = consulta;
   const canonica = `${ctx.baseUrl}/precios/${slug}/`;
@@ -320,7 +355,7 @@ ${intl.length ? `
 ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).join("\n")}
     </tbody></table></div>
   </section>
-` : ""}${afuera.length ? `  <p class="sub">Quedaron afuera ${esc(afuera.join(", "))}.</p>\n` : ""}
+` : ""}${afuera.length ? `  <p class="sub">Quedaron afuera ${esc(afuera.join(", "))}.</p>\n` : ""}${relacionadasHtml(consulta.relacionadas)}
   <p><a class="acc" href="${esc(interactiva)}">Ver la comparativa completa</a> <a class="acc" href="${esc(filtrable)}">Buscar y filtrar por tienda y precio</a></p>
   ${pie(ctx)}
 </main>
@@ -440,17 +475,20 @@ function main(argv) {
   const ctx = crearContexto(idx, { baseUrl, marcas: datos.marcas || {} });
 
   const paginas = [], entradas = [];
-  for (const c of consultas) {
-    const analisis = A.analizarConsulta(c.q, ctx);
-    const dir = path.join(salida, "precios", c.slug);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "index.html"), renderPagina(c, analisis, ctx), "utf8");
-    const feed = renderFeedPagina(c, analisis, ctx);
-    if (feed) fs.writeFileSync(path.join(dir, FEED_ARCHIVO), feed, "utf8");
+  // Primero el analisis de todas, para que cada pagina enlace a sus relacionadas indexables.
+  const analizadas = consultas.map(c => ({ c, analisis: A.analizarConsulta(c.q, ctx) }));
+  for (const { c, analisis } of analizadas) {
     const indexable = esIndexable(analisis);
     paginas.push({ slug: c.slug, q: c.q, indexable });
     if (indexable) entradas.push({ q: c.q, slug: c.slug, grupo: (c.nota || "").split(":")[0] || "Otros",
       desde: Math.min(...analisis.base.map(m => m.f[1])), comparables: analisis.base.length });
+  }
+  for (const { c, analisis } of analizadas) {
+    const dir = path.join(salida, "precios", c.slug);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "index.html"), renderPagina({ ...c, relacionadas: relacionadas(entradas, c.slug) }, analisis, ctx), "utf8");
+    const feed = renderFeedPagina(c, analisis, ctx);
+    if (feed) fs.writeFileSync(path.join(dir, FEED_ARCHIVO), feed, "utf8");
   }
   fs.mkdirSync(path.join(salida, "precios"), { recursive: true });
   fs.writeFileSync(path.join(salida, "precios", "index.html"), renderIndice(entradas, ctx), "utf8");
@@ -460,5 +498,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS };
+module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

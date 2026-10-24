@@ -354,3 +354,30 @@ test("las paginas por busqueda anuncian el feed de ofertas con una URL absoluta"
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.match(html, /<link rel="alternate" type="application\/rss\+xml" title="Ofertas de La Pichincha" href="https:\/\/ejemplo\.test\/la-pichincha\/ofertas\.xml">/);
 });
+
+test("relacionadas: primero las vecinas del mismo grupo, sin la propia, hasta MAX_RELACIONADAS", () => {
+  const entradas = [
+    { q: "rtx 4060", slug: "rtx-4060", grupo: "Placas" },
+    { q: "ddr4 16gb", slug: "ddr4-16gb", grupo: "Memorias" },
+    { q: "rtx 5070", slug: "rtx-5070", grupo: "Placas" },
+    { q: "ddr5 32gb", slug: "ddr5-32gb", grupo: "Memorias" },
+  ];
+  assert.deepEqual(G.relacionadas(entradas, "ddr4-16gb").map(r => r.slug), ["ddr5-32gb", "rtx-5070", "rtx-4060"]);
+  assert.deepEqual(G.relacionadas(entradas, "no-indexable"), []);
+  const muchas = Array.from({ length: 20 }, (_, i) => ({ q: "q" + i, slug: "s" + i, grupo: "G" }));
+  assert.equal(G.relacionadas(muchas, "s0").length, G.MAX_RELACIONADAS);
+  // En ronda: cada pagina recibe enlaces de sus vecinas, no solo las primeras del grupo.
+  const entrantes = {};
+  for (const e of muchas) for (const r of G.relacionadas(muchas, e.slug)) entrantes[r.slug] = (entrantes[r.slug] || 0) + 1;
+  assert.ok(muchas.every(e => entrantes[e.slug] >= 2));
+});
+
+test("la pagina enlaza a sus busquedas relacionadas, y sin relacionadas no muestra la seccion", () => {
+  const { ctx, analisis } = armar(IDX, "ddr4 16gb");
+  const con = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb",
+    relacionadas: [{ q: "ddr5 <32gb>", slug: "ddr5-32gb" }] }, analisis, ctx);
+  assert.match(con, /<h2>Búsquedas relacionadas<\/h2>/);
+  assert.match(con, /<a href="\.\.\/ddr5-32gb\/">ddr5 &lt;32gb&gt;<\/a>/);
+  const sin = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  assert.doesNotMatch(sin, /Búsquedas relacionadas/);
+});
