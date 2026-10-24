@@ -68,8 +68,8 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 
 ### 4. Fallas chicas que encontro la revision (033)
 
-- **siguiente** Costo de importar: el precio leido de un link no pisa lo que la persona ya escribio (spec 023).
-- **siguiente** Veredicto: mirar la portada no fija la consulta ni cambia la URL (spec 021).
+- **hecho** Costo de importar: el precio leido de un link no pisa lo que la persona ya escribio (spec 023).
+- **no es falla** Veredicto: la spec 021 pide armarlo con la busqueda mas reciente.
 - **siguiente** Cadena de `if` por tienda repetida en `js/importar.js` y el Worker; la lista `paths` de `worker.yml`.
 
 ### 5. Fuentes

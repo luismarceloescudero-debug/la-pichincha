@@ -53,10 +53,12 @@ pasan por la lista blanca de `enlace()` y se escapan.
    partes.
 3. **Tachados de Mercado Libre**: el 24/10, 7 de las 10 ofertas del dia eran tachados de ML (ComparaYa) de 33% a 58% sin
    historia propia. Propuesta: exigir confirmacion contra el mismo modelo en otras tiendas o un tope menor para ML.
-4. **Costo de importar** (`js/vista-costo.js:181/198`): al pegar un link, el precio leido puede pisar lo que la persona ya
-   habia escrito en la calculadora (spec 023: «no se pisa si la persona ya escribió»).
-5. **Veredicto** (`js/historial.js:116`): fija la consulta y cambia la URL desde la portada; la spec 021 pedia que mirar la
-   portada no la fije.
+4. **Hecho (24/10)**: Costo de importar (`js/vista-costo.js`): al pegar un link, el precio leido pisaba lo que la persona ya
+   habia escrito en la calculadora (spec 023: «no se pisa si la persona ya escribió»). El precio copiado de la calculadora
+   cuenta como escrito salvo que lo haya puesto una lectura anterior (`dataset.leido`). Probado en Chromium con una respuesta
+   del Worker simulada: con 150 escrito antes queda 150; sin nada, precarga 198,88; antes del arreglo el 150 pasaba a 198,88.
+5. **No es falla**: el Veredicto sin busqueda fija la consulta mas reciente; la spec 021 lo pide asi (punto 2). Lo de «no fija
+   la consulta ni cambia la URL» es de la Comparativa sin busqueda, y se cumple.
 6. Menores: SRI para el script de GoatCounter; la cadena de `if` por tienda repetida en `js/importar.js` y el Worker; la
    lista `paths` de `worker.yml` copia los imports a mano; `fiabilidad.ANULADAS` tambien saca las revisiones buenas del
    24/10 (a proposito, conservador).

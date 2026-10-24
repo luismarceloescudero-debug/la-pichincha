@@ -178,7 +178,12 @@ function pedirPrecioEnlace(raiz, e) {
       if (turno !== ENLACE_TURNO) return;
       const l = Importar.leidoDeEnlace(r), precio = $("#k-link-precio", raiz);
       linea.textContent = l ? (l.nombre && !e.nombre ? `«${l.nombre}» · ` : "") + l.linea : "";   // el nombre, si el link no lo traia
-      if (l && l.precio && precio && !precio.dataset.tocado) { precio.value = l.precio; aplicarEnlace(raiz, e, l.precio); }
+      if (l && l.precio && precio && !precio.dataset.tocado) {
+        precio.value = l.precio;
+        aplicarEnlace(raiz, e, l.precio);
+        const valor = ($("#k-form", raiz) || { elements: {} }).elements.valor;
+        if (valor) valor.dataset.leido = "1";      // lo puso la lectura, no la persona: otro link pegado lo puede cambiar
+      }
     });
   }, 400);
 }
@@ -196,13 +201,16 @@ function leerEnlace(raiz, texto) {
   const precio = $("#k-link-precio", res), valor = ($("#k-form", raiz) || { elements: {} }).elements.valor;
   if (!precio) return;
   if (valor) precio.value = valor.value;    // el precio que ya estaba en la calculadora, para que los dos campos digan lo mismo
-  precio.addEventListener("input", () => { precio.dataset.tocado = "1"; aplicarEnlace(raiz, e, precio.value); });
+  // Si ese precio lo escribio la persona, lo leido no lo pisa (spec 023; revision del 24/10: se copiaba sin marcarlo y la
+  // lectura lo reemplazaba).
+  if (valor && valor.value && !valor.dataset.leido) precio.dataset.tocado = "1";
+  precio.addEventListener("input", () => { precio.dataset.tocado = "1"; if (valor) delete valor.dataset.leido; aplicarEnlace(raiz, e, precio.value); });
 }
 
 function activarCosto(raiz) {
   const form = $("#k-form", raiz);
   if (!form) return;
-  form.addEventListener("input", () => recalcularCosto(raiz));
+  form.addEventListener("input", ev => { if (ev.target && ev.target.name === "valor") delete ev.target.dataset.leido; recalcularCosto(raiz); });
   form.addEventListener("change", () => recalcularCosto(raiz));
   form.addEventListener("submit", ev => ev.preventDefault());
   // Los pasos del encabezado llevan a su seccion sin tocar el hash, que es la pestaña.
