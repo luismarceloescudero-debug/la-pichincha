@@ -514,3 +514,19 @@ test("destacadas: el mismo nombre en dos tiendas, sin codigo, tambien ocupa un s
   assert.equal(lista.length, 1);
   assert.equal(lista[0].f, a);
 });
+
+test("una familia ocupa un solo lugar aunque caiga en dos categorias (revision del 24/10)", () => {
+  const f = (n, p, antes, cod) => [n, p, "https://t.test/" + encodeURIComponent(n), "mexx", "", 0, antes, "", "", cod, "", null, null, 0];
+  const idx = { productos: [f("Mouse Gamer Logitech G502 X Hero", 50000, 60000, "910-006136"),
+    f("Logitech 910-006136 G502 X", 51000, 62000, "910-006136"), f("Teclado Redragon K552", 30000, 36000, "")] };
+  const d = O.destacadas(idx);
+  assert.notEqual(new Set(d.map(o => o.categoria)).size, 1, "el caso de verdad cruza categorias");
+  assert.equal(d.filter(o => o.f[9] === "910-006136").length, 1);
+});
+
+test("el ofertas.json deja de repetir un producto de catalogo de Mercado Libre con dos textos de direccion (24/10)", () => {
+  const ml = (slug, n) => [n, 729999, `https://www.mercadolibre.com.ar/${slug}/p/MLA79317178`, "comparaya", "Mercado Libre", 1299999, 0, "", "", "", "", null, null, 0];
+  const idx = { productos: [ml("monitor-gamer-asrock-phantom-gaming-de-315-2k-qhd-ips-180hz-1ms", "Monitor Gamer ASRock Phantom Gaming de 31.5\" 2K QHD IPS 180Hz 1ms"),
+    ml("monitor-gamer-asrock-phantom-gaming-pg32qft2a-315", "Monitor Gamer ASRock Phantom Gaming PG32QFT2A 31.5\" 2K QHD IPS 180Hz 1ms HDMI DP")] };
+  assert.equal(O.destacadas(idx).length, 1);
+});

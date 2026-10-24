@@ -19,6 +19,7 @@ import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
 
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
+const CACHE_PARCIAL_SEG = 900;                 // si alguna fuente fallo, poco: una caida pasajera no queda 8 horas
 const CACHE_VERSION = "031";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
@@ -35,8 +36,9 @@ function cors(origen) {
   return h;
 }
 
+// Un error (400, 404, 429) no se guarda: un «demasiadas busquedas» no tiene que quedar 15 minutos en el navegador.
 const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { status: estado,
-  headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=900", ...extra } });
+  headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": estado >= 400 ? "no-store" : "public, max-age=900", ...extra } });
 
 /* Atiende un pedido. deps: fetch, cache (con match/put, la Cache API), ahora() en ISO y tiempoMaximo por fuente en ms.
    El tope por IP y los tokens viven en esta instancia (un isolate del Worker). */
@@ -55,7 +57,12 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     let reloj;
     const corte = new Promise((_, no) => { reloj = setTimeout(() => no(new Error("tiempo agotado")), tiempoMaximo); });
     const ida = fetch(url, { method, body, headers: { ...headers, "User-Agent": AGENTE, Accept: html ? "text/html" : "application/json" } })
-      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return html ? r.text() : r.json(); });
+      .then(r => {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        // fetch sigue las redirecciones: una pagina que termina en otro host no se lee (paginaPermitida vale tambien para el destino)
+        if (html && r.url && !paginaPermitida(r.url)) throw new Error("redireccion a otro sitio");
+        return html ? r.text() : r.json();
+      });
     return Promise.race([ida, corte]).finally(() => clearTimeout(reloj));
   }
   const pedir = p => traer(p, false), pedirTexto = url => traer({ url }, true);
@@ -77,11 +84,12 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     for (const [k, v] of Object.entries(h)) r.headers.set(k, v);
     return r;
   }
-  async function responder(datos, clave, guardar, h) {
+  /* segundos: cuanto se guarda en la cache del Worker (0: no se guarda). */
+  async function responder(datos, clave, segundos, h) {
     const salida = json(datos, 200, {});
-    if (guardar) {
+    if (segundos > 0) {
       const copia = salida.clone();
-      copia.headers.set("Cache-Control", `public, max-age=${CACHE_SEG}`);
+      copia.headers.set("Cache-Control", `public, max-age=${segundos}`);
       await cache.put(clave, copia);
     }
     for (const [k, v] of Object.entries(h)) salida.headers.set(k, v);
@@ -99,7 +107,8 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
       .then(items => relevantes(items, q).slice(0, POR_FUENTE))));
     const fuentes = activas.map(([id], i) => ({ id, ok: res[i].status === "fulfilled", n: res[i].status === "fulfilled" ? res[i].value.length : 0 }));
     const items = res.flatMap(r => (r.status === "fulfilled" ? r.value : [])).sort((a, z) => a.precio - z.precio);
-    return responder({ consulta: q, fecha, fuentes, items }, clave, fuentes.some(f => f.ok), h);
+    const segundos = !fuentes.some(f => f.ok) ? 0 : fuentes.every(f => f.ok) ? CACHE_SEG : CACHE_PARCIAL_SEG;
+    return responder({ consulta: q, fecha, fuentes, items }, clave, segundos, h);
   }
 
   /* Un link pegado: que se puede leer de cada tienda y con que. Devuelve el aviso, o un motivo si no se lee. */
@@ -130,7 +139,7 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
         : "La tienda no respondió: escribí el precio a mano." };
     }
     if (!r.motivo && !r.item) r = { motivo: "No se pudo leer el precio de esa página: escribí el precio a mano." };
-    return responder({ enlace: e, leido: Boolean(r.item), item: r.item || null, motivo: r.motivo || null, fecha }, clave, Boolean(r.item), h);
+    return responder({ enlace: e, leido: Boolean(r.item), item: r.item || null, motivo: r.motivo || null, fecha }, clave, r.item ? CACHE_SEG : 0, h);
   }
 
   return async function atender(request, env) {

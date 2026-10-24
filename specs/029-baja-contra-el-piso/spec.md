@@ -25,7 +25,8 @@ el tachado), la de 41% paso entera. Lo mismo, mas disimulado: la RTX 5060 Windfo
   mismo dia no es «antes», como en la spec del 18/10).
 - **Baja propia solo si hoy esta por debajo de ese piso**, y el «antes» que se guarda y se muestra es el piso: el
   porcentaje es la baja contra el mejor precio reciente, no contra una suba.
-- Un aviso que dejo de publicarse y volvio sigue contando como nuevo: la ventana arranca cuando volvio.
+- Un aviso que volvio hoy sigue contando como nuevo (no hay baja). Si ya volvio antes, el piso mira toda la ventana de 30
+  dias, tambien los precios de antes del hueco (cambio del 24/10, spec 032: la RTX 5090 de Venex).
 - Los minimos por categoria (`C.DESCUENTO[...].propia`) no cambian: se aplican sobre la baja medida asi.
 - Los textos que decian «contra el relevamiento anterior» (Mayor baja, Ofertas, consulta y analisis) dicen ahora «contra
   su precio más bajo de los 30 días anteriores».

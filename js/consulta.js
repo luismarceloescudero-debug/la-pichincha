@@ -220,7 +220,11 @@ function vistaDinamica(id) {
 /* --- La busqueda va a la URL ---------------------------------------------
    ?q= guarda la consulta activa y el hash la pestaña: un link copiado
    reproduce la vista. replaceState para no llenar el historial al tipear. */
+const TITULO_SITIO = document.title;
 function sincronizarUrl() {
+  // El titulo dice lo que se busca: es lo que muestran la pestaña, el historial y un link compartido.
+  const titulo = CONSULTA.trim() ? `${CONSULTA.trim()}: precios en Argentina | La Pichincha` : TITULO_SITIO;
+  if (document.title !== titulo) document.title = titulo;
   const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1));
   if (destino === location.pathname + location.search + location.hash) return;
   try { history.replaceState(history.state, "", destino); } catch (e) { /* Safari limita las llamadas */ }
