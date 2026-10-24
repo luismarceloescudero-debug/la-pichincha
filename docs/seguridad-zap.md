@@ -12,7 +12,7 @@
 | `Access-Control-Allow-Origin: *` | Real, no arreglable | Lo pone GitHub Pages en todo. Todo lo publicado es publico (indice, feed, sitemap) |
 | Falta cabecera anti-clickjacking | Real, no arreglable | `frame-ancestors` **se ignora en una meta CSP** y no hay `X-Frame-Options` sin cabeceras. Sin sesion ni acciones, un iframe no puede hacer nada util |
 | Falta SRI (hoja de Google Fonts) | Real, no arreglable | Google sirve un CSS distinto segun el navegador: un hash fijo la rompe |
-| Script de otro dominio (contador GoatCounter) | Por diseno | `gc.zgo.at/count.js` lo actualiza el proveedor (SRI imposible); esta autorizado en la CSP |
+| Script de otro dominio (contador GoatCounter) | Resuelto (24/10) | Se usa la version fija `gc.zgo.at/count.v4.js` con `integrity` (SRI) y `crossorigin`; si el archivo cambia, el navegador no lo corre y solo se pierde la medicion |
 | HSTS no enviada | Real, no arreglable | GitHub Pages no la manda para dominios propios; el dominio ya fuerza HTTPS |
 | `X-Content-Type-Options` ausente | Real, no arreglable | Cabecera de servidor |
 | Timestamp Unix | **Falso positivo** | `1994500640` es el id `MLA-1994500640` de un enlace de MercadoLibre |
