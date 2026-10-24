@@ -66,6 +66,41 @@ class Tarjeta(unittest.TestCase):
         self.assertEqual(ig.tarjeta({**OFERTAS, "ofertas": muchas}).count('class="pct"'), ig.EN_TARJETA)
 
 
+class NombreEnTarjeta(unittest.TestCase):
+    """Dos renglones de la tarjeta: el recorte saca primero el relleno y nunca esconde modelo, CPU, RAM ni disco (23/10:
+    la misma Lenovo con y sin Windows se veia identica porque el corte se comia «Wind 11 Pro»)."""
+
+    def test_un_nombre_que_entra_queda_igual(self):
+        self.assertEqual(ig.nombre_tarjeta("Redmi Note 15 256GB 8GB nuevo Xiaomi"), "Redmi Note 15 256GB 8GB nuevo Xiaomi")
+
+    def test_el_numeral_del_final_nunca_sale_ni_en_la_tarjeta_ni_en_el_texto(self):
+        nombre = "Notebook Lenovo V15 G5 Core i5 13420H 32Gb Ssd 512Gb 15.6\" #"
+        self.assertEqual(ig.nombre_tarjeta(nombre), "Notebook Lenovo V15 G5 Core i5 13420H 32Gb Ssd 512Gb 15.6\"")
+        t = ig.texto({**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "nombre": nombre}]})
+        self.assertIn("15.6\"\n$90.000", t)
+
+    def test_saca_el_relleno_antes_que_las_especificaciones(self):
+        largo = "Monitor Gamer VIEWSONIC 27″ 180Hz QHD 1440P 1MS Curvo VA Gaming VX2718-2KPC-MHD-2K (3378) (II) Negro #"
+        corto = ig.nombre_tarjeta(largo)
+        self.assertLessEqual(len(corto), ig.LARGO_NOMBRE)
+        for clave in ("VIEWSONIC", "27″", "180Hz", "QHD", "VX2718-2KPC-MHD-2K"):
+            self.assertIn(clave, corto)
+        for relleno in ("Gamer", "Gaming", "(3378)", "#", "Negro"):
+            self.assertNotIn(relleno, corto)
+
+    def test_la_notebook_conserva_cpu_ram_disco_y_sistema(self):
+        nombre = "Notebook Lenovo V15 G5 Core i5 13420H 32Gb Ssd 512Gb 15.6\" Wind 11 Pro Negro Gamer con Teclado Numerico #"
+        corto = ig.nombre_tarjeta(nombre)
+        self.assertLessEqual(len(corto), ig.LARGO_NOMBRE)
+        for clave in ("Lenovo V15 G5", "i5 13420H", "32Gb", "512Gb", "Wind 11 Pro"):
+            self.assertIn(clave, corto)
+
+    def test_si_aun_no_entra_corta_en_una_palabra_entera(self):
+        corto = ig.nombre_tarjeta("Placa " + "Especificacion " * 12)
+        self.assertLessEqual(len(corto), ig.LARGO_NOMBRE)
+        self.assertTrue(corto.endswith("…"))
+
+
 class Armar(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())

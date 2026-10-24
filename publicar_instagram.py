@@ -20,6 +20,7 @@ advertencia y la corrida sigue: el sitio ya esta publicado. El token nunca se im
 import html
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -39,6 +40,10 @@ LIMITE = 2200           # largo maximo del texto de una publicacion de Instagram
 ANCHO, ALTO = 1080, 1350   # 4:5, el formato mas alto que Instagram acepta en el feed sin recortar
 ARGENTINA = timezone(timedelta(hours=-3))
 ETIQUETAS = "#hardware #tecnologia #ofertas #argentina #pcgamer"
+LARGO_NOMBRE = 80       # lo que entra en los dos renglones del nombre en la tarjeta
+# Lo que se saca primero si el nombre no entra: no distingue un equipo de otro. Modelo, CPU, RAM, disco y sistema quedan.
+RELLENO = re.compile(r"\s*\([^)]*\)|\s+#|\s+(?:gamer|gaming|nuev[oa]|frameless|reclinable|con|para|de|y|pc|consolas|"
+                     r"negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|color)(?=\s|$)", re.I)
 NAVEGADORES = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome")
 
 
@@ -62,11 +67,28 @@ def texto(datos):
            "El orden no depende de comisiones.\n\n" + ETIQUETAS)
     lineas = []
     for i, o in enumerate(ofertas, 1):
-        lineas.append(f"{i}. {acortar(o['nombre'])}\n{pesos(o['precio'])} (−{o['descuento']}%) en {o['comercio']}"
+        lineas.append(f"{i}. {acortar(sin_numeral(o['nombre']))}\n{pesos(o['precio'])} (−{o['descuento']}%) en {o['comercio']}"
                       + (f"\n{o['puesto']}" if o.get("puesto") else ""))
     while lineas and len(cabeza + "\n\n".join(lineas) + "\n" + pie) > LIMITE:
         lineas.pop()
     return cabeza + "\n" + "\n\n".join(lineas) + "\n" + pie if lineas else None
+
+
+def sin_numeral(nombre):
+    """Mexx termina sus titulos con « #»: no dice nada y en Instagram parece una etiqueta a medias."""
+    return re.sub(r"\s+#+\s*$", "", nombre)
+
+
+def nombre_tarjeta(nombre):
+    """El nombre para los dos renglones de la tarjeta: si no entra, primero se saca el relleno (colores, «Gamer»,
+    codigos entre parentesis, «#»); si aun no entra, se corta en una palabra entera."""
+    nombre = sin_numeral(nombre)
+    if len(nombre) <= LARGO_NOMBRE:
+        return nombre
+    nombre = re.sub(r"\s+", " ", RELLENO.sub("", nombre)).strip()
+    if len(nombre) <= LARGO_NOMBRE:
+        return nombre
+    return nombre[:LARGO_NOMBRE - 1].rsplit(" ", 1)[0].rstrip(" ,;:-") + "…"
 
 
 def tarjeta(datos):
@@ -77,7 +99,7 @@ def tarjeta(datos):
     filas = []
     for o in (datos.get("ofertas") or [])[:EN_TARJETA]:
         antes = f'<s>{esc(pesos(o["antes"]))}</s>' if o.get("antes") else ""
-        filas.append(f'<li><span class="pct">−{o["descuento"]}%</span><div><p class="nom">{esc(acortar(o["nombre"]))}</p>'
+        filas.append(f'<li><span class="pct">−{o["descuento"]}%</span><div><p class="nom">{esc(nombre_tarjeta(o["nombre"]))}</p>'
                      f'<p class="pre"><b>{esc(pesos(o["precio"]))}</b> {antes}</p>'
                      f'<p class="com">{esc(o["comercio"])}{" · " + esc(o["categoria"]) if o.get("categoria") else ""}</p></div></li>')
     return f"""<!doctype html>
