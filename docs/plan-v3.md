@@ -78,7 +78,10 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 
 ### 5. Fuentes
 
+Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `docs/pendientes-del-dueno.md`.
+
 - **pendiente del dueño** FullH4rd (bloquea desde el 8/10), Katech y Compra Cierta: darlas de baja o pedirles un feed.
+  Katech responde bien fuera de GitHub (2.552 productos el 24/10) y da 0 desde los servidores de GitHub: bloquea esas IP.
 - **pendiente del dueño** Credenciales de eBay y AliExpress para Afuera (las unicas fuentes que no se bloquean, y pagan
   comision). Amazon Creators API cuando haya ventas.
 
