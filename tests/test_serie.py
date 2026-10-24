@@ -197,12 +197,12 @@ class PisoPrevio(unittest.TestCase):
         self.assertEqual(serie.piso_previo(ev, HOY), 360453)
 
     def test_cuenta_un_precio_que_duro_una_sola_corrida(self):
-        ev = [(d(4), 2302449), (d(1), 2010581), (d(1), 2370652)]
+        ev = [(d(8), 2302449), (d(1), 2010581), (d(1), 2370652)]
         self.assertEqual(serie.piso_previo(ev, HOY), 2010581)
 
     def test_lo_de_hoy_no_cuenta(self):
         # una corrida anterior del mismo dia no es «antes»
-        self.assertEqual(serie.piso_previo([(d(3), 1000), (HOY, 800)], HOY), 1000)
+        self.assertEqual(serie.piso_previo([(d(8), 1000), (HOY, 800)], HOY), 1000)
         self.assertIsNone(serie.piso_previo([(HOY, 800)], HOY))
 
     def test_un_minimo_de_hace_mas_de_30_dias_no_cuenta_pero_el_precio_vigente_si(self):
@@ -217,3 +217,9 @@ class PisoPrevio(unittest.TestCase):
 
     def test_sin_historial_no_hay_referencia(self):
         self.assertIsNone(serie.piso_previo([], HOY))
+
+    def test_con_menos_de_una_semana_de_seguimiento_no_hay_referencia(self):
+        # Spec 034, 24/10: la webcam Microsoft Studio de Mercado Libre, seguida desde el 23/10, salia «−53%»
+        self.assertIsNone(serie.piso_previo([(d(1), 578998)], HOY))
+        self.assertIsNone(serie.piso_previo([(d(6), 600000), (d(1), 578998)], HOY))
+        self.assertEqual(serie.piso_previo([(d(7), 600000), (d(1), 578998)], HOY), 578998)
