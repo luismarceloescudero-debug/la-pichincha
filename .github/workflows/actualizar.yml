@@ -294,16 +294,24 @@ jobs:
           if [ -n "$n" ]; then gh issue comment "$n" --body-file alarma.md
           else gh issue create --title "Guardia del índice: algo no cierra" --label guardia --body-file alarma.md; fi
 
-      # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Publica la
-      # corrida programada y la que se lanza a mano (para probar el canal), nunca un push: asi no se
-      # repiten mensajes en cada merge.
+      # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Un mensaje por indice: la
+      # corrida programada y la que se lanza a mano lo mandan; un push nunca manda uno nuevo (asi no se repiten
+      # mensajes en cada merge), pero si republica el mismo indice con otra lista corrige el que ya salio (spec 030,
+      # 23/10: /hoy/ se arreglo a las 22:51 y el mensaje de las 22:06 siguio con la Lenovo repetida). Que mensaje
+      # salio para que indice viaja con el sitio en telegram.json.
       - name: Publicar las pichinchas del dia en Telegram
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.guardia.outputs.alarma != 'true'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push') && steps.guardia.outputs.alarma != 'true'
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python publicar_telegram.py _sitio/ofertas.json
+          EVENTO: ${{ github.event_name }}
+        run: |
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/telegram.json" -o telegram-previo.json || echo '{}' > telegram-previo.json
+          modo=""
+          if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi
+          python publicar_telegram.py _sitio/ofertas.json --previo telegram-previo.json --estado _sitio/telegram.json $modo
 
       # Cuanto del indice se pudo agrupar por codigo de modelo, por rubro. Avisa en el resumen si cae.
       - name: Medir la cobertura por codigo de modelo

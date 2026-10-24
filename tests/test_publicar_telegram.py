@@ -134,6 +134,95 @@ class Publicacion(unittest.TestCase):
         abrir.assert_not_called()
 
 
+def respuesta(message_id):
+    """Lo que devuelve urlopen: la respuesta de Telegram con el mensaje que salio."""
+    r = mock.MagicMock()
+    r.__enter__.return_value.read.return_value = json.dumps({"ok": True, "result": {"message_id": message_id}}).encode()
+    return mock.MagicMock(return_value=r)
+
+
+class UnMensajePorIndice(unittest.TestCase):
+    """Spec 030: el 23/10 el arreglo de la Lenovo repetida republico /hoy/ a las 22:51, pero el mensaje de Telegram
+    de las 22:06 siguio con el error. El mensaje de un indice se corrige; no se repite ni se deja mal."""
+    ENV = {"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@pichinchas"}
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dir)
+        self.ruta, self.previo, self.estado = self.dir / "ofertas.json", self.dir / "previo.json", self.dir / "telegram.json"
+        self.ruta.write_text(json.dumps(OFERTAS), encoding="utf-8")
+
+    def correr(self, urlopen, *extra):
+        salida = io.StringIO()
+        with mock.patch.dict(os.environ, self.ENV, clear=True), mock.patch.object(telegram.urllib.request, "urlopen", urlopen), \
+                redirect_stdout(salida):
+            codigo = telegram.main([str(self.ruta), "--previo", str(self.previo), "--estado", str(self.estado), *extra])
+        self.assertEqual(codigo, 0)
+        return salida.getvalue()
+
+    def leer_estado(self):
+        return json.loads(self.estado.read_text(encoding="utf-8"))
+
+    def test_el_mensaje_nuevo_deja_anotado_cual_es(self):
+        self.correr(respuesta(4321))
+        self.assertEqual(self.leer_estado(), {"generado": OFERTAS["generado"], "message_id": 4321, "texto": telegram.mensaje(OFERTAS)})
+
+    def test_el_mismo_indice_con_otra_lista_corrige_el_mensaje_que_ya_salio(self):
+        viejo = {**OFERTAS, "ofertas": OFERTAS["ofertas"] * 2}
+        self.previo.write_text(json.dumps({"generado": OFERTAS["generado"], "message_id": 4321,
+                                           "texto": telegram.mensaje(viejo)}), encoding="utf-8")
+        for extra in ((), ("--solo-corregir",)):
+            abrir = respuesta(4321)
+            texto = self.correr(abrir, *extra)
+            self.assertEqual(abrir.call_count, 1)
+            pedido = abrir.call_args[0][0]
+            self.assertEqual(pedido.full_url, "https://api.telegram.org/bot123:ABC/editMessageText")
+            cuerpo = json.loads(pedido.data.decode("utf-8"))
+            self.assertEqual((cuerpo["chat_id"], cuerpo["message_id"]), ("@pichinchas", 4321))
+            self.assertEqual(cuerpo["text"], telegram.mensaje(OFERTAS))
+            self.assertIn("Corregido en Telegram", texto)
+            self.assertEqual(self.leer_estado()["texto"], telegram.mensaje(OFERTAS))
+
+    def test_el_mismo_indice_con_la_misma_lista_no_se_toca_y_el_estado_sigue(self):
+        previo = {"generado": OFERTAS["generado"], "message_id": 4321, "texto": telegram.mensaje(OFERTAS)}
+        self.previo.write_text(json.dumps(previo), encoding="utf-8")
+        abrir = mock.Mock()
+        self.correr(abrir)
+        abrir.assert_not_called()
+        self.assertEqual(self.leer_estado(), previo)        # el sitio nuevo lo sigue publicando
+
+    def test_otro_indice_manda_un_mensaje_nuevo(self):
+        self.previo.write_text(json.dumps({"generado": "2026-10-08T09:00-03:00", "message_id": 1, "texto": "x"}), encoding="utf-8")
+        abrir = respuesta(4322)
+        self.correr(abrir)
+        self.assertTrue(abrir.call_args[0][0].full_url.endswith("/sendMessage"))
+        self.assertEqual(self.leer_estado()["message_id"], 4322)
+
+    def test_un_push_nunca_manda_un_mensaje_nuevo(self):
+        for previo in ({}, {"generado": "2026-10-08T09:00-03:00", "message_id": 1, "texto": "x"}):
+            self.previo.write_text(json.dumps(previo), encoding="utf-8")
+            abrir = mock.Mock()
+            texto = self.correr(abrir, "--solo-corregir")
+            abrir.assert_not_called()
+            self.assertIn("no manda uno nuevo", texto)
+
+    def test_si_la_correccion_falla_queda_el_estado_anterior(self):
+        previo = {"generado": OFERTAS["generado"], "message_id": 4321, "texto": "otro"}
+        self.previo.write_text(json.dumps(previo), encoding="utf-8")
+        def falla(pedido, timeout=None):
+            raise urllib.error.HTTPError(pedido.full_url, 400, "Bad Request", {},
+                                         io.BytesIO(b'{"ok":false,"description":"Bad Request: message to edit not found"}'))
+        texto = self.correr(falla)
+        self.assertIn("message to edit not found", texto)
+        self.assertEqual(self.leer_estado(), previo)
+
+    def test_un_previo_roto_o_que_falta_es_como_no_tener_mensaje(self):
+        self.previo.write_text("<html>404</html>", encoding="utf-8")
+        abrir = respuesta(7)
+        self.correr(abrir)
+        self.assertTrue(abrir.call_args[0][0].full_url.endswith("/sendMessage"))
+
+
 if __name__ == "__main__":
     unittest.main()
 

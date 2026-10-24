@@ -20,6 +20,14 @@ class EnLaAction(unittest.TestCase):
         self.assertIn("python publicar_telegram.py _sitio/ofertas.json", paso)
         self.assertIn("continue-on-error: true", paso)
 
+    def test_un_push_solo_corrige_el_mensaje_del_mismo_indice_y_el_estado_viaja_con_el_sitio(self):
+        # Spec 030: un push no manda un mensaje nuevo, pero corrige el que ya salio si cambio la lista.
+        paso = YML[YML.index("Publicar las pichinchas"):YML.index("upload-pages-artifact")]
+        self.assertIn('if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi', paso)
+        self.assertIn('"$base/telegram.json" -o telegram-previo.json || echo \'{}\' > telegram-previo.json', paso)
+        self.assertIn("--previo telegram-previo.json --estado _sitio/telegram.json $modo", paso)
+        self.assertIn("steps.guardia.outputs.alarma != 'true'", paso)
+
 
 class AnunciadoEnLasPaginas(unittest.TestCase):
     def test_el_sitio_anuncia_el_feed_para_los_lectores_de_rss(self):
