@@ -164,7 +164,7 @@ function vistaOfertas() {
     catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el índice"; }
   }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
-    <p class="sub">Dos señales distintas. Las que <b>bajaron de precio</b> las detecta la propia app comparando contra el relevamiento anterior,
+    <p class="sub">Dos señales distintas. Las que <b>bajaron de precio</b> las detecta la propia app comparando contra el precio más bajo de los 30 días anteriores,
     así que no dependen de lo que publique la tienda. Las <b>rebajas publicadas</b> son el precio tachado del comercio: una referencia, no una verdad.
     Tocá una tarjeta para ver el detalle.</p></div>
     <p class="estado" id="estadoOf">buscando rebajas…</p>

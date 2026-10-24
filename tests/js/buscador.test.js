@@ -137,7 +137,7 @@ test("Super Oferta incluye la gama alta si la oferta es real, y no inventa ofert
   const ctx = Modos.preparar(IDX, nivel);
   const zen = PRODUCTOS.find(x => /Zenbook/.test(x[0]));
   assert.equal(Modos.filtrar([zen], "super", ctx, med).length, 0, "gama alta sin baja ni rebaja ni otras tiendas: no es oferta");
-  const baja = [...zen]; baja[6] = 5600000;                                           // bajo 11% contra el relevamiento anterior
+  const baja = [...zen]; baja[6] = 5600000;                                           // bajo 11% contra su precio mas bajo de los 30 dias anteriores
   const idx = { ...IDX, productos: [baja] };
   assert.equal(Modos.filtrar([baja], "super", Modos.preparar(idx, nivel), med).length, 1);
 });
@@ -375,11 +375,11 @@ test("notaDe: cada modo dice que deja afuera y cuanto", () => {
 
 /* --- Spec 014 PR 4: Mayor baja y desempate por tiendas --- */
 
-test("orden Mayor baja: el mayor % de baja contra el relevamiento anterior primero; sin baja, al final por precio", () => {
+test("orden Mayor baja: el mayor % de baja contra el precio mas bajo de los 30 dias anteriores primero; sin baja, al final por precio", () => {
   const ctx = Modos.preparar(IDX, nivel);
   const a = f("Celular Moto G15 6GB/128GB", 300000, { antes: 400000 }), b = f("Celular Moto G15 6GB/128GB azul", 500000, { antes: 530000 }), c = f("Celular Moto G15 6GB/128GB rojo", 700000);
   assert.deepEqual(Modos.ordenar([c, b, a], "baja", ctx).map(x => x[1]), [300000, 500000, 700000]);
-  assert.ok(Modos.SECUNDARIOS.some(s => s.id === "baja" && /relevamiento anterior/.test(s.ayuda)));
+  assert.ok(Modos.SECUNDARIOS.some(s => s.id === "baja" && /30 días anteriores/.test(s.ayuda)));
   assert.equal(Modos.migrarSecundario("baja"), "baja");
 });
 

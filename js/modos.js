@@ -23,7 +23,7 @@
      Mercado Libre relevancia, Geizhals) usa «precio de mayor a menor» como orden por defecto; todas dejan precio en ambos sentidos. */
   const SECUNDARIOS = [
     { id: "mejor", eti: "Mejor oferta", ayuda: "primero lo más premium y nuevo; dentro de eso, la mayor baja contra el mismo modelo" },
-    { id: "baja", eti: "Mayor baja", ayuda: "mayor % de baja contra el relevamiento anterior (24 h)" },
+    { id: "baja", eti: "Mayor baja", ayuda: "mayor % de baja contra el precio más bajo de los 30 días anteriores (no cuenta volver al precio de siempre después de una suba)" },
     { id: "baja7", eti: "Baja 7 días", ayuda: "mayor % de baja contra el precio de hace 7 días; sin historia de 7 días no se ordena por este criterio" },
     { id: "baja31", eti: "Baja 31 días", ayuda: "mayor % de baja contra el precio de hace 31 días; sin historia de 31 días no se ordena por este criterio" },
     { id: "precio", eti: "Precio ↓" },
@@ -58,7 +58,7 @@
         e.razones.push(razon);
       };
       const O_ = O(), pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
-      for (const f of of.propias) pone(f, { tipo: "baja", off: 1 - f[1] / f[6], texto: `bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra el relevamiento anterior` });
+      for (const f of of.propias) pone(f, { tipo: "baja", off: 1 - f[1] / f[6], texto: `bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra su precio más bajo de los 30 días anteriores` });
       for (const f of of.publicadas) pone(f, { tipo: "rebaja", off: 1 - f[1] / f[5], texto: `${Math.round((1 - f[1] / f[5]) * 100)}% bajo el precio de lista de la tienda` });
       for (const [f, c] of of.contraModelo || []) pone(f, { tipo: "modelo", off: c.off, texto: O_.textoContraModelo(c, pesos) });
       for (const [f, c] of of.cruceGen || []) pone(f, { tipo: "generacion", off: Math.max(0, 1 - f[1] / c.mediana), texto: O_.textoCruceGen(c, pesos) });

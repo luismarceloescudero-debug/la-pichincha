@@ -19,7 +19,7 @@ import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
 
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
-const CACHE_VERSION = "023";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
+const CACHE_VERSION = "031";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 
@@ -123,7 +123,12 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     const guardada = await desdeCache(clave, h);
     if (guardada) return guardada;
     let r;
-    try { r = await leer(e, env, fecha); } catch (err) { r = { motivo: "La tienda no respondió: escribí el precio a mano." }; }
+    // 24/10: Tiendamia y Loquieroaca pasaron a responder 403 con el desafio anti-bots de Cloudflare: no se saltea, se dice.
+    try { r = await leer(e, env, fecha); } catch (err) {
+      r = { motivo: /HTTP 403/.test(String(err && err.message)) && (e.tienda === "tiendamia" || e.tienda === "loquieroaca")
+        ? `${e.tienda === "tiendamia" ? "Tiendamia" : "Loquieroacá"} no deja leer su página automáticamente: escribí el precio a mano.`
+        : "La tienda no respondió: escribí el precio a mano." };
+    }
     if (!r.motivo && !r.item) r = { motivo: "No se pudo leer el precio de esa página: escribí el precio a mano." };
     return responder({ enlace: e, leido: Boolean(r.item), item: r.item || null, motivo: r.motivo || null, fecha }, clave, Boolean(r.item), h);
   }

@@ -349,7 +349,7 @@ Tres modos (specs 013 y 014, `js/modos.js`):
 
 Dentro de cada modo se elige el orden: **Mejor oferta** (por defecto: primero lo
 mas premium y nuevo, y dentro de eso la mayor baja contra el mismo modelo),
-**Mayor baja** (contra el relevamiento anterior), **Precio ↓**, **Novedades** (generacion o año mas nuevo primero) o **Premium**
+**Mayor baja** (contra el precio mas bajo de los 30 dias anteriores), **Precio ↓**, **Novedades** (generacion o año mas nuevo primero) o **Premium**
 (mayor puntaje primero). El piso de gama se mantiene (4 GB de RAM o 64 GB no alcanzan hoy) y una nota dice
 siempre cuanto deja afuera cada modo. Lo internacional va siempre al final. Lo guardado por la version
 anterior («precio», «marca») arranca en Recomendacion.

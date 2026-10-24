@@ -254,7 +254,7 @@
 
   /* Lo usado, reacondicionado o de caja abierta ("Nuevo con caja abierta" de Mercado Libre) no compite con lo nuevo
      ni es una oferta. Lo dice el nombre o, mejor, la fuente (sello u: la condicion de ComparaYa). */
-  const RE_USADO = /outlet|usado|seminuev|semi[ -]nuev|segunda mano|2da mano|reacondicionad|refurb|open ?box|caja[ -]?abierta|exhibicion/;
+  const RE_USADO = /outlet|usado|seminuev|semi[ -]nuev|segunda mano|2da mano|reacondicionad|renovad|renewed|reconditioned|refurb|open ?box|caja[ -]?abierta|exhibicion/;   // «Renovado» / «Renewed»: el reacondicionado de Amazon (24/10)
   const esUsado = f => (typeof f[8] === "string" && f[8].includes("u")) || RE_USADO.test(normal(String(f[0] || "")));
 
   /* Avisos que no son comparables con el resto aunque coincidan con la busqueda,
@@ -430,7 +430,7 @@
   const textoConteo = (productos, avisos) => productos === avisos
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
-  const api = { normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama,
+  const api = { RE_USADO, normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama,
                 ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, compatibles, agruparPorModelo, textoConteo,
                 filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
   if (typeof module === "object" && module.exports) module.exports = api;
