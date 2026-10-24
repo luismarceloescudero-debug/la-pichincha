@@ -65,7 +65,8 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 - **hecho** Enlace «Saltar al contenido» en todas las paginas (squirrelscan: skip-link).
 - **hecho** `/precios/`: «en 1 comercio» en singular (#136); «Búsquedas relacionadas» entre paginas (#138).
 - **no es falla** El `AggregateOffer` del JSON-LD ya cumple lo que pide Google.
-- **siguiente** `lastmod` del sitemap con la fecha real de cada pagina.
+- **no vale el costo** `lastmod` por pagina: hoy es la fecha real de los precios (la del indice). Una fecha por pagina pide
+  guardar un hash de cada una entre corridas, y Google ignora `lastmod` cuando no es exacto.
 - **hecho** SRI del script de GoatCounter (`count.v4.js`, version fija, con `integrity`).
 - **siguiente** `/.well-known/security.txt`.
 - **pendiente** Pagina «Acerca de» y contacto (E-E-A-T), con lo que el dueño quiera contar.
@@ -74,11 +75,17 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 
 - **hecho** Costo de importar: el precio leido de un link no pisa lo que la persona ya escribio (spec 023).
 - **no es falla** Veredicto: la spec 021 pide armarlo con la busqueda mas reciente.
-- **siguiente** Cadena de `if` por tienda repetida en `js/importar.js` y el Worker; la lista `paths` de `worker.yml`.
+- **no por ahora** Cadena de `if` por tienda en `js/importar.js` y el Worker: funciona, tiene tests y tocarla arriesga el
+  reconocimiento de links (Amazon, Tiendamia, Loquieroaca, eBay) sin ganancia para quien usa el sitio. Se reordena si se
+  suma una tienda mas.
+- **hecho** La lista `paths` de `worker.yml` ya incluye `js/importar.js` y `js/calculadora.js` (que el Worker empaqueta).
 
 ### 5. Fuentes
 
+Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `docs/pendientes-del-dueno.md`.
+
 - **pendiente del dueño** FullH4rd (bloquea desde el 8/10), Katech y Compra Cierta: darlas de baja o pedirles un feed.
+  Katech responde bien fuera de GitHub (2.552 productos el 24/10) y da 0 desde los servidores de GitHub: bloquea esas IP.
 - **pendiente del dueño** Credenciales de eBay y AliExpress para Afuera (las unicas fuentes que no se bloquean, y pagan
   comision). Amazon Creators API cuando haya ventas.
 
