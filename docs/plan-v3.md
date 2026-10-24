@@ -47,7 +47,8 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
   tiendas (035, PR #133).
 - **hecho** `/precios/rtx-4060/`: todo Mercado Libre de $689.532 a $7.197.998 y mezclado con la 4060 Ti. Otra version del
   chip es otra placa y una pagina con un solo comercio no se indexa (036).
-- **siguiente** El mismo producto en dos colores con el titulo escrito distinto (Tronsmart Onyx Ace Pro blanco y negro).
+- **hecho** El mismo producto con el titulo escrito distinto (Tronsmart «Ony»/«Onyx» Ace Pro, blanco y negro): a igual precio
+  y referencia, los mismos numeros y casi todas las palabras en comun ocupan un solo lugar.
 
 ### 2. Velocidad y tamaño (gatillos de la Fase 4)
 
@@ -60,9 +61,11 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 ### 3. Accesibilidad y SEO (squirrelscan, Lighthouse)
 
 - **hecho** Contraste, nombre accesible de «Ver aviso», encabezados de tabla, titulo y JSON-LD de la portada (033).
-- **siguiente** Landmark `<main>` y enlace «Saltar al contenido» (squirrelscan: landmark-one-main, skip-link).
-- **siguiente** `/precios/`: «en 1 comercios» → singular; `Offer` del JSON-LD con precio y disponibilidad (schema/product);
-  `lastmod` del sitemap con la fecha real de cada pagina; enlaces entre paginas de `/precios/` (24 paginas huerfanas).
+- **hecho** Landmark `<main>` (PR #136).
+- **siguiente** Enlace «Saltar al contenido» (squirrelscan: skip-link).
+- **hecho** `/precios/`: «en 1 comercio» en singular (#136); «Búsquedas relacionadas» entre paginas (#138).
+- **no es falla** El `AggregateOffer` del JSON-LD ya cumple lo que pide Google.
+- **siguiente** `lastmod` del sitemap con la fecha real de cada pagina.
 - **hecho** SRI del script de GoatCounter (`count.v4.js`, version fija, con `integrity`).
 - **siguiente** `/.well-known/security.txt`.
 - **pendiente** Pagina «Acerca de» y contacto (E-E-A-T), con lo que el dueño quiera contar.
