@@ -104,3 +104,30 @@ test("sin indice no mide nada, y el resumen de GitHub recibe la tabla", () => {
   assert.match(fs.readFileSync(resumen, "utf8"), /\| Periféricos \| 1 \| 1 \|/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+// ---- Dos ofertas del dia que son el mismo modelo (23/10): red de seguridad sobre el ofertas.json que se publica ----
+test("repetidas: dos ofertas publicadas del mismo modelo o familia son una alarma", () => {
+  const ofertas = [{ nombre: "Notebook Lenovo V15 G5 Core i5 13420H 32Gb Ssd 512Gb 15.6\" #" },
+                   { nombre: "Notebook Lenovo V15 G5 Core i5 13420H 32Gb Ssd 512Gb 15.6\" Wind 11 Pro #" },
+                   { nombre: "SSD A", modelo: "SNV3S/1000G" }, { nombre: "SSD B", modelo: "SNV3S/1000G" },
+                   { nombre: "Monitor LG 27GP850" }];
+  const rep = G.repetidas(ofertas);
+  assert.equal(rep.length, 2);
+  const lista = G.alarmas({ ...G.medir(sano()), repetidas: rep }, null);
+  assert.ok(lista.some(x => /mismo modelo/.test(x) && /Lenovo V15/.test(x)));
+  assert.equal(G.repetidas([{ nombre: "Monitor LG 27GP850" }, { nombre: "SSD A", modelo: "X1" }]).length, 0);
+});
+
+test("main con --ofertas frena la publicacion si se repite un modelo", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guardia-"));
+  const indice = path.join(dir, "indice.json"), ofertas = path.join(dir, "ofertas.json");
+  const muchas = Array.from({ length: 12 }, (_, i) => fila(`SSD Marca${i} Modelo${i} 1TB NVMe`, 90000, { antes: 130000 }));
+  fs.writeFileSync(indice, JSON.stringify({ ...sano(), productos: [...sano().productos, ...muchas] }));
+  fs.writeFileSync(ofertas, JSON.stringify({ ofertas: [{ nombre: "SSD X 1TB Negro" }, { nombre: "SSD X 1TB Blanco" }] }));
+  const log = console.log; console.log = () => {};
+  try {
+    assert.equal(G.main(["--indice", indice, "--ofertas", ofertas]), 3);
+    fs.writeFileSync(ofertas, JSON.stringify({ ofertas: [{ nombre: "SSD X 1TB" }, { nombre: "SSD Y 1TB" }] }));
+    assert.equal(G.main(["--indice", indice, "--ofertas", ofertas]), 0);
+  } finally { console.log = log; }
+});
