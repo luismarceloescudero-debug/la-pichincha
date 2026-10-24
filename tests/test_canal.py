@@ -29,6 +29,21 @@ class EnLaAction(unittest.TestCase):
         self.assertIn("steps.guardia.outputs.alarma != 'true'", paso)
 
 
+class Horario(unittest.TestCase):
+    def test_dos_cron_en_minutos_sueltos_y_el_respaldo_no_repite_el_indice_del_dia(self):
+        # GitHub atrasa los cron de hora en punto: con "0 12" las corridas arrancaron entre las 11:56 y las 15:19.
+        crons = [l.split('"')[1] for l in YML.splitlines() if l.strip().startswith("- cron:")]
+        self.assertEqual(len(crons), 2)
+        self.assertTrue(all(c.split()[0] not in ("0", "30") for c in crons))
+        self.assertTrue(all(int(c.split()[1]) <= 11 for c in crons))       # antes de las 08:00 en Argentina
+        construir = YML[YML.index("  construir:"):YML.index("    steps:", YML.index("  construir:"))]
+        self.assertIn("decidir", construir)
+        self.assertIn("needs.decidir.outputs.correr == 'true'", construir)
+        decidir = YML[YML.index("  decidir:"):YML.index("  tests:")]
+        self.assertIn('"$base/guardia.json"', decidir)
+        self.assertIn("America/Argentina/Buenos_Aires", decidir)
+
+
 class AnunciadoEnLasPaginas(unittest.TestCase):
     def test_el_sitio_anuncia_el_feed_para_los_lectores_de_rss(self):
         html = (RAIZ / "index.html").read_text(encoding="utf-8")

@@ -5,8 +5,12 @@ name: Actualizar precios y publicar
 # indice vive en la rama huerfana `historial`, un CSV por mes.
 
 on:
+  # GitHub atrasa los cron, mas los de hora en punto: con "0 12" (09:00) las corridas del 15 al 24/10 arrancaron entre las
+  # 11:56 y las 15:19. Dos horarios en minutos sueltos y temprano; el segundo es de respaldo y no corre si ya hay indice de
+  # hoy publicado (trabajo "decidir").
   schedule:
-    - cron: "0 12 * * *"        # 09:00 en Argentina (GitHub suele atrasarlo)
+    - cron: "17 8 * * *"        # 05:17 en Argentina
+    - cron: "43 10 * * *"       # 07:43 en Argentina, respaldo
   workflow_dispatch:
     inputs:
       paginas:
@@ -33,11 +37,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Una corrida programada no rearma el indice si ya se publico uno de hoy (la primera ya salio, o se lanzo una a mano).
+  decidir:
+    runs-on: ubuntu-latest
+    outputs:
+      correr: ${{ steps.hoy.outputs.correr }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: sitio.json
+          sparse-checkout-cone-mode: false
+      - id: hoy
+        env:
+          EVENTO: ${{ github.event_name }}
+        run: |
+          correr=true
+          if [ "$EVENTO" = "schedule" ]; then
+            hoy=$(TZ=America/Argentina/Buenos_Aires date +%F)
+            base=$(python3 -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+            publicado=$(curl -fsSL "$base/guardia.json" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("generado", ""))[:10])' || true)
+            if [ "$publicado" = "$hoy" ]; then correr=false; echo "Ya hay indice del $hoy publicado: esta corrida programada no hace nada"; fi
+          fi
+          echo "correr=$correr" >> "$GITHUB_OUTPUT"
+
   tests:
     uses: ./.github/workflows/tests.yml
 
   construir:
-    needs: tests
+    needs: [tests, decidir]
+    if: needs.decidir.outputs.correr == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
