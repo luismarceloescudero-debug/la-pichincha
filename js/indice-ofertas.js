@@ -14,13 +14,34 @@ function asegurarIndice(forzar) {
     .then(r => r.json())
     .then(j => {
       IDX = j;
-      OFERTAS = calcularOfertas(j);
+      OFERTAS = null;
       document.querySelectorAll(".tab[data-ir='buscar'] .n").forEach(n => { n.textContent = j.productos.length; });
-      document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length; });
+      programarOfertas(j);
       return j;
     })
     .finally(() => { pidiendo = null; });
   return pidiendo;
+}
+
+/* Las ofertas de todo el indice (un segundo de CPU en un telefono, Lighthouse del 24/10) no frenan la busqueda: se calculan cuando
+   el navegador queda libre, o enseguida si las pide la pestaña Ofertas o el modo Súper Oferta (ofertasListas). Al terminar,
+   la pestaña muestra su numero y la busqueda vuelve a pintarse con «otra tienda lo tiene más barato». */
+function ofertasListas() {
+  if (!OFERTAS && IDX) {
+    OFERTAS = calcularOfertas(IDX);
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length; });
+  }
+  return OFERTAS;
+}
+function programarOfertas(j) {
+  const correr = () => {
+    if (IDX !== j || OFERTAS) return;
+    ofertasListas();
+    if (typeof CONSULTA === "string" && CONSULTA.trim() && location.hash.slice(1) === "buscar" && typeof pintarResultados === "function")
+      pintarResultados(CONSULTA);
+  };
+  if (typeof requestIdleCallback === "function") requestIdleCallback(correr, { timeout: 4000 });
+  else setTimeout(correr, 300);
 }
 
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
@@ -37,7 +58,7 @@ const leerEstrellas = () => {
 let ESTRELLAS = leerEstrellas();
 
 function listaOfertas() {
-  if (!OFERTAS) return [];
+  if (!ofertasListas()) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
     cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f), local: OFERTAS.equivalente.get(f) });
