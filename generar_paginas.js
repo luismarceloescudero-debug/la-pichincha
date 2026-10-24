@@ -19,6 +19,7 @@ const P = require("./js/pagina.js");
 const SITIO = require("./sitio.json");
 const BASE_URL = SITIO.base_url;   // la direccion publica vive en sitio.json
 const MIN_COMPARABLES = 5;     // debajo de esto la pagina es fina: no se indexa
+const MIN_COMERCIOS = 2;       // con un solo comercio no hay comparacion (24/10: /precios/rtx-4060/, todo de revendedores de Mercado Libre)
 const MAX_FILAS = 20;
 const MAX_INTERNACIONALES = 5;
 
@@ -54,7 +55,7 @@ function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {
   };
 }
 
-const esIndexable = analisis => !!analisis && analisis.base.length >= MIN_COMPARABLES;
+const esIndexable = analisis => !!analisis && analisis.base.length >= MIN_COMPARABLES && analisis.comercios.length >= MIN_COMERCIOS;
 
 /* Los comparables en el orden de la pagina: primero lo que da el modo Recomendacion de la busqueda (precio-calidad, de
    menor a mayor precio) y despues el resto, en el mismo orden: la pagina estatica no esconde ningun comparable, que si
@@ -243,7 +244,9 @@ function renderPagina(consulta, analisis, ctx) {
 <main class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
-  <p class="sub">Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(q)}» en las tiendas que seguimos, así que todavía no armamos la comparación. Probá con el buscador, que mira todos los avisos.</p>
+  <p class="sub">${analisis && analisis.base.length >= MIN_COMPARABLES
+    ? `Hoy las opciones comparables de «${esc(q)}» están en un solo comercio (${esc(analisis.comercios[0] ? analisis.comercios[0].nom : "")}), así que no hay con qué comparar.`
+    : `Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(q)}» en las tiendas que seguimos, así que todavía no armamos la comparación.`} Probá con el buscador, que mira todos los avisos.</p>
   <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(q)}» en La Pichincha</a></p>
   ${pie(ctx)}
 </main>
@@ -457,5 +460,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES };
+module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

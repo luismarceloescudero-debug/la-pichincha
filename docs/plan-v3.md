@@ -43,11 +43,10 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 - **hecho** Una oferta por modelo o familia en todas las categorias (028, 033) y un producto de catalogo de Mercado Libre una
   sola vez (032).
 - **hecho** Carrefour verificado de verdad (032).
-- **en curso** Tachado con la regla Omnibus; el de Mercado Libre y ComparaYa no cuenta; entra el mismo modelo en otras
+- **hecho** Tachado con la regla Omnibus; el de Mercado Libre y ComparaYa no cuenta; entra el mismo modelo en otras
   tiendas (035, PR #133).
-- **siguiente** Precios absurdos de Mercado Libre directo: `/precios/rtx-4060/` muestra 15 opciones, todas de Mercado Libre, de
-  $750.000 a $3.687.000, y mezcla RTX 4060 con 4060 Ti. Descartar del indice el aviso de Mercado Libre muy por encima del
-  mismo modelo en las tiendas locales, y no juntar «Ti» con la version comun.
+- **en curso** `/precios/rtx-4060/`: todo Mercado Libre de $689.532 a $7.197.998 y mezclado con la 4060 Ti. Otra version del
+  chip es otra placa y una pagina con un solo comercio no se indexa (036).
 - **siguiente** El mismo producto en dos colores con el titulo escrito distinto (Tronsmart Onyx Ace Pro blanco y negro).
 
 ### 2. Velocidad y tamaño (gatillos de la Fase 4)

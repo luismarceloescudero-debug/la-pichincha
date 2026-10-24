@@ -93,7 +93,7 @@ test("marca la baja de precio y el precio de una fuente sin relevar hoy, y escap
 });
 
 test("trae como mucho 10 entradas y ningun enlace que no sea http(s)", () => {
-  const muchas = { ...IDX, productos: [...Array.from({ length: 30 }, (_, i) => fila(`Memoria Kingston ${i} DDR4 16GB`, 1000 + i)),
+  const muchas = { ...IDX, productos: [...Array.from({ length: 30 }, (_, i) => fila(`Memoria Kingston ${i} DDR4 16GB`, 1000 + i, i % 2 ? "cg" : "mx")),
     ["Memoria Kingston Malo DDR4 16GB", 1005, "javascript:alert(1)", "cg", "", 0, 0, "", ""]] };
   const { ctx, analisis } = armar(muchas);
   const xml = G.renderFeedPagina(C, analisis, ctx);

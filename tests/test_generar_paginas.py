@@ -76,10 +76,12 @@ class Generar(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.dir)
-        productos = [[f"Memoria Kingston {i} DDR4 16GB", 1000 + i, f"https://t.test/{i}", "cg", "", 0, 0, "", ""]
+        # en dos comercios: con uno solo la pagina no es indexable (24/10)
+        productos = [[f"Memoria Kingston {i} DDR4 16GB", 1000 + i, f"https://t.test/{i}", "cg" if i % 2 else "mx", "", 0, 0, "", ""]
                      for i in range(6)]
         indice = {"generado": "2026-10-09T08:12-03:00", "productos": productos,
-                  "tiendas": {"cg": {"nombre": "CompraGamer", "color": "cg", "relevado": "2026-10-09T08:12-03:00"}}}
+                  "tiendas": {"cg": {"nombre": "CompraGamer", "color": "cg", "relevado": "2026-10-09T08:12-03:00"},
+                              "mx": {"nombre": "Mexx", "color": "mx", "relevado": "2026-10-09T08:12-03:00"}}}
         self.indice = self.dir / "indice.json"
         self.indice.write_text(json.dumps(indice), encoding="utf-8")
         self.consultas = self.dir / "consultas.json"

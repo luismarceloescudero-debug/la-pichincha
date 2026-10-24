@@ -52,7 +52,7 @@ test("la pagina trae todo el contenido en el HTML: titulo, hora, mejor compra, m
 
 test("la tabla se corta en 20 opciones y dice cuantas mas hay", () => {
   const muchas = { ...IDX, productos: Array.from({ length: 30 }, (_, i) =>
-    fila(`Memoria Kingston ${i} DDR4 16GB`, 1000 + i)) };
+    fila(`Memoria Kingston ${i} DDR4 16GB`, 1000 + i, i % 2 ? "cg" : "mx")) };   // en dos comercios: con uno solo no es indexable
   const { ctx, analisis } = armar(muchas, "ddr4 16gb");
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.equal((html.match(/<tr data-op/g) || []).length, 20);
@@ -93,6 +93,16 @@ test("con 5 o mas comparables es indexable y no lleva noindex", () => {
   const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.doesNotMatch(html, /noindex/);
   assert.equal(G.esIndexable(analisis), true);
+});
+
+test("con las opciones en un solo comercio la pagina no es indexable y lo dice (24/10, /precios/rtx-4060/)", () => {
+  const uno = { ...IDX, productos: IDX.productos.map(f => { const g = [...f]; g[3] = "comparaya"; g[4] = "Mercado Libre"; return g; }) };
+  const { ctx, analisis } = armar(uno, "ddr4 16gb");
+  assert.ok(analisis.base.length >= G.MIN_COMPARABLES);
+  assert.equal(G.esIndexable(analisis), false);
+  const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  assert.match(html, /<meta name="robots" content="noindex,follow">/);
+  assert.match(html, /en un solo comercio \(Mercado Libre\)/);
 });
 
 test("una consulta sin resultados tambien es una pagina no indexable", () => {
