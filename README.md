@@ -35,6 +35,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
 | `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), comprar afuera (`importar.js`, specs 015 y 020: la busqueda armada en Amazon, Tiendamia y Loquieroaca cuando nada del indice coincide, y la lectura del link pegado en Costo de importar, sin leer la pagina), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
+| `publicar_instagram.py` | La publicacion diaria en Instagram (spec 025): arma la imagen de las mejores ofertas en el build y la publica despues del despliegue, renovando el token |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
 | `consultas.json`, `generar_paginas.js`, `generar_paginas.py` | Las paginas estaticas por busqueda popular (con su `feed.xml`), el indice `/precios/`, `sitemap.xml` y `robots.txt` |
@@ -428,6 +429,14 @@ Las ofertas del dia salen por dos canales, sin backend:
 - **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
   Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
   `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.
+- **Instagram** ([spec 025](specs/025-instagram-diario/spec.md)): `publicar_instagram.py` publica
+  cada dia en @lapichinchadeldia una imagen 4:5 con las 5 mejores (las mismas ofertas verificadas
+  de Telegram) y un texto con las 10, que manda a `/hoy/` (link en la bio). La imagen se arma en
+  el build (`armar`, Chrome sin interfaz) y viaja con el sitio en `/instagram/AAAA-MM-DD.jpg`,
+  porque Instagram la baja de una direccion publica; el job `instagram`, despues del despliegue,
+  renueva el token (vence a los 60 dias), no repite el dia y la publica. Usa el secreto
+  `INSTAGRAM_TOKEN` y la variable `INSTAGRAM_USER_ID`; sin ellos no hace nada. Corre en la corrida
+  programada, o en una manual con la casilla *instagram*, y nunca con alarma de la guardia.
 
 Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el feed y el
 canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
