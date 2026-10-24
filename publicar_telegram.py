@@ -14,7 +14,7 @@ Un mensaje por indice (spec 030). --estado guarda que mensaje salio para que ind
 texto}); se publica con el sitio y la corrida siguiente lo lee con --previo. Si el sitio se vuelve a publicar
 con el mismo indice y otra lista (23/10: el arreglo de la Lenovo repetida republico /hoy/ a las 22:51, pero el
 mensaje de las 22:06 siguio con el error), se corrige ese mensaje con editMessageText en lugar de mandar otro.
---solo-corregir (un push) nunca manda un mensaje nuevo: solo corrige el del mismo indice.
+--solo-corregir (un push) nunca manda un mensaje nuevo: corrige el del mismo indice o, si el indice se rearmo, el del mismo dia.
 """
 
 import html
@@ -131,8 +131,12 @@ def main(argv=None):
     except (OSError, ValueError):
         print(f"::warning::No hay {ruta}: no se publica en Telegram")
         return 0
-    # El mensaje que ya salio para este mismo indice: se corrige, no se repite.
-    mismo = previo if previo.get("message_id") and previo.get("generado") == datos.get("generado") else None
+    # El mensaje que ya salio para este mismo indice: se corrige, no se repite. Un push corrige tambien el del mismo dia
+    # aunque el indice se haya rearmado (24/10: el merge que cambio indexar.py rearmo el indice y el mensaje de las 15:36
+    # quedaba con la lista vieja).
+    hoy = str(datos.get("generado", ""))[:10]
+    mismo = previo if previo.get("message_id") and (previo.get("generado") == datos.get("generado") or (
+        solo_corregir and hoy and str(previo.get("generado", ""))[:10] == hoy)) else None
     texto = mensaje(datos)
     if texto is None:
         print("Sin ofertas hoy: no se publica en Telegram")
@@ -153,7 +157,7 @@ def main(argv=None):
         if resultado is None:
             escribir_estado(ruta_estado, mismo)
             return 0
-        escribir_estado(ruta_estado, {**mismo, "texto": texto})
+        escribir_estado(ruta_estado, {**mismo, "generado": datos.get("generado"), "texto": texto})
         print(f"Corregido en Telegram el mensaje del {cuando(datos.get('generado', ''))}: {len(datos['ofertas'])} ofertas")
         return 0
     resultado = pedir(token, "sendMessage", campos)
