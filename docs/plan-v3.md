@@ -62,7 +62,7 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 
 - **hecho** Contraste, nombre accesible de «Ver aviso», encabezados de tabla, titulo y JSON-LD de la portada (033).
 - **hecho** Landmark `<main>` (PR #136).
-- **siguiente** Enlace «Saltar al contenido» (squirrelscan: skip-link).
+- **hecho** Enlace «Saltar al contenido» en todas las paginas (squirrelscan: skip-link).
 - **hecho** `/precios/`: «en 1 comercio» en singular (#136); «Búsquedas relacionadas» entre paginas (#138).
 - **no es falla** El `AggregateOffer` del JSON-LD ya cumple lo que pide Google.
 - **siguiente** `lastmod` del sitemap con la fecha real de cada pagina.

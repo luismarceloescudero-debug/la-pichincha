@@ -276,7 +276,8 @@ function renderPagina(consulta, analisis, ctx) {
       canonica, noindex: true, baseUrl: ctx.baseUrl }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<main class="wrap">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
   <p class="sub">${analisis && analisis.base.length >= MIN_COMPARABLES
@@ -317,7 +318,8 @@ function renderPagina(consulta, analisis, ctx) {
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<main class="wrap">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: precios y qué conviene comprar</h1>
   <p class="sub">Comparamos ${conteo} de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
@@ -441,7 +443,8 @@ ${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span clas
     canonica, noindex: false, baseUrl: ctx.baseUrl, grafo, rel: "../" }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<main class="wrap">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>Precios de hardware en Argentina</h1>
   <p class="sub">Lo que se busca más, con el precio de hoy en varias tiendas, la mediana y qué conviene comprar. Cada página sale del mismo análisis que la comparativa de <a href="../">La Pichincha</a>.</p>
