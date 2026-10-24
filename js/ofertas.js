@@ -211,6 +211,18 @@
     return B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
   }
 
+  /* El mismo producto con el titulo escrito distinto (23/10: «Auricular In-Ear Tronsmart Ony Ace Pro Blanco» y «Auricular
+     Tronsmart Onyx Ace Pro Negro», los dos a $58.050 contra $129.000): mismo precio y misma referencia, los mismos numeros
+     en el nombre (capacidad, modelo) y casi todas las palabras del nombre mas corto en el otro. */
+  const COMPARTIDAS_GEMELO = 0.75;
+  function palabras(f) { return new Set(familia(f).split(" ").filter(Boolean)); }
+  function gemelos(a, b) {
+    const numeros = s => [...s].filter(w => /\d/.test(w)).sort().join(" ");
+    if (numeros(a) !== numeros(b)) return false;
+    const [corto, largo] = a.size <= b.size ? [a, b] : [b, a];
+    return corto.size > 0 && [...corto].filter(w => largo.has(w)).length / corto.size >= COMPARTIDAS_GEMELO;
+  }
+
   function destacadas(idx, max = 20, opciones) {
     const { propias, publicadas, cruces, vigentes, contra, notas, gama, equivalente, contraModelo } = calcularOfertas(idx);
     const costo = opciones && opciones.costo;
@@ -228,8 +240,13 @@
       ...publicadas.map(f => nuevo(f, f[5], "publicada"))].filter(o => esUrl(o.f[2]));
     // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
     // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
-    const unico = lista => { const vistos = new Set();
-      return lista.filter(o => { const k = familia(o.f); return !vistos.has(k) && vistos.add(k); }); };
+    // Ademas, a igual precio y referencia, el gemelo con el titulo escrito distinto.
+    const unico = lista => { const vistos = new Set(), porPrecio = new Map();
+      return lista.filter(o => {
+        const k = familia(o.f), p = o.f[1] + "|" + o.antes, w = palabras(o.f), mismos = porPrecio.get(p) || [];
+        if (vistos.has(k) || mismos.some(x => gemelos(x, w))) return false;
+        vistos.add(k); porPrecio.set(p, [...mismos, w]); return true;
+      }); };
     // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.
     const unicas = unico([...todas].sort(por));
     const grupos = new Map(C.ORDEN.map(c => [c, unicas.filter(o => o.categoria === c)]));

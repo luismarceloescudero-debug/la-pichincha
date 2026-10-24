@@ -550,3 +550,20 @@ test("destacadas suma el mismo modelo mas barato que en otras tiendas, con la me
   assert.equal(o.modelo.tiendas, 3);
   assert.equal(Math.round(o.off * 100), 14);
 });
+
+test("destacadas: el mismo producto con el titulo escrito distinto, a igual precio y referencia, ocupa un solo lugar (23/10)", () => {
+  const t = n => fila(n, 58050, { lista: 129000 });
+  const lista = O.destacadas({ productos: [t("Auricular In-Ear Tronsmart Ony Ace Pro Blanco"), t("Auricular Tronsmart Onyx Ace Pro Negro")] }, 10);
+  assert.equal(lista.length, 1);
+});
+
+test("destacadas: a igual precio, otra capacidad u otro producto de la marca siguen siendo dos ofertas", () => {
+  const t = n => fila(n, 58050, { lista: 129000 });
+  for (const [a, b] of [["SSD Kingston NV3 1TB M.2 NVMe", "SSD Kingston NV3 2TB M.2 NVMe"],
+                        ["Auricular Tronsmart Onyx Ace Pro", "Auricular Tronsmart Onyx Ace 2"],
+                        ["Mouse Logitech G203 Lightsync", "Teclado Logitech G213 Prodigy"]])
+    assert.equal(O.destacadas({ productos: [t(a), t(b)] }, 10).length, 2, `${a} / ${b}`);
+  // con otra referencia no se comparan los titulos
+  const c = fila("Auricular Tronsmart Onyx Ace Pro Negro", 58050, { lista: 120000 });
+  assert.equal(O.destacadas({ productos: [t("Auricular In-Ear Tronsmart Ony Ace Pro Blanco"), c] }, 10).length, 2);
+});
