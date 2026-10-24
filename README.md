@@ -425,6 +425,9 @@ Las ofertas del dia salen por dos canales, sin backend:
   `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el repo (Settings > Secrets and variables >
   Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
   (no en cada push), y si Telegram falla el sitio sale igual. El token nunca se imprime.
+- **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
+  Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
+  `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.
 
 Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el feed y el
 canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
