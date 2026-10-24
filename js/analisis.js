@@ -74,7 +74,7 @@
   if (!crudo.length) return null;
   const nq = normalBusq(q);
   const toks = nq.split(/\s+/).filter(Boolean);
-  const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, raros: 0, caros: 0, especificaciones: 0 };
+  const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, variante: 0, raros: 0, caros: 0, especificaciones: 0 };
   const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
   // Las compras internacionales no compiten en la comparativa, pero siguen en la
@@ -199,6 +199,7 @@
       ex.similares ? `${ex.similares} que dicen «simil» y no son lo que buscás` : null,
       ex.accesorios ? `${ex.accesorios} accesorios (cables, adaptadores, soportes)` : null,
       ex.tipo ? `${ex.tipo} de otro tipo de producto` : null,
+      n("variante", "de otra versión del chip (Ti, Super, XT)", "de otra versión del chip (Ti, Super, XT)"),
       ex.usados ? `${ex.usados} usados u outlet` : null,
       ex.especificaciones ? `${ex.especificaciones} con otras especificaciones (no son la misma configuración)` : null,
       ex.raros ? `${ex.raros} muy por debajo del resto y sin marca conocida` : null,

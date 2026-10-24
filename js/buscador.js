@@ -264,7 +264,7 @@
     // Un aviso que EMPIEZA con "Notebook", "PC" o "Combo" es un equipo completo: el
     // componente que buscas solo aparece de pasada. Anclado al inicio a proposito,
     // porque "SSD para notebook" si es un SSD.
-    { id: "equipos", re: /^(notebook|laptop|netbook|pc\b|computadora|all in one|mini pc|combo|kit\b|equipo)/,
+    { id: "equipos", re: /^(notebook|laptop|netbook|portatil|pc\b|computadora|all in one|mini pc|combo|kit\b|equipo)/,
       pide: /notebook|laptop|netbook|\bpc\b|computadora|all in one|combo|armad|equipo|kit/ },
     { id: "usados", re: RE_USADO, pide: RE_USADO },
   ];
@@ -289,6 +289,9 @@
     }
     const a = n.match(ACCESORIOS_INICIO);
     if (a && !nq.includes(a[1])) return "accesorios";
+    // «rtx 4060» no es «rtx 4060 ti»: otra version del chip es otra placa (24/10: /precios/rtx-4060/ las mezclaba)
+    const gq = gpuDe(nq), ga = gq && gpuDe(n);
+    if (ga && ga.chip !== gq.chip && ga.chip.startsWith(gq.chip + " ")) return "variante";
     if (/\bssd\b|solido|nvme/.test(nq) && !/\bhdd\b|rigido|duro/.test(nq) && ES_HDD.test(n)) return "tipo";
     if (/\bhdd\b|rigido|disco duro|hard ?disk/.test(nq) && !/\bssd\b|solido/.test(nq) && ES_SSD.test(n)) return "tipo";
     return null;
