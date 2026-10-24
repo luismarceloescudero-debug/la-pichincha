@@ -63,7 +63,8 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 - **siguiente** Landmark `<main>` y enlace «Saltar al contenido» (squirrelscan: landmark-one-main, skip-link).
 - **siguiente** `/precios/`: «en 1 comercios» → singular; `Offer` del JSON-LD con precio y disponibilidad (schema/product);
   `lastmod` del sitemap con la fecha real de cada pagina; enlaces entre paginas de `/precios/` (24 paginas huerfanas).
-- **siguiente** `/.well-known/security.txt`; SRI del script de GoatCounter.
+- **hecho** SRI del script de GoatCounter (`count.v4.js`, version fija, con `integrity`).
+- **siguiente** `/.well-known/security.txt`.
 - **pendiente** Pagina «Acerca de» y contacto (E-E-A-T), con lo que el dueño quiera contar.
 
 ### 4. Fallas chicas que encontro la revision (033)

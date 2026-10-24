@@ -196,7 +196,7 @@ ${feed ? `<link rel="alternate" type="application/rss+xml" title="${esc(feed.tit
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="${rel}css/sitio.css">
-<script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+" crossorigin="anonymous"></script>
 ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
 ` : ""}<style>
 /* Solo de estas paginas: todo sale de las variables del sitio, asi sigue el tema claro u oscuro. */

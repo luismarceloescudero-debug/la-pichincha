@@ -133,7 +133,7 @@ test("la pagina muestra las mejores opciones y manda a la busqueda, que es donde
 
 test("las paginas cargan GoatCounter y cada enlace a una tienda lleva su rubro", () => {
   const { html } = paginaDe(IDX);
-  assert.match(html, /<script id="gc" data-goatcounter="https:\/\/mescudero\.goatcounter\.com\/count" async src="https:\/\/gc\.zgo\.at\/count\.js"><\/script>/);
+  assert.match(html, /<script id="gc" data-goatcounter="https:\/\/mescudero\.goatcounter\.com\/count" async src="https:\/\/gc\.zgo\.at\/count\.v4\.js" integrity="sha384-[^"]+" crossorigin="anonymous"><\/script>/);
   assert.match(html, /<script src="\.\.\/\.\.\/js\/pagina\.js"><\/script>/);
   const enlaces = html.match(/<a href="https:\/\/t\.test[^>]*>/g) || [];
   assert.ok(enlaces.length >= 5);
@@ -380,4 +380,13 @@ test("la pagina enlaza a sus busquedas relacionadas, y sin relacionadas no muest
   assert.match(con, /<a href="\.\.\/ddr5-32gb\/">ddr5 &lt;32gb&gt;<\/a>/);
   const sin = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.doesNotMatch(sin, /Búsquedas relacionadas/);
+});
+
+test("el contador de GoatCounter va en version fija con SRI, igual en la portada y en las paginas", () => {
+  const fs = require("node:fs"), path = require("node:path");
+  const { ctx, analisis } = armar(IDX, "ddr4 16gb");
+  const etiqueta = h => (/<script id="gc"[^>]*><\/script>/.exec(h) || [""])[0];
+  const pagina = etiqueta(G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx));
+  assert.match(pagina, /src="https:\/\/gc\.zgo\.at\/count\.v\d+\.js" integrity="sha384-[A-Za-z0-9+/]+=*" crossorigin="anonymous"/);
+  assert.equal(etiqueta(fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8")), pagina);
 });
