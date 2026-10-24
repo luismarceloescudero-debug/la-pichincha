@@ -811,3 +811,7 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .afv-puesto{font:600 .9rem var(--font-mono);color:var(--good)}
 .afuera-vivo .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
 .afv-cargando{margin-top:14px}
+
+/* «Saltar al contenido»: fuera de la vista hasta que el teclado llega a el (squirrelscan, skip-link). */
+.saltar{position:absolute;left:8px;top:-60px;z-index:100;padding:8px 14px;border-radius:8px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:600}
+.saltar:focus{top:8px}

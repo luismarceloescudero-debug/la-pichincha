@@ -114,7 +114,8 @@ function renderEstado(idx, salud, { baseUrl = BASE_URL, fiabilidad = null } = {}
     descripcion: "Cuándo se relevó por última vez cada tienda que compara La Pichincha y cuántos avisos trajo.",
     canonica: `${base}/estado/`, baseUrl: base, rel: "../" }) + `
 <body>
-<main class="wrap info">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap info">
   <h1>Estado de las fuentes</h1>
   <p class="sub">Precios del ${esc(P.fechaHora(idx.generado))} (hora argentina). Cada tienda se releva una vez por día; si una no responde, se conservan sus precios anteriores y se muestran con su fecha, nunca como si fueran de hoy.</p>
   <table>
@@ -138,7 +139,8 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     descripcion: "Cómo funciona La Pichincha: de dónde salen los precios, qué datos se miden y cómo se rotulan los enlaces de afiliado.",
     canonica: `${base}/legal/`, baseUrl: base, rel: "../" }) + `
 <body>
-<main class="wrap info">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap info">
   <h1>Términos, privacidad y afiliados</h1>
   <section>
     <h2 id="terminos">Términos de uso</h2>

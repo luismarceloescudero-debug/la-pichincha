@@ -390,3 +390,14 @@ test("el contador de GoatCounter va en version fija con SRI, igual en la portada
   assert.match(pagina, /src="https:\/\/gc\.zgo\.at\/count\.v\d+\.js" integrity="sha384-[A-Za-z0-9+/]+=*" crossorigin="anonymous"/);
   assert.equal(etiqueta(fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8")), pagina);
 });
+
+test("cada pagina abre con «Saltar al contenido», que lleva al <main> (squirrelscan, skip-link)", () => {
+  const fs = require("node:fs"), path = require("node:path");
+  const { ctx, analisis } = armar(IDX, "ddr4 16gb");
+  for (const html of [G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx),
+                      fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8")]) {
+    const cuerpo = html.slice(html.indexOf("<body>"));
+    assert.match(cuerpo, /<a class="saltar" href="#contenido">Saltar al contenido<\/a>\n<main id="contenido"/);
+    assert.ok(cuerpo.indexOf('class="saltar"') < cuerpo.search(/<(a|button|input)\b(?![^>]*class="saltar")/), "es lo primero que enfoca el teclado");
+  }
+});

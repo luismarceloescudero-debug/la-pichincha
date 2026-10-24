@@ -129,7 +129,8 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
 .hoy .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
 </style>
 <body>
-<main class="wrap hoy">
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap hoy">
   <section class="historia" aria-label="Tarjeta con las mejores ofertas de hoy">
     <div class="h-cab"><span>La Pichincha</span><span>${esc(dia)}</span></div>
     <h1>Pichinchas<br>del día</h1>
