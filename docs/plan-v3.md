@@ -45,13 +45,15 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 - **hecho** Carrefour verificado de verdad (032).
 - **hecho** Tachado con la regla Omnibus; el de Mercado Libre y ComparaYa no cuenta; entra el mismo modelo en otras
   tiendas (035, PR #133).
-- **en curso** `/precios/rtx-4060/`: todo Mercado Libre de $689.532 a $7.197.998 y mezclado con la 4060 Ti. Otra version del
+- **hecho** `/precios/rtx-4060/`: todo Mercado Libre de $689.532 a $7.197.998 y mezclado con la 4060 Ti. Otra version del
   chip es otra placa y una pagina con un solo comercio no se indexa (036).
 - **siguiente** El mismo producto en dos colores con el titulo escrito distinto (Tronsmart Onyx Ace Pro blanco y negro).
 
 ### 2. Velocidad y tamaño (gatillos de la Fase 4)
 
-- **siguiente** Buscar en un Web Worker: la busqueda y el analisis (2 s de tarea larga en `arranque.js`) no bloquean la pantalla.
+- **hecho** Las ofertas de todo el indice se calculan cuando el navegador queda libre, no al bajar el indice (037: TBT local
+  de 3,3 s a 1,3-2,3 s).
+- **siguiente** Ese calculo en un Web Worker (claves por posicion de la fila).
 - **siguiente** Partir el indice por rubro y bajar solo el que se busca (1,71 MB gzip).
 - **despues** Si no alcanza: busqueda en el Worker con D1 / SQLite FTS5.
 
