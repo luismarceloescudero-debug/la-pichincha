@@ -186,3 +186,32 @@ class BajaEnDias(unittest.TestCase):
     def test_sin_historial_o_sin_precio_no_afirma_nada(self):
         self.assertIsNone(serie.baja_en([], HOY, 800, 7))
         self.assertIsNone(serie.baja_en([(d(10), 1000), (HOY, None)], HOY, None, 7))
+
+
+class PisoPrevio(unittest.TestCase):
+    """La referencia de la baja propia (spec 029): el precio mas bajo de los 30 dias anteriores a hoy."""
+
+    def test_una_suba_de_un_dia_no_es_la_referencia(self):
+        # 23/10, la MSI Z790-P de SCP: $362.801 el 21/10, $623.616 y $621.600 el 22/10 (dos corridas)
+        ev = [(d(7), 360453), (d(4), 361627), (d(2), 362801), (d(1), 623616), (d(1), 621600)]
+        self.assertEqual(serie.piso_previo(ev, HOY), 360453)
+
+    def test_cuenta_un_precio_que_duro_una_sola_corrida(self):
+        ev = [(d(4), 2302449), (d(1), 2010581), (d(1), 2370652)]
+        self.assertEqual(serie.piso_previo(ev, HOY), 2010581)
+
+    def test_lo_de_hoy_no_cuenta(self):
+        # una corrida anterior del mismo dia no es «antes»
+        self.assertEqual(serie.piso_previo([(d(3), 1000), (HOY, 800)], HOY), 1000)
+        self.assertIsNone(serie.piso_previo([(HOY, 800)], HOY))
+
+    def test_un_minimo_de_hace_mas_de_30_dias_no_cuenta_pero_el_precio_vigente_si(self):
+        self.assertEqual(serie.piso_previo([(d(60), 800), (d(40), 1200), (d(10), 1100)], HOY), 1100)
+        self.assertEqual(serie.piso_previo([(d(60), 800), (d(40), 1200)], HOY), 1200)
+
+    def test_si_dejo_de_publicarse_y_volvio_cuenta_desde_que_volvio(self):
+        self.assertEqual(serie.piso_previo([(d(20), 800), (d(15), None), (d(5), 1000)], HOY), 1000)
+        self.assertIsNone(serie.piso_previo([(d(20), 800), (d(5), None)], HOY))
+
+    def test_sin_historial_no_hay_referencia(self):
+        self.assertIsNone(serie.piso_previo([], HOY))

@@ -145,7 +145,7 @@
     picks.push({ clave: "alt", ico: "balanza", m: alt, rol: "Alternativa de otra marca", rolCorto: "Otra marca",
       razon: `Otra marca (${marcaDe(alt.f[0])}) para no depender de una sola: ${Math.abs(dp)}% ${dp >= 0 ? "más cara" : "más barata"} que la mejor compra.` }); }
   if (baja) picks.push({ clave: "baja", ico: "fuego", m: baja, rol: "Bajó de precio", rolCorto: "Bajó de precio",
-    razon: `Bajó ${Math.round((1 - baja.f[1] / baja.f[6]) * 100)}% desde el relevamiento anterior: antes ${pesos(baja.f[6])}.` });
+    razon: `Bajó ${Math.round((1 - baja.f[1] / baja.f[6]) * 100)}% contra su precio más bajo de los 30 días anteriores (${pesos(baja.f[6])}).` });
 
   // Si la busqueda tiene una sola marca no hay "otra marca" que contrastar. En
   // vez de dejar una tarjeta sola, muestro un escalon arriba y la gama alta.

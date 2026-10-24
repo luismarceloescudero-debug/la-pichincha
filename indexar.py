@@ -846,11 +846,10 @@ def main(argv=None):
     # precios distintos, y con la URL sola una pisaba a la otra.
     carpeta = Path(args.historial)
     estado = historial.leer(carpeta)
-    series = serie.cargar(carpeta)               # para los sellos de minimo y de rebaja inflada
+    series = serie.cargar(carpeta)               # para la baja propia y los sellos de minimo y de rebaja inflada
     hoy = datetime.now(AR).date()
-    # La baja propia se mide contra el precio de antes de hoy: si el indexador corre dos veces en el dia,
-    # la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
-    ayeres = historial.leer(carpeta, antes_de=hoy.isoformat())
+    # La baja propia se mide contra los precios de antes de hoy (serie.piso_previo): si el indexador corre dos veces en
+    # el dia, la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
@@ -930,13 +929,17 @@ def main(argv=None):
             if not rebaja_real or not lista or lista <= it["precio"]:
                 lista = 0
             # Baja propia: lo que valia segun el historial. Este dato no depende
-            # de lo que publique la tienda, asi que vale para todas.
-            ayer = ayeres.get((clave, it["url"])) or 0
-            propia = ayer if ayer > it["precio"] else 0
+            # de lo que publique la tienda, asi que vale para todas. Se mide contra
+            # el precio mas bajo de los 30 dias anteriores (como la directiva Omnibus),
+            # no contra el de ayer: volver al precio de siempre despues de una suba no
+            # es una baja (23/10: la MSI Z790-P de SCP paso de $362.801 a $621.600 por
+            # un dia y al volver a $363.975 se publico como «−41%»).
+            eventos = series.get((clave, it["url"]), [])
+            piso = serie.piso_previo(eventos, hoy)
+            propia = piso if piso and piso > it["precio"] else 0
             if propia:
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
-            eventos = series.get((clave, it["url"]), [])
             desde = serie.desde_cuando(eventos, hoy, it["precio"])
             # Bajas de 7 y 31 dias (%): vacias si el historial no llega; 0 si no bajo. Van al final: el sitio lee por posicion.
             b7 = serie.baja_en(eventos, hoy, it["precio"], 7)

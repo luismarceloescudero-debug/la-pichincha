@@ -1,7 +1,7 @@
 /* Que es una oferta: la misma logica para la pestaña Ofertas, el feed RSS y el canal de Telegram.
    Dos señales distintas:
-   1. Bajas propias: lo que valia en el relevamiento anterior contra lo que vale hoy. No depende de lo que
-      publique la tienda y no se puede inflar.
+   1. Bajas propias: lo que vale hoy contra el precio mas bajo de los 30 dias anteriores (indexar.py, spec 029: volver al
+      precio de siempre despues de una suba no es una baja). No depende de lo que publique la tienda y no se puede inflar.
    2. Rebajas publicadas: el precio tachado del comercio, acotado entre el minimo de su categoria y 60% porque
       arriba de ahi el precio anterior suele estar inventado.
    Antes de eso, cada aviso se evalua en SU categoria (js/categorias.js: monitores, PCs, notebooks, smartphones,

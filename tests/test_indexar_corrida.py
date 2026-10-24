@@ -60,12 +60,12 @@ class Corrida(unittest.TestCase):
         salud = json.loads((self.dir / "salud.json").read_text(encoding="utf-8"))
         return indice, salud
 
-    def pasar_a_ayer(self):
-        """Lo que se relevo hoy pasa a ser de ayer: la proxima corrida es la del dia siguiente."""
+    def pasar_a_ayer(self, dias=1):
+        """Lo que se relevo hoy pasa a ser de ayer (o de hace `dias` dias): la proxima corrida es la del dia siguiente."""
         hoy = datetime.now(indexar.AR).date()
         for ruta in self.hist.glob("*.csv"):
             texto = ruta.read_text(encoding="utf-8")
-            ruta.write_text(texto.replace(hoy.isoformat() + ",", (hoy - timedelta(days=1)).isoformat() + ","),
+            ruta.write_text(texto.replace(hoy.isoformat() + ",", (hoy - timedelta(days=dias)).isoformat() + ","),
                             encoding="utf-8")
 
     def filas(self):
@@ -322,6 +322,16 @@ class Corrida(unittest.TestCase):
         self.correr([(1, 1000)], [(101, 500)])
         indice, _ = self.correr([(1, 800)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 1000)
+
+    def test_volver_al_precio_de_siempre_despues_de_una_suba_no_es_una_baja(self):
+        # Spec 029, 23/10: la MSI Z790-P de SCP valia $362.801, el 22/10 $621.600 y el 23/10 $363.975: salio «−41%».
+        self.correr([(1, 1000), (2, 1000)], [(101, 500)])
+        self.pasar_a_ayer(2)
+        self.correr([(1, 1700), (2, 1700)], [(101, 500)])
+        self.pasar_a_ayer()
+        indice, _ = self.correr([(1, 1010), (2, 900)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 0)
+        self.assertEqual(self.fila(indice, "uno", 2)[6], 1000)    # la baja se mide contra el piso, no contra la suba
 
 
 

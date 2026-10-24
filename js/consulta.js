@@ -174,7 +174,7 @@ function vistaVeredictoDin() {
   const items = [];
 
   items.push({ t: `Comprá ${f[0].slice(0, 72)}.`,
-    d: `${mejor.razon} Sale ${pesos(f[1])} en ${comercioDe(f)}${viejoDe(f) ? `, ${viejoDe(f)}: hoy no lo pudimos verificar` : ""}.` + (f[6] > f[1] ? ` Además bajó ${Math.round((1 - f[1] / f[6]) * 100)}% desde el relevamiento anterior.` : "") });
+    d: `${mejor.razon} Sale ${pesos(f[1])} en ${comercioDe(f)}${viejoDe(f) ? `, ${viejoDe(f)}: hoy no lo pudimos verificar` : ""}.` + (f[6] > f[1] ? ` Además bajó ${Math.round((1 - f[1] / f[6]) * 100)}% contra su precio más bajo de los 30 días anteriores.` : "") });
   if (barato) items.push({ t: "Si el precio es lo único que importa.",
     d: `${barato.m.f[0].slice(0, 72)} a ${pesos(barato.m.f[1])}. ${barato.razon}` });
   if (alt) items.push({ t: "Una alternativa de otra marca.",
