@@ -129,7 +129,7 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
 .hoy .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
 </style>
 <body>
-<div class="wrap hoy">
+<main class="wrap hoy">
   <section class="historia" aria-label="Tarjeta con las mejores ofertas de hoy">
     <div class="h-cab"><span>La Pichincha</span><span>${esc(dia)}</span></div>
     <h1>Pichinchas<br>del día</h1>
@@ -143,7 +143,7 @@ ${tarjeta}
 ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
   <p><a class="acc" href="../">Buscar y comparar en La Pichincha</a> · <a href="${CANAL_TELEGRAM}" rel="noopener">Canal de Telegram</a></p>
   <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones. <a href="../estado/">Estado de las fuentes</a> · <a href="../legal/">Términos y privacidad</a>.</p>
-</div>
+</main>
 <script src="../js/pagina.js"></script>
 <script>${G.SCRIPT_MEDICION}</script>
 </body>

@@ -240,13 +240,13 @@ function renderPagina(consulta, analisis, ctx) {
       canonica, noindex: true, baseUrl: ctx.baseUrl }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<div class="wrap">
+<main class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
   <p class="sub">Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(q)}» en las tiendas que seguimos, así que todavía no armamos la comparación. Probá con el buscador, que mira todos los avisos.</p>
   <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(q)}» en La Pichincha</a></p>
   ${pie(ctx)}
-</div>
+</main>
 <script src="../../js/pagina.js"></script>
 <script src="../../js/app.js"></script>
 <script>${scriptApp(ctx.idx.generado, "../../")}</script>
@@ -271,7 +271,7 @@ function renderPagina(consulta, analisis, ctx) {
   const conteo = avisos > filas.length ? `${filas.length} productos en ${avisos} avisos` : `${filas.length} opciones`;
 
   const titulo = `${q}: precios desde ${pesos(desde)} | La Pichincha`;
-  const descripcion = `${conteo} de ${q} en ${comercios} comercios: desde ${pesos(desde)}, ` +
+  const descripcion = `${conteo} de ${q} en ${comercios === 1 ? "1 comercio" : `${comercios} comercios`}: desde ${pesos(desde)}, ` +
     `mediana ${pesos(analisis.med)}. Mejor compra y precios del ${cuando}.`;
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
@@ -279,7 +279,7 @@ function renderPagina(consulta, analisis, ctx) {
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<div class="wrap">
+<main class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>${esc(q)}: precios y qué conviene comprar</h1>
   <p class="sub">Comparamos ${conteo} de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
@@ -320,7 +320,7 @@ ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).joi
 ` : ""}${afuera.length ? `  <p class="sub">Quedaron afuera ${esc(afuera.join(", "))}.</p>\n` : ""}
   <p><a class="acc" href="${esc(interactiva)}">Ver la comparativa completa</a> <a class="acc" href="${esc(filtrable)}">Buscar y filtrar por tienda y precio</a></p>
   ${pie(ctx)}
-</div>
+</main>
 <script src="../../js/pagina.js"></script>
 <script src="../../js/app.js"></script>
 <script>${scriptApp(ctx.idx.generado, "../../")}</script>
@@ -403,13 +403,13 @@ ${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span clas
     canonica, noindex: false, baseUrl: ctx.baseUrl, grafo, rel: "../" }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
-<div class="wrap">
+<main class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
   <h1>Precios de hardware en Argentina</h1>
   <p class="sub">Lo que se busca más, con el precio de hoy en varias tiendas, la mediana y qué conviene comprar. Cada página sale del mismo análisis que la comparativa de <a href="../">La Pichincha</a>.</p>
 ${cuerpo}
   <p class="nota">Precios con IVA y sin envío. <a href="../">Volver a La Pichincha</a>.</p>
-</div>
+</main>
 <script src="../js/pagina.js"></script>
 <script src="../js/app.js"></script>
 <script>${scriptApp(ctx.idx.generado, "../")}</script>
