@@ -221,7 +221,9 @@
     // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
     const unico = lista => { const vistos = new Set();
       return lista.filter(o => { const k = familia(o.f); return !vistos.has(k) && vistos.add(k); }); };
-    const grupos = new Map(C.ORDEN.map(c => [c, unico(todas.filter(o => o.categoria === c).sort(por))]));
+    // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.
+    const unicas = unico([...todas].sort(por));
+    const grupos = new Map(C.ORDEN.map(c => [c, unicas.filter(o => o.categoria === c)]));
     const elegidas = new Set(), puestos = new Map(C.ORDEN.map(c => [c, 0]));
     // Cada categoria avanza por su propia lista: "otro" no tiene lugar reservado, pero cuando entra lo hace con su mejor oferta.
     const ronda = (hasta, cats) => {
@@ -233,7 +235,7 @@
     };
     ronda(C.CUPO.reservado, C.ORDEN.filter(c => c !== "otro"));          // lugar reservado de cada categoria
     ronda(C.CUPO.tope, C.ORDEN);                                           // lo que sobra, hasta el tope
-    for (const o of unico([...todas].sort(por))) if (elegidas.size < max) elegidas.add(o);   // si aun falta, lo mejor que quede
+    for (const o of unicas) if (elegidas.size < max) elegidas.add(o);   // si aun falta, lo mejor que quede
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }
 

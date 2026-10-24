@@ -123,9 +123,10 @@ def _pedir_token():
 
 
 def pedir_api(url, cabeceras):
-    """(codigo, texto) de la API sin levantar excepciones; codigo 0 si no hubo respuesta."""
+    """(codigo, texto) de la API sin levantar excepciones; codigo 0 si no hubo respuesta. Va con el user-agent del sitio:
+    Carrefour responde 403 al de Python por defecto (24/10), y su verificacion caia siempre en la pagina."""
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=cabeceras), timeout=TIMEOUT) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA, **cabeceras}), timeout=TIMEOUT) as r:
             return r.status, r.read(MAX_BYTES).decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
         try:
@@ -164,13 +165,19 @@ def revisar_ml(url, precio=None):
     return "viva", "api"
 
 
+# Las tiendas VTEX traen en cada pagina los textos de su interfaz, entre ellos
+# "store\u002Favailability-subscriber.title":"Este producto no está disponible en este momento": es la plantilla del aviso de
+# reposicion, no el estado del producto (24/10: por eso las 35 ofertas de Carrefour de 30 dias se dieron por caidas).
+TEXTOS_VTEX = re.compile(r'"store(?:\\u002F|/)[^"]{1,120}":"[^"]{0,300}"')
+
+
 def veredicto(estado, cuerpo):
     """'caida', 'viva' o 'dudosa' a partir del codigo HTTP y el texto de la pagina."""
     if estado in (404, 410):
         return "caida"
     if estado != 200:
         return "dudosa"                 # bloqueo, limite de pedidos o error del servidor: no prueba nada
-    return "caida" if CAIDA.search(cuerpo or "") else "viva"
+    return "caida" if CAIDA.search(TEXTOS_VTEX.sub("", cuerpo or "")) else "viva"
 
 
 def bajar(url):

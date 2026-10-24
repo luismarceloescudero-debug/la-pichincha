@@ -55,8 +55,11 @@ jobs:
           if [ "$EVENTO" = "schedule" ]; then
             hoy=$(TZ=America/Argentina/Buenos_Aires date +%F)
             base=$(python3 -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
-            publicado=$(curl -fsSL "$base/guardia.json" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("generado", ""))[:10])' || true)
-            if [ "$publicado" = "$hoy" ]; then correr=false; echo "Ya hay indice del $hoy publicado: esta corrida programada no hace nada"; fi
+            dia() { curl -fsSL "$base/$1" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("generado", ""))[:10])' || true; }
+            # Hace falta el indice de hoy Y su mensaje: un push de madrugada que reindexa no manda Telegram (spec 030).
+            if [ "$(dia guardia.json)" = "$hoy" ] && [ "$(dia telegram.json)" = "$hoy" ]; then
+              correr=false; echo "Ya hay indice y mensaje del $hoy publicados: esta corrida programada no hace nada"
+            fi
           fi
           echo "correr=$correr" >> "$GITHUB_OUTPUT"
 
@@ -299,6 +302,14 @@ jobs:
       # Guardia del indice (guardia.js): mide sobre el indice real bajas propias y, por categoria, avisos, "sin datos" y
       # ofertas, y lo compara con la medicion publicada de la corrida anterior. Con una alarma (18/10: 0 bajas propias
       # en todo el indice) no se manda Telegram y se abre o comenta un issue con la etiqueta "guardia".
+      # El mensaje de Telegram que ya salio viaja con el sitio (spec 030): se copia antes de la guardia para que no se
+      # pierda si con alarma no se publica, o si un push no tiene que corregir nada.
+      - name: Conservar el mensaje de Telegram anterior
+        run: |
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/telegram.json" -o telegram-previo.json || echo '{}' > telegram-previo.json
+          python -c 'import json,shutil; json.load(open("telegram-previo.json")).get("message_id") and shutil.copy("telegram-previo.json", "_sitio/telegram.json")' || echo '{}' > telegram-previo.json
+
       - name: Guardia del indice
         id: guardia
         continue-on-error: true
@@ -335,8 +346,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           EVENTO: ${{ github.event_name }}
         run: |
-          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
-          curl -fsSL "$base/telegram.json" -o telegram-previo.json || echo '{}' > telegram-previo.json
           modo=""
           if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi
           python publicar_telegram.py _sitio/ofertas.json --previo telegram-previo.json --estado _sitio/telegram.json $modo

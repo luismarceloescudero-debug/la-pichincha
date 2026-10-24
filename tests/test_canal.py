@@ -24,9 +24,16 @@ class EnLaAction(unittest.TestCase):
         # Spec 030: un push no manda un mensaje nuevo, pero corrige el que ya salio si cambio la lista.
         paso = YML[YML.index("Publicar las pichinchas"):YML.index("upload-pages-artifact")]
         self.assertIn('if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi', paso)
-        self.assertIn('"$base/telegram.json" -o telegram-previo.json || echo \'{}\' > telegram-previo.json', paso)
         self.assertIn("--previo telegram-previo.json --estado _sitio/telegram.json $modo", paso)
         self.assertIn("steps.guardia.outputs.alarma != 'true'", paso)
+
+    def test_el_mensaje_anterior_se_conserva_aunque_no_se_publique(self):
+        # Revision del 24/10: con alarma (paso salteado) o en un push sin nada que corregir, telegram.json desaparecia del sitio.
+        paso = YML[YML.index("Conservar el mensaje de Telegram anterior"):YML.index("- name: Guardia del indice")]
+        self.assertNotIn("if:", paso)
+        self.assertIn('"$base/telegram.json" -o telegram-previo.json', paso)
+        self.assertIn('shutil.copy("telegram-previo.json", "_sitio/telegram.json")', paso)
+        self.assertLess(YML.index("Conservar el mensaje de Telegram anterior"), YML.index("Publicar las pichinchas"))
 
 
 class Horario(unittest.TestCase):
@@ -40,7 +47,8 @@ class Horario(unittest.TestCase):
         self.assertIn("decidir", construir)
         self.assertIn("needs.decidir.outputs.correr == 'true'", construir)
         decidir = YML[YML.index("  decidir:"):YML.index("  tests:")]
-        self.assertIn('"$base/guardia.json"', decidir)
+        self.assertIn("dia guardia.json", decidir)
+        self.assertIn("dia telegram.json", decidir)       # sin el mensaje de hoy, el respaldo corre igual
         self.assertIn("America/Argentina/Buenos_Aires", decidir)
 
 

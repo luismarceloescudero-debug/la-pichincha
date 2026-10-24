@@ -209,9 +209,11 @@ class PisoPrevio(unittest.TestCase):
         self.assertEqual(serie.piso_previo([(d(60), 800), (d(40), 1200), (d(10), 1100)], HOY), 1100)
         self.assertEqual(serie.piso_previo([(d(60), 800), (d(40), 1200)], HOY), 1200)
 
-    def test_si_dejo_de_publicarse_y_volvio_cuenta_desde_que_volvio(self):
-        self.assertEqual(serie.piso_previo([(d(20), 800), (d(15), None), (d(5), 1000)], HOY), 1000)
-        self.assertIsNone(serie.piso_previo([(d(20), 800), (d(5), None)], HOY))
+    def test_un_precio_de_la_ventana_cuenta_aunque_haya_dejado_de_publicarse_en_el_medio(self):
+        # 24/10, la RTX 5090 de Venex: $8.099.999 el 13/10, sin publicar el 15/10, $13.999.999 el 22/10
+        self.assertEqual(serie.piso_previo([(d(11), 8099999), (d(9), None), (d(2), 13999999)], HOY), 8099999)
+        self.assertEqual(serie.piso_previo([(d(60), 500), (d(50), None), (d(5), 1000)], HOY), 1000)   # fuera de la ventana no
+        self.assertIsNone(serie.piso_previo([(d(20), 800), (d(5), None)], HOY))       # hoy no habia precio de antes
 
     def test_sin_historial_no_hay_referencia(self):
         self.assertIsNone(serie.piso_previo([], HOY))

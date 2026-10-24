@@ -311,7 +311,9 @@ ${intl.length ? `
   <section>
     <h2>Compras internacionales</h2>
     <p class="sub">Se envían desde el exterior: tardan semanas y pueden pagar impuestos al llegar, por eso no compiten con el resto.</p>
-    <div class="scroll"><table><tbody>
+    <div class="scroll"><table>
+      <thead><tr><th>Producto</th><th>Comercio</th><th>Precio</th><th>Detalle</th></tr></thead>
+      <tbody>
 ${intl.map(f => "      " + filaHtml(f, ctx).replace("<tr data-op>", "<tr>")).join("\n")}
     </tbody></table></div>
   </section>

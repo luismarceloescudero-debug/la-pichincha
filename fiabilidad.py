@@ -33,6 +33,14 @@ MINIMO = 30      # ofertas verificadas en la ventana para decir algo de un comer
 # Descartes que no prueban nada contra la tienda: la API no pudo responder o la tienda no se pudo abrir.
 NO_COMPROBADO = ("no se puede verificar", "no se pudo verificar", "no se pudo abrir")
 
+# Revisiones que no valen porque el error era del verificador, no de la tienda: {comercio: ultimo dia que no cuenta}.
+# Quedan en el historial (es lo que paso) pero no entran al resumen que publica /estado/.
+ANULADAS = {
+    # Spec 032: sin user-agent la API de Carrefour daba 403 y la pagina traia la plantilla «Este producto no está
+    # disponible en este momento» de VTEX; /estado/ decia 39 de 39 caidas, y no lo estaban.
+    "carrefour.com.ar": "2026-10-24",
+}
+
 
 def hoy():
     """La fecha de hoy en Argentina (UTC-3 fijo, sin horario de verano)."""
@@ -98,12 +106,14 @@ def leer(carpeta):
     return [s for s in salida if s["comercio"]]
 
 
-def resumen(todas, hasta, dias=DIAS, minimo=MINIMO):
-    """Por comercio, lo verificado en los ultimos `dias` dias hasta `hasta` (inclusive) y la ultima revision."""
+def resumen(todas, hasta, dias=DIAS, minimo=MINIMO, anuladas=None):
+    """Por comercio, lo verificado en los ultimos `dias` dias hasta `hasta` (inclusive) y la ultima revision. Las filas de
+    `anuladas` (por defecto ANULADAS) no cuentan."""
+    anuladas = ANULADAS if anuladas is None else anuladas
     desde = (date.fromisoformat(hasta) - timedelta(days=dias - 1)).isoformat()
     comercios = {}
     for fila in sorted(todas, key=lambda x: x["fecha"]):
-        if fila["fecha"] > hasta:
+        if fila["fecha"] > hasta or fila["fecha"] <= anuladas.get(fila["comercio"], ""):
             continue
         c = comercios.setdefault(fila["comercio"], {"verificadas": 0, "caidas": 0, "sin_comprobar": 0, "ultima": None})
         c["ultima"] = fila["fecha"]

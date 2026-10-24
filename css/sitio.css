@@ -307,7 +307,7 @@ td.mejor{color:var(--good);font-weight:700}
 .segmentos::-webkit-scrollbar{display:none}
 .seg{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;padding:9px 16px;
   border-radius:9px;font:500 .88rem var(--font-sans);color:var(--ink-2);
-  display:flex;align-items:center;justify-content:center;gap:7px;transition:all .22s var(--curva)}
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:color .22s var(--curva),background-color .22s var(--curva),box-shadow .22s var(--curva)}
 .seg:hover{color:var(--ink)}
 .seg[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
 .seg .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);background:var(--bg);
@@ -441,7 +441,7 @@ td.mejor{color:var(--good);font-weight:700}
   font:500 .66rem var(--font-mono);color:var(--ink-3);white-space:nowrap}
 .franja .extremos{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
   font:500 .74rem var(--font-mono);color:var(--ink-3)}
-.tenue{opacity:.6}
+.tenue{color:var(--ink-3)}   /* con opacity, el verde de una marca de primera linea quedaba en 2,5:1 (Lighthouse, 24/10) */
 
 /* ---- Tira de tus ultimas busquedas (spec 021: sin las curadas) ---- */
 .ultimas{margin-bottom:18px}
@@ -577,6 +577,8 @@ td.mejor{color:var(--good);font-weight:700}
 .mas{display:flex;justify-content:center;margin-top:20px}
 @media (max-width:620px){.ogrid{grid-template-columns:1fr}.of-et{min-width:100%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Sin la demora del doble toque para zoom en botones, links y campos (Web Interface Guidelines). */
+a,button,input,select,textarea,label,summary,[role="tab"]{touch-action:manipulation}
 @media (max-width:620px){
   .largo{display:none}
   /* En telefono el buscador queda a mano y el intro no empuja los resultados. */

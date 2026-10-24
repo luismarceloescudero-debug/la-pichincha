@@ -283,6 +283,21 @@ test("una fuente caida o lenta no tumba a las demas, se marca y no se guarda en 
   assert.equal(cache.m.size, 0);
 });
 
+test("una busqueda con una fuente caida se guarda 15 minutos, no 8 horas; un error no se guarda nunca", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const cache = cacheFalsa();
+  const env = { ...ENV_EBAY, ALIEXPRESS_APP_KEY: "k", ALIEXPRESS_APP_SECRET: "s", ALIEXPRESS_TRACKING_ID: "t" };
+  const f = fetchFalso([["oauth2/token", { access_token: "TOK", expires_in: 7200 }], ["item_summary/search", fixture("ebay-search.json")],
+    ["api-sg.aliexpress.com", () => new Response("error", { status: 500 })]]);
+  const atender = crearAtender({ fetch: f, cache, ahora: () => AHORA });
+  const j = await (await atender(pedido("aeroclip 2"), env)).json();
+  assert.deepEqual(j.fuentes.map(x => x.ok), [true, false]);
+  assert.match([...cache.m.values()][0].headers.get("Cache-Control"), /max-age=900$/);
+  const malo = await atender(pedido(""), env);
+  assert.equal(malo.status, 400);
+  assert.equal(malo.headers.get("Cache-Control"), "no-store");
+});
+
 test("AliExpress y eBay juntos: se mezclan por precio", async () => {
   const { crearAtender } = await cargar("index.js");
   const env = { ...ENV_EBAY, ALIEXPRESS_APP_KEY: "k", ALIEXPRESS_APP_SECRET: "s", ALIEXPRESS_TRACKING_ID: "t" };
@@ -466,6 +481,16 @@ test("/enlace: un link que no es de una tienda conocida da 400 y no se pide nada
   const caida = await (await atender(pedidoEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), {})).json();
   assert.equal(caida.leido, false);
   assert.match(caida.motivo, /no respondió|no se pudo/);
+});
+
+test("/enlace: una pagina que redirige a otro host no se lee (paginaPermitida vale para el destino, revision del 24/10)", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const redirigida = () => { const r = new Response(html("tiendamia-ficha.html"), { status: 200 });
+    Object.defineProperty(r, "url", { value: "https://otro-sitio.example/p/x" }); return r; };
+  const atender = crearAtender({ fetch: fetchFalso([["tiendamia.com.ar/p/", redirigida]]), cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedidoEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), {})).json();
+  assert.equal(j.leido, false);
+  assert.equal(j.item, null);
 });
 
 test("/enlace: con el 403 del desafio anti-bots de Cloudflare dice que la tienda no deja leer su pagina (24/10)", async () => {

@@ -58,7 +58,7 @@
     const fila = t => `<tr><th scope="row">${h.esc(t.comercio)}</th><td class="num">${h.pesos(t.precio)}</td>`
       + `<td${t.f === pt.barata.f ? ' class="mejor"' : ""}>${h.esc(t.pctTexto)}</td>`
       + `<td>${h.esc(t.fecha || "sin fecha")}</td>`
-      + `<td>${h.enlace(t.f, "Ver aviso", `Abrir el aviso de ${t.comercio}`)}</td></tr>`;
+      + `<td>${h.enlace(t.f, "Ver aviso", `Ver aviso de ${t.comercio}`)}</td></tr>`;
     const ahorro = pt.ahorro > 0 ? ` (${pt.ahorroPct}%)` : "";
     // el titulo ya esta escrito arriba como encabezado: aca es solo el nombre accesible de la tabla
     return `<div class="scroll"><table class="pt-tabla"${h.titulo ? ` aria-label="${h.esc("Precio por tienda: " + h.titulo)}"` : ""}>`

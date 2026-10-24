@@ -192,7 +192,7 @@ test("la tabla es accesible: encabezados con scope, el porcentaje va en texto y 
   assert.match(html, /precio del 8\/10/);
   assert.match(html, /precio de hoy/);
   assert.equal((html.match(/rel="noopener"/g) || []).length, 3);
-  assert.match(html, /aria-label="Abrir el aviso de Mexx"/, "cada enlace dice a que tienda va, fuera de contexto");
+  assert.match(html, /aria-label="Ver aviso de Mexx"/, "cada enlace dice a que tienda va, fuera de contexto, y empieza con el texto visible (WCAG 2.5.3)");
   assert.match(html, /<th scope="col">Fecha del precio<\/th>/);
 });
 
