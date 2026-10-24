@@ -48,6 +48,14 @@ test("una categoria que tenia ofertas y queda en cero es una alarma", () => {
   assert.ok(a.some(x => /Monitores.*sin ofertas/.test(x)), a.join("\n"));
 });
 
+test("con otras reglas de oferta la corrida anterior no se compara por categoria (spec 035)", () => {
+  const previa = { ...G.medir(sano()), reglas: "034" };
+  const idx = sano();
+  idx.productos[1][5] = 0;
+  assert.ok(!G.alarmas(G.medir(idx), previa).some(x => /sin ofertas/.test(x)));
+  assert.ok(!G.alarmas(G.medir(idx), { ...previa, reglas: undefined }).some(x => /sin ofertas/.test(x)), "un guardia.json de antes no tiene reglas");
+});
+
 test("el sin datos de una categoria que salta mas de 10 puntos es una alarma", () => {
   const previa = G.medir(sano());
   previa.categorias.smartphone = { avisos: 100, pasan: 90, sinDatos: 5, ofertas: 3 };

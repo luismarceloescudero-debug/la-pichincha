@@ -16,6 +16,9 @@ const C = require("./js/categorias.js");
 const O = require("./js/ofertas.js");
 
 const MIN_DESTACADAS = 10;     // menos que esto en el resumen es que algo filtro de mas
+// Version de las reglas de que es una oferta: si cambia, la cantidad de ofertas por categoria no se compara con la corrida
+// anterior (spec 035: sin el tachado de Mercado Libre los smartphones pasaron de 41 a 0, a proposito, y no es una falla).
+const REGLAS = "035";
 const SALTO_SIN_DATOS = 0.10;  // puntos que puede subir el "sin datos" de una categoria de un dia para otro
 const MIN_AVISOS = 20;         // con menos avisos en la categoria, un porcentaje no dice nada
 
@@ -31,8 +34,9 @@ function medir(idx) {
     else if (/^sin dato/.test(g.motivo || "")) c.sinDatos++;
   }
   const r = O.calcularOfertas(idx);
-  for (const f of [...r.propias, ...r.publicadas]) categorias[r.categorias.get(f).categoria].ofertas++;
-  return { generado: idx.generado || "", historial: (idx.historial || {}).inicio || "", productos: productos.length,
+  // las tres señales del resumen del dia: baja propia, el mismo modelo mas barato que en otras tiendas y tachado (spec 035)
+  for (const f of new Set([...r.propias, ...r.contraModelo.keys(), ...r.publicadas])) categorias[r.gama.get(f).categoria].ofertas++;
+  return { reglas: REGLAS, generado: idx.generado || "", historial: (idx.historial || {}).inicio || "", productos: productos.length,
            bajasPropias: productos.filter(f => (f[6] || 0) > 0).length, destacadas: O.destacadas(idx, 40).length,
            categorias };
 }
@@ -65,7 +69,7 @@ function alarmas(m, previa) {
   for (const c of C.ORDEN) {
     const a = m.categorias[c], b = previa && previa.categorias && previa.categorias[c];
     if (!a || !b) continue;
-    if (b.ofertas > 0 && a.ofertas === 0)
+    if (b.ofertas > 0 && a.ofertas === 0 && previa.reglas === m.reglas)
       lista.push(`${C.ETIQUETAS[c]}: sin ofertas hoy (ayer ${b.ofertas}).`);
     if (a.avisos >= MIN_AVISOS && b.avisos >= MIN_AVISOS) {
       const hoy = pct(a.sinDatos, a.avisos), antes = pct(b.sinDatos, b.avisos);

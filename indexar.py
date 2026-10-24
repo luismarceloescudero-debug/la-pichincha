@@ -923,11 +923,6 @@ def main(argv=None):
         frescas.add(clave)
         bajaron = 0
         for it in items:
-            lista = it.get("lista") or 0
-            # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
-            # el "precio de lista" es apenas el precio sin transferencia.
-            if not rebaja_real or not lista or lista <= it["precio"]:
-                lista = 0
             # Baja propia: lo que valia segun el historial. Este dato no depende
             # de lo que publique la tienda, asi que vale para todas. Se mide contra
             # el precio mas bajo de los 30 dias anteriores (como la directiva Omnibus),
@@ -937,6 +932,15 @@ def main(argv=None):
             eventos = series.get((clave, it["url"]), [])
             piso = serie.piso_previo(eventos, hoy)
             propia = piso if piso and piso > it["precio"] else 0
+            lista = it.get("lista") or 0
+            # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
+            # el "precio de lista" es apenas el precio sin transferencia. Y, como
+            # pide Omnibus para anunciar una rebaja, solo si seguimos el producto hace
+            # una semana y hoy esta en su precio mas bajo de los 30 dias anteriores
+            # (spec 035, 24/10: 8 de las 10 ofertas eran tachados de Mercado Libre de
+            # 33% a 58% de productos que seguiamos hacia 2 o 3 dias).
+            if not rebaja_real or not lista or lista <= it["precio"] or not piso or it["precio"] > piso:
+                lista = 0
             if propia:
                 bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]

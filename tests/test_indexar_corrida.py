@@ -60,6 +60,25 @@ class Corrida(unittest.TestCase):
         salud = json.loads((self.dir / "salud.json").read_text(encoding="utf-8"))
         return indice, salud
 
+    def test_un_tachado_cuenta_con_una_semana_de_seguimiento_y_en_su_precio_mas_bajo(self):
+        # Spec 035, 24/10: 8 de las 10 ofertas eran tachados de Mercado Libre de productos que seguiamos hacia 2 o 3 dias.
+        cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        cfg["uno"]["lista_es_oferta"] = True
+        (self.dir / "tiendas.json").write_text(json.dumps(cfg), encoding="utf-8")
+        def con_tachado(filas):
+            self.catalogos = {"https://uno.test/cat": [{"id": i, "nombre": f"Producto {i}", "precio": p, "lista": l} for i, p, l in filas],
+                              "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(indexar.main(["--historial", str(self.hist)]), 0)
+            return json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        indice = con_tachado([(1, 600, 1300), (2, 1000, 1500), (3, 1000, 1500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[5], 0, "recien aparecido: el tachado no cuenta")
+        self.pasar_a_ayer(8)
+        indice = con_tachado([(1, 600, 1300), (2, 1100, 1500), (3, 1000, 1500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[5], 1300, "una semana despues y en su precio mas bajo: cuenta")
+        self.assertEqual(self.fila(indice, "uno", 2)[5], 0, "hace una semana valia menos: el tachado no es rebaja")
+        self.assertEqual(self.fila(indice, "uno", 3)[5], 1500)
+
     def test_con_menos_de_una_semana_de_seguimiento_no_hay_baja_propia(self):
         # Spec 034: un dia de historia no alcanza para decir que bajo (24/10, webcam Microsoft Studio «−53%»).
         self.correr([(1, 1000)], [(101, 500)])

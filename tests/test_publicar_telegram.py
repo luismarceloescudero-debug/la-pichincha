@@ -53,6 +53,13 @@ class Mensaje(unittest.TestCase):
         self.assertIn("en Mercado Libre (enlace de afiliado)", texto)
         self.assertEqual(texto.count("enlace de afiliado"), 1)
 
+    def test_una_oferta_contra_el_mismo_modelo_dice_contra_que_se_compara(self):
+        # Spec 035: no es un precio de antes, es la mediana del mismo modelo en otras tiendas.
+        datos = {**OFERTAS, "ofertas": [{"nombre": "Router ASUS RT-AX52", "precio": 66700, "antes": 88000, "descuento": 24,
+                                         "comercio": "The Gamer Shop", "url": "https://t.test/r", "tipo": "modelo",
+                                         "contra": "bajo la mediana de otras 3 tiendas"}]}
+        self.assertIn("$66.700 (−24% bajo la mediana de otras 3 tiendas) en The Gamer Shop", telegram.mensaje(datos))
+
     def test_sin_ofertas_no_hay_mensaje(self):
         self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
 

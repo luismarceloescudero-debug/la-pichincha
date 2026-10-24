@@ -55,7 +55,7 @@ test("destacadas trae el descuento y el ahorro de cada una", () => {
   const [o] = O.destacadas({ productos: [fila("A", 7500, { antes: 10000 })] });
   assert.equal(Math.round(o.off * 100), 25);
   assert.equal(o.ahorro, 2500);
-  assert.equal(o.ref, 6);
+  assert.equal(o.antes, 10000);
 });
 
 test("el mismo aviso que llega directo y por ComparaYa cuenta una sola vez, y gana la fila directa", () => {
@@ -525,8 +525,28 @@ test("una familia ocupa un solo lugar aunque caiga en dos categorias (revision d
 });
 
 test("el ofertas.json deja de repetir un producto de catalogo de Mercado Libre con dos textos de direccion (24/10)", () => {
-  const ml = (slug, n) => [n, 729999, `https://www.mercadolibre.com.ar/${slug}/p/MLA79317178`, "comparaya", "Mercado Libre", 1299999, 0, "", "", "", "", null, null, 0];
+  // una baja propia (el tachado de Mercado Libre ya no cuenta, spec 035)
+  const ml = (slug, n) => [n, 729999, `https://www.mercadolibre.com.ar/${slug}/p/MLA79317178`, "comparaya", "Mercado Libre", 0, 829999, "", "", "", "", null, null, 0];
   const idx = { productos: [ml("monitor-gamer-asrock-phantom-gaming-de-315-2k-qhd-ips-180hz-1ms", "Monitor Gamer ASRock Phantom Gaming de 31.5\" 2K QHD IPS 180Hz 1ms"),
     ml("monitor-gamer-asrock-phantom-gaming-pg32qft2a-315", "Monitor Gamer ASRock Phantom Gaming PG32QFT2A 31.5\" 2K QHD IPS 180Hz 1ms HDMI DP")] };
   assert.equal(O.destacadas(idx).length, 1);
+});
+
+test("el tachado de un agregador o de Mercado Libre no es una oferta; el de una tienda directa si (spec 035)", () => {
+  const f = (n, url, tienda) => [n, 600000, url, tienda, tienda === "comparaya" ? "Fravega" : "", 1300000, 0, "", "", "", "", null, null, 0];
+  const idx = { productos: [f("Monitor Gamer ASRock Phantom 31.5 QHD 180Hz", "https://www.mercadolibre.com.ar/x/p/MLA1", "mercadolibre"),
+    f("Monitor MSI Pro 24 IPS 144Hz", "https://www.fravega.com/p/monitor-msi-1/", "comparaya"),
+    f("Monitor LG 27 IPS 180Hz", "https://www.gamingcity.com.ar/monitor-lg-27", "gamingcity")] };
+  assert.deepEqual(O.calcularOfertas(idx).publicadas.map(x => x[3]), ["gamingcity"]);
+});
+
+test("destacadas suma el mismo modelo mas barato que en otras tiendas, con la mediana como referencia (spec 035)", () => {
+  const f = (tienda, precio) => ["Procesador AMD Ryzen 5 7600X 100-100000593WOF", precio, `https://${tienda}.test/r5-7600x`, tienda, "", 0, 0, "", "", "100-100000593WOF", "", null, null, 0];
+  const idx = { productos: [f("venex", 270000), f("mexx", 310000), f("maximus", 315000), f("compragamer", 320000)] };
+  const [o] = O.destacadas(idx);
+  assert.equal(o.tipo, "modelo");
+  assert.equal(o.f[3], "venex");
+  assert.equal(o.antes, 315000);
+  assert.equal(o.modelo.tiendas, 3);
+  assert.equal(Math.round(o.off * 100), 14);
 });

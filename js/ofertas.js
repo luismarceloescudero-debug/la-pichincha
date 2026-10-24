@@ -34,6 +34,7 @@
   const AGREGADOR = "comparaya";
   const DIAS_TACHADO_FIJO = 7;     // dias con el mismo precio para que una rebaja publicada deje de ser noticia   // centavos y redondeos entre tiendas: menos que eso no la descalifica
   const esInternacional = f => typeof f[8] === "string" && f[8].includes("i");
+  const esMercadoLibre = u => /^https?:\/\/(?:[a-z]+\.)?mercadolibre\.com\.ar\//i.test(String(u));
 
   /* "mediana de los smartphones de gama media de 256 GB: $350.000 (12 avisos)" */
   const PLURAL = { smartphone: "los smartphones", notebook: "las notebooks", pc: "las PC completas" };
@@ -146,6 +147,10 @@
         propias.push(f);
         continue;                     // una baja propia ya es noticia: no la repito abajo
       }
+      // El tachado de un agregador o de Mercado Libre no cuenta (spec 035): lo pone cada vendedor, ComparaYa lo trae sin la
+      // regla de cada tienda (el de Carrefour u OnCity leidas directo no cuenta y via ComparaYa si contaba), y el 24/10 eran
+      // 8 de las 10 ofertas del dia, de 33% a 58%. Sus bajas propias y la comparacion contra otras tiendas siguen valiendo.
+      if (f[3] === AGREGADOR || esMercadoLibre(f[2])) continue;
       const lista = f[5] || 0;
       if (!lista || lista <= f[1] || f[1] < PISO_OFERTA) continue;
       // Un tachado que no se mueve en una semana es el precio de siempre con un tachado de adorno (19/10: la impresora
@@ -207,16 +212,20 @@
   }
 
   function destacadas(idx, max = 20, opciones) {
-    const { propias, publicadas, cruces, vigentes, contra, notas, categorias, equivalente } = calcularOfertas(idx);
+    const { propias, publicadas, cruces, vigentes, contra, notas, gama, equivalente, contraModelo } = calcularOfertas(idx);
     const costo = opciones && opciones.costo;
     const rango = { alta: 2, media: 1 };
-    const nuevo = (f, ref, tipo) => { const g = categorias.get(f);
-      return { f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1], categoria: g.categoria, nivel: g.nivel,
+    // `antes` es contra que se compara: el piso de 30 dias (propia), el tachado (publicada) o la mediana del mismo modelo en
+    // otras tiendas (modelo, spec 035: la señal que se puede comprobar, y hasta el 24/10 el resumen del dia no la usaba).
+    const nuevo = (f, antes, tipo, modelo) => { const g = gama.get(f);
+      return { f, antes, tipo, modelo, off: 1 - f[1] / antes, ahorro: antes - f[1], categoria: g.categoria, nivel: g.nivel,
         cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f),
         puesto: esInternacional(f) ? puestoDe(f, g.categoria, costo, equivalente.get(f), idx.tiendas) : undefined }; };
-    const por = (a, b) => a.internacional - b.internacional || (a.tipo === b.tipo ? 0 : a.tipo === "propia" ? -1 : 1)
+    const ORDEN_TIPO = { propia: 0, modelo: 1, publicada: 2 };
+    const por = (a, b) => a.internacional - b.internacional || ORDEN_TIPO[a.tipo] - ORDEN_TIPO[b.tipo]
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
-    const todas = [...propias.map(f => nuevo(f, 6, "propia")), ...publicadas.map(f => nuevo(f, 5, "publicada"))].filter(o => esUrl(o.f[2]));
+    const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),
+      ...publicadas.map(f => nuevo(f, f[5], "publicada"))].filter(o => esUrl(o.f[2]));
     // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
     // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
     const unico = lista => { const vistos = new Set();
@@ -240,7 +249,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, familia, puestoDe, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, familia, puestoDe, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

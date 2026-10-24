@@ -114,7 +114,7 @@ function renderEstado(idx, salud, { baseUrl = BASE_URL, fiabilidad = null } = {}
     descripcion: "Cuándo se relevó por última vez cada tienda que compara La Pichincha y cuántos avisos trajo.",
     canonica: `${base}/estado/`, baseUrl: base, rel: "../" }) + `
 <body>
-<div class="wrap info">
+<main class="wrap info">
   <h1>Estado de las fuentes</h1>
   <p class="sub">Precios del ${esc(P.fechaHora(idx.generado))} (hora argentina). Cada tienda se releva una vez por día; si una no responde, se conservan sus precios anteriores y se muestran con su fecha, nunca como si fueran de hoy.</p>
   <table>
@@ -124,7 +124,7 @@ ${filas}
     </tbody>
   </table>${seccionFiabilidad(fiabilidad)}
   ${pie}
-</div>
+</main>
 <script src="../js/pagina.js"></script>
 <script>${G.SCRIPT_MEDICION}</script>
 </body>
@@ -138,7 +138,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     descripcion: "Cómo funciona La Pichincha: de dónde salen los precios, qué datos se miden y cómo se rotulan los enlaces de afiliado.",
     canonica: `${base}/legal/`, baseUrl: base, rel: "../" }) + `
 <body>
-<div class="wrap info">
+<main class="wrap info">
   <h1>Términos, privacidad y afiliados</h1>
   <section>
     <h2 id="terminos">Términos de uso</h2>
@@ -160,7 +160,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     <p><b>Mercado Libre:</b> La Pichincha es parte del Programa de Afiliados de Mercado Libre. En las ofertas del día (la página /hoy/, el feed y el canal de Telegram) los enlaces a mercadolibre.com.ar llevan su código de afiliado y el rótulo «enlace de afiliado».</p>
   </section>
   ${pie}
-</div>
+</main>
 <script src="../js/pagina.js"></script>
 <script>${G.SCRIPT_MEDICION}</script>
 </body>

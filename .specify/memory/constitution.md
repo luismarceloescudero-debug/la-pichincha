@@ -8,6 +8,12 @@
   backend mientras no se dispare un gatillo de la Fase 4 de `docs/plan-de-escalado.md`
   (indice mayor a 1,5 MB gzip, bloqueos de dos o mas tiendas, 300 usuarios por semana o
   busquedas lentas en telefonos de gama baja).
+- Funciones de borde sin estado (Cloudflare Workers) estan permitidas para lo que el navegador no
+  puede hacer solo: guardar secretos de APIs y leer paginas de afuera (Worker «Afuera», specs 022-023),
+  y, si hace falta, buscar del lado del servidor. Sin base de datos de usuarios ni servidor propio
+  hasta el gatillo de alertas (300 usuarios por semana o pedidos repetidos). El 24/10/2026 se
+  midieron disparados los gatillos de tamaño del indice, bloqueos y busqueda lenta: se responden en
+  orden de menor costo (`docs/plan-v3.md`).
 - Python usa solo la biblioteca estandar. El sitio no suma dependencias JS: los modulos de
   `js/` son scripts comunes, sin build. La unica libreria externa permitida es la que ya se
   carga bajo demanda (ExcelJS) y solo cuando la persona la pide.
@@ -66,8 +72,9 @@
 
 - Idioma: español rioplatense en la conversacion y en la documentacion; commits en español
   sin tildes; identificadores y comandos sin traducir.
-- Todo cambio va por rama y PR con CI en verde. Mergear a `main` despliega el sitio: requiere
-  el OK explicito del dueño.
+- Todo cambio va por rama y PR con CI en verde. Mergear a `main` despliega el sitio. Desde el
+  24/10/2026 el dueño dio un OK permanente: con los tests corridos, el cambio probado y la CI en
+  verde, se mergea sin esperar.
 - Herramientas, sin pisarse:
   - spec-kit define el que y el por que: esta constitucion y, por feature,
     `/speckit-specify` -> `/speckit-clarify` -> `/speckit-plan` -> `/speckit-tasks`.
@@ -87,4 +94,4 @@
   se amplia materialmente, PATCH si se aclara la redaccion.
 - La guia operativa del dia a dia esta en `README.md` y `docs/plan-de-escalado.md`.
 
-**Version**: 1.0.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
+**Version**: 1.1.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-24
