@@ -1,5 +1,7 @@
 /* Lo comun a las fuentes del Worker «Afuera» (spec 022): el aviso normalizado y el user-agent con el que nos presentamos.
    Primera version de `aviso` y de los parsers de cada fuente: OmniRoute `revision` (gpt-oss-120b), corrida contra los tests. */
+import Buscador from "../../../js/buscador.js";
+
 export const AGENTE = "LaPichincha-verificador/1.0 (+https://pichinchadeldia.com.ar)";
 export const POR_FUENTE = 5;   // avisos por fuente: la pagina muestra pocos y la cache guarda poco
 
@@ -33,17 +35,27 @@ const palabras = s => String(s || "").toLowerCase().normalize("NFD").replace(/[�
 
 /* Un accesorio nombra primero lo que es y despues el producto («Funda de silicona para ... AeroClip 2»); el producto, al reves
    («Soundcore Anker AeroClip 2 y estuche...»). Se corta el nombre en la primera palabra de accesorio: si lo de antes no nombra
-   todo lo buscado, es un accesorio. Vale salvo que se busque justamente esa palabra («funda aeroclip 2»). */
+   todo lo buscado, es un accesorio. Vale salvo que se busque justamente esa palabra («funda aeroclip 2»).
+   «para», «for» y «compatible» cortan igual (24/10: «AKNK Compatible con estación de carga GPW para Logitech G502» salia primero
+   buscando «logitech g502»), salvo que la consulta los diga («mouse para notebook»). */
 const ACCESORIOS = new Set(["funda", "fundas", "estuche", "case", "cover", "protector", "carcasa", "correa", "almohadillas", "puntas",
-  "repuesto", "soporte", "cable", "cargador", "adaptador", "skin", "sticker", "vinilo", "mica", "vidrio"]);
+  "repuesto", "soporte", "cable", "cargador", "adaptador", "skin", "sticker", "vinilo", "mica", "vidrio", "estacion", "dock",
+  "reemplazo", "replacement"]);
+const NEXOS = new Set(["para", "for", "compatible", "compatibles"]);
 
 export function relevantes(items, q) {
-  const claves = palabras(q).filter(p => !CONECTORES.has(p));
+  const dichas = palabras(q), claves = dichas.filter(p => !CONECTORES.has(p));
   if (!claves.length) return items;
+  const buscaAccesorio = dichas.some(p => ACCESORIOS.has(p));
+  // Lo reacondicionado («Renewed», «renovada») no compite con lo nuevo salvo que se pida, como en el indice (24/10: buscando
+  // «rtx 4070», la primera de Tiendamia era una «(renovada)»).
+  const pideUsado = Buscador.RE_USADO.test(Buscador.normal(String(q)));
   return items.filter(i => {
     const w = palabras(i.nombre);
     if (!claves.every(c => w.includes(c))) return false;
-    const corte = w.findIndex(p => ACCESORIOS.has(p) && !claves.includes(p));
+    if (!pideUsado && Buscador.RE_USADO.test(Buscador.normal(String(i.nombre || "")))) return false;
+    if (buscaAccesorio) return true;
+    const corte = w.findIndex(p => (ACCESORIOS.has(p) || NEXOS.has(p)) && !dichas.includes(p));
     return corte < 0 || claves.every(c => w.slice(0, corte).includes(c));
   });
 }

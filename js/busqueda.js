@@ -161,12 +161,13 @@ const AFUERA_URL = (document.querySelector('meta[name="afuera-url"]') || {}).con
 const AFUERA = new Map();      // url -> respuesta del Worker
 const AFUERA_FALLO = new Map(); // url -> cuando fallo: no se reintenta durante un minuto (revision de OmniRoute, spec 022)
 let AFUERA_TURNO = 0, AFUERA_ESPERA = null;
-function pintarAfuera(q, mejorAca) {
+/* respaldo: lo que queda si afuera no trae avisos (las busquedas armadas de la spec 020); "" cuando ya estan en la pagina. */
+function pintarAfuera(q, mejorAca, respaldo = "") {
   const caja = $("#afuera"), url = Afuera.urlConsulta(AFUERA_URL, q), turno = ++AFUERA_TURNO;
   clearTimeout(AFUERA_ESPERA);
   if (!caja) return;
-  const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, pathname: location.pathname }); };
-  if (!url || Date.now() - (AFUERA_FALLO.get(url) || 0) < 60000) { caja.innerHTML = ""; return; }
+  const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, pathname: location.pathname, respaldo }); };
+  if (!url || Date.now() - (AFUERA_FALLO.get(url) || 0) < 60000) { caja.innerHTML = q.trim() ? respaldo : ""; return; }
   if (AFUERA.has(url)) return pintar(AFUERA.get(url));
   caja.innerHTML = `<p class="sub chico afv-cargando">${icono("fuera")} Buscando afuera…</p>`;
   AFUERA_ESPERA = setTimeout(() => {
@@ -210,7 +211,8 @@ function pintarResultados(q) {
   // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
   fijarConsulta(q);
   const A = ANALISIS;
-  pintarAfuera(q, A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null);
+  pintarAfuera(q, A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null,
+    Importar.buscarAfueraHtml(q, { esc, icono }));
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.

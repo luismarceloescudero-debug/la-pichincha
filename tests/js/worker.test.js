@@ -254,15 +254,15 @@ test("con eBay configurado busca, normaliza, ordena por precio y guarda en cache
   const j = await r.json();
   assert.equal(r.headers.get("Access-Control-Allow-Origin"), "https://pichinchadeldia.com.ar");
   assert.equal(r.headers.get("Content-Type"), "application/json; charset=utf-8");
-  assert.deepEqual(j.fuentes, [{ id: "ebay", ok: true, n: 2 }]);
-  assert.deepEqual(j.items.map(i => i.precio), [61, 89.99], "de menor a mayor precio, nunca por comision");
+  assert.deepEqual(j.fuentes, [{ id: "ebay", ok: true, n: 1 }]);
+  assert.deepEqual(j.items.map(i => i.precio), [89.99], "el «(usado)» de $61 no compite con lo nuevo (spec 031)");
   assert.equal(cache.m.size, 1);
   const guardado = [...cache.m.values()][0];
   assert.match(guardado.headers.get("Cache-Control"), /max-age=28800/);
   // La segunda vez sale de la cache, sin llamar a eBay (aunque cambien mayusculas y espacios)
   const antes = llamadas.length;
   const r2 = await atender(pedido("soundcore aeroclip 2"), ENV_EBAY);
-  assert.equal((await r2.json()).items.length, 2);
+  assert.equal((await r2.json()).items.length, 1);
   assert.equal(llamadas.length, antes);
   assert.equal(r2.headers.get("Access-Control-Allow-Origin"), "https://pichinchadeldia.com.ar");
   // Las llamadas se identifican con el user-agent del sitio
@@ -290,7 +290,7 @@ test("AliExpress y eBay juntos: se mezclan por precio", async () => {
     ["api-sg.aliexpress.com", fixture("aliexpress-query.json")]]);
   const atender = crearAtender({ fetch: f, cache: cacheFalsa(), ahora: () => AHORA });
   const j = await (await atender(pedido("aeroclip 2"), env)).json();
-  assert.deepEqual(j.items.map(i => i.fuente), ["aliexpress", "ebay", "ebay"], "por precio y solo lo que nombra «aeroclip 2»");
+  assert.deepEqual(j.items.map(i => i.fuente), ["aliexpress", "ebay"], "por precio y solo lo nuevo que nombra «aeroclip 2»");
 });
 
 test("Amazon solo se consulta con sus dos secretos", async () => {
@@ -466,6 +466,44 @@ test("/enlace: un link que no es de una tienda conocida da 400 y no se pide nada
   const caida = await (await atender(pedidoEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), {})).json();
   assert.equal(caida.leido, false);
   assert.match(caida.motivo, /no respondió|no se pudo/);
+});
+
+test("/enlace: con el 403 del desafio anti-bots de Cloudflare dice que la tienda no deja leer su pagina (24/10)", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const desafio = () => new Response("<title>Just a moment...</title>", { status: 403 });
+  const atender = crearAtender({ fetch: fetchFalso([["tiendamia.com.ar/p/", desafio], ["loquieroaca.com/products/", desafio]]),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const tm = await (await atender(pedidoEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), {})).json();
+  assert.equal(tm.leido, false);
+  assert.equal(tm.motivo, "Tiendamia no deja leer su página automáticamente: escribí el precio a mano.");
+  assert.equal(tm.enlace.nombre, "x", "el nombre del link sigue llegando a la pagina");
+  const lq = await (await atender(pedidoEnlace("https://www.loquieroaca.com/products/1589074"), {})).json();
+  assert.match(lq.motivo, /^Loquieroacá no deja leer su página automáticamente/);
+});
+
+test("relevancia: «compatible con... para» el producto es un accesorio, salvo que se busque con «para» (24/10)", async () => {
+  const { relevantes } = await cargar("fuentes/comun.js");
+  const n = nombre => ({ nombre, precio: 1 });
+  const nombres = items => items.map(i => i.nombre);
+  // nombres reales de Tiendamia, 24/10/2026
+  const g502 = [n("AKNK Compatible con estación de carga GPW para Logitech G502/Gen 2/Gen 3/Gen 4/G903/Magnetic USB Hub RGB Luz ambiental"),
+    n("Mouse de Juego Logitech G502 SE Hero de Alto Rendimiento con RGB de 11 Botones Programables"),
+    n("Ratón de Juego Logitech - G502 HERO con Óptica Cableada y Iluminación RGB - Negro-910-005469"),
+    n("Logitech - G502 X Ratán USB Cableado con HERO 25K Sensor - Negro-910-006136")];
+  assert.deepEqual(nombres(relevantes(g502, "logitech g502")), nombres(g502.slice(1)));
+  const para = [n("Mouse inalámbrico para notebook Logitech M170"), n("Funda para notebook 15.6 con bolsillo para mouse")];
+  assert.deepEqual(nombres(relevantes(para, "mouse para notebook")), [para[0].nombre]);
+});
+
+test("relevancia: lo reacondicionado («Renewed», «renovada») no compite con lo nuevo salvo que se pida (24/10)", async () => {
+  const { relevantes } = await cargar("fuentes/comun.js");
+  const n = nombre => ({ nombre, precio: 1 });
+  const reales = [n("GIGABYTE Tarjeta gráfica GeForce RTX 4070 WINDFORCE OC 12G, 3 ventiladores WINDFORCE, 12 GB 192 bits GDDR6X, tarjeta de video GV-N4070WF3OC-12GD (renovada)"),
+    n("GIGABYTE Tarjeta gráfica GeForce RTX 4070 WINDFORCE OC 12G, 3X ventiladores WINDFORCE, 12GB 192-bit GDDR6X, tarjeta de video GV-N4070WF3OC-12GD"),
+    n("Samsung 32\" Odyssey G5 QHD (2560 x 1440), 1000R, 165Hz Curved Gaming Monitor, LS32CG554ENXZA, (Renewed)")];
+  assert.deepEqual(relevantes(reales, "rtx 4070").map(i => i.nombre), [reales[1].nombre]);
+  assert.equal(relevantes(reales, "odyssey g5").length, 0);
+  assert.equal(relevantes(reales, "rtx 4070 renovada").length, 1, "si se pide, vale");
 });
 
 test("relevancia: entra el aviso que nombra todas las palabras de la consulta, sin contar conectores como «by»", async () => {

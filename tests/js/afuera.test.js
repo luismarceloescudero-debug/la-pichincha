@@ -18,8 +18,19 @@ test("la URL del Worker se arma con la consulta; sin Worker configurado no hay U
 });
 
 test("sin respuesta, sin fuentes configuradas o con algo raro no se pinta nada: queda lo de la spec 020", () => {
-  for (const d of [null, undefined, {}, { items: [] }, datos([], []), { fuentes: [{ id: "ebay", ok: true }], items: "x" }])
+  for (const d of [null, undefined, {}, { items: [] }, datos([], []), { fuentes: [{ id: "ebay", ok: true }], items: "x" }]) {
     assert.equal(A.afueraHtml(d, { esc }), "", JSON.stringify(d));
+    assert.equal(A.afueraHtml(d, { esc, respaldo: "<p>armadas</p>" }), "<p>armadas</p>", "con respaldo, queda el respaldo");
+  }
+});
+
+test("si ninguna fuente se pudo leer lo dice y deja las busquedas armadas, no desaparece (24/10: Tiendamia con Cloudflare)", () => {
+  const html = A.afueraHtml(datos([], [{ id: "tiendamia", ok: false, n: 0 }]), { esc, respaldo: "<p>armadas</p>" });
+  assert.match(html, /Ahora no pudimos leer precios de afuera: Tiendamia no respondió\./);
+  assert.ok(html.endsWith("<p>armadas</p>"));
+  const conAvisos = A.afueraHtml(datos([item()]), { esc, respaldo: "<p>armadas</p>" });
+  assert.ok(!conAvisos.includes("armadas"), "con avisos en vivo no hace falta el respaldo");
+  assert.ok(A.afueraHtml(datos([], [{ id: "ebay", ok: true, n: 0 }]), { esc, respaldo: "<p>armadas</p>" }).endsWith("<p>armadas</p>"));
 });
 
 test("con avisos: lista de menor a mayor, precio en dolares, envio, fuente, afiliado rotulado y sponsored", () => {
@@ -80,7 +91,7 @@ test("como mucho 8 avisos; las fuentes caidas se nombran", () => {
 test("fuentes que respondieron sin avisos: lo dice, nombrando donde se busco", () => {
   const html = A.afueraHtml(datos([], [{ id: "ebay", ok: true, n: 0 }, { id: "aliexpress", ok: true, n: 0 }]), { esc });
   assert.match(html, /No encontramos ofertas con envío a Argentina en eBay \(EE\.UU\.\) y AliExpress/);
-  assert.equal(A.afueraHtml(datos([], [{ id: "ebay", ok: false, n: 0 }]), { esc }), "", "si ninguna respondio, nada");
+  assert.match(A.afueraHtml(datos([], [{ id: "ebay", ok: false, n: 0 }]), { esc }), /eBay \(EE\.UU\.\) no respondió/, "si ninguna respondio, lo dice");
   const mixto = A.afueraHtml(datos([], [{ id: "ebay", ok: true, n: 0 }, { id: "amazon", ok: false, n: 0 }]), { esc });
   assert.match(mixto, /en eBay \(EE\.UU\.\)\./);
   assert.match(mixto, /Amazon \(EE\.UU\.\) no respondió/, "la caida no se cuenta como buscada");

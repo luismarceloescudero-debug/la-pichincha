@@ -1,6 +1,8 @@
 /* Seccion «Afuera» de la busqueda (spec 022): lo que pinta la pagina con la respuesta del Worker (worker/). Funciones puras: no
-   tocan el DOM ni la red; el pedido y el pegamento viven en js/busqueda.js. Sin Worker configurado o sin respuesta no se pinta
-   nada y queda el bloque de enlaces de la spec 020. El orden es por precio, nunca por comision.
+   tocan el DOM ni la red; el pedido y el pegamento viven en js/busqueda.js. Sin Worker configurado o sin respuesta queda el
+   `respaldo`: el bloque de busquedas armadas de la spec 020. Si el Worker responde pero ninguna fuente pudo leerse (24/10:
+   Tiendamia y Loquieroaca pasaron a pedir el desafio anti-bots de Cloudflare), se dice y va el respaldo: la seccion no
+   desaparece sin explicacion. El orden es por precio, nunca por comision.
    Primera version: OmniRoute `revision` (gpt-oss-120b), 10/10 tests; a mano, el mensaje sin avisos y los precios no numericos. */
 (function (raiz) {
   "use strict";
@@ -42,18 +44,21 @@
       + `<span class="sub chico">${esc(nombre(it.fuente))}</span>${puesto}</div></li>`;
   }
 
-  /* datos: la respuesta del Worker { consulta, fecha, fuentes: [{ id, ok, n }], items }. mejorAca: { precio, tienda } o null. */
-  function afueraHtml(datos, { esc, icono = () => "", mejorAca = null, pathname = "/" } = {}) {
-    if (!datos || !Array.isArray(datos.items) || !Array.isArray(datos.fuentes)) return "";
+  /* datos: la respuesta del Worker { consulta, fecha, fuentes: [{ id, ok, n }], items }. mejorAca: { precio, tienda } o null.
+     respaldo: HTML que va cuando no hay avisos para mostrar (las busquedas armadas), o "". */
+  function afueraHtml(datos, { esc, icono = () => "", mejorAca = null, pathname = "/", respaldo = "" } = {}) {
+    if (!datos || !Array.isArray(datos.items) || !Array.isArray(datos.fuentes)) return respaldo;
     const ok = datos.fuentes.filter(f => f.ok), caidas = datos.fuentes.filter(f => !f.ok);
-    if (!ok.length) return "";
+    if (!datos.fuentes.length) return respaldo;
     const titulo = `<section class="afuera-vivo" aria-labelledby="afv-tit"><h3 id="afv-tit">${icono("fuera")} Afuera, en vivo</h3>`;
+    const pie = caidas.map(f => `${esc(nombre(f.id))} no respondió.`).join(" ");
+    if (!ok.length)
+      return `${titulo}<p class="sub chico">Ahora no pudimos leer precios de afuera: ${pie}</p></section>${respaldo}`;
     const items = datos.items.filter(i => typeof i.url === "string" && i.url.startsWith("https://") && typeof i.precio === "number")
       .slice().sort((a, z) => a.precio - z.precio).slice(0, MAX);
-    const pie = caidas.map(f => `${esc(nombre(f.id))} no respondió.`).join(" ");
     if (!items.length) {
       return `${titulo}<p class="sub chico">No encontramos ofertas con envío a Argentina en ${esc(unir(ok.map(f => nombre(f.id))))}.`
-        + `${pie ? " " + pie : ""}</p></section>`;
+        + `${pie ? " " + pie : ""}</p></section>${respaldo}`;
     }
     return titulo
       + (mejorAca ? `<p class="sub">Mejor precio acá: <b>${pesos(mejorAca.precio)}</b> en ${esc(mejorAca.tienda)}.</p>` : "")
