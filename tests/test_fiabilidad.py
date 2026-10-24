@@ -126,6 +126,18 @@ class Resumen(unittest.TestCase):
     def test_sin_filas(self):
         self.assertEqual(f.resumen([], "2026-10-21")["comercios"], {})
 
+    def test_las_revisiones_anuladas_no_entran_al_resumen(self):
+        # Spec 032: las caidas de Carrefour hasta el 24/10 eran del verificador, no de la tienda.
+        filas = [{"fecha": "2026-10-21", "comercio": "carrefour.com.ar", "en_pie": 0, "caidas": 15, "sin_comprobar": 0},
+                 {"fecha": "2026-10-24", "comercio": "carrefour.com.ar", "en_pie": 0, "caidas": 4, "sin_comprobar": 0},
+                 {"fecha": "2026-10-25", "comercio": "carrefour.com.ar", "en_pie": 3, "caidas": 0, "sin_comprobar": 0},
+                 {"fecha": "2026-10-21", "comercio": "oncity.com", "en_pie": 3, "caidas": 1, "sin_comprobar": 0}]
+        r = f.resumen(filas, "2026-10-25", dias=30, minimo=1)["comercios"]
+        self.assertEqual((r["carrefour.com.ar"]["verificadas"], r["carrefour.com.ar"]["caidas"]), (3, 0))
+        self.assertEqual(r["oncity.com"]["caidas"], 1)
+        self.assertNotIn("carrefour.com.ar", f.resumen(filas[:2], "2026-10-24", minimo=1)["comercios"])
+        self.assertEqual(f.resumen(filas, "2026-10-25", minimo=1, anuladas={})["comercios"]["carrefour.com.ar"]["caidas"], 19)
+
 
 class Principal(unittest.TestCase):
     def setUp(self):

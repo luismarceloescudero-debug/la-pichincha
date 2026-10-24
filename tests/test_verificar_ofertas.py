@@ -39,6 +39,15 @@ class Veredicto(unittest.TestCase):
         # "Retiro en sucursal no está disponible" es de una pagina que sigue vendiendo.
         self.assertEqual(v.veredicto(200, "Retiro en sucursal no está disponible. Envío a domicilio: $3.000"), "viva")
 
+    def test_los_textos_de_interfaz_de_vtex_no_son_el_estado_del_producto(self):
+        # 24/10: cada pagina de Carrefour trae la plantilla del aviso de reposicion; las 35 ofertas de 30 dias salian caidas.
+        pagina = ('<script>{"store\\u002Fbuybutton.see-cart":"Ver carrito","store\\u002Favailability-subscriber.title":'
+                  '"Este producto no está disponible en este momento","store\\u002Favailability-subscriber.subscribe-label":'
+                  '"Quiero que me avisen"}</script><h1>Celular Libre Motorola G17</h1><button>Agregar al carrito</button>')
+        self.assertEqual(v.veredicto(200, pagina), "viva")
+        self.assertEqual(v.veredicto(200, pagina.replace("\\u002F", "/")), "viva")
+        self.assertEqual(v.veredicto(200, pagina + "<h2>Este producto no está disponible</h2>"), "caida", "el cartel visible si cuenta")
+
     def test_un_bloqueo_o_un_error_del_servidor_no_prueba_nada(self):
         for estado in (401, 403, 429, 500, 503):
             self.assertEqual(v.veredicto(estado, "Este producto no está disponible"), "dudosa", estado)
@@ -368,6 +377,17 @@ class ApiMercadoLibre(unittest.TestCase):
                 tokens = list(pool.map(lambda _: v.token_ml(), range(8)))
         self.assertEqual(tokens, ["T"] * 8)
         self.assertEqual(len(llamadas), 1)
+
+    def test_pedir_api_va_con_el_user_agent_del_sitio(self):
+        # Carrefour responde 403 al user-agent de Python por defecto (24/10).
+        pedidos = []
+        def abrir(pedido, timeout=None):
+            pedidos.append(pedido)
+            raise urllib.error.URLError("sin red")
+        with mock.patch.object(v.urllib.request, "urlopen", side_effect=abrir):
+            v.pedir_api("https://t.test", {"Accept": "application/json"})
+        self.assertEqual(pedidos[0].get_header("User-agent"), v.UA)
+        self.assertEqual(pedidos[0].get_header("Accept"), "application/json")
 
     def test_pedir_api_no_levanta_excepciones(self):
         error = urllib.error.HTTPError("https://t.test", 403, "no", {}, io.BytesIO(b'{"message":"forbidden"}'))
