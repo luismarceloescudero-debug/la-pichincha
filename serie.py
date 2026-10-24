@@ -87,14 +87,16 @@ def baja_en(eventos, hoy, precio_hoy, dias):
 
 def piso_previo(eventos, hoy, dias=DIAS_MINIMO):
     """El menor precio que tuvo el producto en los `dias` dias anteriores a hoy (sin contar lo de hoy), con cada precio
-    que se registro aunque haya durado una sola corrida. None sin historia previa. Es la referencia de la directiva
-    europea Omnibus: una rebaja se mide contra el precio mas bajo de los 30 dias anteriores."""
-    tramo = _tramo_actual([e for e in eventos if e[0] < hoy])
-    if not tramo:
+    que se registro aunque haya durado una sola corrida. None si hoy no habia un precio de antes (nuevo, o volvio hoy).
+    Es la referencia de la directiva europea Omnibus: una rebaja se mide contra el precio mas bajo de los 30 dias anteriores.
+    Un precio de la ventana cuenta aunque el producto haya dejado de publicarse en el medio (24/10: la RTX 5090 de Venex
+    valia $8.099.999 el 13/10, volvio el 22/10 a $13.999.999 y a $11.999.999 salia «−14%»)."""
+    previos = [e for e in eventos if e[0] < hoy]
+    if not _tramo_actual(previos):
         return None
     desde = hoy - timedelta(days=dias)
-    precios = [p for fecha, p in tramo if fecha >= desde]
-    vigente = precio_el(tramo, desde)
+    precios = [p for fecha, p in previos if fecha >= desde and p is not None]
+    vigente = precio_el(previos, desde)
     if vigente is not None:
         precios.append(vigente)
     return min(precios) if precios else None

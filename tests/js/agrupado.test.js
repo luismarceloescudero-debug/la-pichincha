@@ -105,4 +105,8 @@ test("unaPorUrl: el aviso VTEX que llega directo y por ComparaYa queda una vez, 
   assert.deepStrictEqual(B.unaPorUrl([agregador, directa, variante]), [directa, variante]);
   assert.deepStrictEqual(B.unaPorUrl([directa, agregador]), [directa]);
   assert.strictEqual(B.urlClave("https://WWW.oncity.com/a/p/?gclid=1&b=2&a=1"), "oncity.com/a/p?a=1&b=2");
+  // un producto de catalogo de Mercado Libre: el numero, no el texto (24/10: el monitor ASRock salio dos veces)
+  assert.strictEqual(B.urlClave("https://www.mercadolibre.com.ar/monitor-gamer-asrock-phantom-gaming-de-315-2k-qhd-ips-180hz-1ms/p/MLA79317178"),
+    B.urlClave("https://www.mercadolibre.com.ar/monitor-gamer-asrock-phantom-gaming-pg32qft2a-315/p/mla79317178?matt_word=x"));
+  assert.strictEqual(B.urlClave("https://mercadolibre.com.ar/p/MLA1"), "mercadolibre.com.ar/p/MLA1");
 });

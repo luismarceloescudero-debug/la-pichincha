@@ -333,6 +333,11 @@
   /* La misma direccion escrita distinto: sin "www", sin barra final, sin parametros de seguimiento (utm_*, gclid, fbclid, ref...).
      Un parametro que identifica al producto (?variante=2) se conserva: es otro aviso. */
   function urlClave(url) {
+    // Un producto de catalogo de Mercado Libre lo identifica su numero (/p/MLA...), no el texto de la direccion: el 24/10
+    // ComparaYa trajo el mismo monitor ASRock (MLA79317178) con dos textos y salio dos veces en las ofertas del dia
+    // (como indexar.clave_aviso).
+    const ml = String(url).match(/^https?:\/\/(?:www\.)?mercadolibre\.com\.ar\/(?:[^/?#]*\/)?p\/(MLA\d+)/i);
+    if (ml) return "mercadolibre.com.ar/p/" + ml[1].toUpperCase();
     const m = String(url).match(/^https?:\/\/(?:www\.)?([^/?#]*)([^?#]*)(?:\?([^#]*))?/i);
     if (!m) return String(url);
     const params = (m[3] || "").split("&").filter(p => p && !/^(utm_|gclid|fbclid|msclkid|ref=|source=|mc_|_hs)/i.test(p)).sort();

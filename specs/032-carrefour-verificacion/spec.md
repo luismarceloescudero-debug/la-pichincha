@@ -36,3 +36,14 @@ por la API.
 
 `tests/test_verificar_ofertas.py`: `pedir_api` va con el user-agent; los textos de interfaz de VTEX no son el estado del
 producto y el cartel visible si. `tests/test_fiabilidad.py`: las revisiones anuladas no entran al resumen.
+
+## Tambien en esta tanda (revision del 24/10)
+
+- **El mismo producto de Mercado Libre dos veces** (`js/buscador.js`, `urlClave`): el 24/10 13:12 salio dos veces el monitor
+  ASRock Phantom Gaming 31.5" ($729.999): ComparaYa lo trajo con dos textos de direccion para el mismo catalogo
+  `/p/MLA79317178`. `urlClave` identifica un producto de catalogo por su numero, como `indexar.clave_aviso`. En el indice
+  de ese dia habia 22 avisos asi.
+- **El piso de 30 dias cuenta aunque el producto haya dejado de publicarse en el medio** (`serie.piso_previo`, spec 029):
+  la RTX 5090 de Venex valia $8.099.999 el 13/10, volvio el 22/10 a $13.999.999 y a $11.999.999 salio «−14%». Sigue sin
+  haber baja si el producto volvio hoy. Con el indice del 24/10: 66 bajas propias pasan a 39; salen la RTX 5090 y la
+  impresora Brother ($419.189, un dia a $487.599, de vuelta a $419.189).
