@@ -86,11 +86,65 @@ Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `do
 
 - **pendiente del dueño** FullH4rd (bloquea desde el 8/10), Katech y Compra Cierta: darlas de baja o pedirles un feed.
   Katech responde bien fuera de GitHub (2.552 productos el 24/10) y da 0 desde los servidores de GitHub: bloquea esas IP.
-- **en curso, del dueño** eBay: claves cargadas el 25/10 y el Worker las usa, pero eBay responde HTTP 401 (keyset de Production
-  sin activar). Detalle en `docs/pendientes-del-dueno.md`.
-- **pendiente del dueño** Credenciales de eBay y AliExpress para Afuera (las unicas fuentes que no se bloquean, y pagan
-  comision). Amazon Creators API cuando haya ventas.
+- **hecho** eBay en «Afuera» (25/10): con la exencion de Marketplace Account Deletion concedida, `/buscar` trae resultados
+  reales con envio a Argentina y solo articulos nuevos (#143, #145). Los links todavia no llevan comision: falta el numero de
+  campaña de eBay Partner Network (`EBAY_CAMPAIGN_ID`), cuando aprueben la solicitud.
+- **pendiente del dueño** AliExpress: registro en revision desde el 23/10 (de 1 hora a 2 dias habiles); despues, App Key,
+  App Secret y Tracking ID como secretos. Amazon Creators API cuando haya 10 ventas.
+- **sin salida de nuestro lado** Tiendamia da HTTP 403 desde el Worker (era 200 el 23/10): es un bloqueo, no se esquiva.
+  Se pide un feed o se la da de baja de «Afuera».
 
 ### 6. Pendiente y separado
 
 - Instagram (spec 025): PR #126 en borrador, fuera del proceso de las pichincha; si se retoma, workflow propio.
+
+### 7. Monetizacion (Mercado Libre)
+
+- **hecho** El codigo de afiliado sale tambien en la busqueda, la comparativa, la pestaña Ofertas y `/precios/`, con
+  `rel="sponsored"` y el rotulo «afiliado» (#146, spec 027). Antes solo salia en `/hoy/`, el feed y Telegram, y con las
+  ofertas del 24/10 ni un link de Mercado Libre llegaba a `/hoy/`.
+- **medido** Comision de Mercado Libre en monitores: 7 % (la app lo muestra a quien esta conectado como afiliado). En otras
+  categorias el porcentaje cambia.
+- **medido** El link oficial (`meli.la/…`) redirige a `/social/chococuyano?matt_word&matt_tool&forceInApp&ref=…`: una vitrina
+  con el perfil y el boton «Ir a producto». Los links del sitio llevan `matt_word` y `matt_tool` pero van directo al
+  producto y sin `ref`.
+- **sin confirmar** Que Mercado Libre acredite los clics de un link directo. El panel marca 1 clic y no sube ni con links
+  oficiales abiertos desde el mismo telefono: no sirve para decidirlo. Prueba pendiente del dueño: que otra persona, con
+  datos moviles, abra un link del sitio y mirar el panel al dia siguiente. Si no suma, se le pregunta al soporte del
+  programa (mensaje armado en `docs/pendientes-del-dueno.md`).
+- **siguiente** Medir del lado del sitio los clics salientes por tienda (ya salen a GoatCounter con el rubro) y armar un
+  tablero chico en `/estado/` con eso: no depende del panel de Mercado Libre.
+
+### 8. Lo que falta, en orden
+
+| # | Que | Quien | Costo | Para que |
+| --- | --- | --- | --- | --- |
+| 1 | Revisar «Indexacion → Paginas» de Search Console (el mapa de 200 paginas ya figura «Correcto») | dueño | 5 min, hacia el 1/11 | saber cuantas paginas entran y por que no |
+| 2 | Numero de campaña de eBay y claves de AliExpress, cuando aprueben | dueño | 10 min | comision en «Afuera» |
+| 3 | Contacto publico: `security.txt` y pagina «Acerca de» | dueño decide, yo hago | 1 PR | confianza (E-E-A-T) y seguridad |
+| 4 | Prueba de atribucion de clics de Mercado Libre con otra persona | dueño | 10 min + 1 dia | saber si el formato directo cuenta |
+| 5 | Mensajes a Katech, FullH4rd, Compra Cierta y Loquieroaca (armados) | dueño | 15 min | cuatro tiendas mas |
+| 6 | En «Afuera», separar la version del chip (una «4060 Ti» aparece en «rtx 4060») | yo | 1 PR chico | resultados limpios |
+| 7 | Cerrar el issue #117 (alarma vieja de la guardia, hoy sin alarmas) | yo | 1 minuto | orden |
+| 8 | Partir el indice por rubro (1,71 MB gzip) | yo | 1-2 PR | velocidad en telefonos de gama baja |
+| 9 | Calculo de ofertas en un Web Worker | yo | 1-2 PR, mas riesgo | quitar el bloqueo que queda |
+| 10 | Volver a mirar las ofertas de Mercado Libre del dia cuando el historial llegue a una semana | yo | sin codigo | recuperar ofertas de Mercado Libre en `/hoy/` sin bajar el nivel de credibilidad |
+
+### 9. Posibilidades de mejora (por orden de beneficio sobre costo)
+
+| Idea | Que da | Costo | Dependencia |
+| --- | --- | --- | --- |
+| **Tablero de clics salientes por tienda** (con lo que ya mide GoatCounter) | saber que tiendas y rubros mueven trafico y decidir donde conseguir afiliados | bajo | ninguna |
+| **Alertas de precio por Telegram**: «avisame si baja de $X», con un bot que lee un producto y un umbral | retencion, el pedido mas comun en estos sitios | medio; con Worker sin estado + KV o D1 gratis | gatillo de la Fase 4 (300 usuarios o pedidos de alertas) |
+| **Resumen semanal** («lo que mas bajo esta semana») en `/hoy/`, RSS y Telegram | contenido fresco para Google y para el canal, sin trabajo manual | bajo | historial de 7+ dias |
+| **Historial de precio en cada pagina de `/precios/`** (la serie ya existe) | un grafico propio da razon para volver y para enlazar | bajo-medio | ninguna |
+| **Cuotas y medios de pago**: mostrar el precio en cuotas cuando la tienda lo publica | el precio real en Argentina | medio | datos de cada tienda |
+| **Afiliados de otras tiendas** (programas propios de las tiendas locales, Amazon, AliExpress) | mas fuentes de ingreso | bajo por tienda | aprobacion de cada una |
+| **Canal de WhatsApp** con el mismo resumen del dia | otro canal, sin servidor | bajo | cuenta del dueño |
+| **Instagram** (spec 025, PR #126 en borrador) | alcance | medio; workflow propio | cuenta profesional y app de Meta; solo si GoatCounter muestra que trae clics |
+| **Busqueda en el servidor** (Worker + D1 con FTS5) | si partir el indice no alcanza | medio | gatillo de velocidad |
+| **Migrar a Astro** | ordenar las plantillas | alto | solo si el generador de paginas se vuelve inmanejable |
+
+No se hace: migrar a Next.js, servidor propio con base de datos, ni cuentas de usuario hasta el gatillo de alertas. Las
+reglas de credibilidad (baja propia contra el piso de 30 dias con una semana de seguimiento, tachado solo de tiendas directas,
+una oferta por familia) no se aflojan para sumar ofertas de afiliado.
