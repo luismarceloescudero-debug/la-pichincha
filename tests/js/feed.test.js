@@ -269,3 +269,30 @@ test("la lista del canal y /hoy/ llevan el costo estimado de lo internacional", 
   assert.equal(lista.find(o => o.nombre.includes("Kingston")).puesto, undefined);
   assert.match(F.renderHoy(IDX_INTL, { baseUrl: BASE, costo: COSTO_FX }), /Costo puesto en casa/);
 });
+
+// ---- En seguimiento (spec 038): menos de una semana de historial, dicho asi y despues de lo verificado ----
+const IDX_SEG = {
+  generado: "2026-10-26T08:12-03:00",
+  tiendas: { cg: { nombre: "CompraGamer" } },
+  productos: [
+    fila("SSD Kingston 1TB", 90000, { antes: 120000 }),
+    fila("SSD Crucial P3 1TB", 80000, { antes: 100000, sellos: "k" }),                 // −20% con pocos dias de seguimiento
+    fila("SSD WD Blue 1TB", 40000, { antes: 120000, sellos: "k" }),                    // −67%: con tan poca historia no se afirma
+  ],
+};
+
+test("lo que se sigue hace pocos dias sale al final, dice «desde que lo seguimos» y no pasa de 40%", () => {
+  const lista = F.listaParaCanal(IDX_SEG, 10);
+  assert.deepEqual(lista.map(o => [o.nombre, o.tipo]), [["SSD Kingston 1TB", "propia"], ["SSD Crucial P3 1TB", "seguimiento"]]);
+  assert.equal(lista[1].contra, "desde que lo seguimos, hace pocos días");
+  assert.equal(lista[1].descuento, 20);
+  assert.equal("contra" in lista[0], false);
+});
+
+test("el feed y /hoy/ no llaman baja verificada a lo que se sigue hace pocos dias", () => {
+  const xml = F.renderFeed(IDX_SEG, { baseUrl: BASE });
+  assert.match(xml, /Lo seguimos hace pocos días: pasó de \$[\d.]+ a \$[\d.]+/);
+  const hoy = F.renderHoy(IDX_SEG, { baseUrl: BASE });
+  assert.match(hoy, /−20% desde que lo seguimos, hace pocos días/);
+  assert.doesNotMatch(hoy, /<s>\$80\.000<\/s>/, "no se tacha un precio de antes que no tiene una semana de historial");
+});

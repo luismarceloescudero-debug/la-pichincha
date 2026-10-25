@@ -64,8 +64,14 @@
   /* «gama alta del año pasado al precio de una media de hoy: mediana de los smartphones de gama media de 512 GB: $703.500 (8 avisos)» */
   const textoCruceGen = (c, pesos) => `gama alta del año pasado al precio de una media de hoy — ${textoContra(c, pesos)}`;
 
+  /* Una baja de un producto que se sigue hace menos de una semana (sello «k», spec 038): se cuenta aparte, «desde que lo
+     seguimos», y no pasa de 40%: con tan poca historia, una baja mayor casi siempre es el precio de otro vendedor (la webcam
+     de Mercado Libre que salio «−53%» el 24/10). */
+  const DESCUENTO_SEGUIMIENTO_MAX = 0.4;
+  const enSeguimiento = f => typeof f[8] === "string" && f[8].includes("k");
+
   function calcularOfertas(idx) {
-    const propias = [], publicadas = [];
+    const propias = [], publicadas = [], seguimiento = [];
     let descartadas = 0, tachadoFijo = 0;
     const hoy = Date.parse(String(idx.generado || "").slice(0, 10));
     const ref = C.referencia(idx.productos);
@@ -144,9 +150,11 @@
       const d = C.DESCUENTO[g.categoria];
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer + EPS >= d.propia) {
-        propias.push(f);
+        if (enSeguimiento(f)) { if (1 - f[1] / ayer <= DESCUENTO_SEGUIMIENTO_MAX) seguimiento.push(f); }
+        else propias.push(f);
         continue;                     // una baja propia ya es noticia: no la repito abajo
       }
+      if (enSeguimiento(f)) continue;
       // El tachado de un agregador o de Mercado Libre no cuenta (spec 035): lo pone cada vendedor, ComparaYa lo trae sin la
       // regla de cada tienda (el de Carrefour u OnCity leidas directo no cuenta y via ComparaYa si contaba), y el 24/10 eran
       // 8 de las 10 ofertas del dia, de 33% a 58%. Sus bajas propias y la comparacion contra otras tiendas siguen valiendo.
@@ -162,7 +170,7 @@
       publicadas.push(f);
     }
     // Cruce de gamas: una oferta real de gama alta que cuesta lo mismo o menos que la mediana de la gama media.
-    const cruces = new Set([...propias, ...publicadas].filter(f => {
+    const cruces = new Set([...propias, ...publicadas, ...seguimiento].filter(f => {
       const g = gama.get(f);
       return g.alta && medianas[g.categoria + ":" + g.rom] && f[1] <= medianas[g.categoria + ":" + g.rom];
     }));
@@ -180,9 +188,9 @@
         cruceGen.set(f, { rubro: g.categoria, rom: g.rom, mediana: medianasHoy[k], avisos: muestrasHoy[k] });
     }
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
-    const notas = new Map([...propias, ...publicadas].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
-    const categorias = new Map([...propias, ...publicadas].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
+    const notas = new Map([...propias, ...publicadas, ...seguimiento].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
+    const categorias = new Map([...propias, ...publicadas, ...seguimiento].map(f => [f, gama.get(f)]));
+    return { propias, publicadas, seguimiento, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -224,7 +232,7 @@
   }
 
   function destacadas(idx, max = 20, opciones) {
-    const { propias, publicadas, cruces, vigentes, contra, notas, gama, equivalente, contraModelo } = calcularOfertas(idx);
+    const { propias, publicadas, seguimiento, cruces, vigentes, contra, notas, gama, equivalente, contraModelo } = calcularOfertas(idx);
     const costo = opciones && opciones.costo;
     const rango = { alta: 2, media: 1 };
     // `antes` es contra que se compara: el piso de 30 dias (propia), el tachado (publicada) o la mediana del mismo modelo en
@@ -233,11 +241,11 @@
       return { f, antes, tipo, modelo, off: 1 - f[1] / antes, ahorro: antes - f[1], categoria: g.categoria, nivel: g.nivel,
         cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f),
         puesto: esInternacional(f) ? puestoDe(f, g.categoria, costo, equivalente.get(f), idx.tiendas) : undefined }; };
-    const ORDEN_TIPO = { propia: 0, modelo: 1, publicada: 2 };
+    const ORDEN_TIPO = { propia: 0, modelo: 1, publicada: 2, seguimiento: 3 };
     const por = (a, b) => a.internacional - b.internacional || ORDEN_TIPO[a.tipo] - ORDEN_TIPO[b.tipo]
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),
-      ...publicadas.map(f => nuevo(f, f[5], "publicada"))].filter(o => esUrl(o.f[2]));
+      ...publicadas.map(f => nuevo(f, f[5], "publicada")), ...seguimiento.map(f => nuevo(f, f[6], "seguimiento"))].filter(o => esUrl(o.f[2]));
     // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
     // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
     // Ademas, a igual precio y referencia, el gemelo con el titulo escrito distinto.
@@ -266,7 +274,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, familia, puestoDe, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, puestoDe, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

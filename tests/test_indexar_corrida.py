@@ -86,6 +86,24 @@ class Corrida(unittest.TestCase):
         indice, _ = self.correr([(1, 470)], [(101, 500)])
         self.assertEqual(self.fila(indice, "uno", 1)[6], 0)
 
+    def test_con_entre_tres_y_seis_dias_la_baja_va_en_seguimiento_con_el_sello_k(self):
+        # Spec 038: no se inventa una semana, se cuenta lo que se midio y se dice que es poco.
+        self.correr([(1, 1000), (2, 1000)], [(101, 500)])
+        self.pasar_a_ayer(4)
+        indice, _ = self.correr([(1, 800), (2, 1000)], [(101, 500)])
+        baja, quieto = self.fila(indice, "uno", 1), self.fila(indice, "uno", 2)
+        self.assertEqual(baja[6], 1000)
+        self.assertIn("k", baja[8])
+        self.assertEqual((quieto[6], "k" in quieto[8]), (0, False))
+
+    def test_con_una_semana_la_baja_es_de_verdad_y_no_lleva_el_sello_k(self):
+        self.correr([(1, 1000)], [(101, 500)])
+        self.pasar_a_ayer(8)
+        indice, _ = self.correr([(1, 800)], [(101, 500)])
+        fila = self.fila(indice, "uno", 1)
+        self.assertEqual(fila[6], 1000)
+        self.assertNotIn("k", fila[8])
+
     def pasar_a_ayer(self, dias=1):
         """Lo que se relevo hoy pasa a ser de ayer (o de hace `dias` dias): la proxima corrida es la del dia siguiente."""
         hoy = datetime.now(indexar.AR).date()

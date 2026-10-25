@@ -71,3 +71,17 @@ test("una imagen con comillas no inyecta CSS en la tarjeta, y la planilla CSV no
   assert.equal(correr("esc(\"a'b\")"), "a&#39;b");
   assert.equal(correr('enlace("https://evil\\\\@good.com/x")'), "#");
 });
+
+test("la pestaña Ofertas muestra «En seguimiento» aparte, con su propia cinta y su aclaracion, sin mezclarlo con las bajas", () => {
+  const seg = fila("Memoria Corsair Vengeance DDR5 32GB 6000MHz", 90000, 120000);
+  seg[8] = "k";
+  const { correr, els } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000), seg]);
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.match(html, /data-of="tipo:seguimiento"[^>]*>En seguimiento <span class="n">1<\/span>/);
+  assert.match(html, /Bajaron de precio <span class="n">1<\/span>/);
+  assert.match(html, /Rebajas publicadas <span class="n">0<\/span>/);
+  assert.match(html, /bajó desde que lo seguimos/);
+  assert.match(html, /Lo seguimos hace menos de una semana/);
+  assert.match(els["#estadoOf"].textContent, /^2 ofertas/);
+});

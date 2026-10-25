@@ -303,7 +303,8 @@ test("sellosDe traduce las letras a sellos, en orden fijo", () => {
   assert.deepEqual(B.sellosDe("e"), [["off2", "envío gratis"]]);
   assert.deepEqual(B.sellosDe(""), []);
   assert.deepEqual(B.sellosDe(undefined), []);
-  assert.deepEqual(B.sellosDe("kz"), []);
+  assert.deepEqual(B.sellosDe("qz"), []);      // una letra que no conocemos no sale
+  assert.deepEqual(B.sellosDe("k"), [["ojo", "en seguimiento: menos de una semana de historial"]]);
 });
 
 test("sellosDe: el sello s avisa cuotas sin interes", () => {

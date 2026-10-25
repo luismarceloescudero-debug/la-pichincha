@@ -29,7 +29,7 @@ function asegurarIndice(forzar) {
 function ofertasListas() {
   if (!OFERTAS && IDX) {
     OFERTAS = calcularOfertas(IDX);
-    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length; });
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length + OFERTAS.seguimiento.length; });
   }
   return OFERTAS;
 }
@@ -63,7 +63,8 @@ function listaOfertas() {
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
     cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f), local: OFERTAS.equivalente.get(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
-                            ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada"))]);
+                            ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
+                            ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))]);
 }
 
 function ofertasFiltradas() {
@@ -76,13 +77,14 @@ function ofertasFiltradas() {
   if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
   const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
                 precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
-  // Cuando se ven todas, las bajas propias van primero: son la señal mas confiable.
-  return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? (a.tipo === "propia" ? -1 : 1) : por(a, b));
+  // Cuando se ven todas, las bajas propias van primero (son la señal mas confiable) y lo que se sigue hace pocos dias, al final.
+  const rango = { propia: 0, publicada: 1, seguimiento: 2 };
+  return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? rango[a.tipo] - rango[b.tipo] : por(a, b));
 }
 
 function controlesOfertas(todas) {
-  const n = { todas: todas.length, propia: todas.filter(o => o.tipo === "propia").length };
-  n.publicada = n.todas - n.propia;
+  const n = { todas: todas.length, propia: todas.filter(o => o.tipo === "propia").length, seguimiento: todas.filter(o => o.tipo === "seguimiento").length };
+  n.publicada = n.todas - n.propia - n.seguimiento;
   const seg = (k, v, txt, cnt) => `<button class="seg" data-of="${k}:${v}" aria-selected="${OF[k] === v}">${txt}${cnt != null ? ` <span class="n">${cnt}</span>` : ""}</button>`;
   const cuenta = key => {
     const m = new Map();
@@ -95,7 +97,7 @@ function controlesOfertas(todas) {
   const cats = Categorias.ORDEN.filter(c => porCat.has(c)).map(c => [c, porCat.get(c)]);
   const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
   return `<div class="of-ctrl">
-    <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}</div>
+    <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}${n.seguimiento ? seg("tipo", "seguimiento", "En seguimiento", n.seguimiento) : ""}</div>
     <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
     <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
     <div class="of-fila"><span class="of-et">Rubro</span>${cats.map(([c, k]) => chip("cat", c, Categorias.ETIQUETAS[c], k, OF.cat === c)).join("")}</div>
@@ -133,13 +135,15 @@ function cardOferta(o, i, desde) {
   const nivTxt = ["sin marca reconocida", "marca conocida", "primera línea"][o.niv];
   const origen = o.tipo === "propia"
     ? "El precio anterior es lo que valía en nuestro relevamiento previo: lo calculamos nosotros."
-    : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
+    : o.tipo === "seguimiento"
+      ? "Lo seguimos hace menos de una semana: el precio anterior es el más bajo que vimos desde entonces. Todavía no alcanza para decir que bajó contra sus 30 días."
+      : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
   const foto = fondo(f[7]);
   const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
   return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" tabindex="0" aria-label="${esc(f[0])}">
     ${img}
     <div class="o-top">
-      <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : icono("fuego") + " rebaja publicada"}</span>
+      <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
       <button class="o-star${marcada ? " on" : ""}" data-estrella="${esc(f[2])}" title="Marcar esta oferta" aria-label="Marcar esta oferta">${marcada ? "★" : "☆"}</button>
     </div>
     <div class="o-main">

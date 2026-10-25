@@ -302,7 +302,8 @@
                   ["e", "off2", "envío gratis"], ["s", "off2", "cuotas sin interés"],
                   // de la serie de precios (serie.py): solo salen con historial suficiente
                   ["m", "baja", "mínimo de 30 días"], ["h", "baja", "mínimo de 90 días"],
-                  ["x", "ojo", "subió antes de la oferta"]];
+                  ["x", "ojo", "subió antes de la oferta"],
+                  ["k", "ojo", "en seguimiento: menos de una semana de historial"]];
   const sellosDe = s => typeof s !== "string" ? []
     : SELLOS.filter(([l]) => s.includes(l)).map(([, clase, texto]) => [clase, texto]);
 

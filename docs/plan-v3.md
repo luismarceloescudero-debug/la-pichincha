@@ -128,7 +128,7 @@ Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `do
 | 7 | Cerrar el issue #117 (alarma vieja de la guardia, hoy sin alarmas) | yo | 1 minuto | orden |
 | 8 | Partir el indice por rubro (1,71 MB gzip) | yo | 1-2 PR | velocidad en telefonos de gama baja |
 | 9 | Calculo de ofertas en un Web Worker | yo | 1-2 PR, mas riesgo | quitar el bloqueo que queda |
-| 10 | Volver a mirar las ofertas de Mercado Libre del dia cuando el historial llegue a una semana | yo | sin codigo | recuperar ofertas de Mercado Libre en `/hoy/` sin bajar el nivel de credibilidad |
+| 10 | ~~Volver a mirar las ofertas de Mercado Libre cuando el historial llegue a una semana~~ **hecho** (spec 038): entre 3 y 6 dias de seguimiento entran «en seguimiento», con su rotulo, hasta 40 % y detras de lo verificado | yo | — | que no quede nada afuera sin inventar historia |
 
 ### 9. Posibilidades de mejora (por orden de beneficio sobre costo)
 

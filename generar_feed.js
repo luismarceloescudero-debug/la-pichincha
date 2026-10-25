@@ -57,6 +57,7 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED, costo = null } = 
     const f = o.f, pct = Math.round(o.off * 100);
     const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
     const desc = `${C.ETIQUETA[o.categoria]}. ` + (o.modelo ? `Hoy ${pesos(f[1])}: ${O.textoContraModelo(o.modelo, pesos)}. `
+      : o.tipo === "seguimiento" ? `Lo seguimos hace pocos días: pasó de ${pesos(o.antes)} a ${pesos(f[1])} (ahorrás ${pesos(o.ahorro)}); todavía no tiene una semana de historial. `
       : `Antes ${pesos(o.antes)}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. `) +
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
       (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
@@ -103,6 +104,7 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
       (e.afiliado ? ' <span class="rotulo">enlace de afiliado</span>' : ""); };
   const lista = ofertas.map(o => `    <li>${enlace(o)}` +
     (o.modelo ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: ${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
+      : o.tipo === "seguimiento" ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: −${Math.round(o.off * 100)}% desde que lo seguimos, hace pocos días</span>`
       : `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.antes))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span>`) +
     (o.puesto ? `<span class="det">${esc(o.puesto.texto)}${o.puesto.comparacion ? " " + esc(o.puesto.comparacion) : ""}</span>` : "") + `</li>`).join("\n");
   const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
@@ -156,7 +158,8 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 function listaParaCanal(idx, max = 10, costo = null) {
   return O.destacadas(idx, max, { costo }).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
-    ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` } : {}),
+    ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` }
+      : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" } : {}),
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
     tienda: o.f[3], ...(puestoCorto(o.puesto) ? { puesto: puestoCorto(o.puesto) } : {}),
     ...(o.f[9] ? { modelo: o.f[9] } : {}),      // para que la guardia reconozca el mismo modelo en lo que se publica

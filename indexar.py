@@ -932,6 +932,13 @@ def main(argv=None):
             eventos = series.get((clave, it["url"]), [])
             piso = serie.piso_previo(eventos, hoy)
             propia = piso if piso and piso > it["precio"] else 0
+            # Con entre 3 y 6 dias de seguimiento no hay baja de 30 dias, pero si lo que se midio: se guarda la baja contra el
+            # menor precio registrado y el sello «k» (en seguimiento) para decirlo asi y no como una baja verificada (spec 038).
+            corto = False
+            if not piso:
+                piso_c = serie.piso_corto(eventos, hoy)
+                if piso_c and piso_c > it["precio"]:
+                    propia, corto = piso_c, True
             lista = it.get("lista") or 0
             # Solo guardo el tachado si es una rebaja de verdad: en varias tiendas
             # el "precio de lista" es apenas el precio sin transferencia. Y, como
@@ -952,7 +959,7 @@ def main(argv=None):
                     str(it.get("via") or ""), lista, propia,
                     it.get("imagen") if url_valida(it.get("imagen")) else "",   # la foto va a un CSS del sitio
                     (it.get("sellos") or "")
-                    + serie.sellos_de(eventos, hoy, it["precio"]),
+                    + serie.sellos_de(eventos, hoy, it["precio"]) + ("k" if corto else ""),
                     modelo.modelo_de(it["nombre"], it.get("sku")),
                     desde.isoformat() if desde else "",
                     "" if b7 is None else b7,
