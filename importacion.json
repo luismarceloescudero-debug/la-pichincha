@@ -92,7 +92,8 @@
         "https://www.afip.gob.ar/envios-internacionales/puerta-a-puerta/monto.asp"
       ],
       "rige_desde": "2026-07-17",
-      "verificado": "2026-10-15"
+      "verificado": "2026-10-15",
+      "nota": "Regimen: el courier se rige por la RG 5608/2024 (t.o.); la RG 5884/2026 regula la recepcion postal por el Correo Argentino y su cronograma esta a definir. No hay arancel plano para courier: se liquida por posicion NCM."
     },
     "tributos_en_franquicia": {
       "descripcion": "Lo unico que se paga por un envio dentro de la franquicia: IVA e impuestos internos, de corresponder.",
@@ -254,14 +255,14 @@
     },
     "derecho_importacion_consolas_pct": {
       "descripcion": "Derecho de importacion extrazona de videoconsolas (NCM 9504.50.00).",
-      "valor": null,
+      "valor": 20,
       "unidad": "% ad valorem",
-      "nivel": "pendiente",
-      "norma": "Decreto 333/2025: elimina la posicion del Anexo V del Decreto 557/2023, que tributaba 35%",
-      "fuentes": [],
+      "nivel": "prensa",
+      "norma": "Decreto 333/2025 (B.O. 20/05/2025): elimina la posicion del Anexo V del Decreto 557/2023, que tributaba 35%",
+      "fuentes": ["https://www.boletinoficial.gob.ar/detalleAviso/primera/325601/20250520"],
       "rige_desde": "2025-05-20",
-      "verificado": "2026-10-15",
-      "nota": "El decreto remite al Arancel Externo Comun sin decir el numero; un comunicado oficial de mayo de 2025 habla del 20%. Confirmar en el Decreto 557/2023."
+      "verificado": "2026-10-25",
+      "nota": "Valor 20 % segun la guia de importacion y el comunicado oficial de mayo de 2025 (Decreto 333/2025, Arancel Externo Comun). El texto del decreto no se pudo leer desde el entorno de trabajo: confirmar en el Decreto 557/2023 antes de publicar como oficial. No pagan impuestos internos."
     },
     "iva_reducido_hardware": {
       "descripcion": "Si algun rubro de hardware tributa IVA al 10,5% en lugar del 21%.",
@@ -293,8 +294,8 @@
       "norma": null,
       "fuentes": [],
       "rige_desde": null,
-      "verificado": "2026-10-15",
-      "nota": "Las paginas de ARCA sobre pequeños envios no las mencionan; las percepciones que aparecen en el regimen general de importadores (hasta 20% de IVA y 6% de Ganancias segun una nota oficial de 2025) no se sabe si alcanzan al courier. No se suman: se muestran como «no incluido»."
+      "verificado": "2026-10-25",
+      "nota": "Las paginas de ARCA sobre pequenos envios no las mencionan. Se muestran como «segun liquidacion del prestador», nunca como certeza normativa, y no se suman al total."
     },
     "honorarios_courier": {
       "descripcion": "Lo que cobra el courier o el Correo por gestionar el envio (tasa de servicio y almacenaje).",
