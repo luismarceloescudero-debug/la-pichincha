@@ -188,6 +188,28 @@ class BajaEnDias(unittest.TestCase):
         self.assertIsNone(serie.baja_en([(d(10), 1000), (HOY, None)], HOY, None, 7))
 
 
+class PisoCorto(unittest.TestCase):
+    """Spec 038: entre 3 y 6 dias de seguimiento se cuenta lo que se midio, sin proyectar una semana hacia atras."""
+
+    def test_con_tres_a_seis_dias_es_el_menor_precio_registrado(self):
+        self.assertEqual(serie.piso_corto([(d(4), 1000), (d(2), 1200)], HOY), 1000)
+        self.assertEqual(serie.piso_corto([(d(3), 1000)], HOY), 1000)
+        self.assertEqual(serie.piso_corto([(d(6), 1000)], HOY), 1000)
+
+    def test_con_menos_de_tres_dias_o_con_una_semana_no_hay(self):
+        self.assertIsNone(serie.piso_corto([(d(2), 1000)], HOY))      # el caso de la webcam de Mercado Libre del 24/10
+        self.assertIsNone(serie.piso_corto([(d(7), 1000)], HOY))      # con una semana manda piso_previo
+        self.assertIsNone(serie.piso_corto([(HOY, 800)], HOY))        # lo de hoy no es «antes»
+
+    def test_el_dia_siete_es_de_piso_previo_y_no_de_piso_corto(self):
+        ev = [(d(7), 1000)]
+        self.assertEqual(serie.piso_previo(ev, HOY), 1000)
+        self.assertIsNone(serie.piso_corto(ev, HOY))
+        ev = [(d(5), 1000)]
+        self.assertIsNone(serie.piso_previo(ev, HOY))
+        self.assertEqual(serie.piso_corto(ev, HOY), 1000)
+
+
 class PisoPrevio(unittest.TestCase):
     """La referencia de la baja propia (spec 029): el precio mas bajo de los 30 dias anteriores a hoy."""
 

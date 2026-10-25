@@ -567,3 +567,24 @@ test("destacadas: a igual precio, otra capacidad u otro producto de la marca sig
   const c = fila("Auricular Tronsmart Onyx Ace Pro Negro", 58050, { lista: 120000 });
   assert.equal(O.destacadas({ productos: [t("Auricular In-Ear Tronsmart Ony Ace Pro Blanco"), c] }, 10).length, 2);
 });
+
+// ---- En seguimiento (spec 038) ----
+test("una baja con el sello k (menos de una semana de historial) va aparte de las bajas propias, y no pasa de 40%", () => {
+  const k = (n, p, antes) => fila(n, p, { antes, sellos: "k" });
+  const idx = { productos: [fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, { antes: 130000 }),
+                            k("Memoria Corsair Vengeance DDR5 32GB 6000MHz", 90000, 120000),        // −25%: en seguimiento
+                            k("Memoria G.Skill Trident DDR5 32GB 6000MHz", 50000, 120000)] };        // −58%: no se afirma
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.propias.map(f => f[0]), ["Memoria Kingston Fury DDR5 32GB 6000MHz"]);
+  assert.deepEqual(r.seguimiento.map(f => f[0]), ["Memoria Corsair Vengeance DDR5 32GB 6000MHz"]);
+  assert.ok(O.enSeguimiento(r.seguimiento[0]) && !O.enSeguimiento(r.propias[0]));
+});
+
+test("destacadas: lo que se sigue hace pocos dias entra, pero detras de lo verificado de su categoria", () => {
+  const k = (n, p, antes) => fila(n, p, { antes, sellos: "k" });
+  const idx = { productos: [k("Memoria Corsair Vengeance DDR5 32GB 6000MHz", 90000, 120000),       // −25% en seguimiento
+                            fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, { antes: 130000 })] };   // −23% verificada
+  const d = O.destacadas(idx, 10);
+  assert.deepEqual(d.map(o => o.tipo), ["propia", "seguimiento"]);
+  assert.ok(d[1].off > d[0].off, "aunque su descuento sea mayor, no pasa adelante");
+});

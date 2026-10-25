@@ -49,7 +49,7 @@ if (!CATEGORIAS.some(c => c.id === CAT)) CAT = "ram";
 const VISTAS = [
   { id: "comparativa", eti: "Comparativa", ico: "balanza", n: () => null },
   { id: "ofertas", eti: "Ofertas", ico: "fuego",
-    n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length : null },
+    n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length + OFERTAS.seguimiento.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
   { id: "costo", eti: "Costo de importar", ico: "camion", n: () => null },
   { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
