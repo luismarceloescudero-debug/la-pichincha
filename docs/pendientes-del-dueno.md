@@ -118,6 +118,13 @@ afiliado. El código ya está hecho y probado con respuestas de ejemplo; **falta
    | `EBAY_CAMPAIGN_ID` | (opcional) el número de campaña |
 
 5. Avisame: el Worker se redespliega con el próximo cambio en `worker/`, y yo pruebo una búsqueda real.
+6. **Si `/buscar` dice `ebay: HTTP 401`** (pasó el 25/10, con las claves ya cargadas): casi seguro el keyset de Production
+   figura **deshabilitado («Non Compliant»)** hasta resolver el requisito *Marketplace Account Deletion*. Dentro de
+   «Application Keys», en el keyset de Production, completá una de las dos opciones que muestra el cartel: suscribirte a
+   las notificaciones, o **optar por la exención** (el sitio no guarda datos de usuarios de eBay). Al completarla el
+   keyset se activa solo; según los foros de eBay a veces la exención tarda. Comprobá también que las claves sean las de
+   **Production** (los identificadores de Production llevan `PRD`, los de Sandbox `SBX`) y que se hayan pegado sin
+   espacios. Después me avisás y repito la búsqueda.
 
 No me pases las claves por acá: van solo en los secretos de GitHub.
 

@@ -86,6 +86,8 @@ Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `do
 
 - **pendiente del dueño** FullH4rd (bloquea desde el 8/10), Katech y Compra Cierta: darlas de baja o pedirles un feed.
   Katech responde bien fuera de GitHub (2.552 productos el 24/10) y da 0 desde los servidores de GitHub: bloquea esas IP.
+- **en curso, del dueño** eBay: claves cargadas el 25/10 y el Worker las usa, pero eBay responde HTTP 401 (keyset de Production
+  sin activar). Detalle en `docs/pendientes-del-dueno.md`.
 - **pendiente del dueño** Credenciales de eBay y AliExpress para Afuera (las unicas fuentes que no se bloquean, y pagan
   comision). Amazon Creators API cuando haya ventas.
 
