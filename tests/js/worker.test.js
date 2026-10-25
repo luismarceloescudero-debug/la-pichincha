@@ -149,7 +149,7 @@ test("eBay: busca con envio a Argentina, el contexto de ubicacion AR y la campa√
   const u = new URL(p.url);
   assert.equal(u.origin + u.pathname, "https://api.ebay.com/buy/browse/v1/item_summary/search");
   assert.equal(u.searchParams.get("q"), "soundcore aeroclip 2");
-  assert.equal(u.searchParams.get("filter"), "deliveryCountry:AR");
+  assert.equal(u.searchParams.get("filter"), "deliveryCountry:AR,conditions:{NEW}");
   assert.equal(u.searchParams.get("limit"), "5");
   assert.equal(p.headers.Authorization, "Bearer TOKEN");
   assert.equal(p.headers["X-EBAY-C-MARKETPLACE-ID"], "EBAY_US");
