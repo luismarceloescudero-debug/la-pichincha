@@ -105,7 +105,9 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     const activas = FUENTES.filter(([, f]) => f.activa(env));
     const res = await Promise.allSettled(activas.map(([, f]) => f.buscar(q, env, { pedir, pedirTexto, token, fecha, ahoraMs: ms })
       .then(items => relevantes(items, q).slice(0, POR_FUENTE))));
-    const fuentes = activas.map(([id], i) => ({ id, ok: res[i].status === "fulfilled", n: res[i].status === "fulfilled" ? res[i].value.length : 0 }));
+    // Una fuente que falla dice por que («HTTP 401», «tiempo agotado»): son nuestros propios mensajes, sin claves ni respuestas.
+    const fuentes = activas.map(([id], i) => res[i].status === "fulfilled" ? { id, ok: true, n: res[i].value.length }
+      : { id, ok: false, n: 0, motivo: String((res[i].reason && res[i].reason.message) || "error").slice(0, 80) });
     const items = res.flatMap(r => (r.status === "fulfilled" ? r.value : [])).sort((a, z) => a.precio - z.precio);
     const segundos = !fuentes.some(f => f.ok) ? 0 : fuentes.every(f => f.ok) ? CACHE_SEG : CACHE_PARCIAL_SEG;
     return responder({ consulta: q, fecha, fuentes, items }, clave, segundos, h);
