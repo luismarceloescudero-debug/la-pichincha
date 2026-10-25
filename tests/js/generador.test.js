@@ -401,3 +401,16 @@ test("cada pagina abre con «Saltar al contenido», que lleva al <main> (squirre
     assert.ok(cuerpo.indexOf('class="saltar"') < cuerpo.search(/<(a|button|input)\b(?![^>]*class="saltar")/), "es lo primero que enfoca el teclado");
   }
 });
+
+test("las paginas de /precios/ llevan el codigo de afiliado en Mercado Libre, con rel=sponsored y el rotulo; las otras tiendas no", () => {
+  const ml = fila("Memoria Kingston Fury DDR4 16GB 3200MHz Mercado", 800, "ml");
+  ml[2] = "https://www.mercadolibre.com.ar/memoria-kingston/p/MLA1";
+  const idx = { ...IDX, tiendas: { ...IDX.tiendas, ml: { nombre: "Mercado Libre", color: "ml", relevado: "2026-10-09T08:12-03:00" } },
+    productos: [...IDX.productos, ml] };
+  const { ctx, analisis } = armar(idx, "ddr4 16gb");
+  const html = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
+  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/memoria-kingston\/p\/MLA1\?matt_word=chococuyano&amp;matt_tool=31231658" target="_blank" rel="sponsored noopener"/);
+  assert.match(html, /\(afiliado\)/);
+  const otros = html.match(/<a href="https:\/\/t\.test[^>]*>/g) || [];
+  assert.ok(otros.length > 0 && otros.every(a => /rel="noopener"/.test(a) && !/matt_/.test(a)));
+});

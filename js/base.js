@@ -6,6 +6,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 // Sin espacios, comillas, <>, ` ni barra invertida (https://evil\@buena.com va a "evil" en el navegador) ni caracteres de control.
 const URL_SEGURA = /^https?:\/\/[^\s"'<>`\\\u0000-\u001f]+$/i;
 const enlace = u => URL_SEGURA.test(String(u || "")) ? esc(u) : "#";
+/* Un enlace a una tienda con su codigo de afiliado cuando corresponde (spec 027: hoy solo Mercado Libre suma matt_word y
+   matt_tool). Va rotulado («afiliado») y con rel="sponsored"; el precio y el orden no cambian (principio II). */
+const datosTienda = u => {
+  const a = typeof Pagina === "object" && Pagina.enlaceTienda ? Pagina.enlaceTienda(String(u || "")) : { url: u, afiliado: false };
+  return { href: enlace(a.url), afiliado: a.afiliado };
+};
+const hrefTienda = u => datosTienda(u).href;
+const relTienda = u => datosTienda(u).afiliado ? "sponsored noopener" : "noopener";
+const selloAfiliado = u => datosTienda(u).afiliado
+  ? '<span class="sello afi" title="Enlace de afiliado: no cambia el precio ni el orden">afiliado</span>' : "";
 /* Una URL para CSS (background-image): esc no sirve ahi, porque el navegador decodifica &quot; antes de leer el CSS y una
    comilla cerraria el url("..."). Solo pasa una URL segura, que no tiene comillas; si no, nada. */
 const fondo = u => URL_SEGURA.test(String(u || "")) ? String(u) : "";

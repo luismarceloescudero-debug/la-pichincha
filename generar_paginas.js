@@ -25,6 +25,9 @@ const MAX_INTERNACIONALES = 5;
 
 // Las URL de los avisos vienen de terceros: solo se enlaza http(s), nunca javascript: ni data:.
 const esUrl = u => /^https?:\/\//i.test(String(u));
+/* El enlace a una tienda con el codigo de afiliado de Mercado Libre (spec 027), rotulado y con rel="sponsored". */
+const tienda = u => { const a = P.enlaceTienda(String(u)); return { href: esc(a.url), rel: a.afiliado ? "sponsored noopener" : "noopener",
+  sello: a.afiliado ? ' <span class="afi" title="Enlace de afiliado: no cambia el precio ni el orden">(afiliado)</span>' : "" }; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR");
 
@@ -86,7 +89,9 @@ function tambienEn(f, ctx) {
   if (!resto.length) return "";
   const links = resto.map(o => {
     const txt = `${esc(ctx.comercioDe(o))} ${pesos(o[1])}`;
-    return esUrl(o[2]) ? `<a href="${esc(o[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(o[0]) || "otro")}">${txt}</a>` : txt;
+    if (!esUrl(o[2])) return txt;
+    const t = tienda(o[2]);
+    return `<a href="${t.href}" target="_blank" rel="${t.rel}" data-rubro="${esc(B.categoriaDe(o[0]) || "otro")}">${txt}</a>${t.sello}`;
   });
   return `<span class="mismo">También en ${links.join(" · ")}</span>`;
 }
@@ -94,9 +99,9 @@ function tambienEn(f, ctx) {
 /* Seccion "Precio por tienda": para cada opcion que lidera (mejor compra, mas barata...), el mismo modelo en cada tienda
    con el porcentaje contra la mas barata y lo que se ahorra contra la mas cara. Misma tabla que la Comparativa. */
 function enlaceTienda(f, texto, etiqueta) {
-  return esUrl(f[2])
-    ? `<a href="${esc(f[2])}" target="_blank" rel="noopener" aria-label="${esc(etiqueta)}" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${texto}</a>`
-    : "—";
+  if (!esUrl(f[2])) return "—";
+  const t = tienda(f[2]);
+  return `<a href="${t.href}" target="_blank" rel="${t.rel}" aria-label="${esc(etiqueta)}" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${texto}</a>${t.sello}`;
 }
 function precioPorTiendaHtml(analisis, ctx) {
   const h = { esc, pesos, enlace: enlaceTienda };
@@ -115,7 +120,7 @@ ${bloques}
 
 function filaHtml(f, ctx) {
   const nombre = (esUrl(f[2])
-    ? `<a href="${esc(f[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a>`
+    ? `<a href="${tienda(f[2]).href}" target="_blank" rel="${tienda(f[2]).rel}" data-rubro="${esc(B.categoriaDe(f[0]) || "otro")}">${esc(f[0])}</a>${tienda(f[2]).sello}`
     : esc(f[0])) + tambienEn(f, ctx);
   return `<tr data-op><td>${nombre}</td>` +
     `<td>${esc(ctx.comercioDe(f))}</td><td class="num">${pesos(f[1])}</td><td>${sellosHtml(f, ctx)}</td></tr>`;
@@ -326,7 +331,7 @@ function renderPagina(consulta, analisis, ctx) {
 
   <section class="panel">
     <h2>Mejor compra</h2>
-    <p>${esUrl(mejor[2]) ? `<a href="${esc(mejor[2])}" target="_blank" rel="noopener" data-rubro="${esc(B.categoriaDe(mejor[0]) || "otro")}"><b>${esc(mejor[0])}</b></a>` : `<b>${esc(mejor[0])}</b>`} · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
+    <p>${esUrl(mejor[2]) ? `<a href="${tienda(mejor[2]).href}" target="_blank" rel="${tienda(mejor[2]).rel}" data-rubro="${esc(B.categoriaDe(mejor[0]) || "otro")}"><b>${esc(mejor[0])}</b></a>${tienda(mejor[2]).sello}` : `<b>${esc(mejor[0])}</b>`} · ${esc(ctx.comercioDe(mejor))} · <b>${pesos(mejor[1])}</b> ${sellosHtml(mejor, ctx)}</p>
     <p class="sub">${esc(analisis.picks[0].razon)}</p>
   </section>
 

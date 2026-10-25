@@ -70,10 +70,10 @@ function cardPick(p, i) {
   const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
-  return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${enlace(f[2])}" target="_blank" rel="noopener">
+  return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
     <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
     <h3>${esc(f[0])}</h3>
-    <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
+    <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""} ${selloAfiliado(f[2])}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
     <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
       `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
@@ -126,7 +126,7 @@ function tablaPicks(picks) {
    barata y lo que se ahorra contra la mas cara. El orden es el de las opciones, nunca el de una comision. */
 function seccionPrecioPorTienda(picks) {
   const h = { esc, pesos, enlace: (f, texto, etiqueta) =>
-    `<a href="${enlace(f[2])}" target="_blank" rel="noopener" aria-label="${esc(etiqueta)}">${texto}</a>` };
+    `<a href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}" aria-label="${esc(etiqueta)}">${texto}</a>${selloAfiliado(f[2])}` };
   return picks.filter(p => p.porTienda).map((p, i) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
     + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
 }
@@ -153,9 +153,9 @@ function vistaComparativaDin() {
    (el enlace viejo #tiendas sigue andando: js/arranque.js lo lleva hasta aca). */
 function seccionComercios() {
   const A = ANALISIS, top = A.comercios.slice(0, 6), resto = A.comercios.length - top.length;
-  const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${enlace(c.mejorItem.f[2])}" target="_blank" rel="noopener">
+  const cards = top.map((c, i) => `<a class="dcard c-${c.color}${i === 0 ? " mejor" : ""}" style="--i:${i}" href="${hrefTienda(c.mejorItem.f[2])}" target="_blank" rel="${relTienda(c.mejorItem.f[2])}">
     <span class="rol"><b class="letra">${i + 1}</b> ${icono("store")} ${i === 0 ? "Más barata en primera línea" : "Comercio"}</span>
-    <h3>${esc(c.nom)}</h3>
+    <h3>${esc(c.nom)} ${selloAfiliado(c.mejorItem.f[2])}</h3>
     <div><span class="precio">${pesos(c.mejorItem.f[1])}</span> ${selloOjo(viejoDe(c.mejorItem.f))}</div>
     <p class="razon">${c.conPrimera ? "Su opción de primera línea más barata" : "Sin marca de primera línea acá: su opción más barata"}: ${esc(c.mejorItem.f[0].slice(0, 80))}</p>
     <dl><dt>Avisos comparables</dt><dd>${c.n}</dd><dt>Precio típico</dt><dd>${pesos(c.med)}</dd>
