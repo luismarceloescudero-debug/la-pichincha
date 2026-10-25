@@ -573,3 +573,21 @@ test("defensa propia: el Worker solo lee paginas de tiendamia.com.ar y www.loqui
   for (const malo of ["http://tiendamia.com.ar/p/x", "https://localhost:8080/admin", "https://tiendamia.com.ar.evil.com/p/x", "nada", ""])
     assert.equal(paginaPermitida(malo), false, malo);
 });
+
+test("una fuente que falla dice por que en `motivo` (HTTP, tiempo), sin claves ni cuerpo de la respuesta", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const atender = crearAtender({ fetch: fetchFalso([["oauth2/token", () => new Response('{"error":"invalid_client","secret":"sec"}', { status: 401 })]]),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedido("rtx 4060"), ENV_EBAY)).json();
+  assert.deepEqual(j.fuentes, [{ id: "ebay", ok: false, n: 0, motivo: "HTTP 401" }]);
+  assert.doesNotMatch(JSON.stringify(j), /sec|invalid_client|id:/);
+});
+
+test("una fuente que anda no trae `motivo`", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const atender = crearAtender({ fetch: fetchFalso([["oauth2/token", { access_token: "TOK", expires_in: 7200 }], ["item_summary/search", fixture("ebay-search.json")]]),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedido("rtx 4060"), ENV_EBAY)).json();
+  assert.equal(j.fuentes[0].ok, true);
+  assert.equal("motivo" in j.fuentes[0], false);
+});
