@@ -20,7 +20,7 @@ import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
 const CACHE_PARCIAL_SEG = 900;                 // si alguna fuente fallo, poco: una caida pasajera no queda 8 horas
-const CACHE_VERSION = "031";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
+const CACHE_VERSION = "032";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 

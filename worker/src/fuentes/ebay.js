@@ -13,7 +13,7 @@ export function pedidoTokenEbay(env) {
 }
 
 export function pedidoEbay(q, env, token) {
-  const p = new URLSearchParams({ q, limit: String(POR_FUENTE), filter: "deliveryCountry:AR" });
+  const p = new URLSearchParams({ q, limit: String(POR_FUENTE), filter: "deliveryCountry:AR,conditions:{NEW}" });   // solo nuevos: sin usados ni «para repuestos» (25/10: una notebook «Uszkodzony» salio para «rtx 4060»)
   const ctx = (env.EBAY_CAMPAIGN_ID ? `affiliateCampaignId=${env.EBAY_CAMPAIGN_ID},` : "") + "contextualLocation=" + encodeURIComponent("country=AR");
   return { url: "https://api.ebay.com/buy/browse/v1/item_summary/search?" + p,
     headers: { Authorization: "Bearer " + token, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US", "X-EBAY-C-ENDUSERCTX": ctx } };
