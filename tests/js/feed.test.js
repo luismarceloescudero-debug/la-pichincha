@@ -281,12 +281,13 @@ const IDX_SEG = {
   ],
 };
 
-test("lo que se sigue hace pocos dias sale al final, dice «desde que lo seguimos» y no pasa de 40%", () => {
+test("lo que se sigue hace pocos dias compite por su descuento, dice «desde que lo seguimos» y no pasa de 40%", () => {
   const lista = F.listaParaCanal(IDX_SEG, 10);
-  assert.deepEqual(lista.map(o => [o.nombre, o.tipo]), [["SSD Kingston 1TB", "propia"], ["SSD Crucial P3 1TB", "seguimiento"]]);
-  assert.equal(lista[1].contra, "desde que lo seguimos, hace pocos días");
-  assert.equal(lista[1].descuento, 20);
-  assert.equal("contra" in lista[0], false);
+  assert.deepEqual(lista.map(o => [o.nombre, o.tipo]), [["SSD Kingston 1TB", "propia"], ["SSD Crucial P3 1TB", "seguimiento"]]);   // −25% y −20%
+  const seg = lista.find(o => o.tipo === "seguimiento");
+  assert.equal(seg.contra, "desde que lo seguimos, hace pocos días");
+  assert.equal(seg.descuento, 20);
+  assert.equal("contra" in lista.find(o => o.tipo === "propia"), false);
 });
 
 test("el feed y /hoy/ no llaman baja verificada a lo que se sigue hace pocos dias", () => {

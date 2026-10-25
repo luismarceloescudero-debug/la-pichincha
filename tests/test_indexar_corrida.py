@@ -79,12 +79,21 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 2)[5], 0, "hace una semana valia menos: el tachado no es rebaja")
         self.assertEqual(self.fila(indice, "uno", 3)[5], 1500)
 
-    def test_con_menos_de_una_semana_de_seguimiento_no_hay_baja_propia(self):
-        # Spec 034: un dia de historia no alcanza para decir que bajo (24/10, webcam Microsoft Studio «−53%»).
+    def test_con_un_dia_de_seguimiento_la_baja_va_en_seguimiento_y_no_como_baja_de_30_dias(self):
+        # Spec 034 y 038: un dia no alcanza para decir que bajo contra el mes (24/10, webcam Microsoft Studio «−53%»), pero hoy
+        # esta mas barata que ayer: se guarda con el sello k, y el tope de 40 % lo pone js/ofertas.js.
         self.correr([(1, 1000)], [(101, 500)])
         self.pasar_a_ayer()
         indice, _ = self.correr([(1, 470)], [(101, 500)])
-        self.assertEqual(self.fila(indice, "uno", 1)[6], 0)
+        fila = self.fila(indice, "uno", 1)
+        self.assertEqual(fila[6], 1000)
+        self.assertIn("k", fila[8])
+
+    def test_un_producto_nuevo_no_tiene_baja_ni_sello_k(self):
+        indice, _ = self.correr([(1, 1000)], [(101, 500)])
+        fila = self.fila(indice, "uno", 1)
+        self.assertEqual(fila[6], 0)
+        self.assertNotIn("k", fila[8])
 
     def test_con_entre_tres_y_seis_dias_la_baja_va_en_seguimiento_con_el_sello_k(self):
         # Spec 038: no se inventa una semana, se cuenta lo que se midio y se dice que es poco.

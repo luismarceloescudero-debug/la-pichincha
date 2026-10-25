@@ -580,11 +580,11 @@ test("una baja con el sello k (menos de una semana de historial) va aparte de la
   assert.ok(O.enSeguimiento(r.seguimiento[0]) && !O.enSeguimiento(r.propias[0]));
 });
 
-test("destacadas: lo que se sigue hace pocos dias entra, pero detras de lo verificado de su categoria", () => {
+test("destacadas: lo que se sigue hace pocos dias compite con lo verificado por su descuento, con su rotulo", () => {
   const k = (n, p, antes) => fila(n, p, { antes, sellos: "k" });
   const idx = { productos: [k("Memoria Corsair Vengeance DDR5 32GB 6000MHz", 90000, 120000),       // −25% en seguimiento
                             fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, { antes: 130000 })] };   // −23% verificada
   const d = O.destacadas(idx, 10);
-  assert.deepEqual(d.map(o => o.tipo), ["propia", "seguimiento"]);
-  assert.ok(d[1].off > d[0].off, "aunque su descuento sea mayor, no pasa adelante");
+  assert.deepEqual(d.map(o => o.tipo), ["seguimiento", "propia"]);      // −25% contra −23%
+  assert.ok(d[0].off > d[1].off);
 });

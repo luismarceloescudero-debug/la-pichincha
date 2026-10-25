@@ -64,9 +64,9 @@
   /* «gama alta del año pasado al precio de una media de hoy: mediana de los smartphones de gama media de 512 GB: $703.500 (8 avisos)» */
   const textoCruceGen = (c, pesos) => `gama alta del año pasado al precio de una media de hoy — ${textoContra(c, pesos)}`;
 
-  /* Una baja de un producto que se sigue hace menos de una semana (sello «k», spec 038): se cuenta aparte, «desde que lo
-     seguimos», y no pasa de 40%: con tan poca historia, una baja mayor casi siempre es el precio de otro vendedor (la webcam
-     de Mercado Libre que salio «−53%» el 24/10). */
+  /* Una baja de un producto que se sigue hace menos de una semana (sello «k», spec 038): es una oferta de hoy, con poco
+     historial. Se cuenta aparte, «desde que lo seguimos», y compite con las bajas propias; no pasa de 40%: con tan poca
+     historia, una baja mayor casi siempre es el precio de otro vendedor (la webcam de Mercado Libre que salio «−53%» el 24/10). */
   const DESCUENTO_SEGUIMIENTO_MAX = 0.4;
   const enSeguimiento = f => typeof f[8] === "string" && f[8].includes("k");
 
@@ -241,7 +241,7 @@
       return { f, antes, tipo, modelo, off: 1 - f[1] / antes, ahorro: antes - f[1], categoria: g.categoria, nivel: g.nivel,
         cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f),
         puesto: esInternacional(f) ? puestoDe(f, g.categoria, costo, equivalente.get(f), idx.tiendas) : undefined }; };
-    const ORDEN_TIPO = { propia: 0, modelo: 1, publicada: 2, seguimiento: 3 };
+    const ORDEN_TIPO = { propia: 0, seguimiento: 0, modelo: 1, publicada: 2 };
     const por = (a, b) => a.internacional - b.internacional || ORDEN_TIPO[a.tipo] - ORDEN_TIPO[b.tipo]
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),

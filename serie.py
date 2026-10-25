@@ -23,7 +23,7 @@ DIAS_MINIMO = 30
 DIAS_MINIMO_LARGO = 90
 DIAS_MINIMOS_INFLADA = 14
 DIAS_SEGUIMIENTO_BAJA = 7     # dias que se sigue un producto antes de hablar de una baja propia (spec 034)
-DIAS_SEGUIMIENTO_CORTO = 3    # con menos de una semana pero al menos esto, la baja se cuenta «en seguimiento» (spec 038)
+DIAS_SEGUIMIENTO_CORTO = 1    # con menos de una semana pero con un registro anterior, la baja se cuenta «en seguimiento» (spec 038)
 VENTANA_BAJA = 30             # la baja tiene que ser de los ultimos 30 dias
 SUBA_MINIMA = 1.10            # el precio previo era 10% o mas que el piso
 TOLERANCIA_PISO = 0.97        # la baja no pasa 3% por debajo del piso
@@ -114,10 +114,10 @@ def _minimo_previo(previos, hoy, dias):
 
 
 def piso_corto(eventos, hoy, dias=DIAS_MINIMO):
-    """El menor precio que se registro de un producto que se sigue hace entre DIAS_SEGUIMIENTO_CORTO y DIAS_SEGUIMIENTO_BAJA
-    dias (spec 038). Es lo que se vio de verdad, sin inventar una semana de historia: la baja se cuenta «desde que lo
-    seguimos» y no como baja de 30 dias. None con menos de tres dias, con una semana o mas (ahi manda `piso_previo`) o si hoy no
-    habia un precio de antes."""
+    """El menor precio que se registro de un producto que se sigue hace entre DIAS_SEGUIMIENTO_CORTO (un dia) y menos de
+    DIAS_SEGUIMIENTO_BAJA dias (spec 038). Es lo que se vio de verdad, sin inventar una semana de historia: la baja se cuenta
+    «desde que lo seguimos» y no como baja de 30 dias. None con una semana o mas (ahi manda `piso_previo`) o si hoy no habia
+    un precio de antes (producto nuevo)."""
     previos = [e for e in eventos if e[0] < hoy]
     if not _tramo_actual(previos):
         return None

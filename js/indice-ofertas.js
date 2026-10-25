@@ -77,8 +77,8 @@ function ofertasFiltradas() {
   if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
   const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
                 precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
-  // Cuando se ven todas, las bajas propias van primero (son la señal mas confiable) y lo que se sigue hace pocos dias, al final.
-  const rango = { propia: 0, publicada: 1, seguimiento: 2 };
+  // Cuando se ven todas, las bajas (propias y en seguimiento, que dicen su historial) van primero, y las rebajas publicadas despues.
+  const rango = { propia: 0, seguimiento: 0, publicada: 1 };
   return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? rango[a.tipo] - rango[b.tipo] : por(a, b));
 }
 
