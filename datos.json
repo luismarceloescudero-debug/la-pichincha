@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-22",
+  "actualizado": "2026-10-26",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -64,9 +64,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
       "img": "img/adata-d35.jpg",
-      "precio": 222150,
-      "precio_lista": 246833,
-      "sin_impuestos": 201041,
+      "precio": 223600,
+      "precio_lista": 248444,
+      "sin_impuestos": 202353,
       "stock": "en stock",
       "titular": "El mejor equilibrio de marca, latencia y garantía",
       "specs": {
@@ -138,7 +138,8 @@
       "contras": [
         "13,75 ns de latencia contra 10,0 ns de los otros dos. Es la línea ValueRAM, sin selección de chips.",
         "Gaming City dejó de vender la versión de doble rango (D8). La que queda es la S8, de rango simple: pierde el 2 a 4% que el doble rango recuperaba por intercalado, y además sale más cara."
-      ]
+      ],
+      "falla_desde": "2026-10-26"
     },
     {
       "id": "corsair-lpx",
@@ -154,9 +155,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
       "img": "img/corsair-lpx.jpg",
-      "precio": 252400,
-      "precio_lista": 280444,
-      "sin_impuestos": 228416,
+      "precio": 254050,
+      "precio_lista": 282278,
+      "sin_impuestos": 229910,
       "stock": "en stock",
       "titular": "La marca más probada, por treinta mil pesos más",
       "specs": {
@@ -319,9 +320,9 @@
       },
       "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
       "img": "img/brio4k.jpg",
-      "precio": 260250,
-      "precio_lista": 289167,
-      "sin_impuestos": 215083,
+      "precio": 261950,
+      "precio_lista": 291056,
+      "sin_impuestos": 216488,
       "stock": "en stock",
       "titular": "Lo que no compraría",
       "specs": {
@@ -359,7 +360,7 @@
       },
       "url": "https://www.gamingcity.com.ar/webcam-webcam-logitech-c922-pro-hd-stream-1080p--det--4996",
       "img": "img/c922.jpg",
-      "precio": 161499,
+      "precio": 161639,
       "stock": "en stock"
     },
     {
@@ -517,6 +518,31 @@
           "ahora": 260250
         }
       ]
+    },
+    {
+      "fecha": "2026-10-26",
+      "cambios": [
+        {
+          "id": "adata-d35",
+          "antes": 222150,
+          "ahora": 223600
+        },
+        {
+          "id": "corsair-lpx",
+          "antes": 252400,
+          "ahora": 254050
+        },
+        {
+          "id": "brio4k",
+          "antes": 260250,
+          "ahora": 261950
+        },
+        {
+          "id": "c922",
+          "antes": 161499,
+          "ahora": 161639
+        }
+      ]
     }
   ],
   "veredicto": [
@@ -538,11 +564,11 @@
     }
   ],
   "calculado": {
-    "adata_punto": 228789,
-    "adata_domicilio": 233808,
+    "adata_punto": 230239,
+    "adata_domicilio": 235258,
     "kingston_retiro": 299249,
-    "combo_gc": 460748,
-    "combo_partido": 364788,
+    "combo_gc": 460888,
+    "combo_partido": 366238,
     "ram_mas_barata": "adata-d35",
     "webcam_mas_barata": "brio100"
   },
