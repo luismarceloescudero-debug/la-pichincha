@@ -30,7 +30,8 @@
     return `<li class="afv-item">${img}<div class="afv-txt"><a href="${esc(it.url)}" target="_blank" rel="${it.afiliado ? "sponsored noopener" : "noopener"}">${esc(it.nombre)}</a>`
       + (it.afiliado ? '<span class="rotulo">enlace de afiliado</span>' : "")
       + `<span class="afv-precio">${monto(it.precio, it.moneda)}</span>`
-      + (it.envio === 0 ? '<span class="sub chico">con envío incluido</span>'      // Tiendamia: su precio ya trae el envio
+      // Tiendamia: el envio internacional y los servicios de importacion los suma el carrito, no la ficha (spec 041)
+      + (it.envio === 0 ? '<span class="sub chico">+ envío y servicios de importación en el carrito</span>'
         : it.envio != null ? `<span class="sub chico">+ envío ${monto(it.envio, it.moneda)}</span>` : "")
       + `<span class="sub chico">${esc(nombre(it.fuente))}</span>${puesto}</div></li>`;
   }

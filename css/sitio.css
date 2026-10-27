@@ -693,6 +693,14 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .pl-ficha p{margin:0 0 10px;overflow-wrap:anywhere}
 .pl-acciones{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
 .pl-leido:empty{display:none}
+/* Spec 041: el detalle del carrito de Tiendamia, debajo de la ficha */
+.pl-carrito{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
+.pl-carrito textarea{font:500 .9rem var(--font-sans);color:var(--ink);background:var(--surface);padding:10px 12px;min-width:0;width:100%;
+  border:1.5px solid var(--line);border-radius:10px;resize:vertical;transition:border-color .2s,box-shadow .2s}
+.pl-carrito textarea:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.pl-carrito textarea:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.pl-carrito-res{font-weight:600;color:var(--ink)}
+.pl-carrito-res:empty{display:none}
 
 /* --- Spec 022: Afuera en vivo (respuesta del Worker) --- */
 .afuera-vivo{margin:18px 0 4px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
