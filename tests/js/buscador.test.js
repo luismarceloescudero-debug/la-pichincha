@@ -24,6 +24,13 @@ test("una medida tiene que ser palabra entera", () => {
   assert.equal(B.filtroDe("   "), null);
 });
 
+test("un numero entero no matchea el entero de un decimal (5 no es 5.7ghz)", () => {
+  const n = B.normalBusq;
+  assert.equal(B.filtroDe("5")(n("Procesador Intel Core Ultra 9 285K 5.7Ghz")), false);
+  assert.equal(B.filtroDe("ultra 5")(n("Procesador Intel Core Ultra 9 285K 5.7Ghz")), false);
+  assert.equal(B.filtroDe("ultra 5")(n("Procesador Intel Core Ultra 5 245K 5.2Ghz")), true);
+});
+
 test("una palabra no se encuentra adentro de otra", () => {
   const n = B.normalBusq;
   assert.equal(B.filtroDe("ipad")(n("Memoria Ram 16Gb DDR4 Con Disipador")), false);
