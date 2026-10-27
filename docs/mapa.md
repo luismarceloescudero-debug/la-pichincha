@@ -35,8 +35,7 @@ flowchart TD
         FI --> IN["node generar_info.js (L164)"]
         IN --> GU["node guardia.js (alarma: issue 'guardia' y sin Telegram)"]
         GU --> TG["python publicar_telegram.py (schedule o manual manda; push solo corrige el mensaje del mismo indice; sin alarma de la guardia)"]
-        TG --> CO["python generar_cotizaciones.py (L180)"]
-        CO --> CB["python cobertura.py (L183)"]
+        TG --> CB["python cobertura.py (L183)"]
         CB --> UP["upload-pages-artifact _sitio"]
         UP --> DP["job publicar: deploy-pages"]
     end
@@ -65,7 +64,6 @@ flowchart TD
     IJ --> IN
     SJ --> IN
     IN --> EL["_sitio/estado/, legal/"]
-    CO --> CT["_sitio/cotizaciones.json"]
     IJ --> CB
     CB --> CJS["_sitio/cobertura.json"]
     ST[("sitio.json")] --> GPJ
@@ -91,9 +89,6 @@ Puntos que no se ven en el codigo Python ni JS:
   carga `js/buscador.js`, `js/analisis.js` y `js/pagina.js`; `generar_feed.js:12` carga `js/ofertas.js`;
   `generar_portada.js` corre los scripts de la pagina en `vm`. Cambiar uno de esos modulos cambia el sitio
   **y** las paginas generadas.
-- **`importacion.json` viaja con la app**: no lo copia el paso L124 sino `publicar_app.py`
-  (`ARCHIVOS_DE_LA_CASCARA`), igual que el manifiesto, y el service worker lo guarda para usarlo sin red.
-  La pestaña **Costo de importar** (`js/vista-costo.js`) lo pide al abrirse, junto con `cotizaciones.json`.
 - **`tests.yml` corre dos veces**: en cada PR y como primer job de cada publicacion (L37). Su job
   `lighthouse` arma un `_sitio` propio con el indice publicado y los mismos generadores.
 
@@ -115,11 +110,8 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Verificacion en la fuente** | `verificar_ofertas.py` (`revisar_ml`, `revisar_woo`, `revisar_vtex` para las tiendas VTEX directas y las de ComparaYa, `revisar_agregador`; `--telemetria` anota el veredicto de cada enlace) | los dos pasos de verificacion del workflow; `diagnostico_enlaces.py` la corre sobre las candidatas publicadas, mide el catalogo de las tiendas VTEX (`--vtex-catalogo`) y, a mano, las indexa sobre el indice publicado y le pasa la guardia | `tests/test_verificar_ofertas.py`, `tests/test_diagnostico_enlaces.py` |
 | **Fiabilidad por comercio** (spec 016, D4) | `fiabilidad.py` (`clasificar`: caida probada contra sin comprobar; `contar`, `escribir`, `resumen` de 30 dias con minimo de 30) | lee la `telemetria.json` de `verificar_ofertas.py`; escribe `historial/verificacion/AAAA-MM.csv` (rama `historial`) y `_sitio/fiabilidad.json`; `generar_info.js` (`fiabilidadComercios`, seccion «Ofertas que ya no estaban en pie») lo muestra en `/estado/` | `tests/test_fiabilidad.py`, `tests/js/fiabilidad-estado.test.js` |
 | **Ofertas** (que es una) | `js/ofertas.js` (`destacadas` deja un lugar por `familia`: codigo de modelo o nombre sin sistema operativo ni color, spec 028) | la pestaña Ofertas, `generar_feed.js`, `publicar_telegram.py` | `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
-| **Costo puesto en casa de lo internacional** | `js/puesto.js` (rango y comparacion, puro) + `equivalente` de `calcularOfertas` en `js/ofertas.js` | tarjeta de Ofertas (`bloquePuesto` en `js/indice-ofertas.js`), `generar_feed.js` (RSS, /hoy/, `ofertas.json`), `publicar_telegram.py` | `tests/js/puesto.test.js`, `tests/js/ofertas.test.js`, `tests/js/feed.test.js` |
-| **Calculadora de costos** | `js/costos.js` (el motor, sin cifras) + `importacion.json` (las reglas, con norma, fuente y fecha) + `js/calculadora.js` (formulario, desglose y URL, puro) + `js/vista-costo.js` (pegamento con la pagina) | la pestaña Costo de importar (`#costo`, `js/arranque.js` la pinta); `publicar_app.py` publica las reglas | `tests/js/costos.test.js`, `tests/js/calculadora.test.js`, `tests/test_importacion.py` |
 | **Afuera en vivo** (specs 022, 023 y 039) | `worker/` (Cloudflare Worker: `src/index.js` con `/buscar` y `/enlace`, validacion, CORS, cache versionada, tope por IP y `paginaPermitida`; `src/fuentes/` eBay, AliExpress y Amazon por API, Tiendamia y Loquieroaca por su HTML dentro del robots.txt, y `comun.js` con `aviso` y `relevantes`; spec 039: `parsearFichaTiendamia` extrae el precio base de Amazon (`merchant_price`) y calcula el porcentaje del recargo, y un link de Amazon sin su API cruza a la ficha de Tiendamia del mismo ASIN) + `js/afuera.js` (puro: lo que pinta la pagina) | `pintarAfuera` en `js/busqueda.js` (lee `<meta name="afuera-url">`, que repite `afuera_url` de `sitio.json`); `.github/workflows/worker.yml` lo despliega si hay cuenta de Cloudflare | `tests/js/worker.test.js` (fixtures en `tests/fixtures/worker/`), `tests/js/afuera.test.js`, `tests/test_sitio.py` |
-| **Comprar afuera: fuentes, buscar afuera y pegar un link** (specs 015, 020, 023 y 039: `amazonDeRuta`, `urlLeerEnlace`, `leidoDeEnlace` con el porcentaje contra Amazon que publica la ficha de Tiendamia; `pedirPrecioEnlace` en `js/vista-costo.js`) | `js/importar.js` (puro: `FUENTES` con la busqueda de cada tienda, `OFICIALES` verificadas, `COURIERS` con Aerobox como referencia sin comision —spec 039—, `urlBusqueda`, `buscarAfueraHtml`, `parsearEnlace`, `datosDeEnlace`, `estadoDeEnlace`, `hrefCalculadora`) | el bloque sin resultados de `pintarResultados` (`js/busqueda.js`); el cuadro «Pegá el link» y la seccion «Importando» de `js/vista-costo.js`; «Calcular con este precio» en `js/indice-ofertas.js` | `tests/js/importar.test.js` |
-| **Monedas** | `js/monedas.js` (en vivo, `URLS` L10, `TIPOS_DOLAR` L16) + `generar_cotizaciones.py` (copia del build, `URLS` L21) | el workflow (L180) escribe `_sitio/cotizaciones.json`; `sitio.json` habilita las tres APIs en `connect-src` | `tests/js/monedas.test.js`, `tests/test_cotizaciones.py`, fixtures en `tests/fixtures/monedas/` |
+| **Comprar afuera: fuentes, buscar afuera y pegar un link** (specs 015, 020, 023, 039 y 040: `amazonDeRuta`, `urlLeerEnlace`, `leidoDeEnlace` con el porcentaje contra Amazon que publica la ficha de Tiendamia) | `js/importar.js` (puro: `FUENTES` con la busqueda de cada tienda, `OFICIALES` verificadas, `urlBusqueda`, `buscarAfueraHtml`, `parsearEnlace`, `datosDeEnlace`, `pegarLinkHtml`, `fichaEnlaceHtml`, `lineaLeida`) + `js/vista-afuera.js` (pegamento: escucha `#pl-link` desde el documento y pide `/enlace` al Worker con `pedirPrecioEnlace`) | el bloque «Buscalo afuera» (`buscarAfueraHtml`, sin resultados o como respaldo de `pintarAfuera` en `js/busqueda.js`) trae el campo «Pegá el link»; con avisos en vivo, `afueraHtml` lo pone al pie (`pegarLink`). Spec 040: sin calculadora local ni couriers | `tests/js/importar.test.js`, `tests/js/afuera.test.js` |
 | **Portada** | `index.html` (estructura) + `js/` (modulos) + `css/sitio.css`; categorias curadas en `js/base.js:17` (ya sin uso en la portada); tus ultimas busquedas, la comparativa de la mas reciente y el borrado animado en `js/historial.js` (`consultaReciente`, `recienteHtml`, `COMILONES`, spec 021); Tiendas como seccion de la Comparativa (`seccionComercios` en `js/consulta.js`); paneles de lo mas buscado, lo mas vendido (`masVendidosPorCategoria`, columna `vendido` del indice que llena `indexar.vendidos`, spec 019) y lo ultimo en `js/novedades.js` | `generar_portada.js` la pre-renderiza en `_sitio/` | `tests/js/portada.test.js`, `tests/js/pestanas-recientes.test.js`, `tests/js/app.test.js`, `tests/test_sitio.py`, `tests/test_contraste.py` |
 | **Paginas por busqueda** | `generar_consultas.js` (descubre consultas en el indice), `consultas.json` + `generar_paginas.py` (valida y orquesta) + `generar_paginas.js` (escribe) | `js/analisis.js` (analisis y tabla "Precio por tienda": `precioPorTienda`, `tablaTiendasHtml`), compartido con la Comparativa (`js/consulta.js`) | `tests/test_generar_paginas.py`, `tests/js/generador.test.js`, `tests/js/consultas-auto.test.js`, `tests/js/pagina.test.js` |
 | **PWA** | `sw.js` (marcador `__VERSION__`), `manifest.webmanifest`, `sin-red.html`, `js/app.js`, `publicar_app.py` | el workflow (L153) | `tests/js/sw.test.js`, `tests/test_publicar_app.py` |
@@ -161,17 +153,6 @@ node --test "tests/js/*.test.js"
 5. Nada del workflow: la cache del indice se invalida sola porque su clave incluye el hash de
    `tiendas.json` (L88). Actualizar la tabla de fuentes del README.
 
-### Agregar o cambiar una regla de importacion
-
-1. La regla va en `importacion.json` con `valor`, `unidad`, `nivel`, `norma`, `fuentes`, `rige_desde` y
-   `verificado`. Lo que no se confirma en la norma oficial va como pendiente y sin numero
-   (`specs/010-costos/spec.md`).
-2. Si la regla es nueva para el calculo, se usa en `js/costos.js` por su clave: **ninguna cifra en el
-   codigo** (lo controla `tests/js/costos.test.js:264`).
-3. Tests: `tests/test_importacion.py` (forma de cada regla) y `tests/js/costos.test.js` (los casos de
-   referencia). Es plata y normativa: revision de cinco ejes con entradas reales y segunda opinion
-   ([proceso-de-trabajo.md, 1.2](proceso-de-trabajo.md#12-reglas-para-llamar-a-otros-modelos)).
-
 ### Agregar un rubro
 
 "Rubro" quiere decir tres cosas distintas en este repo; elegir cual:
@@ -188,34 +169,15 @@ node --test "tests/js/*.test.js"
 
 Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
 
-### Cambiar la calculadora (pestaña Costo de importar)
+### Cambiar «Pegá el link» (referencia del costo importado, spec 040)
 
-- **Un campo nuevo del formulario**: su parametro corto en `PARAMETROS` y su valor por defecto en
-  `POR_DEFECTO` (`js/calculadora.js`), el campo en `formularioHtml` y, si va al motor, en `entradaDe`.
-  La URL para compartir lo toma sola. `"q"` no se usa: es del buscador.
-- **Un renglon nuevo del desglose** sale del motor (`js/costos.js`); en `js/calculadora.js` solo se le
-  pone el nombre con tildes en `CONCEPTOS`.
-- Tests: `tests/js/calculadora.test.js` (incluye los casos de referencia de la spec de punta a punta) y,
-  si cambia la cuenta, `tests/js/costos.test.js`. Probarla en el navegador con `?v=800&d=20#costo`.
-- **Una tienda nueva para «Pegá el link»**: su host en `HOSTS` y su forma de link en `parsearEnlace`, y su
-  ayuda y campos a pisar en `datosDeEnlace` (`js/importar.js`), con sus casos en `tests/js/importar.test.js`.
-  Nada de leer la pagina: solo la direccion (spec 020).
+- **Una tienda nueva para «Pegá el link»**: su host en `HOSTS` y su forma de link en `parsearEnlace`, y su nombre y a
+  donde abrirlo en `datosDeEnlace` (`js/importar.js`), con sus casos en `tests/js/importar.test.js`. El precio lo lee el
+  Worker (`/enlace`, spec 023) solo si la tienda lo permite; el navegador no lee la pagina.
 - **Una tienda oficial que envia a Argentina**: una entrada en `OFICIALES` (`js/importar.js`) con la pagina
   de envios que lo dice y la fecha en que se leyo. Sin eso no se muestra.
-- **Un courier de referencia** (spec 039): una entrada en `COURIERS` (`js/importar.js`) con su URL de cotizador.
-  Es un enlace informativo, sin comision y sin leer su pagina: la calculadora local no se reemplaza.
-
-### Agregar una moneda o un tipo de dolar
-
-- **Una moneda**: `js/monedas.js` toma todo codigo de tres letras que traigan open.er-api.com y
-  frankfurter.dev; para que aparezca en el formulario, sumarla a `MONEDAS` en `js/calculadora.js`.
-  Si la moneda no esta en ninguna fuente, hace falta una fuente nueva.
-- **Una fuente de cotizaciones**: en **los dos** `URLS` (`js/monedas.js:10` y
-  `generar_cotizaciones.py:21`) con su validacion (`_valida`, `generar_cotizaciones.py:45`), su dominio
-  en `connect-src` de `sitio.json`, y su respuesta guardada en `tests/fixtures/monedas/`. Los tests nunca
-  van a la red: el `fetch` se pasa por parametro.
-- **Un tipo de dolar**: una entrada en `TIPOS_DOLAR` (`js/monedas.js:16`) con el `id` que usa dolarapi.com.
-- Tests: `tests/js/monedas.test.js` y `tests/test_cotizaciones.py`.
+- No hay calculadora local (spec 040): la referencia es el precio final que publican Tiendamia y Loquieroaca.
+  Probarlo en el navegador con una busqueda sin resultados y un link de Tiendamia pegado en «Buscalo afuera».
 
 ### Cambiar que cuenta la fiabilidad por comercio
 

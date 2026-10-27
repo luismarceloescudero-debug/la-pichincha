@@ -14,10 +14,9 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
 | 5 | Mercado Libre: confirmar clics | Saber si el link de afiliado cuenta | 2 min |
 | 6 | Google Search Console | Que Google lea el mapa del sitio y avise de errores | 10 min |
-| 7 | Contador o despachante | Las 8 reglas de importación marcadas «pendiente» | una consulta |
-| 8 | OmniRoute: reconectar Claude | Un respaldo más para las revisiones | 2 min |
-| 9 | Amazon (más adelante) | Amazon en «Afuera» | cuando haya 10 ventas |
-| 10 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
+| 7 | OmniRoute: reconectar Claude | Un respaldo más para las revisiones | 2 min |
+| 8 | Amazon (más adelante) | Amazon en «Afuera» | cuando haya 10 ventas |
+| 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
 
 ---
 
@@ -174,31 +173,7 @@ El link de afiliado ya sale en `/hoy/`, en Telegram y en el feed (spec 027). Fal
 
 ---
 
-## 7. Contador o despachante (una consulta, 8 reglas)
-
-La calculadora de «Costo de importar» usa valores confirmados en normas oficiales, salvo estas 8 reglas que quedaron
-**«pendiente»** en `importacion.json` (hasta confirmarlas se usa el valor prudente indicado en cada una). Si cualquiera
-de las 8 te la confirma un despachante, lo cargo con su fuente.
-
-**Mensaje armado:**
-
-> Hola [NOMBRE]. Tengo un sitio gratuito que estima cuánto cuesta comprar hardware en el exterior y recibirlo por
-> courier a Argentina. ¿Me podés confirmar, con la norma, estos puntos? (para el hardware: placas de video,
-> procesadores, memorias, discos, periféricos, notebooks, consolas)
-> 1. Derecho de importación por posición arancelaria de cada rubro (Nomenclatura Común del Mercosur, Decreto 557/2023
->    y modificatorios) y de las consolas (¿20%?).
-> 2. Si el IVA reducido aplica a algún bien de hardware, o es siempre el 21%.
-> 3. Si los impuestos internos integran la base imponible, y cómo se calculan.
-> 4. Si las percepciones de IVA y Ganancias del régimen general alcanzan al courier.
-> 5. Honorarios típicos del courier y tasa de servicio/almacenaje del Correo.
-> 6. Qué etapa del cronograma de la RG 5884 está vigente hoy.
-> 7. Topes de la tasa de estadística por declaración.
-> 8. Cualquier otro costo que suela aparecer y que no esté en esta lista.
-> Si prefieren no dar una opinión formal, me alcanza con las normas donde mirar. Gracias.
-
----
-
-## 8. OmniRoute: reconectar Claude
+## 7. OmniRoute: reconectar Claude
 
 La conexión `claude` figura vencida en el panel de OmniRoute (es tu panel local, no hay enlace público). Entrá,
 reconectá la cuenta y, si querés, verificá con una consulta de prueba. Hasta entonces el respaldo de las revisiones es
@@ -206,7 +181,7 @@ solo Gemini.
 
 ---
 
-## 9. Amazon (más adelante)
+## 8. Amazon (más adelante)
 
 La Creators API de Amazon exige **10 ventas calificadas en los últimos 30 días** con tu cuenta de afiliado, así que
 por ahora no corresponde.
@@ -218,12 +193,13 @@ por ahora no corresponde.
 
 Mientras tanto, «Afuera» arma el link de búsqueda a Amazon, y un link de Amazon que pegues se cruza con la ficha de
 Tiendamia de ese mismo producto: su precio final (con envío e impuestos) es la referencia del costo importado y se
-muestra el porcentaje contra el precio de Amazon que publica esa ficha (spec 039). El precio de Amazon en vivo sigue
+muestra el porcentaje contra el precio de Amazon que publica esa ficha (spec 039). Desde la spec 040 esa referencia
+va en «Buscalo afuera» (ya no hay calculadora local). El precio de Amazon en vivo sigue
 esperando las 10 ventas.
 
 ---
 
-## 10. Instagram (separado y en pausa)
+## 9. Instagram (separado y en pausa)
 
 Queda fuera del proceso diario de las pichinchas, como pediste: el PR #126 está en borrador. Si más adelante lo
 retomás, hace falta:

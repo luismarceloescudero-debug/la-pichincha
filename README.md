@@ -33,7 +33,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), el motor de costos de importacion (`costos.js`, K1: recibe las reglas de `importacion.json` y no tiene ninguna cifra de normativa), las monedas (`monedas.js`, K2) y la calculadora (`calculadora.js`, K3: formulario, desglose y enlace para compartir, sin DOM), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), comprar afuera (`importar.js`, specs 015 y 020: la busqueda armada en Amazon, Tiendamia y Loquieroaca cuando nada del indice coincide, y la lectura del link pegado en Costo de importar, sin leer la pagina), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-costo`, `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), comprar afuera (`importar.js`, specs 015 y 020: la busqueda armada en Amazon, Tiendamia y Loquieroaca cuando nada del indice coincide, y el bloque para pegar un link, con la referencia que lee el Worker; spec 040: sin calculadora local), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-afuera` (pegar un link en «Buscalo afuera», spec 040), `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
@@ -46,8 +46,6 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `guardia.js` | Guardia del indice: mide bajas propias y, por categoria, avisos, "sin datos" y ofertas sobre el indice real, lo compara con la `guardia.json` publicada de la corrida anterior y con una alarma (0 bajas propias con historial, una categoria que se queda sin ofertas, un salto de mas de 10 puntos en "sin datos", menos de 10 ofertas para el resumen) la corrida no manda Telegram y abre un issue `guardia` |
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
-| `generar_cotizaciones.py`, `js/monedas.js` | Las monedas de la calculadora: la copia de las cotizaciones que escribe el build (`cotizaciones.json`, de dolarapi.com, open.er-api.com y frankfurter.dev) y el modulo que convierte en vivo, con la copia de reserva y la hora de cada cotizacion (plan v3, K2) |
-| `importacion.json` | Reglas de importacion de la calculadora de costos (plan v3), cada una con su norma, fuente oficial, fecha de verificacion y nivel de confianza; lo que no se pudo confirmar va como pendiente y sin numero (`specs/010-costos/spec.md`). Se publica con la app (`publicar_app.py`) y la pestaña **Costo de importar** lo lee al abrirse |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas; tambien `afuera_url`, la direccion del Worker de la spec 022 (vacia hasta el primer despliegue) |
 | `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en Costo de importar (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP. Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
@@ -306,10 +304,8 @@ La pestaña dice cuantos avisos con descuento quedaron afuera por no llegar a lo
 Las compras internacionales no se esconden: pasan por las mismas reglas y en el RSS y Telegram van al
 final de su categoria, rotuladas.
 
-Cada una trae su **costo puesto en casa estimado** (`js/puesto.js`): un rango entre el precio publicado y ese precio con los
-impuestos de importacion, porque no sabemos si el de Mercado Libre ya los incluye. Dice que falta (derecho de importacion del
-hardware, impuesto interno: pendientes en `importacion.json`) y, cuando hay el mismo modelo en una tienda local, la diferencia
-contra ese precio. Es una estimacion, no asesoramiento. Detalle y medicion en `specs/012-reglas-de-ofertas/spec.md`.
+Desde la spec 040 no se estima su costo puesto en casa (ya no hay calculadora local): la referencia del costo importado
+es el precio final de Tiendamia o Loquieroaca, al pegar un link en «Buscalo afuera».
 
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de
