@@ -1,39 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const I = require("../../js/importar.js");
-const C = require("../../js/calculadora.js");
-
-const RUBROS = ["smartphone", "notebook", "pc", "monitor", "componente", "periferico", "otro"];
-
-test("cada rubro tiene un peso tipico positivo, y el que no conoce cae en «otro»", () => {
-  for (const r of RUBROS) assert.ok(I.PESO_TIPICO[r] > 0, r);
-  const sinRubro = I.hrefCalculadora(100, "rubro-raro", "/");
-  assert.equal(C.estadoDeUrl(sinRubro.split("#")[0].split("?")[1]).peso, String(I.PESO_TIPICO.otro));
-});
-
-test("el estado precargado trae el precio en dolares y el peso del rubro, el resto por defecto", () => {
-  const e = I.estadoImportar(199.5, "notebook");
-  assert.equal(e.valor, "199.5");
-  assert.equal(e.moneda, "USD");
-  assert.equal(e.peso, "2.5");
-  assert.equal(e.pago, C.POR_DEFECTO.pago);
-  assert.equal(e.aduana, C.POR_DEFECTO.aduana);
-});
-
-test("el precio se redondea a centavos y nunca sale en notacion cientifica", () => {
-  assert.equal(I.estadoImportar(1234.5678, "pc").valor, "1234.57");
-  assert.equal(I.estadoImportar(3, "monitor").valor, "3");
-});
-
-test("el enlace abre #costo con la calculadora precargada, y se lee de vuelta igual", () => {
-  const href = I.hrefCalculadora(250, "smartphone", "/buscador/");
-  assert.ok(href.startsWith("/buscador/?"), href);
-  assert.ok(href.endsWith("#costo"), href);
-  const leido = C.estadoDeUrl(href.split("?")[1].split("#")[0]);
-  assert.equal(leido.valor, "250");
-  assert.equal(leido.moneda, "USD");
-  assert.equal(leido.peso, "0.3");
-});
 
 test("solo Amazon lleva el tag de afiliado; con termino, va a la busqueda de ese producto", () => {
   const amazon = I.FUENTES.find(f => f.id === "amazon");
@@ -113,11 +80,6 @@ test("Amazon de otro pais se reconoce con su dominio y su moneda, sin el tag de 
   assert.equal(d.tiendaNombre, "Amazon (amazon.es)");
   assert.equal(d.afiliado, false);
   assert.equal(d.abrir, "https://www.amazon.es/dp/B0HFJ7NVPB");
-  assert.equal(d.moneda, "EUR", "el campo del precio dice la moneda de esa tienda");
-  assert.equal(I.datosDeEnlace(I.parsearEnlace("https://www.amazon.com/dp/B0HFJ7NVPB")).moneda, "USD");
-  assert.equal(I.estadoDeEnlace(es, "50").moneda, "EUR");
-  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.com.mx/dp/B0HFJ7NVPB"), "900").moneda, "MXN");
-  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.co.uk/dp/B0HFJ7NVPB"), "9").moneda, "GBP");
   assert.equal(I.parsearEnlace("https://www.amazon.evil.com/dp/B0HFJ7NVPB"), null);
 });
 
@@ -175,32 +137,19 @@ test("el nombre del slug se decodifica, se limpia y no pasa de 120 caracteres", 
   assert.ok(I.parsearEnlace(`https://www.amazon.com/${largo}/dp/B0DLGCHL8M`).nombre.length <= 120);
 });
 
-test("el estado del link precarga el precio en dolares y donde se cobran los impuestos; Loquieroaca no se calcula", () => {
-  const amazon = I.estadoDeEnlace(I.parsearEnlace("https://www.amazon.com/dp/B0DLGCHL8M"), "79,99");
-  assert.equal(amazon.valor, "79,99");
-  assert.equal(amazon.moneda, "USD");
-  assert.equal(amazon.cobro, "checkout");
-  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.ebay.com/itm/266512345678"), "").cobro, "checkout");
-  const tm = I.estadoDeEnlace(I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), "120");
-  assert.equal(tm.cobro, "checkout");
-  assert.equal(tm.flete, "", "Tiendamia muestra el precio con envio: no se suma otro");
-  assert.equal(I.estadoDeEnlace(I.parsearEnlace("https://www.loquieroaca.com/products/1589074"), "100"), null);
-  assert.equal(I.estadoDeEnlace(null, "100"), null);
-});
-
-test("cada tienda reconocida trae su nombre y una ayuda de una linea; Tiendamia con ASIN ofrece el mismo producto en Amazon", () => {
+test("cada tienda reconocida trae su nombre y a donde abrirlo, sin campos de calculo (spec 040); Tiendamia con ASIN ofrece el mismo producto en Amazon", () => {
   for (const url of ["https://www.amazon.com/dp/B0DLGCHL8M", "https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x",
     "https://www.loquieroaca.com/products/1589074", "https://www.ebay.com/itm/266512345678"]) {
     const d = I.datosDeEnlace(I.parsearEnlace(url));
-    assert.ok(d.tiendaNombre && d.ayuda, url);
+    assert.ok(d.tiendaNombre, url);
     assert.match(d.abrir, /^https:\/\//, url);
+    assert.deepEqual(Object.keys(d).sort(), ["abrir", "afiliado", "mismoEnAmazon", "tiendaNombre"], url);
   }
   const tm = I.datosDeEnlace(I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"));
   assert.equal(tm.mismoEnAmazon, "https://www.amazon.com/dp/B0HFJ7NVPB?tag=lapichincha-20");
   assert.equal(I.datosDeEnlace(I.parsearEnlace("https://www.amazon.com/dp/B0DLGCHL8M")).abrir, "https://www.amazon.com/dp/B0DLGCHL8M?tag=lapichincha-20");
   assert.equal(I.datosDeEnlace(I.parsearEnlace("https://www.amazon.com/dp/B0DLGCHL8M")).afiliado, true);
   assert.equal(I.datosDeEnlace(I.parsearEnlace("https://amzn.to/3AbCdEf")).abrir, "https://amzn.to/3AbCdEf", "el corto no se toca: no sabemos adonde va");
-  assert.equal(I.datosDeEnlace(I.parsearEnlace("https://www.loquieroaca.com/products/1589074")).calcula, false);
   assert.equal(I.datosDeEnlace(I.parsearEnlace("https://ebay.com/itm/266512345678")).mismoEnAmazon, null);
   assert.equal(I.datosDeEnlace(null), null);
 });
@@ -237,17 +186,19 @@ test("el bloque «buscar afuera» trae las tres fuentes con el termino, Amazon r
   assert.ok(!html.includes("<b>aeroclip"), "el termino va escapado");
   assert.match(html, /rel="sponsored noopener"/);
   assert.match(html, /enlace de afiliado/);
-  assert.equal((html.match(/rel="noopener"/g) || []).length, 3);
+  assert.equal((html.match(/rel="noopener"/g) || []).length, 2);
 });
 
-test("«buscar afuera» cita a Aerobox como courier de referencia, sin comision", () => {
+test("«buscar afuera» ya no cita a Aerobox ni a ningun courier, y trae el campo para pegar un link (spec 040)", () => {
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const html = I.buscarAfueraHtml("soundcore aeroclip", { esc, icono: () => "", oficiales: [] });
-  assert.match(html, /https:\/\/aerobox\.com\.ar\/calculadora-envios\//);
-  assert.match(html, /Aerobox/);
-  assert.match(html, /cotizás el envío y los impuestos/);
-  assert.match(html, /href="https:\/\/aerobox\.com\.ar\/calculadora-envios\/" target="_blank" rel="noopener"/, "el courier va sin comision");
-  assert.equal(I.COURIERS.length, 1);
+  assert.doesNotMatch(html, /aerobox/i);
+  assert.doesNotMatch(html, /cotiz/i, "sin cotizador de courier");
+  assert.equal(I.COURIERS, undefined);
+  assert.match(html, /¿Ya lo encontraste\? Pegá el link/);
+  assert.match(html, /<input id="pl-link" type="url"/);
+  assert.match(html, /<div id="pl-res" aria-live="polite">/);
+  assert.doesNotMatch(html, /#costo|data-ir-vista|calcul/i, "no hay calculadora a la que saltar");
 });
 
 test("el bloque suma la tienda oficial verificada con su fecha, y sin oficiales no la menciona", () => {
@@ -271,7 +222,7 @@ test("la URL de /enlace lleva el link tal cual; sin Worker o sin link no hay URL
   assert.equal(I.urlLeerEnlace("https://w.workers.dev", "  "), "");
 });
 
-test("Tiendamia leida: el precio en dolares va al campo y la linea dice que trae el envio", () => {
+test("Tiendamia leida: el precio en dolares y la linea dice que trae el envio", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: null, recargoPct: null } });
   assert.equal(r.precio, "198.88");
@@ -288,7 +239,7 @@ test("Tiendamia leida con precio base: la linea muestra el porcentaje contra Ama
   assert.match(r.linea, /En Amazon sale US\$ 169,98: un 17 % más con envío e impuestos incluidos \(aproximado\)/);
 });
 
-test("un link de Amazon que cruza a Tiendamia: el campo se carga con el precio de Amazon y la linea cita a Tiendamia", () => {
+test("un link de Amazon que cruza a Tiendamia: el precio de Amazon es el base y la linea cita a Tiendamia", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
   assert.equal(r.precio, "169.98", "el campo de Amazon se llena con el precio base que publica Tiendamia");
@@ -300,14 +251,14 @@ test("un link de Amazon que cruza a Tiendamia: el campo se carga con el precio d
   assert.doesNotMatch(sin.linea, /% más/);
 });
 
-test("Amazon o eBay leidos por su API: el precio va al campo", () => {
+test("Amazon o eBay leidos por su API: la linea trae el precio", () => {
   const a = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" }, item: { precio: 79.99, moneda: "USD", envio: null, nombre: "x" } });
   assert.equal(a.precio, "79.99");
   assert.match(a.linea, /por la API de Amazon/);
   assert.match(I.leidoDeEnlace({ leido: true, enlace: { tienda: "ebay" }, item: { precio: 5, moneda: "USD", nombre: "x" } }).linea, /eBay/);
 });
 
-test("Loquieroaca leida: el precio en pesos ya puesto en casa, en un pago y en cuotas; no va a la calculadora", () => {
+test("Loquieroaca leida: el precio en pesos ya puesto en casa, en un pago y en cuotas", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "loquieroaca" },
     item: { precio: 538616.1, moneda: "ARS", precioArs: 538616.1, precioCuotas: 598462.33, nombre: "AeroClip 2" } });
   assert.equal(r.precio, null);
@@ -322,4 +273,40 @@ test("sin leer: se muestra el motivo; una respuesta rara no muestra nada", () =>
   assert.equal(I.leidoDeEnlace(null), null);
   assert.equal(I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" }, item: null }), null);
   assert.equal(I.leidoDeEnlace({ leido: false }), null);
+});
+
+/* --- El bloque de pegar un link (spec 040): la referencia sin formulario --- */
+const escHtml = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+test("la ficha de un link de Tiendamia trae la tienda, el codigo y «El mismo en Amazon», sin formulario ni desglose", () => {
+  const html = I.fichaEnlaceHtml(I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/soundcore-aeroclip-2"), { esc: escHtml });
+  assert.match(html, /<b>Tiendamia<\/b> · código B0HFJ7NVPB/);
+  assert.match(html, /«soundcore aeroclip 2»/);
+  assert.match(html, /href="https:\/\/tiendamia\.com\.ar\/p\/amz\/b0hfj7nvpb\/soundcore-aeroclip-2" target="_blank" rel="noopener">/);
+  assert.match(html, /El mismo en Amazon/);
+  assert.match(html, /class="sub chico pl-leido"/);
+  assert.doesNotMatch(html, /<input|<form|Copiar el enlace|desglose/i);
+});
+
+test("la ficha de Amazon lleva el tag y el rotulo de afiliado; un link no reconocido da el mensaje sin nombrar la calculadora", () => {
+  const html = I.fichaEnlaceHtml(I.parsearEnlace("https://www.amazon.com/dp/B0DLGCHL8M"), { esc: escHtml });
+  assert.match(html, /B0DLGCHL8M\?tag=lapichincha-20" target="_blank" rel="sponsored noopener"/);
+  assert.match(html, /enlace de afiliado/);
+  const nada = I.fichaEnlaceHtml(null, { esc: escHtml });
+  assert.match(nada, /No reconozco ese link/);
+  assert.doesNotMatch(nada, /calcul|precio del producto/i);
+  assert.ok(I.fichaEnlaceHtml(I.parsearEnlace("https://amzn.to/3AbCdEf"), { esc: escHtml }).includes("link corto"));
+});
+
+test("la linea de la ficha es la referencia leida: el porcentaje contra Amazon de Tiendamia y el «puesto en casa» de Loquieroaca", () => {
+  const tm = I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x");
+  const l = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
+    item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
+  assert.match(I.lineaLeida(l, tm), /un 17 % más con envío e impuestos incluidos/);
+  assert.doesNotMatch(I.lineaLeida(l, tm), /AeroClip 2/, "el link ya traia nombre: no se repite");
+  assert.match(I.lineaLeida(l, I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb")), /^«AeroClip 2» · /);
+  const lqa = I.leidoDeEnlace({ leido: true, enlace: { tienda: "loquieroaca" },
+    item: { precio: 538616.1, moneda: "ARS", precioArs: 538616.1, nombre: "x" } });
+  assert.match(I.lineaLeida(lqa, I.parsearEnlace("https://www.loquieroaca.com/products/aeroclip-1589074")), /\$538\.616 en un pago, ya puesto en casa/);
+  assert.equal(I.lineaLeida(null, tm), "");
 });

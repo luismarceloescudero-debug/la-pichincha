@@ -7,9 +7,6 @@
 (function (raiz) {
   "use strict";
 
-  const I = typeof module === "object" && module.exports ? require("./importar.js") : raiz.Importar;
-  const C = typeof module === "object" && module.exports ? require("./calculadora.js") : raiz.Calculadora;
-
   const NOMBRES = { ebay: "eBay (EE.UU.)", aliexpress: "AliExpress", amazon: "Amazon (EE.UU.)", loquieroaca: "Loquieroacá", tiendamia: "Tiendamia" };
   const MAX = 8;
   const nombre = id => NOMBRES[id] || id;
@@ -24,18 +21,12 @@
     return base && t ? base + "/buscar?q=" + encodeURIComponent(t) : "";
   }
 
-  /* La calculadora con el precio, el envio (si la fuente lo da) y los impuestos cobrados en el checkout. */
-  function hrefCalcular(item, pathname) {
-    return C.urlDeEstado(pathname || "/", { ...I.estadoImportar(item.precio, "otro"), moneda: item.moneda,
-      flete: item.envio != null ? String(item.envio) : "", cobro: "checkout" });
-  }
-
-  function itemHtml(it, { esc, pathname }) {
+  /* Loquieroaca trae el precio final en pesos (precioArs): ese es el «puesto en casa». Sin calculadora local (spec 040), el resto
+     no lo estima. */
+  function itemHtml(it, { esc }) {
     const img = typeof it.imagen === "string" && it.imagen.startsWith("https://")
       ? `<img src="${esc(it.imagen)}" alt="" loading="lazy" width="64" height="64">` : "";
-    const puesto = it.precioArs > 0
-      ? `<span class="afv-puesto">${pesos(it.precioArs)} puesto en casa</span>`
-      : `<a class="acc" href="${esc(hrefCalcular(it, pathname))}">Calcular puesto en casa</a>`;
+    const puesto = it.precioArs > 0 ? `<span class="afv-puesto">${pesos(it.precioArs)} puesto en casa</span>` : "";
     return `<li class="afv-item">${img}<div class="afv-txt"><a href="${esc(it.url)}" target="_blank" rel="${it.afiliado ? "sponsored noopener" : "noopener"}">${esc(it.nombre)}</a>`
       + (it.afiliado ? '<span class="rotulo">enlace de afiliado</span>' : "")
       + `<span class="afv-precio">${monto(it.precio, it.moneda)}</span>`
@@ -45,8 +36,9 @@
   }
 
   /* datos: la respuesta del Worker { consulta, fecha, fuentes: [{ id, ok, n }], items }. mejorAca: { precio, tienda } o null.
-     respaldo: HTML que va cuando no hay avisos para mostrar (las busquedas armadas), o "". */
-  function afueraHtml(datos, { esc, icono = () => "", mejorAca = null, pathname = "/", respaldo = "" } = {}) {
+     respaldo: HTML que va cuando no hay avisos para mostrar (las busquedas armadas), o "". pegarLink: el campo de pegar un link
+     (spec 040), que ya viene en el respaldo y va al pie cuando hay avisos. */
+  function afueraHtml(datos, { esc, icono = () => "", mejorAca = null, respaldo = "", pegarLink = "" } = {}) {
     if (!datos || !Array.isArray(datos.items) || !Array.isArray(datos.fuentes)) return respaldo;
     const ok = datos.fuentes.filter(f => f.ok), caidas = datos.fuentes.filter(f => !f.ok);
     if (!datos.fuentes.length) return respaldo;
@@ -62,11 +54,11 @@
     }
     return titulo
       + (mejorAca ? `<p class="sub">Mejor precio acá: <b>${pesos(mejorAca.precio)}</b> en ${esc(mejorAca.tienda)}.</p>` : "")
-      + `<ul class="afv-lista">${items.map(it => itemHtml(it, { esc, pathname })).join("")}</ul>`
-      + `<p class="sub chico">${pie ? pie + " " : ""}El orden es por precio, nunca por comisión. Los precios son de cada tienda; impuestos y envío a Argentina aparte salvo que se indique.</p></section>`;
+      + `<ul class="afv-lista">${items.map(it => itemHtml(it, { esc })).join("")}</ul>`
+      + `<p class="sub chico">${pie ? pie + " " : ""}El orden es por precio, nunca por comisión. Los precios son de cada tienda; impuestos y envío a Argentina aparte salvo que se indique.</p>${pegarLink}</section>`;
   }
 
-  const api = { NOMBRES, urlConsulta, hrefCalcular, afueraHtml };
+  const api = { NOMBRES, urlConsulta, afueraHtml };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Afuera = api;
 })(this);

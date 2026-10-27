@@ -51,6 +51,5 @@ const VISTAS = [
   { id: "ofertas", eti: "Ofertas", ico: "fuego",
     n: () => OFERTAS ? OFERTAS.propias.length + OFERTAS.publicadas.length + OFERTAS.seguimiento.length : null },
   { id: "buscar", eti: "Buscar", ico: "lupa", n: () => IDX ? IDX.productos.length : null },
-  { id: "costo", eti: "Costo de importar", ico: "camion", n: () => null },
   { id: "veredicto", eti: "Veredicto", ico: "trofeo", n: () => null }
 ];

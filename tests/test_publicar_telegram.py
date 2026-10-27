@@ -37,13 +37,12 @@ class Mensaje(unittest.TestCase):
         self.assertIn("precios del 07/10" + chr(10), telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))
         self.assertNotIn("precios del  ", telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))
 
-    def test_una_compra_internacional_dice_su_costo_puesto_en_casa_y_escapado(self):
-        puesto = "costo puesto en casa, estimado: $306.000 a $370.260. Local <b>más</b> barato"
-        internacional = {**OFERTAS["ofertas"][0], "comercio": "Mercado Libre · compra internacional", "puesto": puesto}
+    def test_una_compra_internacional_va_rotulada_sin_estimar_el_costo_puesto_en_casa(self):
+        # Spec 040: sin calculadora local no se estima el costo; un `puesto` que quedara en un ofertas.json viejo no se publica.
+        internacional = {**OFERTAS["ofertas"][0], "comercio": "Mercado Libre · compra internacional", "puesto": "costo puesto en casa"}
         texto = telegram.mensaje({**OFERTAS, "ofertas": [internacional, OFERTAS["ofertas"][1]]})
-        self.assertIn("costo puesto en casa, estimado: $306.000 a $370.260", texto)
-        self.assertIn("Local &lt;b&gt;más&lt;/b&gt; barato", texto)
-        self.assertEqual(texto.count("costo puesto en casa"), 1)      # la oferta local no lo trae
+        self.assertIn("compra internacional", texto)
+        self.assertNotIn("puesto en casa", texto)
 
     def test_el_enlace_de_afiliado_se_abre_y_se_rotula(self):
         ml = {**OFERTAS["ofertas"][0], "comercio": "Mercado Libre", "url": "https://www.mercadolibre.com.ar/x",

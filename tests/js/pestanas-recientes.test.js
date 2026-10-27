@@ -40,9 +40,20 @@ function app(hist = [], { conIndice = true } = {}) {
 test("las pestañas ya no traen Tiendas: es una sección de la Comparativa", () => {
   const { correr } = app();
   const tabs = correr('pestanasHtml("comparativa")');
-  assert.equal((tabs.match(/class="tab"/g) || []).length, 5);
+  assert.equal((tabs.match(/class="tab"/g) || []).length, 4);
+  assert.doesNotMatch(tabs, /data-ir="costo"|Costo de importar/, "sin calculadora local (spec 040)");
   assert.doesNotMatch(tabs, /data-ir="tiendas"/);
   assert.deepEqual([...correr("DINAMICAS")], ["comparativa", "veredicto"]);
+});
+
+test("#costo ya no es una vista (spec 040): la calculadora no se carga y el hash cae en la Comparativa", () => {
+  const { correr } = app();
+  assert.equal(correr('VISTAS.some(v => v.id === "costo")'), false);
+  assert.equal(correr("typeof vistaCosto"), "undefined");
+  assert.equal(correr("typeof Calculadora"), "undefined");
+  const arranque = leer("js/arranque.js");
+  assert.match(arranque, /pintar\(VISTAS\.some\(v => v\.id === id\) \|\| porId\[id\] \? id : "comparativa"\)/, "lo que no es una vista cae en la Comparativa");
+  assert.doesNotMatch(arranque, /"costo"/);
 });
 
 test("la Comparativa sin búsqueda no muestra el análisis curado de memorias y webcams", () => {

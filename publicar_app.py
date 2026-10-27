@@ -21,7 +21,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent
 # Lo que se copia tal cual; sw.js va aparte porque lleva la version estampada.
 ARCHIVOS_DE_LA_CASCARA = [
-    "manifest.webmanifest", "sin-red.html", "importacion.json",
+    "manifest.webmanifest", "sin-red.html",
     "img/icono-192.png", "img/icono-512.png", "img/icono-maskable-512.png", "img/apple-touch-icon.png",
 ]
 # Datos que la pagina pide cuando hacen falta (no son de la cascara: el service worker no los guarda de entrada).

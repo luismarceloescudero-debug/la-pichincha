@@ -238,36 +238,19 @@ test("--candidatas ya sin las descartadas: la siguiente candidata ocupa el lugar
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-// ---- costo puesto en casa de lo internacional (spec 012) ----
-const COSTO_FX = (() => {
-  const fs = require("fs"), path = require("path"), M = require("../../js/monedas.js");
-  const leerFx = n => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "monedas", n), "utf8"));
-  return { reglas: JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "importacion.json"), "utf8")),
-    tasas: M.normalizar({ dolarapi: leerFx("dolarapi-dolares.json"), erapi: leerFx("erapi-usd.json"), frankfurter: leerFx("frankfurter-usd.json") }) };
-})();
+// ---- lo internacional (spec 040): rotulado, sin estimar el costo puesto en casa ----
 const IDX_INTL = { generado: "2026-10-19T08:00-03:00", tiendas: { cg: { nombre: "CompraGamer" } },
   productos: [fila("SSD Kingston 1TB", 90000, { lista: 120000 }),
     (() => { const f = fila("SSD Importado 1TB", 306000, { lista: 450000 }); f[8] = "ie"; return f; })()] };
 
-test("el feed dice el costo puesto en casa de una compra internacional, y solo de ella", () => {
-  const xml = F.renderFeed(IDX_INTL, { baseUrl: BASE, costo: COSTO_FX });
-  const items = xml.split("<item>").slice(1);
-  const intl = items.find(i => i.includes("SSD Importado")), local = items.find(i => i.includes("SSD Kingston"));
-  assert.match(intl, /Costo puesto en casa, estimación/);
-  assert.match(intl, /\$370\.260/);
-  assert.doesNotMatch(local, /puesto en casa/);
-});
-
-test("sin reglas ni cotizaciones el feed sale como antes", () => {
-  assert.equal(F.renderFeed(IDX_INTL, { baseUrl: BASE }), F.renderFeed(IDX_INTL, { baseUrl: BASE, costo: null }));
-  assert.doesNotMatch(F.renderFeed(IDX_INTL, { baseUrl: BASE }), /puesto en casa/);
-});
-
-test("la lista del canal y /hoy/ llevan el costo estimado de lo internacional", () => {
-  const lista = F.listaParaCanal(IDX_INTL, 10, COSTO_FX);
-  assert.match(lista.find(o => o.nombre.includes("Importado")).puesto, /\$306\.000.*\$370\.260/);
-  assert.equal(lista.find(o => o.nombre.includes("Kingston")).puesto, undefined);
-  assert.match(F.renderHoy(IDX_INTL, { baseUrl: BASE, costo: COSTO_FX }), /Costo puesto en casa/);
+test("el feed, el canal y /hoy/ rotulan la compra internacional y no estiman su costo puesto en casa", () => {
+  const xml = F.renderFeed(IDX_INTL, { baseUrl: BASE });
+  assert.match(xml, /SSD Importado 1TB[^<]*compra internacional/);
+  assert.doesNotMatch(xml, /puesto en casa/);
+  const lista = F.listaParaCanal(IDX_INTL, 10);
+  assert.ok(lista.every(o => !("puesto" in o)));
+  assert.doesNotMatch(F.renderHoy(IDX_INTL, { baseUrl: BASE }), /puesto en casa/i);
+  assert.equal(F.cargarCosto, undefined);
 });
 
 // ---- En seguimiento (spec 038): menos de una semana de historial, dicho asi y despues de lo verificado ----

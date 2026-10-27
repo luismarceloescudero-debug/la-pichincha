@@ -2,7 +2,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const A = require("../../js/afuera.js");
-const C = require("../../js/calculadora.js");
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const FECHA = "2026-10-23T15:00:00.000Z";
@@ -54,21 +53,28 @@ test("el mejor precio de aca va arriba, para comparar", () => {
   assert.ok(!A.afueraHtml(datos([item()]), { esc }).includes("Mejor precio acá"));
 });
 
-test("cada aviso sin precio puesto lleva «Calcular puesto en casa» con precio, envio y cobro en el checkout", () => {
-  const html = A.afueraHtml(datos([item()]), { esc, pathname: "/" });
-  const href = html.match(/href="([^"]*#costo)"/)[1].replace(/&amp;/g, "&");
-  const e = C.estadoDeUrl(href.split("?")[1].split("#")[0]);
-  assert.equal(e.valor, "89.99");
-  assert.equal(e.flete, "24.5");
-  assert.equal(e.moneda, "USD");
-  assert.equal(e.cobro, "checkout");
-  assert.match(html, /Calcular puesto en casa/);
+test("Tiendamia, Amazon y eBay ya no ofrecen «Calcular puesto en casa»: no hay calculadora a la que saltar (spec 040)", () => {
+  for (const fuente of ["tiendamia", "amazon", "ebay"]) {
+    const html = A.afueraHtml(datos([item({ fuente })], [{ id: fuente, ok: true, n: 1 }]), { esc });
+    assert.ok(!html.includes("Calcular puesto en casa"), fuente);
+    assert.ok(!html.includes("#costo"), fuente);
+    assert.ok(!html.includes("puesto en casa"), fuente + ": sin precio final en pesos no se estima");
+  }
+});
+
+test("con avisos, el campo de pegar un link va al pie; sin avisos queda el del respaldo y no se repite", () => {
+  const campo = '<div class="pegar-link">campo</div>';
+  assert.ok(A.afueraHtml(datos([item()]), { esc, pegarLink: campo }).includes(campo));
+  assert.ok(!A.afueraHtml(datos([item()]), { esc }).includes("pegar-link"));
+  const vacio = A.afueraHtml(datos([]), { esc, respaldo: "RESPALDO", pegarLink: campo });
+  assert.ok(!vacio.includes(campo), "el respaldo ya trae el campo");
 });
 
 test("si la fuente ya da el precio puesto en pesos, se muestra ese y no hace falta calcular", () => {
   const html = A.afueraHtml(datos([item({ precioArs: 597646.5, moneda: "USD", fuente: "loquieroaca", afiliado: false })]), { esc });
   assert.match(html, /\$597\.647 puesto en casa/);
   assert.ok(!html.includes("Calcular puesto en casa"));
+  assert.match(html, /class="afv-puesto"/);
 });
 
 test("el nombre y la URL van escapados; una URL que no es https no se pinta", () => {
@@ -103,11 +109,9 @@ test("un aviso con precio que no es numero no se pinta", () => {
   assert.ok(html.includes("bien"));
 });
 
-test("una moneda que no es dolar se muestra con su codigo y la calculadora la recibe", () => {
+test("una moneda que no es dolar se muestra con su codigo", () => {
   const html = A.afueraHtml(datos([item({ moneda: "EUR", precio: 50, envio: null })]), { esc });
   assert.match(html, /EUR 50,00/);
-  const href = html.match(/href="([^"]*#costo)"/)[1].replace(/&amp;/g, "&");
-  assert.equal(C.estadoDeUrl(href.split("?")[1].split("#")[0]).moneda, "EUR");
 });
 
 test("Tiendamia: el precio ya trae el envio y se dice asi (no «+ envio US$ 0,00»)", () => {

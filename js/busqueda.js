@@ -161,12 +161,13 @@ const AFUERA_URL = (document.querySelector('meta[name="afuera-url"]') || {}).con
 const AFUERA = new Map();      // url -> respuesta del Worker
 const AFUERA_FALLO = new Map(); // url -> cuando fallo: no se reintenta durante un minuto (revision de OmniRoute, spec 022)
 let AFUERA_TURNO = 0, AFUERA_ESPERA = null;
-/* respaldo: lo que queda si afuera no trae avisos (las busquedas armadas de la spec 020); "" cuando ya estan en la pagina. */
+/* respaldo: lo que queda si afuera no trae avisos (las busquedas armadas de la spec 020); "" cuando ya estan en la pagina. Con
+   respaldo, el campo de pegar un link (spec 040) va tambien al pie de los avisos: si no, quedaria fuera de la vista. */
 function pintarAfuera(q, mejorAca, respaldo = "") {
   const caja = $("#afuera"), url = Afuera.urlConsulta(AFUERA_URL, q), turno = ++AFUERA_TURNO;
   clearTimeout(AFUERA_ESPERA);
   if (!caja) return;
-  const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, pathname: location.pathname, respaldo }); };
+  const pintar = d => { if (turno === AFUERA_TURNO) caja.innerHTML = Afuera.afueraHtml(d, { esc, icono, mejorAca, respaldo, pegarLink: respaldo ? Importar.pegarLinkHtml() : "" }); };
   if (!url || Date.now() - (AFUERA_FALLO.get(url) || 0) < 60000) { caja.innerHTML = q.trim() ? respaldo : ""; return; }
   if (AFUERA.has(url)) return pintar(AFUERA.get(url));
   caja.innerHTML = `<p class="sub chico afv-cargando">${icono("fuera")} Buscando afuera…</p>`;
@@ -197,10 +198,9 @@ function pintarResultados(q) {
   if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
     // Si la marca o el producto no estan en ninguna fuente, se dice asi y ya se arma la busqueda en cada tienda de afuera
-    // (spec 020: solo enlaces, js/importar.js); con el link del que encuentre, la calculadora saca cuanto sale traerlo.
+    // (spec 020: solo enlaces, js/importar.js); el bloque trae el campo para pegar el link del que encuentre (spec 040).
     caja.innerHTML = `<p class="sub">Ninguna de las ${Object.keys(IDX.tiendas).length} tiendas del índice tiene «${esc(q)}». Si es un modelo, probá con la marca sola o con menos palabras.</p>
-      ${Importar.buscarAfueraHtml(q, { esc, icono })}
-      <p class="sub chico">¿Lo encontraste afuera? <button class="acc" data-ir-vista="costo">${icono("camion")} Pegá el link y calculá cuánto te sale puesto en casa</button></p>`;
+      ${Importar.buscarAfueraHtml(q, { esc, icono })}`;
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
     pintarAfuera(q, null);

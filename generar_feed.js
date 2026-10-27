@@ -37,10 +37,6 @@ const comercioDe = (f, idx) => f[4] || (idx.tiendas[f[3]] || {}).nombre || f[3];
 /* Una compra internacional no se esconde pero se rotula: puede pagar impuestos al llegar. */
 const comercioDeOferta = (o, idx) => comercioDe(o.f, idx) + (o.internacional ? " · compra internacional" : "");
 
-/* Lo que se dice de una compra internacional (js/puesto.js): su costo puesto en casa y, si hay equivalente local, la
-   diferencia. Corto para Telegram: el rango y la comparacion; la aclaracion completa va en el feed y en /hoy/. */
-const puestoCorto = p => !p || !p.est.ok ? "" : `costo puesto en casa, estimado: ${pesos(p.est.minPesos)} a ${pesos(p.est.maxPesos)}` + (p.comparacion ? `. ${p.comparacion}` : "");
-
 /* El indice sin las publicaciones que verificar_ofertas.py encontro caidas (por su enlace). Sin lista, el mismo indice. */
 function sinCaidas(idx, descartadas) {
   if (!Array.isArray(descartadas) || !descartadas.length) return idx;
@@ -48,12 +44,12 @@ function sinCaidas(idx, descartadas) {
   return { ...idx, productos: idx.productos.filter(f => !caidas.has(f[2])) };
 }
 
-function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED, costo = null } = {}) {
+function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   const fecha = new Date(idx.generado);
   const rfc = isNaN(fecha) ? new Date().toUTCString() : fecha.toUTCString();
   const dia = String(idx.generado).slice(0, 10);
-  const items = O.destacadas(idx, max, { costo }).map(o => {
+  const items = O.destacadas(idx, max).map(o => {
     const f = o.f, pct = Math.round(o.off * 100);
     const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
     const desc = `${C.ETIQUETA[o.categoria]}. ` + (o.modelo ? `Hoy ${pesos(f[1])}: ${O.textoContraModelo(o.modelo, pesos)}. `
@@ -61,7 +57,6 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED, costo = null } = 
       : `Antes ${pesos(o.antes)}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. `) +
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
       (o.nota ? o.nota[0].toUpperCase() + o.nota.slice(1) + ". " : "") +
-      (o.puesto ? o.puesto.texto + " " + (o.puesto.comparacion ? o.puesto.comparacion + " " : "") : "") +
       (P.enlaceTienda(f[2]).afiliado ? "Enlace de afiliado. " : "") +
       `Precios del ${cuando(idx.generado)}${horaDe(idx.generado)}. Verificá en la tienda antes de comprar.`;
     return `    <item>
@@ -89,12 +84,12 @@ ${items.join("\n")}${items.length ? "\n" : ""}  </channel>
 /* /hoy/: la pagina para historias de Instagram y para el link de la bio. Arriba, una tarjeta 9:16 con
    las mejores del dia para sacarle captura (en Instagram el texto de una imagen no es un enlace); abajo,
    todas con su enlace a la tienda, que es lo que abre el sticker de link. Mismas ofertas que el feed. */
-function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}) {
+function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   const esc = G.esc;
   const fecha = P.fechaHora(idx.generado);
   const dia = fecha.split(" ")[0];
-  const ofertas = O.destacadas(idx, max, { costo });
+  const ofertas = O.destacadas(idx, max);
   const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
   const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
     `<span class="h-nom">${esc(o.f[0])}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
@@ -105,8 +100,7 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, costo = null } = {}
   const lista = ofertas.map(o => `    <li>${enlace(o)}` +
     (o.modelo ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: ${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
       : o.tipo === "seguimiento" ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: −${Math.round(o.off * 100)}% desde que lo seguimos, hace pocos días</span>`
-      : `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.antes))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span>`) +
-    (o.puesto ? `<span class="det">${esc(o.puesto.texto)}${o.puesto.comparacion ? " " + esc(o.puesto.comparacion) : ""}</span>` : "") + `</li>`).join("\n");
+      : `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.antes))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span>`) + `</li>`).join("\n");
   const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
   const descripcion = ofertas.length
     ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
@@ -155,26 +149,16 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 }
 
 /* Lo justo para el canal: texto plano, sin nada de terceros sin escapar (lo escapa quien lo publica). */
-function listaParaCanal(idx, max = 10, costo = null) {
-  return O.destacadas(idx, max, { costo }).map(o => ({
+function listaParaCanal(idx, max = 10) {
+  return O.destacadas(idx, max).map(o => ({
     nombre: o.f[0], precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
     ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` }
       : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" } : {}),
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
-    tienda: o.f[3], ...(puestoCorto(o.puesto) ? { puesto: puestoCorto(o.puesto) } : {}),
+    tienda: o.f[3],
     ...(o.f[9] ? { modelo: o.f[9] } : {}),      // para que la guardia reconozca el mismo modelo en lo que se publica
     // `url` queda como esta en el indice (verificar_ofertas.py la busca por ese valor); el canal abre `enlace`, con el afiliado.
     ...(P.enlaceTienda(o.f[2]).afiliado ? { enlace: P.enlaceTienda(o.f[2]).url, afiliado: true } : {}) }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera
-}
-
-/* Las reglas de importacion y la copia de las cotizaciones del build. Si falta cualquiera de las dos no se dice nada del costo
-   (el feed sale como siempre): nunca se inventa un dolar. */
-function cargarCosto(archivoReglas, archivoCotizaciones) {
-  try {
-    const reglas = JSON.parse(fs.readFileSync(archivoReglas, "utf8"));
-    const tasas = require("./js/monedas.js").normalizar(JSON.parse(fs.readFileSync(archivoCotizaciones, "utf8")));
-    return reglas && reglas.reglas && tasas.dolares.oficial ? { reglas, tasas } : null;
-  } catch (e) { return null; }
 }
 
 function main(argv) {
@@ -195,17 +179,16 @@ function main(argv) {
     console.log(`candidatas a verificar: ${Math.min(O.destacadas(idx, n).length, n)}`);
     return 0;
   }
-  const costo = cargarCosto(arg("importacion", path.join(__dirname, "importacion.json")), arg("cotizaciones", path.join(salida, "cotizaciones.json")));
   fs.mkdirSync(salida, { recursive: true });
-  fs.writeFileSync(path.join(salida, "ofertas.xml"), renderFeed(idx, { baseUrl, costo }), "utf8");
-  const lista = listaParaCanal(idx, 10, costo);
+  fs.writeFileSync(path.join(salida, "ofertas.xml"), renderFeed(idx, { baseUrl }), "utf8");
+  const lista = listaParaCanal(idx, 10);
   fs.writeFileSync(path.join(salida, "ofertas.json"),
     JSON.stringify({ generado: idx.generado, sitio: baseUrl.replace(/\/$/, "") + "/", ofertas: lista }), "utf8");
   fs.mkdirSync(path.join(salida, "hoy"), { recursive: true });
-  fs.writeFileSync(path.join(salida, "hoy", "index.html"), renderHoy(idx, { baseUrl, costo }), "utf8");
+  fs.writeFileSync(path.join(salida, "hoy", "index.html"), renderHoy(idx, { baseUrl }), "utf8");
   console.log(`feed de ofertas: ${Math.min(O.destacadas(idx, MAX_FEED).length, MAX_FEED)} entradas`);
   return 0;
 }
 
-module.exports = { cargarCosto, sinCaidas, renderFeed, renderHoy, listaParaCanal, main, BASE_URL };
+module.exports = { sinCaidas, renderFeed, renderHoy, listaParaCanal, main, BASE_URL };
 if (require.main === module) process.exit(main(process.argv.slice(2)));
