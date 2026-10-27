@@ -1,0 +1,22 @@
+{
+  "_nota": "Spec 041: carritos reales de Tiendamia que arma y pega el dueño, para encontrar la regla del envio internacional y de los servicios de importacion. El Worker no lee el carrito (robots.txt). price, merchant_price, markup, markup_regla, weight y categoria_aduana salen de la ficha /p/amz/... (leida el mismo dia); productos, envio, servicios y subtotal, en AR$, del detalle pegado. dolar = productos / price.",
+  "compras": [
+    {
+      "fecha": "2026-10-27",
+      "url": "https://tiendamia.com.ar/p/amz/b0hfj7nvpb/soundcore-anker-aeroclip-2-auriculares-con-clip-para-llamadas",
+      "categoria": "periferico",
+      "nombre": "Soundcore Anker AeroClip 2 - Auriculares con clip para llamadas",
+      "price": 198.88,
+      "merchant_price": 169.98,
+      "markup": 28.9,
+      "markup_regla": "150-175 USD - USA",
+      "weight": 0.05,
+      "categoria_aduana": "AURICULARES",
+      "productos": 371667,
+      "envio": 9278,
+      "servicios": 16506,
+      "subtotal": 397451,
+      "dolar": 1868.8
+    }
+  ]
+}
