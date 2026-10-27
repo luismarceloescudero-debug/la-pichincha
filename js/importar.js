@@ -34,6 +34,13 @@
      no nombran a Argentina. */
   const OFICIALES = [];
 
+  /* Couriers de referencia (spec 039): links informativos, sin comision. No se les lee la pagina ni se arma una calculadora
+     de ellos; la persona cotiza su envio e impuestos en la pagina de cada uno. Solo Aerobox (verificado el 27/10/2026). */
+  const COURIERS = [
+    { nombre: "Aerobox", url: "https://aerobox.com.ar/calculadora-envios/",
+      texto: "Courier: en su página cotizás el envío y los impuestos para traerlo por tu cuenta (no lo calculamos acá)." },
+  ];
+
   const redondear = n => Math.round(n * 100) / 100;
 
   /* El estado que precarga la calculadora: el precio en dolares y el peso tipico del rubro. Todo lo demas, por defecto. */
@@ -240,13 +247,15 @@
         <span class="sub chico">${esc(f.texto)}</span></li>`);
     const propias = oficialesPara(t, oficiales).map(o => `<li><a href="${esc(o.busqueda ? o.busqueda + encodeURIComponent(t) : o.url)}" target="_blank" rel="noopener">${icono("fuera")} ${esc(o.nombre)}</a>
         <span class="sub chico">Tienda oficial de ${esc(o.marca)}: envía a Argentina según <a href="${esc(o.envios)}" target="_blank" rel="noopener">su página de envíos</a> (verificado el ${esc(fecha(o.verificado))}).</span></li>`);
+    const couriers = COURIERS.map(c => `<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${icono("fuera")} ${esc(c.nombre)}</a>
+        <span class="sub chico">${esc(c.texto)}</span></li>`);
     return `<section class="afuera" aria-labelledby="afuera-tit">
       <h3 id="afuera-tit">Buscalo afuera: la búsqueda ya está armada</h3>
-      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda. No leemos sus páginas ni sus precios.</p>
-      <ul class="afuera-lista">${[...fuentes, ...propias].join("")}</ul></section>`;
+      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda; los couriers de abajo abren su cotizador. No leemos sus páginas ni sus precios.</p>
+      <ul class="afuera-lista">${[...fuentes, ...propias, ...couriers].join("")}</ul></section>`;
   }
 
-  const api = { PESO_TIPICO, FUENTES, OFICIALES, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente, urlBusqueda,
+  const api = { PESO_TIPICO, FUENTES, OFICIALES, COURIERS, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente, urlBusqueda,
     parsearEnlace, datosDeEnlace, estadoDeEnlace, oficialesPara, buscarAfueraHtml, urlLeerEnlace, leidoDeEnlace };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
