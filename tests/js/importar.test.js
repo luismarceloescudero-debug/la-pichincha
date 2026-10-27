@@ -262,11 +262,32 @@ test("la URL de /enlace lleva el link tal cual; sin Worker o sin link no hay URL
 });
 
 test("Tiendamia leida: el precio en dolares va al campo y la linea dice que trae el envio", () => {
-  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" }, item: { precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2" } });
+  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
+    item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: null, recargoPct: null } });
   assert.equal(r.precio, "198.88");
   assert.equal(r.ars, false);
   assert.match(r.linea, /Precio leído en Tiendamia: US\$ 198,88, con el envío incluido/);
+  assert.doesNotMatch(r.linea, /% más/, "sin precio base no hay porcentaje");
   assert.equal(r.nombre, "AeroClip 2");
+});
+
+test("Tiendamia leida con precio base: la linea muestra el porcentaje contra Amazon (spec 039)", () => {
+  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
+    item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
+  assert.equal(r.precio, "198.88");
+  assert.match(r.linea, /En Amazon sale US\$ 169,98: un 17 % más con envío e impuestos incluidos \(aproximado\)/);
+});
+
+test("un link de Amazon que cruza a Tiendamia: el campo se carga con el precio de Amazon y la linea cita a Tiendamia", () => {
+  const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" },
+    item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
+  assert.equal(r.precio, "169.98", "el campo de Amazon se llena con el precio base que publica Tiendamia");
+  assert.match(r.linea, /Tiendamia tiene este producto a US\$ 198,88, con el envío incluido/);
+  assert.match(r.linea, /un 17 % más/);
+  const sin = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" },
+    item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "x", precioBase: null, recargoPct: null } });
+  assert.equal(sin.precio, "", "sin precio base no se llena el campo: no se inventa el precio de Amazon");
+  assert.doesNotMatch(sin.linea, /% más/);
 });
 
 test("Amazon o eBay leidos por su API: el precio va al campo", () => {
