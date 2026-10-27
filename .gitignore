@@ -15,6 +15,9 @@ comparativa-ram-ddr4-16gb.html
 .claude/worktrees/
 .claude/settings.local.json
 .claude/launch.json
+.claude/skills/
+.agents/
+skills-lock.json
 .coverage
 descartadas.json
 candidatas.json
