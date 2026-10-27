@@ -82,3 +82,21 @@ calculadora.
 
 - PR contra `main`; `gh pr checks N --watch` (sin tubería); merge `gh pr merge N --rebase` con la CI en verde.
 - Borrar worktree, rama local y remota, y `git pull --ff-only`.
+
+## Resultado (27/10/2026)
+
+Hecho de punta a punta. Decisiones que no estaban escritas en el plan:
+
+- **El campo de pegar link también va al pie de «Afuera, en vivo»** (`afueraHtml`, opción `pegarLink`): cuando el
+  Worker trae avisos, el bloque «Buscalo afuera» (el respaldo) no se muestra y el campo quedaba inaccesible. Con
+  respaldo vacío (búsqueda sin resultados, donde el bloque ya está en la lista) no se repite.
+- **El pegamento es `js/vista-afuera.js`** y escucha `#pl-link` desde el documento: el bloque se repinta con cada
+  búsqueda y así no hay que volver a engancharlo.
+- **Monedas fuera**: `js/monedas.js` solo lo usaba la calculadora; se borraron también `generar_cotizaciones.py`, su
+  paso en `actualizar.yml`, sus tests y fixtures, y las tres APIs de cotizaciones de `connect-src` (`sitio.json` e
+  `index.html`).
+- **Telegram** deja de publicar la línea `puesto` (un `ofertas.json` viejo que la trajera no la muestra).
+- **El equivalente local** de `calcularOfertas` solo servía para comparar el costo estimado: se quitó.
+- `leidoDeEnlace` sigue devolviendo `precio` (ya sin uso en la página) para no tocar la forma que prueban sus tests.
+- Probado en el navegador con el Worker publicado: un link de Tiendamia muestra «Precio leído en Tiendamia: US$ 198,88
+  … un 17 % más» dentro de la búsqueda, y `#costo` cae en la vista por defecto.
