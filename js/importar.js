@@ -204,10 +204,18 @@
       return { precio: null, ars: true, nombre: it.nombre || "", linea: `Loquieroacá: ${pesosTexto(it.precioArs || it.precio)} en un pago`
         + (it.precioCuotas > 0 ? ` o ${pesosTexto(it.precioCuotas)} en cuotas` : "") + ", ya puesto en casa (impuestos y envío incluidos)." };
     }
+    // Spec 039: la ficha de Tiendamia publica su precio final y el precio base de Amazon; de ahi sale el porcentaje del recargo.
+    const recargo = it.precioBase > 0 && it.recargoPct != null
+      ? ` En Amazon sale ${usdTexto(it.precioBase)}: un ${it.recargoPct} % más con envío e impuestos incluidos (aproximado).` : "";
+    if (it.fuente === "tiendamia") {
+      if (r.enlace.tienda === "amazon")       // un link de Amazon cruzo a la ficha de Tiendamia (sin la Creators API)
+        return { precio: it.precioBase > 0 ? String(it.precioBase) : "", ars: false, nombre: it.nombre || "",
+          linea: `Tiendamia tiene este producto a ${usdTexto(it.precio)}, con el envío incluido.${recargo} Revisalo antes de pagar: puede cambiar.` };
+      return { precio: String(it.precio), ars: false, nombre: it.nombre || "",
+        linea: `Precio leído en Tiendamia: ${usdTexto(it.precio)}, con el envío incluido.${recargo} Revisalo antes de pagar: puede cambiar.` };
+    }
     const tienda = r.enlace.tienda;
-    const linea = tienda === "tiendamia"
-      ? `Precio leído en Tiendamia: ${usdTexto(it.precio)}, con el envío incluido. Revisalo antes de pagar: puede cambiar.`
-      : `Precio leído por la API de ${POR_API[tienda] || tienda}: ${usdTexto(it.precio)}.`;
+    const linea = `Precio leído por la API de ${POR_API[tienda] || tienda}: ${usdTexto(it.precio)}.`;
     return { precio: String(it.precio), ars: false, nombre: it.nombre || "", linea };
   }
 
