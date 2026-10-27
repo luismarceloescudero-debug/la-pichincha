@@ -4,14 +4,42 @@ La base es `datos/tiendamia-cargos.json` (una entrada por carrito que arma y peg
 `tests/js/tiendamia-cargos.test.js`). Acá va la tabla y lo que se puede decir con ella. **Ninguna regla se propone para
 estimar sin carrito hasta que explique todos los casos, diciendo con cuántos.**
 
-## Carritos cargados
+## Carritos cargados (8, todos del 27/10/2026)
 
-| Fecha | Producto | Cat. | price US$ | merchant US$ | markup (regla) | kg | Productos AR$ | Envío AR$ | Servicios AR$ | Subtotal AR$ | Dólar |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 27/10 | Soundcore AeroClip 2 | periférico | 198,88 | 169,98 | 28,9 (150-175 USD - USA) | 0,05 | 371.667 | 9.278 | 16.506 | 397.451 | 1.868,80 |
+Montos en AR$. «Imp.» es «IVA e impuestos internos» (en el celular, «+ Aranceles y gestión aduanera»); «Local» es «Envío
+Estándar a tu dirección». El AeroClip se armó sin dirección cargada: su carrito no mostraba ni el IVA ni el envío local.
 
-Con una sola entrada no se ve ninguna regla. Solo cuentas: el envío es el 2,5 % de productos y los servicios el 4,4 %;
-en dólares de Tiendamia, envío ≈ US$ 4,96 y servicios ≈ US$ 8,83.
+| Producto | Cat. | Cant. | price US$ | kg (total) | Aduana | Productos | Envío int. | Servicios | Imp. | Local | Total | Dólar |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Soundcore AeroClip 2 | periférico | 1 | 198,88 | 0,05 | AURICULARES | 371.667 | 9.278 | 16.506 | — | — | 397.451 | 1.868,80 |
+| Moto G 2025 | smartphone | 2 | 197,72 | 0,80 | CELULARES | 732.435 | 9.250 | 35.569 | 267.023 | 22.231 | 1.066.508 | 1.852,20 |
+| Acer Aspire 3 | notebook | 1 | 386,74 | 3,05 | COMPUTADORAS | 714.089 | 9.250 | 143.366 | 77.168 | 22.231 | 968.353 | 1.846,43 |
+| Samsung 27" S3 | monitor | 1 | 100,99 | 5,85 | ACC. COMPUTADORA | 187.061 | 9.250 | 267.824 | 41.225 | 22.231 | 527.590 | 1.852,27 |
+| Beelink SER3 | pc | 1 | 327,80 | 0,93 | COMPUTADORAS | 607.160 | 9.250 | 49.129 | 65.687 | 22.231 | 753.456 | 1.852,23 |
+| Samsung 990 PRO 1 TB | componente | 1 | 285,99 | 0,10 | ACC. COMPUTADORA | 529.719 | 9.250 | 6.661 | 113.180 | 22.231 | 681.041 | 1.852,23 |
+| Logitech G305 | periférico | 1 | 27,80 | 0,28 | VIDEOJUEGOS | 51.497 | 9.250 | 12.895 | 12.759 | 22.231 | 108.632 | 1.852,41 |
+| Anker USB-C Hub | otro | 1 | 80,79 | 0,46 | ACC. COMPUTADORA | 149.635 | 9.250 | 20.442 | 33.371 | 22.231 | 234.929 | 1.852,15 |
+
+Rarezas del Acer: el total pegado no es la suma de sus líneas (faltan 2.249) y su dólar da 1.846,43. Con el dólar de los
+otros (1.852,2) productos daría 716.338 y el total cerraría exacto: el precio cambió mientras se armaba el carrito. Además
+su ficha dice price 386,74, pero merchant + markup dan 371,69 (US$ 15,05 que el markup no explica).
+
+## Lo que se ve (candidatas, no reglas todavía)
+
+| Cargo | Candidata | Casos que explica |
+|---|---|---|
+| Dólar implícito | Uno solo por día para todos los productos (1.852,2 a la noche) | 6 de 7 del mismo rato (el Acer, por el cambio de precio) |
+| Envío internacional | Fijo, ≈ US$ 5 por carrito: 9.250 / 1.852,2 = 4,99; a la mañana 9.278 / 1.868,8 = 4,96 | 8 de 8; no depende del peso ni de la cantidad |
+| Envío a tu dirección | Fijo, AR$ 22.231 (seguramente depende de la dirección) | 7 de 7 |
+| Servicios de importación | Por peso, ≈ AR$ 44.400 a 47.000 por kg (≈ US$ 24-25/kg) | 5 de 8 (celular, notebook, monitor, G305, hub). No cierran: Beelink 52.800/kg, SSD de 0,1 kg 66.600/kg y AeroClip de 0,05 kg 330.000/kg: hay un mínimo o se usa el peso volumétrico, que la ficha no trae |
+| IVA e impuestos | 21 % de (productos + envío internacional) en accesorios de computadora y videojuegos | 4 de 4 (±5 pesos) |
+| | ≈ 10,66 % de (productos + envío) en COMPUTADORAS (IVA reducido de 10,5 % más algo) | 2 de 2, sin explicar el 0,16 % de más |
+| | 36 % de (productos + envío) en CELULARES (IVA + aranceles) | 1 de 1 |
+
+Con esto **todavía no se puede estimar sin carrito**: los servicios no cierran en 3 de 8 y los impuestos dependen de la
+categoría aduanera, de la que hay pocas muestras. Hace falta más de lo mismo: productos livianos (menos de 0,3 kg) para
+ver el mínimo de los servicios, más computadoras y celulares, y otras categorías aduaneras. La página «Carritos de
+Tiendamia» arma una tanda al azar en cada apertura para eso.
 
 ## Lo que ya dice la ficha (sin carrito)
 
@@ -34,7 +62,7 @@ Tiendamia y el de Amazon) y, en `category_information`, la **categoría aduanera
 O sea: el markup va por **tramos del precio de Amazon** (el porcentaje baja a medida que sube el precio) y algunas
 categorías tienen su propia regla. El markup ya está en `price`; el envío y los servicios del carrito van aparte.
 
-## Carritos que faltan: un link por categoría
+## La primera tanda: un link por categoría (ya cargada)
 
 Productos de Amazon (`/p/amz/`) buscados en `tiendamia.com.ar/search/amazon/...` el 27/10/2026, con pesos de 0,1 a
 5,85 kg para ver el envío contra el peso. El dueño agrega cada uno al carrito y pega el «Detalle de la compra»; con cada

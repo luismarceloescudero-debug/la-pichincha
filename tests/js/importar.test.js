@@ -342,12 +342,12 @@ Ingresar cupón de descuento`;
 
 test("parsearDetalleTiendamia lee el carrito real: productos, envio, servicios y subtotal en pesos", () => {
   assert.deepEqual(I.parsearDetalleTiendamia(CARRITO),
-    { cantidad: 1, productos: 371667, envio: 9278, servicios: 16506, subtotal: 397451 });
+    { cantidad: 1, productos: 371667, envio: 9278, servicios: 16506, impuestos: 0, envioLocal: 0, subtotal: 397451 });
 });
 
 test("el parser aguanta tildes o no, mayusculas, todo en una linea, espacios tras AR$ y decimales con coma", () => {
   const una = "PRODUCTOS (2) AR$ 1.200.000,50 Envío internacional AR$ 10.000 Servicios de importacion tooltip AR$ 20.000,25 Subtotal AR$ 1.230.000,75";
-  assert.deepEqual(I.parsearDetalleTiendamia(una), { cantidad: 2, productos: 1200000.5, envio: 10000, servicios: 20000.25, subtotal: 1230000.75 });
+  assert.deepEqual(I.parsearDetalleTiendamia(una), { cantidad: 2, productos: 1200000.5, envio: 10000, servicios: 20000.25, impuestos: 0, envioLocal: 0, subtotal: 1230000.75 });
   const sinSub = "Productos (1)\nAR$100\nEnvio Internacional\nAR$10\nServicios de Importación\nAR$5";
   assert.equal(I.parsearDetalleTiendamia(sinSub).subtotal, 115, "sin subtotal, la suma");
   assert.equal(I.parsearDetalleTiendamia("Productos AR$100").cantidad, 1, "sin (n), una unidad");
@@ -384,4 +384,30 @@ test("la ficha de Tiendamia trae el campo para pegar el detalle de la compra; la
   assert.match(tm, /class="sub chico pl-carrito-res" aria-live="polite"/);
   for (const otro of ["https://www.amazon.com/dp/B0DLGCHL8M", "https://www.loquieroaca.com/products/1589074"])
     assert.doesNotMatch(I.fichaEnlaceHtml(I.parsearEnlace(otro), { esc: escHtml }), /pl-carrito/, otro);
+});
+
+/* El detalle completo, tal cual lo guardo el dueño el 27/10/2026 con su direccion cargada: suma IVA, envio local y Total, y
+   dice «Producto(s) (2)». */
+const CARRITO_MOTO = "Detalle de la compra\nProductos de USA\nProducto(s) (2)\tAR$732.435\nEnvio Internacional\ntooltip \nAR$9.250\n"
+  + "Servicios de Importación\ntooltip \nAR$35.569\nIVA e impuestos internos + Aranceles y gestión aduanera\ntooltip \nAR$267.023\n"
+  + "Envío Estándar a tu dirección\tAR$22.231\nSubtotal\tAR$1.066.508\n";
+const CARRITO_MONITOR = "Detalle de la compra\nProductos de USA\nProducto(s) (1)\tAR$187.061\nEnvio Internacional\ntooltip \nAR$9.250\n"
+  + "Servicios de Importación\ntooltip \nAR$267.824\nIVA e impuestos internos\ntooltip \nAR$41.225\nEnvío Estándar a tu dirección\tAR$22.231\nTotal\tAR$527.590";
+
+test("el detalle completo: «Producto(s) (2)», IVA e impuestos (con aranceles), envio a tu direccion y Subtotal o Total", () => {
+  assert.deepEqual(I.parsearDetalleTiendamia(CARRITO_MOTO),
+    { cantidad: 2, productos: 732435, envio: 9250, servicios: 35569, impuestos: 267023, envioLocal: 22231, subtotal: 1066508 });
+  assert.deepEqual(I.parsearDetalleTiendamia(CARRITO_MONITOR),
+    { cantidad: 1, productos: 187061, envio: 9250, servicios: 267824, impuestos: 41225, envioLocal: 22231, subtotal: 527590 });
+  const sinTotal = CARRITO_MONITOR.replace(/Total\tAR\$527\.590/, "");
+  assert.equal(I.parsearDetalleTiendamia(sinTotal).subtotal, 187061 + 9250 + 267824 + 41225 + 22231, "sin Total, la suma de todo");
+});
+
+test("referenciaCarrito con impuestos y envio local: los nombra y Amazon suma los mismos cargos", () => {
+  const d = I.parsearDetalleTiendamia(CARRITO_MONITOR);
+  const l = I.referenciaCarrito(d, { precio: 100.99, precioBase: 99.99 });
+  assert.match(l, /^Tiendamia: AR\$ 527\.590 en total \(producto 187\.061 \+ envío 9\.250 \+ servicios de importación 267\.824 \+ IVA e impuestos 41\.225 \+ envío a tu dirección 22\.231\)\./);
+  // dolar = 187061 / 100.99; Amazon = 99.99 x dolar + 9250 + 267824 + 41225 + 22231
+  const esperado = Math.round(99.99 * (187061 / 100.99) + 9250 + 267824 + 41225 + 22231).toLocaleString("es-AR");
+  assert.ok(l.includes(`Comprado en Amazon saldría aprox. AR$ ${esperado} (US$ 99,99 al dólar de Tiendamia + los mismos envíos, servicios e impuestos)`), l);
 });
