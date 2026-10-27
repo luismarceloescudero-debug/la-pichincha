@@ -20,7 +20,7 @@ import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
 const CACHE_PARCIAL_SEG = 900;                 // si alguna fuente fallo, poco: una caida pasajera no queda 8 horas
-const CACHE_VERSION = "032";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
+const CACHE_VERSION = "033";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 
@@ -120,8 +120,18 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     if (e.tienda === "tiendamia") return { item: tiendamia.parsearFichaTiendamia(await pedirTexto(e.url), e.url, fecha) };
     if (e.tienda === "loquieroaca") return { item: parsearFichaLoquieroaca(await pedirTexto(e.url), e.url, fecha) };
     if (e.tienda === "amazon") {
-      if (!e.id || e.dominio || !amazon.activa(env)) return { motivo: "Amazon no se lee sin su API (Creators API): escribí el precio a mano." };
-      return { item: await amazon.leerItem(e.id, env, deps) };
+      if (!e.id || e.dominio) return { motivo: "Amazon no se lee sin su API (Creators API): escribí el precio a mano." };
+      if (amazon.activa(env)) return { item: await amazon.leerItem(e.id, env, deps) };
+      // Spec 039: sin la Creators API, la referencia del costo importado es la ficha de Tiendamia de ese mismo ASIN
+      // (ella publica su precio final y el merchant_price de Amazon). Si no lo tiene o no responde, se cae al mensaje de siempre.
+      if (tiendamia.activa(env)) {
+        const ficha = `https://tiendamia.com.ar/p/amz/${e.id.toLowerCase()}`;
+        try {
+          const item = tiendamia.parsearFichaTiendamia(await pedirTexto(ficha), ficha, fecha);
+          if (item) return { item };
+        } catch (err) { /* Tiendamia no respondió o no tiene el producto: sin referencia */ }
+      }
+      return { motivo: "Amazon no se lee sin su API (Creators API): escribí el precio a mano." };
     }
     if (!ebay.activa(env)) return { motivo: "eBay se lee con su API, que todavía no está configurada: escribí el precio a mano." };
     return { item: await ebay.leerItem(e.id, env, deps) };

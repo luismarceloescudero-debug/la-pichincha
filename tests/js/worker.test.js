@@ -458,16 +458,41 @@ test("/enlace de Amazon sin la Creators API no lee nada y lo dice; con ella usa 
   const getItems = { itemsResult: { items: fixture("amazon-search.json").searchResult.items } };
   const atender = crearAtender({ fetch: fetchFalso([["auth/o2/token", { access_token: "A", expires_in: 3600 }], ["catalog/v1/getItems", getItems]], llamadas),
     cache: cacheFalsa(), ahora: () => AHORA });
-  const sin = await (await atender(pedidoEnlace("https://www.amazon.com/-/es/X/dp/B0DLGCHL8M"), {})).json();
+  const sin = await (await atender(pedidoEnlace("https://www.amazon.com/-/es/X/dp/B0DLGCHL8M"), SIN_TM)).json();
   assert.equal(sin.leido, false);
   assert.match(sin.motivo, /Amazon/);
-  assert.equal(llamadas.length, 0, "nada de leer la pagina de Amazon");
+  assert.equal(llamadas.length, 0, "nada de leer la pagina de Amazon ni de Tiendamia");
   const con = await (await atender(pedidoEnlace("https://www.amazon.com/dp/B0DLGCHL8M"), { AMAZON_CREATORS_ID: "i", AMAZON_CREATORS_SECRET: "s" })).json();
   assert.equal(con.leido, true);
   assert.equal(con.item.precio, 79.99);
   const body = JSON.parse(llamadas.find(l => l.url.includes("getItems")).init.body);
   assert.deepEqual(body.itemIds, ["B0DLGCHL8M"]);
   assert.equal(body.partnerTag, "lapichincha-20");
+});
+
+test("/enlace de Amazon sin API cruza a la ficha de Tiendamia del mismo ASIN (spec 039)", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const llamadas = [];
+  const atender = crearAtender({ fetch: fetchFalso([["tiendamia.com.ar/p/amz/b0dlgchl8m", conHtml("tiendamia-ficha.html")]], llamadas),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedidoEnlace("https://www.amazon.com/dp/B0DLGCHL8M"), {})).json();
+  assert.equal(j.leido, true);
+  assert.equal(j.enlace.tienda, "amazon", "el link original es de Amazon");
+  assert.equal(j.item.fuente, "tiendamia", "lo leido es la referencia de Tiendamia");
+  assert.equal(j.item.precioBase, 169.98);
+  assert.equal(j.item.recargoPct, 17);
+  assert.equal(llamadas[0].url, "https://tiendamia.com.ar/p/amz/b0dlgchl8m");
+  assert.ok(llamadas.every(l => !l.url.includes("amazon.com")), "nunca se pide la pagina de Amazon");
+});
+
+test("/enlace de Amazon sin API y sin el producto en Tiendamia: dice que Amazon no se lee sin su API", async () => {
+  const { crearAtender } = await cargar("index.js");
+  const llamadas = [];
+  const atender = crearAtender({ fetch: fetchFalso([["tiendamia.com.ar/p/amz/", () => new Response("sin datos", { status: 200 })]], llamadas),
+    cache: cacheFalsa(), ahora: () => AHORA });
+  const j = await (await atender(pedidoEnlace("https://www.amazon.com/dp/B0DLGCHL8M"), {})).json();
+  assert.equal(j.leido, false);
+  assert.match(j.motivo, /Amazon/);
 });
 
 test("/enlace de eBay usa getItem de la Browse API si hay credenciales", async () => {
