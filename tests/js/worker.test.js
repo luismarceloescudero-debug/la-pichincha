@@ -89,6 +89,21 @@ test("ficha de Tiendamia: nombre completo, precio en dolares con envio (198,88) 
   assert.equal(parsearFichaTiendamia("<html>sin datos</html>", url, AHORA), null);
 });
 
+test("ficha de Tiendamia: precio base de Amazon y porcentaje del recargo (spec 039)", async () => {
+  const { parsearFichaTiendamia } = await cargar("fuentes/tiendamia.js");
+  const url = "https://tiendamia.com.ar/p/amz/b0hfj7nvpb/soundcore-anker-aeroclip-2-auriculares-con-clip-para-llamadas";
+  const a = parsearFichaTiendamia(html("tiendamia-ficha.html"), url, AHORA);
+  assert.equal(a.precioBase, 169.98, "merchant_price: el precio base de Amazon que publica la ficha");
+  assert.equal(a.recargoPct, 17, "(198,88 - 169,98) / 169,98 = 17%");
+  // Sin merchant_price (o con merchant_price 0) no hay porcentaje: nunca un porcentaje con un solo numero
+  const sinBase = parsearFichaTiendamia('"item_name":"Algo" "final_price":100', url, AHORA);
+  assert.equal(sinBase.precioBase, null);
+  assert.equal(sinBase.recargoPct, null);
+  const baseCero = parsearFichaTiendamia('"item_name":"Algo" "merchant_price":0 "final_price":100', url, AHORA);
+  assert.equal(baseCero.precioBase, 0);
+  assert.equal(baseCero.recargoPct, null);
+});
+
 test("busqueda de Tiendamia: tarjetas con precio en dolares, sin repetir el mismo producto en otro color", async () => {
   const { parsearBusquedaTiendamia } = await cargar("fuentes/tiendamia.js");
   const items = parsearBusquedaTiendamia(html("tiendamia-busqueda.html"), AHORA);

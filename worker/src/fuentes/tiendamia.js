@@ -18,7 +18,9 @@ const meta = (html, prop) => {
   return m ? decodificar(m[1]) : null;
 };
 
-/* La ficha /p/<origen>/<id>/<slug>: el nombre completo y el precio salen de los datos de la pagina (item_name, final_price). */
+/* La ficha /p/<origen>/<id>/<slug>: el nombre completo y el precio salen de los datos de la pagina (item_name, final_price).
+   Ademas (spec 039) el merchant_price, que es el precio base de Amazon que publica la propia ficha: con el y el final_price
+   sale el porcentaje del recargo (envio + impuestos + margen de Tiendamia). Sin merchant_price no hay porcentaje. */
 export function parsearFichaTiendamia(html, url, fecha) {
   let nombre = null;
   const n = html.match(/"item_name"\s*:\s*"([^"]*)"/);
@@ -26,9 +28,14 @@ export function parsearFichaTiendamia(html, url, fecha) {
   if (!nombre) nombre = meta(html, "og:title");
   const p = html.match(/"final_price"\s*:\s*(\d+(?:\.\d+)?)/) || html.match(/"price"\s*:\s*"(\d+(?:\.\d+)?)"/);
   if (!nombre || !p) return null;
+  const b = html.match(/merchant_price\\*"\s*:\s*(\d+(?:\.\d+)?)/);   // dentro de pricing_rules va con la comilla escapada
+  const precioBase = b ? Number(b[1]) : null;
   const img = meta(html, "og:image");
-  return aviso({ fuente: "tiendamia", nombre, precio: Number(p[1]), moneda: "USD", envio: 0, url, afiliado: false, fecha,
+  const a = aviso({ fuente: "tiendamia", nombre, precio: Number(p[1]), moneda: "USD", envio: 0, url, afiliado: false, fecha,
     imagen: img ? img.replace(/UXTMWIDTH/g, "UX438").replace(/UYTMHEIGHT/g, "UY408") : null });
+  if (!a) return null;
+  const recargoPct = precioBase > 0 ? Math.round((a.precio - precioBase) / precioBase * 100) : null;
+  return { ...a, precioBase, recargoPct };
 }
 
 /* La busqueda /search/amazon/<palabras>: una tarjeta por producto, sin repetir el mismo producto en otro color. */
