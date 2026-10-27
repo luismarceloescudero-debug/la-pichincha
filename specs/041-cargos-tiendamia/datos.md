@@ -29,6 +29,7 @@ Tiendamia y el de Amazon) y, en `category_information`, la **categoría aduanera
 | Acer Aspire 3 | 353,99 | 17,70 | 5,0 | 350-380 USD - USA |
 | Logitech G305 | 26,99 | 0,81 | 3,0 | Category Markup Game Hardware - 0+ - USA |
 | Samsung 27" S3 | 99,99 | 1,00 | 1,0 | Category Markup Monitors & Accessories - 0+ - USA |
+| Anker USB-C Hub (docking) | 79,99 | 0,80 | 1,0 | Category Markup Networking Products - 0+ - USA |
 
 O sea: el markup va por **tramos del precio de Amazon** (el porcentaje baja a medida que sube el precio) y algunas
 categorías tienen su propia regla. El markup ya está en `price`; el envío y los servicios del carrito van aparte.
@@ -47,7 +48,11 @@ pegado se vuelve a leer la ficha (el precio cambia) y se suma la entrada.
 | pc | Beelink SER3 mini PC | 327,80 | 0,93 | https://tiendamia.com.ar/p/amz/b09syspssm/beelink-ser3-mini-pc-amd-ryzen-3-3200u-2c-4t-16g |
 | componente | Samsung 990 PRO 1 TB | 285,82 | 0,10 | https://tiendamia.com.ar/p/amz/b0bhjf2vrn/samsung-ssd-990-pro-1tb-pcie-4-0-m-2-2280-hasta |
 | periférico | Logitech G305 | 27,80 | 0,28 | https://tiendamia.com.ar/p/amz/b07cms5q6p/logitech-g-raton-inalambrico-para-juegos-305-lightspeed-negro |
-| otro | Anker power bank 20.000 mAh | 81,18 | 0,43 | https://tiendamia.com.ar/p/amz/b0cxdxp8vr/anker-banco-de-energia-20-000mah-travel-essential-cable-usb-c-incorporado |
+| otro | Anker USB-C Hub (docking dual monitor) | 80,79 | 0,46 | https://tiendamia.com.ar/p/amz/b0h36fv12q/anker-usb-c-hub-smart-display-hub-docking-station-dual |
+
+El primer «otro» era el power bank Anker 20.000 mAh (B0CXDXP8VR, US$ 81,18, 0,43 kg): el carrito lo rechazó con
+«NO PERMITIDO · ADUANA» («este producto no puede ingresar al país por restricciones de aduana», 27/10/2026). Las baterías
+sueltas no pasan; la ficha no lo avisa. Se cambió por un hub USB-C de Anker de precio y peso parecidos, sin batería.
 
 Pares útiles para separar efectos: el Moto G 2025 y el AeroClip 2 tienen casi el mismo precio y distinto peso (0,40 y
 0,05 kg); el monitor es barato y pesado; el SSD es caro y liviano.

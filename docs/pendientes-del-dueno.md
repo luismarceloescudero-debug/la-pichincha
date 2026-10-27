@@ -254,9 +254,11 @@ al pie: «Contacto» o «Ayuda»; abrilo desde el navegador). Si contestan, pasa
 (¿un porcentaje?, ¿mínimos?). Está la lista en `specs/041-cargos-tiendamia/datos.md`: un producto de Amazon por
 categoría del sitio, con pesos de 0,1 a 5,85 kg.
 
-**Paso a paso:** abrí cada link, «Agregar al carrito», y en el carrito copiá el bloque «Detalle de la compra» (de
-«Detalle de la compra» a «Subtotal»). Pegámelo en el chat diciendo de qué producto es: leo la ficha ese mismo día,
-agrego la entrada a `datos/tiendamia-cargos.json` y lo commiteo. No hace falta comprar ni iniciar el pago.
+**Paso a paso:** en la página «Carritos de Tiendamia» (https://claude.ai/artifact/XPWp1R98sJvpftxUtrY9gg, privada,
+con tu cuenta de claude.ai) cada producto tiene «Abrir en Tiendamia»: agregalo al carrito, copiá el bloque «Detalle de
+la compra» (hasta «Subtotal»), pegalo en su campo y tocá «Guardar». Cuando me avises, leo lo guardado y la ficha ese
+mismo día, agrego las entradas a `datos/tiendamia-cargos.json` y lo commiteo. No hace falta comprar ni iniciar el pago.
+Si el carrito dice «NO PERMITIDO · ADUANA» (pasó con un power bank), avisame y busco otro de la misma categoría.
 
 ---
 
