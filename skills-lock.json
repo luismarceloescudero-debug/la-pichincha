@@ -18,6 +18,12 @@
       "sourceType": "github",
       "skillPath": "skills/web-quality-audit/SKILL.md",
       "computedHash": "9be796fc70ff05cf9842327d234b019376dc1abad8d7e3c4e3ea2dab8d8d3deb"
+    },
+    "reverse-engineer-anything": {
+      "source": "morluto/rea",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/reverse-engineer-anything/SKILL.md",
+      "computedHash": "597f554988bb03dbe738607f72dd04300cd97ec4d088219cd97feeb0a97606a8"
     }
   }
 }
