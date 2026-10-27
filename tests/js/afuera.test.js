@@ -114,9 +114,10 @@ test("una moneda que no es dolar se muestra con su codigo", () => {
   assert.match(html, /EUR 50,00/);
 });
 
-test("Tiendamia: el precio ya trae el envio y se dice asi (no «+ envio US$ 0,00»)", () => {
+test("Tiendamia: el envio y los servicios van en el carrito y se dice asi (no «+ envio US$ 0,00» ni «envio incluido»)", () => {
   const html = A.afueraHtml(datos([item({ fuente: "tiendamia", envio: 0, afiliado: false })], [{ id: "tiendamia", ok: true, n: 1 }]), { esc });
-  assert.match(html, /con envío incluido/);
-  assert.ok(!html.includes("+ envío"));
+  assert.match(html, /\+ envío y servicios de importación en el carrito/);
+  assert.ok(!html.includes("envío incluido"));
+  assert.ok(!html.includes("US$ 0,00"));
   assert.match(html, />Tiendamia</);
 });

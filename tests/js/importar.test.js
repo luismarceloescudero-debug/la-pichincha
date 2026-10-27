@@ -222,29 +222,32 @@ test("la URL de /enlace lleva el link tal cual; sin Worker o sin link no hay URL
   assert.equal(I.urlLeerEnlace("https://w.workers.dev", "  "), "");
 });
 
-test("Tiendamia leida: el precio en dolares y la linea dice que trae el envio", () => {
+/* Spec 041: el carrito de Tiendamia suma envio internacional y servicios de importacion aparte; la ficha no los trae. */
+test("Tiendamia leida: el precio en dolares y la linea dice que el envio y los servicios van en el carrito", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: null, recargoPct: null } });
   assert.equal(r.precio, "198.88");
   assert.equal(r.ars, false);
-  assert.match(r.linea, /Precio leído en Tiendamia: US\$ 198,88, con el envío incluido/);
-  assert.doesNotMatch(r.linea, /% más/, "sin precio base no hay porcentaje");
+  assert.match(r.linea, /Precio leído en Tiendamia: US\$ 198,88\./);
+  assert.match(r.linea, /envío internacional y los servicios de importación/);
+  assert.doesNotMatch(r.linea, /% más|envío incluido|En Amazon/);
   assert.equal(r.nombre, "AeroClip 2");
 });
 
-test("Tiendamia leida con precio base: la linea muestra el porcentaje contra Amazon (spec 039)", () => {
+test("Tiendamia leida con precio base: cita el precio de Amazon sin el porcentaje (spec 041)", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
   assert.equal(r.precio, "198.88");
-  assert.match(r.linea, /En Amazon sale US\$ 169,98: un 17 % más con envío e impuestos incluidos \(aproximado\)/);
+  assert.match(r.linea, /En Amazon figura a US\$ 169,98/);
+  assert.doesNotMatch(r.linea, /% más|envío incluido|impuestos incluidos/);
 });
 
 test("un link de Amazon que cruza a Tiendamia: el precio de Amazon es el base y la linea cita a Tiendamia", () => {
   const r = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
   assert.equal(r.precio, "169.98", "el campo de Amazon se llena con el precio base que publica Tiendamia");
-  assert.match(r.linea, /Tiendamia tiene este producto a US\$ 198,88, con el envío incluido/);
-  assert.match(r.linea, /un 17 % más/);
+  assert.match(r.linea, /Tiendamia tiene este producto a US\$ 198,88\./);
+  assert.doesNotMatch(r.linea, /% más|envío incluido/);
   const sin = I.leidoDeEnlace({ leido: true, enlace: { tienda: "amazon" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "x", precioBase: null, recargoPct: null } });
   assert.equal(sin.precio, "", "sin precio base no se llena el campo: no se inventa el precio de Amazon");
@@ -298,15 +301,87 @@ test("la ficha de Amazon lleva el tag y el rotulo de afiliado; un link no recono
   assert.ok(I.fichaEnlaceHtml(I.parsearEnlace("https://amzn.to/3AbCdEf"), { esc: escHtml }).includes("link corto"));
 });
 
-test("la linea de la ficha es la referencia leida: el porcentaje contra Amazon de Tiendamia y el «puesto en casa» de Loquieroaca", () => {
+test("la linea de la ficha es la referencia leida: el precio de Amazon que cita Tiendamia y el «puesto en casa» de Loquieroaca", () => {
   const tm = I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x");
   const l = I.leidoDeEnlace({ leido: true, enlace: { tienda: "tiendamia" },
     item: { fuente: "tiendamia", precio: 198.88, moneda: "USD", envio: 0, nombre: "AeroClip 2", precioBase: 169.98, recargoPct: 17 } });
-  assert.match(I.lineaLeida(l, tm), /un 17 % más con envío e impuestos incluidos/);
+  assert.match(I.lineaLeida(l, tm), /En Amazon figura a US\$ 169,98/);
   assert.doesNotMatch(I.lineaLeida(l, tm), /AeroClip 2/, "el link ya traia nombre: no se repite");
   assert.match(I.lineaLeida(l, I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb")), /^«AeroClip 2» · /);
   const lqa = I.leidoDeEnlace({ leido: true, enlace: { tienda: "loquieroaca" },
     item: { precio: 538616.1, moneda: "ARS", precioArs: 538616.1, nombre: "x" } });
   assert.match(I.lineaLeida(lqa, I.parsearEnlace("https://www.loquieroaca.com/products/aeroclip-1589074")), /\$538\.616 en un pago, ya puesto en casa/);
   assert.equal(I.lineaLeida(null, tm), "");
+});
+
+/* --- Spec 041: Amazon que envia a Argentina y el detalle del carrito de Tiendamia --- */
+test("Amazon queda en «Buscalo afuera» con el tag, sin un filtro no verificado, y avisa que muchos no se envian", () => {
+  const amazon = I.FUENTES.find(f => f.id === "amazon");
+  const u = I.urlBusqueda(amazon, "power bank");
+  assert.equal(u, "https://www.amazon.com/s?k=power%20bank&tag=lapichincha-20");
+  assert.doesNotMatch(u, /rh=|p_n_/, "Amazon filtra por la direccion «Enviar a», no por la URL (verificado el 27/10/2026)");
+  assert.match(amazon.texto, /Muchos productos no se envían a Argentina/);
+  assert.match(amazon.texto, /Enviar a/);
+});
+
+// El texto tal cual lo pego el dueño el 27/10/2026 (Soundcore AeroClip 2, ficha price 198.88, merchant_price 169.98).
+const CARRITO = `Detalle de la compra
+Productos de USA
+
+Productos (1)    AR$371.667
+Envio Internacional
+tooltip
+AR$9.278
+Servicios de Importación
+tooltip
+AR$16.506
+Subtotal    AR$397.451
+Comenzar compra
+
+Ingresar cupón de descuento`;
+
+test("parsearDetalleTiendamia lee el carrito real: productos, envio, servicios y subtotal en pesos", () => {
+  assert.deepEqual(I.parsearDetalleTiendamia(CARRITO),
+    { cantidad: 1, productos: 371667, envio: 9278, servicios: 16506, subtotal: 397451 });
+});
+
+test("el parser aguanta tildes o no, mayusculas, todo en una linea, espacios tras AR$ y decimales con coma", () => {
+  const una = "PRODUCTOS (2) AR$ 1.200.000,50 Envío internacional AR$ 10.000 Servicios de importacion tooltip AR$ 20.000,25 Subtotal AR$ 1.230.000,75";
+  assert.deepEqual(I.parsearDetalleTiendamia(una), { cantidad: 2, productos: 1200000.5, envio: 10000, servicios: 20000.25, subtotal: 1230000.75 });
+  const sinSub = "Productos (1)\nAR$100\nEnvio Internacional\nAR$10\nServicios de Importación\nAR$5";
+  assert.equal(I.parsearDetalleTiendamia(sinSub).subtotal, 115, "sin subtotal, la suma");
+  assert.equal(I.parsearDetalleTiendamia("Productos AR$100").cantidad, 1, "sin (n), una unidad");
+  assert.equal(I.parsearDetalleTiendamia("Productos AR$100").envio, 0, "lo que no aparece vale 0");
+});
+
+test("el parser no inventa: sin productos o con texto cualquiera da null", () => {
+  for (const t of [null, undefined, "", "hola", "Envio Internacional AR$9.278", "Productos (1) sin precio"])
+    assert.equal(I.parsearDetalleTiendamia(t), null, String(t));
+});
+
+test("referenciaCarrito arma la linea del dueño: total desglosado y Amazon al dolar de Tiendamia", () => {
+  const d = I.parsearDetalleTiendamia(CARRITO);
+  assert.equal(I.referenciaCarrito(d, { precio: 198.88, precioBase: 169.98 }),
+    "Tiendamia: AR$ 397.451 en total (producto 371.667 + envío 9.278 + servicios de importación 16.506). "
+    + "Comprado en Amazon saldría aprox. AR$ 343.443 (US$ 169,98 al dólar de Tiendamia + el mismo envío y servicios). "
+    + "Aproximado: revisalo antes de pagar.");
+});
+
+test("referenciaCarrito: con dos unidades el dolar sale del precio por la cantidad; sin precios leidos, solo el total", () => {
+  const d = { cantidad: 2, productos: 400000, envio: 10000, servicios: 20000, subtotal: 430000 };
+  // dolar = 400000 / (200 * 2) = 1000; Amazon = 150 * 2 * 1000 + 30000
+  assert.match(I.referenciaCarrito(d, { precio: 200, precioBase: 150 }), /saldría aprox\. AR\$ 330\.000 \(2 × US\$ 150,00/);
+  const solo = I.referenciaCarrito(d, null);
+  assert.equal(solo, "Tiendamia: AR$ 430.000 en total (producto 400.000 + envío 10.000 + servicios de importación 20.000). Aproximado: revisalo antes de pagar.");
+  assert.doesNotMatch(I.referenciaCarrito(d, { precio: 200, precioBase: null }), /Amazon/);
+  assert.equal(I.referenciaCarrito(null, { precio: 1 }), "");
+});
+
+test("la ficha de Tiendamia trae el campo para pegar el detalle de la compra; las otras tiendas no", () => {
+  const tm = I.fichaEnlaceHtml(I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), { esc: escHtml });
+  assert.match(tm, /<label for="pl-carrito">Pegá el detalle de la compra de Tiendamia<\/label>/);
+  assert.match(tm, /<textarea id="pl-carrito"/);
+  assert.match(tm, /class="sub chico pl-carrito-res" aria-live="polite"/);
+  for (const otro of ["https://www.amazon.com/dp/B0DLGCHL8M", "https://www.loquieroaca.com/products/1589074"])
+    assert.doesNotMatch(I.fichaEnlaceHtml(I.parsearEnlace(otro), { esc: escHtml }), /pl-carrito/, otro);
 });

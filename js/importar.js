@@ -12,7 +12,9 @@
      las dos devolvieron el Soundcore AeroClip 2; www.tiendamia.com da 403, tiendamia.com.ar responde). */
   const FUENTES = [
     { id: "amazon", nombre: "Amazon (EE.UU.)", url: "https://www.amazon.com/", afiliado: true,
-      texto: "Compra directa en la tienda de EE.UU. El envío y los impuestos los pagás vos o el courier: revisá el total del checkout antes de pagar." },
+      // Spec 041: no hay filtro de envio internacional en la URL (verificado el 27/10/2026): Amazon muestra lo que se envia segun
+      // la direccion «Enviar a» de quien mira. Por eso el aviso y no un parametro.
+      texto: "Muchos productos no se envían a Argentina: elegí «Enviar a: Argentina» arriba y Amazon muestra solo los que sí. El envío y los impuestos los pagás vos: revisá el total del checkout antes de pagar." },
     { id: "tiendamia", nombre: "Tiendamia", url: "https://tiendamia.com.ar/", afiliado: false,
       busqueda: "https://tiendamia.com.ar/search/amazon/",
       texto: "Intermediario: compra en tiendas del exterior por vos. Antes de pagar, revisá en el resumen qué impuestos suma y si ya vienen incluidos." },
@@ -160,7 +162,7 @@
   }
 
   /* La respuesta de /enlace -> { precio (en dolares, texto) o null, ars, nombre, linea } o null si no hay que mostrar nada. La
-     linea es la referencia: el precio final de Tiendamia (y el porcentaje contra Amazon) o el de Loquieroaca, en pesos. */
+     linea es la referencia: el precio de Tiendamia (y el de Amazon que cita su ficha) o el final de Loquieroaca, en pesos. */
   function leidoDeEnlace(r) {
     if (!r || !r.enlace) return null;
     if (!r.leido) return r.motivo ? { precio: null, ars: false, nombre: "", linea: r.motivo } : null;
@@ -170,19 +172,56 @@
       return { precio: null, ars: true, nombre: it.nombre || "", linea: `Loquieroacá: ${pesosTexto(it.precioArs || it.precio)} en un pago`
         + (it.precioCuotas > 0 ? ` o ${pesosTexto(it.precioCuotas)} en cuotas` : "") + ", ya puesto en casa (impuestos y envío incluidos)." };
     }
-    // Spec 039: la ficha de Tiendamia publica su precio final y el precio base de Amazon; de ahi sale el porcentaje del recargo.
-    const recargo = it.precioBase > 0 && it.recargoPct != null
-      ? ` En Amazon sale ${usdTexto(it.precioBase)}: un ${it.recargoPct} % más con envío e impuestos incluidos (aproximado).` : "";
+    /* La ficha de Tiendamia publica su precio y el de Amazon (merchant_price, spec 039). El envio internacional y los servicios
+       de importacion no estan en la ficha: los suma el carrito (spec 041), que el Worker no lee. */
+    const enAmazon = it.precioBase > 0 ? ` En Amazon figura a ${usdTexto(it.precioBase)}.` : "";
     if (it.fuente === "tiendamia") {
       if (r.enlace.tienda === "amazon")       // un link de Amazon cruzo a la ficha de Tiendamia (sin la Creators API)
         return { precio: it.precioBase > 0 ? String(it.precioBase) : "", ars: false, nombre: it.nombre || "",
-          linea: `Tiendamia tiene este producto a ${usdTexto(it.precio)}, con el envío incluido.${recargo} Revisalo antes de pagar: puede cambiar.` };
-      return { precio: String(it.precio), ars: false, nombre: it.nombre || "",
-        linea: `Precio leído en Tiendamia: ${usdTexto(it.precio)}, con el envío incluido.${recargo} Revisalo antes de pagar: puede cambiar.` };
+          linea: `Tiendamia tiene este producto a ${usdTexto(it.precio)}.${enAmazon} Revisalo antes de pagar: puede cambiar.` };
+      return { precio: String(it.precio), ars: false, nombre: it.nombre || "", linea: `Precio leído en Tiendamia: ${usdTexto(it.precio)}.`
+        + `${enAmazon} El envío internacional y los servicios de importación se suman en el carrito: pegá abajo su detalle para verlos.` };
     }
     const tienda = r.enlace.tienda;
     const linea = `Precio leído por la API de ${POR_API[tienda] || tienda}: ${usdTexto(it.precio)}.`;
     return { precio: String(it.precio), ars: false, nombre: it.nombre || "", linea };
+  }
+
+  /* --- El detalle del carrito de Tiendamia (spec 041) ---
+     La persona pega el texto del «Detalle de la compra» de su carrito (el Worker no lo lee: el robots.txt lo prohibe). Se lee en
+     el navegador y no sale a ningun lado. Cada rotulo toma el primer AR$ que le sigue; miles con punto y decimales con coma. */
+  const RE_ARS = String.raw`ar\$\s*(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)`;
+  const ROTULOS = { conCantidad: String.raw`productos\s*\((\d+)\)`, productos: "productos()", envio: String.raw`envio\s+internacional`,
+    servicios: String.raw`servicios\s+de\s+importacion`, subtotal: "subtotal" };
+  const pesosNum = t => Number(t.replace(/\./g, "").replace(",", "."));
+
+  function parsearDetalleTiendamia(texto) {
+    if (texto === undefined || texto === null) return null;
+    const t = String(texto).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const leer = clave => t.match(new RegExp(`${ROTULOS[clave]}[^$]*?${RE_ARS}`));   // [^$]: no salta al monto de otro rotulo
+    const p = leer("conCantidad") || leer("productos");     // «Productos de USA» va antes de «Productos (1)»
+    if (!p) return null;
+    const monto = clave => { const m = leer(clave); return m ? pesosNum(m[m.length - 1]) : 0; };
+    const d = { cantidad: p[1] ? Number(p[1]) : 1, productos: pesosNum(p[2]), envio: monto("envio"), servicios: monto("servicios") };
+    const sub = leer("subtotal");
+    return { ...d, subtotal: sub ? pesosNum(sub[1]) : d.productos + d.envio + d.servicios };
+  }
+
+  const milesTexto = n => Math.round(n).toLocaleString("es-AR");
+
+  /* La linea con el detalle pegado. item: lo que el Worker leyo de la ficha (precio = USD de Tiendamia, precioBase =
+     merchant_price de Amazon). Dolar implicito = productos / (precio x cantidad); Amazon = merchant_price x cantidad x dolar +
+     el mismo envio y servicios. Sin esos precios, solo el total. */
+  function referenciaCarrito(d, item) {
+    if (!d) return "";
+    const total = `Tiendamia: AR$ ${milesTexto(d.subtotal)} en total (producto ${milesTexto(d.productos)} + envío ${milesTexto(d.envio)}`
+      + ` + servicios de importación ${milesTexto(d.servicios)}).`;
+    const fin = " Aproximado: revisalo antes de pagar.";
+    if (!item || !(item.precio > 0) || !(item.precioBase > 0)) return total + fin;
+    const dolar = d.productos / (item.precio * d.cantidad);
+    const amazon = item.precioBase * d.cantidad * dolar + d.envio + d.servicios;
+    const base = (d.cantidad > 1 ? `${d.cantidad} × ` : "") + usdTexto(item.precioBase);
+    return `${total} Comprado en Amazon saldría aprox. AR$ ${milesTexto(amazon)} (${base} al dólar de Tiendamia + el mismo envío y servicios).${fin}`;
   }
 
   /* --- El bloque de pegar un link (spec 040): vive en «Buscalo afuera», sin formulario ni desglose --- */
@@ -197,6 +236,13 @@
         <div id="pl-res" aria-live="polite"></div></div>`;
   }
 
+  // Spec 041: solo en la ficha de Tiendamia, el campo para pegar el detalle del carrito (lo lee js/vista-afuera.js).
+  const CARRITO_HTML = `<div class="pl-carrito">
+          <label for="pl-carrito">Pegá el detalle de la compra de Tiendamia</label>
+          <textarea id="pl-carrito" rows="4" spellcheck="false" aria-describedby="pl-carrito-ayuda" placeholder="Productos (1) AR$… Envío Internacional AR$… Servicios de Importación AR$… Subtotal AR$…"></textarea>
+          <small id="pl-carrito-ayuda" class="sub chico">Agregá el producto al carrito de Tiendamia y copiá el «Detalle de la compra». Se lee acá, en tu navegador: no se envía a ningún lado.</small>
+          <p class="sub chico pl-carrito-res" aria-live="polite"></p></div>`;
+
   /* La ficha de un link: tienda, codigo, enlaces y el lugar de la linea leida (la llena js/vista-afuera.js). */
   function fichaEnlaceHtml(e, { esc, icono = () => "" }) {
     const d = datosDeEnlace(e);
@@ -207,7 +253,7 @@
     return `<div class="pl-ficha">
         <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
         <p class="pl-acciones">${abrir}</p>
-        <p class="sub chico pl-leido" aria-live="polite"></p></div>`;
+        <p class="sub chico pl-leido" aria-live="polite"></p>${e.tienda === "tiendamia" ? CARRITO_HTML : ""}</div>`;
   }
 
   /* La linea de la ficha con lo que leyo el Worker; el nombre leido va solo si el link no lo traia. */
@@ -245,7 +291,7 @@
   }
 
   const api = { FUENTES, OFICIALES, AMAZON_TAG, NO_RECONOCIDO, enlaceFuente, urlBusqueda, parsearEnlace, datosDeEnlace, oficialesPara,
-    buscarAfueraHtml, pegarLinkHtml, fichaEnlaceHtml, lineaLeida, urlLeerEnlace, leidoDeEnlace };
+    buscarAfueraHtml, pegarLinkHtml, fichaEnlaceHtml, lineaLeida, urlLeerEnlace, leidoDeEnlace, parsearDetalleTiendamia, referenciaCarrito };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
 })(this);
