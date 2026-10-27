@@ -62,8 +62,7 @@ def mensaje(datos):
                       f"{pesos(o['precio'])} (−{o['descuento']}%"
                       # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
                       + (f" {html.escape(o['contra'])}" if o.get("contra") else "") + f") en {html.escape(o['comercio'])}"
-                      + (" (enlace de afiliado)" if o.get("afiliado") else "")
-                      + (f"\n   <i>{html.escape(o['puesto'])}</i>" if o.get("puesto") else ""))
+                      + (" (enlace de afiliado)" if o.get("afiliado") else ""))
     while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
         lineas.pop()
     return cabeza + "\n".join(lineas) + "\n" + pie if lineas else None

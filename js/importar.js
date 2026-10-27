@@ -1,24 +1,18 @@
-/* Importar desde la busqueda (spec 015): lo que une un aviso internacional con la calculadora de costos (js/calculadora.js).
-   Dos cosas: (1) el enlace «Calcular con este precio» abre la calculadora con el precio del aviso ya cargado (en dolares, al
-   dolar oficial, igual que js/puesto.js) y un peso tipico por rubro; (2) la lista de donde comprar afuera (Amazon, Tiendamia,
-   Loquieroaca). Solo enlaces: no leemos esas tiendas ni sacamos precios de ellas (Tiendamia y Loquieroaca bloquean al lector;
-   no se esquiva). Funciones puras: no tocan el DOM ni la red. Estimacion, no asesoramiento. */
+/* Buscar afuera (spec 020) y pegar un link (spec 023): la lista de donde comprar afuera (Amazon, Tiendamia, Loquieroaca) con la
+   busqueda ya armada, y lo que se muestra de un link pegado. Desde la spec 040 no hay calculadora local: la referencia del costo
+   importado es el precio final que publican Tiendamia y Loquieroaca (lo lee el Worker, GET /enlace). Funciones puras: no tocan
+   el DOM ni la red; el pegamento vive en js/vista-afuera.js. */
 (function (raiz) {
   "use strict";
 
-  const C = typeof module === "object" && module.exports ? require("./calculadora.js") : raiz.Calculadora;
   const AMAZON_TAG = "lapichincha-20";   // el mismo ID que js/pagina.js; va en cada enlace de afiliado
-
-  /* Peso tipico en kg, solo para precargar el campo: la persona lo cambia. No es una regla: importacion.json solo fija el tope
-     de 50 kg por paquete (peso_max_kg). Las dimensiones no entran al calculo, asi que no se precargan. */
-  const PESO_TIPICO = { smartphone: 0.3, notebook: 2.5, pc: 8, monitor: 6, componente: 1, periferico: 0.5, otro: 1 };
 
   /* Donde comprar afuera. `afiliado` marca el enlace que cobra comision (se rotula en la pagina, rel=sponsored). `busqueda`: la
      URL de busqueda de cada tienda, a la que se le pegan las palabras unidas con "+" (verificadas en la fuente el 23/10/2026:
      las dos devolvieron el Soundcore AeroClip 2; www.tiendamia.com da 403, tiendamia.com.ar responde). */
   const FUENTES = [
     { id: "amazon", nombre: "Amazon (EE.UU.)", url: "https://www.amazon.com/", afiliado: true,
-      texto: "Compra directa en la tienda de EE.UU. El envío y los impuestos los pagás vos o el courier: calculalos acá antes de comprar." },
+      texto: "Compra directa en la tienda de EE.UU. El envío y los impuestos los pagás vos o el courier: revisá el total del checkout antes de pagar." },
     { id: "tiendamia", nombre: "Tiendamia", url: "https://tiendamia.com.ar/", afiliado: false,
       busqueda: "https://tiendamia.com.ar/search/amazon/",
       texto: "Intermediario: compra en tiendas del exterior por vos. Antes de pagar, revisá en el resumen qué impuestos suma y si ya vienen incluidos." },
@@ -33,26 +27,6 @@
      Vacia el 23/10/2026: Soundcore/Anker (soundcore.com/policies/shipping-policy) y Keychron (keychron.com/pages/where-to-buy)
      no nombran a Argentina. */
   const OFICIALES = [];
-
-  /* Couriers de referencia (spec 039): links informativos, sin comision. No se les lee la pagina ni se arma una calculadora
-     de ellos; la persona cotiza su envio e impuestos en la pagina de cada uno. Solo Aerobox (verificado el 27/10/2026). */
-  const COURIERS = [
-    { nombre: "Aerobox", url: "https://aerobox.com.ar/calculadora-envios/",
-      texto: "Courier: en su página cotizás el envío y los impuestos para traerlo por tu cuenta (no lo calculamos acá)." },
-  ];
-
-  const redondear = n => Math.round(n * 100) / 100;
-
-  /* El estado que precarga la calculadora: el precio en dolares y el peso tipico del rubro. Todo lo demas, por defecto. */
-  function estadoImportar(fobUsd, categoria) {
-    const peso = PESO_TIPICO[categoria] !== undefined ? PESO_TIPICO[categoria] : PESO_TIPICO.otro;
-    return { ...C.POR_DEFECTO, valor: String(redondear(fobUsd)), moneda: "USD", peso: String(peso) };
-  }
-
-  /* Enlace a la pestaña de costo con el precio cargado. pathname: la pagina actual (location.pathname). */
-  function hrefCalculadora(fobUsd, categoria, pathname) {
-    return C.urlDeEstado(pathname || "/", estadoImportar(fobUsd, categoria));
-  }
 
   const normalTermino = t => String(t === undefined || t === null ? "" : t).trim().replace(/\s+/g, " ");
 
@@ -71,7 +45,7 @@
 
   /* --- Pegar un link (spec 020) ---
      Del link sale lo que dice la propia direccion: la tienda, el codigo del producto y un nombre legible del slug. La pagina no
-     se lee: el navegador no puede (las tiendas no lo permiten) y no copiamos precios ajenos. El precio lo escribe la persona.
+     se lee desde el navegador (las tiendas no lo permiten): el precio, cuando se puede, lo lee el Worker (spec 023).
      Primera version de parsearEnlace y urlBusqueda: OmniRoute `revision` (gpt-oss-120b), corrida contra los tests antes de usarla. */
   function nombreDeSlug(slug) {
     if (!slug) return "";
@@ -162,31 +136,16 @@
 
   const amazonDp = asin => `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
 
-  /* Lo que la pestaña muestra de un link reconocido: a donde abrirlo, una ayuda de una linea sobre que precio escribir y que
-     campos de la calculadora pisa. `calcula: false` cuando la tienda ya publica el precio final (Loquieroaca, en pesos). */
+  /* Lo que se muestra de un link reconocido: la tienda, a donde abrirlo (Amazon con el tag) y, si Tiendamia lo trae de Amazon,
+     el mismo producto en Amazon. */
   function datosDeEnlace(e) {
     if (!e) return null;
-    const base = { tiendaNombre: "", ayuda: "", abrir: e.url, afiliado: false, calcula: true, mismoEnAmazon: null,
-      pisar: ["valor", "moneda", "cobro"], moneda: e.dominio ? AMAZON_PAISES[e.dominio] : "USD" };
-    if (e.tienda === "amazon" && e.dominio) return { ...base, tiendaNombre: `Amazon (${e.dominio})`,
-      ayuda: `Escribí el precio del producto en ${AMAZON_PAISES[e.dominio]}, como lo muestra ${e.dominio}, sin el envío: el envío va en su campo.` };
-    if (e.tienda === "amazon") return { ...base, tiendaNombre: "Amazon (EE.UU.)", abrir: e.id ? amazonDp(e.id) : e.url, afiliado: !!e.id,
-      ayuda: "Escribí el precio del producto que muestra Amazon, sin el envío ni el depósito de impuestos («Import Fees Deposit»): el envío va en su campo." };
-    if (e.tienda === "tiendamia") return { ...base, tiendaNombre: "Tiendamia", mismoEnAmazon: e.origen === "amz" ? amazonDp(e.id) : null,
-      pisar: [...base.pisar, "flete"],
-      ayuda: "Tiendamia muestra el precio con el envío incluido: elegí U$S arriba de su página y escribí ese número (el envío queda vacío acá). Los impuestos los suma en el resumen de pago." };
-    if (e.tienda === "loquieroaca") return { ...base, tiendaNombre: "Loquieroaca", calcula: false, pisar: [],
-      ayuda: "Loquieroaca publica el precio final en pesos, con impuestos y envío incluidos: no hace falta calcularlo, comparalo directo con las tiendas de acá." };
-    return { ...base, tiendaNombre: "eBay (EE.UU.)",
-      ayuda: "Escribí el precio del producto en dólares; el envío que muestra eBay va en su campo." };
-  }
-
-  /* El estado de la calculadora para un link y el precio que escribio la persona: en dolares y con los impuestos cobrados en el
-     checkout (Amazon, eBay y Tiendamia los cobran ahi). null si la tienda ya da el precio final. */
-  function estadoDeEnlace(e, precio) {
-    const d = datosDeEnlace(e);
-    if (!d || !d.calcula) return null;
-    return { ...C.POR_DEFECTO, valor: normalTermino(precio), moneda: e.dominio ? AMAZON_PAISES[e.dominio] : "USD", cobro: "checkout" };
+    const base = { tiendaNombre: "", abrir: e.url, afiliado: false, mismoEnAmazon: null };
+    if (e.tienda === "amazon" && e.dominio) return { ...base, tiendaNombre: `Amazon (${e.dominio})` };
+    if (e.tienda === "amazon") return { ...base, tiendaNombre: "Amazon (EE.UU.)", abrir: e.id ? amazonDp(e.id) : e.url, afiliado: !!e.id };
+    if (e.tienda === "tiendamia") return { ...base, tiendaNombre: "Tiendamia", mismoEnAmazon: e.origen === "amz" ? amazonDp(e.id) : null };
+    if (e.tienda === "loquieroaca") return { ...base, tiendaNombre: "Loquieroaca" };
+    return { ...base, tiendaNombre: "eBay (EE.UU.)" };
   }
 
   /* --- Lo que el Worker lee del link pegado (spec 023, GET /enlace) --- */
@@ -200,8 +159,8 @@
     return base && t ? base + "/enlace?url=" + encodeURIComponent(t) : "";
   }
 
-  /* La respuesta de /enlace -> { precio (texto para el campo, en dolares) o null, ars, nombre, linea } o null si no hay que mostrar
-     nada. Loquieroaca da el precio final en pesos: no va a la calculadora. Lo leido se puede cambiar a mano. */
+  /* La respuesta de /enlace -> { precio (en dolares, texto) o null, ars, nombre, linea } o null si no hay que mostrar nada. La
+     linea es la referencia: el precio final de Tiendamia (y el porcentaje contra Amazon) o el de Loquieroaca, en pesos. */
   function leidoDeEnlace(r) {
     if (!r || !r.enlace) return null;
     if (!r.leido) return r.motivo ? { precio: null, ars: false, nombre: "", linea: r.motivo } : null;
@@ -226,6 +185,37 @@
     return { precio: String(it.precio), ars: false, nombre: it.nombre || "", linea };
   }
 
+  /* --- El bloque de pegar un link (spec 040): vive en «Buscalo afuera», sin formulario ni desglose --- */
+  const NO_RECONOCIDO = "No reconozco ese link. Por ahora leo los de Amazon, Tiendamia, Loquieroacá y eBay.";
+
+  function pegarLinkHtml() {
+    return `<div class="pegar-link">
+        <h4>¿Ya lo encontraste? Pegá el link</h4>
+        <label for="pl-link">Link del producto en Amazon, Tiendamia, Loquieroacá o eBay</label>
+        <input id="pl-link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://tiendamia.com.ar/p/amz/…" aria-describedby="pl-ayuda">
+        <small id="pl-ayuda" class="sub chico">De Tiendamia y Loquieroacá leemos el precio final de la página que pegás; de Amazon y eBay, solo por su API cuando esté activa.</small>
+        <div id="pl-res" aria-live="polite"></div></div>`;
+  }
+
+  /* La ficha de un link: tienda, codigo, enlaces y el lugar de la linea leida (la llena js/vista-afuera.js). */
+  function fichaEnlaceHtml(e, { esc, icono = () => "" }) {
+    const d = datosDeEnlace(e);
+    if (!d) return `<p class="sub chico">${esc(NO_RECONOCIDO)}</p>`;
+    const abrir = `<a class="acc" href="${esc(d.abrir)}" target="_blank" rel="${d.afiliado ? "sponsored noopener" : "noopener"}">${icono("fuera")} Abrir en ${esc(d.tiendaNombre)}</a>`
+      + (d.afiliado ? ' <span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span>' : "")
+      + (d.mismoEnAmazon ? ` <a class="acc" href="${esc(d.mismoEnAmazon)}" target="_blank" rel="sponsored noopener">El mismo en Amazon</a> <span class="rotulo">enlace de afiliado</span>` : "");
+    return `<div class="pl-ficha">
+        <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
+        <p class="pl-acciones">${abrir}</p>
+        <p class="sub chico pl-leido" aria-live="polite"></p></div>`;
+  }
+
+  /* La linea de la ficha con lo que leyo el Worker; el nombre leido va solo si el link no lo traia. */
+  function lineaLeida(l, e) {
+    if (!l) return "";
+    return (l.nombre && !(e && e.nombre) ? `«${l.nombre}» · ` : "") + l.linea;
+  }
+
   /* --- Buscar afuera (spec 020): cuando ninguna tienda del indice tiene el termino --- */
   const normalMarca = t => normalTermino(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   const verificada = o => /^https:\/\//.test(o.url || "") && /^https:\/\//.test(o.envios || "") && /^\d{4}-\d{2}-\d{2}$/.test(o.verificado || "");
@@ -247,16 +237,15 @@
         <span class="sub chico">${esc(f.texto)}</span></li>`);
     const propias = oficialesPara(t, oficiales).map(o => `<li><a href="${esc(o.busqueda ? o.busqueda + encodeURIComponent(t) : o.url)}" target="_blank" rel="noopener">${icono("fuera")} ${esc(o.nombre)}</a>
         <span class="sub chico">Tienda oficial de ${esc(o.marca)}: envía a Argentina según <a href="${esc(o.envios)}" target="_blank" rel="noopener">su página de envíos</a> (verificado el ${esc(fecha(o.verificado))}).</span></li>`);
-    const couriers = COURIERS.map(c => `<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${icono("fuera")} ${esc(c.nombre)}</a>
-        <span class="sub chico">${esc(c.texto)}</span></li>`);
     return `<section class="afuera" aria-labelledby="afuera-tit">
       <h3 id="afuera-tit">Buscalo afuera: la búsqueda ya está armada</h3>
-      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda; los couriers de abajo abren su cotizador. No leemos sus páginas ni sus precios.</p>
-      <ul class="afuera-lista">${[...fuentes, ...propias, ...couriers].join("")}</ul></section>`;
+      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda.</p>
+      <ul class="afuera-lista">${[...fuentes, ...propias].join("")}</ul>
+      ${pegarLinkHtml()}</section>`;
   }
 
-  const api = { PESO_TIPICO, FUENTES, OFICIALES, COURIERS, AMAZON_TAG, estadoImportar, hrefCalculadora, enlaceFuente, urlBusqueda,
-    parsearEnlace, datosDeEnlace, estadoDeEnlace, oficialesPara, buscarAfueraHtml, urlLeerEnlace, leidoDeEnlace };
+  const api = { FUENTES, OFICIALES, AMAZON_TAG, NO_RECONOCIDO, enlaceFuente, urlBusqueda, parsearEnlace, datosDeEnlace, oficialesPara,
+    buscarAfueraHtml, pegarLinkHtml, fichaEnlaceHtml, lineaLeida, urlLeerEnlace, leidoDeEnlace };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
 })(this);

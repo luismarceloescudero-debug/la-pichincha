@@ -18,7 +18,6 @@
   const esUrl = u => /^https?:\/\//i.test(String(u));
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
   const C = typeof module === "object" && module.exports ? require("./categorias.js") : raiz.Categorias;
-  const puesto = () => typeof module === "object" && module.exports ? require("./puesto.js") : raiz.Puesto;   // al usarlo: en la pagina se carga despues
 
   /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL (aunque venga con "www", barra
      final o parametros de seguimiento), mismo precio. Uno por URL, y gana la fila de la tienda sobre la del agregador. */
@@ -133,17 +132,6 @@
       if (f[1] > minimo * (1 + TOLERANCIA_MODELO) || Math.max(...precios) / minimo > DISPERSION_MODELO) continue;
       if (off + EPS >= C.DESCUENTO[g.categoria].propia && off <= DESCUENTO_MODELO_MAX) contraModelo.set(f, { tiendas: new Set(otros.map(x => x[3])).size, mediana, minimo, off });
     }
-    // El equivalente local de cada compra internacional, para comparar el costo puesto en casa: el aviso local mas barato del
-    // mismo modelo (codigo exacto y, en equipos, misma configuracion) de las tiendas que se leen directo. El agregador no
-    // cuenta, como en masBarato: su precio puede ser viejo (19/10: con ComparaYa como equivalente, 2 de 11 comparaciones daban 30% a
-    // 51% de diferencia contra un aviso de Mercado Libre que no se pudo confirmar).
-    const equivalente = new Map();
-    for (const f of filas) {
-      if (!f[9] || !esInternacional(f)) continue;
-      const directos = porModelo.get(f[9]).filter(x => x !== f && !esInternacional(x) && x[3] !== AGREGADOR && mismaConfiguracion(f, x));
-      const mejor = directos.reduce((a, x) => !a || x[1] < a[1] ? x : a, null);
-      if (mejor) equivalente.set(f, mejor);
-    }
     for (const f of filas) {
       const g = gama.get(f);
       if (!g.pasa || masBarato.has(f)) { descartadas++; continue; }
@@ -190,7 +178,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas, ...seguimiento].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas, ...seguimiento].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, seguimiento, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, equivalente, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, seguimiento, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -198,17 +186,6 @@
      que los componentes (que son casi todo el catalogo) no acaparen el resumen. Dentro de una categoria: primero las
      bajas propias, despues las publicadas; a igual señal la gama alta antes que la media y despues por descuento. Las
      compras internacionales van al final de su categoria y rotuladas. Sin enlaces que no sean http(s). */
-  /* Lo que se dice de una compra internacional: su costo puesto en casa (js/puesto.js) y, si hay un equivalente local, la
-     comparacion. costo = { reglas, tasas } (importacion.json y las cotizaciones); sin ellos no se dice nada. */
-  function puestoDe(f, categoria, costo, local, tiendas) {
-    if (!costo || !costo.reglas || !costo.tasas) return undefined;
-    const P = puesto(), est = P.estimar(f, categoria, costo);
-    const contra = P.comparar(est, local);
-    const nombre = local && (local[4] || ((tiendas || {})[local[3]] || {}).nombre || local[3]);
-    return { est, contra, tienda: local ? local[4] || local[3] : null, texto: P.texto(est), detalle: P.detalle(est),
-      comparacion: contra ? P.textoComparacion(contra, nombre) : "" };
-  }
-
   /* Que equipo es, para no ofrecer el mismo dos veces en el resumen del dia (23/10: Mexx publica la misma Lenovo V15 con y
      sin Windows 11 Pro, y las dos salieron). Con codigo de modelo, el codigo. Sin codigo, el nombre normalizado como lo
      compara el buscador, sin lo que no cambia el equipo: sistema operativo, color, «#» y «nuevo». Otra RAM, otro disco u
@@ -231,16 +208,14 @@
     return corto.size > 0 && [...corto].filter(w => largo.has(w)).length / corto.size >= COMPARTIDAS_GEMELO;
   }
 
-  function destacadas(idx, max = 20, opciones) {
-    const { propias, publicadas, seguimiento, cruces, vigentes, contra, notas, gama, equivalente, contraModelo } = calcularOfertas(idx);
-    const costo = opciones && opciones.costo;
+  function destacadas(idx, max = 20) {
+    const { propias, publicadas, seguimiento, cruces, vigentes, contra, notas, gama, contraModelo } = calcularOfertas(idx);
     const rango = { alta: 2, media: 1 };
     // `antes` es contra que se compara: el piso de 30 dias (propia), el tachado (publicada) o la mediana del mismo modelo en
     // otras tiendas (modelo, spec 035: la señal que se puede comprobar, y hasta el 24/10 el resumen del dia no la usaba).
     const nuevo = (f, antes, tipo, modelo) => { const g = gama.get(f);
       return { f, antes, tipo, modelo, off: 1 - f[1] / antes, ahorro: antes - f[1], categoria: g.categoria, nivel: g.nivel,
-        cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f),
-        puesto: esInternacional(f) ? puestoDe(f, g.categoria, costo, equivalente.get(f), idx.tiendas) : undefined }; };
+        cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f) }; };
     const ORDEN_TIPO = { propia: 0, seguimiento: 0, modelo: 1, publicada: 2 };
     const por = (a, b) => a.internacional - b.internacional || ORDEN_TIPO[a.tipo] - ORDEN_TIPO[b.tipo]
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
@@ -274,7 +249,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, puestoDe, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

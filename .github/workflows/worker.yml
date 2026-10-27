@@ -13,7 +13,6 @@ on:
       - "js/buscadas.js"
       - "js/buscador.js"
       - "js/importar.js"
-      - "js/calculadora.js"
       - ".github/workflows/worker.yml"
   workflow_dispatch:
 

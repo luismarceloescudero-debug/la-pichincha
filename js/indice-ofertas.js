@@ -61,7 +61,7 @@ function listaOfertas() {
   if (!ofertasListas()) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
-    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f), local: OFERTAS.equivalente.get(f) });
+    cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f) });
   return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
                             ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
                             ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))]);
@@ -108,24 +108,6 @@ function controlesOfertas(todas) {
     </div></div>`;
 }
 
-/* Lo internacional trae su costo puesto en casa y, si hay un equivalente local, la diferencia. Las reglas y las cotizaciones
-   se piden una sola vez (js/vista-costo.js); mientras llegan la tarjeta sale sin el bloque y se repinta. */
-let PUESTO_PEDIDO = false;
-function bloquePuesto(o) {
-  if (!Ofertas.esInternacional(o.f)) return "";
-  if (!COSTO.listo) {
-    if (!PUESTO_PEDIDO) { PUESTO_PEDIDO = true; cargarCosto().then(() => pintarOfertas()).catch(() => {}); }
-    return "";
-  }
-  const p = Ofertas.puestoDe(o.f, o.cat, { reglas: COSTO.reglas, tasas: COSTO.tasas }, o.local, IDX.tiendas);
-  if (!p) return "";
-  const e = p.est;
-  const cifra = e.ok ? (e.minPesos === e.maxPesos ? pesos(e.minPesos) : `${pesos(e.minPesos)} a ${pesos(e.maxPesos)}`) : "sin estimar";
-  return `<div class="o-puesto"><span><b>Puesto en casa: ${cifra}</b> <small>(estimación)</small></span>
-      <small>${esc(p.detalle)}</small>${p.comparacion ? `<span>${esc(p.comparacion)}</span>` : ""}
-      <small><a href="${esc(e.ok ? Importar.hrefCalculadora(e.fobUsd, o.cat, location.pathname) : "#costo")}">${e.ok ? "Calcular con este precio" : "Calcular con tus datos"}</a></small></div>`;
-}
-
 function cardOferta(o, i, desde) {
   const f = o.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
   const pct = Math.round(o.off * 100);
@@ -153,7 +135,6 @@ function cardOferta(o, i, desde) {
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div class="o-precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[o.ref])}</span></div>
     ${selloOjo(viejoDe(f))}
-    ${bloquePuesto(o)}
     ${o.contra ? `<p class="o-contra">Cruza contra la ${esc(Ofertas.textoContra(o.contra, pesos))}</p>` : ""}
     ${o.nota ? `<p class="o-contra">${esc(o.nota[0].toUpperCase() + o.nota.slice(1))}.</p>` : ""}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
