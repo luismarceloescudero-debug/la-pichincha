@@ -191,8 +191,11 @@
      La persona pega el texto del «Detalle de la compra» de su carrito (el Worker no lo lee: el robots.txt lo prohibe). Se lee en
      el navegador y no sale a ningun lado. Cada rotulo toma el primer AR$ que le sigue; miles con punto y decimales con coma. */
   const RE_ARS = String.raw`ar\$\s*(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)`;
-  const ROTULOS = { conCantidad: String.raw`productos\s*\((\d+)\)`, productos: "productos()", envio: String.raw`envio\s+internacional`,
-    servicios: String.raw`servicios\s+de\s+importacion`, subtotal: "subtotal" };
+  /* Con la direccion cargada, el carrito suma «IVA e impuestos internos» (a veces «+ Aranceles y gestión aduanera»), «Envío
+     Estándar a tu dirección» y cierra con «Subtotal» o «Total»; la cantidad viene como «Producto(s) (2)». */
+  const ROTULOS = { conCantidad: String.raw`producto(?:s|\(s\))?\s*\((\d+)\)`, productos: "productos()", envio: String.raw`envio\s+internacional`,
+    servicios: String.raw`servicios\s+de\s+importacion`, impuestos: String.raw`iva\s+e\s+impuestos`,
+    envioLocal: String.raw`envio\s+estandar\s+a\s+tu\s+direccion`, total: String.raw`(?<![a-z])total`, subtotal: "subtotal" };
   const pesosNum = t => Number(t.replace(/\./g, "").replace(",", "."));
 
   function parsearDetalleTiendamia(texto) {
@@ -202,26 +205,31 @@
     const p = leer("conCantidad") || leer("productos");     // «Productos de USA» va antes de «Productos (1)»
     if (!p) return null;
     const monto = clave => { const m = leer(clave); return m ? pesosNum(m[m.length - 1]) : 0; };
-    const d = { cantidad: p[1] ? Number(p[1]) : 1, productos: pesosNum(p[2]), envio: monto("envio"), servicios: monto("servicios") };
-    const sub = leer("subtotal");
-    return { ...d, subtotal: sub ? pesosNum(sub[1]) : d.productos + d.envio + d.servicios };
+    const d = { cantidad: p[1] ? Number(p[1]) : 1, productos: pesosNum(p[2]), envio: monto("envio"), servicios: monto("servicios"),
+      impuestos: monto("impuestos"), envioLocal: monto("envioLocal") };
+    const cierre = leer("total") || leer("subtotal");
+    return { ...d, subtotal: cierre ? pesosNum(cierre[1]) : d.productos + d.envio + d.servicios + d.impuestos + d.envioLocal };
   }
 
   const milesTexto = n => Math.round(n).toLocaleString("es-AR");
 
   /* La linea con el detalle pegado. item: lo que el Worker leyo de la ficha (precio = USD de Tiendamia, precioBase =
      merchant_price de Amazon). Dolar implicito = productos / (precio x cantidad); Amazon = merchant_price x cantidad x dolar +
-     el mismo envio y servicios. Sin esos precios, solo el total. */
+     los mismos cargos (envio, servicios y, si el carrito los trae, impuestos y envio a tu direccion). Sin esos precios, solo el
+     total. */
   function referenciaCarrito(d, item) {
     if (!d) return "";
+    const impuestos = d.impuestos || 0, envioLocal = d.envioLocal || 0;
     const total = `Tiendamia: AR$ ${milesTexto(d.subtotal)} en total (producto ${milesTexto(d.productos)} + envío ${milesTexto(d.envio)}`
-      + ` + servicios de importación ${milesTexto(d.servicios)}).`;
+      + ` + servicios de importación ${milesTexto(d.servicios)}`
+      + (impuestos ? ` + IVA e impuestos ${milesTexto(impuestos)}` : "") + (envioLocal ? ` + envío a tu dirección ${milesTexto(envioLocal)}` : "") + ").";
     const fin = " Aproximado: revisalo antes de pagar.";
     if (!item || !(item.precio > 0) || !(item.precioBase > 0)) return total + fin;
     const dolar = d.productos / (item.precio * d.cantidad);
-    const amazon = item.precioBase * d.cantidad * dolar + d.envio + d.servicios;
+    const amazon = item.precioBase * d.cantidad * dolar + d.envio + d.servicios + impuestos + envioLocal;
     const base = (d.cantidad > 1 ? `${d.cantidad} × ` : "") + usdTexto(item.precioBase);
-    return `${total} Comprado en Amazon saldría aprox. AR$ ${milesTexto(amazon)} (${base} al dólar de Tiendamia + el mismo envío y servicios).${fin}`;
+    const mismos = impuestos || envioLocal ? "los mismos envíos, servicios e impuestos" : "el mismo envío y servicios";
+    return `${total} Comprado en Amazon saldría aprox. AR$ ${milesTexto(amazon)} (${base} al dólar de Tiendamia + ${mismos}).${fin}`;
   }
 
   /* --- El bloque de pegar un link (spec 040): vive en «Buscalo afuera», sin formulario ni desglose --- */

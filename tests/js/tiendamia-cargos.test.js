@@ -19,17 +19,20 @@ test("cada compra tiene los campos con su tipo, una categoria del sitio y una fi
     assert.match(c.url, /^https:\/\/tiendamia\.com\.ar\/p\/amz\/[a-z0-9]{10}\//, c.url);
     assert.ok(CATEGORIAS.includes(c.categoria), c.categoria);
     assert.ok(typeof c.nombre === "string" && c.nombre.length > 3, c.url);
-    for (const k of ["price", "merchant_price", "markup", "weight", "productos", "envio", "servicios", "subtotal", "dolar"])
+    for (const k of ["cantidad", "price", "merchant_price", "markup", "weight", "productos", "envio", "servicios", "subtotal", "dolar"])
       assert.ok(typeof c[k] === "number" && c[k] >= 0, `${c.url} ${k}`);
-    assert.ok(c.price > 0 && c.productos > 0 && c.dolar > 0, c.url);
+    // null: la linea no figuraba en el carrito (sin direccion cargada no aparecen el IVA ni el envio a domicilio)
+    for (const k of ["impuestos", "envio_local"]) assert.ok(c[k] === null || (typeof c[k] === "number" && c[k] >= 0), `${c.url} ${k}`);
+    assert.ok(Number.isInteger(c.cantidad) && c.cantidad >= 1 && c.price > 0 && c.productos > 0 && c.dolar > 0, c.url);
   }
 });
 
-test("las cuentas cierran: subtotal = suma, dolar = productos / price, markup = price - merchant_price; sin repetidos", () => {
+test("las cuentas cierran: total = suma (±2 de redondeo, o una nota que explique), dolar = productos / (price x cantidad); sin repetidos", () => {
   for (const c of base.compras) {
-    assert.equal(c.subtotal, c.productos + c.envio + c.servicios, c.url);
-    assert.equal(c.dolar, Math.round(c.productos / c.price * 100) / 100, c.url);
-    assert.ok(Math.abs(c.price - c.merchant_price - c.markup) < 0.011, c.url);
+    const suma = c.productos + c.envio + c.servicios + (c.impuestos || 0) + (c.envio_local || 0);
+    if (Math.abs(c.subtotal - suma) > 2) assert.match(c.nota || "", /no es la suma/, `${c.url}: ${c.subtotal} contra ${suma}`);
+    assert.equal(c.dolar, Math.round(c.productos / (c.price * c.cantidad) * 100) / 100, c.url);
+    assert.ok(c.price >= c.merchant_price, c.url);     // price no siempre es merchant + markup: el Acer tiene US$ 15,05 de mas (datos.md)
   }
   const claves = base.compras.map(c => c.url + "|" + c.fecha);
   assert.equal(new Set(claves).size, claves.length);
