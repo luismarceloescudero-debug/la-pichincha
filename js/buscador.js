@@ -36,7 +36,9 @@
         return n => re.test(n);
       }
       if (!esMedida(t)) return n => n.includes(t);
-      const re = new RegExp("(^|[^0-9a-z])" + t + "([^0-9a-z]|$)");
+      // Un entero es palabra entera: "5" no entra en "5.7ghz" (el reloj), como "2tb" no entra en "12tb".
+      const fin = /^\d+$/.test(t) ? "[^0-9a-z.]|$" : "[^0-9a-z]|$";
+      const re = new RegExp("(^|[^0-9a-z])" + t + "(" + fin + ")");
       return n => re.test(n);
     });
     return n => pruebas.every(p => p(n));
