@@ -17,6 +17,8 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 7 | OmniRoute: reconectar Claude | Un respaldo más para las revisiones | 2 min |
 | 8 | Amazon (más adelante) | Amazon en «Afuera» | cuando haya 10 ventas |
 | 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
+| 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
+| 11 | Tiendamia: armar los carritos de prueba | La base para encontrar cómo calcula Tiendamia el envío y los servicios | 15 min |
 
 ---
 
@@ -210,6 +212,51 @@ retomás, hace falta:
    https://developers.facebook.com/docs/instagram-platform (guía oficial).
 4. Mi recomendación: solo avanzar si GoatCounter muestra que Instagram trae clics (es la condición que dejamos en el
    plan).
+
+---
+
+## 10. Tiendamia: pedir permiso para leer la cotización (spec 041)
+
+**Qué pasa:** la ficha de Tiendamia trae su precio y el de Amazon, pero el envío internacional y los servicios de
+importación aparecen solo en el carrito (`/checkout/cart`), y su `robots.txt` lo prohíbe. No se esquiva: hoy la persona
+pega el detalle del carrito a mano. Si Tiendamia nos autoriza (o nos da una API), el sitio puede mostrarlo solo.
+
+**Paso a paso:** mandá el mail desde tu correo a la dirección de contacto de Tiendamia (en https://tiendamia.com.ar/ ,
+al pie: «Contacto» o «Ayuda»; abrilo desde el navegador). Si contestan, pasame la respuesta tal cual.
+
+> **Asunto:** Consulta: leer la cotización de envío e impuestos de productos de Tiendamia en La Pichincha
+>
+> Hola, ¿cómo están? Soy [TU NOMBRE] y armé La Pichincha (https://pichinchadeldia.com.ar), un comparador gratuito de
+> precios de hardware en Argentina. Cuando un producto no está en las tiendas locales, mostramos dónde comprarlo afuera,
+> y Tiendamia es una de las opciones que recomendamos, con el link directo a su ficha.
+>
+> Hoy leemos sus fichas públicas (`/p/...`), siempre dentro de lo que permite su robots.txt. Pero el costo final para la
+> persona (envío internacional y servicios de importación) aparece solo en el carrito, y su robots.txt no permite
+> leerlo, así que no lo hacemos. Queremos mostrar el costo completo y no un número a medias.
+>
+> ¿Podrían ayudarnos con alguna de estas opciones?
+> 1. Una API o un endpoint de cotización (producto y destino → envío y servicios de importación).
+> 2. Autorización por escrito para consultar la cotización del carrito a un ritmo bajo (con caché de horas), sin
+>    cuentas ni compras.
+> 3. La regla con la que calculan el envío y los servicios (por peso, por precio o por categoría), para estimarla
+>    nosotros y aclarar siempre que es una estimación.
+>
+> Para ustedes no tiene costo: la compra se hace siempre en Tiendamia. Si tienen un programa de afiliados, también nos
+> interesa. Quedo atento, gracias.
+>
+> [TU NOMBRE] · [TU CONTACTO]
+
+---
+
+## 11. Tiendamia: armar los carritos de prueba (spec 041)
+
+**Qué se destraba:** con varios carritos reales se puede buscar la regla del envío (¿por peso?) y de los servicios
+(¿un porcentaje?, ¿mínimos?). Está la lista en `specs/041-cargos-tiendamia/datos.md`: un producto de Amazon por
+categoría del sitio, con pesos de 0,1 a 5,85 kg.
+
+**Paso a paso:** abrí cada link, «Agregar al carrito», y en el carrito copiá el bloque «Detalle de la compra» (de
+«Detalle de la compra» a «Subtotal»). Pegámelo en el chat diciendo de qué producto es: leo la ficha ese mismo día,
+agrego la entrada a `datos/tiendamia-cargos.json` y lo commiteo. No hace falta comprar ni iniciar el pago.
 
 ---
 

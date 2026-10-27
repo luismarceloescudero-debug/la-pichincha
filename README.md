@@ -47,7 +47,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `guardia.js` | Guardia del indice: mide bajas propias y, por categoria, avisos, "sin datos" y ofertas sobre el indice real, lo compara con la `guardia.json` publicada de la corrida anterior y con una alarma (0 bajas propias con historial, una categoria que se queda sin ofertas, un salto de mas de 10 puntos en "sin datos", menos de 10 ofertas para el resumen) la corrida no manda Telegram y abre un issue `guardia` |
 | `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas; tambien `afuera_url`, la direccion del Worker de la spec 022 (vacia hasta el primer despliegue) |
-| `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en Costo de importar (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP. Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
+| `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en «Buscalo afuera» (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP. Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
@@ -305,7 +305,13 @@ Las compras internacionales no se esconden: pasan por las mismas reglas y en el 
 final de su categoria, rotuladas.
 
 Desde la spec 040 no se estima su costo puesto en casa (ya no hay calculadora local): la referencia del costo importado
-es el precio final de Tiendamia o Loquieroaca, al pegar un link en «Buscalo afuera».
+es el precio final de Tiendamia o Loquieroaca, al pegar un link en «Buscalo afuera». Desde la spec 041, debajo de la ficha de
+un link de Tiendamia se puede pegar el «Detalle de la compra» del carrito (el envio internacional y los servicios de
+importacion no estan en la ficha y el robots.txt de Tiendamia prohibe leer el carrito): se lee en el navegador y muestra
+el total y cuanto saldria en Amazon al dolar de Tiendamia. Los carritos reales que pega el dueño se juntan en
+`datos/tiendamia-cargos.json` para buscar la regla del envio y de los servicios (`specs/041-cargos-tiendamia/datos.md`).
+Amazon sigue en «Buscalo afuera» con el aviso «Muchos productos no se envían a Argentina»: no hay un filtro de envio
+internacional en la URL (verificado el 27/10/2026), lo decide la direccion «Enviar a».
 
 Cada oferta tiene una lupa que salta al buscador con la categoria y la marca
 del producto, sin el codigo de modelo, para que traiga competencia en vez de
