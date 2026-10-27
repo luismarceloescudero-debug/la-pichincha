@@ -216,7 +216,10 @@ por ahora no corresponde.
    sesión) y generá las credenciales.
 3. Secretos en GitHub: `AMAZON_CREATORS_ID` y `AMAZON_CREATORS_SECRET`.
 
-Mientras tanto, «Afuera» arma el link de búsqueda a Amazon y un link de producto que pegues se lee igual.
+Mientras tanto, «Afuera» arma el link de búsqueda a Amazon, y un link de Amazon que pegues se cruza con la ficha de
+Tiendamia de ese mismo producto: su precio final (con envío e impuestos) es la referencia del costo importado y se
+muestra el porcentaje contra el precio de Amazon que publica esa ficha (spec 039). El precio de Amazon en vivo sigue
+esperando las 10 ventas.
 
 ---
 
