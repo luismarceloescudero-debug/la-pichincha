@@ -89,9 +89,8 @@ solo trae el precio final (`data-price`), no el desglose: la referencia con porc
   `markup_applied` y `final_price`).
 - `tests/js/worker.test.js`: el parser de la ficha extrae el precio base y calcula el porcentaje; sin `merchant_price`,
   sin porcentaje y sin error.
-- `tests/js/importar.test.js` y `tests/js/afuera.test.js`: el texto que muestra el porcentaje, el rotulado «aproximado»
-  y el caso de Amazon sin API que pasa a mostrar la referencia de Tiendamia.
-- `tests/js/afuera.test.js`: Aerobox y couriers aparecen como links de referencia, con su aclaración, sin leerse.
+- `tests/js/importar.test.js`: el texto que muestra el porcentaje, el rotulado «aproximado», el caso de Amazon sin API que
+  pasa a mostrar la referencia de Tiendamia, y Aerobox/couriers como links de referencia sin leerse.
 - Navegador, con el Worker local: pegar un link de Tiendamia muestra el porcentaje contra el precio de Amazon; pegar un
   link de Amazon del que Tiendamia tiene ficha muestra la referencia; en claro, oscuro y móvil.
 

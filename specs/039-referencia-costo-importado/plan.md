@@ -33,10 +33,10 @@ y un commit chico. El «qué» está en `spec.md`; acá el «cómo» y el orden.
 
 ## 4. La sección «Afuera, en vivo» (`js/afuera.js`)
 
-- `itemHtml`: si un ítem de Tiendamia trae `recargoPct`, sumar una línea «un <pct> % más que en Amazon». La búsqueda no trae
-  el desglose, así que en la práctica esto aparece solo cuando el ítem viene de una ficha; mientras tanto, la búsqueda sigue
-  mostrando «con envío incluido», que ya es la referencia.
-- Tests: `tests/js/afuera.test.js` — ítem con `recargoPct` muestra la línea; sin él, no.
+- **No se hace** (decidido al implementar, 27/10): la búsqueda (`parsearBusquedaTiendamia`) no trae `merchant_price` ni
+  `recargoPct`, así que ningún ítem de la sección «Afuera, en vivo» (que sale de `/buscar`) lo lleva: sería código muerto.
+  La búsqueda ya muestra «con envío incluido», que es la referencia del importado. Si algún día un ítem de ficha entra a
+  esa lista, se suma la línea ahí.
 
 ## 5. Aerobox y couriers como links (`js/importar.js`)
 

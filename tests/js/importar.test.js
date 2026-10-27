@@ -237,7 +237,17 @@ test("el bloque «buscar afuera» trae las tres fuentes con el termino, Amazon r
   assert.ok(!html.includes("<b>aeroclip"), "el termino va escapado");
   assert.match(html, /rel="sponsored noopener"/);
   assert.match(html, /enlace de afiliado/);
-  assert.equal((html.match(/rel="noopener"/g) || []).length, 2);
+  assert.equal((html.match(/rel="noopener"/g) || []).length, 3);
+});
+
+test("«buscar afuera» cita a Aerobox como courier de referencia, sin comision", () => {
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const html = I.buscarAfueraHtml("soundcore aeroclip", { esc, icono: () => "", oficiales: [] });
+  assert.match(html, /https:\/\/aerobox\.com\.ar\/calculadora-envios\//);
+  assert.match(html, /Aerobox/);
+  assert.match(html, /cotizás el envío y los impuestos/);
+  assert.match(html, /href="https:\/\/aerobox\.com\.ar\/calculadora-envios\/" target="_blank" rel="noopener"/, "el courier va sin comision");
+  assert.equal(I.COURIERS.length, 1);
 });
 
 test("el bloque suma la tienda oficial verificada con su fecha, y sin oficiales no la menciona", () => {
