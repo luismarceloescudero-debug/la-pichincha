@@ -699,8 +699,18 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
   border:1.5px solid var(--line);border-radius:10px;resize:vertical;transition:border-color .2s,box-shadow .2s}
 .pl-carrito textarea:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .pl-carrito textarea:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
-.pl-carrito-res{font-weight:600;color:var(--ink)}
 .pl-carrito-res:empty{display:none}
+.pl-carrito-res p{margin:6px 0 0}
+/* Spec 042: el desglose del detalle pegado, con las mismas filas en los cuatro proveedores */
+.pl-detalle{border-collapse:collapse;width:100%;max-width:520px;font-size:.88rem}
+.pl-detalle caption{text-align:left;padding:0 0 4px}
+.pl-detalle th,.pl-detalle td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.pl-detalle th{font-weight:500;color:var(--ink-2);text-align:left}
+.pl-detalle td{font:600 .88rem var(--font-mono);color:var(--ink);text-align:right}
+.pl-detalle td .sub{font:400 .74rem var(--font-sans)}
+.pl-detalle .pl-d-total th,.pl-detalle .pl-d-total td,.pl-detalle .pl-d-pesos th,.pl-detalle .pl-d-pesos td{font-weight:700;color:var(--ink)}
+.pl-detalle .pl-d-pesos td{color:var(--good)}
+.pl-detalle .pl-d-pesos td.pl-sin{color:var(--ink-3)}
 
 /* --- Spec 022: Afuera en vivo (respuesta del Worker) --- */
 .afuera-vivo{margin:18px 0 4px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
