@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-26",
+  "actualizado": "2026-10-28",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -155,9 +155,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
       "img": "img/corsair-lpx.jpg",
-      "precio": 254050,
-      "precio_lista": 282278,
-      "sin_impuestos": 229910,
+      "precio": 262370,
+      "precio_lista": 291522,
+      "sin_impuestos": 237439,
       "stock": "en stock",
       "titular": "La marca más probada, por treinta mil pesos más",
       "specs": {
@@ -541,6 +541,16 @@
           "id": "c922",
           "antes": 161499,
           "ahora": 161639
+        }
+      ]
+    },
+    {
+      "fecha": "2026-10-28",
+      "cambios": [
+        {
+          "id": "corsair-lpx",
+          "antes": 254050,
+          "ahora": 262370
         }
       ]
     }
