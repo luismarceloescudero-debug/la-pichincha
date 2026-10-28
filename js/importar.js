@@ -366,7 +366,7 @@
     if (d.moneda === "ARS") pesos = { clave: "pesos", rotulo: "Total en pesos", texto: montoTexto(d.total, "ARS"), monto: d.total };
     else if (cotizacion && cotizacion.valor > 0)
       pesos = { clave: "pesos", rotulo: "Total en pesos", monto: Math.round(d.total * cotizacion.valor),
-        texto: montoTexto(d.total * cotizacion.valor, "ARS"), nota: `a ${montoTexto(cotizacion.valor, "ARS")} (${cotizacion.nombre}${cotizacion.hora ? ", " + cotizacion.hora : ""}${cotizacion.fuente ? ", " + cotizacion.fuente : ""})` };
+        texto: montoTexto(d.total * cotizacion.valor, "ARS"), nota: `a AR$ ${cotizacion.valor.toLocaleString("es-AR", { maximumFractionDigits: 2 })} (${cotizacion.nombre}${cotizacion.hora ? ", " + cotizacion.hora : ""}${cotizacion.fuente ? ", " + cotizacion.fuente : ""})` };
     else pesos = { clave: "pesos", rotulo: "Total en pesos", texto: "sin cotización", monto: null };
     return [...filas, pesos];
   }
@@ -390,6 +390,7 @@
   function pegarLinkHtml() {
     return `<div class="pegar-link">
         <h4>¿Ya lo encontraste? Pegá el link</h4>
+        <div class="pl-monedas" aria-live="polite"></div>
         <label for="pl-link">Link del producto en Amazon, Tiendamia, Loquieroacá o eBay</label>
         <input id="pl-link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://tiendamia.com.ar/p/amz/…" aria-describedby="pl-ayuda">
         <small id="pl-ayuda" class="sub chico">De Tiendamia y Loquieroacá leemos el precio final de la página que pegás; de Amazon y eBay, solo por su API cuando esté activa.</small>

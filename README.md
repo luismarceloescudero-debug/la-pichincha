@@ -33,7 +33,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | Archivo | Que es |
 | --- | --- |
 | `index.html` | La pagina que sirve GitHub Pages, y el unico HTML que se edita a mano |
-| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), comprar afuera (`importar.js`, specs 015 y 020: la busqueda armada en Amazon, Tiendamia y Loquieroaca cuando nada del indice coincide, y el bloque para pegar un link, con la referencia que lee el Worker; spec 040: sin calculadora local), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-afuera` (pegar un link en «Buscalo afuera», spec 040), `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
+| `js/` | El sitio partido en modulos (F1.1): funciones puras del buscador (`buscador.js`), de la pagina (`pagina.js`) y del analisis (`analisis.js`, compartido con las paginas por busqueda), los modos de la busqueda (`modos.js`, spec 013: Recomendacion, Super Oferta, Primera Linea y su orden; sin DOM), comprar afuera (`importar.js`, con `monedas.js` para el monitor de monedas de la spec 043; specs 015 y 020: la busqueda armada en Amazon, Tiendamia y Loquieroaca cuando nada del indice coincide, y el bloque para pegar un link, con la referencia que lee el Worker; spec 040: sin calculadora local), mas los modulos de la pagina (`base`, `vistas`, `indice-ofertas`, `historial`, `busqueda`, `exportar`, `consulta`, `medicion`, `vista-afuera` (pegar un link en «Buscalo afuera», spec 040), `serie-precios` (el grafico del historial, puro), `vista-historial` (el boton y la descarga del fragmento), `arranque`). `index.html` solo trae la estructura y los datos |
 | `js/ofertas.js`, `generar_feed.js`, `publicar_telegram.py` | Que es una oferta (compartido), el feed `ofertas.xml` y el canal de Telegram |
 | `modelo.py`, `cobertura.py` | Codigo de modelo de cada aviso (identidad entre tiendas) y cuanto del indice se pudo agrupar, por rubro |
 | `css/sitio.css` | Los estilos del sitio, compartidos con las paginas por busqueda |
@@ -311,7 +311,10 @@ importacion no estan en la ficha y el robots.txt de Tiendamia prohibe leer el ca
 el total y cuanto saldria en Amazon al dolar de Tiendamia. Desde la spec 042 el campo «Pegá el detalle de la compra» esta en
 los cuatro proveedores (Amazon, eBay, Tiendamia y Loquieroaca) y muestra el mismo desglose: producto, envio, importacion o
 servicios, impuestos, envio local, total y total en pesos (un parser por proveedor en `js/importar.js`; Amazon con un pegado
-real, eBay y Loquieroaca sin uno todavia). Los carritos reales que pega el dueño se juntan en
+real, eBay y Loquieroaca sin uno todavia). Desde la spec 043, arriba de «Pegá el link» hay un monitor de monedas en vivo
+(dolar tarjeta, MEP y oficial y el euro contra el peso, de DolarApi, cada uno con su hora; `js/monedas.js`) y lo que esta
+en dolares o euros pasa a pesos al dolar elegido (tarjeta por defecto). Si DolarApi no responde, dice «sin cotización» y no
+convierte. Los carritos reales que pega el dueño se juntan en
 `datos/tiendamia-cargos.json` para buscar la regla del envio y de los servicios (`specs/041-cargos-tiendamia/datos.md`).
 Amazon sigue en «Buscalo afuera» con el aviso «Muchos productos no se envían a Argentina»: no hay un filtro de envio
 internacional en la URL (verificado el 27/10/2026), lo decide la direccion «Enviar a».
