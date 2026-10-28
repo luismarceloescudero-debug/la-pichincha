@@ -4,7 +4,7 @@ La base es `datos/tiendamia-cargos.json` (una entrada por carrito que arma y peg
 `tests/js/tiendamia-cargos.test.js`). Acá va la tabla y lo que se puede decir con ella. **Ninguna regla se propone para
 estimar sin carrito hasta que explique todos los casos, diciendo con cuántos.**
 
-## Carritos cargados (8, todos del 27/10/2026)
+## Carritos cargados (22, todos del 27/10/2026)
 
 Montos en AR$. «Imp.» es «IVA e impuestos internos» (en el celular, «+ Aranceles y gestión aduanera»); «Local» es «Envío
 Estándar a tu dirección». El AeroClip se armó sin dirección cargada: su carrito no mostraba ni el IVA ni el envío local.
@@ -19,10 +19,29 @@ Estándar a tu dirección». El AeroClip se armó sin dirección cargada: su car
 | Samsung 990 PRO 1 TB | componente | 1 | 285,99 | 0,10 | ACC. COMPUTADORA | 529.719 | 9.250 | 6.661 | 113.180 | 22.231 | 681.041 | 1.852,23 |
 | Logitech G305 | periférico | 1 | 27,80 | 0,28 | VIDEOJUEGOS | 51.497 | 9.250 | 12.895 | 12.759 | 22.231 | 108.632 | 1.852,41 |
 | Anker USB-C Hub | otro | 1 | 80,79 | 0,46 | ACC. COMPUTADORA | 149.635 | 9.250 | 20.442 | 33.371 | 22.231 | 234.929 | 1.852,15 |
+| Patriot Viper Steel DDR4 16 GB | componente | 1 | 138,05 | 0,09 | ACC. COMPUTADORA | 255.695 | 9.250 | 6.661 | 55.636 | 22.231 | 349.472 | 1.852,19 |
+| Razer BlackShark V2 X | periférico | 1 | 42,79 | 0,63 | AURICULARES | 79.247 | 9.250 | 35.790 | 18.585 | 22.231 | 165.103 | 1.852,00 |
+| MNN 15,6" portátil USB-C | monitor | 1 | 44,25 | 1,88 | ACC. COMPUTADORA | 81.955 | 9.250 | 91.359 | 19.147 | 22.231 | 223.942 | 1.852,09 |
+| Anker (cable) | otro | 1 | 8,98 | 0,07 | CABLES. ADAPTADORES | 16.626 | 9.250 | 6.661 | — | — | 32.537 | 1.851,45 |
+| Samsung Galaxy A16 5G | smartphone | 1 | 154,44 | 0,46 | CELULARES | 286.051 | 9.250 | 20.442 | 106.315 | 22.231 | 444.289 | 1.852,18 |
+| GMKtec M6 Ultra (Ryzen) | pc | 1 | 679,00 | 1,64 | COMPUTADORAS | 1.257.657 | 9.250 | 110.949 | 423.847 | 22.231 | 1.823.934 | 1.852,22 |
+| ASUS Vivobook 16 | notebook | 1 | 670,00 | 3,49 | COMPUTADORAS | 1.240.980 | 9.250 | 224.010 | 310.922 | 22.231 | 1.807.393 | 1.852,21 |
+| Highwings HDMI 8K | otro | 1 | 6,48 | 0,16 | CABLES. ADAPTADORES | 12.010 | 9.250 | 7.121 | 4.463 | 22.231 | 55.074 | 1.853,40 |
+| Logitech G413 SE | periférico | 1 | 80,16 | 1,05 | ACC. COMPUTADORA | 131.817 | 9.250 | 54.461 | 29.624 | 22.231 | 247.382 | 1.644,42 |
+| OnePlus 11 256 GB | smartphone | 1 | 518,29 | 0,64 | CELULARES | 959.988 | 9.250 | 49.827 | 348.927 | 22.231 | 1.390.223 | 1.852,22 |
+| HP 14 Chromebook | notebook | 2 | 258,25 | 5,02 | COMPUTADORAS | 956.650 | 9.250 | 238.728 | 224.197 | 22.231 | 1.451.055 | 1.852,18 |
+| GMKtec Mini PC i7 | pc | 1 | 539,98 | 1,43 | COMPUTADORAS | 1.000.157 | 9.250 | 98.104 | 292.558 | 22.231 | 1.422.300 | 1.852,21 |
+| WD_Black SN7100 1 TB | componente | 1 | 221,07 | 0,08 | ACC. COMPUTADORA | 372.265 | 9.250 | 6.661 | 80.115 | 22.231 | 490.522 | 1.683,92 |
+| MSI MAG 272QP QD-OLED | monitor | 1 | 353,49 | 9,04 | ACC. COMPUTADORA | 654.739 | 9.250 | 409.640 | 139.431 | 22.231 | 1.235.290 | 1.852,21 |
 
 Rarezas del Acer: el total pegado no es la suma de sus líneas (faltan 2.249) y su dólar da 1.846,43. Con el dólar de los
 otros (1.852,2) productos daría 716.338 y el total cerraría exacto: el precio cambió mientras se armaba el carrito. Además
 su ficha dice price 386,74, pero merchant + markup dan 371,69 (US$ 15,05 que el markup no explica).
+
+Rarezas de la segunda tanda (14 carritos): el G413 (1.644,42) y el WD SN7100 (1.683,92) dan un dólar más bajo que el
+resto (1.852,2): el precio de la ficha cambió entre la lectura y el carrito, o había un descuento. El cable Anker
+(US$ 8,98) no trae ni IVA ni envío local. **Las candidatas de abajo se armaron con los 8 primeros: falta revisarlas con
+los 22.**
 
 ## Lo que se ve (candidatas, no reglas todavía)
 
