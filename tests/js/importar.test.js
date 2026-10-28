@@ -377,13 +377,13 @@ test("referenciaCarrito: con dos unidades el dolar sale del precio por la cantid
   assert.equal(I.referenciaCarrito(null, { precio: 1 }), "");
 });
 
-test("la ficha de Tiendamia trae el campo para pegar el detalle de la compra; las otras tiendas no", () => {
+// Spec 042: el campo ya no es solo de Tiendamia (los cuatro proveedores, en tests/js/detalle.test.js).
+test("la ficha de Tiendamia trae el campo para pegar el detalle de la compra", () => {
   const tm = I.fichaEnlaceHtml(I.parsearEnlace("https://tiendamia.com.ar/p/amz/b0hfj7nvpb/x"), { esc: escHtml });
-  assert.match(tm, /<label for="pl-carrito">Pegá el detalle de la compra de Tiendamia<\/label>/);
+  assert.match(tm, /<label for="pl-carrito">Pegá el detalle de la compra<\/label>/);
   assert.match(tm, /<textarea id="pl-carrito"/);
-  assert.match(tm, /class="sub chico pl-carrito-res" aria-live="polite"/);
-  for (const otro of ["https://www.amazon.com/dp/B0DLGCHL8M", "https://www.loquieroaca.com/products/1589074"])
-    assert.doesNotMatch(I.fichaEnlaceHtml(I.parsearEnlace(otro), { esc: escHtml }), /pl-carrito/, otro);
+  assert.match(tm, /«Detalle de la compra»/);
+  assert.match(tm, /class="pl-carrito-res" aria-live="polite"/);
 });
 
 /* El detalle completo, tal cual lo guardo el dueño el 27/10/2026 con su direccion cargada: suma IVA, envio local y Total, y

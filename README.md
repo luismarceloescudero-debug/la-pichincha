@@ -308,7 +308,10 @@ Desde la spec 040 no se estima su costo puesto en casa (ya no hay calculadora lo
 es el precio final de Tiendamia o Loquieroaca, al pegar un link en «Buscalo afuera». Desde la spec 041, debajo de la ficha de
 un link de Tiendamia se puede pegar el «Detalle de la compra» del carrito (el envio internacional y los servicios de
 importacion no estan en la ficha y el robots.txt de Tiendamia prohibe leer el carrito): se lee en el navegador y muestra
-el total y cuanto saldria en Amazon al dolar de Tiendamia. Los carritos reales que pega el dueño se juntan en
+el total y cuanto saldria en Amazon al dolar de Tiendamia. Desde la spec 042 el campo «Pegá el detalle de la compra» esta en
+los cuatro proveedores (Amazon, eBay, Tiendamia y Loquieroaca) y muestra el mismo desglose: producto, envio, importacion o
+servicios, impuestos, envio local, total y total en pesos (un parser por proveedor en `js/importar.js`; Amazon con un pegado
+real, eBay y Loquieroaca sin uno todavia). Los carritos reales que pega el dueño se juntan en
 `datos/tiendamia-cargos.json` para buscar la regla del envio y de los servicios (`specs/041-cargos-tiendamia/datos.md`).
 Amazon sigue en «Buscalo afuera» con el aviso «Muchos productos no se envían a Argentina»: no hay un filtro de envio
 internacional en la URL (verificado el 27/10/2026), lo decide la direccion «Enviar a».

@@ -19,6 +19,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
 | 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
 | 11 | Tiendamia: armar los carritos de prueba | La base para encontrar cómo calcula Tiendamia el envío y los servicios | 15 min |
+| 12 | eBay y Loquieroacá: pegar un detalle de compra real | Que «Pegá el detalle de la compra» lea sus rótulos de verdad | 10 min |
 
 ---
 
@@ -259,6 +260,18 @@ con tu cuenta de claude.ai) cada producto tiene «Abrir en Tiendamia»: agregalo
 la compra» (hasta «Subtotal»), pegalo en su campo y tocá «Guardar». Cuando me avises, leo lo guardado y la ficha ese
 mismo día, agrego las entradas a `datos/tiendamia-cargos.json` y lo commiteo. No hace falta comprar ni iniciar el pago.
 Si el carrito dice «NO PERMITIDO · ADUANA» (pasó con un power bank), avisame y busco otro de la misma categoría.
+
+---
+
+## 12. eBay y Loquieroacá: pegar un detalle de compra real (spec 042)
+
+**Qué se destraba:** el campo «Pegá el detalle de la compra» ya está en los cuatro proveedores, pero para eBay y
+Loquieroacá se lee con una lectura tolerante (cada concepto con su monto), sin un texto real visto. Con uno de cada
+uno, se guarda como fixture y se prueba con sus rótulos verdaderos, como ya pasa con Amazon (28/10) y Tiendamia.
+
+**Paso a paso:** en eBay, poné un producto en el carrito con envío a Argentina y copiá el resumen del pago (desde el
+artículo hasta el total). En Loquieroacá, lo mismo con el resumen de la compra. No hace falta pagar. Pegámelos en el
+chat tal cual, con los montos: los guardo en `tests/fixtures/detalle/`.
 
 ---
 

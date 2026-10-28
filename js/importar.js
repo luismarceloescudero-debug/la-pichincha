@@ -232,6 +232,158 @@
     return `${total} Comprado en Amazon saldría aprox. AR$ ${milesTexto(amazon)} (${base} al dólar de Tiendamia + ${mismos}).${fin}`;
   }
 
+  /* --- El detalle pegado, igual para los cuatro proveedores (spec 042) ---
+     Cada proveedor tiene su parser y todos devuelven la misma forma: { tienda, moneda, cantidad, producto, envio, importacion,
+     impuestos, envioLocal, total, totalLeido, otros: [{ rotulo, monto }], notas: [] }. Tiendamia usa parsearDetalleTiendamia
+     (spec 041); Amazon, eBay y Loquieroaca, la lectura por rotulo + monto de abajo. Se lee en el navegador: no sale a ningun lado. */
+
+  /* Un monto con su moneda antes (US$, US $, U$S, USD, AR$, ARS, EUR, €, $) o despues (€, EUR, USD). El signo puede ir antes o
+     despues de la moneda («-US$27.10» de la promocion de envio de Amazon). */
+  const MONEDA = String.raw`us\s?\$|u\$s|usd|ar\$|ars|eur|€|\$`;
+  const RE_MONTO = new RegExp(String.raw`(-)?\s*(${MONEDA})\s*(-)?\s*(\d[\d.,]*\d|\d)|(-)?\s*(\d[\d.,]*\d|\d)\s*(€|eur|usd)(?![a-z])`, "g");
+  const MONEDA_DE = m => /^ar|^ars/.test(m) ? "ARS" : /eur|€/.test(m) ? "EUR" : /^\$$/.test(m) ? null : "USD";
+
+  /* «1.234,56», «1,234.56», «168.99», «371.667»: el ultimo separador es decimal si le siguen 1 o 2 cifras; si le siguen 3, es
+     de miles. */
+  function numeroFlexible(t) {
+    const i = Math.max(t.lastIndexOf("."), t.lastIndexOf(","));
+    if (i < 0) return Number(t);
+    const decimales = t.length - i - 1;
+    if (decimales === 3) return Number(t.replace(/[.,]/g, ""));
+    return Number(t.slice(0, i).replace(/[.,]/g, "") + "." + t.slice(i + 1));
+  }
+
+  /* Las parejas rotulo + monto, en orden. El rotulo es el texto entre el monto anterior y este, en su ultimo renglon o despues
+     de la ultima barra (el dueño pego el checkout de Amazon como «Productos: US$168.99 / Envío y manejo: US$27.10 / ...»). */
+  const ultimoRenglon = trozo => (trozo.split(/\n|\s\/\s|\|/).map(x => x.trim()).filter(x => x && x.toLowerCase() !== "tooltip").pop() || "")
+    .replace(/^[\s:/|·-]+|[\s:·]+$/g, "");
+  function parejas(texto, monedaPesos) {
+    const original = String(texto);
+    // Sin tildes y en minusculas letra por letra: las posiciones son las del original, del que sale el rotulo que se muestra.
+    const t = original.toLowerCase().replace(/[áàäâ]/g, "a").replace(/[éèëê]/g, "e").replace(/[íìïî]/g, "i")
+      .replace(/[óòöô]/g, "o").replace(/[úùüû]/g, "u");
+    const salida = [];
+    let previo = 0;
+    for (const m of t.matchAll(RE_MONTO)) {
+      const rotulo = ultimoRenglon(t.slice(previo, m.index)), visible = ultimoRenglon(original.slice(previo, m.index));
+      previo = m.index + m[0].length;
+      const negativo = !!(m[1] || m[3] || m[5]);
+      const moneda = m[2] !== undefined ? MONEDA_DE(m[2].replace(/\s/g, "")) || monedaPesos : MONEDA_DE(m[7]);
+      const monto = numeroFlexible(m[4] !== undefined ? m[4] : m[6]);
+      if (Number.isFinite(monto)) salida.push({ rotulo, visible, moneda, monto: negativo ? -monto : monto });
+    }
+    return salida;
+  }
+
+  /* A que fila va cada rotulo. Son palabras clave, no rotulos inventados: los unicos rotulos vistos de verdad son los del
+     checkout de Amazon.com (28/10/2026) y los del carrito de Tiendamia (spec 041). El orden importa: «Cargos de importacion»
+     va antes que «impuestos»; «envio a tu direccion» antes que «envio»; «subtotal» no es «total». */
+  const CLASES = [
+    ["total", /(^|[^a-z])total(?!\s*parcial)(?![a-z])/],
+    ["subtotal", /subtotal|total\s+parcial/],
+    ["importacion", /importacion|import|aduan|arancel|customs|dut(y|ies)|servicios/],
+    ["impuestos", /impuesto|(^|[^a-z])iva([^a-z]|$)|tax/],
+    ["envioLocal", /a tu direccion|a domicilio|envio local|entrega local/],
+    ["envio", /envio|shipping|postage|flete|manejo/],
+    ["producto", /producto|articulo|item|precio/],
+  ];
+  const claseDe = rotulo => (CLASES.find(([, re]) => re.test(rotulo)) || [null])[0];
+
+  const montoTexto = (n, moneda) => (n < 0 ? "−" : "") + (moneda === "ARS" ? "AR$ " + milesTexto(Math.abs(n))
+    : (moneda === "EUR" ? "€ " : "US$ ") + Math.abs(n).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+  /* La lectura comun: suma cada rotulo en su fila (la promocion de envio de Amazon resta del envio), toma el total si esta y,
+     si no, la suma. Lo que no se sabe a que fila va queda en `otros` (y dentro del total leido). */
+  function detallePorRotulos(tienda, texto, monedaPesos) {
+    if (texto === undefined || texto === null) return null;
+    const pares = parejas(texto, monedaPesos).filter(p => p.moneda);
+    if (!pares.length) return null;
+    const moneda = (pares.find(p => claseDe(p.rotulo) === "total") || pares[0]).moneda;
+    const d = { tienda, moneda, cantidad: 1, producto: 0, envio: 0, importacion: 0, impuestos: 0, envioLocal: 0, total: 0,
+      totalLeido: false, otros: [], notas: [] };
+    let subtotal = null, hayProducto = false, otraMoneda = false;
+    const descuentos = [];
+    for (const p of pares) {
+      if (p.moneda !== moneda) { otraMoneda = true; continue; }
+      const clase = claseDe(p.rotulo);
+      if (clase === "total") { if (!d.totalLeido) { d.total = p.monto; d.totalLeido = true; } }
+      else if (clase === "subtotal") { if (subtotal === null) subtotal = p.monto; }
+      else if (clase) {
+        d[clase] += p.monto;
+        if (clase === "producto") hayProducto = true;
+        if (p.monto < 0) descuentos.push(`«${p.visible}» (${montoTexto(p.monto, moneda)})`);
+      }
+      else d.otros.push({ rotulo: p.visible, monto: p.monto });
+    }
+    if (!hayProducto && subtotal !== null) { d.producto = subtotal; hayProducto = true; }
+    if (!hayProducto) return null;
+    const cant = String(texto).toLowerCase().match(/(\d+)\s*(?:productos|articulos|artículos|items)|(?:productos|art[ií]culos|items)\s*\((\d+)\)/);
+    if (cant) d.cantidad = Number(cant[1] || cant[2]) || 1;
+    const suma = d.producto + d.envio + d.importacion + d.impuestos + d.envioLocal + d.otros.reduce((s, o) => s + o.monto, 0);
+    for (const k of ["producto", "envio", "importacion", "impuestos", "envioLocal"]) d[k] = Math.round(d[k] * 100) / 100;
+    if (!d.totalLeido) d.total = Math.round(suma * 100) / 100;
+    else if (Math.abs(suma - d.total) > Math.max(1, d.total * 0.01))
+      d.notas.push(`La suma de lo pegado (${montoTexto(suma, moneda)}) no da el total: puede faltar un renglón.`);
+    if (descuentos.length) d.notas.push(`Ya descontado en su fila: ${descuentos.join(", ")}.`);
+    if (d.otros.length) d.notas.push(`No sé en qué fila va ${d.otros.map(o => `«${o.rotulo || "sin rótulo"}»`).join(", ")}: está en el total, no en el desglose.`);
+    if (otraMoneda) d.notas.push(`Hay montos en otra moneda que no sumé: el desglose va en ${moneda === "ARS" ? "pesos" : moneda === "EUR" ? "euros" : "dólares"}.`);
+    return d;
+  }
+
+  /* Amazon.com: el checkout de AmazonGlobal que pego el dueño el 28/10/2026 (Productos, Envío y manejo, Promoción de envío
+     GRATIS, Cálculo estimado de impuestos por cobrar, Cargos de importación, Total del pedido). Un «$» solo es dolar. */
+  const parsearDetalleAmazon = texto => detallePorRotulos("amazon", texto, "USD");
+  /* eBay y Loquieroaca: sin un pegado real todavia (pendiente del dueño); la misma lectura tolerante. En eBay un «$» solo es
+     dolar; en Loquieroaca, pesos. */
+  const parsearDetalleEbay = texto => detallePorRotulos("ebay", texto, "USD");
+  const parsearDetalleLoquieroaca = texto => detallePorRotulos("loquieroaca", texto, "ARS");
+
+  /* El carrito de Tiendamia en la forma comun. */
+  function detalleTiendamia(texto) {
+    const d = parsearDetalleTiendamia(texto);
+    if (!d) return null;
+    return { tienda: "tiendamia", moneda: "ARS", cantidad: d.cantidad, producto: d.productos, envio: d.envio, importacion: d.servicios,
+      impuestos: d.impuestos, envioLocal: d.envioLocal, total: d.subtotal, totalLeido: true, otros: [], notas: [], tiendamia: d };
+  }
+
+  const PARSERS = { amazon: parsearDetalleAmazon, ebay: parsearDetalleEbay, loquieroaca: parsearDetalleLoquieroaca, tiendamia: detalleTiendamia };
+
+  /* El detalle pegado para la tienda del link. */
+  function parsearDetalle(tienda, texto) {
+    const p = PARSERS[tienda];
+    return p ? p(texto) : null;
+  }
+
+  /* Las filas, las mismas en todos los proveedores. `cotizacion`: { valor (pesos por unidad de la moneda), nombre, fuente, hora }
+     o null; sin ella, un total en dolares o euros queda «sin cotización» (no se convierte con un valor viejo sin decirlo). */
+  function filasDetalle(d, cotizacion) {
+    if (!d) return [];
+    const f = (clave, rotulo, monto) => ({ clave, rotulo, texto: montoTexto(monto, d.moneda), monto });
+    const filas = [f("producto", d.cantidad > 1 ? `Producto (${d.cantidad})` : "Producto", d.producto),
+      f("envio", "Envío", d.envio), f("importacion", "Importación o servicios", d.importacion), f("impuestos", "Impuestos", d.impuestos),
+      f("envioLocal", "Envío local", d.envioLocal), f("total", "Total", d.total)];
+    let pesos;
+    if (d.moneda === "ARS") pesos = { clave: "pesos", rotulo: "Total en pesos", texto: montoTexto(d.total, "ARS"), monto: d.total };
+    else if (cotizacion && cotizacion.valor > 0)
+      pesos = { clave: "pesos", rotulo: "Total en pesos", monto: Math.round(d.total * cotizacion.valor),
+        texto: montoTexto(d.total * cotizacion.valor, "ARS"), nota: `a ${montoTexto(cotizacion.valor, "ARS")} (${cotizacion.nombre}${cotizacion.hora ? ", " + cotizacion.hora : ""}${cotizacion.fuente ? ", " + cotizacion.fuente : ""})` };
+    else pesos = { clave: "pesos", rotulo: "Total en pesos", texto: "sin cotización", monto: null };
+    return [...filas, pesos];
+  }
+
+  /* El desglose en una tabla, mas las notas y, en Tiendamia, la cuenta de Amazon al dolar de Tiendamia (spec 041). */
+  function detalleHtml(d, { esc, cotizacion = null, item = null }) {
+    if (!d) return "";
+    const filas = filasDetalle(d, cotizacion).map(r => `<tr class="pl-d-${r.clave}"><th scope="row">${esc(r.rotulo)}</th>`
+      + `<td${r.monto === null ? ' class="pl-sin"' : ""}>${esc(r.texto)}${r.nota ? `<br><span class="sub chico">${esc(r.nota)}</span>` : ""}</td></tr>`).join("");
+    const notas = d.notas.map(n => `<p class="sub chico">${esc(n)}</p>`).join("");
+    const extra = d.tiendamia ? `<p class="sub chico">${esc(referenciaCarrito(d.tiendamia, item))}</p>`
+      : `<p class="sub chico">Aproximado: revisalo antes de pagar.</p>`;
+    return `<table class="pl-detalle"><caption class="sub chico">Desglose de lo que pegaste (${esc(TIENDAS_NOMBRE[d.tienda] || d.tienda)})</caption>`
+      + `<tbody>${filas}</tbody></table>${notas}${extra}`;
+  }
+  const TIENDAS_NOMBRE = { amazon: "Amazon", ebay: "eBay", tiendamia: "Tiendamia", loquieroaca: "Loquieroacá" };
+
   /* --- El bloque de pegar un link (spec 040): vive en «Buscalo afuera», sin formulario ni desglose --- */
   const NO_RECONOCIDO = "No reconozco ese link. Por ahora leo los de Amazon, Tiendamia, Loquieroacá y eBay.";
 
@@ -244,12 +396,26 @@
         <div id="pl-res" aria-live="polite"></div></div>`;
   }
 
-  // Spec 041: solo en la ficha de Tiendamia, el campo para pegar el detalle del carrito (lo lee js/vista-afuera.js).
-  const CARRITO_HTML = `<div class="pl-carrito">
-          <label for="pl-carrito">Pegá el detalle de la compra de Tiendamia</label>
-          <textarea id="pl-carrito" rows="4" spellcheck="false" aria-describedby="pl-carrito-ayuda" placeholder="Productos (1) AR$… Envío Internacional AR$… Servicios de Importación AR$… Subtotal AR$…"></textarea>
-          <small id="pl-carrito-ayuda" class="sub chico">Agregá el producto al carrito de Tiendamia y copiá el «Detalle de la compra». Se lee acá, en tu navegador: no se envía a ningún lado.</small>
-          <p class="sub chico pl-carrito-res" aria-live="polite"></p></div>`;
+  /* Spec 042: el campo para pegar el detalle de la compra, en la ficha de los cuatro proveedores (lo lee js/vista-afuera.js).
+     Cambia solo la ayuda: donde se copia el detalle en cada tienda. */
+  const AYUDA_DETALLE = {
+    amazon: { donde: "En el checkout de Amazon, con «Enviar a: Argentina», copiá el resumen del pedido (Productos, Envío, Cargos de importación, Total del pedido).",
+      ejemplo: "Productos: US$… Envío y manejo: US$… Cargos de importación: US$… Total del pedido: US$…" },
+    tiendamia: { donde: "Agregá el producto al carrito de Tiendamia y copiá el «Detalle de la compra».",
+      ejemplo: "Productos (1) AR$… Envío Internacional AR$… Servicios de Importación AR$… Subtotal AR$…" },
+    ebay: { donde: "Copiá el resumen del pago de eBay: cada concepto con su monto (artículo, envío, importación, total).",
+      ejemplo: "Artículo US$… Envío US$… Total US$…" },
+    loquieroaca: { donde: "Copiá el resumen de la compra de Loquieroacá: cada concepto con su monto.",
+      ejemplo: "Producto $… Envío $… Total $…" },
+  };
+  const carritoHtml = tienda => {
+    const a = AYUDA_DETALLE[tienda];
+    return `<div class="pl-carrito">
+          <label for="pl-carrito">Pegá el detalle de la compra</label>
+          <textarea id="pl-carrito" rows="4" spellcheck="false" aria-describedby="pl-carrito-ayuda" placeholder="${a.ejemplo}"></textarea>
+          <small id="pl-carrito-ayuda" class="sub chico">${a.donde} Se lee acá, en tu navegador: no se envía a ningún lado.</small>
+          <div class="pl-carrito-res" aria-live="polite"></div></div>`;
+  };
 
   /* La ficha de un link: tienda, codigo, enlaces y el lugar de la linea leida (la llena js/vista-afuera.js). */
   function fichaEnlaceHtml(e, { esc, icono = () => "" }) {
@@ -261,7 +427,7 @@
     return `<div class="pl-ficha">
         <p><b>${esc(d.tiendaNombre)}</b>${e.id ? ` · código ${esc(e.id)}` : " · link corto: abrilo para ver el producto"}${e.nombre ? `<br><span class="sub">«${esc(e.nombre)}»</span>` : ""}</p>
         <p class="pl-acciones">${abrir}</p>
-        <p class="sub chico pl-leido" aria-live="polite"></p>${e.tienda === "tiendamia" ? CARRITO_HTML : ""}</div>`;
+        <p class="sub chico pl-leido" aria-live="polite"></p>${AYUDA_DETALLE[e.tienda] ? carritoHtml(e.tienda) : ""}</div>`;
   }
 
   /* La linea de la ficha con lo que leyo el Worker; el nombre leido va solo si el link no lo traia. */
@@ -299,7 +465,8 @@
   }
 
   const api = { FUENTES, OFICIALES, AMAZON_TAG, NO_RECONOCIDO, enlaceFuente, urlBusqueda, parsearEnlace, datosDeEnlace, oficialesPara,
-    buscarAfueraHtml, pegarLinkHtml, fichaEnlaceHtml, lineaLeida, urlLeerEnlace, leidoDeEnlace, parsearDetalleTiendamia, referenciaCarrito };
+    buscarAfueraHtml, pegarLinkHtml, fichaEnlaceHtml, lineaLeida, urlLeerEnlace, leidoDeEnlace, parsearDetalleTiendamia, referenciaCarrito,
+    numeroFlexible, parsearDetalleAmazon, parsearDetalleEbay, parsearDetalleLoquieroaca, parsearDetalle, filasDetalle, detalleHtml };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Importar = api;
 })(this);
