@@ -40,25 +40,37 @@ su ficha dice price 386,74, pero merchant + markup dan 371,69 (US$ 15,05 que el 
 
 Rarezas de la segunda tanda (14 carritos): el G413 (1.644,42) y el WD SN7100 (1.683,92) dan un dólar más bajo que el
 resto (1.852,2): el precio de la ficha cambió entre la lectura y el carrito, o había un descuento. El cable Anker
-(US$ 8,98) no trae ni IVA ni envío local. **Las candidatas de abajo se armaron con los 8 primeros: falta revisarlas con
-los 22.**
+(US$ 8,98) no trae ni IVA ni envío local.
 
 ## Lo que se ve (candidatas, no reglas todavía)
 
-| Cargo | Candidata | Casos que explica |
-|---|---|---|
-| Dólar implícito | Uno solo por día para todos los productos (1.852,2 a la noche) | 6 de 7 del mismo rato (el Acer, por el cambio de precio) |
-| Envío internacional | Fijo, ≈ US$ 5 por carrito: 9.250 / 1.852,2 = 4,99; a la mañana 9.278 / 1.868,8 = 4,96 | 8 de 8; no depende del peso ni de la cantidad |
-| Envío a tu dirección | Fijo, AR$ 22.231 (seguramente depende de la dirección) | 7 de 7 |
-| Servicios de importación | Por peso, ≈ AR$ 44.400 a 47.000 por kg (≈ US$ 24-25/kg) | 5 de 8 (celular, notebook, monitor, G305, hub). No cierran: Beelink 52.800/kg, SSD de 0,1 kg 66.600/kg y AeroClip de 0,05 kg 330.000/kg: hay un mínimo o se usa el peso volumétrico, que la ficha no trae |
-| IVA e impuestos | 21 % de (productos + envío internacional) en accesorios de computadora y videojuegos | 4 de 4 (±5 pesos) |
-| | ≈ 10,66 % de (productos + envío) en COMPUTADORAS (IVA reducido de 10,5 % más algo) | 2 de 2, sin explicar el 0,16 % de más |
-| | 36 % de (productos + envío) en CELULARES (IVA + aranceles) | 1 de 1 |
+Revisadas el 28/10/2026 con los 22 carritos (tolerancia AR$ 2 salvo que se diga otra cosa; peso total = `weight` ×
+`cantidad`).
 
-Con esto **todavía no se puede estimar sin carrito**: los servicios no cierran en 3 de 8 y los impuestos dependen de la
-categoría aduanera, de la que hay pocas muestras. Hace falta más de lo mismo: productos livianos (menos de 0,3 kg) para
-ver el mínimo de los servicios, más computadoras y celulares, y otras categorías aduaneras. La página «Carritos de
-Tiendamia» arma una tanda al azar en cada apertura para eso.
+| Cargo | Candidata | Casos que explica (de 22) |
+|---|---|---|
+| Dólar implícito | Uno por tanda de carga (1.852,2 a la noche del 27/10) | 18 dan 1.852,2 ± 1,2 (la diferencia es redondeo de centavos). No cierran 4, todos por precio: AeroClip (1.868,8, tanda de la mañana), Acer (1.846,43), G413 (1.644,42) y WD SN7100 (1.683,92) |
+| Envío internacional | Fijo, AR$ 9.250 (≈ US$ 5), sin depender del peso ni de la cantidad | 21; el AeroClip (9.278) es de la tanda de la mañana, con otro dólar |
+| Envío a tu dirección | Fijo, AR$ 22.231 (seguramente depende de la dirección) | 20 de 20 con dato (el AeroClip y el cable Anker se armaron sin dirección) |
+| Servicios de importación | Por peso, ≈ AR$ 44.400 a 47.000 por kg | **7**: Moto G, Samsung 27", G305, hub Anker, Galaxy A16, Highwings y MSI. Se rompe |
+| | Mínimo de AR$ 6.661 | Lo pagan exacto los 4 de 0,1 kg o menos (SSD 990 PRO, Patriot, cable Anker, WD SN7100) |
+| IVA e impuestos | 21 % de (productos + envío internacional) en ACC. COMPUTADORA, VIDEOJUEGOS, AURICULARES y CABLES | 11 de 11 con tolerancia AR$ 7 (6 con AR$ 2): el resto es redondeo |
+| | 36 % de (productos + envío) en CELULARES (IVA + aranceles) | 3 de 3 con tolerancia AR$ 17 (36,000 a 36,002 %) |
+| | ≈ 10,66 % en COMPUTADORAS | **2 de 6**: solo Acer y Beelink, las dos con que se armó. HP Chromebook 23,21 %, Vivobook 24,87 %, GMKtec i7 28,98 % y GMKtec M6 33,46 %. Se rompe |
+
+Lo que aguanta: los dos envíos (fijos), el dólar por tanda y el IVA del 21 % y del 36 % por categoría aduanera. Lo
+que no:
+
+- **Servicios**: no siguen el peso de la ficha. Fuera del mínimo, el AR$/kg va de 44.400 (bultos chicos y densos) a
+  77.900 (OnePlus 11) y 330.000 (AeroClip). Una hipótesis que encaja, **sin probar**: se cobran por **peso volumétrico**
+  (las cajas grandes y livianas pagan de más). La ficha no trae ni ese peso ni las medidas.
+- **COMPUTADORAS**: el 10,66 % era un artefacto de 2 muestras; con 6 no hay regla (ni por precio ni por tipo, con
+  tan pocas).
+
+Con esto **todavía no se puede estimar sin carrito** ni los servicios ni las computadoras. Para la próxima tanda
+conviene: cajas grandes con poco peso (para ver el volumétrico), más computadoras de distinto tipo (notebook,
+Chromebook, mini PC, all-in-one) y más celulares. La página «Carritos de Tiendamia» arma una tanda al azar en cada
+apertura para eso.
 
 ## Lo que ya dice la ficha (sin carrito)
 
