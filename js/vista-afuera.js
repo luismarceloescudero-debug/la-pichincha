@@ -41,9 +41,47 @@ function pintarCarrito(res) {
     : texto ? `<p class="sub chico">${esc("No encuentro el producto con su monto: copiá el detalle completo, con cada concepto y su precio.")}</p>` : "";
 }
 
-/* La cotizacion para pasar a pesos un desglose en dolares o euros. Hasta el monitor de monedas (spec 043), ninguna: el total
-   en pesos dice «sin cotización». */
-const cotizacionPara = () => null;
+/* --- Monitor de monedas (spec 043) ---
+   DolarApi se consulta al aparecer el bloque y de nuevo si lo que hay tiene mas de MONEDAS_VIGENCIA. Si no responde, no hay
+   cotizacion: el monitor y el total en pesos lo dicen (no se usa un valor anterior sin avisar). El dolar elegido para
+   pasar a pesos se recuerda en este navegador (tarjeta por defecto). */
+const MONEDAS_VIGENCIA = 10 * 60 * 1000;
+let MONEDAS = { tasas: null, pedido: 0, cargando: false };
+let MONEDAS_TIPO = (() => { try { return localStorage.getItem("pichincha-dolar") || Monedas.POR_DEFECTO; } catch (e) { return Monedas.POR_DEFECTO; } })();
+
+const cotizacionPara = moneda => Monedas.cotizacion(MONEDAS.tasas, moneda, MONEDAS_TIPO);
+
+function pintarMonedas() {
+  for (const caja of document.querySelectorAll(".pl-monedas"))
+    caja.innerHTML = Monedas.monitorHtml(MONEDAS.tasas, { esc, tipo: MONEDAS_TIPO, cargando: MONEDAS.cargando });
+  const res = $("#pl-res");
+  if (res) pintarCarrito(res);
+}
+
+function pedirMonedas() {
+  if (MONEDAS.cargando || Date.now() - MONEDAS.pedido < MONEDAS_VIGENCIA) return pintarMonedas();
+  MONEDAS = { tasas: null, pedido: Date.now(), cargando: true };
+  pintarMonedas();
+  const corte = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? { signal: AbortSignal.timeout(8000) } : {};
+  const json = url => fetch(url, corte).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  Promise.all([json(Monedas.URLS.dolares), json(Monedas.URLS.eur)]).then(([dolares, eur]) => {
+    const tasas = Monedas.normalizar(dolares, eur);
+    MONEDAS = { tasas, pedido: tasas ? Date.now() : 0, cargando: false };    // un fallo se reintenta al volver a pintar
+    pintarMonedas();
+  });
+}
+
+/* El bloque se pinta con innerHTML desde js/busqueda.js: cuando aparece un monitor vacio, se llena. */
+if (typeof MutationObserver !== "undefined" && document.body)
+  new MutationObserver(() => { if (document.querySelector(".pl-monedas:empty")) pedirMonedas(); })
+    .observe(document.body, { childList: true, subtree: true });
+
+document.addEventListener("change", ev => {
+  if (!ev.target || ev.target.name !== "mn-tipo") return;
+  MONEDAS_TIPO = ev.target.value;
+  try { localStorage.setItem("pichincha-dolar", MONEDAS_TIPO); } catch (e) { /* sin almacenamiento, vale para esta visita */ }
+  pintarMonedas();
+});
 
 function leerEnlace(res, texto) {
   ENLACE_ITEM = null;

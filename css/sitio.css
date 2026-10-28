@@ -711,6 +711,20 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .pl-detalle .pl-d-total th,.pl-detalle .pl-d-total td,.pl-detalle .pl-d-pesos th,.pl-detalle .pl-d-pesos td{font-weight:700;color:var(--ink)}
 .pl-detalle .pl-d-pesos td{color:var(--good)}
 .pl-detalle .pl-d-pesos td.pl-sin{color:var(--ink-3)}
+/* Spec 043: el monitor de monedas, arriba de «Pegá el link» */
+.pl-monedas:empty{display:none}
+.monedas{display:flex;flex-direction:column;gap:6px;padding:0 0 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.monedas p{margin:0}
+.mn-lista{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}
+.mn-lista li{display:flex;flex-direction:column;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mn-nombre{font-size:.78rem;color:var(--ink-2)}
+.mn-valor{font:600 1rem var(--font-mono);color:var(--ink)}
+.mn-hora{font:500 .72rem var(--font-mono);color:var(--ink-3)}
+.mn-vieja{color:var(--warn)}
+.mn-elegir{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}
+.mn-elegir legend{padding:0 0 4px;flex-basis:100%}
+.pegar-link .mn-op{display:inline-flex;align-items:center;gap:6px;min-height:32px;font:500 .88rem var(--font-sans);color:var(--ink)}
+.pegar-link .mn-op input{width:auto;min-height:0;padding:0;margin:0;accent-color:var(--accent)}
 
 /* --- Spec 022: Afuera en vivo (respuesta del Worker) --- */
 .afuera-vivo{margin:18px 0 4px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
