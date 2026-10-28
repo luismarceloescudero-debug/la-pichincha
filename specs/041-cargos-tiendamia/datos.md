@@ -4,7 +4,7 @@ La base es `datos/tiendamia-cargos.json` (una entrada por carrito que arma y peg
 `tests/js/tiendamia-cargos.test.js`). Acá va la tabla y lo que se puede decir con ella. **Ninguna regla se propone para
 estimar sin carrito hasta que explique todos los casos, diciendo con cuántos.**
 
-## Carritos cargados (22, todos del 27/10/2026)
+## Carritos cargados (23: 22 del 27/10/2026 y uno del 28/10)
 
 Montos en AR$. «Imp.» es «IVA e impuestos internos» (en el celular, «+ Aranceles y gestión aduanera»); «Local» es «Envío
 Estándar a tu dirección». El AeroClip se armó sin dirección cargada: su carrito no mostraba ni el IVA ni el envío local.
@@ -33,6 +33,7 @@ Estándar a tu dirección». El AeroClip se armó sin dirección cargada: su car
 | GMKtec Mini PC i7 | pc | 1 | 539,98 | 1,43 | COMPUTADORAS | 1.000.157 | 9.250 | 98.104 | 292.558 | 22.231 | 1.422.300 | 1.852,21 |
 | WD_Black SN7100 1 TB | componente | 1 | 221,07 | 0,08 | ACC. COMPUTADORA | 372.265 | 9.250 | 6.661 | 80.115 | 22.231 | 490.522 | 1.683,92 |
 | MSI MAG 272QP QD-OLED | monitor | 1 | 353,49 | 9,04 | ACC. COMPUTADORA | 654.739 | 9.250 | 409.640 | 139.431 | 22.231 | 1.235.290 | 1.852,21 |
+| Moto G 2025 (28/10, 1 u.) | smartphone | 1 | 197,72 | 0,40 | CELULARES | 367.757 | 9.289 | 17.859 | 135.740 | 22.324 | 552.969 | 1.859,99 |
 
 Rarezas del Acer: el total pegado no es la suma de sus líneas (faltan 2.249) y su dólar da 1.846,43. Con el dólar de los
 otros (1.852,2) productos daría 716.338 y el total cerraría exacto: el precio cambió mientras se armaba el carrito. Además
@@ -71,6 +72,37 @@ Con esto **todavía no se puede estimar sin carrito** ni los servicios ni las co
 conviene: cajas grandes con poco peso (para ver el volumétrico), más computadoras de distinto tipo (notebook,
 Chromebook, mini PC, all-in-one) y más celulares. La página «Carritos de Tiendamia» arma una tanda al azar en cada
 apertura para eso.
+
+### El mismo producto dos días seguidos: los cargos fijos van en dólares
+
+El Moto G 2025 se volvió a armar el 28/10 (1 unidad; el 27/10 eran 2). La ficha no cambió (price US$ 197,72, Amazon
+US$ 168,99, recargo 17 %), pero el dólar sí: 1.852,2 → 1.860,0 (+0,42 %). Todos los cargos se movieron lo mismo:
+
+| Cargo | 27/10 (por unidad) | 28/10 | En US$ |
+|---|---|---|---|
+| Envío internacional | 9.250 | 9.289 | 5,00 los dos días |
+| Envío a tu dirección | 22.231 | 22.324 | 12,00 los dos días |
+| Servicios de importación | 17.785 | 17.859 | 9,60 los dos días |
+| IVA e impuestos (36 % de productos + envío) | 133.512 | 135.740 | 36,00 % los dos días |
+
+O sea: **los dos envíos son fijos en dólares (US$ 5 y US$ 12) y se pasan a pesos con el dólar del día**, y los servicios
+de un mismo producto también están en dólares (US$ 9,60 por Moto G, por unidad: con 2 unidades fueron el doble).
+
+## Amazon directo contra Tiendamia (mismo producto, mismo día)
+
+El 28/10 el dueño armó el mismo Moto G (B0DNRK51QQ) en el checkout de Amazon.com con AmazonGlobal y en Tiendamia
+(`amazon_directo` en la entrada del 28/10 de la base):
+
+| | Amazon.com (AmazonGlobal) | Tiendamia |
+|---|---|---|
+| Producto | US$ 168,99 | AR$ 367.757 (US$ 197,72: Amazon + 17 % de recargo) |
+| Envío | US$ 27,10, con promoción de envío gratis: US$ 0 | AR$ 9.289 (US$ 5) + AR$ 22.324 a tu dirección (US$ 12) |
+| Importación | «Cargos de importación» US$ 41,46 (24,5 % del producto, depósito que estima Amazon) | Servicios AR$ 17.859 (US$ 9,60) + IVA e impuestos AR$ 135.740 (US$ 73) |
+| **Total** | **US$ 210,45** | **AR$ 552.969 (US$ 297,30 al dólar del carrito)** |
+
+Tiendamia sale **US$ 86,85 más (+41 %)**. Lo que no se sabe con este dato: si a lo de Amazon se le suma algo al
+recibirlo (el courier de AmazonGlobal, una percepción por pagar con tarjeta en dólares) y si la promoción de envío
+gratis se repite. Por eso es una referencia, no una regla: hace falta el mismo par en más productos.
 
 ## Lo que ya dice la ficha (sin carrito)
 
