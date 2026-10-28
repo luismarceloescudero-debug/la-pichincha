@@ -202,7 +202,7 @@
       "impuestos": 18585,
       "envio_local": 22231,
       "subtotal": 165103,
-      "dolar": 1852.0,
+      "dolar": 1852,
       "nota": "ficha de Tiendamia no leida (HTTP 403 desde el entorno de carga): merchant_price, markup y markup_regla quedan null"
     },
     {
@@ -456,6 +456,36 @@
       "subtotal": 1235290,
       "dolar": 1852.21,
       "nota": "ficha de Tiendamia no leida (HTTP 403 desde el entorno de carga): merchant_price, markup y markup_regla quedan null"
+    },
+    {
+      "fecha": "2026-10-28",
+      "url": "https://tiendamia.com.ar/p/amz/b0dnrk51qq/moto-g-2025-desbloqueado-hecho-para-us",
+      "categoria": "smartphone",
+      "nombre": "Moto G 2025 desbloqueado (otra vez, 1 unidad)",
+      "cantidad": 1,
+      "price": 197.72,
+      "merchant_price": 168.99,
+      "markup": 28.73,
+      "markup_regla": "150-175 USD - USA",
+      "weight": 0.4,
+      "categoria_aduana": "CELULARES",
+      "productos": 367757,
+      "envio": 9289,
+      "servicios": 17859,
+      "impuestos": 135740,
+      "envio_local": 22324,
+      "subtotal": 552969,
+      "dolar": 1859.99,
+      "nota": "Ficha leida el 28/10 por el Worker (price, merchant_price y 17 % de recargo); weight y categoria_aduana de la lectura del 27/10, la ficha no los devuelve por el Worker.",
+      "amazon_directo": {
+        "url": "https://www.amazon.com/dp/B0DNRK51QQ",
+        "productos_usd": 168.99,
+        "envio_usd": 0,
+        "cargos_importacion_usd": 41.46,
+        "impuestos_usd": 0,
+        "total_usd": 210.45,
+        "nota": "Checkout de Amazon.com con AmazonGlobal el mismo dia: envio de US$ 27,10 con promocion de envio gratis; los cargos de importacion son el deposito que estima Amazon."
+      }
     }
   ]
 }
