@@ -310,8 +310,8 @@ un link de Tiendamia se puede pegar el «Detalle de la compra» del carrito (el 
 importacion no estan en la ficha y el robots.txt de Tiendamia prohibe leer el carrito): se lee en el navegador y muestra
 el total y cuanto saldria en Amazon al dolar de Tiendamia. Desde la spec 042 el campo «Pegá el detalle de la compra» esta en
 los cuatro proveedores (Amazon, eBay, Tiendamia y Loquieroaca) y muestra el mismo desglose: producto, envio, importacion o
-servicios, impuestos, envio local, total y total en pesos (un parser por proveedor en `js/importar.js`; Amazon con un pegado
-real, eBay y Loquieroaca sin uno todavia). Desde la spec 043, arriba de «Pegá el link» hay un monitor de monedas en vivo
+servicios, impuestos, envio local, total y total en pesos (un parser por proveedor en `js/importar.js`, probado con un pegado
+real de cada uno). Desde la spec 043, arriba de «Pegá el link» hay un monitor de monedas en vivo
 (dolar tarjeta, MEP y oficial y el euro contra el peso, de DolarApi, cada uno con su hora; `js/monedas.js`) y lo que esta
 en dolares o euros pasa a pesos al dolar elegido (tarjeta por defecto). Si DolarApi no responde, dice «sin cotización» y no
 convierte. Los carritos reales que pega el dueño se juntan en

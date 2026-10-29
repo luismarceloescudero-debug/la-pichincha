@@ -31,8 +31,8 @@ totalLeido, otros, notas }`.
 |---|---|---|---|
 | Amazon.com | `parsearDetalleAmazon` | **sí** (`tests/fixtures/detalle/amazon-2026-10-28.txt`) | checkout con AmazonGlobal que pegó el dueño el 28/10/2026 |
 | Tiendamia | `parsearDetalleTiendamia` (spec 041) | **sí** (los 23 carritos de `datos/tiendamia-cargos.json`) | «Detalle de la compra» del carrito |
-| eBay | `parsearDetalleEbay` | **no: sin fixture real** | — |
-| Loquieroacá | `parsearDetalleLoquieroaca` | **no: sin fixture real** | — |
+| eBay | `parsearDetalleEbay` | **sí** (`tests/fixtures/detalle/ebay-2026-10-29.txt`) | «Resumen del pedido» del carrito que pegó el dueño el 29/10/2026 |
+| Loquieroacá | `parsearDetalleLoquieroaca` | **sí** (`tests/fixtures/detalle/loquieroaca-2026-10-29.txt`) | «Resumen de tu pedido» que pegó el dueño el 29/10/2026 |
 
 El texto real de Amazon (una línea por concepto):
 
@@ -49,8 +49,16 @@ Amazon, eBay y Loquieroacá usan la misma lectura tolerante (`detallePorRotulos`
 U$S, USD, AR$, ARS, EUR, € antes o después; un `$` solo es dólar en Amazon y eBay y peso en Loquieroacá) y el rótulo que
 lo precede en su renglón (o después de la última barra). El rótulo va a una fila por **palabras clave**, no por rótulos
 inventados: total (no «subtotal» ni «total parcial»), importación/aduana/aranceles/servicios, impuestos/IVA/tax, envío a tu
-dirección/local, envío/shipping/manejo, producto/artículo/item. Para eBay y Loquieroacá no se vio un pegado real: se pide
-uno en `docs/pendientes-del-dueno.md` (pendiente 12) y, cuando llegue, se suma como fixture.
+dirección/nacional/local, envío/shipping/manejo, producto/artículo/item.
+
+Lo que enseñaron los pegados reales de eBay y Loquieroacá (29/10/2026, el mismo AeroClip 2):
+
+- **eBay** pega antes del resumen el cupón ofrecido («Canjear cupón$5.00 off your purchase of $50.00 or more»), que no
+  está aplicado. Si el texto tiene «Resumen del pedido» o «Resumen de tu pedido», se lee desde ahí. Después: «Artículo (1)
+  US $255.54», «Envío US $34.89», «Total US $290.43» (sin cargos de importación: eBay no los cobró en este envío).
+- **Loquieroacá** trae un renglón «x1 $ 611.162,92» (el producto con IVA, que repite el total), «Subtotal $ 556.451,43»
+  (sin IVA), «IVA $ 54.711,49», «Impuestos de importación $ 0,00», «Envío nacional Bonificado» y «Total a pagar
+  $ 611.162,92». El «xN» da la cantidad y es el producto solo si no hay subtotal; «Envío nacional» va a «Envío local».
 
 ## Requisitos funcionales
 

@@ -1,13 +1,14 @@
-/* Spec 042: el detalle de la compra pegado, igual para Amazon, eBay, Tiendamia y Loquieroaca. Amazon tiene un pegado real
-   (tests/fixtures/detalle/amazon-2026-10-28.txt, checkout de Amazon.com con AmazonGlobal que pego el dueño el 28/10/2026);
-   eBay y Loquieroaca, todavia no: sus casos prueban la lectura tolerante (rotulo + monto), no rotulos vistos. */
+/* Spec 042: el detalle de la compra pegado, igual para Amazon, eBay, Tiendamia y Loquieroaca. Los pegados reales del dueño
+   estan en tests/fixtures/detalle/: el checkout de Amazon.com con AmazonGlobal (28/10/2026) y los resumenes de eBay y
+   Loquieroaca del mismo AeroClip 2 (29/10/2026). Los demas casos prueban la lectura tolerante (rotulo + monto). */
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const I = require("../../js/importar.js");
 
-const AMAZON = fs.readFileSync(path.join(__dirname, "..", "fixtures", "detalle", "amazon-2026-10-28.txt"), "utf8").replace(/\r\n/g, "\n");
+const fixture = nombre => fs.readFileSync(path.join(__dirname, "..", "fixtures", "detalle", nombre), "utf8").replace(/\r\n/g, "\n");
+const AMAZON = fixture("amazon-2026-10-28.txt"), EBAY = fixture("ebay-2026-10-29.txt"), LOQUIEROACA = fixture("loquieroaca-2026-10-29.txt");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const FILAS = ["producto", "envio", "importacion", "impuestos", "envioLocal", "total", "pesos"];
 
@@ -62,7 +63,7 @@ test("sin producto o sin montos, no hay desglose", () => {
     assert.equal(I.parsearDetalleAmazon(t), null, String(t));
 });
 
-test("eBay (sin fixture real): rotulo + monto con «US $» y coma decimal; un «$» solo es dolar", () => {
+test("eBay, lectura tolerante: rotulo + monto con «US $» y coma decimal; un «$» solo es dolar", () => {
   const d = I.parsearDetalleEbay("Subtotal (2 artículos) US $50,00\nEnvío US $10,00\nCargos de importación US $5,00\nTotal US $65,00");
   assert.deepEqual([d.moneda, d.cantidad, d.producto, d.envio, d.importacion, d.total], ["USD", 2, 50, 10, 5, 65]);
   assert.equal(I.parsearDetalleEbay("Item $20\nShipping $5").moneda, "USD");
@@ -70,9 +71,31 @@ test("eBay (sin fixture real): rotulo + monto con «US $» y coma decimal; un «
   assert.equal(I.parsearDetalleEbay("Artículo 30,00 EUR\nTotal 30,00 EUR").moneda, "EUR", "eBay de Europa, con la moneda despues");
 });
 
-test("Loquieroaca (sin fixture real): un «$» solo es peso, miles con punto", () => {
+test("Loquieroaca, lectura tolerante: un «$» solo es peso, miles con punto", () => {
   const d = I.parsearDetalleLoquieroaca("Producto $ 150.000\nEnvío $ 1.500,50\nImpuestos $ 20.000\nTotal $171.500,50");
   assert.deepEqual([d.moneda, d.producto, d.envio, d.impuestos, d.total], ["ARS", 150000, 1500.5, 20000, 171500.5]);
+});
+
+test("eBay: el resumen real del dueño; el cupon ofrecido antes de «Resumen del pedido» no cuenta", () => {
+  const d = I.parsearDetalleEbay(EBAY);
+  assert.deepEqual([d.moneda, d.cantidad, d.producto, d.envio, d.importacion, d.impuestos, d.envioLocal, d.total],
+    ["USD", 1, 255.54, 34.89, 0, 0, 0, 290.43]);
+  assert.equal(d.totalLeido, true);
+  assert.deepEqual(d.otros, [], "ni «$5.00» ni «$50.00» del cupon");
+  assert.deepEqual(d.notas, []);
+});
+
+test("Loquieroaca: el resumen real del dueño; «x1» es la cantidad, el producto es el subtotal sin IVA", () => {
+  const d = I.parsearDetalleLoquieroaca(LOQUIEROACA);
+  assert.deepEqual([d.moneda, d.cantidad, d.producto, d.envio, d.importacion, d.impuestos, d.envioLocal, d.total],
+    ["ARS", 1, 556451.43, 0, 0, 54711.49, 0, 611162.92]);
+  assert.deepEqual(d.otros, [], "el renglon x1 repite el total: no se suma otra vez");
+  assert.deepEqual(d.notas, []);
+  assert.equal(I.filasDetalle(d).at(-1).texto, "AR$ 611.163", "en pesos, el total es el total en pesos");
+  const dos = I.parsearDetalleLoquieroaca("x2\n$ 1.000\nTotal a pagar\n$ 1.000");
+  assert.equal(dos.cantidad, 2);
+  assert.equal(dos.producto, 1000, "sin subtotal, el renglon x2");
+  assert.equal(I.parsearDetalleLoquieroaca("Subtotal $ 100\nEnvío nacional $ 20\nTotal a pagar $ 120").envioLocal, 20);
 });
 
 test("Tiendamia en la forma comun: servicios de importacion en «Importación o servicios», IVA en impuestos", () => {

@@ -276,14 +276,14 @@
   }
 
   /* A que fila va cada rotulo. Son palabras clave, no rotulos inventados: los unicos rotulos vistos de verdad son los del
-     checkout de Amazon.com (28/10/2026) y los del carrito de Tiendamia (spec 041). El orden importa: «Cargos de importacion»
+     checkout de Amazon.com (28/10/2026), los de eBay y Loquieroaca (29/10/2026) y los del carrito de Tiendamia (spec 041). El orden importa: «Cargos de importacion»
      va antes que «impuestos»; «envio a tu direccion» antes que «envio»; «subtotal» no es «total». */
   const CLASES = [
     ["total", /(^|[^a-z])total(?!\s*parcial)(?![a-z])/],
     ["subtotal", /subtotal|total\s+parcial/],
     ["importacion", /importacion|import|aduan|arancel|customs|dut(y|ies)|servicios/],
     ["impuestos", /impuesto|(^|[^a-z])iva([^a-z]|$)|tax/],
-    ["envioLocal", /a tu direccion|a domicilio|envio local|entrega local/],
+    ["envioLocal", /a tu direccion|a domicilio|envio local|envio nacional|entrega local/],
     ["envio", /envio|shipping|postage|flete|manejo/],
     ["producto", /producto|articulo|item|precio/],
   ];
@@ -296,15 +296,23 @@
      si no, la suma. Lo que no se sabe a que fila va queda en `otros` (y dentro del total leido). */
   function detallePorRotulos(tienda, texto, monedaPesos) {
     if (texto === undefined || texto === null) return null;
+    /* eBay y Loquieroaca encabezan el resumen con «Resumen del pedido» / «Resumen de tu pedido» (pegados del 29/10/2026); lo
+       de antes no es la compra: en eBay, el cupon ofrecido y no aplicado («$5.00 off your purchase of $50.00»). */
+    const inicio = String(texto).search(/resumen\s+(?:del|de\s+tu)\s+pedido/i);
+    if (inicio > 0) texto = String(texto).slice(inicio);
     const pares = parejas(texto, monedaPesos).filter(p => p.moneda);
     if (!pares.length) return null;
     const moneda = (pares.find(p => claseDe(p.rotulo) === "total") || pares[0]).moneda;
     const d = { tienda, moneda, cantidad: 1, producto: 0, envio: 0, importacion: 0, impuestos: 0, envioLocal: 0, total: 0,
       totalLeido: false, otros: [], notas: [] };
-    let subtotal = null, hayProducto = false, otraMoneda = false;
+    let subtotal = null, linea = null, hayProducto = false, otraMoneda = false;
     const descuentos = [];
     for (const p of pares) {
       if (p.moneda !== moneda) { otraMoneda = true; continue; }
+      /* «x1» y su monto: el renglon del producto en Loquieroaca (29/10/2026), que ya trae el IVA y repite el total. Da la
+         cantidad; es el producto solo si no hay otro rotulo ni subtotal. */
+      const porCantidad = p.rotulo.match(/^x\s*(\d+)$/);
+      if (porCantidad) { d.cantidad = Number(porCantidad[1]) || 1; if (linea === null) linea = p.monto; continue; }
       const clase = claseDe(p.rotulo);
       if (clase === "total") { if (!d.totalLeido) { d.total = p.monto; d.totalLeido = true; } }
       else if (clase === "subtotal") { if (subtotal === null) subtotal = p.monto; }
@@ -316,8 +324,10 @@
       else d.otros.push({ rotulo: p.visible, monto: p.monto });
     }
     if (!hayProducto && subtotal !== null) { d.producto = subtotal; hayProducto = true; }
+    if (!hayProducto && linea !== null) { d.producto = linea; hayProducto = true; }
     if (!hayProducto) return null;
-    const cant = String(texto).toLowerCase().match(/(\d+)\s*(?:productos|articulos|artículos|items)|(?:productos|art[ií]culos|items)\s*\((\d+)\)/);
+    // «2 artículos», «Artículo (1)» (eBay, 29/10/2026), «Productos (3)»
+    const cant = String(texto).toLowerCase().match(/(\d+)\s*(?:productos?|art[ií]culos?|items?)(?![a-z])|(?:productos?|art[ií]culos?|items?)\s*\((\d+)\)/);
     if (cant) d.cantidad = Number(cant[1] || cant[2]) || 1;
     const suma = d.producto + d.envio + d.importacion + d.impuestos + d.envioLocal + d.otros.reduce((s, o) => s + o.monto, 0);
     for (const k of ["producto", "envio", "importacion", "impuestos", "envioLocal"]) d[k] = Math.round(d[k] * 100) / 100;
@@ -333,8 +343,9 @@
   /* Amazon.com: el checkout de AmazonGlobal que pego el dueño el 28/10/2026 (Productos, Envío y manejo, Promoción de envío
      GRATIS, Cálculo estimado de impuestos por cobrar, Cargos de importación, Total del pedido). Un «$» solo es dolar. */
   const parsearDetalleAmazon = texto => detallePorRotulos("amazon", texto, "USD");
-  /* eBay y Loquieroaca: sin un pegado real todavia (pendiente del dueño); la misma lectura tolerante. En eBay un «$» solo es
-     dolar; en Loquieroaca, pesos. */
+  /* eBay («Resumen del pedido»: Artículo (1), Envío, Total, en «US $255.54») y Loquieroaca («Resumen de tu pedido»: x1,
+     Subtotal, IVA, Impuestos de importación, Envío nacional, Total a pagar, en «$ 611.162,92»): los pegados reales del
+     dueño del 29/10/2026. En eBay un «$» solo es dolar; en Loquieroaca, pesos. */
   const parsearDetalleEbay = texto => detallePorRotulos("ebay", texto, "USD");
   const parsearDetalleLoquieroaca = texto => detallePorRotulos("loquieroaca", texto, "ARS");
 
@@ -404,10 +415,10 @@
       ejemplo: "Productos: US$… Envío y manejo: US$… Cargos de importación: US$… Total del pedido: US$…" },
     tiendamia: { donde: "Agregá el producto al carrito de Tiendamia y copiá el «Detalle de la compra».",
       ejemplo: "Productos (1) AR$… Envío Internacional AR$… Servicios de Importación AR$… Subtotal AR$…" },
-    ebay: { donde: "Copiá el resumen del pago de eBay: cada concepto con su monto (artículo, envío, importación, total).",
-      ejemplo: "Artículo US$… Envío US$… Total US$…" },
-    loquieroaca: { donde: "Copiá el resumen de la compra de Loquieroacá: cada concepto con su monto.",
-      ejemplo: "Producto $… Envío $… Total $…" },
+    ebay: { donde: "En el carrito de eBay, con envío a Argentina, copiá el «Resumen del pedido» (Artículo, Envío, Total).",
+      ejemplo: "Resumen del pedido Artículo (1) US $… Envío US $… Total US $…" },
+    loquieroaca: { donde: "En Loquieroacá, copiá el «Resumen de tu pedido» (Subtotal, IVA, Impuestos de importación, Total a pagar).",
+      ejemplo: "Resumen de tu pedido Subtotal $… IVA $… Impuestos de importación $… Total a pagar $…" },
   };
   const carritoHtml = tienda => {
     const a = AYUDA_DETALLE[tienda];
