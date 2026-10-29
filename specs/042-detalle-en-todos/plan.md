@@ -8,8 +8,8 @@ El «qué» está en `spec.md`.
   `CLASES` (palabras clave por fila, en orden) y `detallePorRotulos(tienda, texto, monedaDelPesoSolo)`.
 - `parsearDetalleAmazon`, `parsearDetalleEbay`, `parsearDetalleLoquieroaca` sobre esa lectura; `detalleTiendamia` pasa
   `parsearDetalleTiendamia` (spec 041) a la forma común; `parsearDetalle(tienda, texto)` elige.
-- Tests en `tests/js/detalle.test.js` con el fixture real de Amazon y casos tolerantes (marcados «sin fixture real») para
-  eBay y Loquieroacá.
+- Tests en `tests/js/detalle.test.js` con los fixtures reales de Amazon (28/10), eBay y Loquieroacá (29/10, que sumaron
+  leer desde «Resumen del pedido» y el renglón «xN») y casos tolerantes.
 
 ## 2. Las filas y la tabla (R5, R6)
 
