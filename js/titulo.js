@@ -190,7 +190,7 @@
       const cod = toks.slice(i).find(t => esCodigo(t) && t.length <= 10 && !esDato(t) && !esInterno(t) && !vistas.has(t.toLowerCase()));
       if (cod) titulo.push(cod);
     }
-    return (titulo.length ? titulo.join(" ") : sin.trim().split(/\s+/).slice(0, 4).join(" ")).toUpperCase();
+    return (titulo.length ? titulo.join(" ") : (sin.trim() || pulgadas(nombre).trim()).split(/\s+/).slice(0, 4).join(" ")).toUpperCase();
   }
 
   /* --- Las chips: lo que define la compra ------------------------------------- */
