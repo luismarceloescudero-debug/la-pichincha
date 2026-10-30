@@ -68,8 +68,8 @@ Estado: hecho / en curso / siguiente / pendiente del dueño.
 - **no vale el costo** `lastmod` por pagina: hoy es la fecha real de los precios (la del indice). Una fecha por pagina pide
   guardar un hash de cada una entre corridas, y Google ignora `lastmod` cuando no es exacto.
 - **hecho** SRI del script de GoatCounter (`count.v4.js`, version fija, con `integrity`).
-- **siguiente** `/.well-known/security.txt`.
-- **pendiente** Pagina «Acerca de» y contacto (E-E-A-T), con lo que el dueño quiera contar.
+- **hecho** `/.well-known/security.txt`, `/contacto/` (formulario por el Worker) y `/acerca/` (spec 046). Falta que el dueño
+  active Email Routing (`docs/pendientes-del-dueno.md`, item 1) y complete el `[COMPLETAR]` de «Acerca de».
 
 ### 4. Fallas chicas que encontro la revision (033)
 
@@ -121,7 +121,7 @@ Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `do
 | --- | --- | --- | --- | --- |
 | 1 | Revisar «Indexacion → Paginas» de Search Console (el mapa de 200 paginas ya figura «Correcto») | dueño | 5 min, hacia el 1/11 | saber cuantas paginas entran y por que no |
 | 2 | Numero de campaña de eBay y claves de AliExpress, cuando aprueben | dueño | 10 min | comision en «Afuera» |
-| 3 | Contacto publico: `security.txt` y pagina «Acerca de» | dueño decide, yo hago | 1 PR | confianza (E-E-A-T) y seguridad |
+| 3 | Contacto publico: hecho el formulario (spec 046); falta activar Email Routing y escribir «Acerca de» | dueño | 15 min | confianza (E-E-A-T) y seguridad |
 | 4 | Prueba de atribucion de clics de Mercado Libre con otra persona | dueño | 10 min + 1 dia | saber si el formato directo cuenta |
 | 5 | Mensajes a Katech, FullH4rd, Compra Cierta y Loquieroaca (armados) | dueño | 15 min | cuatro tiendas mas |
 | 6 | En «Afuera», separar la version del chip (una «4060 Ti» aparece en «rtx 4060») | yo | 1 PR chico | resultados limpios |
