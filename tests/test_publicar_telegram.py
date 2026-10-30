@@ -33,6 +33,15 @@ class Mensaje(unittest.TestCase):
         self.assertIn("Memoria &lt;b&gt;Fury&lt;/b&gt; &amp; Co", texto)
         self.assertIn('href="https://t.test/mem?a=1&amp;b=2"', texto)
 
+    def test_con_el_nombre_legible_va_el_emoji_el_titulo_y_las_chips(self):
+        # spec 044: generar_feed.js agrega titulo, chips y emoji; el nombre de la tienda queda para quien no los trae
+        legible = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "titulo": "KINGSTON NV2", "chips": ["1 TB", "NVMe"], "emoji": "💽"},
+                                          {**OFERTAS["ofertas"][1], "titulo": "<B>FURY</B>", "chips": ["16 GB"], "emoji": "💾"}]}
+        texto = telegram.mensaje(legible)
+        self.assertIn('1. 💽 <a href="https://t.test/ssd">KINGSTON NV2 · 1 TB · NVMe</a>: $90.000 (−25%) en CompraGamer', texto)
+        self.assertIn("&lt;B&gt;FURY&lt;/B&gt; · 16 GB", texto)
+        self.assertNotIn("SSD Kingston 1TB", texto)
+
     def test_si_solo_hay_fecha_sin_hora_dice_la_fecha(self):
         self.assertIn("precios del 07/10" + chr(10), telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))
         self.assertNotIn("precios del  ", telegram.mensaje({**OFERTAS, "generado": "2026-10-07"}))

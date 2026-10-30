@@ -56,9 +56,16 @@ def mensaje(datos):
            "Verificá en la tienda antes de comprar.")
     lineas = []
     for i, o in enumerate(ofertas, 1):
-        categoria = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
+        # El nombre legible (spec 044): emoji del tipo, MARCA Y MODELO y las chips. Un ofertas.json de antes no los trae:
+        # entonces la categoria en cursiva y el titulo de la tienda, como siempre.
+        if o.get("titulo"):
+            cabeza_oferta = f"{o['emoji']} " if o.get("emoji") else ""
+            nombre = o["titulo"] + "".join(f" · {c}" for c in o.get("chips") or [])
+        else:
+            cabeza_oferta = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
+            nombre = o["nombre"]
         # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
-        lineas.append(f"{i}. {categoria}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(o['nombre']))}</a>: "
+        lineas.append(f"{i}. {html.escape(cabeza_oferta) if o.get('titulo') else cabeza_oferta}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(nombre))}</a>: "
                       f"{pesos(o['precio'])} (−{o['descuento']}%"
                       # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
                       + (f" {html.escape(o['contra'])}" if o.get("contra") else "") + f") en {html.escape(o['comercio'])}"

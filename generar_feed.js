@@ -14,6 +14,7 @@ const path = require("path");
 const O = require("./js/ofertas.js");
 const C = require("./js/categorias.js");
 const P = require("./js/pagina.js");
+const T = require("./js/titulo.js");
 const G = require("./generar_paginas.js");
 
 const SITIO = require("./sitio.json");
@@ -51,8 +52,8 @@ function renderFeed(idx, { baseUrl = BASE_URL, max = MAX_FEED } = {}) {
   const dia = String(idx.generado).slice(0, 10);
   const items = O.destacadas(idx, max).map(o => {
     const f = o.f, pct = Math.round(o.off * 100);
-    const titulo = `${f[0]}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
-    const desc = `${C.ETIQUETA[o.categoria]}. ` + (o.modelo ? `Hoy ${pesos(f[1])}: ${O.textoContraModelo(o.modelo, pesos)}. `
+    const titulo = `${T.linea(f[0], { emoji: false })}: ${pesos(f[1])} (−${pct}%) en ${comercioDeOferta(o, idx)}`;
+    const desc = `${T.de(f[0]).completo}. ${C.ETIQUETA[o.categoria]}. ` + (o.modelo ? `Hoy ${pesos(f[1])}: ${O.textoContraModelo(o.modelo, pesos)}. `
       : o.tipo === "seguimiento" ? `Lo seguimos hace pocos días: pasó de ${pesos(o.antes)} a ${pesos(f[1])} (ahorrás ${pesos(o.ahorro)}); todavía no tiene una semana de historial. `
       : `Antes ${pesos(o.antes)}, hoy ${pesos(f[1])}: ahorrás ${pesos(o.ahorro)}. `) +
       (o.cruce ? `Gama alta al precio de la gama media (${O.textoContra(o.contra, pesos)}). ` : "") +
@@ -92,10 +93,10 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const ofertas = O.destacadas(idx, max);
   const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
   const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
-    `<span class="h-nom">${esc(o.f[0])}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
+    `<span class="h-nom">${T.html(o.f[0], esc)}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
   // Los enlaces de afiliado (P.enlaceTienda) llevan su rotulo y rel="sponsored"; el orden no cambia (principio II).
   const enlace = o => { const e = P.enlaceTienda(o.f[2]);
-    return `<a class="oferta" data-rubro="ofertas" href="${esc(e.url)}" rel="${e.afiliado ? "sponsored noopener" : "noopener"}">${esc(o.f[0])}</a>` +
+    return `<a class="oferta" data-rubro="ofertas" href="${esc(e.url)}" rel="${e.afiliado ? "sponsored noopener" : "noopener"}">${T.html(o.f[0], esc)}</a>` +
       (e.afiliado ? ' <span class="rotulo">enlace de afiliado</span>' : ""); };
   const lista = ofertas.map(o => `    <li>${enlace(o)}` +
     (o.modelo ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: ${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
@@ -114,7 +115,7 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;flex:1}
 .hoy .h-lista li{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:start}
 .hoy .h-pct{grid-row:span 2;font:700 1.05rem var(--font-mono);color:var(--good);background:var(--good-soft);border-radius:10px;padding:6px 8px}
-.hoy .h-nom{font-weight:600;font-size:.9rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hoy .h-nom{font-size:.9rem;line-height:1.25;min-width:0}
 .hoy .h-pre{font:500 .8rem var(--font-mono);color:var(--ink-2)}
 .hoy .h-pie{margin:0;font-size:.78rem;color:var(--ink-3);overflow-wrap:anywhere}
 .hoy .h-pie b{color:var(--ink)}
@@ -151,7 +152,8 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 /* Lo justo para el canal: texto plano, sin nada de terceros sin escapar (lo escapa quien lo publica). */
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
-    nombre: o.f[0], precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
+    // titulo, chips y tipo (spec 044): el nombre legible que muestran el canal y la imagen; `nombre` sigue siendo el de la tienda
+    nombre: o.f[0], ...(({ titulo, chips, tipo, emoji }) => ({ titulo, chips, icono: tipo, emoji }))(T.de(o.f[0])), precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
     ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` }
       : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" } : {}),
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],

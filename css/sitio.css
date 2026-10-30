@@ -742,3 +742,16 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 /* «Saltar al contenido»: fuera de la vista hasta que el teclado llega a el (squirrelscan, skip-link). */
 .saltar{position:absolute;left:8px;top:-60px;z-index:100;padding:8px 14px;border-radius:8px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:600}
 .saltar:focus{top:8px}
+
+/* El nombre legible de un aviso (spec 044): icono del tipo, MARCA Y MODELO grande y las chips con lo que define la compra.
+   El nombre completo de la tienda queda en el title. */
+.tit{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.tit-ico{flex:none;width:1.35em;height:1.35em;margin-top:.05em;color:var(--accent);stroke-width:1.8}
+.tit-txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.tit-nom{font-weight:700;letter-spacing:.01em;line-height:1.2;overflow-wrap:anywhere}
+.tit-chips{display:flex;flex-wrap:wrap;gap:4px}
+.tit-chip{font:500 .72rem/1.6 var(--font-mono);padding:0 7px;border-radius:6px;background:var(--accent-soft,var(--surface-2));color:var(--ink-2);white-space:nowrap}
+.o-nom:has(> .tit){display:block;overflow:visible;-webkit-line-clamp:unset}
+.o-nom .tit-nom{font-size:1.02rem}
+.oferta .tit-nom{color:var(--ink)}
+
