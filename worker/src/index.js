@@ -199,8 +199,8 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     return responder({ enlace: e, leido: Boolean(r.item), item: r.item || null, motivo: r.motivo || null, fecha }, clave, r.item ? CACHE_SEG : 0, h);
   }
 
-  /* POST /contacto: JSON con nombre, correo, motivo, mensaje, el campo trampa `sitio` (vacio para una persona) y `cargado`
-     (cuando se abrio el formulario, en ms). Un error se dice con un texto para mostrar y, si corresponde, el campo. */
+  /* POST /contacto: JSON con nombre, correo, motivo, mensaje, el campo trampa `sitio` (vacio para una persona) y `espera`
+     (ms desde que se abrio el formulario). Un error se dice con un texto para mostrar y, si corresponde, el campo. */
   async function contacto(request, env, h, fecha, ms, ip) {
     const salir = (datos, estado, extra = {}) => json(datos, estado, { ...h, "Cache-Control": "no-store", ...extra });
     if (!/^application\/json\b/i.test(request.headers.get("Content-Type") || "")) return salir({ error: "El formulario tiene que llegar como JSON." }, 415);
@@ -210,9 +210,10 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     try { c = JSON.parse(crudo); } catch (e) { return salir({ error: "Faltan los datos del formulario." }, 400); }
     // El campo trampa: un programa lo llena, una persona no lo ve. Se le dice que salio bien y no se manda nada.
     if (c && typeof c.sitio === "string" && c.sitio.trim()) return salir({ ok: true }, 200);
-    const cargado = Number(c && c.cargado);
-    if (!Number.isFinite(cargado) || cargado > ms + 60 * 1000) return salir({ error: "Recargá la página y probá de nuevo." }, 400);
-    if (ms - cargado < ESPERA_MIN_MS) return salir({ error: "Lo mandaste demasiado rápido: esperá unos segundos y probá de nuevo." }, 400);
+    // La espera la mide el navegador (ms desde que cargo el formulario): asi un reloj adelantado no deja afuera a nadie.
+    const espera = typeof (c && c.espera) === "number" ? c.espera : NaN;
+    if (!Number.isFinite(espera) || espera < 0) return salir({ error: "Recargá la página y probá de nuevo." }, 400);
+    if (espera < ESPERA_MIN_MS) return salir({ error: "Lo mandaste demasiado rápido: esperá unos segundos y probá de nuevo." }, 400);
     const v = validarContacto(c);
     if (v.error) return salir({ error: v.error, campo: v.campo || null }, 400);
     if (excedido(ip, ms, contactosPorIp, TOPE_CONTACTO, VENTANA_CONTACTO_MS))
