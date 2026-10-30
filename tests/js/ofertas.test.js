@@ -482,7 +482,7 @@ test("una familia ocupa un solo lugar aunque caiga en dos categorias (revision d
   const idx = { productos: [f("Mouse Gamer Logitech G502 X Hero", 50000, 60000, "910-006136"),
     f("Logitech 910-006136 G502 X", 51000, 62000, "910-006136"), f("Teclado Redragon K552", 30000, 36000, "")] };
   const d = O.destacadas(idx);
-  assert.notEqual(new Set(d.map(o => o.categoria)).size, 1, "el caso de verdad cruza categorias");
+  assert.notEqual(B.categoriaDe(idx.productos[0][0]), B.categoriaDe(idx.productos[1][0]), "el caso de verdad cruza categorias");
   assert.equal(d.filter(o => o.f[9] === "910-006136").length, 1);
 });
 
@@ -549,4 +549,21 @@ test("destacadas: lo que se sigue hace pocos dias compite con lo verificado por 
   const d = O.destacadas(idx, 10);
   assert.deepEqual(d.map(o => o.tipo), ["seguimiento", "propia"]);      // −25% contra −23%
   assert.ok(d[0].off > d[1].off);
+});
+
+// ---- Repetidas del 30/10 (spec 047): salieron dos veces en las Pichinchas del dia ----
+test("destacadas: la misma memoria en dos colores, con su codigo de modelo cada una, ocupa un solo lugar", () => {
+  const m = (color, codigo) => { const f = fila(`Memoria Corsair DDR5 64GB (2x32GB) 6000MHz Vengeance ${color} CL40 AMD EXPO/Intel XMP 3.0`, 2197760, { antes: 2500000 }); f[9] = codigo; return f; };
+  assert.equal(O.destacadas({ productos: [m("Black", "CMK64GX5M2B6000Z40"), m("Grey", "CMK64GX5M2B6000Z40G")] }, 10).length, 1);
+});
+
+test("destacadas: el mismo equipo con el procesador escrito distinto en dos tiendas ocupa un solo lugar", () => {
+  const a = fila("Notebook HP 15.6 250 C5-120U 16GB SSD512GB", 1596165, { lista: 1900000 });
+  const b = fila("Notebook HP 250 15.6″ Core 5 120U 16GB 512GB", 1545000, { lista: 1800000 });
+  const lista = O.destacadas({ productos: [a, b] }, 10);
+  assert.equal(lista.length, 1);
+  assert.equal(lista[0].f[1], 1545000);   // queda la mas barata, aunque la otra tenga mas descuento
+  // otra RAM sigue siendo otro equipo
+  const c = fila("Notebook HP 250 15.6″ Core 5 120U 32GB 512GB", 1745000, { lista: 2000000 });   // 8 GB no pasa el minimo de notebook
+  assert.equal(O.destacadas({ productos: [b, c] }, 10).length, 2);
 });

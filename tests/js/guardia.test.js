@@ -96,7 +96,7 @@ test("main escribe guardia.json, el resumen y sale con 3 si hay alarma", () => {
   assert.match(fs.readFileSync(alarma, "utf8"), /0 bajas propias/);
   // sin alarma: 0 y sin archivo de alarma
   fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ ...sano(), productos: [
-    ...sano().productos, ...Array.from({ length: 12 }, (_, i) => fila("SSD Kingston NV3 1TB NVMe Gen4 " + i, 90000, { antes: 120000 }))] }));
+    ...sano().productos, ...Array.from({ length: 12 }, (_, i) => fila("SSD Kingston NV" + (i + 10) + " 1TB NVMe Gen4", 90000, { antes: 120000 }))] }));
   fs.rmSync(alarma);
   assert.equal(G.main(["--indice", path.join(dir, "indice.json"), "--salida", salida, "--alarma", alarma]), 0);
   assert.equal(fs.existsSync(alarma), false);
@@ -138,4 +138,10 @@ test("main con --ofertas frena la publicacion si se repite un modelo", () => {
     fs.writeFileSync(ofertas, JSON.stringify({ ofertas: [{ nombre: "SSD X 1TB" }, { nombre: "SSD Y 1TB" }] }));
     assert.equal(G.main(["--indice", indice, "--ofertas", ofertas]), 0);
   } finally { console.log = log; }
+});
+
+test("repetidas: la misma notebook con el procesador escrito distinto en dos tiendas es una alarma (30/10)", () => {
+  const pares = G.repetidas([{ nombre: "Notebook HP 15.6 250 C5-120U 16GB SSD512GB" }, { nombre: "Notebook HP 250 15.6″ Core 5 120U 16GB 512GB" },
+                             { nombre: "Notebook HP 250 15.6″ Core 5 120U 32GB 512GB" }]);
+  assert.equal(pares.length, 1);
 });
