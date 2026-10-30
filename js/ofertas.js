@@ -18,6 +18,7 @@
   const esUrl = u => /^https?:\/\//i.test(String(u));
   const B = typeof module === "object" && module.exports ? require("./buscador.js") : raiz.Buscador;
   const C = typeof module === "object" && module.exports ? require("./categorias.js") : raiz.Categorias;
+  const T = typeof module === "object" && module.exports ? require("./titulo.js") : raiz.Titulo;
 
   /* ComparaYa vuelve a listar avisos de las tiendas que ya relevamos directo: misma URL (aunque venga con "www", barra
      final o parametros de seguimiento), mismo precio. Uno por URL, y gana la fila de la tienda sobre la del agregador. */
@@ -191,16 +192,26 @@
      compara el buscador, sin lo que no cambia el equipo: sistema operativo, color, «#» y «nuevo». Otra RAM, otro disco u
      otro procesador siguen siendo otro equipo. */
   const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna)\b/g;
+  const nombreFamilia = f => B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
   function familia(f) {
     if (f[9]) return "modelo:" + f[9];
-    return B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
+    return nombreFamilia(f);
+  }
+
+  /* La ficha legible (spec 044): marca y modelo mas lo que define la compra. Dos tiendas que escriben distinto el mismo
+     equipo («HP 250 C5-120U 16GB SSD512GB» y «HP 250 Core 5 120U 16GB 512GB», 30/10) dan la misma ficha. Solo cuenta si
+     el titulo tiene un modelo (un numero) y hay al menos dos datos: «KINGSTON · 1 TB» no alcanza para decir que es lo mismo. */
+  function ficha(f) {
+    const t = T.de(f[0]), datos = t.chips.filter(c => !/″|Usado|Reacondicionado/.test(c));
+    return /\d/.test(t.titulo) && datos.length >= 2 ? t.tipo + "|" + t.titulo + "|" + datos.join("|") : "";
   }
 
   /* El mismo producto con el titulo escrito distinto (23/10: «Auricular In-Ear Tronsmart Ony Ace Pro Blanco» y «Auricular
      Tronsmart Onyx Ace Pro Negro», los dos a $58.050 contra $129.000): mismo precio y misma referencia, los mismos numeros
      en el nombre (capacidad, modelo) y casi todas las palabras del nombre mas corto en el otro. */
   const COMPARTIDAS_GEMELO = 0.75;
-  function palabras(f) { return new Set(familia(f).split(" ").filter(Boolean)); }
+  // Por el nombre aunque haya codigo de modelo: cada color trae su codigo («…Z40» y «…Z40G», 30/10) y son el mismo producto.
+  function palabras(f) { return new Set(nombreFamilia(f).split(" ").filter(Boolean)); }
   function gemelos(a, b) {
     const numeros = s => [...s].filter(w => /\d/.test(w)).sort().join(" ");
     if (numeros(a) !== numeros(b)) return false;
@@ -224,11 +235,16 @@
     // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
     // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
     // Ademas, a igual precio y referencia, el gemelo con el titulo escrito distinto.
-    const unico = lista => { const vistos = new Set(), porPrecio = new Map();
+    // Entre las del mismo producto queda la mas barata (30/10: la HP 250 salio de Max Tecno a $1.596.165 y Click Gaming la
+    // tenia a $1.545.000); a igual precio, la mejor ubicada.
+    const unico = lista => { const vistos = new Set(), porPrecio = new Map(), minimo = new Map();
+      const claves = o => [familia(o.f), ficha(o.f)].filter(Boolean);
+      for (const o of lista) for (const k of claves(o)) minimo.set(k, Math.min(minimo.get(k) ?? Infinity, o.f[1]));
       return lista.filter(o => {
-        const k = familia(o.f), p = o.f[1] + "|" + o.antes, w = palabras(o.f), mismos = porPrecio.get(p) || [];
-        if (vistos.has(k) || mismos.some(x => gemelos(x, w))) return false;
-        vistos.add(k); porPrecio.set(p, [...mismos, w]); return true;
+        if (claves(o).some(k => o.f[1] > minimo.get(k))) return false;
+        const k = familia(o.f), fi = ficha(o.f), p = o.f[1] + "|" + o.antes, w = palabras(o.f), mismos = porPrecio.get(p) || [];
+        if (vistos.has(k) || (fi && vistos.has(fi)) || mismos.some(x => gemelos(x, w))) return false;
+        vistos.add(k); if (fi) vistos.add(fi); porPrecio.set(p, [...mismos, w]); return true;
       }); };
     // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.
     const unicas = unico([...todas].sort(por));
@@ -249,7 +265,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, ficha, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

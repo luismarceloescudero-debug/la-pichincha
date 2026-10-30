@@ -102,6 +102,8 @@
   const CPUS = [
     [/\b(?:amd\s+)?ryzen\s?(ai\s?)?(?:max\+?\s?)?([3579])(?:\s?pro)?[-\s]?(\d{3,4}[a-z]{0,3}\d?)?(?![a-z\d])/i, m => `Ryzen ${m[1] ? "AI " : ""}${m[2]}${m[3] ? " " + m[3].toUpperCase() : ""}`],
     [/\b(?:intel\s+)?core\s?ultra\s?([3579])\s?(\d{3}[a-z]{0,2})?(?![a-z\d])/i, m => `Core Ultra ${m[1]}${m[2] ? " " + m[2].toUpperCase() : ""}`],
+    // Intel Core 5/7 de la serie 1 (2024): «Core 5 120U», «C5-120U»
+    [/\b(?:intel\s+)?(?:core\s?|c)([357])[-\s](1\d{2}[a-z]{1,2})(?![a-z\d])/i, m => `Core ${m[1]} ${m[2].toUpperCase()}`],
     // «INTEL Ultra 5 125H», sin «Core»: con el modelo, para no confundirlo con un «Galaxy S25 Ultra»
     [/\b(?:intel\s+)?ultra\s?([3579])\s(\d{3}[a-z]{1,2})(?![a-z\d])/i, m => `Core Ultra ${m[1]} ${m[2].toUpperCase()}`],
     [/\b(?:intel\s+)?(?:core\s?)?i([3579])(?:[-\s_]?(\d{4,5}[a-z]{0,2}\d?))?(?![a-z\d])/i, m => `Core i${m[1]}${m[2] ? "-" + m[2].toUpperCase() : ""}`],
@@ -142,7 +144,7 @@
     /^(?:qd-?oled|oled|amoled|qled|neo|super|ips|va|tn|mini-?led|miniled|led|lcd|retina)$/i,
     /^(?:[2345]g|lte|nfc|dual|sim|esim|wi-?fi\d*(?:-?e)?|wifi\d?e?|wf\d?e?|bluetooth|bt|usb(?:-c)?|tipo-?c|type-?c|hdmi|dp|displayport)$/i,
     /^(?:ddr\d|gddr\d|lpddr\d+x?|nvme|m\.2|sata|pcie|gen\d|am[345]|lga\d+|s1[27]\d\d|socket|atx|matx|m-atx|micro-atx|itx|mini-itx|e-atx)$/i,
-    /^(?:ram|rom|ssd|hdd|emmc|memoria|almacenamiento|gb|tb|nucleos|núcleos|cores|hilos|turbo)$/i,
+    /^(?:ram|rom|ssd|hdd|emmc|memoria|almacenamiento|gb|tb|nucleos|núcleos|cores|hilos|turbo|smartphone|celular|notebook|laptop)$/i,
     /^(?:win\d*\w*|w1[01]\w*|windows|freedos|free|dos|linux|android|ios|chromeos|macos|sistema|operativo)$/i,
     /^\d+(?:gb|mb)\/s$/i, /^(?:gamer|gaming|mid|tower|switch|fans?|\d+fans?|tkl|vga|s\/\w*|c\/\w*)$/i,
     /^(?:g-?sync|freesync|hdr\d*|rgb|argb|backlight|retroiluminado|bateria|batería|recargable|inalambrico|inalámbrico|wireless|mecanico|mecánico)$/i,

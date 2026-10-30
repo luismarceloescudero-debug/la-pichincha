@@ -46,9 +46,12 @@ function medir(idx) {
 function repetidas(ofertas) {
   const vistas = new Map(), pares = [];
   for (const o of ofertas || []) {
-    const k = O.familia([o.nombre, 0, "", "", "", 0, 0, "", "", o.modelo || ""]);
-    if (vistas.has(k)) pares.push([vistas.get(k), o]);
-    else vistas.set(k, o);
+    // La familia y la ficha legible (spec 047): la misma HP 250 con el procesador escrito distinto en dos tiendas, o la
+    // misma memoria en dos colores con su codigo cada una, tambien son la misma.
+    const f = [o.nombre, 0, "", "", "", 0, 0, "", "", o.modelo || ""];
+    const ks = [O.familia(f), O.ficha(f)].filter(Boolean), previa = ks.find(k => vistas.has(k));
+    if (previa) pares.push([vistas.get(previa), o]);
+    else ks.forEach(k => vistas.set(k, o));
   }
   return pares;
 }
