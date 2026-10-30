@@ -145,3 +145,27 @@ test("el Veredicto de una búsqueda lleva a dónde conviene comprar, dentro de l
   correr('fijarConsulta("ssd 1tb")');
   assert.match(correr("vistaVeredictoDin()"), /data-ir-vista="tiendas"/);   // #tiendas: js/arranque.js lo lleva a la Comparativa
 });
+
+test("las pestañas siguen el patrón de ARIA: controlan #vista y solo la elegida entra en el orden de Tab", () => {
+  const { correr } = app();
+  const tabs = correr('pestanasHtml("ofertas")');
+  for (const id of ["comparativa", "ofertas", "buscar", "veredicto"])
+    assert.match(tabs, new RegExp(`role="tab" id="tab-${id}" aria-controls="vista" tabindex="${id === "ofertas" ? 0 : -1}"`));
+  assert.match(correr('pestanasHtml("")'), /id="tab-comparativa" aria-controls="vista" tabindex="0"/, "sin elegida, entra la primera");
+  assert.match(leer("index.html"), /<div id="vista" role="tabpanel" aria-labelledby="tab-comparativa">/);
+  const arranque = leer("js/arranque.js");
+  assert.match(arranque, /v\.setAttribute\("aria-labelledby", "tab-" \+ id\)/, "el panel se nombra con la pestaña elegida");
+  assert.match(arranque, /b\.tabIndex = b\.dataset\.ir === id \? 0 : -1/);
+});
+
+test("flechas, Inicio y Fin mueven el foco entre pestañas y dan la vuelta; otra tecla no", () => {
+  const { correr } = app();
+  const ir = (actual, tecla) => correr(`tabDestino(["comparativa", "ofertas", "buscar", "veredicto"], ${JSON.stringify(actual)}, ${JSON.stringify(tecla)})`);
+  assert.equal(ir("comparativa", "ArrowRight"), "ofertas");
+  assert.equal(ir("veredicto", "ArrowRight"), "comparativa");
+  assert.equal(ir("comparativa", "ArrowLeft"), "veredicto");
+  assert.equal(ir("buscar", "Home"), "comparativa");
+  assert.equal(ir("ofertas", "End"), "veredicto");
+  assert.equal(ir("ofertas", "Enter"), null, "Enter lo resuelve el botón: activa");
+  assert.equal(ir("otra", "ArrowRight"), null);
+});

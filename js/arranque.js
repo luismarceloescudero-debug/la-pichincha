@@ -7,8 +7,11 @@ function pintar(id) {
   else if (id === "buscar") v.innerHTML = vistaBuscar();
   else if (id === "veredicto") v.innerHTML = vistaVeredicto();
   else if (porId[id]) { v.innerHTML = detalle(porId[id]); return; }
-  document.querySelectorAll(".tab").forEach(b =>
-    b.setAttribute("aria-selected", String(b.dataset.ir === id)));
+  document.querySelectorAll(".tab").forEach(b => {
+    b.setAttribute("aria-selected", String(b.dataset.ir === id));
+    b.tabIndex = b.dataset.ir === id ? 0 : -1;
+  });
+  v.setAttribute("aria-labelledby", "tab-" + id);
 }
 
 /* La primera vista puede venir escrita desde el build (generar_portada.js, data-pre): si es la que toca
@@ -135,6 +138,15 @@ function arrancar() {
         .catch(() => {})
         .finally(() => { refrescar.innerHTML = previo; });
     }
+  });
+
+  $("#tablist").addEventListener("keydown", ev => {
+    const tab = ev.target.closest(".tab"), tabs = [...document.querySelectorAll(".tab")];
+    const destino = tab && tabDestino(tabs.map(b => b.dataset.ir), tab.dataset.ir, ev.key);
+    if (!destino) return;
+    ev.preventDefault();
+    tabs.forEach(b => { b.tabIndex = b.dataset.ir === destino ? 0 : -1; });
+    tabs.find(b => b.dataset.ir === destino).focus();
   });
 
   const marcarDesborde = () => {
