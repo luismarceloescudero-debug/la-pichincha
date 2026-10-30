@@ -85,3 +85,30 @@ test("la pestaña Ofertas muestra «En seguimiento» aparte, con su propia cinta
   assert.match(html, /Lo seguimos hace menos de una semana/);
   assert.match(els["#estadoOf"].textContent, /^2 ofertas/);
 });
+
+test("una tarjeta se abre con un botón que dice si está abierta y la estrella dice si está marcada", () => {
+  const { correr, els } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.doesNotMatch(html, /<article[^>]*tabindex/, "la tarjeta no es un foco sin rol: el foco va al botón del nombre");
+  const [, id] = /<h3 class="o-nom"><button type="button" class="o-abrir" aria-expanded="false" aria-controls="(od-\d+)">/.exec(html) || [];
+  assert.ok(id, "el nombre es el botón que abre la tarjeta");
+  assert.match(html, new RegExp(`<div class="o-detalle" id="${id}">`), "y controla el detalle");
+  assert.match(html, /class="o-star" [^>]*aria-pressed="false"/);
+
+  const atributos = {}, clases = new Set();
+  const boton = { setAttribute: (k, v) => { atributos[k] = v; } };
+  const tarjeta = { classList: { toggle: c => (clases.has(c) ? (clases.delete(c), false) : (clases.add(c), true)) }, querySelector: () => boton };
+  assert.strictEqual(correr("alternarOferta")(tarjeta), true);
+  assert.strictEqual(atributos["aria-expanded"], "true");
+  assert.strictEqual(correr("alternarOferta")(tarjeta), false);
+  assert.strictEqual(atributos["aria-expanded"], "false");
+});
+
+test("el detalle cerrado no se lee y el foco del botón resalta la tarjeta", () => {
+  const css = leer("css/sitio.css");
+  assert.match(css, /\.o-detalle>\.o-in\{[^}]*visibility:hidden/);
+  assert.match(css, /\.ocard\.abierta \.o-detalle>\.o-in\{visibility:visible\}/);
+  assert.match(css, /\.ocard:has\(\.o-abrir:focus-visible\)/);
+  assert.match(leer("js/indice-ofertas.js"), /btn\.setAttribute\("aria-pressed", String\(ESTRELLAS\.has\(u\)\)\)/);
+});

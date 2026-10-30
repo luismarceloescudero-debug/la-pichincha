@@ -121,15 +121,15 @@ function cardOferta(o, i, desde) {
       : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
   const foto = fondo(f[7]);
   const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" tabindex="0" aria-label="${esc(f[0])}">
+  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(f[0])}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
-      <button class="o-star${marcada ? " on" : ""}" data-estrella="${esc(f[2])}" title="Marcar esta oferta" aria-label="Marcar esta oferta">${marcada ? "★" : "☆"}</button>
+      <button class="o-star${marcada ? " on" : ""}" data-estrella="${esc(f[2])}" title="Marcar esta oferta" aria-label="Marcar esta oferta" aria-pressed="${marcada}">${marcada ? "★" : "☆"}</button>
     </div>
     <div class="o-main">
       <div class="o-off" style="--p:${anillo}"><b data-n="${pct}">${pct}%</b></div>
-      <h3 class="o-nom">${Titulo.html(f[0], esc)}</h3>
+      <h3 class="o-nom"><button type="button" class="o-abrir" aria-expanded="false" aria-controls="od-${i}">${Titulo.html(f[0], esc)}</button></h3>
     </div>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div class="o-precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[o.ref])}</span></div>
@@ -138,7 +138,7 @@ function cardOferta(o, i, desde) {
     ${o.nota ? `<p class="o-contra">${esc(o.nota[0].toUpperCase() + o.nota.slice(1))}.</p>` : ""}
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
     ${historialHtml(f)}
-    <div class="o-detalle"><div class="o-in">
+    <div class="o-detalle" id="od-${i}"><div class="o-in">
       <div class="chips"><span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
@@ -230,6 +230,7 @@ function marcarEstrella(btn) {
   if (OF.marcadas) return pintarOfertas();
   btn.classList.toggle("on", ESTRELLAS.has(u));
   btn.textContent = ESTRELLAS.has(u) ? "★" : "☆";
+  btn.setAttribute("aria-pressed", String(ESTRELLAS.has(u)));
   const n = document.querySelector("[data-of='marcadas:1'] .n");
   if (n) n.textContent = ESTRELLAS.size;
 }
@@ -243,9 +244,10 @@ function compararOferta(i) {
   compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f);
 }
 
-document.addEventListener("keydown", ev => {
-  if ((ev.key === "Enter" || ev.key === " ") && ev.target.classList && ev.target.classList.contains("ocard")) {
-    ev.preventDefault();
-    ev.target.classList.toggle("abierta");
-  }
-});
+/* Abrir o cerrar una tarjeta (patron disclosure): el nombre es el boton, con aria-expanded; un clic en cualquier
+   otra parte de la tarjeta que no sea un enlace o un boton hace lo mismo (js/arranque.js). */
+function alternarOferta(tarjeta) {
+  const abierta = tarjeta.classList.toggle("abierta"), b = tarjeta.querySelector(".o-abrir");
+  if (b) b.setAttribute("aria-expanded", String(abierta));
+  return abierta;
+}

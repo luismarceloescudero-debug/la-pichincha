@@ -542,8 +542,8 @@ td.mejor{color:var(--good);font-weight:700}
 .ocard.quieta{animation:none}
 .ocard::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--c)}
 .ocard.propia::before{background:var(--accent)}
-.ocard:hover,.ocard:focus-visible,.ocard.abierta{transform:translateY(-5px);box-shadow:var(--shadow-up);border-color:var(--c)}
-.ocard.propia:hover,.ocard.propia:focus-visible,.ocard.propia.abierta{border-color:var(--accent)}
+.ocard:hover,.ocard:has(.o-abrir:focus-visible),.ocard.abierta{transform:translateY(-5px);box-shadow:var(--shadow-up);border-color:var(--c)}
+.ocard.propia:hover,.ocard.propia:has(.o-abrir:focus-visible),.ocard.propia.abierta{border-color:var(--accent)}
 .o-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .o-cinta{font:700 .64rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--c);
   display:flex;align-items:center;gap:5px}
@@ -562,6 +562,7 @@ td.mejor{color:var(--good);font-weight:700}
 .o-nom{font-size:.92rem;line-height:1.32;font-weight:600;display:-webkit-box;-webkit-line-clamp:3;
   -webkit-box-orient:vertical;overflow:hidden;min-width:0}
 .ocard.abierta .o-nom{-webkit-line-clamp:unset}
+.o-abrir{display:inline;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .o-precios{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .o-precios .ahora{font:700 1.45rem var(--font-mono);letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--good)}
 .ocard.propia .o-precios .ahora{color:var(--accent)}
@@ -570,8 +571,9 @@ td.mejor{color:var(--good);font-weight:700}
 .o-ahorro b{font-family:var(--font-mono);color:var(--ink)}
 .o-contra{margin:0;font-size:.8rem;color:var(--ink-2)}
 .o-detalle{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--curva)}
-.o-detalle>.o-in{overflow:hidden;min-height:0}
+.o-detalle>.o-in{overflow:hidden;min-height:0;visibility:hidden;transition:visibility .3s}
 .ocard.abierta .o-detalle{grid-template-rows:1fr}
+.ocard.abierta .o-detalle>.o-in{visibility:visible}
 .o-detalle p{margin:9px 0 0;font-size:.82rem;color:var(--ink-3)}
 .o-acciones{display:flex;gap:8px;margin-top:2px}
 .o-acciones .acc{flex:1;justify-content:center;padding:8px 10px}
