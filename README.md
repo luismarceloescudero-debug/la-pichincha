@@ -55,6 +55,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `docs/proceso-de-trabajo.md` | Como se trabaja con Claude Code en este repo: arranque, delegacion con modelos gratis (FCC, sin modelos pagos), que skill usar en cada escenario, auditoria de skills y plugins contra GitHub, ciclo de cada pedido, merge y limpieza, y la cola de pendientes |
 | `docs/delegacion-modelos.md` | La tanda del 19/10/2026 con un modelo asignado por tarea: quien hizo cada una, cuanto tardo, y cuantos hallazgos reales y falsos dio cada modelo |
 | `docs/seguridad-zap.md` | Analisis pasivo del sitio publicado con OWASP ZAP (19/10/2026): cada alerta con su veredicto verificado, lo que no se puede arreglar en GitHub Pages y cuanto acertaron los modelos al clasificarlas |
+| `docs/auditoria-2026-10-30.md` | Auditoria exigente del 30/10/2026: Lighthouse en celular y escritorio antes y despues, accesibilidad, pruebas de punta a punta, seguridad, SEO y datos publicados; lo arreglado (PR #172 a #175) y lo que queda por prioridad |
 | `docs/og-imagen.html` | Fuente de `img/og.png` |
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
