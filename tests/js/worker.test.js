@@ -638,7 +638,7 @@ const ENV_CORREO = envios => ({ ...SIN_TM, CONTACTO_DESTINO: "dueno@example.com"
   CORREO: { send: async m => { envios.push(m); } } });
 const crearMensaje = (de, para, crudo) => ({ de, para, crudo });
 const formulario = (extra = {}) => ({ nombre: "Ana", correo: "ana@example.com", motivo: "consulta",
-  mensaje: "Hola, ¿cada cuánto se actualizan los precios?", sitio: "", cargado: MS_AHORA - 10000, ...extra });
+  mensaje: "Hola, ¿cada cuánto se actualizan los precios?", sitio: "", espera: 10000, ...extra });
 const pedidoContacto = (datos, { origin = "https://pichinchadeldia.com.ar", ip = "7.7.7.7", tipo = "application/json", metodo = "POST" } = {}) =>
   new Request("https://afuera.example.workers.dev/contacto", { method: metodo,
     headers: { Origin: origin, "CF-Connecting-IP": ip, "Content-Type": tipo },
@@ -712,11 +712,11 @@ test("contacto: el campo trampa lleno responde ok y no manda nada", async () => 
   assert.equal(envios.length, 0);
 });
 
-test("contacto: enviado antes de 3 segundos de cargado, sin la hora de carga o con una del futuro, no se manda", async () => {
+test("contacto: enviado antes de 3 segundos de cargado el formulario, o sin esa medida, no se manda", async () => {
   const envios = [], atender = await atenderContacto(), env = ENV_CORREO(envios);
-  for (const cargado of [MS_AHORA - 1000, undefined, "x", MS_AHORA + 5 * 60 * 1000]) {
-    const r = await atender(pedidoContacto(formulario({ cargado })), env);
-    assert.equal(r.status, 400, String(cargado));
+  for (const espera of [1000, 2999, undefined, "9000", -5, null]) {
+    const r = await atender(pedidoContacto(formulario({ espera })), env);
+    assert.equal(r.status, 400, String(espera));
   }
   assert.equal(envios.length, 0);
 });
@@ -764,12 +764,12 @@ test("contacto: CORS solo para el sitio, con POST y Content-Type en el preflight
 test("contacto: tope propio de 5 mensajes por IP cada 10 minutos, ademas del tope general", async () => {
   let reloj = MS_AHORA;
   const envios = [], atender = await atenderContacto({ ahora: () => new Date(reloj).toISOString() }), env = ENV_CORREO(envios);
-  for (let i = 0; i < 5; i++) assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env)).status, 200);
-  const r = await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env);
+  for (let i = 0; i < 5; i++) assert.equal((await atender(pedidoContacto(formulario()), env)).status, 200);
+  const r = await atender(pedidoContacto(formulario()), env);
   assert.equal(r.status, 429);
   assert.equal(r.headers.get("Retry-After"), "600");
-  assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 }), { ip: "1.1.1.1" }), env)).status, 200, "otra IP sigue");
+  assert.equal((await atender(pedidoContacto(formulario(), { ip: "1.1.1.1" }), env)).status, 200, "otra IP sigue");
   reloj += 11 * 60 * 1000;
-  assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env)).status, 200, "pasados 10 minutos vuelve a andar");
+  assert.equal((await atender(pedidoContacto(formulario()), env)).status, 200, "pasados 10 minutos vuelve a andar");
   assert.equal(envios.length, 7);
 });
