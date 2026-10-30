@@ -261,7 +261,7 @@ td.mejor{color:var(--good);font-weight:700}
 .fila .nom{flex:1;min-width:0;font-size:.92rem;line-height:1.35}
 .fila .tie{font:600 .72rem/1 var(--font-mono);color:var(--c);background:var(--c-soft);
   padding:5px 10px;border-radius:999px;white-space:nowrap}
-.fila .via{color:var(--ink-3);font-weight:500}
+.fila .via{color:var(--ink-2);font-weight:500}
 .fila .via::before{content:"\203A ";opacity:.7}
 .fila .pre{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
@@ -330,7 +330,7 @@ td.mejor{color:var(--good);font-weight:700}
 .oferta .nom{flex:1;min-width:0;font-size:.92rem;line-height:1.35}
 .oferta .tie{font:600 .72rem/1 var(--font-mono);color:var(--c);background:var(--c-soft);
   padding:5px 10px;border-radius:999px;white-space:nowrap}
-.oferta .via{color:var(--ink-3);font-weight:500}
+.oferta .via{color:var(--ink-2);font-weight:500}
 .oferta .via::before{content:"A ";opacity:.7}
 .oferta .precios{text-align:right;white-space:nowrap}
 .oferta .ahora{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;

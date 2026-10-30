@@ -200,7 +200,7 @@ function pintarOfertas(append) {
   est.textContent = `${OF_ACTUAL.length} ofertas`
     + (OF_ACTUAL.length ? ` · ahorro promedio ${pesos(ahorro / OF_ACTUAL.length)} por producto` : "")
     + nota
-    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento quedaron afuera por no llegar a los mínimos de su categoría` : "");
+    + (OFERTAS.descartadas ? ` · ${OFERTAS.descartadas} con descuento ${OFERTAS.descartadas === 1 ? "quedó" : "quedaron"} afuera por no llegar a los mínimos de su categoría` : "");
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length

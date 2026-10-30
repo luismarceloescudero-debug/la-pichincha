@@ -299,3 +299,18 @@ test("las sugerencias de Buscar son las fijas, o lo más buscado si el build lo 
   correr("var BUSCADAS = []");
   assert.match(correr("vistaBuscar()"), /<button class="sug">ddr4 16gb<\/button>/, "lista vacia: las de siempre");
 });
+
+test("un solo aviso afuera se dice en singular", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('fijarConsulta("ssd 1tb")');
+  correr('pintarResultados("ssd 1tb")');
+  assert.deepStrictEqual([...correr("[ANALISIS.total - ANALISIS.base.length - ANALISIS.internacionales.length]")], [1]);
+  assert.match(els["#estado"].innerHTML, / · 1 aviso quedó afuera por no ser comparables/);
+  assert.doesNotMatch(els["#estado"].innerHTML, /1 avisos/);
+});
+
+test("Ofertas también dice en singular la única descartada", () => {
+  const fuente = require("fs").readFileSync(require("path").join(__dirname, "../../js/indice-ofertas.js"), "utf8");
+  assert.match(fuente, /con descuento \$\{OFERTAS\.descartadas === 1 \? "quedó" : "quedaron"\} afuera/);
+});

@@ -49,6 +49,16 @@ class Contraste(unittest.TestCase):
                 with self.subTest(tema=tema, color=color):
                     self.assertGreaterEqual(round(contraste(t[color], t[color + "-soft"]), 2), MINIMO)
 
+    def test_el_vendedor_dentro_del_chip_de_la_tienda_se_lee(self):
+        # «Samsung Shop» en el chip de Mercado Libre: .via va sobre el -soft de cada tienda, no sobre la superficie.
+        usados = re.findall(r"\.(?:fila|oferta) \.via\{color:var\(--([\w-]+)\)", CSS)
+        self.assertEqual(len(usados), 2)
+        for tema, t in self.TEMAS.items():
+            for texto in usados:
+                for color in CHIPS:
+                    with self.subTest(tema=tema, texto=texto, chip=color):
+                        self.assertGreaterEqual(round(contraste(t[texto], t[color + "-soft"]), 2), MINIMO)
+
     def test_el_oscuro_del_sistema_y_el_elegido_a_mano_son_iguales(self):
         inicio = CSS.index("@media (prefers-color-scheme:dark)")
         sistema = dict(re.findall(r"--([\w-]+):\s*(#[0-9a-fA-F]{6})", CSS[inicio:CSS.index("}", inicio)]))
