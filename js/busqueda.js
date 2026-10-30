@@ -251,7 +251,7 @@ function pintarResultados(q) {
     `<div class="puente">
       <div class="p-txt">
         <span class="p-tit">${icono("balanza")} Armamos la comparación para «${esc(q.trim())}»</span>
-        <span>Mejor compra: <b>${esc(A.picks[0].m.f[0].slice(0, 64))}</b> · ${pesos(A.picks[0].m.f[1])} · ${esc(comercioDe(A.picks[0].m.f))}${Buscador.plusDe(A.picks[0].m.f[8]).map(t => ` · ＋ ${t}`).join("")}</span>
+        <span>Mejor compra: <b>${esc(Titulo.linea(A.picks[0].m.f[0], { emoji: false }))}</b> · ${pesos(A.picks[0].m.f[1])} · ${esc(comercioDe(A.picks[0].m.f))}${Buscador.plusDe(A.picks[0].m.f[8]).map(t => ` · ＋ ${t}`).join("")}</span>
       </div>
       <div class="botones">
         <button class="acc" data-ir-vista="comparativa">${icono("balanza")} Comparativa</button>
