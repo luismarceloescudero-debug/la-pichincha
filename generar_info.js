@@ -193,11 +193,11 @@ const ESTILO_CONTACTO = `<style>
 .contacto .error{display:block;font-size:.88rem;color:var(--bad);margin-top:5px;font-weight:500}
 .contacto .error:empty{display:none}
 .contacto .trampa{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
-.contacto button{font:600 1rem var(--font-sans);color:#fff;background:var(--accent);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
+.contacto button{font:600 1rem var(--font-sans);color:var(--surface);background:var(--accent);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
 .contacto button[disabled]{opacity:.6;cursor:progress}
 .contacto fieldset{border:0;margin:0;padding:0;min-width:0}
-.contacto fieldset[disabled] button{cursor:not-allowed}
-.contacto .estado{margin:18px 0 0;padding:12px 14px;border-radius:10px;max-width:36rem;line-height:1.5}
+.contacto fieldset[disabled] button{cursor:not-allowed;opacity:.6}
+.contacto .estado{font:500 .95rem var(--font-sans);margin:18px 0 0;padding:12px 14px;border-radius:10px;max-width:36rem;line-height:1.5}
 .contacto .estado:empty{display:none}
 .contacto .estado.ok{background:var(--good-soft);color:var(--good)}
 .contacto .estado.mal{background:var(--surface-2);color:var(--bad)}
@@ -239,7 +239,7 @@ const SCRIPT_CONTACTO = `(function () {
       mensaje: form.elements.mensaje.value.trim(), sitio: form.elements.sitio.value, espera: Date.now() - inicio };
     ["nombre", "correo", "motivo", "mensaje"].forEach(function (c) { marcar(c, ""); });
     var mal = revisar(d);
-    if (mal) { marcar(mal[0], mal[1]); avisar("mal", "Revisá el formulario: " + mal[1]); form.elements[mal[0]].focus(); return; }
+    if (mal) { marcar(mal[0], mal[1]); avisar("mal", mal[1]); form.elements[mal[0]].focus(); return; }
     boton.disabled = true;
     form.setAttribute("aria-busy", "true");
     avisar("enviando", "Enviando el mensaje…");
