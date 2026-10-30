@@ -7,6 +7,9 @@
      el producto por la API de Amazon o de eBay si hay credenciales. Solo se pide la URL canonica que arma js/importar.js
      (host fijo, nunca la que llega), asi que no sirve para pedirle otra cosa a nadie. Amazon nunca se lee sin su API.
    - La consulta se valida con los mismos criterios que lo mas buscado (js/buscadas.js): sin mails, links, telefonos ni documentos.
+   - POST /contacto (spec 046) manda el formulario de /contacto/ por correo con el binding send_email de Cloudflare (Email
+     Routing): destino y remitente salen de CONTACTO_DESTINO y CONTACTO_REMITENTE, nunca del codigo; sin binding o sin esas
+     variables responde 503. Campo trampa, tiempo minimo desde que se cargo el formulario y un tope propio por IP.
    - CORS solo para el sitio y localhost; cache de 8 horas por consulta o por enlace; tope de 30 pedidos por minuto por IP. */
 import Buscadas from "../../js/buscadas.js";
 import Importar from "../../js/importar.js";
@@ -22,6 +25,7 @@ const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de
 const CACHE_PARCIAL_SEG = 900;                 // si alguna fuente fallo, poco: una caida pasajera no queda 8 horas
 const CACHE_VERSION = "033";                   // cambia cuando cambian las reglas: lo guardado con las anteriores no se usa
 const TOPE = 30, VENTANA_MS = 60 * 1000;       // pedidos por IP por minuto
+const TOPE_CONTACTO = 5, VENTANA_CONTACTO_MS = 10 * 60 * 1000;   // mensajes por IP cada 10 minutos
 const ORIGEN_OK = /^(?:https:\/\/pichinchadeldia\.com\.ar|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?)$/;
 
 /* Defensa propia, ademas de la URL canonica de js/importar.js: solo se leen paginas de estos dos hosts y por https. */
@@ -30,26 +34,67 @@ export function paginaPermitida(url) {
   try { const u = new URL(url); return u.protocol === "https:" && PAGINAS.has(u.hostname); } catch (e) { return false; }
 }
 
-function cors(origen) {
+function cors(origen, contacto) {
   const h = { Vary: "Origin" };
-  if (ORIGEN_OK.test(origen || "")) Object.assign(h, { "Access-Control-Allow-Origin": origen, "Access-Control-Allow-Methods": "GET, OPTIONS" });
+  if (ORIGEN_OK.test(origen || "")) Object.assign(h, { "Access-Control-Allow-Origin": origen, "Access-Control-Allow-Methods": contacto ? "POST, OPTIONS" : "GET, OPTIONS" },
+    contacto ? { "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "600" } : {});
   return h;
+}
+
+/* --- Spec 046: el formulario de contacto --- */
+export const MOTIVOS = { consulta: "Consulta", error: "Un precio o dato mal", tienda: "Soy de una tienda", prensa: "Prensa", otro: "Otro" };
+export const LARGOS = { nombre: 80, correo: 254, mensajeMin: 10, mensaje: 4000, cuerpo: 16000 };
+export const ESPERA_MIN_MS = 3000;            // un formulario enviado antes de 3 s de cargado lo lleno un programa
+const CORREO_OK = /^[^\s@<>()[\]",;:\\]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;     // el mensaje conserva sus saltos de linea; el resto, nada
+
+/* Valida lo que llega del formulario. Devuelve { datos } limpios o { error, campo } con un texto para mostrarle a la persona.
+   Nombre y correo van a cabeceras del mail: sin saltos de linea, asi no se puede inyectar otra cabecera. */
+export function validarContacto(c) {
+  if (!c || typeof c !== "object") return { error: "Faltan los datos del formulario." };
+  const texto = v => (typeof v === "string" ? v : "");
+  const nombre = texto(c.nombre).replace(/[\r\n\t]+/g, " ").replace(CONTROL, "").trim();
+  const correo = texto(c.correo).trim();
+  const mensaje = texto(c.mensaje).replace(/\r\n?/g, "\n").replace(CONTROL, "").trim();
+  if (nombre.length > LARGOS.nombre) return { error: `El nombre puede tener hasta ${LARGOS.nombre} caracteres.`, campo: "nombre" };
+  if (!correo) return { error: "Falta tu correo para poder responderte.", campo: "correo" };
+  if (correo.length > LARGOS.correo || !CORREO_OK.test(correo)) return { error: "Revisá el correo: no parece una dirección válida.", campo: "correo" };
+  if (!Object.prototype.hasOwnProperty.call(MOTIVOS, c.motivo)) return { error: "Elegí un motivo.", campo: "motivo" };
+  if (mensaje.length < LARGOS.mensajeMin) return { error: `El mensaje es muy corto: escribí al menos ${LARGOS.mensajeMin} caracteres.`, campo: "mensaje" };
+  if (mensaje.length > LARGOS.mensaje) return { error: `El mensaje puede tener hasta ${LARGOS.mensaje} caracteres.`, campo: "mensaje" };
+  return { datos: { nombre, correo, motivo: c.motivo, mensaje } };
+}
+
+const base64 = s => { let b = ""; for (const x of new TextEncoder().encode(s)) b += String.fromCharCode(x); return btoa(b); };
+const encabezado = s => (/^[\x20-\x7E]*$/.test(s) ? s : `=?UTF-8?B?${base64(s)}?=`);   // RFC 2047 si no es ASCII
+
+/* El mail en crudo (RFC 5322), en texto plano UTF-8 y base64. Reply-To es quien escribio: se contesta desde el correo. */
+export function armarCorreo({ nombre, correo, motivo, mensaje }, { remitente, destino, fecha, id }) {
+  const dominio = remitente.split("@")[1];
+  const asunto = `[La Pichincha] ${MOTIVOS[motivo]}${nombre ? " de " + nombre : ""}`.slice(0, 150);
+  const cuerpo = [`Motivo: ${MOTIVOS[motivo]}`, `Nombre: ${nombre || "(sin nombre)"}`, `Correo: ${correo}`, `Enviado: ${fecha}`, "",
+    mensaje.replace(/\n/g, "\r\n"), "", "-- ", "Llegó por el formulario de https://pichinchadeldia.com.ar/contacto/. Respondé este correo para contestarle."].join("\r\n");
+  const lineas = base64(cuerpo).match(/.{1,76}/g) || [];
+  return [`From: ${encabezado("La Pichincha (contacto)")} <${remitente}>`, `To: <${destino}>`, `Reply-To: <${correo}>`,
+    `Subject: ${encabezado(asunto)}`, `Date: ${new Date(fecha).toUTCString()}`, `Message-ID: <${id}@${dominio}>`, "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=utf-8", "Content-Transfer-Encoding: base64", "", ...lineas, ""].join("\r\n");
 }
 
 // Un error (400, 404, 429) no se guarda: un «demasiadas busquedas» no tiene que quedar 15 minutos en el navegador.
 const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { status: estado,
   headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": estado >= 400 ? "no-store" : "public, max-age=900", ...extra } });
 
-/* Atiende un pedido. deps: fetch, cache (con match/put, la Cache API), ahora() en ISO y tiempoMaximo por fuente en ms.
+/* Atiende un pedido. deps: fetch, cache (con match/put, la Cache API), ahora() en ISO, tiempoMaximo por fuente en ms y
+   crearMensaje(de, para, crudo), que arma el EmailMessage de cloudflare:email (en los tests, uno falso).
    El tope por IP y los tokens viven en esta instancia (un isolate del Worker). */
-export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
-  const porIp = new Map(), tokens = new Map();
+export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMensaje }) {
+  const porIp = new Map(), contactosPorIp = new Map(), tokens = new Map();
 
-  function excedido(ip, ms) {
-    if (porIp.size > 5000) porIp.clear();       // no crece sin limite en un isolate que vive mucho
-    const v = porIp.get(ip);
-    if (!v || ms - v.inicio >= VENTANA_MS) { porIp.set(ip, { inicio: ms, n: 1 }); return false; }
-    return ++v.n > TOPE;
+  function excedido(ip, ms, mapa = porIp, tope = TOPE, ventana = VENTANA_MS) {
+    if (mapa.size > 5000) mapa.clear();         // no crece sin limite en un isolate que vive mucho
+    const v = mapa.get(ip);
+    if (!v || ms - v.inicio >= ventana) { mapa.set(ip, { inicio: ms, n: 1 }); return false; }
+    return ++v.n > tope;
   }
 
   /* Un pedido afuera con nuestro user-agent; corta a tiempoMaximo y falla si la respuesta no es 2xx. JSON o HTML. */
@@ -154,13 +199,43 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
     return responder({ enlace: e, leido: Boolean(r.item), item: r.item || null, motivo: r.motivo || null, fecha }, clave, r.item ? CACHE_SEG : 0, h);
   }
 
+  /* POST /contacto: JSON con nombre, correo, motivo, mensaje, el campo trampa `sitio` (vacio para una persona) y `cargado`
+     (cuando se abrio el formulario, en ms). Un error se dice con un texto para mostrar y, si corresponde, el campo. */
+  async function contacto(request, env, h, fecha, ms, ip) {
+    const salir = (datos, estado, extra = {}) => json(datos, estado, { ...h, "Cache-Control": "no-store", ...extra });
+    if (!/^application\/json\b/i.test(request.headers.get("Content-Type") || "")) return salir({ error: "El formulario tiene que llegar como JSON." }, 415);
+    const crudo = await request.text();
+    if (crudo.length > LARGOS.cuerpo) return salir({ error: "El mensaje es demasiado largo." }, 413);
+    let c;
+    try { c = JSON.parse(crudo); } catch (e) { return salir({ error: "Faltan los datos del formulario." }, 400); }
+    // El campo trampa: un programa lo llena, una persona no lo ve. Se le dice que salio bien y no se manda nada.
+    if (c && typeof c.sitio === "string" && c.sitio.trim()) return salir({ ok: true }, 200);
+    const cargado = Number(c && c.cargado);
+    if (!Number.isFinite(cargado) || cargado > ms + 60 * 1000) return salir({ error: "Recargá la página y probá de nuevo." }, 400);
+    if (ms - cargado < ESPERA_MIN_MS) return salir({ error: "Lo mandaste demasiado rápido: esperá unos segundos y probá de nuevo." }, 400);
+    const v = validarContacto(c);
+    if (v.error) return salir({ error: v.error, campo: v.campo || null }, 400);
+    if (excedido(ip, ms, contactosPorIp, TOPE_CONTACTO, VENTANA_CONTACTO_MS))
+      return salir({ error: "Ya mandaste varios mensajes seguidos: esperá unos minutos y probá de nuevo." }, 429, { "Retry-After": "600" });
+    const remitente = env.CONTACTO_REMITENTE, destino = env.CONTACTO_DESTINO;
+    if (!env.CORREO || typeof env.CORREO.send !== "function" || !remitente || !destino || !crearMensaje)
+      return salir({ error: "El formulario de contacto todavía no está activo. Probá de nuevo en unos días." }, 503);
+    const mail = armarCorreo(v.datos, { remitente, destino, fecha, id: crypto.randomUUID() });
+    try { await env.CORREO.send(await crearMensaje(remitente, destino, mail)); } catch (e) {
+      return salir({ error: "No se pudo enviar el mensaje. Probá de nuevo más tarde." }, 502);
+    }
+    return salir({ ok: true }, 200);
+  }
+
   return async function atender(request, env) {
-    const url = new URL(request.url), origen = request.headers.get("Origin"), h = cors(origen);
-    if (url.pathname !== "/buscar" && url.pathname !== "/enlace") return json({ error: "no existe" }, 404, h);
+    const url = new URL(request.url), origen = request.headers.get("Origin"), esContacto = url.pathname === "/contacto";
+    const h = cors(origen, esContacto);
+    if (url.pathname !== "/buscar" && url.pathname !== "/enlace" && !esContacto) return json({ error: "no existe" }, 404, h);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
-    if (request.method !== "GET") return json({ error: "solo GET" }, 405, h);
-    const fecha = ahora(), ms = Date.parse(fecha);
-    if (excedido(request.headers.get("CF-Connecting-IP") || "sin-ip", ms)) return json({ error: "demasiadas busquedas" }, 429, { ...h, "Retry-After": "60" });
+    if (request.method !== (esContacto ? "POST" : "GET")) return json({ error: esContacto ? "solo POST" : "solo GET" }, 405, h);
+    const fecha = ahora(), ms = Date.parse(fecha), ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
+    if (excedido(ip, ms)) return json({ error: "demasiadas busquedas" }, 429, { ...h, "Retry-After": "60" });
+    if (esContacto) return contacto(request, env, h, fecha, ms, ip);
     return url.pathname === "/buscar" ? buscar(url, env, h, fecha, ms) : enlace(url, env, h, fecha);
   };
 }
@@ -168,7 +243,9 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000 }) {
 let instancia = null;
 export default {
   fetch(request, env) {
-    if (!instancia) instancia = crearAtender({ fetch: (u, i) => fetch(u, i), cache: caches.default, ahora: () => new Date().toISOString() });
+    // cloudflare:email existe solo dentro de Workers: se importa recien al mandar un mensaje (asi los tests corren en Node).
+    const crearMensaje = async (de, para, crudo) => { const { EmailMessage } = await import("cloudflare:email"); return new EmailMessage(de, para, crudo); };
+    if (!instancia) instancia = crearAtender({ fetch: (u, i) => fetch(u, i), cache: caches.default, ahora: () => new Date().toISOString(), crearMensaje });
     return instancia(request, env);
   },
 };

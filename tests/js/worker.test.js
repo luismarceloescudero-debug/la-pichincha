@@ -631,3 +631,145 @@ test("una fuente que anda no trae `motivo`", async () => {
   assert.equal(j.fuentes[0].ok, true);
   assert.equal("motivo" in j.fuentes[0], false);
 });
+
+/* --- Spec 046: POST /contacto, con el binding send_email simulado --- */
+const MS_AHORA = Date.parse(AHORA);
+const ENV_CORREO = envios => ({ ...SIN_TM, CONTACTO_DESTINO: "dueno@example.com", CONTACTO_REMITENTE: "contacto@pichinchadeldia.com.ar",
+  CORREO: { send: async m => { envios.push(m); } } });
+const crearMensaje = (de, para, crudo) => ({ de, para, crudo });
+const formulario = (extra = {}) => ({ nombre: "Ana", correo: "ana@example.com", motivo: "consulta",
+  mensaje: "Hola, ¿cada cuánto se actualizan los precios?", sitio: "", cargado: MS_AHORA - 10000, ...extra });
+const pedidoContacto = (datos, { origin = "https://pichinchadeldia.com.ar", ip = "7.7.7.7", tipo = "application/json", metodo = "POST" } = {}) =>
+  new Request("https://afuera.example.workers.dev/contacto", { method: metodo,
+    headers: { Origin: origin, "CF-Connecting-IP": ip, "Content-Type": tipo },
+    body: metodo === "POST" ? (typeof datos === "string" ? datos : JSON.stringify(datos)) : undefined });
+const atenderContacto = (deps = {}) => cargar("index.js").then(({ crearAtender }) =>
+  crearAtender({ fetch: fetchFalso([]), cache: cacheFalsa(), ahora: () => AHORA, crearMensaje, ...deps }));
+const decodificar = crudo => Buffer.from(crudo.split("\r\n\r\n")[1].replace(/\r\n/g, ""), "base64").toString("utf8");
+
+test("contacto: un mensaje valido se manda con send_email, Reply-To de quien escribe y destino y remitente de las variables", async () => {
+  const envios = [], atender = await atenderContacto();
+  const r = await atender(pedidoContacto(formulario()), ENV_CORREO(envios));
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { ok: true });
+  assert.equal(r.headers.get("Cache-Control"), "no-store");
+  assert.equal(envios.length, 1);
+  const { de, para, crudo } = envios[0];
+  assert.equal(de, "contacto@pichinchadeldia.com.ar");
+  assert.equal(para, "dueno@example.com");
+  assert.match(crudo, /^From: La Pichincha \(contacto\) <contacto@pichinchadeldia\.com\.ar>\r\n/);
+  assert.match(crudo, /\r\nTo: <dueno@example\.com>\r\n/);
+  assert.match(crudo, /\r\nReply-To: <ana@example\.com>\r\n/);
+  assert.match(crudo, /\r\nMessage-ID: <[0-9a-f-]{36}@pichinchadeldia\.com\.ar>\r\n/);
+  assert.match(crudo, /\r\nDate: Fri, 23 Oct 2026 15:00:00 GMT\r\n/);
+  assert.match(crudo, /\r\nSubject: \[La Pichincha\] Consulta de Ana\r\n/);
+  const cuerpo = decodificar(crudo);
+  assert.match(cuerpo, /Motivo: Consulta/);
+  assert.match(cuerpo, /Correo: ana@example\.com/);
+  assert.match(cuerpo, /¿cada cuánto se actualizan los precios\?/);
+});
+
+test("contacto: el asunto con tildes va en RFC 2047 y el mensaje conserva sus saltos de linea", async () => {
+  const envios = [], atender = await atenderContacto();
+  await atender(pedidoContacto(formulario({ nombre: "Martín", motivo: "error", mensaje: "Primera línea\nsegunda línea" })), ENV_CORREO(envios));
+  const crudo = envios[0].crudo, asunto = /\r\nSubject: =\?UTF-8\?B\?([^?]+)\?=\r\n/.exec(crudo);
+  assert.ok(asunto, "asunto codificado");
+  assert.equal(Buffer.from(asunto[1], "base64").toString("utf8"), "[La Pichincha] Un precio o dato mal de Martín");
+  assert.match(decodificar(crudo), /Primera línea\r\nsegunda línea/);
+});
+
+test("contacto: nombre y correo no pueden meter otra cabecera (sin saltos de linea)", async () => {
+  const { validarContacto } = await cargar("index.js");
+  assert.equal(validarContacto(formulario({ correo: "ana@example.com\r\nBcc: x@evil.com" })).campo, "correo");
+  const v = validarContacto(formulario({ nombre: "Ana\r\nBcc: x@evil.com" }));
+  assert.equal(v.datos.nombre, "Ana Bcc: x@evil.com");
+  const envios = [], atender = await atenderContacto();
+  await atender(pedidoContacto(formulario({ nombre: "Ana\r\nBcc: x@evil.com" })), ENV_CORREO(envios));
+  assert.doesNotMatch(envios[0].crudo, /\r\nBcc:/);
+});
+
+test("contacto: valida correo, motivo y largos, y dice que campo esta mal", async () => {
+  const atender = await atenderContacto(), env = ENV_CORREO([]);
+  const casos = [[{ correo: "" }, "correo"], [{ correo: "ana@" }, "correo"], [{ correo: "ana example.com" }, "correo"],
+    [{ correo: "a".repeat(250) + "@x.com" }, "correo"], [{ motivo: "spam" }, "motivo"], [{ motivo: "constructor" }, "motivo"],
+    [{ mensaje: "hola" }, "mensaje"], [{ mensaje: "x".repeat(4001) }, "mensaje"], [{ nombre: "n".repeat(81) }, "nombre"]];
+  for (const [i, [extra, campo]] of casos.entries()) {
+    const r = await atender(pedidoContacto(formulario(extra), { ip: "8.8.8." + i }), env);
+    assert.equal(r.status, 400, JSON.stringify(extra).slice(0, 40));
+    const j = await r.json();
+    assert.equal(j.campo, campo);
+    assert.ok(j.error.length > 5);
+  }
+  const sinNombre = await atender(pedidoContacto(formulario({ nombre: "" }), { ip: "8.8.9.9" }), env);
+  assert.equal(sinNombre.status, 200, "el nombre es opcional");
+});
+
+test("contacto: el campo trampa lleno responde ok y no manda nada", async () => {
+  const envios = [], atender = await atenderContacto();
+  const r = await atender(pedidoContacto(formulario({ sitio: "https://spam.example" })), ENV_CORREO(envios));
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { ok: true });
+  assert.equal(envios.length, 0);
+});
+
+test("contacto: enviado antes de 3 segundos de cargado, sin la hora de carga o con una del futuro, no se manda", async () => {
+  const envios = [], atender = await atenderContacto(), env = ENV_CORREO(envios);
+  for (const cargado of [MS_AHORA - 1000, undefined, "x", MS_AHORA + 5 * 60 * 1000]) {
+    const r = await atender(pedidoContacto(formulario({ cargado })), env);
+    assert.equal(r.status, 400, String(cargado));
+  }
+  assert.equal(envios.length, 0);
+});
+
+test("contacto: solo POST con JSON y un cuerpo de tamaño razonable", async () => {
+  const atender = await atenderContacto(), env = ENV_CORREO([]);
+  assert.equal((await atender(pedidoContacto(null, { metodo: "GET" }), env)).status, 405);
+  assert.equal((await atender(pedidoContacto("nombre=Ana", { tipo: "application/x-www-form-urlencoded" }), env)).status, 415);
+  assert.equal((await atender(pedidoContacto("{roto"), env)).status, 400);
+  assert.equal((await atender(pedidoContacto(formulario({ relleno: "x".repeat(20000) })), env)).status, 413);
+});
+
+test("contacto: sin el binding o sin las variables responde 503 con un mensaje claro", async () => {
+  const atender = await atenderContacto();
+  const sinBinding = { ...ENV_CORREO([]) }; delete sinBinding.CORREO;
+  const sinDestino = { ...ENV_CORREO([]) }; delete sinDestino.CONTACTO_DESTINO;
+  const sinRemitente = { ...ENV_CORREO([]) }; delete sinRemitente.CONTACTO_REMITENTE;
+  for (const [i, env] of [sinBinding, sinDestino, sinRemitente, SIN_TM].entries()) {
+    const r = await atender(pedidoContacto(formulario(), { ip: "6.6.6." + i }), env);
+    assert.equal(r.status, 503);
+    assert.match((await r.json()).error, /todavía no está activo/);
+  }
+});
+
+test("contacto: si send_email falla responde 502 sin detalles del error", async () => {
+  const atender = await atenderContacto();
+  const env = { ...ENV_CORREO([]), CORREO: { send: async () => { throw new Error("destination address not verified: dueno@example.com"); } } };
+  const r = await atender(pedidoContacto(formulario()), env);
+  assert.equal(r.status, 502);
+  assert.doesNotMatch(JSON.stringify(await r.json()), /dueno@example\.com/);
+});
+
+test("contacto: CORS solo para el sitio, con POST y Content-Type en el preflight", async () => {
+  const atender = await atenderContacto(), env = ENV_CORREO([]);
+  const pre = await atender(pedidoContacto(null, { metodo: "OPTIONS" }), env);
+  assert.equal(pre.status, 204);
+  assert.equal(pre.headers.get("Access-Control-Allow-Origin"), "https://pichinchadeldia.com.ar");
+  assert.equal(pre.headers.get("Access-Control-Allow-Methods"), "POST, OPTIONS");
+  assert.equal(pre.headers.get("Access-Control-Allow-Headers"), "Content-Type");
+  const ajeno = await atender(pedidoContacto(null, { metodo: "OPTIONS", origin: "https://evil.com" }), env);
+  assert.equal(ajeno.headers.get("Access-Control-Allow-Origin"), null);
+  assert.equal(ajeno.headers.get("Access-Control-Allow-Headers"), null);
+});
+
+test("contacto: tope propio de 5 mensajes por IP cada 10 minutos, ademas del tope general", async () => {
+  let reloj = MS_AHORA;
+  const envios = [], atender = await atenderContacto({ ahora: () => new Date(reloj).toISOString() }), env = ENV_CORREO(envios);
+  for (let i = 0; i < 5; i++) assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env)).status, 200);
+  const r = await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env);
+  assert.equal(r.status, 429);
+  assert.equal(r.headers.get("Retry-After"), "600");
+  assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 }), { ip: "1.1.1.1" }), env)).status, 200, "otra IP sigue");
+  reloj += 11 * 60 * 1000;
+  assert.equal((await atender(pedidoContacto(formulario({ cargado: reloj - 10000 })), env)).status, 200, "pasados 10 minutos vuelve a andar");
+  assert.equal(envios.length, 7);
+});
