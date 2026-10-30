@@ -36,7 +36,7 @@ function armar(idx, q = C.q) {
 test("cada pagina indexable anuncia su feed en el head, ademas del global", () => {
   const { ctx, analisis } = armar(IDX);
   const html = G.renderPagina(C, analisis, ctx);
-  assert.match(html, /<link rel="alternate" type="application\/rss\+xml" title="[^"]*ddr4 16gb[^"]*" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/feed\.xml">/);
+  assert.match(html, /<link rel="alternate" type="application\/rss\+xml" title="[^"]*DDR4 16GB[^"]*" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/feed\.xml">/);
   assert.match(html, /href="https:\/\/ejemplo\.test\/la-pichincha\/ofertas\.xml"/);
 });
 
@@ -54,7 +54,7 @@ test("el feed es un RSS 2.0 con el canal apuntando a la pagina y la hora de los 
   const xml = G.renderFeedPagina(C, analisis, ctx);
   assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.match(xml, /<rss version="2\.0" xmlns:atom="http:\/\/www\.w3\.org\/2005\/Atom">/);
-  assert.match(xml, /<title>La Pichincha: ddr4 16gb<\/title>/);
+  assert.match(xml, /<title>La Pichincha: DDR4 16GB<\/title>/);
   assert.match(xml, /<link>https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/<\/link>/);
   assert.match(xml, /<atom:link href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/feed\.xml" rel="self" type="application\/rss\+xml"\/>/);
   assert.match(xml, /<language>es-AR<\/language>/);

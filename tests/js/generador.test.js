@@ -191,7 +191,7 @@ test("el JSON-LD trae ItemList, el rango de precios en ARS y las migas", () => {
   assert.equal(oferta["@type"], "AggregateOffer");
   assert.deepEqual([oferta.lowPrice, oferta.highPrice, oferta.offerCount, oferta.priceCurrency], [900, 1100, 5, "ARS"]);
   const migas = tipo("BreadcrumbList").itemListElement.map(e => e.name);
-  assert.deepEqual(migas, ["La Pichincha", "Precios", "ddr4 16gb"]);
+  assert.deepEqual(migas, ["La Pichincha", "Precios", "DDR4 16GB"]);
 });
 
 test("el JSON-LD escapa lo que podria cerrar el script", () => {
@@ -205,14 +205,14 @@ test("el JSON-LD escapa lo que podria cerrar el script", () => {
 
 test("titulo, descripcion, canonica y social son propios de la pagina", () => {
   const { html } = paginaDe(IDX);
-  assert.match(html, /<title>ddr4 16gb: precios desde \$900 \| La Pichincha<\/title>/);
+  assert.match(html, /<title>DDR4 16GB: precios desde \$900 \| La Pichincha<\/title>/);
   // Un titulo muy largo se corta en Google: aun con una consulta larga y un precio de siete cifras entra.
   const larga = { ...IDX, productos: IDX.productos.map(f => [f[0], f[1] * 100000, ...f.slice(2)]) };
   const largo = paginaDe(larga, "memoria ddr4 16gb 3200mhz");
   assert.match(largo.html, /<tr data-op/, "la consulta larga tiene que dar una pagina completa");
   const titulo = (largo.html.match(/<title>(.*?)<\/title>/) || [])[1] || "";
   assert.ok(titulo.length <= 70, titulo.length + ": " + titulo);
-  assert.match(html, /<meta name="description" content="5 opciones de ddr4 16gb en 2 comercios: desde \$900, mediana \$1\.000\./);
+  assert.match(html, /<meta name="description" content="5 opciones de DDR4 16GB en 2 comercios: desde \$900, mediana \$1\.000\./);
   assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/ddr4-16gb\/">/);
   assert.match(html, /<meta property="og:image" content="https:\/\/ejemplo\.test\/la-pichincha\/img\/og\.png">/);
 });
@@ -229,7 +229,7 @@ test("el indice de consultas enlaza cada pagina, agrupada, con su precio desde",
   assert.match(html, /<h1>Precios de hardware en Argentina<\/h1>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/precios\/">/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/css\/sitio\.css">/);
-  assert.match(html, /<a href="ssd-1tb\/">ssd 1tb<\/a>[^<]*<span[^>]*>desde \$204\.250/);
+  assert.match(html, /<a href="ssd-1tb\/">SSD 1TB<\/a>[^<]*<span[^>]*>desde \$204\.250/);
   assert.ok(html.indexOf("Almacenamiento") < html.indexOf("ssd-1tb/") && html.indexOf("ssd-2tb/") < html.indexOf("Memorias"),
     "las del mismo grupo van juntas");
   assert.doesNotMatch(html, /noindex/);
@@ -377,7 +377,7 @@ test("la pagina enlaza a sus busquedas relacionadas, y sin relacionadas no muest
   const con = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb",
     relacionadas: [{ q: "ddr5 <32gb>", slug: "ddr5-32gb" }] }, analisis, ctx);
   assert.match(con, /<h2>Búsquedas relacionadas<\/h2>/);
-  assert.match(con, /<a href="\.\.\/ddr5-32gb\/">ddr5 &lt;32gb&gt;<\/a>/);
+  assert.match(con, /<a href="\.\.\/ddr5-32gb\/">DDR5 &lt;32gb&gt;<\/a>/);
   const sin = G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx);
   assert.doesNotMatch(sin, /Búsquedas relacionadas/);
 });
@@ -419,4 +419,14 @@ test("las paginas de /precios/ llevan el codigo de afiliado en Mercado Libre, co
   assert.match(html, /\(afiliado\)/);
   const otros = html.match(/<a href="https:\/\/t\.test[^>]*>/g) || [];
   assert.ok(otros.length > 0 && otros.every(a => /rel="noopener"/.test(a) && !/matt_/.test(a)));
+});
+
+test("rotulo escribe la consulta como se lee: siglas, unidades, tildes y la primera en mayúscula; la URL no cambia", () => {
+  const { rotulo, renderPagina } = require("../../generar_paginas.js");
+  const casos = { "rtx 5060": "RTX 5060", "placa de video": "Placa de video", "mother b650": "Mother B650", "ddr5 32gb": "DDR5 32GB",
+    "ssd nvme 1tb": "SSD NVMe 1TB", "fuente 650w": "Fuente 650W", "monitor 144hz": "Monitor 144Hz", "monitor 4k": "Monitor 4K",
+    "teclado mecanico": "Teclado mecánico", "mouse inalambrico": "Mouse inalámbrico", "microfono usb": "Micrófono USB",
+    "notebook i5": "Notebook i5", "ipad": "iPad", "tablet samsung": "Tablet Samsung", "procesador intel": "Procesador Intel" };
+  for (const [q, esperado] of Object.entries(casos)) assert.equal(rotulo(q), esperado, q);
+  assert.ok(typeof renderPagina === "function");
 });

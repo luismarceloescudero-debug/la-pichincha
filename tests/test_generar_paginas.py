@@ -95,7 +95,7 @@ class Generar(unittest.TestCase):
     def test_crea_una_pagina_por_consulta(self):
         self.assertEqual(self.correr(), 0)
         buena = (self.salida / "precios" / "ddr4-16gb" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("<h1>ddr4 16gb", buena)
+        self.assertIn("<h1>DDR4 16GB", buena)
         self.assertNotIn("noindex", buena)
         fina = (self.salida / "precios" / "placa-inexistente" / "index.html").read_text(encoding="utf-8")
         self.assertIn("noindex", fina)

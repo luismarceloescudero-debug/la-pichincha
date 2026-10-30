@@ -31,6 +31,25 @@ const tienda = u => { const a = P.enlaceTienda(String(u)); return { href: esc(a.
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pesos = n => n == null ? "—" : "$" + Math.round(n).toLocaleString("es-AR");
 
+/* Como se muestra una consulta en titulos y encabezados: la busqueda se guarda en minuscula y sin tildes («rtx 5060»,
+   «teclado mecanico»), pero Google y la persona leen «RTX 5060» y «Teclado mecánico». La URL y el ?q= no cambian. */
+const SIGLAS = /^(rtx|gtx|rx|ssd|ddr\d|ram|usb|cpu|gpu|led|ips|va|oled|qd|hdmi|[abhxz]\d{3}[a-z]?|\d+k)$/;
+const PALABRAS = { nvme: "NVMe", ipad: "iPad", iphone: "iPhone", ryzen: "Ryzen", intel: "Intel", amd: "AMD", samsung: "Samsung", logitech: "Logitech",
+  mecanico: "mecánico", mecanicos: "mecánicos", inalambrico: "inalámbrico", inalambricos: "inalámbricos", microfono: "micrófono" };
+function rotulo(q) {
+  const palabras = String(q).trim().split(/\s+/).map(p => {
+    const m = p.toLowerCase();
+    if (PALABRAS[m]) return PALABRAS[m];
+    if (SIGLAS.test(m)) return m.toUpperCase();
+    const unidad = /^(\d+)(gb|tb|mb|w|hz|mhz)$/.exec(m);
+    if (unidad) return unidad[1] + { gb: "GB", tb: "TB", mb: "MB", w: "W", hz: "Hz", mhz: "MHz" }[unidad[2]];
+    return p;
+  });
+  const t = palabras.join(" ");
+  // «iPad» y las demas del diccionario ya vienen escritas como van
+  return /^[a-zà-ÿ]/.test(t) && !PALABRAS[t.split(" ")[0].toLowerCase()] ? t[0].toUpperCase() + t.slice(1) : t;
+}
+
 /* Lo que Analisis necesita de la "pagina": la busqueda sobre el indice, comercios y marcas. */
 function crearContexto(idx, { baseUrl = BASE_URL, ahora = new Date(), marcas = {} } = {}) {
   const nombres = idx.productos.map(f => B.normalBusq(f[0]));
@@ -156,15 +175,15 @@ function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
   // Un precio que no se pudo verificar hoy lo dice tambien aca, no solo en la pagina (FR-017).
   const listados = filas.filter(f => esUrl(f[2])).slice(0, MAX_FILAS);
   return { "@context": "https://schema.org", "@graph": [
-    { "@type": "ItemList", name: `${consulta.q}: precios en Argentina`, numberOfItems: listados.length,
+    { "@type": "ItemList", name: `${rotulo(consulta.q)}: precios en Argentina`, numberOfItems: listados.length,
       itemListElement: listados.map((f, i) => ({ "@type": "ListItem", position: i + 1, name: f[0], url: f[2],
         ...(viejoDe(f, ctx) ? { description: viejoDe(f, ctx) } : {}) })) },
-    { "@type": "Product", name: consulta.q, image: `${base}/img/og.png`, url: canonica,
+    { "@type": "Product", name: rotulo(consulta.q), image: `${base}/img/og.png`, url: canonica,
       offers: { "@type": "AggregateOffer", lowPrice: desde, highPrice: hasta, offerCount: filas.length, priceCurrency: "ARS" } },
     { "@type": "BreadcrumbList", itemListElement: [
       { "@type": "ListItem", position: 1, name: "La Pichincha", item: `${base}/` },
       { "@type": "ListItem", position: 2, name: "Precios", item: `${base}/precios/` },
-      { "@type": "ListItem", position: 3, name: consulta.q, item: canonica } ] },
+      { "@type": "ListItem", position: 3, name: rotulo(consulta.q), item: canonica } ] },
   ] };
 }
 
@@ -238,7 +257,7 @@ function relacionadasHtml(lista) {
   if (!lista || !lista.length) return "";
   return `  <section>
     <h2>Búsquedas relacionadas</h2>
-    <ul class="relacionadas">${lista.map(r => `<li><a href="../${esc(r.slug)}/">${esc(r.q)}</a></li>`).join("")}</ul>
+    <ul class="relacionadas">${lista.map(r => `<li><a href="../${esc(r.slug)}/">${esc(rotulo(r.q))}</a></li>`).join("")}</ul>
   </section>
 `;
 }
@@ -269,6 +288,7 @@ function relacionadas(entradas, slug) {
 /* Pagina de una consulta. consulta = { q, slug, relacionadas? }; analisis = Analisis.analizarConsulta o null. */
 function renderPagina(consulta, analisis, ctx) {
   const { q, slug } = consulta;
+  const nom = rotulo(q);
   const canonica = `${ctx.baseUrl}/precios/${slug}/`;
   const cuando = P.fechaHora(ctx.idx.generado);   // fija: la pagina queda escrita
   const interactiva = P.armarUrl("../../", q, "comparativa");
@@ -276,19 +296,19 @@ function renderPagina(consulta, analisis, ctx) {
 
   if (!esIndexable(analisis)) {
     const buscador = P.armarUrl("../../", q, "buscar");
-    return cabeza({ titulo: `${q}: precios en Argentina | La Pichincha`,
-      descripcion: `Hoy no hay opciones suficientes de ${q} para comparar. Probá el buscador de La Pichincha.`,
+    return cabeza({ titulo: `${nom}: precios en Argentina | La Pichincha`,
+      descripcion: `Hoy no hay opciones suficientes de ${nom} para comparar. Probá el buscador de La Pichincha.`,
       canonica, noindex: true, baseUrl: ctx.baseUrl }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <main id="contenido" class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
-  <h1>${esc(q)}: hoy no hay opciones suficientes</h1>
+  <h1>${esc(nom)}: hoy no hay opciones suficientes</h1>
   <p class="sub">${analisis && analisis.base.length >= MIN_COMPARABLES
-    ? `Hoy las opciones comparables de «${esc(q)}» están en un solo comercio (${esc(analisis.comercios[0] ? analisis.comercios[0].nom : "")}), así que no hay con qué comparar.`
-    : `Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(q)}» en las tiendas que seguimos, así que todavía no armamos la comparación.`} Probá con el buscador, que mira todos los avisos.</p>
-  <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(q)}» en La Pichincha</a></p>
+    ? `Hoy las opciones comparables de «${esc(nom)}» están en un solo comercio (${esc(analisis.comercios[0] ? analisis.comercios[0].nom : "")}), así que no hay con qué comparar.`
+    : `Encontramos menos de ${MIN_COMPARABLES} opciones comparables de «${esc(nom)}» en las tiendas que seguimos, así que todavía no armamos la comparación.`} Probá con el buscador, que mira todos los avisos.</p>
+  <p><a class="acc" href="${esc(buscador)}">Buscar «${esc(nom)}» en La Pichincha</a></p>
   ${pie(ctx)}
 </main>
 <script src="../../js/pagina.js"></script>
@@ -314,20 +334,20 @@ function renderPagina(consulta, analisis, ctx) {
   const avisos = filas.length + filas.reduce((n, f) => n + ((ctx.otras && ctx.otras.get(f)) || []).length, 0);
   const conteo = avisos > filas.length ? `${filas.length} productos en ${avisos} avisos` : `${filas.length} opciones`;
 
-  const titulo = `${q}: precios desde ${pesos(desde)} | La Pichincha`;
-  const descripcion = `${conteo} de ${q} en ${comercios === 1 ? "1 comercio" : `${comercios} comercios`}: desde ${pesos(desde)}, ` +
+  const titulo = `${nom}: precios desde ${pesos(desde)} | La Pichincha`;
+  const descripcion = `${conteo} de ${nom} en ${comercios === 1 ? "1 comercio" : `${comercios} comercios`}: desde ${pesos(desde)}, ` +
     `mediana ${pesos(analisis.med)}. Mejor compra y precios del ${cuando}.`;
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
-    feed: { titulo: `Precios de ${q} en La Pichincha`, href: `${canonica}${FEED_ARCHIVO}` },
+    feed: { titulo: `Precios de ${nom} en La Pichincha`, href: `${canonica}${FEED_ARCHIVO}` },
     grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <main id="contenido" class="wrap">
   <p class="meta">La Pichincha · precios del ${esc(cuando)}</p>
-  <h1>${esc(q)}: precios y qué conviene comprar</h1>
-  <p class="sub">Comparamos ${conteo} de «${esc(q)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
+  <h1>${esc(nom)}: precios y qué conviene comprar</h1>
+  <p class="sub">Comparamos ${conteo} de «${esc(nom)}» en ${comercios} comercio${comercios > 1 ? "s" : ""}: de ${pesos(desde)} a ${pesos(hasta)}, con una mediana de ${pesos(analisis.med)}. Dejamos afuera lo que no es comparable.</p>
 
   <section class="panel">
     <h2>Mejor compra</h2>
@@ -343,7 +363,7 @@ function renderPagina(consulta, analisis, ctx) {
 
 ${precioPorTiendaHtml(analisis, ctx)}
   <section>
-    <h2>Opciones de ${esc(q)}</h2>
+    <h2>Opciones de ${esc(nom)}</h2>
     <div class="scroll"><table>
       <thead><tr><th>Producto</th><th>Comercio</th><th>Precio</th><th>Detalle</th></tr></thead>
       <tbody>
@@ -385,6 +405,7 @@ const MAX_FEED_PAGINA = 10;
 function renderFeedPagina(consulta, analisis, ctx) {
   if (!esIndexable(analisis)) return null;
   const { q, slug } = consulta;
+  const nom = rotulo(q);
   const canonica = `${ctx.baseUrl}/precios/${slug}/`;
   const fecha = new Date(ctx.idx.generado);
   const rfc = isNaN(fecha) ? new Date().toUTCString() : fecha.toUTCString();
@@ -409,10 +430,10 @@ function renderFeedPagina(consulta, analisis, ctx) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${esc(`La Pichincha: ${q}`)}</title>
+    <title>${esc(`La Pichincha: ${nom}`)}</title>
     <link>${esc(canonica)}</link>
     <atom:link href="${esc(canonica + FEED_ARCHIVO)}" rel="self" type="application/rss+xml"/>
-    <description>${esc(`Los mejores precios de ${q} en tiendas de Argentina, con el precio, el comercio y el enlace a cada aviso.`)}</description>
+    <description>${esc(`Los mejores precios de ${nom} en tiendas de Argentina, con el precio, el comercio y el enlace a cada aviso.`)}</description>
     <language>es-AR</language>
     <lastBuildDate>${rfc}</lastBuildDate>
 ${items.join("\n")}
@@ -439,7 +460,7 @@ function renderIndice(entradas, ctx) {
   const cuerpo = entradas.length ? [...grupos].map(([grupo, lista]) => `  <section>
     <h2>${esc(grupo)}</h2>
     <ul>
-${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(e.q)}</a> <span class="sub">desde ${pesos(e.desde)} · ${e.comparables} opciones</span></li>`).join("\n")}
+${lista.map(e => `      <li><a href="${esc(e.slug)}/">${esc(rotulo(e.q))}</a> <span class="sub">desde ${pesos(e.desde)} · ${e.comparables} opciones</span></li>`).join("\n")}
     </ul>
   </section>`).join("\n")
     : `  <p class="sub">Todavía no hay páginas de precios con opciones suficientes. Probá el <a href="../">buscador</a>.</p>`;
@@ -506,5 +527,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
+module.exports = { rotulo, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));
