@@ -155,6 +155,8 @@ document.addEventListener("click", async ev => {
    ExcelJS pesa 257 KB comprimido, asi que se baja recien cuando pedis el
    archivo, no en cada visita. Si el CDN no responde, cae en CSV. */
 const EXCEL_URL = "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+// Hash de cdnjs para esa version (SRI): si el archivo del CDN cambia, el navegador no lo corre y se cae en CSV.
+const EXCEL_SRI = "sha512-dlPw+ytv/6JyepmelABrgeYgHI0O+frEwgfnPdXDTOIZz+eDgfW07QXG02/O8COfivBdGNINy+Vex+lYmJ5rxw==";
 let excelPromesa = null;
 
 function cargarExcel() {
@@ -163,6 +165,8 @@ function cargarExcel() {
     excelPromesa = new Promise((listo, falla) => {
       const et = document.createElement("script");
       et.src = EXCEL_URL;
+      et.integrity = EXCEL_SRI;
+      et.crossOrigin = "anonymous";
       et.onload = () => (window.ExcelJS ? listo(window.ExcelJS) : falla(new Error("sin ExcelJS")));
       et.onerror = () => { excelPromesa = null; falla(new Error("no cargo")); };
       document.head.appendChild(et);
