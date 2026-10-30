@@ -156,6 +156,7 @@ test("las pestañas siguen el patrón de ARIA: controlan #vista y solo la elegid
   const arranque = leer("js/arranque.js");
   assert.match(arranque, /v\.setAttribute\("aria-labelledby", "tab-" \+ id\)/, "el panel se nombra con la pestaña elegida");
   assert.match(arranque, /b\.tabIndex = b\.dataset\.ir === id \? 0 : -1/);
+  assert.match(arranque, /addEventListener\("focusout"[\s\S]{0,200}aria-selected"\) === "true" \? 0 : -1/, "al salir sin activar, vuelve a entrar por la elegida");
 });
 
 test("flechas, Inicio y Fin mueven el foco entre pestañas y dan la vuelta; otra tecla no", () => {
