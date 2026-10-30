@@ -164,9 +164,13 @@ section{position:absolute;inset:0;display:none}
 .foto.sin{display:none}
 /* Disposicion «plena»: sin caja, la foto grande arriba y el descuento encima */
 .disp-plena #oferta .tarjeta{background:transparent;border:none;backdrop-filter:none;padding-top:0}
-.disp-plena .foto{position:relative;right:auto;top:auto;width:100%;height:560px;margin:0 0 26px;order:-1;padding:30px;border-radius:44px}
+.disp-plena .foto{position:relative;right:auto;top:auto;width:100%;height:440px;margin:0 0 26px;order:-1;padding:30px;border-radius:44px}
 .disp-plena .pct{position:absolute;left:28px;top:28px;z-index:1;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 .disp-plena .ico{display:none}
+/* Sin foto, el descuento vuelve a su lugar y el icono tambien */
+.disp-plena .tarjeta:has(.foto.sin){padding-top:60px}
+.disp-plena .tarjeta:has(.foto.sin) .pct{position:static;box-shadow:none}
+.disp-plena .tarjeta:has(.foto.sin) .ico{display:block}
 .disp-plena .nom{-webkit-line-clamp:2}
 </style></head>
 <body class="disp-${est.disposicion}"><div id="esc">
