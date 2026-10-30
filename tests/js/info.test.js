@@ -111,3 +111,79 @@ test("la privacidad explica lo más buscado con el mismo mínimo y la misma vent
   assert.match(html, /sin conteos, sin fechas y sin nada de quién buscó/);
   assert.match(html, /datos personales/);
 });
+
+/* --- Spec 046: /contacto/, /acerca/ y security.txt --- */
+const cargarWorker = () => import(path.join(__dirname, "..", "..", "worker", "src", "index.js").replace(/\\/g, "/").replace(/^([A-Za-z]):/, "file:///$1:"));
+
+test("contacto: los limites y los motivos de la pagina son los mismos que valida el Worker", async () => {
+  const W = await cargarWorker();
+  assert.equal(I.CONTACTO.nombre, W.LARGOS.nombre);
+  assert.equal(I.CONTACTO.correo, W.LARGOS.correo);
+  assert.equal(I.CONTACTO.mensajeMin, W.LARGOS.mensajeMin);
+  assert.equal(I.CONTACTO.mensaje, W.LARGOS.mensaje);
+  assert.equal(I.CONTACTO.esperaMin, W.ESPERA_MIN_MS);
+  assert.deepEqual(I.MOTIVOS.map(m => m[0]), Object.keys(W.MOTIVOS));
+});
+
+test("contacto: formulario accesible, con el endpoint del Worker, campo trampa y estados anunciados", () => {
+  const html = I.renderContacto({ baseUrl: BASE, workerUrl: "https://afuera.example.workers.dev/" });
+  assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/contacto\/">/);
+  assert.match(html, /data-endpoint="https:\/\/afuera\.example\.workers\.dev\/contacto"/);
+  for (const id of ["nombre", "correo", "motivo", "mensaje"]) {
+    assert.match(html, new RegExp(`<label for="${id}">`), "label de " + id);
+    assert.match(html, new RegExp(`id="${id}"[^>]*aria-describedby="[^"]*error-${id}`), "error asociado a " + id);
+  }
+  assert.match(html, /id="correo"[^>]*type="email"[^>]*required/);
+  assert.match(html, /id="estado" role="status" aria-live="polite"/);
+  assert.match(html, /class="trampa" aria-hidden="true"[\s\S]*?id="sitio" name="sitio" type="text" tabindex="-1" autocomplete="off"/);
+  assert.match(html, /<fieldset id="campos" disabled>/, "sin JS el formulario queda deshabilitado");
+  assert.match(html, /<noscript>[^<]*<p[^>]*>Este formulario necesita JavaScript/);
+  for (const t of ["Enviando el mensaje", "Tu mensaje se envió", "No se pudo"]) assert.ok(html.includes(t), t);
+  assert.match(html, /espera: Date\.now\(\) - inicio/);
+  assert.match(html, /href="\.\.\/legal\/#contacto"/);
+  assert.match(html, /<option value="error">Un precio o dato mal<\/option>/);
+});
+
+test("contacto: sin direccion del Worker el formulario dice que no esta disponible y no apunta a ningun lado", () => {
+  const html = I.renderContacto({ baseUrl: BASE, workerUrl: "" });
+  assert.match(html, /data-endpoint=""/);
+  assert.match(html, /no está disponible en este momento/);
+});
+
+test("contacto: por defecto usa la direccion del Worker de sitio.json, que ya esta en connect-src de la CSP", () => {
+  const sitio = require("../../sitio.json");
+  const html = I.renderContacto();
+  assert.ok(html.includes(`data-endpoint="${sitio.afuera_url}/contacto"`));
+  assert.ok(sitio.csp.includes(`connect-src 'self' ${sitio.afuera_url}`));
+});
+
+test("acerca: texto neutro, sin datos inventados: lo personal queda marcado [COMPLETAR] y el contacto es el formulario", () => {
+  const html = I.renderAcerca({ baseUrl: BASE });
+  assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/acerca\/">/);
+  assert.match(html, /\[COMPLETAR:/);
+  assert.match(html, /href="\.\.\/contacto\/"/);
+  assert.doesNotMatch(html, /@[a-z0-9-]+\.[a-z]/i, "ningun correo publicado");
+});
+
+test("security.txt: Contact es el formulario y Expires vence a un año (RFC 9116)", () => {
+  const txt = I.securityTxt({ baseUrl: BASE, ahora: new Date("2026-10-30T15:00:00Z") });
+  assert.equal(txt, "Contact: https://ejemplo.test/la-pichincha/contacto/\nExpires: 2027-10-30T03:00:00Z\n" +
+    "Preferred-Languages: es, en\nCanonical: https://ejemplo.test/la-pichincha/.well-known/security.txt\n");
+});
+
+test("las paginas de informacion enlazan contacto en el pie y la privacidad explica el formulario", () => {
+  assert.match(I.renderLegal({ baseUrl: BASE }), /href="\.\.\/contacto\/">Contacto<\/a>/);
+  assert.match(I.renderLegal({ baseUrl: BASE }), /<p id="contacto"><b>Formulario de contacto\.<\/b>/);
+  assert.doesNotMatch(I.renderLegal({ baseUrl: BASE }), /no tiene cuentas ni formularios/);
+  assert.match(I.renderEstado(IDX, SALUD, { baseUrl: BASE }), /href="\.\.\/contacto\/">Contacto<\/a>/);
+  const portada = fs.readFileSync(path.join(__dirname, "..", "..", "index.html"), "utf8");
+  assert.match(portada, /<a href="legal\/">Términos, privacidad y afiliados<\/a> · <a href="contacto\/">Contacto<\/a>/);
+});
+
+test("main escribe /contacto/, /acerca/ y /.well-known/security.txt aunque no haya indice", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "info-"));
+  I.main(["--indice", path.join(dir, "no-hay.json"), "--salud", path.join(dir, "tampoco.json"), "--salida", dir, "--base-url", BASE]);
+  assert.match(fs.readFileSync(path.join(dir, "contacto", "index.html"), "utf8"), /<h1>Contacto<\/h1>/);
+  assert.match(fs.readFileSync(path.join(dir, "acerca", "index.html"), "utf8"), /<h1>Acerca de La Pichincha<\/h1>/);
+  assert.match(fs.readFileSync(path.join(dir, ".well-known", "security.txt"), "utf8"), /^Contact: https:\/\/ejemplo\.test\/la-pichincha\/contacto\/\n/);
+});

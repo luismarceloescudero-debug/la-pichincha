@@ -229,7 +229,7 @@ const listaDeFuentes = tiendas => {
 function pie(ctx) {
   return `<p class="nota">Precios con IVA y sin envío, tomados de ${esc(listaDeFuentes(ctx.idx.tiendas))}. ` +
     `El stock y los precios de hardware se mueven rápido: confirmá antes de pagar. ` +
-    `<a href="../../">Volver a La Pichincha</a> · <a href="../../estado/">Estado de las fuentes</a> · <a href="../../legal/">Términos y privacidad</a>.</p>`;
+    `<a href="../../">Volver a La Pichincha</a> · <a href="../../estado/">Estado de las fuentes</a> · <a href="../../legal/">Términos y privacidad</a> · <a href="../../contacto/">Contacto</a>.</p>`;
 }
 
 /* Otras paginas del mismo rubro (squirrelscan, 24/10: 24 paginas de /precios/ solo tenian un enlace interno, al indice). */
