@@ -316,10 +316,10 @@ td.mejor{color:var(--good);font-weight:700}
   border-radius:9px;font:500 .88rem var(--font-sans);color:var(--ink-2);
   display:flex;align-items:center;justify-content:center;gap:7px;transition:color .22s var(--curva),background-color .22s var(--curva),box-shadow .22s var(--curva)}
 .seg:hover{color:var(--ink)}
-.seg[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.seg[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
 .seg .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);background:var(--bg);
   border-radius:5px;padding:0 5px}
-.seg[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
+.seg[aria-pressed="true"] .n{color:var(--accent);background:var(--accent-soft)}
 
 /* ---- Ofertas ---- */
 .oferta{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);

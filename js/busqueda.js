@@ -29,12 +29,12 @@ function ctxModos() {
 function ordenesHtml() {
   return `<div class="orden" role="group" aria-label="Qué mostrar">
       <div class="segmentos chico">${Modos.MODOS.map(o =>
-        `<button class="seg" data-orden="${o.id}" aria-selected="${o.id === ORDEN}" title="${esc(o.ayuda)}">${esc(o.eti)}</button>`).join("")}</div>
+        `<button class="seg" data-orden="${o.id}" aria-pressed="${o.id === ORDEN}" title="${esc(o.ayuda)}">${esc(o.eti)}</button>`).join("")}</div>
     </div>
     <p class="sub chico" id="nota-modo" aria-live="polite"></p>
     <div class="orden2" role="group" aria-label="Ordenar por"><span class="of-et" aria-hidden="true">Ordenar por</span>
       <div class="segmentos chico">${Modos.SECUNDARIOS.map(o =>
-        `<button class="seg" data-orden2="${o.id}" aria-selected="${o.id === ORDEN2}">${esc(o.eti)}</button>`).join("")}</div>
+        `<button class="seg" data-orden2="${o.id}" aria-pressed="${o.id === ORDEN2}">${esc(o.eti)}</button>`).join("")}</div>
     </div>`;
 }
 
@@ -43,8 +43,8 @@ function elegirOrden(modo, secundario) {
   if (modo) ORDEN = Modos.migrarModo(modo);
   if (secundario) ORDEN2 = Modos.migrarSecundario(secundario);
   try { if (modo) localStorage.setItem("orden", ORDEN); if (secundario) localStorage.setItem("orden2", ORDEN2); } catch (e) {}
-  document.querySelectorAll("[data-orden]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.orden === ORDEN)));
-  document.querySelectorAll("[data-orden2]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.orden2 === ORDEN2)));
+  document.querySelectorAll("[data-orden]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.orden === ORDEN)));
+  document.querySelectorAll("[data-orden2]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.orden2 === ORDEN2)));
   pintarResultados(($("#q") || {}).value || "");
 }
 
