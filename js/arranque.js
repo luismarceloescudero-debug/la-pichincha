@@ -148,6 +148,11 @@ function arrancar() {
     tabs.forEach(b => { b.tabIndex = b.dataset.ir === destino ? 0 : -1; });
     tabs.find(b => b.dataset.ir === destino).focus();
   });
+  // Si sale de las pestañas sin activar ninguna, al volver con Tab entra por la elegida.
+  $("#tablist").addEventListener("focusout", ev => {
+    if (ev.relatedTarget && $("#tablist").contains(ev.relatedTarget)) return;
+    document.querySelectorAll(".tab").forEach(b => { b.tabIndex = b.getAttribute("aria-selected") === "true" ? 0 : -1; });
+  });
 
   const marcarDesborde = () => {
     const l = $(".tablist");
