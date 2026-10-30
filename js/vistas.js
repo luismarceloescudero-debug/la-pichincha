@@ -84,12 +84,26 @@ function detalle(p) {
 }
 
 /* --- Pestañas y sello: los arma el JS al arrancar y, en la portada publicada, generar_portada.js --- */
+/* Patron de pestañas de ARIA: cada una controla #vista (el tabpanel) y solo la elegida entra en el orden de Tab
+   (tabindex itinerante); entre ellas se va con las flechas, Inicio y Fin (js/arranque.js). Sin elegida, entra la primera. */
 function pestanasHtml(activa) {
-  return VISTAS.map(v => {
-    const n = v.n();
-    return `<button class="tab" role="tab" data-ir="${v.id}" data-dina="${DINAMICAS.includes(v.id) ? 1 : 0}" aria-selected="${v.id === activa}">
+  return VISTAS.map((v, i) => {
+    const n = v.n(), enTab = activa ? v.id === activa : i === 0;
+    return `<button class="tab" role="tab" id="tab-${v.id}" aria-controls="vista" tabindex="${enTab ? 0 : -1}" data-ir="${v.id}" data-dina="${DINAMICAS.includes(v.id) ? 1 : 0}" aria-selected="${v.id === activa}">
       ${icono(v.ico)} ${v.eti}${n ? ` <span class="n">${n}</span>` : ""}</button>`;
   }).join("");
+}
+
+/* A que pestaña pasa el foco con una tecla, o null si la tecla no es de las pestañas. Se activa con Enter o espacio
+   (activacion manual): pasar por Ofertas con las flechas no tiene que bajar el indice. */
+function tabDestino(ids, actual, tecla) {
+  const i = ids.indexOf(actual), n = ids.length;
+  if (i < 0 || !n) return null;
+  if (tecla === "ArrowRight") return ids[(i + 1) % n];
+  if (tecla === "ArrowLeft") return ids[(i - 1 + n) % n];
+  if (tecla === "Home") return ids[0];
+  if (tecla === "End") return ids[n - 1];
+  return null;
 }
 
 function selloTexto() {

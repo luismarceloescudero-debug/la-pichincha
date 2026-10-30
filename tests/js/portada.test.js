@@ -29,7 +29,7 @@ test("el HTML publicado trae el sello con la cantidad de productos", () => {
 
 test("el HTML publicado trae la portada sin la comparativa curada del primer relevamiento (spec 021)", () => {
   const vista = PRE.slice(PRE.indexOf('id="vista"'), PRE.indexOf("<noscript>", PRE.indexOf('id="vista"')));
-  assert.match(vista, /^id="vista" data-pre="comparativa:ram">/);
+  assert.match(vista, /^id="vista" data-pre="comparativa:ram" role="tabpanel" aria-labelledby="tab-comparativa">/);
   assert.doesNotMatch(vista, /Memorias DDR4 16GB|análisis a fondo|class="card /);
   assert.match(vista, /Tus búsquedas van a aparecer acá/);    // sin storage en el build, la tira invita a buscar
   assert.match(vista, /id="reciente"/);                        // ahi va tu ultima busqueda cuando llega el indice

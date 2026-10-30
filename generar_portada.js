@@ -19,7 +19,7 @@ const vm = require("vm");
 const INICIO = "/* === DATOS: generado por actualizar.py, no editar a mano === */";
 const FINAL = "/* === FIN DATOS === */";
 const TABLIST = '<div class="tablist" role="tablist" id="tablist"></div>';
-const VISTA = '<div id="vista"></div>';
+const VISTA = '<div id="vista" role="tabpanel" aria-labelledby="tab-comparativa"></div>';
 const SELLO = /(<p class="meta" id="sello">)[^<]*(<\/p>)/;
 // Los scripts de la pagina, en orden: los de js/ y el bloque de datos. Analitica y JSON-LD llevan
 // atributos y quedan afuera.
@@ -74,7 +74,7 @@ function prerender(html, leer, novedades = null, buscadas = null, vendidos = nul
   return html
     .replace(TABLIST, () => TABLIST.replace("></div>", `>${pestanas}</div>`))
     .replace(SELLO, (_, abre, cierra) => abre + esc(sello) + cierra)
-    .replace(VISTA, () => `<div id="vista" data-pre="comparativa:${cat}">${vista}</div>`);
+    .replace(VISTA, () => `<div id="vista" data-pre="comparativa:${cat}" role="tabpanel" aria-labelledby="tab-comparativa">${vista}</div>`);
 }
 
 /* Un panel calculado sobre el indice de la carpeta de salida (o el de --indice) con las mismas funciones de js/ que usa la
