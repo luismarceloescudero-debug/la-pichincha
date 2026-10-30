@@ -29,7 +29,8 @@ test("una entrada por oferta, las bajas propias primero, con precio, descuento, 
   const xml = F.renderFeed(IDX, { baseUrl: BASE });
   const items = xml.match(/<item>[\s\S]*?<\/item>/g);
   assert.equal(items.length, 2);
-  assert.match(items[0], /<title>SSD Kingston 1TB: \$90\.000 \(−25%\) en CompraGamer<\/title>/);
+  assert.match(items[0], /<title>KINGSTON · 1 TB: \$90\.000 \(−25%\) en CompraGamer<\/title>/);   // el nombre legible (spec 044)
+  assert.match(items[0], /<description>SSD Kingston 1TB\. Componente\./);                          // y el de la tienda, entero
   assert.match(items[0], /<link>https:\/\/t\.test\/SSD%20Kingston%201TB<\/link>/);
   assert.match(items[0], /Antes \$120\.000, hoy \$90\.000: ahorrás \$30\.000\./);
   assert.match(items[0], /Precios del 09\/10 08:12/);
@@ -44,6 +45,7 @@ test("todo texto de terceros va escapado y ningun enlace raro entra", () => {
   const xml = F.renderFeed(idx, { baseUrl: BASE });
   assert.ok(!xml.includes("<b>Fury</b>"));
   assert.match(xml, /Memoria &lt;b&gt;Fury&lt;\/b&gt; &amp; &quot;Beast&quot; 16GB/);
+  assert.match(xml, /<title>&lt;B&gt;FURY&lt;\/B&gt; &amp; &quot;BEAST&quot; · 16 GB:/);
   assert.ok(!xml.includes("javascript:"));
 });
 
@@ -61,7 +63,7 @@ test("el feed trae como mucho 20 entradas", () => {
 
 test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", () => {
   const lista = F.listaParaCanal(IDX, 10);
-  assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", precio: 90000, antes: 120000, descuento: 25,
+  assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", titulo: "KINGSTON", chips: ["1 TB"], icono: "disco", emoji: "💽", precio: 90000, antes: 120000, descuento: 25,
     comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente", tienda: "cg" });
   assert.equal(lista.length, 2);
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
@@ -84,7 +86,7 @@ test("en el canal, una oferta de Mercado Libre trae el enlace de afiliado aparte
 
 test("en /hoy/ y el feed el enlace de Mercado Libre lleva el codigo, rel sponsored y el rotulo", () => {
   const html = F.renderHoy(IDX_ML, { baseUrl: BASE });
-  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658" rel="sponsored noopener">SSD Samsung 990 2TB<\/a> <span class="rotulo">enlace de afiliado<\/span>/);
+  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658" rel="sponsored noopener"><span class="tit" title="SSD Samsung 990 2TB">[\s\S]*?SAMSUNG 990[\s\S]*?<\/a> <span class="rotulo">enlace de afiliado<\/span>/);
   assert.equal((html.match(/enlace de afiliado/g) || []).length, 1);
   assert.match(html, /href="https:\/\/t\.test\/SSD%20Kingston%201TB" rel="noopener">/);
   const item = F.renderFeed(IDX_ML, { baseUrl: BASE }).match(/<item>[\s\S]*?<\/item>/g).find(i => i.includes("SSD Samsung 990 2TB"));
@@ -157,7 +159,7 @@ test("una compra internacional entra al feed, al final de su categoria y rotulad
   const idx = { ...IDX, productos: [fila("Celular Importado 8GB RAM 256GB", 7000, { antes: 10000, sellos: "i" }), ...IDX.productos] };
   const xml = F.renderFeed(idx, { baseUrl: BASE });
   const items = xml.match(/<item>[\s\S]*?<\/item>/g);
-  assert.match(items.find(i => i.includes("Celular Importado")), /Celular Importado.*compra internacional/);
+  assert.match(items.find(i => i.includes("Celular Importado")), /<title>[^<]*compra internacional<\/title>/);
   assert.equal(F.listaParaCanal(idx, 10).find(o => o.nombre.includes("Importado")).comercio.endsWith("compra internacional"), true);
 });
 
@@ -245,7 +247,7 @@ const IDX_INTL = { generado: "2026-10-19T08:00-03:00", tiendas: { cg: { nombre: 
 
 test("el feed, el canal y /hoy/ rotulan la compra internacional y no estiman su costo puesto en casa", () => {
   const xml = F.renderFeed(IDX_INTL, { baseUrl: BASE });
-  assert.match(xml, /SSD Importado 1TB[^<]*compra internacional/);
+  assert.match(xml, /<title>IMPORTADO · 1 TB:[^<]*compra internacional<\/title>/);
   assert.doesNotMatch(xml, /puesto en casa/);
   const lista = F.listaParaCanal(IDX_INTL, 10);
   assert.ok(lista.every(o => !("puesto" in o)));

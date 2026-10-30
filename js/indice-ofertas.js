@@ -112,7 +112,6 @@ function cardOferta(o, i, desde) {
   const f = o.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
   const pct = Math.round(o.off * 100);
   const anillo = Math.min(100, Math.round(o.off / DESCUENTO_MAX * 100));
-  const specs = Object.values(specsDe(f[0])).slice(0, 5);
   const marcada = ESTRELLAS.has(f[2]);
   const nivTxt = ["sin marca reconocida", "marca conocida", "primera línea"][o.niv];
   const origen = o.tipo === "propia"
@@ -130,7 +129,7 @@ function cardOferta(o, i, desde) {
     </div>
     <div class="o-main">
       <div class="o-off" style="--p:${anillo}"><b data-n="${pct}">${pct}%</b></div>
-      <h3 class="o-nom">${esc(f[0])}</h3>
+      <h3 class="o-nom">${Titulo.html(f[0], esc)}</h3>
     </div>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
     <div class="o-precios"><span class="ahora">${pesos(f[1])}</span><span class="antes">${pesos(f[o.ref])}</span></div>
@@ -140,7 +139,7 @@ function cardOferta(o, i, desde) {
     <div class="o-ahorro">Ahorrás <b>${pesos(o.ahorro)}</b></div>
     ${historialHtml(f)}
     <div class="o-detalle"><div class="o-in">
-      <div class="chips">${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
+      <div class="chips"><span class="chip${o.niv === 2 ? " ok" : ""}">${nivTxt}</span>${o.cruce ? `<span class="chip ok">${o.vigente ? "gama alta del año anterior, vigente, " : "gama alta "}al precio de media</span>` : ""}</div>
       <p>${origen}</p></div></div>
     <div class="o-acciones">
       <a class="acc" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">${icono("fuera")} Abrir</a>${selloAfiliado(f[2])}

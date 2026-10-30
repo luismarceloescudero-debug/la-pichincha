@@ -296,7 +296,7 @@ function pintarResultados(q) {
     const compara = Especificaciones.mismas(f, f).aplica
       ? `<button class="acc" data-comparar-fila="${esc(f[2])}" title="Compara solo con avisos de las mismas especificaciones">${icono("balanza")} Comparar con las mismas especificaciones</button>` : "";
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
-      <span class="nom">${esc(f[0])}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
+      <span class="nom">${Titulo.html(f[0], esc)}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
       <span class="pre">${pesos(f[1])}</span>
     </a>` + (otras.length || compara ? `<div class="mismo">${otras.length ? `<span>También en</span>${otras.map(o =>

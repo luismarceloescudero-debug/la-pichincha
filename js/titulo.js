@@ -273,7 +273,16 @@
   /* Una linea de texto plano: «💻 LENOVO LEGION 5 15AKP10 · Ryzen AI 7 350 · RTX 5050» (feed, Telegram). */
   const linea = (nombre, { emoji = true } = {}) => { const t = de(nombre); return [(emoji ? t.emoji + " " : "") + t.titulo, ...t.chips].join(" · "); };
 
-  const api = { de, tipoDe, tituloDe, chipsDe, pulgadas, svg, linea, ICONOS, EMOJI, NOMBRE_TIPO };
+  /* El nombre para una pagina: icono, titulo y chips. `esc` es el escape de quien lo pinta (base.js o generador.js).
+     El nombre completo queda en el title, para quien quiera leerlo entero. */
+  const html = (nombre, esc) => {
+    const t = de(nombre);
+    return `<span class="tit" title="${esc(t.completo)}">${svg(t.tipo, "ico tit-ico")}<span class="tit-txt"><b class="tit-nom">${esc(t.titulo)}</b>`
+      + (t.chips.length ? `<span class="tit-chips">${t.chips.map(c => `<span class="tit-chip">${esc(c)}</span>`).join("")}</span>` : "")
+      + `</span></span>`;
+  };
+
+  const api = { de, tipoDe, tituloDe, chipsDe, pulgadas, svg, linea, html, ICONOS, EMOJI, NOMBRE_TIPO };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Titulo = api;
 })(this);
