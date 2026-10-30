@@ -96,7 +96,7 @@ function arrancar() {
     const comparaOf = ev.target.closest("[data-comparar-oferta]");
     if (comparaOf) return compararOferta(+comparaOf.dataset.compararOferta);
     const tarjetaOf = ev.target.closest(".ocard");
-    if (tarjetaOf && !ev.target.closest("a,button")) return tarjetaOf.classList.toggle("abierta");
+    if (tarjetaOf && (ev.target.closest(".o-abrir") || !ev.target.closest("a,button"))) return alternarOferta(tarjetaOf);
 
     const repetir = ev.target.closest("[data-rep]");
     if (repetir) return consultar(repetir.dataset.rep);
