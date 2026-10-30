@@ -647,6 +647,14 @@ procesador, RAM y almacenamiento. Reconoce
 FHD/Full HD/1080p, 4K/UHD/2160p y QHD/2K/1440p como equivalentes. Si no encuentra
 la configuracion exacta, relaja la ultima especificacion, nunca el tipo de producto.
 
+### Nombre legible (spec 044)
+
+En Buscar, Ofertas, `/hoy/`, el RSS y Telegram cada producto se muestra con un icono de su tipo,
+la MARCA Y MODELO en grande y, abajo, solo los datos que definen la compra («27″ · 4K · QD-OLED · 240 Hz»).
+Se sacan la palabra del tipo, los codigos internos de la tienda, el color repetido y el relleno; las
+pulgadas pasan a ″. Lo usado o reacondicionado va como primera chip. El nombre completo de la tienda
+queda en el `title` y en la ficha. Todo sale de `js/titulo.js` (`specs/044-nombres-legibles/spec.md`).
+
 ## Paginas por busqueda
 
 Para que Google encuentre el sitio, cada publicacion genera una pagina estatica por busqueda
