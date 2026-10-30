@@ -102,6 +102,8 @@
   const CPUS = [
     [/\b(?:amd\s+)?ryzen\s?(ai\s?)?(?:max\+?\s?)?([3579])(?:\s?pro)?[-\s]?(\d{3,4}[a-z]{0,3}\d?)?(?![a-z\d])/i, m => `Ryzen ${m[1] ? "AI " : ""}${m[2]}${m[3] ? " " + m[3].toUpperCase() : ""}`],
     [/\b(?:intel\s+)?core\s?ultra\s?([3579])\s?(\d{3}[a-z]{0,2})?(?![a-z\d])/i, m => `Core Ultra ${m[1]}${m[2] ? " " + m[2].toUpperCase() : ""}`],
+    // «INTEL Ultra 5 125H», sin «Core»: con el modelo, para no confundirlo con un «Galaxy S25 Ultra»
+    [/\b(?:intel\s+)?ultra\s?([3579])\s(\d{3}[a-z]{1,2})(?![a-z\d])/i, m => `Core Ultra ${m[1]} ${m[2].toUpperCase()}`],
     [/\b(?:intel\s+)?(?:core\s?)?i([3579])(?:[-\s_]?(\d{4,5}[a-z]{0,2}\d?))?(?![a-z\d])/i, m => `Core i${m[1]}${m[2] ? "-" + m[2].toUpperCase() : ""}`],
     [/\b(?:apple\s+)?(m[1-5])(\s?(?:pro|max|ultra))?(?![a-z\d])/i, m => `Apple ${m[1].toUpperCase()}${m[2] ? " " + m[2].trim().replace(/^./, c => c.toUpperCase()) : ""}`, /apple|macbook|imac|mac\s?mini|ipad/i],
     [/\b(?:intel\s+|amd\s+)?(celeron|pentium|athlon)\s?([a-z]?\d{3,5}[a-z]?)?(?![a-z\d])/i, m => m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() + (m[2] ? " " + m[2].toUpperCase() : "")],

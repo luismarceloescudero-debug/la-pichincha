@@ -19,6 +19,7 @@ caso('Monitor Gamer Samsung Odyssey G8 G81SF 27" UHD 4K QD-OLED 240Hz 0,03ms G-S
   "monitor", "SAMSUNG ODYSSEY G8 G81SF", ["27″", "4K", "QD-OLED", "240 Hz"]);
 caso('Monitor GIGABYTE 27" QD-OLED QHD GO27Q24A - 240hz 0.03ms', "monitor", "GIGABYTE GO27Q24A", ["27″", "QHD", "QD-OLED", "240 Hz"]);
 caso("MONITOR LG 27 ULTRAGEAR 27GS60F FULL HD 180 Hz (II) (1816)", "monitor", "LG ULTRAGEAR 27GS60F", ["27″", "FHD", "180 Hz"]);
+caso("Notebook LENOVO YOGA 14″ INTEL Ultra 5 125H 16GB 512G SSD – Windows 11 Home", "notebook", "LENOVO YOGA", ["Core Ultra 5 125H", "16 GB RAM", "512 GB SSD", "14″"]);
 caso("Motherboard Gigabyte Ga-a520m-h 1.0 Am4 Ddr4", "mother", "GIGABYTE GA-A520M-H", ["AM4", "DDR4"]);
 caso("Procesador AMD Ryzen 5 5600 3.50GHz AM4 DDR4", "procesador", "AMD RYZEN 5 5600", ["AM4", "3.5 GHz"]);
 caso("Procesador Intel Core i7 12700 4.9GHz Turbo Socket 1700 Alder Lake", "procesador", "INTEL CORE I7 12700", ["LGA1700", "4.9 GHz"]);
