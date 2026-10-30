@@ -11,7 +11,8 @@ un Reel), mas la portada instagram/AAAA-MM-DD-portada.jpg.
 
 Formato: 9:16 (1080x1920) es lo que Instagram muestra entero en Reels e historias. Lo importante queda en la franja
 del medio (y 250-1500): arriba y abajo van los controles de Instagram, y la grilla del perfil recorta a 3:4.
-Cada dia cambia la paleta, el fondo y la transicion (`estilo`), siempre con contraste para leerse en el celular.
+Cada dia cambian la paleta, la tipografia, el ritmo, el fondo, la transicion y la disposicion (`estilo`), siempre con
+contraste para leerse en el celular. De fondo va la foto del producto (la de la tienda, desenfocada) y, nitida, en la tarjeta.
 
 No publica nada: solo arma el archivo. Publicarlo es del job de Instagram (PR #126), que espera el OK del dueño. */
 "use strict";
@@ -23,7 +24,24 @@ const { spawn, execFileSync } = require("child_process");
 const T = require("./js/titulo.js");
 
 const ANCHO = 1080, ALTO = 1920;
+// El ritmo «normal»; cada dia elige uno de RITMOS.
 const MS = { intro: 2200, oferta: 1700, cierre: 3000 };
+const RITMOS = [
+  { nombre: "agil", intro: 1900, oferta: 1450, cierre: 2600 },
+  { nombre: "normal", ...MS },
+  { nombre: "pausado", intro: 2400, oferta: 2050, cierre: 3200 },
+];
+// Juegos de letras de Google Fonts con acentos y ñ: titulo (condensada o de impacto), texto y numeros (monoespaciada).
+// `escala` iguala el ancho: una letra ancha (Archivo Black) va mas chica para que el nombre entre en tres lineas.
+const LETRAS = [
+  { nombre: "plex", titulo: "IBM Plex Sans Condensed", peso: 700, texto: "IBM Plex Sans", mono: "IBM Plex Mono", escala: 1 },
+  { nombre: "bebas", titulo: "Bebas Neue", peso: 400, texto: "Inter", mono: "JetBrains Mono", escala: 1.12 },
+  { nombre: "anton", titulo: "Anton", peso: 400, texto: "Work Sans", mono: "Space Mono", escala: 0.92 },
+  { nombre: "archivo", titulo: "Archivo Black", peso: 400, texto: "Archivo", mono: "DM Mono", escala: 0.78 },
+  { nombre: "oswald", titulo: "Oswald", peso: 700, texto: "Source Sans 3", mono: "Roboto Mono", escala: 0.95 },
+  { nombre: "barlow", titulo: "Barlow Condensed", peso: 800, texto: "Barlow", mono: "IBM Plex Mono", escala: 1.05 },
+];
+const DISPOSICIONES = ["tarjeta", "plena"];
 
 /* --- El estilo del dia ------------------------------------------------------- */
 // Paletas con contraste AA para texto grande sobre su fondo (tinta sobre fondo, acento sobre fondo).
@@ -38,16 +56,22 @@ const PALETAS = [
 const FONDOS = ["grilla", "rayas", "puntos"];
 const TRANSICIONES = ["deslizar", "zoom", "cortina"];
 
-/* Dia del año de una fecha AAAA-MM-DD: elige paleta, fondo y transicion sin repetir la combinacion en 18 dias seguidos. */
+/* El estilo de una fecha AAAA-MM-DD. Cada parte avanza con el dia a su propio paso, asi dos dias seguidos nunca se
+   parecen y la misma fecha da siempre el mismo Reel. */
 function estilo(fecha) {
   const d = new Date(fecha + "T12:00:00Z");
   const n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5) || 0;
-  return { paleta: PALETAS[n % PALETAS.length], fondo: FONDOS[n % FONDOS.length], transicion: TRANSICIONES[Math.floor(n / FONDOS.length) % TRANSICIONES.length] };
+  const de = (lista, salto) => lista[(n * salto) % lista.length];
+  return { paleta: de(PALETAS, 1), letra: de(LETRAS, 5), ritmo: de(RITMOS, 1), fondo: de(FONDOS, 2),
+    transicion: TRANSICIONES[Math.floor(n / 2) % TRANSICIONES.length], disposicion: de(DISPOSICIONES, 1) };
 }
 
 /* --- Los datos ----------------------------------------------------------------- */
 const pesos = n => "$" + Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
 const fechaDe = datos => String(datos.generado || "").slice(0, 10);
+
+// La foto va en un src y en un url() de CSS: solo https, sin comillas, espacios ni parentesis.
+const URL_FOTO = /^https:\/\/[^\s"'()<>\\]+$/;
 
 /* Lo que pinta el Reel por oferta. Con un ofertas.json de antes de la spec 044 lo calcula desde el nombre. */
 function ofertasReel(datos, max = 10) {
@@ -55,11 +79,11 @@ function ofertasReel(datos, max = 10) {
     const t = T.de(o.nombre);
     return { titulo: o.titulo || t.titulo, chips: o.chips || t.chips, icono: o.icono || t.tipo,
       precio: o.precio, antes: o.antes, descuento: o.descuento, comercio: o.comercio,
-      contra: o.contra || "" };
+      contra: o.contra || "", imagen: URL_FOTO.test(o.imagen || "") ? o.imagen : "" };
   });
 }
 
-const duracion = n => MS.intro + n * MS.oferta + MS.cierre;
+const duracion = (n, ritmo = MS) => ritmo.intro + n * ritmo.oferta + ritmo.cierre;
 
 /* --- La pagina ----------------------------------------------------------------- */
 const escHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -72,18 +96,22 @@ function paginaReel(datos, { sitio = "pichinchadeldia.com.ar/hoy" } = {}) {
   const iconos = Object.fromEntries([...new Set(ofertas.map(o => o.icono))].map(k => [k, T.ICONOS[k] || T.ICONOS.otro]));
   const dia = fecha ? `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}` : "";
   // Los datos van como JSON dentro de un <script type="application/json">: se escapa «<» para que no cierre la etiqueta.
-  const json = JSON.stringify({ ofertas, iconos, dia, sitio, ms: MS, transicion: est.transicion }).replace(/</g, "\\u003c");
+  const ms = { intro: est.ritmo.intro, oferta: est.ritmo.oferta, cierre: est.ritmo.cierre };
+  const L = est.letra, fam = f => f.replace(/ /g, "+");
+  const fuentes = `family=${fam(L.titulo)}:wght@${L.peso}&family=${fam(L.texto)}:wght@600;700;800&family=${fam(L.mono)}:wght@500;700`;
+  const json = JSON.stringify({ ofertas, iconos, dia, sitio, ms, transicion: est.transicion }).replace(/</g, "\\u003c");
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=${ANCHO}">
 <title>Reel ${escHtml(dia)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@600;700;800&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fuentes}&display=block">
 <style>
-:root{--fondo:${p.fondo};--fondo2:${p.fondo2};--tinta:${p.tinta};--suave:${p.suave};--acento:${p.acento};--chip:${p.chip};--tachado:${p.tachado}}
+:root{--f-tit:"${L.titulo}",sans-serif;--f-txt:"${L.texto}",sans-serif;--f-mono:"${L.mono}",monospace;--p-tit:${L.peso};--esc:${L.escala};
+  --fondo:${p.fondo};--fondo2:${p.fondo2};--tinta:${p.tinta};--suave:${p.suave};--acento:${p.acento};--chip:${p.chip};--tachado:${p.tachado}}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:${ANCHO}px;height:${ALTO}px;overflow:hidden;background:var(--fondo)}
-body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--tinta)}
+body{font-family:var(--f-txt);color:var(--tinta)}
 #esc{position:relative;width:${ANCHO}px;height:${ALTO}px;overflow:hidden;
   background:radial-gradient(120% 70% at 50% 35%,var(--fondo2),var(--fondo) 70%)}
 .patron{position:absolute;inset:-80px;opacity:.16;will-change:transform}
@@ -93,44 +121,56 @@ body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--tinta)}
 section{position:absolute;inset:0;display:none}
 /* Franja segura: y 250-1500 */
 .marca{position:absolute;left:90px;right:90px;top:250px;display:flex;justify-content:space-between;align-items:center;
-  font:700 34px "IBM Plex Mono",monospace;letter-spacing:.12em;color:var(--acento)}
+  font:700 34px var(--f-mono);letter-spacing:.12em;color:var(--acento)}
 .barras{position:absolute;left:90px;right:90px;top:200px;display:flex;gap:10px}
 .barras i{flex:1;height:8px;border-radius:4px;background:color-mix(in srgb,var(--suave) 35%,transparent);overflow:hidden}
 .barras i b{display:block;height:100%;width:0;background:var(--acento)}
-#intro h1{position:absolute;left:80px;right:60px;top:560px;font:800 150px/0.95 "IBM Plex Sans Condensed";letter-spacing:-.02em}
+#intro h1{position:absolute;left:80px;right:60px;top:560px;font:var(--p-tit) calc(150px * var(--esc))/0.95 var(--f-tit);letter-spacing:-.02em}
 #intro h1 span{display:block}
-#intro .sub{position:absolute;left:90px;right:90px;top:920px;font:600 48px/1.3 "IBM Plex Sans";color:var(--suave)}
-#intro .fecha{position:absolute;left:90px;top:1120px;font:700 56px "IBM Plex Mono";color:var(--fondo);background:var(--acento);
+#intro .sub{position:absolute;left:90px;right:90px;top:920px;font:600 48px/1.3 var(--f-txt);color:var(--suave)}
+#intro .fecha{position:absolute;left:90px;top:1120px;font:700 56px var(--f-mono);color:var(--fondo);background:var(--acento);
   padding:10px 26px;border-radius:18px}
 #oferta .tarjeta{position:absolute;left:60px;right:60px;top:330px;height:1200px;border-radius:56px;padding:60px 60px 56px;
   display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;
   background:color-mix(in srgb,var(--fondo) 72%,transparent);border:3px solid color-mix(in srgb,var(--suave) 40%,transparent);
   backdrop-filter:blur(6px);will-change:transform,opacity,clip-path}
-.num{position:absolute;right:60px;top:60px;font:700 40px "IBM Plex Mono";color:var(--suave)}
-.pct{display:inline-block;font:800 140px/1 "IBM Plex Sans Condensed";color:var(--fondo);background:var(--acento);
+.pct{display:inline-block;font:var(--p-tit) calc(140px * var(--esc))/1 var(--f-tit);color:var(--fondo);background:var(--acento);
   padding:18px 34px 22px;border-radius:34px;transform-origin:20% 60%}
 .ico{display:block;flex:none;width:120px;height:120px;margin:30px 0 12px;color:var(--acento)}
 .ico *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.nom{flex:none;font:700 106px/1 "IBM Plex Sans Condensed";letter-spacing:-.005em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nom{flex:none;font:var(--p-tit) calc(106px * var(--esc))/1 var(--f-tit);letter-spacing:-.005em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .cursor{display:inline-block;width:.08em;height:.9em;margin-left:.06em;background:var(--acento);vertical-align:-.08em}
 .chips{flex:none;display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
-.chip{font:700 38px/1 "IBM Plex Mono";background:var(--chip);color:var(--tinta);padding:16px 22px;border-radius:18px;
+.chip{font:700 38px/1 var(--f-mono);background:var(--chip);color:var(--tinta);padding:16px 22px;border-radius:18px;
   border:2px solid color-mix(in srgb,var(--acento) 45%,transparent)}
 .precios{margin-top:auto;display:flex;align-items:baseline;gap:8px 28px;flex-wrap:wrap}
-.ahora{font:700 120px/1 "IBM Plex Mono";letter-spacing:-.02em}
-.antes{position:relative;font:600 46px "IBM Plex Mono";color:var(--suave)}
+.ahora{font:700 120px/1 var(--f-mono);letter-spacing:-.02em}
+.antes{position:relative;font:600 46px var(--f-mono);color:var(--suave)}
 .antes i{position:absolute;left:-4px;top:52%;height:6px;width:0;background:var(--tachado);border-radius:3px}
-.tienda{margin-top:18px;font:600 40px/1.25 "IBM Plex Sans";color:var(--suave)}
+.tienda{margin-top:18px;font:600 40px/1.25 var(--f-txt);color:var(--suave)}
 .tienda b{color:var(--tinta)}
-#cierre h2{position:absolute;left:90px;right:90px;top:470px;font:800 120px/0.98 "IBM Plex Sans";letter-spacing:-.02em}
-#cierre .link{position:absolute;left:70px;right:70px;top:900px;font:700 50px "IBM Plex Mono";color:var(--tinta);
+#cierre h2{position:absolute;left:90px;right:90px;top:470px;font:800 120px/0.98 var(--f-txt);letter-spacing:-.02em}
+#cierre .link{position:absolute;left:70px;right:70px;top:900px;font:700 50px var(--f-mono);color:var(--tinta);
   background:var(--chip);border:3px solid var(--acento);border-radius:28px;padding:34px 36px;overflow:hidden;white-space:nowrap}
 #cierre .onda{position:absolute;width:40px;height:40px;border-radius:50%;background:var(--acento);opacity:0;pointer-events:none}
-#cierre .bio{position:absolute;left:90px;right:90px;top:1110px;font:800 70px "IBM Plex Sans";color:var(--acento)}
+#cierre .bio{position:absolute;left:90px;right:90px;top:1110px;font:800 70px var(--f-txt);color:var(--acento)}
 #cierre .bio span{display:inline-block}
-#cierre .letra{position:absolute;left:90px;right:90px;top:1300px;font:600 34px/1.4 "IBM Plex Sans";color:var(--suave)}
+#cierre .letra{position:absolute;left:90px;right:90px;top:1300px;font:600 34px/1.4 var(--f-txt);color:var(--suave)}
+/* La foto del producto: de fondo, desenfocada bajo un velo del color del dia; nitida en la tarjeta. */
+.fotofondo{position:absolute;inset:-60px;background:center/cover no-repeat;filter:blur(26px) saturate(1.25);opacity:0;transform:scale(1.08)}
+.velo{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--fondo) 70%,transparent),color-mix(in srgb,var(--fondo) 88%,transparent))}
+.foto{position:absolute;right:52px;top:52px;width:280px;height:280px;object-fit:contain;background:#fff;border-radius:36px;padding:18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);opacity:0}
+.foto.sin{display:none}
+/* Disposicion «plena»: sin caja, la foto grande arriba y el descuento encima */
+.disp-plena #oferta .tarjeta{background:transparent;border:none;backdrop-filter:none;padding-top:0}
+.disp-plena .foto{position:relative;right:auto;top:auto;width:100%;height:560px;margin:0 0 26px;order:-1;padding:30px;border-radius:44px}
+.disp-plena .pct{position:absolute;left:28px;top:28px;z-index:1;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.disp-plena .ico{display:none}
+.disp-plena .nom{-webkit-line-clamp:2}
 </style></head>
-<body><div id="esc">
+<body class="disp-${est.disposicion}"><div id="esc">
+<div class="fotofondo"></div><div class="velo"></div>
 <div class="patron ${est.fondo}"></div>
 <div class="barras">${ofertas.map(() => "<i><b></b></i>").join("")}</div>
 <section id="intro">
@@ -140,8 +180,8 @@ section{position:absolute;inset:0;display:none}
   <span class="fecha"></span>
 </section>
 <section id="oferta"><div class="tarjeta">
-  <span class="num"></span>
   <span class="pct"></span>
+  <img class="foto" alt="">
   <svg class="ico" viewBox="0 0 24 24"></svg>
   <h2 class="nom"></h2>
   <div class="chips"></div>
@@ -176,7 +216,11 @@ function cargar(i) {
   if (i === actual) return;
   actual = i;
   const o = D.ofertas[i], c = $("#oferta");
-  $(".num", c).textContent = String(i + 1).padStart(2, "0") + "/" + String(D.ofertas.length).padStart(2, "0");
+  // La foto: nitida en la tarjeta y desenfocada de fondo; sin foto (o si no bajo) queda el fondo del dia.
+  const ok = o.imagen && FOTOS[i];
+  $(".foto", c).classList.toggle("sin", !ok);
+  if (ok) $(".foto", c).src = o.imagen;
+  $(".fotofondo").style.backgroundImage = ok ? 'url("' + o.imagen + '")' : "none";
   $(".pct", c).textContent = "−" + o.descuento + "%";
   $(".ico", c).innerHTML = D.iconos[o.icono] || "";
   $(".ico", c).querySelectorAll("*").forEach(e => e.setAttribute("pathLength", "1"));
@@ -199,6 +243,7 @@ function pintar(t) {
   $(".barras").style.opacity = t < ms.intro ? 0 : 1;
   if (t < ms.intro) {
     mostrar("intro");
+    $(".fotofondo").style.opacity = 0;
     const h = document.querySelectorAll("#intro h1 span");
     h.forEach((s, j) => { const p = salir(tramo(t, 150 + j * 170, 650 + j * 170)); s.style.transform = "translateY(" + (90 * (1 - p)) + "px)"; s.style.opacity = p; });
     const sub = salir(tramo(t, 900, 1400)); $("#intro .sub").style.opacity = sub; $("#intro .sub").style.transform = "translateY(" + (30 * (1 - sub)) + "px)";
@@ -210,32 +255,39 @@ function pintar(t) {
     mostrar("oferta");
     const i = Math.floor((t - ms.intro) / ms.oferta), u = (t - ms.intro) % ms.oferta;
     cargar(i);
-    const o = D.ofertas[i], c = $("#oferta"), tj = $(".tarjeta", c);
+    const o = D.ofertas[i], c = $("#oferta"), tj = $(".tarjeta", c), uu = u * 1700 / ms.oferta;
     // Entrada y salida de la tarjeta segun la transicion del dia
     const ent = salir(tramo(u, 0, 260)), sal = tramo(u, ms.oferta - 200, ms.oferta);
     if (D.transicion === "zoom") { tj.style.transform = "scale(" + (0.85 + 0.15 * ent + 0.1 * sal) + ")"; tj.style.opacity = ent * (1 - sal); tj.style.clipPath = "none"; }
     else if (D.transicion === "cortina") { tj.style.transform = "none"; tj.style.opacity = 1 - sal; tj.style.clipPath = "inset(0 0 " + (100 * (1 - ent)) + "% 0 round 56px)"; }
     else { tj.style.transform = "translateX(" + (900 * (1 - ent) - 900 * sal * sal) + "px)"; tj.style.opacity = 1; tj.style.clipPath = "none"; }
+    // La foto aparece y se acerca despacio (efecto Ken Burns); de fondo, la misma foto desenfocada
+    const fo = salir(tramo(uu, 60, 420));
+    $(".foto", c).style.opacity = fo;
+    $(".foto", c).style.transform = "scale(" + (0.9 + 0.1 * fo + 0.04 * tramo(uu, 420, 1700)) + ")";
+    $(".fotofondo").style.opacity = 0.9 * salir(tramo(u, 0, 300)) * (1 - 0.5 * sal);
+    $(".fotofondo").style.transform = "scale(" + (1.08 + 0.06 * tramo(u, 0, ms.oferta)) + ")";
     // El descuento se estampa
-    const pc = rebote(tramo(u, 120, 460)); $(".pct", c).style.transform = "scale(" + (u < 120 ? 0 : 0.3 + 0.7 * pc) + ") rotate(" + (-6 * (1 - pc)) + "deg)";
+    const pc = rebote(tramo(uu, 120, 460)); $(".pct", c).style.transform = "scale(" + (uu < 120 ? 0 : 0.3 + 0.7 * pc) + ") rotate(" + (-6 * (1 - pc)) + "deg)";
     // El icono se dibuja
-    const di = salir(tramo(u, 160, 640)); $(".ico", c).querySelectorAll("*").forEach(e => { e.style.strokeDasharray = "1"; e.style.strokeDashoffset = String(1 - di); });
+    const di = salir(tramo(uu, 160, 640)); $(".ico", c).querySelectorAll("*").forEach(e => { e.style.strokeDasharray = "1"; e.style.strokeDashoffset = String(1 - di); });
     // El nombre se escribe en vivo
-    const k = Math.round(o.titulo.length * tramo(u, 260, 760)), escribiendo = k < o.titulo.length && u >= 260;
+    const k = Math.round(o.titulo.length * tramo(uu, 260, 760)), escribiendo = k < o.titulo.length && uu >= 260;
     $(".nom", c).textContent = o.titulo.slice(0, k);
-    if (escribiendo || (u > 760 && u < 1000 && Math.floor(u / 120) % 2 === 0)) { const cur = document.createElement("span"); cur.className = "cursor"; $(".nom", c).append(cur); }
+    if (escribiendo || (uu > 760 && uu < 1000 && Math.floor(uu / 120) % 2 === 0)) { const cur = document.createElement("span"); cur.className = "cursor"; $(".nom", c).append(cur); }
     // Las chips aparecen de a una
-    c.querySelectorAll(".chip").forEach((e, j) => { const p = rebote(tramo(u, 700 + j * 90, 960 + j * 90)); e.style.opacity = clamp(p); e.style.transform = "scale(" + (0.6 + 0.4 * p) + ")"; });
+    c.querySelectorAll(".chip").forEach((e, j) => { const p = rebote(tramo(uu, 700 + j * 90, 960 + j * 90)); e.style.opacity = clamp(p); e.style.transform = "scale(" + (0.6 + 0.4 * p) + ")"; });
     // El precio cuenta del de antes al de hoy, y el de antes se tacha
-    const pr = salir(tramo(u, 760, 1180)), desde = o.antes || o.precio;
+    const pr = salir(tramo(uu, 760, 1180)), desde = o.antes || o.precio;
     $(".ahora", c).textContent = pesos(desde + (o.precio - desde) * pr);
-    $(".ahora", c).style.opacity = clamp(tramo(u, 700, 820));
-    $(".antes", c).style.opacity = clamp(tramo(u, 980, 1100));
-    $(".antes i", c).style.width = "calc(" + (100 * salir(tramo(u, 1100, 1320))) + "% + 8px)";
-    $(".tienda", c).style.opacity = clamp(tramo(u, 1000, 1150));
+    $(".ahora", c).style.opacity = clamp(tramo(uu, 700, 820));
+    $(".antes", c).style.opacity = clamp(tramo(uu, 980, 1100));
+    $(".antes i", c).style.width = "calc(" + (100 * salir(tramo(uu, 1100, 1320))) + "% + 8px)";
+    $(".tienda", c).style.opacity = clamp(tramo(uu, 1000, 1150));
     return;
   }
   mostrar("cierre");
+  $(".fotofondo").style.opacity = 0;
   const v = t - fin, cz = $("#cierre");
   const h2 = salir(tramo(v, 0, 450)); $("h2", cz).style.opacity = h2; $("h2", cz).style.transform = "translateY(" + (60 * (1 - h2)) + "px)";
   // El link se escribe y se «toca»: una onda sale del link y abre
@@ -258,7 +310,17 @@ window.pintar = pintar;
 window.DURACION = D.ms.intro + D.ofertas.length * D.ms.oferta + D.ms.cierre;
 // «#t=4000» pinta ese momento al abrir: sirve para revisar un cuadro con una captura de Chrome.
 const T0 = +(location.hash.match(/t=(\d+)/) || [0, 0])[1];
-window.listo = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { pintar(T0); return true; });
+// Se espera a las letras y a las fotos (cada una con 8 s de tope: una tienda lenta no frena el Reel, esa oferta va sin foto).
+const FOTOS = [];
+const bajar = (u, i) => new Promise(ok => {
+  if (!u) return ok();
+  const im = new Image(), corte = setTimeout(() => ok(), 8000);
+  im.onload = () => { clearTimeout(corte); FOTOS[i] = im.naturalWidth > 0; ok(); };
+  im.onerror = () => { clearTimeout(corte); ok(); };
+  im.src = u;
+});
+window.listo = Promise.all([document.fonts ? document.fonts.ready : 0, ...D.ofertas.map((o, i) => bajar(o.imagen, i))])
+  .then(() => { actual = -1; pintar(T0); return true; });
 pintar(T0);
 </script></body></html>
 `;
@@ -367,9 +429,9 @@ async function main(argv) {
     const mp4 = path.join(carpeta, `${fecha}.mp4`);
     video(cuadros, mp4, fps);
     // Portada: el cuadro de la primera oferta ya armada (se ve el descuento, el nombre y el precio).
-    const portada = Math.min(n - 1, Math.round((MS.intro + MS.oferta * 0.9) / 1000 * fps));
+    const r = estilo(fecha).ritmo, portada = Math.min(n - 1, Math.round((r.intro + r.oferta * 0.9) / 1000 * fps));
     fs.copyFileSync(path.join(cuadros, `c${String(portada).padStart(5, "0")}.jpg`), path.join(carpeta, `${fecha}-portada.jpg`));
-    console.log(`Reel armado: ${mp4} (${(total / 1000).toFixed(1)} s, ${n} cuadros, estilo ${estilo(fecha).paleta.nombre}/${estilo(fecha).fondo}/${estilo(fecha).transicion})`);
+    console.log(`Reel armado: ${mp4} (${(total / 1000).toFixed(1)} s, ${n} cuadros, estilo ${Object.values(estilo(fecha)).map(x => typeof x === "string" ? x : x.nombre).join("/")})`);
   } finally { fs.rmSync(cuadros, { recursive: true, force: true }); }
   return 0;
 }

@@ -23,8 +23,14 @@ frenado: esta spec solo arma el video, no publica.
   contra el mismo modelo (spec 035) lo dice.
 - Cierre: `pichinchadeldia.com.ar/hoy` se escribe, se «toca» (onda) y aparece «Link en la bio», con el aviso de siempre
   (IVA, sin envío, verificá en la tienda, el orden no depende de comisiones).
-- **Un estilo por día** (`estilo(fecha)`): 6 paletas con contraste para el celular × 3 fondos (grilla, rayas, puntos) × 3
-  transiciones (deslizar, zoom, cortina). La misma fecha da siempre el mismo estilo.
+- **Un estilo por día** (`estilo(fecha)`): 6 paletas con contraste para el celular, 6 juegos de letras de Google Fonts
+  (Plex, Bebas Neue, Anton, Archivo Black, Oswald, Barlow), 3 ritmos (ágil 1,45 s, normal 1,7 s, pausado 2,05 s por
+  oferta; la coreografía se estira o se encoge), 3 fondos, 3 transiciones y 2 disposiciones (tarjeta con la foto chica, o
+  «plena» con la foto grande arriba). Cada parte avanza a su propio paso: dos días seguidos no se parecen y la misma fecha
+  da siempre el mismo Reel.
+- **La foto del producto** (la de la tienda, que `generar_feed.js` suma a `ofertas.json` como `imagen`, solo https limpia):
+  de fondo, desenfocada bajo un velo del color del día, y nítida en la tarjeta, con un acercamiento lento. Se espera a que
+  baje (8 s de tope por foto); si no baja, esa oferta va sin foto.
 
 ## Cómo se arma
 

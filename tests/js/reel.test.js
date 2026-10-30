@@ -41,3 +41,23 @@ test("sin ofertas no arma nada y no falla", async () => {
   assert.equal(fs.existsSync(path.join(dir, "instagram")), false);
   assert.equal(await R.main([path.join(dir, "o.json"), "--salida", dir, "--solo-html"]), 0);
 });
+
+test("cada dia cambia tambien la letra, el ritmo y la disposicion; la duracion sigue al ritmo", () => {
+  const dias = ["2026-10-30", "2026-10-31", "2026-11-01"].map(d => R.estilo(d));
+  assert.equal(new Set(dias.map(e => e.letra.nombre)).size, 3);
+  assert.equal(new Set(dias.map(e => e.ritmo.nombre)).size, 3);
+  assert.notEqual(dias[0].disposicion, dias[1].disposicion);
+  const html = R.paginaReel(DATOS);
+  assert.match(html, /fonts\.googleapis\.com\/css2\?family=/);
+  assert.match(html, /<body class="disp-(tarjeta|plena)">/);
+  const r = R.estilo("2026-10-29").ritmo;
+  assert.equal(R.duracion(10, r), r.intro + 10 * r.oferta + r.cierre);
+});
+
+test("la foto de la tienda entra solo si es https limpia", () => {
+  const o = (imagen) => R.ofertasReel({ ofertas: [{ ...DATOS.ofertas[0], imagen }] })[0].imagen;
+  assert.equal(o("https://img.test/a.jpg"), "https://img.test/a.jpg");
+  assert.equal(o("http://img.test/a.jpg"), "");
+  assert.equal(o('https://img.test/a".jpg'), "");
+  assert.equal(o("https://img.test/a).jpg"), "");
+});
