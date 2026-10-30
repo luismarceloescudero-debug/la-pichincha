@@ -1,5 +1,8 @@
 # Worker «Afuera» (spec 022). Lo despliega .github/workflows/worker.yml solo si existen CLOUDFLARE_API_TOKEN y
 # CLOUDFLARE_ACCOUNT_ID; los secretos de las APIs se cargan con `wrangler secret put` (nunca aca).
+# Spec 046: el formulario de contacto necesita el binding send_email "CORREO" y los secretos CONTACTO_DESTINO y
+# CONTACTO_REMITENTE. Se suma recien cuando Email Routing este activo (docs/pendientes-del-dueno.md, item 1); sin el,
+# POST /contacto responde 503.
 name = "pichincha-afuera"
 main = "src/index.js"
 compatibility_date = "2026-10-01"

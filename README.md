@@ -45,9 +45,9 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `guardia.js` | Guardia del indice: mide bajas propias y, por categoria, avisos, "sin datos" y ofertas sobre el indice real, lo compara con la `guardia.json` publicada de la corrida anterior y con una alarma (0 bajas propias con historial, una categoria que se queda sin ofertas, un salto de mas de 10 puntos en "sin datos", menos de 10 ofertas para el resumen) la corrida no manda Telegram y abre un issue `guardia` |
-| `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`) y `/legal/` (terminos, privacidad y afiliados) |
+| `generar_info.js` | `/estado/` (cuando se relevo cada tienda y cuantos avisos trajo, de `indice.json` y `salud.json`), `/legal/` (terminos, privacidad y afiliados), `/contacto/` (el formulario, spec 046), `/acerca/` y `/.well-known/security.txt` |
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas; tambien `afuera_url`, la direccion del Worker de la spec 022 (vacia hasta el primer despliegue) |
-| `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en «Buscalo afuera» (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP. Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
+| `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en «Buscalo afuera» (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP; `POST /contacto` manda el formulario de `/contacto/` por correo (spec 046, binding `send_email` de Email Routing; responde 503 hasta que el dueño lo configure). Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
 | `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
@@ -769,6 +769,16 @@ tienda cambia su plantilla (llega el issue de `salud-fuente`):
 El test que falla dice que regex de `tiendas.json` hay que corregir. FullH4rd
 todavia no tiene HTML guardado: el 2026-10-08 respondia con un desafio de
 Cloudflare y se cubre con HTML escrito a mano.
+
+## Contacto
+
+El sitio no publica ningun correo: [/contacto/](https://pichinchadeldia.com.ar/contacto/) es un formulario (spec 046) que
+el Worker «Afuera» manda por correo con `POST /contacto`, usando el binding `send_email` de Cloudflare Email Routing, con
+`Reply-To` de quien escribe. Tiene campo trampa, un tiempo minimo desde que se cargo la pagina y un tope de 5 mensajes
+cada 10 minutos por IP. Destino y remitente son variables del Worker (`CONTACTO_DESTINO`, `CONTACTO_REMITENTE`); hasta
+que el dueño active Email Routing y las cargue (paso a paso en `docs/pendientes-del-dueno.md`, item 1), el formulario
+responde que todavia no esta activo. `/.well-known/security.txt` apunta a ese formulario y vence a un año de cada
+publicacion; `/acerca/` cuenta quien hace el sitio. Detalle en `specs/046-contacto/spec.md`.
 
 ## Analitica
 

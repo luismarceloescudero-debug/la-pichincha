@@ -1,6 +1,6 @@
 # Pendientes que dependen de vos
 
-Última revisión: 24/10/2026. Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
+Última revisión: 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
 24/10 desde el entorno de trabajo: los que piden iniciar sesión o tienen anti-bots están marcados) y, cuando hay que
 escribirle a alguien, el **mensaje ya armado**. Entre `[CORCHETES]` va lo que tenés que completar vos.
 
@@ -8,7 +8,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 | # | Pendiente | Qué se destraba | Tiempo |
 |---|---|---|---|
-| 1 | Un contacto público | `security.txt` y la página «Acerca de» (confianza para Google y para quien compra) | 5 min |
+| 1 | Activar el formulario de contacto | Que lleguen a tu Gmail los mensajes de /contacto/ sin publicar tu correo, y completar «Acerca de» | 15 min |
 | 2 | Escribir a FullH4rd, Katech, Compra Cierta y Loquieroacá | Cuatro tiendas que hoy no entran al índice o a «Afuera» | 15 min |
 | 3 | eBay (claves y afiliados) | «Afuera» con eBay: precios en vivo y comisión | 30 min + espera |
 | 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
@@ -22,21 +22,62 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 ---
 
-## 1. Un contacto público
+## 1. Activar el formulario de contacto
 
-**Qué decidir:** qué dirección ponemos en `/.well-known/security.txt` y en «Acerca de». No publico tu email sin que lo
-elijas.
+**Qué se destraba:** el formulario de https://pichinchadeldia.com.ar/contacto/ (spec 046). Ya está publicado, igual que
+`/.well-known/security.txt` y «Acerca de», pero hasta que hagas estos pasos responde «El formulario de contacto todavía no
+está activo».
 
-**Opciones** (de más a menos recomendada):
+**Cómo funciona:** quien escribe completa el formulario; el Worker «Afuera» te lo manda por correo desde
+`hola@pichinchadeldia.com.ar` a tu Gmail, con «Responder a» la dirección de esa persona. **Tu correo personal no se
+publica en ningún lado**: no está en el sitio, ni en el `security.txt`, ni en el repositorio (va como secreto). Si un día
+llega spam, se cambia la dirección sin tocar tu Gmail.
 
-1. Una dirección nueva solo para el sitio (por ejemplo `hola@` en tu dominio, o una cuenta gratis aparte). Si un día
-   recibe spam, se cambia sin tocar tu correo personal.
-2. Tu correo actual.
-3. Un formulario (Google Forms). El `security.txt` acepta un enlace en lugar de un correo.
+**Antes de empezar** (ya verificado el 30/10): `pichinchadeldia.com.ar` usa los DNS de Cloudflare
+(`mallory` y `stanley.ns.cloudflare.com`) y todavía no tiene registros MX, así que no se pisa ningún correo existente. El
+dominio y el Worker `pichincha-afuera` tienen que estar en **la misma cuenta** de Cloudflare.
 
-**Paso a paso:** elegí una opción y mandame la dirección o el enlace; con eso dejo `security.txt` (con vencimiento a un
-año) y «Acerca de» listos en un solo PR. Para «Acerca de» también me sirve que me cuentes en dos o tres frases quién
-hace el sitio y por qué (es lo que Google llama E-E-A-T: que se vea una persona real detrás).
+**Paso a paso** (~15 minutos). El panel de Cloudflare cambia los nombres de los menús seguido: si no coinciden, seguí la
+documentación enlazada en cada paso.
+
+1. **Activar Email Routing.** Entrá a https://dash.cloudflare.com/ → **Compute** → **Email Service** →
+   **Email Routing** → **Onboard Domain** y elegí `pichinchadeldia.com.ar`. Cloudflare te muestra los registros que
+   suma (MX, SPF y DKIM): aceptalos y tocá **Done**. Suelen tardar entre 5 y 15 minutos (hasta 24 h).
+   Documentación: https://developers.cloudflare.com/email-service/get-started/route-emails/
+2. **Verificar tu Gmail como destino.** En **Email Routing** → **Destination Addresses**, escribí tu Gmail y confirmá.
+   Te llega un correo de Cloudflare: tocá **Verify email address**. Sin este paso el Worker no te puede mandar nada.
+   Documentación: https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/
+3. **Crear `hola@pichinchadeldia.com.ar`.** En **Email Routing** → tu dominio → **Routing Rules** →
+   **Create routing rule**: en **Email pattern** poné `hola`, en **Action** «Send to an email» y en **Destination** tu
+   Gmail verificado. **Save**.
+4. **Probar la dirección.** Desde otra cuenta (no desde tu Gmail) mandá un correo a `hola@pichinchadeldia.com.ar`. Tiene
+   que llegarte; si no, mirá en Spam.
+5. **Cargar los dos secretos en GitHub.** En https://github.com/luismarceloescudero-debug/la-pichincha → **Settings** →
+   **Secrets and variables** → **Actions** → **New repository secret**, creá:
+   - `CONTACTO_DESTINO` = `[TU GMAIL VERIFICADO]`
+   - `CONTACTO_REMITENTE` = `hola@pichinchadeldia.com.ar`
+
+   El workflow «Desplegar el Worker Afuera» se los pasa al Worker con `wrangler secret put`, como las claves de eBay.
+   Documentación: https://docs.github.com/es/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+6. **Sumar el binding en `worker/wrangler.toml`.** Avisame y lo hago en un PR (o agregalo vos al final del archivo):
+
+   ```toml
+   [[send_email]]
+   name = "CORREO"
+   ```
+
+   Sin `destination_address`, el Worker solo puede mandar a direcciones **verificadas** en tu cuenta (la del paso 2).
+   Documentación: https://developers.cloudflare.com/email-service/configuration/send-bindings/ y
+   https://developers.cloudflare.com/email-service/api/send-emails/workers-api/
+7. **Desplegar y probar.** Al mergear ese PR, el workflow despliega el Worker solo. Después entrá a
+   https://pichinchadeldia.com.ar/contacto/, mandá un mensaje de prueba y fijate que te llegue, y que al tocar
+   «Responder» salga la dirección que escribiste en el formulario.
+
+**Para «Acerca de»:** en https://pichinchadeldia.com.ar/acerca/ quedó un `[COMPLETAR]`. Mandame dos o tres frases de quién
+hace el sitio y por qué (lo que Google llama E-E-A-T: que se vea una persona real detrás) y lo dejo publicado.
+
+**Límites del formulario** (no hace falta tocarlos): campo trampa para robots, 3 segundos mínimos desde que se abre la
+página, 5 mensajes cada 10 minutos por persona y mensajes de 10 a 4000 caracteres.
 
 ---
 

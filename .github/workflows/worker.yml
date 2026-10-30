@@ -59,7 +59,7 @@ jobs:
         run: $WRANGLER deploy
 
       # Cada secreto se carga solo si el dueño lo creo en GitHub; los que faltan dejan esa fuente apagada.
-      - name: Pasar los secretos de las APIs
+      - name: Pasar los secretos de las APIs y del contacto
         if: steps.cuenta.outputs.lista == 'si'
         working-directory: worker
         env:
@@ -71,9 +71,12 @@ jobs:
           ALIEXPRESS_TRACKING_ID: ${{ secrets.ALIEXPRESS_TRACKING_ID }}
           AMAZON_CREATORS_ID: ${{ secrets.AMAZON_CREATORS_ID }}
           AMAZON_CREATORS_SECRET: ${{ secrets.AMAZON_CREATORS_SECRET }}
+          # Spec 046: el formulario de contacto. El destino es el correo del dueño: va como secreto, nunca en el repo.
+          CONTACTO_DESTINO: ${{ secrets.CONTACTO_DESTINO }}
+          CONTACTO_REMITENTE: ${{ secrets.CONTACTO_REMITENTE }}
         run: |
           for nombre in EBAY_CLIENT_ID EBAY_CLIENT_SECRET EBAY_CAMPAIGN_ID ALIEXPRESS_APP_KEY ALIEXPRESS_APP_SECRET \
-                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET; do
+                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET CONTACTO_DESTINO CONTACTO_REMITENTE; do
             valor="${!nombre}"
             if [ -n "$valor" ]; then
               printf '%s' "$valor" | $WRANGLER secret put "$nombre" >/dev/null
