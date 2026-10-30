@@ -73,7 +73,7 @@ jobs:
           sleep 2
           # Si Chrome no arranca en el runner se reintenta (solo ese error: un puntaje bajo corta igual).
           # Tres corridas por pagina: el verificador evalua la mediana (la primera sale con Chrome en frio).
-          for ruta in "" precios/ hoy/ estado/ legal/; do
+          for ruta in "" precios/ hoy/ estado/ legal/ contacto/; do
             for i in 1 2 3; do
               nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d /)
               bash .github/lighthouse-corrida.sh npx --yes lighthouse@12.8.2 "http://localhost:8080/$ruta" --quiet --output=json \

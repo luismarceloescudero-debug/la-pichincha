@@ -289,7 +289,8 @@ jobs:
             git push
           fi
 
-      # /estado/ (cuando se relevo cada tienda, de indice.json y salud.json) y /legal/. Si falla, el sitio sale igual.
+      # /estado/ (cuando se relevo cada tienda, de indice.json y salud.json), /legal/, /contacto/, /acerca/ y
+      # /.well-known/security.txt (spec 046, con Expires a un año de cada corrida). Si falla, el sitio sale igual.
       - name: Armar las paginas de estado y legales
         run: node generar_info.js --indice indice.json --salud salud.json --fiabilidad _sitio/fiabilidad.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
 
@@ -352,6 +353,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _sitio
+          include-hidden-files: true   # spec 046: /.well-known/security.txt (por defecto deja afuera lo que empieza con punto)
 
   publicar:
     needs: construir

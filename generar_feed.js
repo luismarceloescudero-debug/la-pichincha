@@ -140,7 +140,7 @@ ${tarjeta}
   <h2>Todas las ofertas de hoy</h2>
 ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
   <p><a class="acc" href="../">Buscar y comparar en La Pichincha</a> · <a href="${CANAL_TELEGRAM}" rel="noopener">Canal de Telegram</a></p>
-  <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones. <a href="../estado/">Estado de las fuentes</a> · <a href="../legal/">Términos y privacidad</a>.</p>
+  <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones. <a href="../estado/">Estado de las fuentes</a> · <a href="../legal/">Términos y privacidad</a> · <a href="../contacto/">Contacto</a>.</p>
 </main>
 <script src="../js/pagina.js"></script>
 <script>${G.SCRIPT_MEDICION}</script>
