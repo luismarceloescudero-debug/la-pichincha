@@ -15,6 +15,7 @@
     pc: ["cpu", "ram", "rom", "gpu"],
     smartphone: ["ram", "rom"],
     componente: ["capacidad", "ddr", "interfaz"],
+    placa: ["gpu", "vram"],      // una placa de video es un componente, pero se compara por chip y memoria
   };
   const MIN_CLAVES = 2;      // con menos de dos especificaciones leidas la tarjeta no alcanza para comparar con justicia
   const MIN_COMPARABLES = 3; // menos que esto: la comparativa lo dice en vez de mezclar familias
@@ -46,18 +47,26 @@
     return todos.length > 1 ? todos.join("/") : todos.length ? todos[0] : 0;
   }
 
+  /* La capacidad que dice el titulo, la primera: «64GB (2x32GB)» es 64, «1TB» es 1000. No usa C.memoriaDe, que separa RAM de
+     almacenamiento para notebooks y celulares (una sola capacidad de 32 GB no es ninguna de las dos) y deja afuera la
+     memoria de una placa de video. */
+  function capacidadDe(nombre) {
+    const m = String(nombre).match(/(?<![\d.x])(\d{1,4})\s?(gb|tb)(?![a-z\d])/i);
+    return m ? +m[1] * (/t/i.test(m[2]) ? 1000 : 1) : 0;
+  }
+
   const ddrDe = n => { const m = String(n).match(/\bddr\s?([345])\b/i); return m ? `ddr${m[1]}` : ""; };
   const interfazDe = n => /\bnvme\b|\bm\.?2\b/i.test(n) ? "nvme" : /\bsata\b/i.test(n) ? "sata" : "";
 
   /* { categoria, valores: { clave: valor } } solo con lo que el titulo dice. */
   function clavesDe(nombre) {
     const categoria = C.categoriaDe(nombre);
-    const nombres = CLAVES[categoria] || [];
+    const nombres = CLAVES[categoria === "componente" && gpuDe(nombre) ? "placa" : categoria] || [];
     const mem = C.memoriaDe(nombre);
     const lectores = {
       pulgadas: () => C.pulgadasDe(nombre), panel: () => C.panelDe(nombre), hz: () => hzDe(nombre),
       resolucion: () => resolucionDe(nombre), cpu: () => cpuDe(nombre), gpu: () => gpuDe(nombre),
-      ram: () => mem.ram, rom: () => mem.rom, capacidad: () => Math.max(mem.ram, mem.rom),
+      ram: () => mem.ram, rom: () => mem.rom, capacidad: () => capacidadDe(nombre), vram: () => capacidadDe(nombre),
       ddr: () => ddrDe(nombre), interfaz: () => interfazDe(nombre),
     };
     const valores = {};
@@ -91,7 +100,7 @@
   const TEXTO = {
     pulgadas: v => `${v}"`, panel: v => v.toUpperCase(), hz: v => `${String(v).replace("/", " / ")} Hz`, resolucion: v => RESOLUCION[v] || v,
     cpu: textoCpu, ram: v => `${v} GB de RAM`, rom: gb, gpu: v => v.toUpperCase(), capacidad: gb,
-    ddr: v => v.toUpperCase(), interfaz: v => (v === "nvme" ? "NVMe" : "SATA"),
+    vram: v => `${v} GB`, ddr: v => v.toUpperCase(), interfaz: v => (v === "nvme" ? "NVMe" : "SATA"),
   };
 
   /* Las especificaciones de la tarjeta, en palabras: «27" · OLED · 300 Hz · 2K (QHD)». */

@@ -124,3 +124,19 @@ test("un monitor de modo dual muestra y compara todas sus frecuencias, no solo l
   assert.equal(E.mismas([dual], ['Monitor Otra Marca 27" 4K UHD IPS Mini LED 160Hz']).coincide, false, "uno de 160 Hz solo no es el mismo");
   assert.equal(E.clavesDe('Monitor Gamer 27" IPS FHD 144Hz').valores.hz, 144, "con una sola frecuencia, el numero de siempre");
 });
+
+test("placas de video: se comparan por chip y memoria, aunque la tienda escriba en minúscula", () => {
+  const ref = "Tarjeta De Video Gigabyte Rtx 5080 Windforce Oc 16gb Gddr7 .";
+  assert.deepEqual(E.clavesDe(ref).valores, { gpu: "rtx 5080", vram: 16 });
+  assert.equal(E.resumen([ref]), "RTX 5080 · 16 GB");
+  assert.equal(E.mismas([ref], ["Placa de Video MSI GeForce RTX 5080 16G VENTUS 3X OC"]).aplica, true);
+  assert.equal(E.mismas([ref], ["Placa de Video ASUS TUF RTX 5080 16GB GDDR7"]).coincide, true);
+  assert.deepEqual(E.mismas([ref], ["Placa de Video ASUS RTX 5070 Ti 16GB"]).distintas, ["gpu"]);
+  assert.deepEqual(E.clavesDe("Placa de video ASUS Dual Radeon RX 7600 8GB").valores, { gpu: "rx 7600", vram: 8 });
+});
+
+test("memorias de 32 y 64 GB tienen capacidad: un kit no se queda sin comparar", () => {
+  assert.deepEqual(E.clavesDe("Memoria Kingston Fury DDR5 32GB 6000MHz").valores, { capacidad: 32, ddr: "ddr5" });
+  assert.deepEqual(E.clavesDe("Memoria Corsair DDR5 64GB (2x32GB) 6000MHz Vengeance").valores, { capacidad: 64, ddr: "ddr5" });
+  assert.equal(E.mismas(["Memoria Kingston Fury DDR5 32GB 6000MHz"], ["Memoria Corsair DDR5 64GB (2x32GB) 6000MHz"]).coincide, false);
+});
