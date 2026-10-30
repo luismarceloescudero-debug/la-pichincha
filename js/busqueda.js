@@ -244,7 +244,7 @@ function pintarResultados(q) {
     + ` en ${fuentes.size} fuente${fuentes.size > 1 ? "s" : ""}`
     + ` · mediana ${pesos(med)} · ${nPremium} premium por especificaciones`
     + (F.ocultas ? ` · ${F.ocultas} oculto${F.ocultas > 1 ? "s" : ""} por los filtros` : "")
-    + (afuera ? ` · ${afuera} avisos quedaron afuera por no ser comparables (el detalle está en Comparativa)` : "")
+    + (afuera ? ` · ${afuera === 1 ? "1 aviso quedó" : afuera + " avisos quedaron"} afuera por no ser comparables (el detalle está en Comparativa)` : "")
     + (nInt ? ` · ${nInt} compra${nInt > 1 ? "s" : ""} internacional${nInt > 1 ? "es" : ""}, marcada${nInt > 1 ? "s" : ""} y fuera de la comparativa` : "");
   const cat = CATEGORIAS.find(c => (c.claves || []).some(k => normal(q).includes(normal(k))));
   $("#puente").innerHTML = !A ? "" :
