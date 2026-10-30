@@ -85,7 +85,7 @@ function ofertasFiltradas() {
 function controlesOfertas(todas) {
   const n = { todas: todas.length, propia: todas.filter(o => o.tipo === "propia").length, seguimiento: todas.filter(o => o.tipo === "seguimiento").length };
   n.publicada = n.todas - n.propia - n.seguimiento;
-  const seg = (k, v, txt, cnt) => `<button class="seg" data-of="${k}:${v}" aria-selected="${OF[k] === v}">${txt}${cnt != null ? ` <span class="n">${cnt}</span>` : ""}</button>`;
+  const seg = (k, v, txt, cnt) => `<button class="seg" data-of="${k}:${v}" aria-pressed="${OF[k] === v}">${txt}${cnt != null ? ` <span class="n">${cnt}</span>` : ""}</button>`;
   const cuenta = key => {
     const m = new Map();
     todas.forEach(o => m.set(o[key], (m.get(o[key]) || 0) + 1));
