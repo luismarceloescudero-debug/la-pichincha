@@ -25,11 +25,11 @@ const T = require("./js/titulo.js");
 
 const ANCHO = 1080, ALTO = 1920;
 // El ritmo «normal»; cada dia elige uno de RITMOS.
-const MS = { intro: 2200, oferta: 1700, cierre: 3000 };
+const MS = { intro: 3000, oferta: 2700, cierre: 4000 };   // el «normal»; 31/10: el dueño pidio mas lento, con 1,45 s por oferta no daba tiempo a leer
 const RITMOS = [
-  { nombre: "agil", intro: 1900, oferta: 1450, cierre: 2600 },
+  { nombre: "agil", intro: 2600, oferta: 2300, cierre: 3600 },
   { nombre: "normal", ...MS },
-  { nombre: "pausado", intro: 2400, oferta: 2050, cierre: 3200 },
+  { nombre: "pausado", intro: 3400, oferta: 3100, cierre: 4400 },
 ];
 // Juegos de letras de Google Fonts con acentos y ñ: titulo (condensada o de impacto), texto y numeros (monoespaciada).
 // `escala` iguala el ancho: una letra ancha (Archivo Black) va mas chica para que el nombre entre en tres lineas.

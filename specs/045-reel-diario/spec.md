@@ -17,14 +17,14 @@ frenado: esta spec solo arma el video, no publica.
 
 - **9:16, 1080x1920**: se ve entero como Reel y como historia. Lo importante va en la franja y 250-1500 (arriba y abajo
   están los controles de Instagram; la grilla del perfil recorta a 3:4).
-- ~22 s a 30 fps: intro (2,2 s) · 10 ofertas (1,7 s cada una) · cierre (3 s). Barras de progreso como las historias.
+- ~29 s a 30 fps con el ritmo ágil: intro (2,6 s) · 10 ofertas (2,3 s cada una) · cierre (3,6 s). Barras de progreso como las historias.
 - Cada oferta: el descuento se estampa, el icono del tipo se dibuja, el nombre legible (spec 044) se escribe en vivo con
   cursor, las chips aparecen de a una, el precio cuenta del de antes al de hoy y el de antes se tacha. Si la oferta es
   contra el mismo modelo (spec 035) lo dice.
 - Cierre: `pichinchadeldia.com.ar/hoy` se escribe, se «toca» (onda) y aparece «Link en la bio», con el aviso de siempre
   (IVA, sin envío, verificá en la tienda, el orden no depende de comisiones).
 - **Un estilo por día** (`estilo(fecha)`): 6 paletas con contraste para el celular, 6 juegos de letras de Google Fonts
-  (Plex, Bebas Neue, Anton, Archivo Black, Oswald, Barlow), 3 ritmos (ágil 1,45 s, normal 1,7 s, pausado 2,05 s por
+  (Plex, Bebas Neue, Anton, Archivo Black, Oswald, Barlow), 3 ritmos (ágil 2,3 s, normal 2,7 s, pausado 3,1 s por
   oferta; la coreografía se estira o se encoge), 3 fondos, 3 transiciones y 2 disposiciones (tarjeta con la foto chica, o
   «plena» con la foto grande arriba). Cada parte avanza a su propio paso: dos días seguidos no se parecen y la misma fecha
   da siempre el mismo Reel.

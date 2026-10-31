@@ -456,7 +456,7 @@ rotulan.
 
 ### Reel de Instagram (spec 045, todavía sin publicar)
 
-`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (~22 s) con las 10 ofertas:
+`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (~29 s) con las 10 ofertas:
 el descuento se estampa, el nombre se escribe en vivo, el precio cuenta hasta el de hoy y al final el link
 a `/hoy/` se escribe y se toca. Cada día cambia la paleta, el fondo y la transición. Necesita Chrome y
 ffmpeg. `--fotos 1900,8800` saca cuadros sueltos para revisar el diseño. No publica nada: eso queda para
