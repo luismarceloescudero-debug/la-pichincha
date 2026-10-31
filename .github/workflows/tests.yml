@@ -39,6 +39,62 @@ jobs:
           --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=85
           "tests/js/*.test.js"
 
+  # Pruebas de punta a punta con Playwright (spec 051): Chromium contra el sitio armado con el indice de prueba de
+  # tests/fixtures/e2e y los terceros simulados. Playwright es solo de la CI: no se publica (constitucion I, excepcion).
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Version de Playwright
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache de los navegadores
+        id: navegadores
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Instalar Chromium con sus dependencias
+        if: steps.navegadores.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # Con la cache del navegador hay que instalar igual las librerias del sistema.
+      - name: Instalar las dependencias del sistema
+        if: steps.navegadores.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Armar el sitio con el indice de prueba
+        run: bash tests/e2e/armar-sitio.sh
+
+      - name: Correr las pruebas
+        run: npx playwright test
+
+      # El reporte HTML y, de las pruebas que fallan, capturas y trazas (test-results).
+      - name: Guardar el reporte y las capturas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reporte
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
   # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md): las cuatro
   # categorias cortan si la mediana de tres corridas baja de 90.
   lighthouse:
