@@ -74,9 +74,11 @@ jobs:
           # Spec 046: el formulario de contacto. El destino es el correo del dueño: va como secreto, nunca en el repo.
           CONTACTO_DESTINO: ${{ secrets.CONTACTO_DESTINO }}
           CONTACTO_REMITENTE: ${{ secrets.CONTACTO_REMITENTE }}
+          # Spec 053: el acuse de recibo por Resend. Sin este secreto no se manda acuse y el formulario sigue como antes.
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
           for nombre in EBAY_CLIENT_ID EBAY_CLIENT_SECRET EBAY_CAMPAIGN_ID ALIEXPRESS_APP_KEY ALIEXPRESS_APP_SECRET \
-                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET CONTACTO_DESTINO CONTACTO_REMITENTE; do
+                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET CONTACTO_DESTINO CONTACTO_REMITENTE RESEND_API_KEY; do
             valor="${!nombre}"
             if [ -n "$valor" ]; then
               printf '%s' "$valor" | $WRANGLER secret put "$nombre" >/dev/null

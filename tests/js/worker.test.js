@@ -651,7 +651,7 @@ test("contacto: un mensaje valido se manda con send_email, Reply-To de quien esc
   const envios = [], atender = await atenderContacto();
   const r = await atender(pedidoContacto(formulario()), ENV_CORREO(envios));
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true });
+  assert.deepEqual(await r.json(), { ok: true, acuse: false }, "sin RESEND_API_KEY no hay acuse");
   assert.equal(r.headers.get("Cache-Control"), "no-store");
   assert.equal(envios.length, 1);
   const { de, para, crudo } = envios[0];
@@ -772,4 +772,101 @@ test("contacto: tope propio de 5 mensajes por IP cada 10 minutos, ademas del top
   reloj += 11 * 60 * 1000;
   assert.equal((await atender(pedidoContacto(formulario()), env)).status, 200, "pasados 10 minutos vuelve a andar");
   assert.equal(envios.length, 7);
+});
+
+/* --- Spec 053: el acuse de recibo por Resend, con fetch simulado (nunca se le pega a Resend de verdad) --- */
+const ENV_ACUSE = (envios, extra = {}) => ({ ...ENV_CORREO(envios), CONTACTO_REMITENTE: "hola@pichinchadeldia.com.ar", RESEND_API_KEY: "re_clave_de_prueba", ...extra });
+const resendFalso = (llamadas, respuesta = () => new Response(JSON.stringify({ id: "x" }), { status: 200 })) =>
+  async (url, init) => { llamadas.push({ url, init }); return respuesta(); };
+
+test("acuse: se manda a quien escribio, con el cuerpo fijo y sin nada de lo que escribio", async () => {
+  const envios = [], llamadas = [], atender = await atenderContacto({ fetch: resendFalso(llamadas) });
+  const r = await atender(pedidoContacto(formulario({ nombre: "Ana Secreta", mensaje: "Texto privado que no debe viajar al acuse" })), ENV_ACUSE(envios));
+  assert.deepEqual(await r.json(), { ok: true, acuse: true });
+  assert.equal(envios.length, 1, "el mensaje al dueño sale igual");
+  assert.equal(llamadas.length, 1);
+  const { url, init } = llamadas[0];
+  assert.equal(url, "https://api.resend.com/emails");
+  assert.equal(init.method, "POST");
+  assert.equal(init.headers.Authorization, "Bearer re_clave_de_prueba");
+  assert.equal(init.headers["Content-Type"], "application/json");
+  assert.match(init.headers["Idempotency-Key"], /^acuse-contacto\/[0-9a-f-]{36}$/);
+  assert.ok(init.signal, "con corte por tiempo");
+  const { armarAcuse, ACUSE_CUERPO } = await cargar("index.js");
+  const cuerpo = JSON.parse(init.body);
+  assert.deepEqual(cuerpo, { from: "La Pichincha <hola@pichinchadeldia.com.ar>", to: ["ana@example.com"], reply_to: "hola@pichinchadeldia.com.ar",
+    subject: "Recibimos tu consulta", text: ACUSE_CUERPO });
+  assert.deepEqual(cuerpo, armarAcuse("ana@example.com", "hola@pichinchadeldia.com.ar"));
+  assert.doesNotMatch(init.body, /Ana Secreta|Texto privado|Consulta/);
+  assert.match(cuerpo.text, /Gracias por escribirnos/);
+  assert.match(cuerpo.text, /aviso automático/);
+});
+
+test("acuse: sin RESEND_API_KEY no se manda y el formulario responde como antes (acuse: false)", async () => {
+  const envios = [], llamadas = [], atender = await atenderContacto({ fetch: resendFalso(llamadas) });
+  const env = ENV_ACUSE(envios); delete env.RESEND_API_KEY;
+  const r = await atender(pedidoContacto(formulario()), env);
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { ok: true, acuse: false });
+  assert.equal(llamadas.length, 0);
+  assert.equal(envios.length, 1);
+});
+
+test("acuse: si Resend falla (500, 429 o corte) el formulario igual responde bien y el log no trae ni clave ni direccion", async () => {
+  const avisos = [], original = console.warn;
+  console.warn = (...a) => avisos.push(a.join(" "));
+  try {
+    const casos = [() => new Response("{}", { status: 500 }), () => new Response("{}", { status: 429 }), () => { throw new DOMException("timeout", "TimeoutError"); }];
+    for (const [i, caso] of casos.entries()) {
+      const envios = [], atender = await atenderContacto({ fetch: resendFalso([], caso) });
+      const r = await atender(pedidoContacto(formulario({ correo: `ana${i}@example.com` })), ENV_ACUSE(envios));
+      assert.equal(r.status, 200);
+      assert.deepEqual(await r.json(), { ok: true, acuse: false });
+      assert.equal(envios.length, 1);
+    }
+  } finally { console.warn = original; }
+  assert.equal(avisos.length, 3);
+  assert.match(avisos[0], /500/); assert.match(avisos[1], /429/);
+  assert.doesNotMatch(avisos.join("\n"), /re_clave_de_prueba|example\.com/);
+});
+
+test("acuse: un solo acuse por direccion por hora, sin importar mayusculas; pasada la hora vuelve a mandar", async () => {
+  let reloj = MS_AHORA;
+  const envios = [], llamadas = [];
+  const atender = await atenderContacto({ fetch: resendFalso(llamadas), ahora: () => new Date(reloj).toISOString() }), env = ENV_ACUSE(envios);
+  const acuse = async correo => (await (await atender(pedidoContacto(formulario({ correo }), { ip: "9.9.9." + (envios.length + 1) }), env)).json()).acuse;
+  assert.equal(await acuse("ana@example.com"), true);
+  assert.equal(await acuse("ANA@example.com"), false, "misma direccion en la hora");
+  assert.equal(await acuse("otra@example.com"), true, "otra direccion si");
+  assert.equal(llamadas.length, 2);
+  assert.equal(envios.length, 3, "el mensaje al dueño sale siempre");
+  reloj += 61 * 60 * 1000;
+  assert.equal(await acuse("ana@example.com"), true);
+  assert.equal(llamadas.length, 3);
+});
+
+test("acuse: no se manda a la direccion del dueño ni a la del remitente", async () => {
+  const envios = [], llamadas = [], atender = await atenderContacto({ fetch: resendFalso(llamadas) }), env = ENV_ACUSE(envios);
+  for (const [i, correo] of ["dueno@example.com", "DUENO@example.com", "hola@pichinchadeldia.com.ar"].entries()) {
+    const r = await atender(pedidoContacto(formulario({ correo }), { ip: "5.5.5." + i }), env);
+    assert.equal(r.status, 200);
+    assert.deepEqual(await r.json(), { ok: true, acuse: false }, correo);
+  }
+  assert.equal(llamadas.length, 0);
+  assert.equal(envios.length, 3);
+});
+
+test("acuse: el campo trampa y los rechazos no mandan acuse", async () => {
+  const llamadas = [], atender = await atenderContacto({ fetch: resendFalso(llamadas) }), env = ENV_ACUSE([]);
+  await atender(pedidoContacto(formulario({ sitio: "x" })), env);
+  await atender(pedidoContacto(formulario({ espera: 100 }), { ip: "4.4.4.4" }), env);
+  await atender(pedidoContacto(formulario({ mensaje: "hola" }), { ip: "4.4.4.5" }), env);
+  assert.equal(llamadas.length, 0);
+});
+
+test("acuse: armarAcuse toma la direccion de CONTACTO_REMITENTE aunque venga con nombre", async () => {
+  const { armarAcuse } = await cargar("index.js");
+  const a = armarAcuse("x@example.com", "Otro Nombre <hola@pichinchadeldia.com.ar>");
+  assert.equal(a.from, "La Pichincha <hola@pichinchadeldia.com.ar>");
+  assert.equal(a.reply_to, "hola@pichinchadeldia.com.ar");
 });

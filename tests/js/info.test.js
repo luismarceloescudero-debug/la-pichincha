@@ -138,7 +138,8 @@ test("contacto: formulario accesible, con el endpoint del Worker, campo trampa y
   assert.match(html, /class="trampa" aria-hidden="true"[\s\S]*?id="sitio" name="sitio" type="text" tabindex="-1" autocomplete="off"/);
   assert.match(html, /<fieldset id="campos" disabled>/, "sin JS el formulario queda deshabilitado");
   assert.match(html, /<noscript>[^<]*<p[^>]*>Este formulario necesita JavaScript/);
-  for (const t of ["Enviando el mensaje", "Tu mensaje se envió", "No se pudo"]) assert.ok(html.includes(t), t);
+  for (const t of ["Enviando el mensaje", "Tu mensaje se envió", "No se pudo", "Te mandamos un correo de confirmación", "x.j.acuse"]) assert.ok(html.includes(t), t);
+  assert.match(html, /pasa por Resend solo para mandarte el aviso/);
   assert.match(html, /espera: Date\.now\(\) - inicio/);
   assert.match(html, /href="\.\.\/legal\/#contacto"/);
   assert.match(html, /<option value="error">Un precio o dato mal<\/option>/);
@@ -176,6 +177,7 @@ test("security.txt: Contact es el formulario y Expires vence a un año (RFC 9116
 test("las paginas de informacion enlazan contacto en el pie y la privacidad explica el formulario", () => {
   assert.match(I.renderLegal({ baseUrl: BASE }), /href="\.\.\/contacto\/">Contacto<\/a>/);
   assert.match(I.renderLegal({ baseUrl: BASE }), /<p id="contacto"><b>Formulario de contacto\.<\/b>/);
+  assert.match(I.renderLegal({ baseUrl: BASE }), /pasa por Resend, el servicio que lo envía, solo para mandar ese aviso, y no se guarda/);
   assert.doesNotMatch(I.renderLegal({ baseUrl: BASE }), /no tiene cuentas ni formularios/);
   assert.match(I.renderEstado(IDX, SALUD, { baseUrl: BASE }), /href="\.\.\/contacto\/">Contacto<\/a>/);
   const portada = fs.readFileSync(path.join(__dirname, "..", "..", "index.html"), "utf8");
