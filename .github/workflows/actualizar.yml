@@ -189,7 +189,8 @@ jobs:
         run: |
           mkdir -p _sitio
           cp index.html _sitio/
-          cp -r img js css diseno _sitio/
+          cp -r img js css _sitio/
+          cp -r diseno _sitio/   # pagina oculta con opciones de diseno (temporal, noindex)
           if [ -f indice.json ]; then
             cp indice.json _sitio/
             echo "indice: $(du -h indice.json | cut -f1)"
