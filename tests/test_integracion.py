@@ -111,6 +111,12 @@ class SitioArmado(unittest.TestCase):
             with self.subTest(pagina=str(pagina.relative_to(self.sitio))):
                 self.assertIn('http-equiv="Content-Security-Policy"', pagina.read_text(encoding="utf-8"))
 
+    def test_toda_pagina_dice_su_politica_de_referrer(self):
+        # No filtra la busqueda a las tiendas: el navegador ya lo hace por defecto, esto lo deja escrito (auditoria 054).
+        for pagina in self.paginas():
+            with self.subTest(pagina=str(pagina.relative_to(self.sitio))):
+                self.assertIn('<meta name="referrer" content="strict-origin-when-cross-origin">', pagina.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

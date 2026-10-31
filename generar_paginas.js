@@ -213,6 +213,7 @@ function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, feed, 
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="${SITIO.csp}">
 <title>${esc(titulo)}</title>
 <meta name="description" content="${esc(descripcion)}">

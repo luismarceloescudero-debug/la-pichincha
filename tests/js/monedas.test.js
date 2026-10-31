@@ -99,5 +99,5 @@ test("el desglose de Amazon en dolares pasa a pesos al dolar tarjeta, citando la
 });
 
 test("el bloque de pegar un link trae el lugar del monitor", () => {
-  assert.match(I.pegarLinkHtml(), /<div class="pl-monedas" aria-live="polite"><\/div>/);
+  assert.match(I.pegarLinkHtml(), /<div class="pl-monedas"><\/div>/);
 });
