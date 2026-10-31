@@ -29,7 +29,7 @@ function asegurarIndice(forzar) {
 function ofertasListas() {
   if (!OFERTAS && IDX) {
     OFERTAS = calcularOfertas(IDX);
-    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length + OFERTAS.seguimiento.length; });
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = listaOfertas().length; });
   }
   return OFERTAS;
 }
@@ -58,13 +58,14 @@ const leerEstrellas = () => {
 let ESTRELLAS = leerEstrellas();
 
 function listaOfertas() {
-  if (!ofertasListas()) return [];
+  if (!OFERTAS && !ofertasListas()) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
     cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f) });
-  return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
-                            ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
-                            ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))]);
+  // El mismo equipo en dos o tres tiendas (31/10: tres veces la Corsair SCUF) ocupa un solo lugar, el de la tienda mas barata.
+  return (OFERTAS._lista = Ofertas.unico([...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
+                                          ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
+                                          ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))].sort((a, b) => b.off - a.off)));
 }
 
 function ofertasFiltradas() {
