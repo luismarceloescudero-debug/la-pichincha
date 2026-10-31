@@ -10,4 +10,4 @@ workers_dev = true
 # Sin destination_address: el Worker manda al correo verificado de CONTACTO_DESTINO (un secreto: la direccion personal no
 # se escribe en el repo). Con destination_address solo podria mandar a esa direccion.
 [[send_email]]
-binding = "CORREO"
+name = "CORREO"
