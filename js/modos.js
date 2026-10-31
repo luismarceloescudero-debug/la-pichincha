@@ -43,7 +43,7 @@
   /* Lo que se calcula una vez por indice: la referencia de generaciones, la gama de cada titulo y las ofertas. */
   /* Las ofertas se calculan recien cuando un modo las pide (en 25 mil avisos son ~1,4 s): `calculadas` es el resultado de
      calcularOfertas si la pagina ya lo tiene, y si no se calcula aca. */
-  function preparar(idx, nivelMarca, calculadas, ganadores) {
+  function preparar(idx, nivelMarca, calculadas, ganadores, yaCalculadas) {
     const ref = C.referencia(idx.productos), memo = new Map();
     const gama = nombre => { let g = memo.get(nombre); if (!g) memo.set(nombre, g = C.evaluar(nombre, ref)); return g; };
     const pmemo = new Map();
@@ -64,7 +64,10 @@
       for (const [f, c] of of.cruceGen || []) pone(f, { tipo: "generacion", off: Math.max(0, 1 - f[1] / c.mediana), texto: O_.textoCruceGen(c, pesos) });
       return ofertas;
     };
-    return { ref, gama, premium, ofertas: deOfertas, nivelMarca };
+    /* Para ordenar: usa las ofertas si ya estan (las calcula un Web Worker, spec 054) y si no vale 0. Calcularlas aca frenaba
+       la primera busqueda varios segundos en un celular; la pagina vuelve a ordenar cuando llegan. Sin `yaCalculadas`, las calcula. */
+    const ofertasYa = () => (typeof yaCalculadas !== "function" || ofertas || yaCalculadas() ? deOfertas() : null);
+    return { ref, gama, premium, ofertas: deOfertas, ofertasYa, nivelMarca };
   }
 
   /* Que tan nuevo es un titulo: 0 es lo ultimo que hay a la venta de su familia, -1 la generacion anterior; sin generacion
@@ -83,7 +86,7 @@
   const enRecomendacion = (f, ctx, med) => ctx.gama(f[0]).pasa && ctx.nivelMarca(f[0]) >= 1 && !B.pisoDeGama(f[1], ctx.nivelMarca(f[0]), med);
 
   /* La mayor baja de un aviso: la mejor de sus razones de oferta (0 si no es una oferta). Lee las ofertas del indice. */
-  const bajaDe = (f, ctx) => { const e = ctx.ofertas().get(f[2]); return e ? Math.max(...e.razones.map(r => r.off || 0)) : 0; };
+  const bajaDe = (f, ctx) => { const e = (ctx.ofertasYa || ctx.ofertas)(); const r = e && e.get(f[2]); return r ? Math.max(...r.razones.map(x => x.off || 0)) : 0; };
 
   /* Las filas que entran en un modo. med es la mediana de lo comparable de la busqueda. El piso de gama SE MANTIENE (decision
      del dueño, spec 014): 4 GB de RAM o 64 GB de almacenamiento no alcanzan hoy y, por ser lo mas barato, parecerian una falsa oferta. */

@@ -268,8 +268,31 @@
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }
 
+  /* Para calcular las ofertas en un Web Worker (js/ofertas-worker.js): el resultado de calcularOfertas lleva filas como claves
+     de Map y de Set, y una fila no sobrevive a postMessage (llega una copia). Se manda por posicion en `productos` y el
+     navegador vuelve a poner las filas de su propio indice. `gama` solo viaja para las filas que algun uso pide. */
+  function codificar(r, productos) {
+    const pos = new Map(productos.map((f, i) => [f, i])), ix = f => pos.get(f);
+    const mapa = m => [...m].map(([f, v]) => [ix(f), v]);
+    const conGama = new Set([...r.categorias.keys(), ...r.contraModelo.keys(), ...r.cruceGen.keys()]);
+    return { propias: r.propias.map(ix), publicadas: r.publicadas.map(ix), seguimiento: r.seguimiento.map(ix),
+      descartadas: r.descartadas, sospechosas: r.sospechosas, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
+      cruces: [...r.cruces].map(ix), vigentes: [...r.vigentes].map(ix), contra: mapa(r.contra), notas: mapa(r.notas),
+      categorias: mapa(r.categorias), masBarato: [...r.masBarato].map(([f, o]) => [ix(f), ix(o)]),
+      contraModelo: mapa(r.contraModelo), cruceGen: mapa(r.cruceGen), gama: [...conGama].map(f => [ix(f), r.gama.get(f)]) };
+  }
+  function decodificar(c, productos) {
+    const fila = i => productos[i], lista = a => a.map(fila), set = a => new Set(lista(a));
+    const mapa = a => new Map(a.map(([i, v]) => [productos[i], v]));
+    return { propias: lista(c.propias), publicadas: lista(c.publicadas), seguimiento: lista(c.seguimiento), descartadas: c.descartadas,
+      sospechosas: c.sospechosas, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
+      contra: mapa(c.contra), notas: mapa(c.notas), categorias: mapa(c.categorias),
+      masBarato: new Map(c.masBarato.map(([i, o]) => [productos[i], productos[o]])),
+      contraModelo: mapa(c.contraModelo), cruceGen: mapa(c.cruceGen), gama: mapa(c.gama) };
+  }
+
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, ficha, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, ficha, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

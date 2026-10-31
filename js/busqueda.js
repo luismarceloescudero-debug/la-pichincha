@@ -22,7 +22,7 @@ function cargarGanadores() {
 }
 function ctxModos() {
   if (!CTX_MODOS || CTX_MODOS.idx !== IDX || CTX_MODOS.ganadores !== GANADORES)
-    CTX_MODOS = { idx: IDX, ganadores: GANADORES, ctx: Modos.preparar(IDX, nivelMarca, () => ofertasListas(), GANADORES) };
+    CTX_MODOS = { idx: IDX, ganadores: GANADORES, ctx: Modos.preparar(IDX, nivelMarca, () => ofertasListas(), GANADORES, () => !!OFERTAS) };
   return CTX_MODOS.ctx;
 }
 

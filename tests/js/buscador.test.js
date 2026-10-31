@@ -158,6 +158,18 @@ test("Super Oferta no calcula ofertas si el modo no las pide (el calculo caro es
   assert.equal(calculos, 1);
 });
 
+test("ordenar «Mejor oferta» no calcula las ofertas si todavia no estan (las calcula un Web Worker) y las usa cuando llegan (spec 054)", () => {
+  let calculos = 0, listas = false;
+  const ctx = Modos.preparar(IDX, nivel, () => { calculos++; return require("../../js/ofertas.js").calcularOfertas(IDX); }, null, () => listas);
+  Modos.ordenar(PRODUCTOS, "mejor", ctx);
+  assert.equal(calculos, 0, "la primera busqueda no frena esperando las ofertas");
+  listas = true;
+  Modos.ordenar(PRODUCTOS, "mejor", ctx);
+  assert.equal(calculos, 1);
+  Modos.filtrar(PRODUCTOS, "super", ctx, med);
+  assert.equal(calculos, 1, "una sola vez");
+});
+
 // el indice real tiene Ryzen de la serie 9000: sin eso, el Ryzen 7 7735HS de la LOQ pareceria la ultima generacion
 const IDX_REAL = { ...IDX, productos: [...PRODUCTOS, f("Notebook Asus Ryzen 7 9955HX 16GB 512GB", 1)] };
 
