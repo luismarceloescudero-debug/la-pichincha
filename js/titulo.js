@@ -41,10 +41,14 @@
   ];
   const POR_CATEGORIA = { smartphone: "celular", notebook: "notebook", monitor: "monitor", pc: "pc", componente: "componente", periferico: "accesorio", otro: "otro" };
 
+  const GPU_SUELTA = /\b(?:rtx|gtx)\s?\d{3,4}\b|\bradeon\s+rx\b|\brx\s?\d{4}\b|\barc\s+[ab]\d{3}\b/i;
+
   function tipoDe(nombre, categoria = C.categoriaDe(nombre)) {
     const t = TIPOS.find(([, re]) => re.test(nombre));
     // Los equipos los dice la categoria (mira mas que el principio); un componente o periferico, su primera palabra.
     if (["smartphone", "notebook", "monitor", "pc"].includes(categoria) && !(t && t[0] === "tablet")) return POR_CATEGORIA[categoria];
+    // Una placa sin «placa de video» al principio («GIGABYTE RTX 5080 16 GB», 31/10) tambien es una placa, no «Componente».
+    if (!t && categoria === "componente" && GPU_SUELTA.test(nombre)) return "placa-video";
     return t ? t[0] : POR_CATEGORIA[categoria] || "otro";
   }
 
@@ -270,7 +274,7 @@
     const original = String(nombre || "");
     const categoria = C.categoriaDe(original);
     const tipo = tipoDe(original, categoria);
-    return { categoria, tipo, titulo: tituloDe(original, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).trim(),
+    return { categoria, tipo, titulo: tituloDe(original, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).replace(/[\s.]+$/, ""),
       emoji: EMOJI[tipo], etiqueta: NOMBRE_TIPO[tipo] };
   }
 

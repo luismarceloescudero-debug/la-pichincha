@@ -55,3 +55,10 @@ test("un titulo raro no queda vacio", () => {
   assert.ok(T.de("Notebook").titulo.length);
   assert.equal(T.de("Estabilizador Desktop TCA-1200N LYONN AV").tipo, "otro");
 });
+
+test("una placa sin «placa de video» al principio es placa de video, y el punto suelto del final no queda en el nombre (31/10)", () => {
+  assert.equal(T.de("GIGABYTE RTX 5080 16 GB GDDR7").tipo, "placa-video");
+  assert.equal(T.de("Gigabyte Radeon RX 9070 XT 16GB").tipo, "placa-video");
+  assert.equal(T.de("Notebook Lenovo RTX 4050 16GB").tipo, "notebook");
+  assert.equal(T.de("Tarjeta De Video Gigabyte Rtx 5080 16gb Gddr7 .").completo, "Tarjeta De Video Gigabyte Rtx 5080 16gb Gddr7");
+});
