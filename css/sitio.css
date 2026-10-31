@@ -757,3 +757,50 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .o-nom .tit-nom{font-size:1.02rem}
 .oferta .tit-nom{color:var(--ink)}
 
+/* ---- Jerarquia de las ofertas (spec 055): no todo pesa igual ---- */
+/* Tres pesos segun el descuento (js/indice-ofertas.js, nivelOferta): heroe = bloque de color solido y precio grande,
+   fuerte = precio grande en verde, normal = quieta (precio en tinta, anillo chico). Los bloques llevan colores propios
+   (no los del tema) para que el texto blanco tenga contraste en claro y en oscuro. */
+:root{--bloque:#0f5132; --bloque-2:#2f7d52; --banda-0:#0b3b9c; --banda-1:#4c1d95}
+.ocard.n-normal .o-off{width:50px;height:50px}
+.ocard.n-normal .o-off::before{inset:5px}
+.ocard.n-normal .o-off b{font-size:.8rem}
+.ocard.n-normal .o-precios .ahora{font-size:1.2rem;color:var(--ink)}
+.ocard.n-normal .o-nom{font-weight:500}
+.ocard.n-normal::before{height:3px}
+.ocard.n-fuerte .o-off{width:72px;height:72px}
+.ocard.n-fuerte .o-off b{font-size:1.1rem}
+.ocard.n-fuerte .o-precios .ahora{font-size:1.85rem}
+.ocard.n-fuerte{border-color:var(--good)}
+.ocard.n-heroe{background:var(--bloque);border-color:var(--bloque);color:#fff;box-shadow:var(--shadow-up)}
+.ocard.n-heroe::before,.ocard.n-heroe.propia::before{background:var(--bloque-2);height:7px}
+.ocard.n-heroe:hover,.ocard.n-heroe.abierta,.ocard.n-heroe:has(.o-abrir:focus-visible){border-color:var(--bloque-2)}
+.ocard.n-heroe .o-cinta,.ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-precios .ahora,
+.ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:#fff}
+.ocard.n-heroe .o-precios .ahora{font-size:2.35rem;letter-spacing:-.045em;line-height:1}
+.ocard.n-heroe .o-precios .antes,.ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:rgba(255,255,255,.82)}
+.ocard.n-heroe .o-ahorro{font-size:1rem}
+.ocard.n-heroe .o-off{width:auto;height:auto;border-radius:12px;background:#fff;padding:6px 11px;transform:none}
+.ocard.n-heroe .o-off::before{display:none}
+.ocard.n-heroe .o-off b{font-size:1.65rem;letter-spacing:-.05em;color:var(--bloque)}
+.ocard.n-heroe:hover .o-off{transform:none}
+.ocard.n-heroe .tit-ico{color:#fff}
+.ocard.n-heroe .tit-chip{background:rgba(255,255,255,.16);color:#fff}
+.ocard.n-heroe .o-star{color:rgba(255,255,255,.85)}
+.ocard.n-heroe .o-star:hover{background:rgba(255,255,255,.14)}
+.ocard.n-heroe .acc{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5);color:#fff;box-shadow:none}
+.ocard.n-heroe .acc:hover{background:#fff;color:var(--bloque);border-color:#fff}
+.ocard.n-heroe :focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* Los botones no se cortan contra el borde de la tarjeta */
+.o-acciones{flex-wrap:wrap}
+.o-acciones .acc{min-width:0;flex:1 1 auto}
+/* Bloque de color a todo el ancho entre tramos de tarjetas: corta la grilla sin gritar */
+.o-banda{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px 20px;border-radius:14px;color:#fff;background:var(--banda-0)}
+.o-banda.b-1{background:var(--banda-1)}
+.o-banda b{font:700 1.15rem var(--font-sans);letter-spacing:-.01em}
+.o-banda span{font:600 .76rem var(--font-mono);opacity:.9}
+@media (max-width:620px){
+  .ocard.n-heroe .o-precios .ahora{font-size:2.1rem}
+  .o-banda{padding:12px 16px}
+}

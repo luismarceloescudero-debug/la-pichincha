@@ -138,11 +138,35 @@ function controlesOfertas(todas) {
     </div></div>`;
 }
 
+// Jerarquia (spec 055): no todo pesa igual. Cuanto pesa una tarjeta lo decide su descuento contra el resto de la lista que se
+// ve: las ~6 mejores son un bloque de color solido, las siguientes llevan el precio grande y el resto queda quieto. Hay pisos
+// (20 % y 15 %) para que un descuento chico no se vista de estrella cuando todo el dia es flojo.
+const HEROES = 6, PISO_HEROE = 20, PISO_FUERTE = 15, TRAMO = 8;
+let CORTES = { heroe: Infinity, fuerte: Infinity };
+function cortesDe(lista) {
+  const pcts = lista.map(o => Math.round(o.off * 100)).sort((a, b) => b - a);
+  const n = pcts.length;
+  if (!n) return { heroe: Infinity, fuerte: Infinity };
+  const heroe = Math.max(PISO_HEROE, pcts[Math.min(HEROES, n) - 1]);
+  const fuerte = Math.max(PISO_FUERTE, pcts[Math.min(Math.max(Math.ceil(n * 0.2), HEROES + 4), n) - 1]);   // el 20 %, y al menos 4 mas que los heroes
+  return { heroe, fuerte: Math.min(fuerte, heroe) };
+}
+const nivelOferta = pct => pct >= CORTES.heroe ? "heroe" : pct >= CORTES.fuerte ? "fuerte" : "normal";
+
+// Un bloque de color a todo el ancho entre tramos de tarjetas: corta la grilla y dice que viene (el rango del tramo que sigue).
+function bandaTramo(siguientes, n) {
+  const pcts = siguientes.map(o => Math.round(o.off * 100));
+  const mayor = Math.max(...pcts), menor = Math.min(...pcts);
+  const texto = mayor === menor ? `Ahora: ${mayor}% de descuento` : `Ahora: de ${mayor}% a ${menor}% de descuento`;
+  return `<div class="o-banda b-${n % 2}" aria-hidden="true"><b>${texto}</b><span>${siguientes.length} ${siguientes.length === 1 ? "oferta" : "ofertas"}</span></div>`;
+}
+
 function cardOferta(o, i, desde) {
   const f = o.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
   const pct = Math.round(o.off * 100);
   const anillo = Math.min(100, Math.round(o.off / DESCUENTO_MAX * 100));
   const marcada = ESTRELLAS.has(f[2]);
+  const nivel = nivelOferta(pct);
   const nivTxt = ["sin marca reconocida", "marca conocida", "primera línea"][o.niv];
   const origen = o.tipo === "propia"
     ? "El precio anterior es lo que valía en nuestro relevamiento previo: lo calculamos nosotros."
@@ -152,7 +176,7 @@ function cardOferta(o, i, desde) {
   const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
   const foto = fondo(f[7]);
   const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(nombreCompleto)}">
+  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(nombreCompleto)}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
@@ -220,6 +244,7 @@ function pintarOfertas(append) {
     return;
   }
   OF_ACTUAL = ofertasFiltradas();
+  CORTES = cortesDe(OF_ACTUAL);
   const visibles = OF_ACTUAL.slice(0, OF.pagina * POR_PAGINA);
   const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
@@ -235,7 +260,7 @@ function pintarOfertas(append) {
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
-      ? `<div class="ogrid">${visibles.map((o, i) => cardOferta(o, i, desde)).join("")}</div>`
+      ? `<div class="ogrid">${visibles.map((o, i) => (i && i % TRAMO === 0 ? bandaTramo(visibles.slice(i, i + TRAMO), i / TRAMO) : "") + cardOferta(o, i, desde)).join("")}</div>`
         + (resto > 0 ? `<div class="mas"><button class="acc" data-of="mas:1">Ver ${Math.min(POR_PAGINA, resto)} más · quedan ${resto}</button></div>` : "")
       : `<p class="sub">Ninguna oferta coincide con esos filtros. Probá sacando alguno.</p>`);
   animarCuentas();

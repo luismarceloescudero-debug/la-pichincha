@@ -112,3 +112,29 @@ test("el detalle cerrado no se lee y el foco del botón resalta la tarjeta", () 
   assert.match(css, /\.ocard:has\(\.o-abrir:focus-visible\)/);
   assert.match(leer("js/indice-ofertas.js"), /btn\.setAttribute\("aria-pressed", String\(ESTRELLAS\.has\(u\)\)\)/);
 });
+
+test("jerarquia (spec 055): lo mejor del dia es un bloque solido, lo siguiente pesa mas y el resto queda quieto, con pisos", () => {
+  const { correr } = pagina([]);
+  // Un dia flojo (todo por debajo de los pisos): nada se disfraza de estrella.
+  assert.strictEqual(correr(`cortesDe([0.05, 0.08, 0.1].map(off => ({ off }))); nivelOferta(10)`), "normal");
+  // Con descuentos grandes, las ~6 mejores son heroes y las del 20 % siguiente llevan el precio grande.
+  correr(`CORTES = cortesDe(Array.from({ length: 30 }, (_, i) => ({ off: (50 - i) / 100 })))`);
+  assert.strictEqual(correr("nivelOferta(50)"), "heroe");
+  assert.strictEqual(correr("nivelOferta(45)"), "heroe");    // la 6.a mejor es 45 %: el corte de heroe
+  assert.strictEqual(correr("nivelOferta(44)"), "fuerte");   // y siguen 4 con el precio grande
+  assert.strictEqual(correr("nivelOferta(20)"), "normal");
+  const niveles = correr("[50, 49, 48, 47, 46, 45, 44, 43, 30, 21].map(nivelOferta).join()");
+  assert.strictEqual(niveles.split("heroe").length - 1, 6);
+});
+
+test("jerarquia (spec 055): entre tramos de 8 tarjetas va una banda de color con el rango de lo que sigue, sin tocar los indices", () => {
+  const { correr, els } = pagina(Array.from({ length: 10 }, (_, i) => fila(`Memoria Kingston Fury DDR5 ${16 + i}GB 6000MHz`, 100000 - i * 3000, 150000)));
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.strictEqual((html.match(/class="o-banda/g) || []).length, 1);   // 10 tarjetas: una banda, antes de la novena
+  assert.match(html, /Ahora: (de \d+% a \d+%|\d+%) de descuento/);
+  assert.match(html, /aria-hidden="true"><b>/);                          // decorativa: el dato esta en cada tarjeta
+  assert.strictEqual((html.match(/data-comparar-oferta="\d+"/g) || []).length, 10);
+  assert.match(html, /data-comparar-oferta="9"/);
+  assert.match(html, /class="ocard[^"]* n-(heroe|fuerte|normal)/);
+});
