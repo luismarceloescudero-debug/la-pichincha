@@ -120,9 +120,10 @@ function cardOferta(o, i, desde) {
     : o.tipo === "seguimiento"
       ? "Lo seguimos hace menos de una semana: el precio anterior es el más bajo que vimos desde entonces. Todavía no alcanza para decir que bajó contra sus 30 días."
       : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
+  const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
   const foto = fondo(f[7]);
-  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(f[0])}">
+  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
+  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(nombreCompleto)}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
