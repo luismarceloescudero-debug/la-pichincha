@@ -14,7 +14,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
 | 5 | Mercado Libre: confirmar clics | Saber si el link de afiliado cuenta | 2 min |
 | 6 | Google Search Console | Que Google lea el mapa del sitio y avise de errores | 10 min |
-| 7 | OmniRoute: reconectar Claude | Un respaldo más para las revisiones | 2 min |
+| 7 | ~~OmniRoute: reconectar Claude~~ | Cerrado el 27/10: el respaldo ahora es FCC | — |
 | 8 | Amazon (más adelante) | Amazon en «Afuera» | cuando haya 10 ventas |
 | 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
 | 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
@@ -217,11 +217,10 @@ El link de afiliado ya sale en `/hoy/`, en Telegram y en el feed (spec 027). Fal
 
 ---
 
-## 7. OmniRoute: reconectar Claude
+## 7. OmniRoute (cerrado)
 
-La conexión `claude` figura vencida en el panel de OmniRoute (es tu panel local, no hay enlace público). Entrá,
-reconectá la cuenta y, si querés, verificá con una consulta de prueba. Hasta entonces el respaldo de las revisiones es
-solo Gemini.
+Ya no aplica: OmniRoute y OpenCode se desinstalaron el 27/10/2026 y el respaldo gratis de las revisiones es FCC
+(`free-claude-code`, ver `docs/proceso-de-trabajo.md`). No hace falta reconectar nada.
 
 ---
 
