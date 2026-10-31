@@ -73,8 +73,9 @@ documentación enlazada en cada paso.
    https://pichinchadeldia.com.ar/contacto/, mandá un mensaje de prueba y fijate que te llegue, y que al tocar
    «Responder» salga la dirección que escribiste en el formulario.
 
-**Para «Acerca de»:** en https://pichinchadeldia.com.ar/acerca/ quedó un `[COMPLETAR]`. Mandame dos o tres frases de quién
-hace el sitio y por qué (lo que Google llama E-E-A-T: que se vea una persona real detrás) y lo dejo publicado.
+**Para «Acerca de»:** hecho el 31/10. El texto sale de la filosofía que dijo el dueño (ofertas reales, con tecnología reciente,
+características premium y buena construcción, lo mejor al mejor costo posible), sin nombre ni datos personales. Si más
+adelante querés sumar tu nombre, está en `renderAcerca` de `generar_info.js`.
 
 **Límites del formulario** (no hace falta tocarlos): campo trampa para robots, 3 segundos mínimos desde que se abre la
 página, 5 mensajes cada 10 minutos por persona y mensajes de 10 a 4000 caracteres.
