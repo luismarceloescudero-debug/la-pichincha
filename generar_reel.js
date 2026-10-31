@@ -73,11 +73,22 @@ const fechaDe = datos => String(datos.generado || "").slice(0, 10);
 // La foto va en un src y en un url() de CSS: solo https, sin comillas, espacios ni parentesis.
 const URL_FOTO = /^https:\/\/[^\s"'()<>\\]+$/;
 
+/* El titulo del Reel es solo marca y nombre del producto, sin codigos de modelo («SAMSUNG ODYSSEY G8 G81SF» → «SAMSUNG ODYSSEY G8»):
+   un codigo es una letra o un numero seguido de una letra, de 5 o mas caracteres («G81SF», «15AKP10», «GA-A520M-H»). No cuentan los
+   nombres de linea («KC600», «M190»), los chipsets («B650», «Z890-A») ni la primera palabra. Si sacarlos deja una sola palabra, se le suma
+   el tipo («GIGABYTE MONITOR»). Las caracteristicas van aparte, en el segundo titulo. */
+const CODIGO = /^(?=.*\d)(?=.*[A-Z])[A-Z0-9][A-Z0-9-]{4,}$/;
+const CHIPSET = /^[ABHQWXZ]\d{3}[A-Z]{0,2}(?:-[A-Z0-9]+)?$/;
+function sinCodigos(titulo, tipo) {
+  const sin = String(titulo).split(/\s+/).filter((p, i) => i === 0 || !(CODIGO.test(p) && /\d[A-Z]/.test(p) && !CHIPSET.test(p)));
+  return (sin.length >= 2 ? sin.join(" ") : `${sin[0] || ""} ${T.NOMBRE_TIPO[tipo] || ""}`).trim().toUpperCase();
+}
+
 /* Lo que pinta el Reel por oferta. Con un ofertas.json de antes de la spec 044 lo calcula desde el nombre. */
 function ofertasReel(datos, max = 10) {
   return (datos.ofertas || []).slice(0, max).map(o => {
     const t = T.de(o.nombre);
-    return { titulo: o.titulo || t.titulo, chips: o.chips || t.chips, icono: o.icono || t.tipo,
+    return { titulo: sinCodigos(o.titulo || t.titulo, o.icono || t.tipo), chips: o.chips || t.chips, icono: o.icono || t.tipo,
       precio: o.precio, antes: o.antes, descuento: o.descuento, comercio: o.comercio,
       contra: o.contra || "", imagen: URL_FOTO.test(o.imagen || "") ? o.imagen : "" };
   });
@@ -140,9 +151,9 @@ section{position:absolute;inset:0;display:none}
 .ico *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .nom{flex:none;font:var(--p-tit) calc(106px * var(--esc))/1 var(--f-tit);letter-spacing:-.005em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .cursor{display:inline-block;width:.08em;height:.9em;margin-left:.06em;background:var(--acento);vertical-align:-.08em}
-.chips{flex:none;display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
-.chip{font:700 38px/1 var(--f-mono);background:var(--chip);color:var(--tinta);padding:16px 22px;border-radius:18px;
-  border:2px solid color-mix(in srgb,var(--acento) 45%,transparent)}
+/* El segundo titulo: las caracteristicas en una linea, mas chica que el nombre y del color del dia */
+.sub2{flex:none;margin-top:22px;font:600 46px/1.22 var(--f-txt);letter-spacing:.005em;color:var(--acento);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .precios{margin-top:auto;display:flex;align-items:baseline;gap:8px 28px;flex-wrap:wrap}
 .ahora{font:700 120px/1 var(--f-mono);letter-spacing:-.02em}
 .antes{position:relative;font:600 46px var(--f-mono);color:var(--suave)}
@@ -188,7 +199,7 @@ section{position:absolute;inset:0;display:none}
   <img class="foto" alt="">
   <svg class="ico" viewBox="0 0 24 24"></svg>
   <h2 class="nom"></h2>
-  <div class="chips"></div>
+  <p class="sub2"></p>
   <div class="precios"><span class="ahora"></span><span class="antes"><span class="a"></span><i></i></span></div>
   <p class="tienda"></p>
 </div></section>
@@ -228,8 +239,7 @@ function cargar(i) {
   $(".pct", c).textContent = "−" + o.descuento + "%";
   $(".ico", c).innerHTML = D.iconos[o.icono] || "";
   $(".ico", c).querySelectorAll("*").forEach(e => e.setAttribute("pathLength", "1"));
-  $(".chips", c).innerHTML = o.chips.map(t => '<span class="chip"></span>').join("");
-  $(".chips", c).querySelectorAll(".chip").forEach((e, j) => e.textContent = o.chips[j]);
+  $(".sub2", c).textContent = o.chips.join("  ·  ");
   $(".antes .a", c).textContent = o.antes ? pesos(o.antes) : "";
   $(".tienda", c).innerHTML = "en <b></b>" + (o.contra ? " · " : "");
   $(".tienda b", c).textContent = o.comercio;
@@ -279,8 +289,8 @@ function pintar(t) {
     const k = Math.round(o.titulo.length * tramo(uu, 260, 760)), escribiendo = k < o.titulo.length && uu >= 260;
     $(".nom", c).textContent = o.titulo.slice(0, k);
     if (escribiendo || (uu > 760 && uu < 1000 && Math.floor(uu / 120) % 2 === 0)) { const cur = document.createElement("span"); cur.className = "cursor"; $(".nom", c).append(cur); }
-    // Las chips aparecen de a una
-    c.querySelectorAll(".chip").forEach((e, j) => { const p = rebote(tramo(uu, 700 + j * 90, 960 + j * 90)); e.style.opacity = clamp(p); e.style.transform = "scale(" + (0.6 + 0.4 * p) + ")"; });
+    // El segundo titulo (las caracteristicas) entra deslizandose despues del nombre
+    const s2 = salir(tramo(uu, 720, 1000)); $(".sub2", c).style.opacity = s2; $(".sub2", c).style.transform = "translateY(" + (22 * (1 - s2)) + "px)";
     // El precio cuenta del de antes al de hoy, y el de antes se tacha
     const pr = salir(tramo(uu, 760, 1180)), desde = o.antes || o.precio;
     $(".ahora", c).textContent = pesos(desde + (o.precio - desde) * pr);
@@ -440,5 +450,5 @@ async function main(argv) {
   return 0;
 }
 
-module.exports = { estilo, ofertasReel, paginaReel, duracion, PALETAS, MS, main };
+module.exports = { estilo, ofertasReel, paginaReel, duracion, sinCodigos, PALETAS, MS, main };
 if (require.main === module) main(process.argv.slice(2)).then(c => process.exit(c), e => { console.log(`::warning::No se pudo armar el Reel: ${e.message}`); process.exit(0); });

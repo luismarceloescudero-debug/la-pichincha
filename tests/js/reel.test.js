@@ -61,3 +61,22 @@ test("la foto de la tienda entra solo si es https limpia", () => {
   assert.equal(o('https://img.test/a".jpg'), "");
   assert.equal(o("https://img.test/a).jpg"), "");
 });
+
+test("el titulo del Reel es marca y nombre, sin codigos de modelo; las caracteristicas van al segundo titulo", () => {
+  const R2 = require("../../generar_reel.js");
+  assert.equal(R2.sinCodigos("SAMSUNG ODYSSEY G8 G81SF", "monitor"), "SAMSUNG ODYSSEY G8");
+  assert.equal(R2.sinCodigos("LENOVO LEGION 5 15AKP10", "notebook"), "LENOVO LEGION 5");
+  assert.equal(R2.sinCodigos("LENOVO LOQ ESSENTIAL 15ARP11", "notebook"), "LENOVO LOQ ESSENTIAL");
+  // nombres de linea, chipsets y la primera palabra no son codigos
+  assert.equal(R2.sinCodigos("KINGSTON KC600", "disco"), "KINGSTON KC600");
+  assert.equal(R2.sinCodigos("LOGITECH M190", "mouse"), "LOGITECH M190");
+  assert.equal(R2.sinCodigos("GIGABYTE B860M E", "mother"), "GIGABYTE B860M E");
+  // si sacar el codigo deja una sola palabra, se le suma el tipo
+  assert.equal(R2.sinCodigos("GIGABYTE GO27Q24A", "monitor"), "GIGABYTE MONITOR");
+  const [a] = R2.ofertasReel({ ofertas: [{ nombre: "Monitor Gamer Samsung Odyssey G8 G81SF 27\" UHD 4K QD-OLED 240Hz", precio: 1, antes: 2, descuento: 50, comercio: "X" }] });
+  assert.equal(a.titulo, "SAMSUNG ODYSSEY G8");
+  assert.deepEqual(a.chips, ["27″", "4K", "QD-OLED", "240 Hz"]);
+  const html = R2.paginaReel({ generado: "2026-10-30T09:00-03:00", ofertas: [{ nombre: "SSD Kingston 1TB", precio: 1, antes: 2, descuento: 50, comercio: "X" }] });
+  assert.match(html, /<p class="sub2"><\/p>/);
+  assert.doesNotMatch(html, /class="chip"/);
+});
