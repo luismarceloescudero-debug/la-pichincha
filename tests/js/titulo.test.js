@@ -62,3 +62,9 @@ test("una placa sin «placa de video» al principio es placa de video, y el punt
   assert.equal(T.de("Notebook Lenovo RTX 4050 16GB").tipo, "notebook");
   assert.equal(T.de("Tarjeta De Video Gigabyte Rtx 5080 16gb Gddr7 .").completo, "Tarjeta De Video Gigabyte Rtx 5080 16gb Gddr7");
 });
+
+test("«SSD512GB» pegado es un dato y no parte del titulo (31/10: «HP SSD512GB 250»)", () => {
+  const t = T.de("Notebook HP 15.6 C5-120U 16GB SSD512GB 250 Sin Sistema Operativo");
+  assert.equal(t.titulo, "HP 250");
+  assert.ok(t.chips.includes("512 GB SSD"));
+});
