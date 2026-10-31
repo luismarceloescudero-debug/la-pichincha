@@ -584,3 +584,20 @@ test("unico: el mismo equipo repetido en la lista de la pestaña queda una vez, 
   const c = ["Teclado Logitech G515 TKL", 159483, "https://t/c", "scp", "", 0, 181704, "", "", "G515"];
   assert.deepEqual(O.unico([item(b), item(a), item(c)]).map(o => o.f[2]), ["https://t/a", "https://t/c"]);
 });
+
+test("codificar y decodificar: el resultado del Worker vuelve con las filas del indice de la pagina (spec 054)", () => {
+  const productos = [...TRES([["cg", 80000], ["mx", 100000], ["vx", 104000]]), fila("Algo", 6000, { antes: 10000 }),
+                     conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 130000, "zz", "KF560C36-32")];
+  const idx = { productos };
+  const r = O.calcularOfertas(idx);
+  const en_la_pagina = productos.map(f => [...f]);           // el indice que la pagina bajo por su cuenta: copias de las mismas filas
+  const d = O.decodificar(structuredClone(O.codificar(r, productos)), en_la_pagina);
+  assert.deepEqual(d.propias.map(f => f[0]), r.propias.map(f => f[0]));
+  assert.ok(d.propias.every(f => en_la_pagina.includes(f)), "las filas son las de la pagina, no copias del Worker");
+  assert.deepEqual([...d.contraModelo.keys()].map(f => f[2]), [...r.contraModelo.keys()].map(f => f[2]));
+  assert.ok([...d.contraModelo.keys()].every(f => en_la_pagina.includes(f)));
+  assert.deepEqual([...d.masBarato].map(([f, o]) => [f[2], o[2]]), [...r.masBarato].map(([f, o]) => [f[2], o[2]]));
+  assert.deepEqual([...d.categorias.values()], [...r.categorias.values()]);
+  for (const f of d.contraModelo.keys()) assert.ok(d.gama.get(f), "las filas con oferta traen su gama");
+  assert.deepEqual([d.descartadas, d.sospechosas, d.tachadoFijo], [r.descartadas, r.sospechosas, r.tachadoFijo]);
+});

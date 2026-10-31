@@ -33,15 +33,44 @@ function ofertasListas() {
   }
   return OFERTAS;
 }
+/* Con Web Worker el calculo no frena la pantalla (spec 054: en un celular eran varios segundos de corrido). Si el navegador no
+   tiene Worker, el worker falla o su indice no es el de la pagina, se calcula aca, cuando el navegador queda libre, como antes. */
 function programarOfertas(j) {
-  const correr = () => {
-    if (IDX !== j || OFERTAS) return;
-    ofertasListas();
+  const terminar = () => {
+    if (IDX !== j || !OFERTAS) return;
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = listaOfertas().length; });
     if (typeof CONSULTA === "string" && CONSULTA.trim() && location.hash.slice(1) === "buscar" && typeof pintarResultados === "function")
       pintarResultados(CONSULTA);
   };
-  if (typeof requestIdleCallback === "function") requestIdleCallback(correr, { timeout: 4000 });
-  else setTimeout(correr, 300);
+  const enHilo = () => {
+    const correr = () => {
+      if (IDX !== j || OFERTAS) return;
+      ofertasListas();
+      terminar();
+    };
+    if (typeof requestIdleCallback === "function") requestIdleCallback(correr, { timeout: 4000 });
+    else setTimeout(correr, 300);
+  };
+  if (typeof Worker !== "function") return enHilo();
+  // Recien con la pagina cargada: un Worker creado en plena carga puede fallar al bajar su script (probado el 31/10).
+  const arrancar = () => {
+    let w;
+    try { w = new Worker("js/ofertas-worker.js"); } catch (e) { return enHilo(); }
+    const cerrar = () => { try { w.terminate(); } catch (e) { /* ya cerrado */ } };
+    w.onmessage = e => {
+      cerrar();
+      if (IDX !== j) return;
+      if (!e.data || !e.data.ok) return enHilo();
+      if (!OFERTAS) {                     // si la pestaña Ofertas lo pidio antes, ya se calculo aca
+        OFERTAS = Ofertas.decodificar(e.data.ofertas, j.productos);
+        terminar();
+      }
+    };
+    w.onerror = () => { cerrar(); enHilo(); };
+    w.postMessage({ url: new URL("indice.json", location.href).href, generado: j.generado, filas: j.productos.length });
+  };
+  if (document.readyState === "complete") arrancar();
+  else addEventListener("load", () => setTimeout(arrancar, 0), { once: true });
 }
 
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
