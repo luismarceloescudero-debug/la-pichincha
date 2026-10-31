@@ -36,8 +36,9 @@ la guia para configurar el correo en Cloudflare.
   JS nunca pone el correo y el mensaje en la URL. Sin direccion del Worker, dice que no esta disponible.
 - El endpoint es `afuera_url` de `sitio.json` + `/contacto`; ese host ya estaba en `connect-src` de la CSP.
 - Los limites y motivos de la pagina (`CONTACTO`, `MOTIVOS`) son los del Worker (`LARGOS`, `MOTIVOS`): un test lo exige.
-- **`/acerca/`**: texto neutro (proyecto independiente, como funciona, como escribir). Lo personal lo escribe el dueño:
-  queda marcado `[COMPLETAR]` y no se inventa ningun dato.
+- **`/acerca/`**: proyecto independiente, como funciona, como escribir y, desde el 31/10, la filosofia del dueño (ofertas reales
+  con tecnologia reciente, caracteristicas premium y buena construccion, lo mejor al mejor costo posible). Sin nombre ni
+  datos personales: no se inventa ningun dato.
 - **`/.well-known/security.txt`** (RFC 9116): `Contact: https://pichinchadeldia.com.ar/contacto/`, `Expires` a un año de
   cada corrida (se renueva solo al publicar), `Preferred-Languages` y `Canonical`. `actualizar.yml` sube el sitio con
   `include-hidden-files: true` (si no, `upload-pages-artifact` deja afuera las carpetas que empiezan con punto).

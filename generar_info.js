@@ -322,7 +322,7 @@ ${opciones}
 `;
 }
 
-/* «Acerca de»: quien hace el sitio y como. Lo personal lo escribe el dueño: va marcado [COMPLETAR] y no se inventa. */
+/* «Acerca de»: quien hace el sitio y como. El texto del dueño (31/10): su filosofia de oferta; sin nombre ni datos personales. */
 function renderAcerca({ baseUrl = BASE_URL } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   return cabeza({ titulo: "Acerca de | La Pichincha",
@@ -335,7 +335,8 @@ function renderAcerca({ baseUrl = BASE_URL } = {}) {
   <section>
     <h2 id="quien">Quién lo hace</h2>
     <p>La Pichincha es un proyecto independiente hecho en Argentina. No es una tienda ni pertenece a ninguna: no vende nada y no cobra por aparecer.</p>
-    <p>[COMPLETAR: en dos o tres frases, quién hace el sitio y por qué lo armó.]</p>
+    <p>Lo arma una sola persona, con una idea simple: encontrar ofertas reales de hardware y tenerlas todas en un mismo lugar.</p>
+    <p>Para La Pichincha una oferta no es solo un precio más bajo. Tiene que ser un buen producto: con tecnología reciente, características premium y buena calidad de construcción. Lo que no reúne esos requisitos mínimos no se destaca como oferta. La filosofía es dar lo mejor, al mejor costo posible.</p>
   </section>
   <section>
     <h2 id="como">Cómo funciona</h2>

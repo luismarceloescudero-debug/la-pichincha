@@ -157,10 +157,12 @@ test("contacto: por defecto usa la direccion del Worker de sitio.json, que ya es
   assert.ok(sitio.csp.includes(`connect-src 'self' ${sitio.afuera_url}`));
 });
 
-test("acerca: texto neutro, sin datos inventados: lo personal queda marcado [COMPLETAR] y el contacto es el formulario", () => {
+test("acerca: dice la filosofia del sitio, sin datos personales ni marcas pendientes, y el contacto es el formulario", () => {
   const html = I.renderAcerca({ baseUrl: BASE });
   assert.match(html, /<link rel="canonical" href="https:\/\/ejemplo\.test\/la-pichincha\/acerca\/">/);
-  assert.match(html, /\[COMPLETAR:/);
+  assert.doesNotMatch(html, /\[COMPLETAR/);
+  assert.match(html, /ofertas reales de hardware/);
+  assert.match(html, /lo mejor, al mejor costo posible/);
   assert.match(html, /href="\.\.\/contacto\/"/);
   assert.doesNotMatch(html, /@[a-z0-9-]+\.[a-z]/i, "ningun correo publicado");
 });
