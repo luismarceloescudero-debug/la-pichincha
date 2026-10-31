@@ -46,33 +46,69 @@ def pesos(n):
     return "$" + f"{round(n):,}".replace(",", ".")
 
 
+BARRA = "🟩" * 8   # bloque de color solido: abre y cierra la oferta destacada, el resto va en citas (jerarquia, spec 055)
+
+
+def _marca(o):
+    """El emoji del tipo y el nombre (ya sin chips): MARCA Y MODELO (spec 044) o, de un ofertas.json viejo, categoria y titulo."""
+    if o.get("titulo"):
+        return (f"{o['emoji']} " if o.get("emoji") else ""), o["titulo"]
+    return (f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""), o["nombre"]
+
+
+def _enlace(o, texto):
+    # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
+    return f"<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(texto))}</a>"
+
+
+def _pie_oferta(o):
+    # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
+    contra = f" {html.escape(o['contra'])}" if o.get("contra") else ""
+    return (f"en {html.escape(o['comercio'])}" + (" (enlace de afiliado)" if o.get("afiliado") else ""), contra)
+
+
+def _heroe(o):
+    """La mejor del dia: titulo en mayusculas ya viene de titulo.js; precio y porcentaje en su propia linea, entre dos barras."""
+    emoji, nombre = _marca(o)
+    donde, contra = _pie_oferta(o)
+    lineas = [BARRA, "<b>🔥 LA MEJOR DEL DÍA</b>",
+              f"{html.escape(emoji) if o.get('titulo') else emoji}<b>{_enlace(o, nombre)}</b>"]
+    if o.get("chips"):
+        lineas.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
+    lineas.append(f"<b>{pesos(o['precio'])}</b>  ·  <b>−{o['descuento']}%</b>{contra}")
+    lineas.append(donde)
+    lineas.append(BARRA)
+    return "\n".join(lineas)
+
+
+def _compacta(o):
+    """El resto: una cita con el nombre, las caracteristicas en cursiva (mas apagadas) y el precio con el porcentaje en negrita."""
+    emoji, nombre = _marca(o)
+    donde, contra = _pie_oferta(o)
+    punta = "🔥 " if o["descuento"] >= 30 else "⚡ " if o["descuento"] >= 20 else ""
+    cuerpo = [f"{html.escape(emoji) if o.get('titulo') else emoji}{_enlace(o, nombre)}"]
+    if o.get("chips"):
+        cuerpo.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
+    cuerpo.append(f"<b>{pesos(o['precio'])}</b> · {punta}<b>−{o['descuento']}%</b>{contra} {donde}")
+    return "<blockquote>" + "\n".join(cuerpo) + "</blockquote>"
+
+
 def mensaje(datos):
-    """El texto (HTML de Telegram) con las ofertas, o None si no hay. Se achica hasta entrar en el limite."""
+    """El texto (HTML de Telegram) con las ofertas, o None si no hay. Jerarquia (spec 055): la de mayor descuento va grande
+    entre dos barras de color y el resto en citas compactas; no todo pesa igual. Se achica hasta entrar en el limite."""
     ofertas = datos.get("ofertas") or []
     if not ofertas:
         return None
     cabeza = f"<b>Pichinchas del día</b> · precios del {cuando(datos.get('generado', ''))}\n"
     pie = (f"\nMás en <a href=\"{html.escape(datos.get('sitio', ''), quote=True)}\">La Pichincha</a>. "
            "Verificá en la tienda antes de comprar.")
-    lineas = []
-    for i, o in enumerate(ofertas, 1):
-        # El nombre legible (spec 044): emoji del tipo, MARCA Y MODELO y las chips. Un ofertas.json de antes no los trae:
-        # entonces la categoria en cursiva y el titulo de la tienda, como siempre.
-        if o.get("titulo"):
-            cabeza_oferta = f"{o['emoji']} " if o.get("emoji") else ""
-            nombre = o["titulo"] + "".join(f" · {c}" for c in o.get("chips") or [])
-        else:
-            cabeza_oferta = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
-            nombre = o["nombre"]
-        # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
-        lineas.append(f"{i}. {html.escape(cabeza_oferta) if o.get('titulo') else cabeza_oferta}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(nombre))}</a>: "
-                      f"{pesos(o['precio'])} (−{o['descuento']}%"
-                      # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
-                      + (f" {html.escape(o['contra'])}" if o.get("contra") else "") + f") en {html.escape(o['comercio'])}"
-                      + (" (enlace de afiliado)" if o.get("afiliado") else ""))
-    while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
-        lineas.pop()
-    return cabeza + "\n".join(lineas) + "\n" + pie if lineas else None
+    mejor = max(range(len(ofertas)), key=lambda i: (ofertas[i]["descuento"], -i))
+    bloques = [_heroe(ofertas[mejor])] + [_compacta(o) for i, o in enumerate(ofertas) if i != mejor]
+    while bloques and len(cabeza + "\n".join(bloques) + "\n" + pie) > LIMITE:
+        if len(bloques) == 1:
+            return None
+        bloques.pop()
+    return cabeza + "\n".join(bloques) + "\n" + pie if bloques else None
 
 
 def leer_json(ruta):
