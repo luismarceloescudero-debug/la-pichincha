@@ -90,7 +90,8 @@ Puntos que no se ven en el codigo Python ni JS:
   `generar_portada.js` corre los scripts de la pagina en `vm`. Cambiar uno de esos modulos cambia el sitio
   **y** las paginas generadas.
 - **`tests.yml` corre dos veces**: en cada PR y como primer job de cada publicacion (L37). Su job
-  `lighthouse` arma un `_sitio` propio con el indice publicado y los mismos generadores.
+  `lighthouse` arma un `_sitio` propio con el indice publicado y los mismos generadores; su job `e2e` (spec 051)
+  arma otro con el indice de prueba de `tests/fixtures/e2e/` (`tests/e2e/armar-sitio.sh`) y corre Playwright.
 
 ## 2. Que archivo es dueño de que
 
@@ -123,6 +124,7 @@ Puntos que no se ven en el codigo Python ni JS:
 | **Direccion publica y CSP** | `sitio.json` | todos los generadores y `index.html` | `tests/test_sitio.py` |
 | **Umbrales de calidad** | `CONSTRAINTS.md` | `tests.yml` (cobertura 85% Python; 90/85/85 JS; Lighthouse 90) | `.github/lighthouse.js`, `tests/js/lighthouse.test.js`, `tests/test_rendimiento.py` |
 | **Tests** | `tests/` (Python, `unittest`) y `tests/js/` (`node --test`) | `tests.yml` | `tests/test_integracion.py` arma el sitio entero y revisa los enlaces |
+| **Pruebas e2e** (Playwright, solo CI, spec 051) | `tests/e2e/*.spec.js`, `tests/e2e/base.js` (terceros simulados), `playwright.config.js`, `package.json` (solo `devDependencies`) | job `e2e` de `tests.yml`; `tests/e2e/armar-sitio.sh` arma `_sitio` con `tests/fixtures/e2e/indice.json` | las propias pruebas; no tocan `tests/js` |
 | **Specs** | `specs/NNN-nombre/` (spec-kit: `spec.md`, `plan.md`, `tasks.md`) y la constitucion en `.specify/memory/constitution.md` | cada fase nueva arranca ahi | se cuentan las `- [ ]` de cada `tasks.md` |
 
 ## 3. Recetas

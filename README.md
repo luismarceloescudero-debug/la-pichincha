@@ -49,7 +49,8 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `sitio.json` | La direccion publica y la politica de contenido (CSP) de todas las paginas; tambien `afuera_url`, la direccion del Worker de la spec 022 (vacia hasta el primer despliegue) |
 | `worker/` | Worker de Cloudflare «Afuera» (spec 022): `GET /buscar?q=` consulta eBay, AliExpress y Amazon por sus APIs oficiales (cada una apagada hasta que el dueño cargue sus secretos) y Tiendamia sin credenciales (spec 023); `GET /enlace?url=` lee el precio del link pegado en «Buscalo afuera» (Tiendamia y Loquieroaca por su pagina, Amazon y eBay solo por API), con cache de 8 h, CORS solo para el sitio y tope por IP; `POST /contacto` manda el formulario de `/contacto/` por correo (spec 046, binding `send_email` de Email Routing; responde 503 hasta que el dueño lo configure). Lo despliega `.github/workflows/worker.yml` si existen `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`; la pagina lo muestra en la seccion «Afuera, en vivo» (`js/afuera.js`) |
 | `CONSTRAINTS.md` | Los umbrales de calidad que hace cumplir la CI: cobertura, contraste, enlaces, CSP y Lighthouse |
-| `tests/` | Tests de Python (`unittest`) y de JS (`node --test`) |
+| `tests/` | Tests de Python (`unittest`) y de JS (`node --test`); `tests/e2e/` son las pruebas de punta a punta con Playwright (spec 051), solo de la CI y de quien desarrolla |
+| `package.json` | Solo `devDependencies` (`@playwright/test` fijado a una version exacta) para `tests/e2e/`; nada de esto se publica (constitucion I, excepcion de la v1.2.0) |
 | `img/` | Fotos oficiales de producto, optimizadas, y `og.png` para compartir |
 | `docs/mapa.md` | El mapa del repo para arrancar una sesion: el flujo de cada publicacion (pasos del workflow, scripts, `subprocess` y JSON) como diagrama, que archivo es dueño de que, y que tocar para sumar una fuente, una regla de importacion, un rubro o una moneda |
 | `docs/proceso-de-trabajo.md` | Como se trabaja con Claude Code en este repo: arranque, delegacion con modelos gratis (FCC, sin modelos pagos), que skill usar en cada escenario, auditoria de skills y plugins contra GitHub, ciclo de cada pedido, merge y limpieza, y la cola de pendientes |
@@ -183,6 +184,17 @@ Quedaron afuera: **Cetrogar** (su `robots.txt` prohibe `/api/`), **Samsung**
 audio), **Easy** (sin categorias de tecnologia: su "almacenamiento" son frascos)
 y las farmacias y perfumerias que llegan por ComparaYa (Farmacity, FarmaOnline,
 FarmaPlus, Pigmento, Get The Look, Simplicity).
+
+## Pruebas de punta a punta (Playwright)
+
+Corren en el job `e2e` de la CI en cada PR. Para correrlas en local (Python 3 y Node 22):
+
+```bash
+npm ci && npx playwright install chromium && bash tests/e2e/armar-sitio.sh && npx playwright test
+```
+
+`armar-sitio.sh` arma `_sitio` con el indice de prueba de `tests/fixtures/e2e/`; las pruebas simulan DolarApi, GoatCounter,
+las fuentes de Google y el Worker, asi que no salen a la red. Detalle en `specs/051-e2e/spec.md`.
 
 ## Como se publica
 
