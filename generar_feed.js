@@ -92,7 +92,10 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const dia = fecha.split(" ")[0];
   const ofertas = O.destacadas(idx, max);
   const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
-  const tarjeta = ofertas.slice(0, EN_TARJETA).map(o => `      <li><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
+  const enTarjeta = ofertas.slice(0, EN_TARJETA);
+  const mejorOff = Math.max(...enTarjeta.map(o => o.off));
+  let marcada = false;   // solo una: la primera con el mayor descuento
+  const tarjeta = enTarjeta.map(o => `      <li${!marcada && o.off === mejorOff && (marcada = true) ? ' class="h-top"' : ""}><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
     `<span class="h-nom">${T.html(o.f[0], esc)}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
   // Los enlaces de afiliado (P.enlaceTienda) llevan su rotulo y rel="sponsored"; el orden no cambia (principio II).
   const enlace = o => { const e = P.enlaceTienda(o.f[2]);
@@ -112,11 +115,19 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;overflow:hidden}
 .hoy .h-cab{display:flex;justify-content:space-between;font:600 .8rem var(--font-mono);color:var(--accent)}
 .hoy .historia h1{font-size:2.3rem;line-height:1.02;margin:4px 0 2px;letter-spacing:-.02em}
-.hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;flex:1}
+.hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;flex:1}
 .hoy .h-lista li{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:start}
 .hoy .h-pct{grid-row:span 2;font:700 1.05rem var(--font-mono);color:var(--good);background:var(--good-soft);border-radius:10px;padding:6px 8px}
 .hoy .h-nom{font-size:.9rem;line-height:1.25;min-width:0}
 .hoy .h-pre{font:500 .8rem var(--font-mono);color:var(--ink-2)}
+/* Jerarquia (spec 055): la de mayor descuento es un bloque de color solido con el porcentaje grande; el resto queda chico. */
+.hoy .h-lista li.h-top{background:#0f5132;color:#fff;border-radius:14px;padding:8px 12px;margin:0 -4px}
+.hoy .h-top .h-pct{font-size:1.5rem;letter-spacing:-.05em;color:#0f5132;background:#fff;padding:6px 10px}
+.hoy .h-top .h-nom,.hoy .h-top .tit-nom{color:#fff}
+.hoy .h-top .tit-ico{color:#fff}
+.hoy .h-top .tit-chip{background:rgba(255,255,255,.16);color:#fff}
+.hoy .h-top .h-pre{font-size:.8rem;font-weight:700;color:#fff}
+.hoy .h-top .h-pre s,.hoy .h-top .h-pre *{color:rgba(255,255,255,.82)}
 .hoy .h-pie{margin:0;font-size:.78rem;color:var(--ink-3);overflow-wrap:anywhere}
 .hoy .h-pie b{color:var(--ink)}
 .hoy ol.todas{padding-left:1.2em}
