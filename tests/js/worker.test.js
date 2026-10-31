@@ -311,6 +311,7 @@ test("una busqueda con una fuente caida se guarda 15 minutos, no 8 horas; un err
   const malo = await atender(pedido(""), env);
   assert.equal(malo.status, 400);
   assert.equal(malo.headers.get("Cache-Control"), "no-store");
+  assert.equal(malo.headers.get("X-Content-Type-Options"), "nosniff");
 });
 
 test("AliExpress y eBay juntos: se mezclan por precio", async () => {
