@@ -1,0 +1,11 @@
+{
+  "name": "la-pichincha-e2e",
+  "private": true,
+  "description": "Solo herramientas de desarrollo y de CI (spec 051). Nada de esto se publica: el sitio usa solo la biblioteca estandar.",
+  "scripts": {
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

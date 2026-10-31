@@ -21,3 +21,7 @@ descartadas.json
 candidatas.json
 privado/
 .playwright-mcp/
+node_modules/
+test-results/
+playwright-report/
+!tests/fixtures/e2e/indice.json
