@@ -17,6 +17,12 @@
 - Python usa solo la biblioteca estandar. El sitio no suma dependencias JS: los modulos de
   `js/` son scripts comunes, sin build. La unica libreria externa permitida es la que ya se
   carga bajo demanda (ExcelJS) y solo cuando la persona la pide.
+- **Excepcion acotada (31/10/2026, spec 051): herramientas de desarrollo y de CI que no se publican.** Se permiten
+  como `devDependencies` de `package.json` (hoy solo `@playwright/test`, para las pruebas de punta a punta en la CI),
+  con version exacta, `package-lock.json` y `npm ci`. Nunca entran al sitio publicado (`_sitio`), a sus generadores ni al
+  Worker, que siguen usando solo la biblioteca estandar; la prueba es que ningun archivo publicado las carga. Motivo: las
+  pruebas a mano de la auditoria del 30/10 (teclado, tarjetas, sin conexion) pasan a correr en cada PR, y el costo de
+  mantenimiento queda en la CI y no en lo que se sirve. Decision del dueño, 31/10/2026.
 - Razon: el cuello de botella son los usuarios, no la tecnologia; cada dependencia es costo
   de mantenimiento para un solo desarrollador.
 
@@ -45,6 +51,8 @@
 - Los tests de Python (`python -m unittest discover -s tests -t .`) y de JS
   (`node --test "tests/js/*.test.js"`) corren en cada PR y antes de cada despliegue.
   Si uno falla, no se commitea ni se publica nada.
+- Las pruebas de punta a punta (`tests/e2e/`, Playwright, spec 051) corren en el job `e2e` de la CI, contra el sitio
+  armado con un indice de prueba y con los terceros simulados; nunca contra la red ni contra produccion.
 - Los extractores se prueban contra HTML guardado de cada tienda (`tests/fixtures/`), nunca
   contra la red.
 - Todo bug arreglado deja un test que lo reproducia.
@@ -94,4 +102,4 @@
   se amplia materialmente, PATCH si se aclara la redaccion.
 - La guia operativa del dia a dia esta en `README.md` y `docs/plan-de-escalado.md`.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-24
+**Version**: 1.2.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-31
