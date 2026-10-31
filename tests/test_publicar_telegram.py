@@ -23,7 +23,8 @@ class Mensaje(unittest.TestCase):
         texto = telegram.mensaje(OFERTAS)
         self.assertIn("<b>Pichinchas del día</b>", texto)
         self.assertIn("precios del 09/10 08:12", texto)
-        self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>: $90.000 (−25%) en CompraGamer', texto)
+        self.assertIn('<b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', texto)
+        self.assertIn("<b>$90.000</b>  ·  <b>−25%</b>\nen CompraGamer", texto)
         self.assertIn('<a href="https://ejemplo.test/la-pichincha/">La Pichincha</a>', texto)
         self.assertIn("Verificá en la tienda antes de comprar", texto)
 
@@ -38,8 +39,8 @@ class Mensaje(unittest.TestCase):
         legible = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "titulo": "KINGSTON NV2", "chips": ["1 TB", "NVMe"], "emoji": "💽"},
                                           {**OFERTAS["ofertas"][1], "titulo": "<B>FURY</B>", "chips": ["16 GB"], "emoji": "💾"}]}
         texto = telegram.mensaje(legible)
-        self.assertIn('1. 💽 <a href="https://t.test/ssd">KINGSTON NV2 · 1 TB · NVMe</a>: $90.000 (−25%) en CompraGamer', texto)
-        self.assertIn("&lt;B&gt;FURY&lt;/B&gt; · 16 GB", texto)
+        self.assertIn('💽 <b><a href="https://t.test/ssd">KINGSTON NV2</a></b>\n<i>1 TB · NVMe</i>', texto)
+        self.assertIn("&lt;B&gt;FURY&lt;/B&gt;</a>\n<i>16 GB</i>", texto)
         self.assertNotIn("SSD Kingston 1TB", texto)
 
     def test_si_solo_hay_fecha_sin_hora_dice_la_fecha(self):
@@ -66,7 +67,18 @@ class Mensaje(unittest.TestCase):
         datos = {**OFERTAS, "ofertas": [{"nombre": "Router ASUS RT-AX52", "precio": 66700, "antes": 88000, "descuento": 24,
                                          "comercio": "The Gamer Shop", "url": "https://t.test/r", "tipo": "modelo",
                                          "contra": "bajo la mediana de otras 3 tiendas"}]}
-        self.assertIn("$66.700 (−24% bajo la mediana de otras 3 tiendas) en The Gamer Shop", telegram.mensaje(datos))
+        self.assertIn("<b>$66.700</b>  ·  <b>−24%</b> bajo la mediana de otras 3 tiendas\nen The Gamer Shop", telegram.mensaje(datos))
+
+    def test_la_de_mayor_descuento_va_destacada_y_el_resto_en_citas(self):
+        # spec 055: no todo pesa igual. La mejor del dia entre dos barras de color y el resto compacto, en <blockquote>.
+        texto = telegram.mensaje(OFERTAS)
+        self.assertIn("LA MEJOR DEL DÍA", texto)
+        self.assertEqual(texto.count(telegram.BARRA), 2)
+        heroe, resto = texto.split(telegram.BARRA)[1], texto.split(telegram.BARRA)[2]
+        self.assertIn("SSD Kingston 1TB", heroe)
+        self.assertNotIn("Fury", heroe)
+        self.assertIn("<blockquote>", resto)
+        self.assertIn("⚡ <b>−20%</b>", resto)
 
     def test_sin_ofertas_no_hay_mensaje(self):
         self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
@@ -257,10 +269,10 @@ if __name__ == "__main__":
 class Categoria(unittest.TestCase):
     def test_la_linea_dice_la_categoria_cuando_el_dato_la_trae(self):
         datos = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "categoria": "Notebook"}]}
-        self.assertIn('1. <i>Notebook</i> · <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(datos))
+        self.assertIn('<i>Notebook</i> · <b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', telegram.mensaje(datos))
 
     def test_sin_categoria_la_linea_queda_como_antes(self):
-        self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(OFERTAS))
+        self.assertIn('<b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', telegram.mensaje(OFERTAS))
 
 
 class TitulosLargos(unittest.TestCase):
