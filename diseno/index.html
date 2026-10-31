@@ -1,85 +1,54 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>La Pichincha — dos opciones finales de diseño</title>
-<style>:root{--bg:#f4f6f9;--sur:#fff;--ink:#14181f;--ink2:#4e5767;--line:#d9dfe8;--chip:#eceff4}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif}
-body.dark{--bg:#0e1117;--sur:#161b23;--ink:#e9edf4;--ink2:#aab3c2;--line:#2b323d;--chip:#232a35}
-.top{max-width:1180px;margin:0 auto;padding:28px 20px 8px}.top h1{margin:0 0 4px;font-size:1.8rem}.top p{margin:0 0 12px;color:var(--ink2)}
-#tema{font:600 .9rem inherit;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--sur);color:var(--ink);cursor:pointer}
-.op{max-width:1180px;margin:0 auto;padding:26px 20px 40px}.rot{max-width:760px;margin-bottom:18px}.rot h2{margin:0 0 6px;font-size:1.5rem}.rot p{margin:0;color:var(--ink2)}
+<title>La Pichincha — opción B ajustada</title>
+<style>:root{--pagina:#f4f6f9;--sur:#fff;--ink:#14181f;--ink2:#3d4552;--line:#d9dfe8}
+body{margin:0;background:var(--pagina);color:var(--ink);font:16px/1.4 "IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif}
+body.dark{--pagina:#0e1117;--sur:#161b23;--ink:#e9edf4;--ink2:#aab3c2;--line:#2b323d}
+.top,.op{max-width:1180px;margin:0 auto;padding:24px 20px}.top{padding-bottom:6px}.top h1{margin:0 0 6px;font-size:1.7rem}.top p{margin:0 0 12px;color:var(--ink2);max-width:780px}
+#tema{font:600 .9rem system-ui;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--sur);color:var(--ink);cursor:pointer}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.ley{font:600 .74rem system-ui;background:var(--bg);color:var(--ac);border-radius:999px;padding:3px 10px}
 .sub{margin:26px 0 10px;font-size:1rem;color:var(--ink2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:stretch}
-.ba,.bb{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 20px;border-radius:14px}
-.ba b,.bb b{font-size:1.15rem}.ba span,.bb span{font:600 .76rem ui-monospace,Consolas,monospace;opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
 
-/* ===== Opcion A ===== */
-.ca{--c:#0b4fd8;border-radius:16px;padding:18px;background:var(--sur);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
-.ca.hot{--c:#c1122f}.ca.warm{--c:#c2410c}.ca.ok{--c:#146c2e}.ca.cold{--c:#0b4fd8}
-body.dark .ca.hot{--c:#ff6b81}body.dark .ca.warm{--c:#ff9a62}body.dark .ca.ok{--c:#5bd68a}body.dark .ca.cold{--c:#7aa7ff}
-.ca-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.ca-pill{font:800 1.35rem ui-monospace,Consolas,monospace;letter-spacing:-.04em;background:var(--c);color:#fff;border-radius:10px;padding:5px 11px}
-body.dark .ca-pill{color:#0e1117}
-.ca-tienda{font:600 .78rem system-ui;color:var(--ink2);background:var(--chip);border-radius:999px;padding:4px 10px}
-.ca h3{margin:4px 0 0;font-size:1.05rem;line-height:1.25;color:var(--ink)}
-.ca-chips{display:flex;flex-wrap:wrap;gap:5px}.ca-chips span{font:500 .72rem ui-monospace,Consolas,monospace;color:var(--ink2);background:var(--chip);border-radius:6px;padding:1px 7px}
-.ca-precio{margin-top:auto;font:800 2rem/1.05 ui-monospace,Consolas,monospace;letter-spacing:-.045em;color:var(--ink)}
-.ca-ahorro{font-size:.85rem;color:var(--ink2)}.ca-ahorro b{color:var(--c);font-weight:800}.ca-ahorro s{color:var(--ink2)}
-.ca.sol{background:var(--c);border-color:var(--c);color:#fff}
-.ca.sol h3,.ca.sol .ca-precio,.ca.sol .ca-ahorro b{color:#fff}.ca.sol .ca-ahorro,.ca.sol .ca-ahorro s{color:rgba(255,255,255,.88)}
-.ca.sol .ca-pill{background:#fff;color:var(--c)}.ca.sol .ca-tienda{background:rgba(255,255,255,.2);color:#fff}
-.ca.sol .ca-chips span{background:rgba(255,255,255,.18);color:#fff}.ca.sol .ca-precio{font-size:2.3rem}
-body.dark .ca.sol{background:color-mix(in srgb,var(--c) 38%,#0e1117);border-color:var(--c)}
-body.dark .ca.sol .ca-pill{color:#0e1117;background:var(--c)}
-.ba{background:#111827;color:#fff}.ba b{color:#ffb86b}
-body.dark .ba{background:#e9edf4;color:#0e1117}body.dark .ba b{color:#b4231a}
+/* tarjeta: fondo de la tienda (--bg), numero grande y ahorro en su color fuerte (--ac), el resto en tinta */
+.c{--bg:#fff;--ac:#0b4fd8;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;background:var(--bg);color:#14181f}
+.c .pct{font:800 3rem/1 "IBM Plex Sans",system-ui;letter-spacing:-.06em;color:var(--ac)}.c .pct small{font-size:1.3rem;letter-spacing:0}
+.c h3{margin:0;font-size:1.02rem;line-height:1.25;font-weight:700;color:#14181f}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{font:500 .75rem system-ui;color:#2f3744;border:1px solid rgba(20,24,31,.4);border-radius:999px;padding:0 8px}
+.precio{margin-top:auto;font:800 1.8rem/1.05 "IBM Plex Sans",system-ui;letter-spacing:-.035em;color:#14181f}
+.pie{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.82rem;color:#2f3744}
+.pie b{font-weight:800;color:var(--ac)}.tienda{font-weight:700;color:#14181f}
+/* cada tres, una tarjeta blanca con el color de la tienda solo en el numero, el ahorro y un filo arriba: descanso para la vista */
+.c.blanca{background:#fff;border:1px solid #d9dfe8;border-top:7px solid var(--bg)}
+/* la mejor del dia ocupa dos columnas y todo va mas grande */
+.c.heroe{grid-column:span 2;padding:24px}.c.heroe .pct{font-size:5rem}.c.heroe .pct small{font-size:2rem}.c.heroe h3{font-size:1.4rem}.c.heroe .precio{font-size:2.8rem}.c.heroe .pie{font-size:.95rem}
+@media (max-width:560px){.c.heroe{grid-column:auto}}
+.banda{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 20px;border-radius:14px;background:#c6f432;color:#14181f}
+.banda b{font-size:1.15rem}.banda span{font:600 .76rem ui-monospace,Consolas,monospace}
 
-/* ===== Opcion B ===== */
-.cb{--p:#14181f;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;background:var(--sur);border:1px solid var(--line)}
-.cb-pct{font:800 3rem/1 "IBM Plex Sans",system-ui;letter-spacing:-.06em;color:var(--p)}.cb-pct small{font-size:1.3rem;letter-spacing:0}
-.cb h3{margin:0;font-size:1.02rem;line-height:1.25;font-weight:700}
-.cb-chips{display:flex;flex-wrap:wrap;gap:6px}.cb-chips span{font:400 .75rem system-ui;color:inherit;opacity:.78;border:1px solid currentColor;border-radius:999px;padding:0 8px}
-.cb-precio{margin-top:auto;font:700 1.75rem/1.05 "IBM Plex Sans",system-ui;letter-spacing:-.03em}
-.cb-pie{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;opacity:.92}.cb-pie b{font-weight:800}
-.cb.blanca{--p:#0b4fd8}body.dark .cb.blanca{--p:#7aa7ff}
-.cb.lima{background:#e6f9a8;border-color:#e6f9a8;color:#1f2a00;--p:#00482f}
-.cb.lila{background:#e7e0ff;border-color:#e7e0ff;color:#1c1340;--p:#3b1fa8}
-.cb.dur{background:#ffe3cf;border-color:#ffe3cf;color:#3a1a05;--p:#9a3412}
-.cb.cel{background:#d9efff;border-color:#d9efff;color:#08243f;--p:#0b3f7a}
-.cb.heroe{background:#14181f;border-color:#14181f;color:#fff;--p:#c6f432}.cb.heroe .cb-precio{font-size:2.2rem}.cb.heroe .cb-pct{font-size:3.6rem}
-body.dark .cb.lima{background:#27300a;border-color:#27300a;color:#eefcc0;--p:#d4f56a}
-body.dark .cb.lila{background:#241c4a;border-color:#241c4a;color:#e9e4ff;--p:#b9a6ff}
-body.dark .cb.dur{background:#3d2312;border-color:#3d2312;color:#ffe9d9;--p:#ffb184}
-body.dark .cb.cel{background:#10304d;border-color:#10304d;color:#e0f2ff;--p:#8fd0ff}
-body.dark .cb.heroe{background:#e9edf4;border-color:#e9edf4;color:#14181f;--p:#00482f}
-.bb{background:#c6f432;color:#14181f}body.dark .bb{background:#3b1fa8;color:#fff}
+/* tema oscuro: los paneles se oscurecen con el mismo tono y las letras se aclaran */
+body.dark .c{background:color-mix(in srgb,var(--ac) 22%,#12161d);color:#eef1f6}
+body.dark .c h3,body.dark .precio,body.dark .tienda{color:#eef1f6}
+body.dark .c .pct,body.dark .pie b{color:var(--dk,color-mix(in oklab,var(--ac) 38%,#fff))}
+body.dark .chips span{color:#cdd5e0;border-color:rgba(255,255,255,.35)}body.dark .pie{color:#cdd5e0}
+body.dark .c.blanca{background:#161b23;border-color:#2b323d;border-top-color:var(--ac)}
+body.dark .banda{background:#d4f56a}
 
-/* ===== Telegram ===== */
 .tg{background:#7a9bb5;padding:22px;border-radius:16px;display:flex;justify-content:center}
 .burbuja{max-width:420px;background:#fff;color:#111;border-radius:16px;padding:12px 14px;font:15px/1.4 system-ui,"Segoe UI Emoji",sans-serif}
 body.dark .tg{background:#1b2733}body.dark .burbuja{background:#182533;color:#e9edf4}
-.burbuja blockquote{margin:6px 0;padding:4px 10px;border-left:3px solid #3390ec;background:rgba(51,144,236,.1);border-radius:4px}
 </style></head>
 <body>
 <header class="top">
-  <h1>Dos opciones finales</h1>
-  <p>Datos reales publicados hoy. Cada opción se ve en tema claro y oscuro (botón) y trae su versión para Telegram.</p>
+  <h1>Opción B ajustada</h1>
+  <p>Cada tarjeta toma el color de <b>su tienda</b>: Mercado Libre en amarillo, CompraGamer en violeta, y así. Las tiendas sin color de marca reciben uno fijo de una paleta. <b>Ninguna letra ni número va en blanco</b>: el título va en tinta, el porcentaje en el color fuerte de la tienda, el precio en tinta y el ahorro en el color de la tienda. Datos reales del 31/10.</p>
   <button id="tema" type="button">Cambiar a tema oscuro</button>
+  <div class="leyenda"><span class="ley" style="--bg:#ffe600;--ac:#2d3277">🟨 Mercado Libre</span><span class="ley" style="--bg:#fde6c4;--ac:#8a4a05">🟧 Mexx</span><span class="ley" style="--bg:#ffdce2;--ac:#a3123a">🟥 SCP Hardstore</span><span class="ley" style="--bg:#cdeee6;--ac:#0b6b57">🟩 OnCity (sin marca: color automático)</span><span class="ley" style="--bg:#cdeee6;--ac:#0b6b57">🟩 Coppel (sin marca: color automático)</span><span class="ley" style="--bg:#e9e2ff;--ac:#4b1fc4">🟪 CompraGamer</span><span class="ley" style="--bg:#d0ecff;--ac:#0b5f9c">🟦 Naldo (sin marca: color automático)</span></div>
 </header>
-
-<section class="op" id="A">
-  <div class="rot"><h2>Opción A · «Temperatura»</h2>
-    <p>El color dice cuánto se ahorra: 🟥 desde 30 %, 🟧 desde 20 %, 🟩 desde 12 %, 🟦 el resto. Los bloques sólidos van <b>intercalados</b> (uno cada tres tarjetas) y cambian de color según la oferta, no es un solo verde. El precio va en negro grande, el porcentaje en una pastilla de color y el ahorro con el color de su nivel. Inspirada en el sistema de mydealz (sitio de ofertas).</p></div>
-  <div class="grid ga"><article class="ca hot sol"><div class="ca-top"><b class="ca-pill">−51%</b><span class="ca-tienda">Mercado Libre</span></div><h3>🎧 USOTSO SA-723</h3><div class="ca-chips"></div><div class="ca-precio">$147.053</div><div class="ca-ahorro">antes <s>$300.108</s> · ahorrás <b>$153.055</b></div></article><article class="ca ok"><div class="ca-top"><b class="ca-pill">−19%</b><span class="ca-tienda">Mexx</span></div><h3>🔌 ASUS PRIME</h3><div class="ca-chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="ca-precio">$149.999</div><div class="ca-ahorro">antes <s>$185.184</s> · ahorrás <b>$35.185</b></div></article><article class="ca ok"><div class="ca-top"><b class="ca-pill">−17%</b><span class="ca-tienda">SCP Hardstore</span></div><h3>💻 MSI MODERN 14 H D2RMG</h3><div class="ca-chips"><span>16 GB RAM</span><span>512 GB SSD</span><span>14″</span></div><div class="ca-precio">$1.750.413</div><div class="ca-ahorro">antes <s>$2.108.931</s> · ahorrás <b>$358.518</b></div></article><article class="ca ok sol"><div class="ca-top"><b class="ca-pill">−14%</b><span class="ca-tienda">OnCity</span></div><h3>💻 HP 250</h3><div class="ca-chips"><span>Core 5 120U</span><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="ca-precio">$2.025.499</div><div class="ca-ahorro">antes <s>$2.355.231</s> · ahorrás <b>$329.732</b></div></article><article class="ca cold"><div class="ca-top"><b class="ca-pill">−11%</b><span class="ca-tienda">Coppel</span></div><h3>📱 MOTOROLA G MAX</h3><div class="ca-chips"><span>8/256 GB</span></div><div class="ca-precio">$799.999</div><div class="ca-ahorro">antes <s>$898.875</s> · ahorrás <b>$98.876</b></div></article><article class="ca cold"><div class="ca-top"><b class="ca-pill">−11%</b><span class="ca-tienda">OnCity</span></div><h3>🖥️ MSI MAG 274QP</h3><div class="ca-chips"><span>27″</span><span>QHD</span><span>QD-OLED</span><span>240 Hz</span></div><div class="ca-precio">$1.732.599</div><div class="ca-ahorro">antes <s>$1.946.740</s> · ahorrás <b>$214.141</b></div></article><div class="ba"><b>Ahora: de 11% a 8% de descuento</b><span>4 ofertas</span></div><article class="ca cold sol"><div class="ca-top"><b class="ca-pill">−11%</b><span class="ca-tienda">OnCity</span></div><h3>🖥️ MSI PRO MP251 E14L</h3><div class="ca-chips"><span>25″</span><span>FHD</span><span>144 Hz</span></div><div class="ca-precio">$289.199</div><div class="ca-ahorro">antes <s>$324.943</s> · ahorrás <b>$35.744</b></div></article><article class="ca cold"><div class="ca-top"><b class="ca-pill">−11%</b><span class="ca-tienda">CompraGamer</span></div><h3>🔌 ASUS PRIME AP-750G</h3><div class="ca-chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="ca-precio">$148.000</div><div class="ca-ahorro">antes <s>$166.292</s> · ahorrás <b>$18.292</b></div></article><article class="ca cold"><div class="ca-top"><b class="ca-pill">−10%</b><span class="ca-tienda">OnCity</span></div><h3>🗄️ ESCRITORIO DELL PRO SFF U5-235</h3><div class="ca-chips"><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="ca-precio">$3.365.599</div><div class="ca-ahorro">antes <s>$3.739.554</s> · ahorrás <b>$373.955</b></div></article><article class="ca cold sol"><div class="ca-top"><b class="ca-pill">−8%</b><span class="ca-tienda">Naldo</span></div><h3>📱 GOOGLE PIXEL 10A</h3><div class="ca-chips"><span>8/128 GB</span><span>5G</span></div><div class="ca-precio">$1.645.902</div><div class="ca-ahorro">antes <s>$1.789.024</s> · ahorrás <b>$143.122</b></div></article></div>
-  <h3 class="sub">En Telegram</h3>
-  <div class="tg"><div class="burbuja"><b>Pichinchas del día</b> · precios del 31/10 13:36<br><br>🟥🟥🟥🟥🟥🟥🟥🟥<br><b>🟥 −51% · $147.053</b><br>🎧 <b>USOTSO SA-723</b><br><i></i><br>en Mercado Libre<br>🟥🟥🟥🟥🟥🟥🟥🟥<br><br><blockquote>🟩 <b>−19%</b> · <b>$149.999</b><br>🔌 ASUS PRIME <i>750 W · 80+ Gold · Modular</i> · Mexx</blockquote><br><blockquote>🟩 <b>−17%</b> · <b>$1.750.413</b><br>💻 MSI MODERN 14 H D2RMG <i>16 GB RAM · 512 GB SSD · 14″</i> · SCP Hardstore</blockquote><br><blockquote>🟩 <b>−14%</b> · <b>$2.025.499</b><br>💻 HP 250 <i>Core 5 120U · 16 GB RAM · 512 GB SSD</i> · OnCity</blockquote><br><blockquote>🟦 <b>−11%</b> · <b>$799.999</b><br>📱 MOTOROLA G MAX <i>8/256 GB</i> · Coppel</blockquote></div></div>
-</section>
-
-<section class="op" id="B">
-  <div class="rot"><h2>Opción B · «Editorial pastel»</h2>
-    <p>Más calma: paneles de color suave (lima, lila, durazno, celeste) que se <b>alternan</b> con tarjetas blancas, y una sola tarjeta de tinta oscura para la mejor del día. El número grande toma el color de su panel, así que cada tarjeta tiene su propio acento y no todo se ve igual. Tipografía más pesada en el porcentaje y liviana en las características. Inspirada en NerdWallet.</p></div>
-  <div class="grid gb"><article class="cb heroe"><div class="cb-pct">−51<small>%</small></div><h3>🎧 USOTSO SA-723</h3><div class="cb-chips"></div><div class="cb-precio">$147.053</div><div class="cb-pie"><span>Mercado Libre</span><span>ahorrás <b>$153.055</b></span></div></article><article class="cb lima"><div class="cb-pct">−19<small>%</small></div><h3>🔌 ASUS PRIME</h3><div class="cb-chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="cb-precio">$149.999</div><div class="cb-pie"><span>Mexx</span><span>ahorrás <b>$35.185</b></span></div></article><article class="cb blanca"><div class="cb-pct">−17<small>%</small></div><h3>💻 MSI MODERN 14 H D2RMG</h3><div class="cb-chips"><span>16 GB RAM</span><span>512 GB SSD</span><span>14″</span></div><div class="cb-precio">$1.750.413</div><div class="cb-pie"><span>SCP Hardstore</span><span>ahorrás <b>$358.518</b></span></div></article><article class="cb lila"><div class="cb-pct">−14<small>%</small></div><h3>💻 HP 250</h3><div class="cb-chips"><span>Core 5 120U</span><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="cb-precio">$2.025.499</div><div class="cb-pie"><span>OnCity</span><span>ahorrás <b>$329.732</b></span></div></article><article class="cb blanca"><div class="cb-pct">−11<small>%</small></div><h3>📱 MOTOROLA G MAX</h3><div class="cb-chips"><span>8/256 GB</span></div><div class="cb-precio">$799.999</div><div class="cb-pie"><span>Coppel</span><span>ahorrás <b>$98.876</b></span></div></article><article class="cb dur"><div class="cb-pct">−11<small>%</small></div><h3>🖥️ MSI MAG 274QP</h3><div class="cb-chips"><span>27″</span><span>QHD</span><span>QD-OLED</span><span>240 Hz</span></div><div class="cb-precio">$1.732.599</div><div class="cb-pie"><span>OnCity</span><span>ahorrás <b>$214.141</b></span></div></article><div class="bb"><b>Ahora: de 11% a 8% de descuento</b><span>4 ofertas</span></div><article class="cb blanca"><div class="cb-pct">−11<small>%</small></div><h3>🖥️ MSI PRO MP251 E14L</h3><div class="cb-chips"><span>25″</span><span>FHD</span><span>144 Hz</span></div><div class="cb-precio">$289.199</div><div class="cb-pie"><span>OnCity</span><span>ahorrás <b>$35.744</b></span></div></article><article class="cb cel"><div class="cb-pct">−11<small>%</small></div><h3>🔌 ASUS PRIME AP-750G</h3><div class="cb-chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="cb-precio">$148.000</div><div class="cb-pie"><span>CompraGamer</span><span>ahorrás <b>$18.292</b></span></div></article><article class="cb blanca"><div class="cb-pct">−10<small>%</small></div><h3>🗄️ ESCRITORIO DELL PRO SFF U5-235</h3><div class="cb-chips"><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="cb-precio">$3.365.599</div><div class="cb-pie"><span>OnCity</span><span>ahorrás <b>$373.955</b></span></div></article><article class="cb lima"><div class="cb-pct">−8<small>%</small></div><h3>📱 GOOGLE PIXEL 10A</h3><div class="cb-chips"><span>8/128 GB</span><span>5G</span></div><div class="cb-precio">$1.645.902</div><div class="cb-pie"><span>Naldo</span><span>ahorrás <b>$143.122</b></span></div></article></div>
-  <h3 class="sub">En Telegram</h3>
-  <div class="tg"><div class="burbuja"><b>Pichinchas del día</b> · precios del 31/10 13:36<br><br>⬛⬛⬛⬛⬛⬛⬛⬛<br><b>LA MEJOR DEL DÍA</b><br>🎧 <b>USOTSO SA-723</b><br><i></i><br><b>−51%</b> · <b>$147.053</b> · Mercado Libre<br>⬛⬛⬛⬛⬛⬛⬛⬛<br><br>🟨 🔌 <b>ASUS PRIME</b><br><i>750 W · 80+ Gold · Modular</i><br><b>−19%</b> · $149.999 · Mexx<br><br>🟧 💻 <b>MSI MODERN 14 H D2RMG</b><br><i>16 GB RAM · 512 GB SSD · 14″</i><br><b>−17%</b> · $1.750.413 · SCP Hardstore<br><br>🟦 💻 <b>HP 250</b><br><i>Core 5 120U · 16 GB RAM · 512 GB SSD</i><br><b>−14%</b> · $2.025.499 · OnCity<br><br>🟪 📱 <b>MOTOROLA G MAX</b><br><i>8/256 GB</i><br><b>−11%</b> · $799.999 · Coppel<br></div></div>
+<section class="op">
+  <div class="grid"><article class="c heroe" style="--bg:#ffe600;--ac:#2d3277;--dk:#ffe600"><div class="pct">−51<small>%</small></div><h3>🎧 USOTSO SA-723</h3><div class="chips"></div><div class="precio">$147.053</div><div class="pie"><span class="tienda">Mercado Libre</span><span>ahorrás <b>$153.055</b></span></div></article><article class="c panel" style="--bg:#fde6c4;--ac:#8a4a05"><div class="pct">−19<small>%</small></div><h3>🔌 ASUS PRIME</h3><div class="chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="precio">$149.999</div><div class="pie"><span class="tienda">Mexx</span><span>ahorrás <b>$35.185</b></span></div></article><article class="c blanca" style="--bg:#ffdce2;--ac:#a3123a"><div class="pct">−17<small>%</small></div><h3>💻 MSI MODERN 14 H D2RMG</h3><div class="chips"><span>16 GB RAM</span><span>512 GB SSD</span><span>14″</span></div><div class="precio">$1.750.413</div><div class="pie"><span class="tienda">SCP Hardstore</span><span>ahorrás <b>$358.518</b></span></div></article><article class="c panel" style="--bg:#cdeee6;--ac:#0b6b57"><div class="pct">−14<small>%</small></div><h3>💻 HP 250</h3><div class="chips"><span>Core 5 120U</span><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="precio">$2.025.499</div><div class="pie"><span class="tienda">OnCity</span><span>ahorrás <b>$329.732</b></span></div></article><article class="c panel" style="--bg:#cdeee6;--ac:#0b6b57"><div class="pct">−11<small>%</small></div><h3>📱 MOTOROLA G MAX</h3><div class="chips"><span>8/256 GB</span></div><div class="precio">$799.999</div><div class="pie"><span class="tienda">Coppel</span><span>ahorrás <b>$98.876</b></span></div></article><article class="c blanca" style="--bg:#cdeee6;--ac:#0b6b57"><div class="pct">−11<small>%</small></div><h3>🖥️ MSI MAG 274QP</h3><div class="chips"><span>27″</span><span>QHD</span><span>QD-OLED</span><span>240 Hz</span></div><div class="precio">$1.732.599</div><div class="pie"><span class="tienda">OnCity</span><span>ahorrás <b>$214.141</b></span></div></article><div class="banda"><b>Ahora: de 11% a 8% de descuento</b><span>4 ofertas</span></div><article class="c panel" style="--bg:#cdeee6;--ac:#0b6b57"><div class="pct">−11<small>%</small></div><h3>🖥️ MSI PRO MP251 E14L</h3><div class="chips"><span>25″</span><span>FHD</span><span>144 Hz</span></div><div class="precio">$289.199</div><div class="pie"><span class="tienda">OnCity</span><span>ahorrás <b>$35.744</b></span></div></article><article class="c panel" style="--bg:#e9e2ff;--ac:#4b1fc4"><div class="pct">−11<small>%</small></div><h3>🔌 ASUS PRIME AP-750G</h3><div class="chips"><span>750 W</span><span>80+ Gold</span><span>Modular</span></div><div class="precio">$148.000</div><div class="pie"><span class="tienda">CompraGamer</span><span>ahorrás <b>$18.292</b></span></div></article><article class="c blanca" style="--bg:#cdeee6;--ac:#0b6b57"><div class="pct">−10<small>%</small></div><h3>🗄️ ESCRITORIO DELL PRO SFF U5-235</h3><div class="chips"><span>16 GB RAM</span><span>512 GB SSD</span></div><div class="precio">$3.365.599</div><div class="pie"><span class="tienda">OnCity</span><span>ahorrás <b>$373.955</b></span></div></article><article class="c panel" style="--bg:#d0ecff;--ac:#0b5f9c"><div class="pct">−8<small>%</small></div><h3>📱 GOOGLE PIXEL 10A</h3><div class="chips"><span>8/128 GB</span><span>5G</span></div><div class="precio">$1.645.902</div><div class="pie"><span class="tienda">Naldo</span><span>ahorrás <b>$143.122</b></span></div></article></div>
+  <h2 class="sub">En Telegram</h2>
+  <div class="tg"><div class="burbuja"><b>Pichinchas del día</b> · precios del 31/10 13:36<br><br>🟨🟨🟨🟨🟨🟨🟨🟨<br><b>LA MEJOR DEL DÍA</b><br>🎧 <b>USOTSO SA-723</b><br><i></i><br><b>−51%</b> · <b>$147.053</b> · Mercado Libre<br>🟨🟨🟨🟨🟨🟨🟨🟨<br><br>🟧 🔌 <b>ASUS PRIME</b><br><i>750 W · 80+ Gold · Modular</i><br><b>−19%</b> · $149.999 · Mexx<br><br>🟥 💻 <b>MSI MODERN 14 H D2RMG</b><br><i>16 GB RAM · 512 GB SSD · 14″</i><br><b>−17%</b> · $1.750.413 · SCP Hardstore<br><br>🟩 💻 <b>HP 250</b><br><i>Core 5 120U · 16 GB RAM · 512 GB SSD</i><br><b>−14%</b> · $2.025.499 · OnCity<br><br>🟩 📱 <b>MOTOROLA G MAX</b><br><i>8/256 GB</i><br><b>−11%</b> · $799.999 · Coppel<br></div></div>
 </section>
 <script>
 const b=document.getElementById("tema");
