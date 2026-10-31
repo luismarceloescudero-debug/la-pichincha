@@ -142,6 +142,7 @@
   // Un token que ya es un dato (va en las chips) o ruido: el titulo termina antes.
   const DATO = [
     /^\d+(?:[.,]\d+)?″$/, /^\d+(?:[.,]\d+)?(?:gb|tb|mb)$/i, /^\d{1,3}(?:[.,]\d+)?(?:g|t)$/i, /^\d+\/\d+(?:gb|g|tb)?$/i, /^\d+\+\d+/,
+    /^(?:ssd|hdd|nvme|ram|ddr\d?)\d+(?:gb|tb)$/i,   // «SSD512GB», «RAM16GB»: tipo y capacidad pegados (31/10: «HP SSD512GB 250»)
     /^\(?\d+\s?x\s?\d+(?:mm|cm)?\)?$/i, /^\d{2,3}%$/,
     /^\d+(?:[.,]\d+)?(?:hz|mhz|ghz|ms|w|mah|mp|dpi|v|mm|cm|mt|kg|rpm|db|mt\/s)$/i, /^\d+(?:[.,]\d+)$/,
     /^(?:4k|5k|8k|uhd|fhd|qhd|wqhd|uwqhd|wqxga|wuxga|hd\+?|full|2k|2\.5k|1080p|1440p|2160p|720p)$/i,
