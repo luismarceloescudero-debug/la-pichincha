@@ -77,6 +77,26 @@ documentación enlazada en cada paso.
 características premium y buena construcción, lo mejor al mejor costo posible), sin nombre ni datos personales. Si más
 adelante querés sumar tu nombre, está en `renderAcerca` de `generar_info.js`.
 
+**Acuse de recibo con Resend** (spec 053, opcional pero decidido el 31/10): para que quien escribe reciba «Recibimos tu consulta».
+El Worker ya está listo; sin la clave todo sigue como hoy. Pasos:
+
+1. **Crear la cuenta** en https://resend.com/signup (plan gratis: 3.000 correos por mes y 100 por día).
+2. **Agregar el dominio** en https://resend.com/domains → `pichinchadeldia.com.ar`, con el botón **Sign in to Cloudflare**, que carga los
+   registros en el subdominio `send`. Guía: https://resend.com/docs/guides/dns/cloudflare. Si lo hacés a mano, los registros van con el
+   proxy en «DNS only» y en el subdominio `send`. Esperá a que el dominio diga **Verified**.
+3. **Crear la clave** en https://resend.com/api-keys con permiso solo de envío («Sending access») y restringida al dominio
+   `pichinchadeldia.com.ar`. Copiala una sola vez; no la pegues en ningún chat.
+4. **Cargarla como secreto** (pide el valor por teclado, sin mostrarlo):
+
+   ```bash
+   gh secret set RESEND_API_KEY --repo luismarceloescudero-debug/la-pichincha
+   ```
+
+5. **Desplegar:** corré el workflow «Desplegar el Worker Afuera» (Actions → Run workflow) o esperá al próximo cambio en `worker/`. Después mandá un
+   mensaje de prueba desde `/contacto/` con otro correo tuyo: tiene que llegar el acuse y la página dice «Te mandamos un correo de confirmación».
+
+El acuse sale desde `CONTACTO_REMITENTE` (`hola@pichinchadeldia.com.ar`), así que ese dominio es el que hay que verificar en Resend.
+
 **Límites del formulario** (no hace falta tocarlos): campo trampa para robots, 3 segundos mínimos desde que se abre la
 página, 5 mensajes cada 10 minutos por persona y mensajes de 10 a 4000 caracteres.
 
