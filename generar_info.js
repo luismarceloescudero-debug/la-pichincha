@@ -154,7 +154,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     <p>El sitio no tiene cuentas y no guarda datos personales. Las visitas, las búsquedas y los clics a tiendas se miden con GoatCounter, sin cookies y sin identificar a nadie, para saber qué se busca y qué sirve.</p>
     <p><b>Lo más buscado.</b> La portada muestra las búsquedas más frecuentes. Se calculan con conteos agregados de GoatCounter de los últimos ${Buscadas.VENTANA_DIAS} días (cuántas personas distintas hicieron cada búsqueda). Una búsqueda solo se publica si la hicieron al menos ${Buscadas.MINIMO_VISITANTES} personas distintas y corresponde a un producto del catálogo; se descartan las que parecen datos personales (mails, teléfonos, números largos o direcciones web). Se publica solo la lista, sin conteos, sin fechas y sin nada de quién buscó.</p>
     <p>Las preferencias (por ejemplo, el tema claro u oscuro) quedan solo en tu navegador.</p>
-    <p id="contacto"><b>Formulario de contacto.</b> Lo que escribís en <a href="../contacto/">Contacto</a> (tu nombre si lo ponés, tu correo, el motivo y el mensaje) se manda por correo a quien hace el sitio, solo para poder responderte. El sitio no lo guarda en ninguna base ni lo usa para otra cosa, y no pasa por GoatCounter.</p>
+    <p id="contacto"><b>Formulario de contacto.</b> Lo que escribís en <a href="../contacto/">Contacto</a> (tu nombre si lo ponés, tu correo, el motivo y el mensaje) se manda por correo a quien hace el sitio, solo para poder responderte. El sitio no lo guarda en ninguna base ni lo usa para otra cosa, y no pasa por GoatCounter. Si el envío sale bien, te mandamos un correo automático de confirmación («Recibimos tu consulta»): para eso tu dirección de correo pasa por Resend, el servicio que lo envía, solo para mandar ese aviso, y no se guarda.</p>
   </section>
   <section>
     <h2 id="afiliados">Enlaces de afiliado</h2>
@@ -249,7 +249,7 @@ const SCRIPT_CONTACTO = `(function () {
         if (x.r.ok && x.j.ok) {
           form.reset();
           caja.disabled = true;
-          avisar("ok", "¡Listo! Tu mensaje se envió. Te respondemos a tu correo, por lo general en unos días.");
+          avisar("ok", "¡Listo! Tu mensaje se envió." + (x.j.acuse ? " Te mandamos un correo de confirmación." : "") + " Te respondemos a tu correo, por lo general en unos días.");
           estado.focus();
           return;
         }
@@ -311,7 +311,7 @@ ${opciones}
     </fieldset>
   </form>
   <p class="estado" id="estado" role="status" aria-live="polite" tabindex="-1"></p>
-  <p class="nota" id="nota-contacto">Lo que escribís se manda por correo a quien hace el sitio y no se guarda en ningún otro lado. Más en <a href="../legal/#contacto">privacidad</a>.</p>
+  <p class="nota" id="nota-contacto">Lo que escribís se manda por correo a quien hace el sitio y no se guarda en ningún otro lado; tu dirección pasa por Resend solo para mandarte el aviso de confirmación. Más en <a href="../legal/#contacto">privacidad</a>.</p>
   ${pie}
 </main>
 <script src="../js/pagina.js"></script>

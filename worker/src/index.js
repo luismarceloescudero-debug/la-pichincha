@@ -10,6 +10,8 @@
    - POST /contacto (spec 046) manda el formulario de /contacto/ por correo con el binding send_email de Cloudflare (Email
      Routing): destino y remitente salen de CONTACTO_DESTINO y CONTACTO_REMITENTE, nunca del codigo; sin binding o sin esas
      variables responde 503. Campo trampa, tiempo minimo desde que se cargo el formulario y un tope propio por IP.
+   - Spec 053: con el secreto RESEND_API_KEY, tras mandar el mensaje se manda un acuse de texto fijo a quien escribio (por Resend);
+     la respuesta suma acuse: true/false. Sin la clave todo sigue como antes.
    - CORS solo para el sitio y localhost; cache de 8 horas por consulta o por enlace; tope de 30 pedidos por minuto por IP. */
 import Buscadas from "../../js/buscadas.js";
 import Importar from "../../js/importar.js";
@@ -80,6 +82,23 @@ export function armarCorreo({ nombre, correo, motivo, mensaje }, { remitente, de
     "Content-Type: text/plain; charset=utf-8", "Content-Transfer-Encoding: base64", "", ...lineas, ""].join("\r\n");
 }
 
+/* --- Spec 053: el acuse de recibo. Asunto y cuerpo fijos: no llevan nada de lo que escribio la persona. --- */
+export const RESEND_URL = "https://api.resend.com/emails";
+export const VENTANA_ACUSE_MS = 60 * 60 * 1000;     // un acuse por direccion por hora
+export const TIEMPO_ACUSE_MS = 4000;
+export const ACUSE_ASUNTO = "Recibimos tu consulta";
+export const ACUSE_CUERPO = ["¡Hola!", "",
+  "Gracias por escribirnos: tu mensaje llegó a La Pichincha.",
+  "Lo leemos y te respondemos por correo en unos días.", "",
+  "Este es un aviso automático: no hace falta que contestes este correo.", "",
+  "La Pichincha", "https://pichinchadeldia.com.ar"].join("\n");
+
+/* El cuerpo del pedido a Resend. El remitente lleva el nombre del codigo y la direccion de CONTACTO_REMITENTE; reply_to es esa misma. */
+export function armarAcuse(para, remitente) {
+  const direccion = String(remitente).replace(/^.*<([^>]+)>\s*$/, "$1").trim();
+  return { from: `La Pichincha <${direccion}>`, to: [para], reply_to: direccion, subject: ACUSE_ASUNTO, text: ACUSE_CUERPO };
+}
+
 // Un error (400, 404, 429) no se guarda: un «demasiadas busquedas» no tiene que quedar 15 minutos en el navegador.
 const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { status: estado,
   headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": estado >= 400 ? "no-store" : "public, max-age=900", ...extra } });
@@ -88,7 +107,7 @@ const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { sta
    crearMensaje(de, para, crudo), que arma el EmailMessage de cloudflare:email (en los tests, uno falso).
    El tope por IP y los tokens viven en esta instancia (un isolate del Worker). */
 export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMensaje }) {
-  const porIp = new Map(), contactosPorIp = new Map(), tokens = new Map();
+  const porIp = new Map(), contactosPorIp = new Map(), acusesPorCorreo = new Map(), tokens = new Map();
 
   function excedido(ip, ms, mapa = porIp, tope = TOPE, ventana = VENTANA_MS) {
     if (mapa.size > 5000) mapa.clear();         // no crece sin limite en un isolate que vive mucho
@@ -221,11 +240,29 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     const remitente = env.CONTACTO_REMITENTE, destino = env.CONTACTO_DESTINO;
     if (!env.CORREO || typeof env.CORREO.send !== "function" || !remitente || !destino || !crearMensaje)
       return salir({ error: "El formulario de contacto todavía no está activo. Probá de nuevo en unos días." }, 503);
-    const mail = armarCorreo(v.datos, { remitente, destino, fecha, id: crypto.randomUUID() });
+    const id = crypto.randomUUID();
+    const mail = armarCorreo(v.datos, { remitente, destino, fecha, id });
     try { await env.CORREO.send(await crearMensaje(remitente, destino, mail)); } catch (e) {
       return salir({ error: "No se pudo enviar el mensaje. Probá de nuevo más tarde." }, 502);
     }
-    return salir({ ok: true }, 200);
+    // El mensaje al dueño ya salió: el acuse es un extra y nunca hace fallar el formulario.
+    return salir({ ok: true, acuse: await acusar(v.datos.correo, { env, remitente, destino, ms, id }) }, 200);
+  }
+
+  /* Spec 053: el acuse de recibo por Resend. Devuelve true solo si Resend lo aceptó. No se manda sin RESEND_API_KEY, a las
+     direcciones del dueño ni a la misma dirección dos veces en una hora. El texto es fijo: nada de lo que escribio la persona. */
+  async function acusar(correo, { env, remitente, destino, ms, id }) {
+    if (!env.RESEND_API_KEY) return false;
+    const dir = correo.toLowerCase(), propias = [destino, remitente].map(x => String(x).trim().toLowerCase());
+    if (propias.includes(dir)) return false;
+    if (excedido(dir, ms, acusesPorCorreo, 1, VENTANA_ACUSE_MS)) return false;
+    try {
+      const r = await fetch(RESEND_URL, { method: "POST", signal: AbortSignal.timeout(TIEMPO_ACUSE_MS),
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `acuse-contacto/${id}` },
+        body: JSON.stringify(armarAcuse(correo, remitente)) });
+      if (!r.ok) console.warn("acuse: Resend respondio " + r.status);   // solo el codigo: ni la clave ni la direccion
+      return r.ok;
+    } catch (e) { console.warn("acuse: Resend no respondio"); return false; }
   }
 
   return async function atender(request, env) {

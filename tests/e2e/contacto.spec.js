@@ -20,7 +20,8 @@ test.describe("formulario de contacto (el envío está simulado, no sale nada)",
           body: JSON.stringify({ ok: false, error: "Enviaste el mensaje demasiado rápido. Esperá unos segundos y probá de nuevo." }) });
         return;
       }
-      await ruta.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      // El correo ...+sin-acuse@ simula un Worker sin RESEND_API_KEY (o con Resend caido): responde acuse: false.
+      await ruta.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, acuse: !/sin-acuse/.test(d.correo) }) });
     });
     await page.goto("/contacto/");
     await expect(page.locator("#campos")).toBeEnabled();
@@ -41,6 +42,24 @@ test.describe("formulario de contacto (el envío está simulado, no sale nada)",
     await expect(page.locator("#error-mensaje")).toContainText("muy corto");
     await expect(page.locator("#estado")).toContainText("muy corto");
     expect(enviados).toHaveLength(0);
+  });
+
+  async function enviarEsperando(page, correo) {
+    await llenar(page, { correo, motivo: "consulta", mensaje: "Un mensaje de prueba largo" });
+    await page.waitForTimeout(3200);
+    await page.getByRole("button", { name: "Enviar mensaje" }).click();
+  }
+
+  test("si el Worker mandó el acuse, la página avisa del correo de confirmación", async ({ page }) => {
+    await enviarEsperando(page, "persona@ejemplo.com");
+    await expect(page.locator("#estado")).toContainText("Te mandamos un correo de confirmación");
+    await expect(page.locator("#estado")).toHaveClass(/ok/);
+  });
+
+  test("si no hubo acuse, la página dice lo de siempre", async ({ page }) => {
+    await enviarEsperando(page, "persona+sin-acuse@ejemplo.com");
+    await expect(page.locator("#estado")).toContainText("Tu mensaje se envió");
+    await expect(page.locator("#estado")).not.toContainText("correo de confirmación");
   });
 
   test("un envío demasiado rápido lo rechaza el servidor y el formulario lo dice", async ({ page }) => {
