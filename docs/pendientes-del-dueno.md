@@ -59,7 +59,7 @@ documentación enlazada en cada paso.
 
    El workflow «Desplegar el Worker Afuera» se los pasa al Worker con `wrangler secret put`, como las claves de eBay.
    Documentación: https://docs.github.com/es/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
-6. **Sumar el binding en `worker/wrangler.toml`.** Avisame y lo hago en un PR (o agregalo vos al final del archivo):
+6. **El binding en `worker/wrangler.toml`** (ya sumado el 31/10, sin `destination_address` a proposito):
 
    ```toml
    [[send_email]]
