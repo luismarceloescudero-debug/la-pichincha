@@ -83,6 +83,9 @@ Puntos que no se ven en el codigo Python ni JS:
 - **Las series del grafico (D2) no viajan en el indice**: `generar_series.py` (L182) lee el historial ya commiteado y el
   indice final, y deja `_sitio/series/NN.json` en 64 fragmentos; la pagina baja solo el de un aviso cuando se abre su
   historial (`js/vista-historial.js`).
+- **JSON-LD (spec 052)**: `nodosDelSitio`/`idsDelSitio` en `generar_paginas.js` definen `Organization` y `Service`; los usan
+  `renderAcerca` (`generar_info.js`) y la portada (`index.html`, escrito a mano y vigilado por `tests/js/marcado.test.js`).
+  `/precios/` lleva `CollectionPage` + `ItemList` + migas y los referencia por `@id`.
 - **Tres llamadas por `subprocess`**: `generar_paginas.py:89` corre `node generar_paginas.js`,
   `publicar_app.py:34` pide el commit con `git rev-parse` y `salud.py:86` abre issues con `gh`.
 - **Los generadores de Node reusan los modulos del navegador** con `require`: `generar_paginas.js:14-16`

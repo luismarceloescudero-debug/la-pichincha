@@ -186,10 +186,8 @@ test("el JSON-LD trae ItemList, el rango de precios en ARS y las migas", () => {
   assert.equal(primero.item, undefined, "sin Product anidado");
   assert.ok(!JSON.stringify(lista).includes('"Offer"'), "ninguna Offer individual");
   assert.ok(!JSON.stringify(lista).includes('"Product"'), "ningun Product individual");
-  const producto = tipo("Product");
-  const oferta = producto.offers;
-  assert.equal(oferta["@type"], "AggregateOffer");
-  assert.deepEqual([oferta.lowPrice, oferta.highPrice, oferta.offerCount, oferta.priceCurrency], [900, 1100, 5, "ARS"]);
+  assert.equal(tipo("Product"), undefined, "spec 052: es una lista, no la ficha de un producto");
+  assert.ok(!JSON.stringify(grafo).includes("AggregateOffer"), "sin AggregateOffer");
   const migas = tipo("BreadcrumbList").itemListElement.map(e => e.name);
   assert.deepEqual(migas, ["La Pichincha", "Precios", "DDR4 16GB"]);
 });
@@ -312,14 +310,11 @@ test("la fecha que va dentro del script inline sale escapada, como el JSON-LD", 
   assert.ok(html.includes("alert(1)"), "el texto sigue estando, escapado");
 });
 
-test("el unico precio que declara la pagina es el rango de la comparacion, con imagen", () => {
+test("el JSON-LD no declara ningun precio: ni Product, ni Offer, ni calificaciones (spec 052)", () => {
   const { html } = paginaDe(IDX);
-  const grafo = jsonld(html)["@graph"];
-  const productos = grafo.filter(n => n["@type"] === "Product");
-  assert.equal(productos.length, 1, "un solo Product: la consulta, no cada tienda");
-  assert.equal(productos[0].offers["@type"], "AggregateOffer");
-  assert.match(productos[0].image, /^https:\/\/.*\.png$/, "Product siempre con image");
-  assert.equal(grafo.flatMap(n => JSON.stringify(n).match(/"@type":"Offer"/g) || []).length, 0);
+  const texto = JSON.stringify(jsonld(html));
+  for (const prohibido of ["Product", "Offer", "AggregateOffer", "price", "Price", "rating", "Rating", "review", "availability"])
+    assert.ok(!texto.includes(prohibido), prohibido);
 });
 
 test("un producto que dos tiendas venden con el mismo codigo sale una vez, con la otra tienda al lado", () => {

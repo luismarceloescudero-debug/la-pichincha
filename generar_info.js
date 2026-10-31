@@ -327,7 +327,12 @@ function renderAcerca({ baseUrl = BASE_URL } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   return cabeza({ titulo: "Acerca de | La Pichincha",
     descripcion: "Quién hace La Pichincha, cómo compara los precios de hardware en Argentina y cómo escribirnos.",
-    canonica: `${base}/acerca/`, baseUrl: base, rel: "../" }) + `
+    canonica: `${base}/acerca/`, baseUrl: base, rel: "../",
+    grafo: { "@context": "https://schema.org", "@graph": [
+      ...G.nodosDelSitio(base),
+      { "@type": "AboutPage", "@id": `${base}/acerca/#pagina`, url: `${base}/acerca/`, name: "Acerca de La Pichincha",
+        inLanguage: "es-AR", isPartOf: { "@id": G.idsDelSitio(base).sitio }, about: { "@id": G.idsDelSitio(base).organizacion } },
+    ] } }) + `
 <body>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <main id="contenido" class="wrap info">
