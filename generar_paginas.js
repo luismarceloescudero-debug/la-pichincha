@@ -166,21 +166,41 @@ const SCRIPT_MEDICION = `(function () {
   document.addEventListener("auxclick", alClic, true);
 })();`;
 
-function grafoDe(consulta, filas, analisis, ctx, desde, hasta) {
+/* Identidad del sitio (spec 052): la organizacion y el servicio se describen UNA vez, en la portada y en /acerca/;
+   el resto de las paginas los nombra por @id. Sin nombre de persona ni correo: el contacto es /contacto/. */
+const idsDelSitio = base => ({ sitio: `${base}/#sitio`, organizacion: `${base}/#organizacion`, servicio: `${base}/#servicio` });
+function nodosDelSitio(base) {
+  const id = idsDelSitio(base);
+  return [
+    { "@type": "Organization", "@id": id.organizacion, name: "La Pichincha", url: `${base}/`,
+      logo: `${base}/img/icono-192.png` },
+    { "@type": "Service", "@id": id.servicio, name: "La Pichincha", serviceType: "Comparador de precios de hardware",
+      description: "Compara precios de hardware de tiendas argentinas, producto por producto y con la fecha de cada precio.",
+      url: `${base}/`, areaServed: { "@type": "Country", name: "Argentina", identifier: "AR" },
+      provider: { "@id": id.organizacion } },
+  ];
+}
+
+/* Cambio del 31/10/2026 (spec 052, decision del dueño tras la auditoria del 30/10): esta pagina es una LISTA de
+   resultados, no la ficha de un producto, asi que ya no lleva Product ni AggregateOffer (Google pide Product para
+   un producto concreto y puede ignorarlo o avisar). Queda CollectionPage + ItemList + migas, y se declara que
+   pertenece al sitio por @id. La Pichincha no vende: tampoco hay Offer por tienda, ni calificaciones, ni
+   disponibilidad, ni ningun precio que la pagina no muestre (principio II: lo que no se midio no se afirma).
+   Cada item es un ListItem con nombre, posicion y enlace; un precio que no se pudo verificar hoy lo dice tambien
+   aca, no solo en la pagina (FR-017). */
+function grafoDe(consulta, filas, analisis, ctx) {
   const base = ctx.baseUrl;
   const canonica = `${base}/precios/${consulta.slug}/`;
-  // La Pichincha no vende: un Product con Offer por tienda es, para Google, una "ficha de comerciante"
-  // (exige imagen, envio y devoluciones, que no tenemos). Cada item es un ListItem con nombre y enlace,
-  // que es lo que pide el carrusel; el unico precio que se declara es el rango de la comparacion.
-  // Un precio que no se pudo verificar hoy lo dice tambien aca, no solo en la pagina (FR-017).
+  const id = idsDelSitio(base);
   const listados = filas.filter(f => esUrl(f[2])).slice(0, MAX_FILAS);
   return { "@context": "https://schema.org", "@graph": [
-    { "@type": "ItemList", name: `${rotulo(consulta.q)}: precios en Argentina`, numberOfItems: listados.length,
+    { "@type": "CollectionPage", "@id": `${canonica}#pagina`, url: canonica, name: `${rotulo(consulta.q)}: precios en Argentina`,
+      inLanguage: "es-AR", isPartOf: { "@id": id.sitio }, about: { "@id": id.servicio },
+      mainEntity: { "@id": `${canonica}#lista` }, breadcrumb: { "@id": `${canonica}#migas` } },
+    { "@type": "ItemList", "@id": `${canonica}#lista`, name: `${rotulo(consulta.q)}: precios en Argentina`, numberOfItems: listados.length,
       itemListElement: listados.map((f, i) => ({ "@type": "ListItem", position: i + 1, name: f[0], url: f[2],
         ...(viejoDe(f, ctx) ? { description: viejoDe(f, ctx) } : {}) })) },
-    { "@type": "Product", name: rotulo(consulta.q), image: `${base}/img/og.png`, url: canonica,
-      offers: { "@type": "AggregateOffer", lowPrice: desde, highPrice: hasta, offerCount: filas.length, priceCurrency: "ARS" } },
-    { "@type": "BreadcrumbList", itemListElement: [
+    { "@type": "BreadcrumbList", "@id": `${canonica}#migas`, itemListElement: [
       { "@type": "ListItem", position: 1, name: "La Pichincha", item: `${base}/` },
       { "@type": "ListItem", position: 2, name: "Precios", item: `${base}/precios/` },
       { "@type": "ListItem", position: 3, name: rotulo(consulta.q), item: canonica } ] },
@@ -340,7 +360,7 @@ function renderPagina(consulta, analisis, ctx) {
 
   return cabeza({ titulo, descripcion, canonica, noindex: false, baseUrl: ctx.baseUrl,
     feed: { titulo: `Precios de ${nom} en La Pichincha`, href: `${canonica}${FEED_ARCHIVO}` },
-    grafo: grafoDe(consulta, filas, analisis, ctx, desde, hasta) }) + `
+    grafo: grafoDe(consulta, filas, analisis, ctx) }) + `
 <body>
 <div id="sin-red" class="sin-red" role="status" hidden></div>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -527,5 +547,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { rotulo, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
+module.exports = { rotulo, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, idsDelSitio, nodosDelSitio, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

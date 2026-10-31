@@ -665,6 +665,10 @@ con su razon, la mediana, una tabla de hasta 20 opciones, lo que quedo afuera y 
 datos estructurados (`ItemList`, `AggregateOffer` en pesos y migas). El boton "Ver la
 comparativa completa" abre la Comparativa con esa busqueda ya armada.
 
+Su JSON-LD (spec 052) es de lista, no de producto: `CollectionPage` + `ItemList` + migas, sin `Product` ni `Offer`; la
+identidad del sitio (`Organization` y `Service` «Comparador de precios de hardware») se declara una vez en la portada y
+en `/acerca/`, y estas paginas la referencian por `@id`.
+
 **Un feed RSS por pagina.** Cada pagina indexable publica `feed.xml` en su carpeta
 (`/precios/rtx-5060-ti-16gb/feed.xml`) y lo anuncia en el `<head>` con `rel="alternate"`, ademas del
 `ofertas.xml` global: sirve para suscribirse a una busqueda y enterarse cuando cambian los precios.
