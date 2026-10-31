@@ -18,7 +18,7 @@ const O = require("./js/ofertas.js");
 const MIN_DESTACADAS = 10;     // menos que esto en el resumen es que algo filtro de mas
 // Version de las reglas de que es una oferta: si cambia, la cantidad de ofertas por categoria no se compara con la corrida
 // anterior (spec 035: sin el tachado de Mercado Libre los smartphones pasaron de 41 a 0, a proposito, y no es una falla).
-const REGLAS = "035";
+const REGLAS = "054";
 const SALTO_SIN_DATOS = 0.10;  // puntos que puede subir el "sin datos" de una categoria de un dia para otro
 const MIN_AVISOS = 20;         // con menos avisos en la categoria, un porcentaje no dice nada
 

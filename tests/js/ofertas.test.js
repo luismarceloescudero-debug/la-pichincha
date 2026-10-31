@@ -567,3 +567,20 @@ test("destacadas: el mismo equipo con el procesador escrito distinto en dos tien
   const c = fila("Notebook HP 250 15.6″ Core 5 120U 32GB 512GB", 1745000, { lista: 2000000 });   // 8 GB no pasa el minimo de notebook
   assert.equal(O.destacadas({ productos: [b, c] }, 10).length, 2);
 });
+
+test("una baja propia de mas de 60% no es oferta, y de mas de 40% tampoco si la trae un agregador (31/10: RTX 5080 «−70 %»)", () => {
+  const ag = (n, precio, antes) => [n, precio, "https://t.test/" + n, "comparaya", "", 0, antes, "", "", ""];
+  const idx = { productos: [fila("grande", 3000, { antes: 10000 }), fila("normal", 6000, { antes: 10000 }),
+                            ag("agregador-46", 5400, 10000), ag("agregador-30", 7000, 10000)] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.propias.map(f => f[0]), ["normal", "agregador-30"]);
+  assert.equal(r.sospechosas, 2);
+});
+
+test("unico: el mismo equipo repetido en la lista de la pestaña queda una vez, el de la tienda mas barata", () => {
+  const item = (f) => ({ f, ref: 6 });
+  const a = ["Mouse Corsair SCUF Envision Pro Inalambrico", 114299, "https://t/a", "fh", "", 0, 150000, "", "", "X1"];
+  const b = ["Mouse Corsair SCUF Envision Pro Inalambrico", 114899, "https://t/b", "fh", "", 0, 150000, "", "", "X1"];
+  const c = ["Teclado Logitech G515 TKL", 159483, "https://t/c", "scp", "", 0, 181704, "", "", "G515"];
+  assert.deepEqual(O.unico([item(b), item(a), item(c)]).map(o => o.f[2]), ["https://t/a", "https://t/c"]);
+});
