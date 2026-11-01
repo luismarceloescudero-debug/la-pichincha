@@ -2,7 +2,7 @@
 """Paginas estaticas por busqueda popular: /precios/<slug>/, indice, sitemap y robots.
 
 Uso:
-    python generar_paginas.py --indice indice.json --salida _sitio
+    python generar_paginas.py --indice indice.json --salida _sitio [--fechas-previas https://.../precios/fechas.json]
 
 La lista de consultas vive en consultas.json: agregar una entrada y publicar crea su pagina.
 A esas, curadas a mano y siempre primeras, se suman las que descubre generar_consultas.js en el
@@ -18,6 +18,7 @@ import subprocess
 import sys
 import tempfile
 import unicodedata
+import urllib.request
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -81,15 +82,48 @@ def consultas_automaticas(indice, manuales, tope=None):
     return autos
 
 
-def sitemap(paginas, generado, base_url=BASE_URL):
-    """sitemap.xml: la principal, el indice /precios/ y solo las paginas indexables.
-    lastmod es la fecha de los precios; sin indice no hay fecha ni paginas (FR-016)."""
-    fecha = (generado or "")[:10]
-    urls = [base_url + "/"]
+def fechas_de_las_paginas(paginas, generado, previas=None):
+    """{slug: {"huella", "lastmod"}}: la fecha de la ultima corrida en que cambio lo que dice la pagina (su huella, ver
+    generar_paginas.js). Si la huella es la de la publicacion anterior, conserva aquella fecha; si cambio, o la pagina es
+    nueva, o no hay fechas anteriores, es la fecha de los precios de esta corrida."""
+    hoy = (generado or "")[:10]
+    previas = previas if isinstance(previas, dict) else {}
+    fechas = {}
+    for p in paginas:
+        antes = previas.get(p["slug"]) if isinstance(previas.get(p["slug"]), dict) else {}
+        igual = p.get("huella") and antes.get("huella") == p.get("huella") and antes.get("lastmod")
+        fechas[p["slug"]] = {"huella": p.get("huella"), "lastmod": antes["lastmod"] if igual else hoy}
+    return fechas
+
+
+def leer_fechas_previas(origen):
+    """Las fechas de la publicacion anterior (una URL del sitio o un archivo); {} si no hay o no se pueden leer."""
+    if not origen:
+        return {}
+    try:
+        if re.match(r"https?://", origen):
+            with urllib.request.urlopen(origen, timeout=20) as r:
+                datos = json.loads(r.read().decode("utf-8"))
+        else:
+            datos = json.loads(Path(origen).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 - sin fechas anteriores, todas llevan la de hoy (como la primera publicacion)
+        return {}
+    return datos if isinstance(datos, dict) else {}
+
+
+def sitemap(paginas, generado, base_url=BASE_URL, fechas=None):
+    """sitemap.xml: la principal, el indice /precios/ y solo las paginas indexables (sin indice no hay paginas, FR-016).
+    lastmod: la portada, la fecha de los precios (cambia cada dia); cada pagina, la del dia en que cambio lo que dice
+    (fechas, de fechas_de_las_paginas); /precios/, la mas reciente de esas. Sin fecha confiable no lleva lastmod."""
+    hoy = (generado or "")[:10]
+    fechas = fechas if fechas is not None else fechas_de_las_paginas(paginas, generado)
+    urls = [(base_url + "/", hoy)]
     if paginas or generado:
-        urls.append(base_url + "/precios/")
-        urls += [f"{base_url}/precios/{p['slug']}/" for p in paginas if p["indexable"]]
-    filas = [f"  <url><loc>{escape(u)}</loc>" + (f"<lastmod>{fecha}</lastmod>" if fecha else "") + "</url>" for u in urls]
+        propias = [(f"{base_url}/precios/{p['slug']}/", (fechas.get(p["slug"]) or {}).get("lastmod") or "")
+                   for p in paginas if p["indexable"]]
+        urls.append((base_url + "/precios/", max([f for _, f in propias if f], default=hoy)))
+        urls += propias
+    filas = [f"  <url><loc>{escape(u)}</loc>" + (f"<lastmod>{f}</lastmod>" if f else "") + "</url>" for u, f in urls]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(filas) + "\n</urlset>\n")
 
@@ -105,6 +139,8 @@ def main(argv=None):
     ap.add_argument("--salida", default=str(RAIZ / "_sitio"))
     ap.add_argument("--base-url", default=BASE_URL)
     ap.add_argument("--sin-auto", action="store_true", help="solo las consultas de consultas.json")
+    ap.add_argument("--fechas-previas", default=None,
+                    help="precios/fechas.json de la publicacion anterior (URL o archivo), para el lastmod del mapa del sitio")
     args = ap.parse_args(argv)
 
     consultas = cargar_consultas(args.consultas)      # una lista invalida corta antes de generar nada
@@ -134,7 +170,13 @@ def main(argv=None):
         print("aviso: sin indice de precios, el mapa del sitio lista solo la pagina principal")
     salida = Path(args.salida)
     salida.mkdir(parents=True, exist_ok=True)
-    (salida / "sitemap.xml").write_text(sitemap(manifiesto["paginas"], manifiesto["generado"], args.base_url), encoding="utf-8")
+    fechas = fechas_de_las_paginas(manifiesto["paginas"], manifiesto["generado"], leer_fechas_previas(args.fechas_previas))
+    if manifiesto["paginas"]:
+        (salida / "precios").mkdir(parents=True, exist_ok=True)
+        (salida / "precios" / "fechas.json").write_text(json.dumps(fechas, ensure_ascii=False, separators=(",", ":")),
+                                                        encoding="utf-8")
+    (salida / "sitemap.xml").write_text(sitemap(manifiesto["paginas"], manifiesto["generado"], args.base_url, fechas),
+                                        encoding="utf-8")
     (salida / "robots.txt").write_text(robots(args.base_url), encoding="utf-8")
     return 0
 
