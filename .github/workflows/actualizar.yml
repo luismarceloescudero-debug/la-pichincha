@@ -211,11 +211,14 @@ jobs:
       - name: Pre-renderizar la portada
         run: node generar_portada.js --salida _sitio || echo "::warning::No se pre-renderizo la portada"
 
-      # Si las paginas por busqueda fallan, el sitio y los precios se publican igual.
+      # Si las paginas por busqueda fallan, el sitio y los precios se publican igual. --fechas-previas: el lastmod del mapa del
+      # sitio es el dia en que cambio cada pagina (sin las fechas publicadas, todas llevan la de hoy, como antes).
       - name: Generar las paginas por busqueda
         run: |
+          previas="$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')/precios/fechas.json"
+          echo "FECHAS_PREVIAS=$previas" >> "$GITHUB_ENV"      # lo usa tambien el paso de los enlaces rotos
           if [ -f indice.json ]; then
-            python generar_paginas.py --indice indice.json --salida _sitio || echo "::warning::No se generaron las paginas por busqueda"
+            python generar_paginas.py --indice indice.json --salida _sitio --fechas-previas "$previas" || echo "::warning::No se generaron las paginas por busqueda"
           else
             python generar_paginas.py --indice indice.json --salida _sitio
           fi
@@ -233,7 +236,7 @@ jobs:
           if [ "$(python -c 'import json;print(len(json.load(open("rotos.json"))))')" != "0" ]; then
             python filtrar_indice.py indice.json rotos.json
             cp indice.json _sitio/
-            python generar_paginas.py --indice indice.json --salida _sitio
+            python generar_paginas.py --indice indice.json --salida _sitio --fechas-previas "$FECHAS_PREVIAS"
           fi
 
       # Las series de precio por aviso (plan v2, D2): un fragmento chico por cada 1/64 de los avisos, que la pagina baja solo al

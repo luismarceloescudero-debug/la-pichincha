@@ -59,6 +59,43 @@ class SitemapYRobots(unittest.TestCase):
             BASE + "/": "2026-10-09", BASE + "/precios/": "2026-10-09",
             BASE + "/precios/ssd-1tb/": "2026-10-09", BASE + "/precios/rtx-4060/": "2026-10-09"})
 
+    def test_cada_pagina_lleva_la_fecha_en_que_cambio_lo_que_dice(self):
+        paginas = [{"slug": "ssd-1tb", "q": "ssd 1tb", "indexable": True, "huella": "aaa"},
+                   {"slug": "rtx-4060", "q": "rtx 4060", "indexable": True, "huella": "bbb-nueva"},
+                   {"slug": "nueva", "q": "nueva", "indexable": True, "huella": "ccc"}]
+        previas = {"ssd-1tb": {"huella": "aaa", "lastmod": "2026-10-20"},
+                   "rtx-4060": {"huella": "bbb", "lastmod": "2026-10-21"}}
+        fechas = generar_paginas.fechas_de_las_paginas(paginas, "2026-11-01T05:20-03:00", previas)
+        self.assertEqual(fechas, {"ssd-1tb": {"huella": "aaa", "lastmod": "2026-10-20"},
+                                  "rtx-4060": {"huella": "bbb-nueva", "lastmod": "2026-11-01"},
+                                  "nueva": {"huella": "ccc", "lastmod": "2026-11-01"}})
+        locs = self.locs(generar_paginas.sitemap(paginas, "2026-11-01T05:20-03:00", BASE, fechas))
+        self.assertEqual(locs[BASE + "/precios/ssd-1tb/"], "2026-10-20")
+        self.assertEqual(locs[BASE + "/precios/rtx-4060/"], "2026-11-01")
+        self.assertEqual(locs[BASE + "/"], "2026-11-01")              # la portada cambia cada dia
+        self.assertEqual(locs[BASE + "/precios/"], "2026-11-01")      # la mas reciente de sus paginas
+        self.assertGreater(len(set(locs.values())), 1)
+
+    def test_si_ninguna_cambio_precios_lleva_la_mas_reciente_de_ellas(self):
+        paginas = [{"slug": "a", "q": "a", "indexable": True, "huella": "x"},
+                   {"slug": "b", "q": "b", "indexable": True, "huella": "y"}]
+        previas = {"a": {"huella": "x", "lastmod": "2026-10-20"}, "b": {"huella": "y", "lastmod": "2026-10-25"}}
+        fechas = generar_paginas.fechas_de_las_paginas(paginas, "2026-11-01", previas)
+        self.assertEqual(self.locs(generar_paginas.sitemap(paginas, "2026-11-01", BASE, fechas))[BASE + "/precios/"], "2026-10-25")
+
+    def test_fechas_previas_ilegibles_o_ausentes_dan_la_fecha_de_hoy(self):
+        self.assertEqual(generar_paginas.leer_fechas_previas(None), {})
+        self.assertEqual(generar_paginas.leer_fechas_previas("no-existe.json"), {})
+        self.assertEqual(generar_paginas.leer_fechas_previas("http://127.0.0.1:9/precios/fechas.json"), {})
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp, "fechas.json")
+            ruta.write_text('["no es un objeto"]', encoding="utf-8")
+            self.assertEqual(generar_paginas.leer_fechas_previas(str(ruta)), {})
+            ruta.write_text('{"a": {"huella": "x", "lastmod": "2026-10-20"}}', encoding="utf-8")
+            self.assertEqual(generar_paginas.leer_fechas_previas(str(ruta)), {"a": {"huella": "x", "lastmod": "2026-10-20"}})
+        fechas = generar_paginas.fechas_de_las_paginas([{"slug": "a", "huella": "x"}], "2026-11-01", {"a": "roto"})
+        self.assertEqual(fechas["a"]["lastmod"], "2026-11-01")
+
     def test_sin_indice_solo_la_pagina_principal_y_sin_fecha(self):
         self.assertEqual(self.locs(generar_paginas.sitemap([], None, BASE)), {BASE + "/": None})
 
@@ -99,6 +136,25 @@ class Generar(unittest.TestCase):
         self.assertNotIn("noindex", buena)
         fina = (self.salida / "precios" / "placa-inexistente" / "index.html").read_text(encoding="utf-8")
         self.assertIn("noindex", fina)
+
+    def test_una_pagina_sin_cambios_conserva_su_fecha_en_el_mapa_del_sitio(self):
+        self.assertEqual(self.correr(), 0)
+        fechas = self.salida / "precios" / "fechas.json"
+        previas = self.dir / "fechas-previas.json"
+        previas.write_text(fechas.read_text(encoding="utf-8").replace("2026-10-09", "2026-10-01"), encoding="utf-8")
+        datos = json.loads(self.indice.read_text(encoding="utf-8"))
+        datos["generado"] = "2026-10-10T05:20-03:00"
+        self.indice.write_text(json.dumps(datos), encoding="utf-8")
+        argumentos = ["--indice", str(self.indice), "--consultas", str(self.consultas), "--salida", str(self.salida),
+                      "--fechas-previas", str(previas)]
+        self.assertEqual(generar_paginas.main(argumentos), 0)
+        self.assertIn("<loc>https://pichinchadeldia.com.ar/precios/ddr4-16gb/</loc><lastmod>2026-10-01</lastmod>",
+                      (self.salida / "sitemap.xml").read_text(encoding="utf-8"))
+        datos["productos"][0][1] = 900                     # cambia un precio: la pagina toma la fecha de esta corrida
+        self.indice.write_text(json.dumps(datos), encoding="utf-8")
+        self.assertEqual(generar_paginas.main(argumentos), 0)
+        self.assertIn("<loc>https://pichinchadeldia.com.ar/precios/ddr4-16gb/</loc><lastmod>2026-10-10</lastmod>",
+                      (self.salida / "sitemap.xml").read_text(encoding="utf-8"))
 
     def test_cada_pagina_indexable_publica_su_feed_bien_formado(self):
         from xml.etree import ElementTree

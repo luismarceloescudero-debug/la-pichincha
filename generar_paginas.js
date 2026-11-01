@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const B = require("./js/buscador.js");
 const A = require("./js/analisis.js");
 const Modos = require("./js/modos.js");
@@ -506,6 +507,13 @@ ${cuerpo}
 `;
 }
 
+/* Lo que dice una pagina, resumido: sus comparables (nombre, precio y enlace). Si no cambia, el mapa del sitio conserva su
+   fecha anterior (generar_paginas.py); antes las 201 URLs llevaban la fecha de cada corrida y Google deja de creerle. */
+function huella(analisis) {
+  const filas = ((analisis && analisis.base) || []).map(m => [m.f[0], m.f[1], m.f[2]]).sort((a, b) => String(a[2]).localeCompare(String(b[2])) || a[1] - b[1]);
+  return crypto.createHash("sha1").update(JSON.stringify(filas)).digest("hex").slice(0, 16);
+}
+
 function main(argv) {
   const arg = (nombre, defecto) => { const i = argv.indexOf("--" + nombre); return i >= 0 ? argv[i + 1] : defecto; };
   const raiz = __dirname;
@@ -529,7 +537,7 @@ function main(argv) {
   const analizadas = consultas.map(c => ({ c, analisis: A.analizarConsulta(c.q, ctx) }));
   for (const { c, analisis } of analizadas) {
     const indexable = esIndexable(analisis);
-    paginas.push({ slug: c.slug, q: c.q, indexable });
+    paginas.push({ slug: c.slug, q: c.q, indexable, huella: huella(analisis) });
     if (indexable) entradas.push({ q: c.q, slug: c.slug, grupo: (c.nota || "").split(":")[0] || "Otros",
       desde: Math.min(...analisis.base.map(m => m.f[1])), comparables: analisis.base.length });
   }
@@ -548,5 +556,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { rotulo, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, idsDelSitio, nodosDelSitio, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
+module.exports = { rotulo, huella, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, idsDelSitio, nodosDelSitio, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));
