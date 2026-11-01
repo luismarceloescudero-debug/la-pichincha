@@ -631,3 +631,28 @@ test("destacadas (056): del indice del 31/10 sale una fuente ASUS Prime (la mas 
   const lista = O.destacadas(REPETIDAS, 10);
   assert.deepEqual(lista.map(o => [o.f[3], o.f[1]]).sort(), [["compragamer", 148000], ["fullh4rd", 114299]]);
 });
+
+/* Spec 056: OnCity bajo el 31/10 su lista entera con el mismo porcentaje; Mercado Libre trajo unos auriculares «−51 %». */
+const LOTES = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "ofertas", "lotes-2026-10-31.json"), "utf8"));
+
+test("lote (056): diez bajas o mas de una tienda con el mismo porcentaje el mismo dia son un cambio de lista, no ofertas", () => {
+  const r = O.calcularOfertas(LOTES);
+  const oncity = [...r.propias, ...r.seguimiento].filter(f => f[3] === "oncity");
+  assert.deepEqual(oncity.map(f => f[0]), [LOTES.productos[12][0]]);       // queda la HP 250, que bajo 14 % sola
+  assert.equal(r.enLote, 8);                     // los 4 restantes del lote ya no eran oferta por otra regla (minimos de su categoria)
+  // nueve iguales todavia pueden ser ofertas; otro dia u otra tienda no suman al lote
+  const n = (k, tienda = "cg", desde = "2026-10-31") => { const f = fila("SSD Kingston NV" + k + " 1TB NVMe Gen4", 89000, { antes: 100000 }); f[3] = tienda; f[10] = desde; return f; };
+  const nueve = Array.from({ length: 9 }, (_, k) => n(k));
+  assert.equal(O.calcularOfertas({ productos: nueve }).propias.length, 9);
+  assert.equal(O.calcularOfertas({ productos: [...nueve, n(9, "cg", "2026-10-30"), n(10, "mx")] }).propias.length, 11);
+  assert.equal(O.calcularOfertas({ productos: [...nueve, n(9)] }).propias.length, 0);
+});
+
+test("Mercado Libre (056): una baja propia de mas de 40 % es dudosa (paginas /p/ con otro vendedor), como en un agregador", () => {
+  const r = O.calcularOfertas(LOTES);
+  assert.ok(!r.propias.some(f => /Usotso/.test(f[0])));
+  assert.equal(r.sospechosas, 1);
+  const ml = (n, precio) => [n, precio, "https://www.mercadolibre.com.ar/" + n + "/p/MLA1", "mercadolibre", "", 0, 100000, "", "", ""];
+  assert.deepEqual(O.calcularOfertas({ productos: [ml("auriculares-hyperx-cloud-38", 62000), ml("auriculares-hyperx-cloud-45", 55000)] }).propias.map(f => f[0]),
+                   ["auriculares-hyperx-cloud-38"]);
+});

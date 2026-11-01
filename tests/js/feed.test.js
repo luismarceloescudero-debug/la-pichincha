@@ -56,7 +56,7 @@ test("sin ofertas el feed sale igual, vacio y bien formado", () => {
 });
 
 test("el feed trae como mucho 20 entradas", () => {
-  const muchas = Array.from({ length: 30 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 }));
+  const muchas = Array.from({ length: 30 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));   // cada una con su porcentaje: muchas iguales son un lote (056)
   const xml = F.renderFeed({ ...IDX, productos: muchas }, { baseUrl: BASE });
   assert.equal((xml.match(/<item>/g) || []).length, 20);
 });
@@ -214,7 +214,7 @@ test("main sin --descartadas, o con el archivo roto, publica todo como antes", (
 test("main con --candidatas escribe solo la lista a verificar (hasta --max) y no genera el sitio", () => {
   const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
-  const muchas = Array.from({ length: 12 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 }));
+  const muchas = Array.from({ length: 12 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));
   fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ ...IDX, productos: muchas }));
   F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"),
           "--candidatas", path.join(dir, "c.json"), "--max", "5"]);
