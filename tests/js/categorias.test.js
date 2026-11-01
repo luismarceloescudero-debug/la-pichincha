@@ -284,3 +284,10 @@ test("esTecnologia (056): en «Otros» queda la tecnologia (TV, tablet, proyecto
                    "Tira De Led Tp-Link Tapo L930-5 Multicolor Wifi", "Sillón Premium Gamer Ideal P/ Playstation,xbox, Gaming, Pc Negro Cuero Sintético"])
     assert.ok(!C.esTecnologia(n), n);
 });
+
+test("categoria (056): un megafono, un proyector o una consola «portátil» no son notebooks", () => {
+  for (const n of ["Megáfono Portátil Gadnic Altavoz Bluetooth", "Proyector Portátil ViewSonic M1+, WiFi, BT y p/Harman Kardon",
+                   "Consola Gamer Portátil J36 Ultra YouTube WiFi Bluetooth RGB"])
+    assert.notEqual(C.categoriaDe(n), "notebook", n);
+  assert.equal(C.categoriaDe("Ordenador Portátil HP 15 Core i5 16GB 512GB"), "notebook");
+});

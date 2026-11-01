@@ -55,7 +55,7 @@
     equipoConMonitor: /^\s*(?:pc|computadora|computador|combo|kit|notebook|all\s?in\s?one|mini\s?pc|escritorio|puesto)\b/i,
     pc: /^\s*(?:pc|computadora|computador|all\s?in\s?one|mini\s?pc|equipo\s+armado)\b/i,
     periferico: /^\s*(?:combo|kit)\b.*\b(?:teclado|mouse|auricular)|^\s*(?:mouse|teclado|auricular|auriculares|headset|webcam|camara\s+web|parlante|parlantes|joystick|gamepad|control|mousepad|pad|microfono|silla|alfombrilla|volante|capturadora|impresora|router|switch|placa\s+de\s+sonido)\b/i,
-    notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|port[aá]til|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
+    notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|portatil|(?:ordenador|computadora)\s+port[aá]til|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
     smartphone: /\b(celular|smartphone|telefono|movil|iphone|redmi|poco\s?[a-z]\d|moto\s?(?:[gex]\d|edge|razr)|motorola\s+(?:edge|razr)|galaxy\s?(?:[samf]\d|z\s?(?:fold|flip))|honor\s?(?:\d|x\d|magic)|oppo\s?(?:reno|a\d|find)|vivo\s?[vyx]\d|oneplus|nothing\s+phone|zte\s?(?:blade|nubia)|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,
     // por el principio del titulo (antes que notebook/smartphone: "Memoria RAM Notebook SODIMM" es una memoria)
     componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|mother(?:board)?|placa\s+madre|water\s?cool(?:er|ing)|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:amd|intel|ryzen))\b/i,

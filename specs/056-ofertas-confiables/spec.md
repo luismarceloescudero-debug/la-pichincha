@@ -31,6 +31,9 @@ sobre `https://pichinchadeldia.com.ar/indice.json`, antes y despues de cada PR.
   cambio, son un cambio de lista y no ofertas (`enLote` cuenta las que habrian sido oferta). Medido el umbral: con 10 junta
   52 de OnCity y una cuna de ComparaYa; ninguna otra tienda tenia mas de 6 ofertas iguales. Contar ±1 punto juntaba
   bajas chicas reales de Venex, Gaming City y ComparaYa: se descarto.
+- **Decision del dueño (01/11)**: un cambio de lista que deja el producto mas barato que en otras tiendas SI es oferta, por
+  la señal «contra el mismo modelo» (`contraModelo`, que no mira el lote). Test que lo fija. En el indice del 31/10 no habia
+  ninguno (0 de 310).
 - No se exige una semana de historia para «seguimiento»: el sello «k» es justo lo que tiene menos de una semana, y la
   regla de lote ya saca las 23 de OnCity.
 - Medido: con esta regla la pestaña pasa de 109 a 57 (OnCity de 58 a 7: quedan la HP 250 −14 %, las Acer TravelMate −13 % y −9 %, la
@@ -56,4 +59,21 @@ sobre `https://pichinchadeldia.com.ar/indice.json`, antes y despues de cada PR.
 
 ## 5. Titulos y 6. Premium (PR 4)
 
-Pendiente.
+- `js/titulo.js`: «Mhz», «SODIMM» y «DPI» sueltos son datos, no modelo («SODIMM MHZ ADATA» -> «ADATA», «RAPTOR STORM GRIP
+  8000 DPI» -> «RAPTOR STORM GRIP»); un codigo de dos letras vale con la sigla de la linea delante («COOLER MASTER MWE V3»);
+  «R7-7730U» y «U5-115U» son procesadores y van a las chips («LENOVO V15», «CX»); la marca de una linea que la tienda no
+  escribe va adelante («LENOVO THINKPAD T14 GEN 6»), sin repetirla; «Ordenador Portátil» es el tipo.
+- Los titulos truncados de OnCity («Sensor Apc Temperatura/ Hu», «BANCO BATERIAS APC EASY U») vienen asi en el indice: no se
+  inventa el resto. Salen de Ofertas por la regla de lote o por no ser tecnologia.
+- `js/categorias.js`: «portátil» solo es notebook como «ordenador/computadora portátil» (un megafono, un proyector o una
+  consola portatil no).
+- Medido: cambian 614 de 31.028 titulos o chips (2 %); revisados por muestreo.
+- `js/premium.js`: en una fuente, 750 W Gold suma 1 (no 3), PCIe 5.1 no suma y Platinum/Titanium suma 3 (fuentes premium:
+  44 % -> 9,5 %; la Cooler Master MWE V3 y la ASUS Prime 750W Gold dejan de serlo). En notebooks, «U7-366H» es Core Ultra 7
+  con NPU y la RTX 500/1000-5000 profesional suma 2: la HP ZBook pasa a premium (notebooks 11,9 % -> 12,7 %).
+- Queda para mirar: las placas de video salen premium en el 37 % (Componentes en total 11 %, dentro del ~25 %).
+
+## Resultado
+
+Pestaña Ofertas: 111 -> 46. `ofertas.json`: sin repetidas, OnCity 4 -> 2, sin la Usotso, con dos monitores contra el mismo
+modelo. Sigue: la pasada de pruebas con diseño (`web-design-reviewer` y `break-ui`, instaladas el 01/11) en otra sesion.
