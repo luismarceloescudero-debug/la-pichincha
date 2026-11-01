@@ -138,3 +138,13 @@ test("jerarquia (spec 055): entre tramos de 8 tarjetas va una banda de color con
   assert.match(html, /data-comparar-oferta="9"/);
   assert.match(html, /class="ocard[^"]* n-(heroe|fuerte|normal)/);
 });
+
+test("orden (056): «Mayor descuento» ordena toda la lista por descuento, sin volver a empezar con las rebajas publicadas", () => {
+  const pub = (nombre, precio, lista) => { const f = fila(nombre, precio, 0); f[5] = lista; return f; };
+  const { correr } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 97000, 100000),            // baja propia de 3 %
+                             fila("Celular Motorola Edge 50 8GB 256GB", 450000, 500000),                  // baja propia de 10 %
+                             pub("Celular Motorola G85 8GB 256GB", 300000, 400000)]);                     // publicada de 25 %
+  assert.deepEqual(JSON.parse(correr("JSON.stringify(ofertasFiltradas().map(o => Math.round(o.off * 100)))")), [25, 10]);
+  correr("OF.orden = 'precio'");
+  assert.deepEqual(JSON.parse(correr("JSON.stringify(ofertasFiltradas().map(o => o.f[1]))")), [300000, 450000]);
+});
