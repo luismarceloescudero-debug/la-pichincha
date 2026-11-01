@@ -194,7 +194,7 @@
      sin Windows 11 Pro, y las dos salieron). Con codigo de modelo, el codigo. Sin codigo, el nombre normalizado como lo
      compara el buscador, sin lo que no cambia el equipo: sistema operativo, color, «#» y «nuevo». Otra RAM, otro disco u
      otro procesador siguen siendo otro equipo. */
-  const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna)\b/g;
+  const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna|naranja|orange|verde|green|acero|ros[ae]|rosad[oa]|pink|violeta|purple|lila|amarill[oa]|yellow|celeste|turquesa|grafito|graphite)\b/g;
   const nombreFamilia = f => B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
   function familia(f) {
     if (f[9]) return "modelo:" + f[9];
@@ -204,9 +204,20 @@
   /* La ficha legible (spec 044): marca y modelo mas lo que define la compra. Dos tiendas que escriben distinto el mismo
      equipo («HP 250 C5-120U 16GB SSD512GB» y «HP 250 Core 5 120U 16GB 512GB», 30/10) dan la misma ficha. Solo cuenta si
      el titulo tiene un modelo (un numero) y hay al menos dos datos: «KINGSTON · 1 TB» no alcanza para decir que es lo mismo. */
+  /* En un componente o periferico el codigo que repite un dato («AP-750G» con 750 W) no agrega nada: la misma fuente sin el
+     codigo en el titulo («Fuente Asus Prime 750W 80 Plus Gold Modular», Mexx, 31/10) es la misma. Sin numero en el titulo hacen
+     falta tres datos: «ASUS PRIME · 750 W · 80+ Gold · Modular» dice que es; «KINGSTON · 1 TB» no. */
   function ficha(f) {
     const t = T.de(f[0]), datos = t.chips.filter(c => !/″|Usado|Reacondicionado/.test(c));
-    return /\d/.test(t.titulo) && datos.length >= 2 ? t.tipo + "|" + t.titulo + "|" + datos.join("|") : "";
+    const clave = titulo => t.tipo + "|" + titulo + "|" + datos.join("|");
+    if (t.categoria === "componente" || t.categoria === "periferico") {
+      const nums = new Set(datos.flatMap(c => c.match(/\d+/g) || []));
+      const repite = w => /[a-z]/i.test(w) && /\d/.test(w) && w.match(/\d+/g).every(n => nums.has(n));
+      const palabras = t.titulo.split(" "), sin = palabras.filter(w => !repite(w));
+      if (sin.length >= 2 && sin.length < palabras.length || !/\d/.test(t.titulo))
+        if (/\d/.test(sin.join(" ")) ? datos.length >= 2 : datos.length >= 3) return clave(sin.join(" "));
+    }
+    return /\d/.test(t.titulo) && datos.length >= 2 ? clave(t.titulo) : "";
   }
 
   /* El mismo producto con el titulo escrito distinto (23/10: «Auricular In-Ear Tronsmart Ony Ace Pro Blanco» y «Auricular

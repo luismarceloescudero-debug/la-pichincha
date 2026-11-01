@@ -1,0 +1,106 @@
+{
+ "_nota": "Indice publicado el 2026-10-31 13:36: la fuente ASUS Prime 750W Gold salio dos veces en ofertas.json (Mexx sin codigo de modelo, CompraGamer con 90YE00U1-B0SA00) y el Corsair SCUF Envision Pro blanco y naranja de FullH4rd salieron como dos destacadas.",
+ "generado": "2026-10-31T13:36-03:00",
+ "campos": [
+  "nombre",
+  "precio",
+  "url",
+  "tienda",
+  "via",
+  "lista",
+  "antes",
+  "imagen",
+  "sellos",
+  "modelo",
+  "desde",
+  "baja7",
+  "baja31",
+  "vendido"
+ ],
+ "tiendas": {
+  "mexx": {
+   "nombre": "Mexx",
+   "color": "mx",
+   "segunda": false,
+   "relevado": "2026-10-31T13:36-03:00"
+  },
+  "compragamer": {
+   "nombre": "CompraGamer",
+   "color": "cg",
+   "segunda": false,
+   "relevado": "2026-10-31T13:36-03:00"
+  },
+  "fullh4rd": {
+   "nombre": "FullH4rd",
+   "color": "fh",
+   "segunda": false,
+   "relevado": "2026-10-30T12:58-03:00"
+  }
+ },
+ "productos": [
+  [
+   "Fuente ASUS PRIME 750W 80 Plus Gold AP-750G Full Modular ATX 3.1 PCIe 5.1",
+   148000,
+   "https://compragamer.com/producto/Fuente_ASUS_PRIME_750W_80_Plus_Gold_AP_750G_Full_Modular_ATX_3_1_PCIe_5_1_21399",
+   "compragamer",
+   "",
+   0,
+   166600,
+   "https://imagenes.compragamer.com/productos/compragamer_Imganen_general_56551_Fuente_ASUS_PRIME_750W_80_Plus_Gold_AP-750G_Full_Modular_ATX_3.1_PCIe_5.1_1f0be02b-grn.jpg",
+   "",
+   "90YE00U1-B0SA00",
+   "2026-10-31",
+   11,
+   "",
+   0
+  ],
+  [
+   "Fuente Asus Prime 750W 80 Plus Gold Modular",
+   149999,
+   "https://www.mexx.com.ar/productos-rubro/fuentes-de-poder/49212-fuente-asus-prime-750w-80-plus-gold-modular.html",
+   "mexx",
+   "",
+   0,
+   184239,
+   "https://mexx-img-2019.s3.amazonaws.com/tumb_Fuente-Asus-Prime-750W-80-Plus-Gold-Modular_49212_1.jpeg",
+   "",
+   "",
+   "2026-10-31",
+   26,
+   "",
+   0
+  ],
+  [
+   "JOYSTICK GAMEPAD CORSAIR SCUF ENVISION PRO WIRELESS PC BLANCO",
+   114299,
+   "https://fullh4rd.com.ar/prod/33198/joystick-gamepad-corsair-scuf-envision-pro-wireless-pc-blanco",
+   "fullh4rd",
+   "",
+   0,
+   150000,
+   "",
+   "",
+   "",
+   "2026-10-30",
+   24,
+   "",
+   0
+  ],
+  [
+   "JOYSTICK GAMEPAD CORSAIR SCUF ENVISION PRO WIRELESS PC NARANJA",
+   114899,
+   "https://fullh4rd.com.ar/prod/33200/joystick-gamepad-corsair-scuf-envision-pro-wireless-pc-naranja",
+   "fullh4rd",
+   "",
+   0,
+   150000,
+   "",
+   "",
+   "",
+   "2026-10-30",
+   23,
+   "",
+   0
+  ]
+ ]
+}

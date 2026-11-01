@@ -601,3 +601,33 @@ test("codificar y decodificar: el resultado del Worker vuelve con las filas del 
   for (const f of d.contraModelo.keys()) assert.ok(d.gama.get(f), "las filas con oferta traen su gama");
   assert.deepEqual([d.descartadas, d.sospechosas, d.tachadoFijo], [r.descartadas, r.sospechosas, r.tachadoFijo]);
 });
+
+/* Spec 056: el indice publicado el 31/10 13:36 repitio la fuente ASUS Prime 750W Gold (Mexx sin codigo de modelo y
+   CompraGamer con 90YE00U1-B0SA00) y dos colores del mismo Corsair SCUF de FullH4rd. */
+const REPETIDAS = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "ofertas", "repetidas-2026-10-31.json"), "utf8"));
+const repetida = (tienda, re) => REPETIDAS.productos.find(f => f[3] === tienda && re.test(f[0]));
+
+test("ficha (056): la misma fuente con y sin el codigo en el titulo da la misma ficha, por sus datos", () => {
+  const mexx = repetida("mexx", /Asus Prime/), cg = repetida("compragamer", /AP-750G/);
+  assert.ok(O.ficha(mexx), "«ASUS PRIME» + 750 W + Gold + Modular alcanza para una ficha");
+  assert.equal(O.ficha(mexx), O.ficha(cg));
+  // otra certificacion u otra potencia siguen siendo otra fuente
+  assert.notEqual(O.ficha(fila("Fuente Asus Prime 750W 80 Plus Bronze Modular", 1)), O.ficha(mexx));
+  assert.notEqual(O.ficha(fila("Fuente Asus Prime 850W 80 Plus Gold Modular", 1)), O.ficha(mexx));
+  // sin numero en el titulo, dos datos no alcanzan (como «KINGSTON · 1 TB»)
+  assert.equal(O.ficha(fila("Fuente Asus Prime 750W 80 Plus Bronze", 1)), "");
+});
+
+test("familia (056): el mismo joystick en otro color (naranja, verde, acero) es la misma familia", () => {
+  const blanco = repetida("fullh4rd", /BLANCO/), naranja = repetida("fullh4rd", /NARANJA/);
+  assert.equal(O.familia(blanco), O.familia(naranja));
+  for (const color of ["VERDE", "ACERO", "ROSA", "VIOLETA", "AMARILLO", "CELESTE", "Orange", "Green", "Pink", "Purple"])
+    assert.equal(O.familia(fila("JOYSTICK GAMEPAD CORSAIR SCUF ENVISION PRO WIRELESS PC " + color, 1)), O.familia(blanco), color);
+  // «Gold» no es un color en una fuente: Bronze y Gold siguen separadas
+  assert.notEqual(O.familia(fila("Fuente Asus Prime 750W 80 Plus Gold", 1)), O.familia(fila("Fuente Asus Prime 750W 80 Plus Bronze", 1)));
+});
+
+test("destacadas (056): del indice del 31/10 sale una fuente ASUS Prime (la mas barata) y un solo SCUF", () => {
+  const lista = O.destacadas(REPETIDAS, 10);
+  assert.deepEqual(lista.map(o => [o.f[3], o.f[1]]).sort(), [["compragamer", 148000], ["fullh4rd", 114299]]);
+});

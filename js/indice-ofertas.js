@@ -107,9 +107,10 @@ function ofertasFiltradas() {
   if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
   const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
                 precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
-  // Cuando se ven todas, las bajas (propias y en seguimiento, que dicen su historial) van primero, y las rebajas publicadas despues.
+  // Un solo orden para toda la lista (056): antes las bajas iban primero y las rebajas publicadas despues, y al cargar mas
+  // volvian a aparecer tarjetas de 26 % y 19 % detras de las de 3 %. A igual valor, las bajas (que dicen su historial) primero.
   const rango = { propia: 0, seguimiento: 0, publicada: 1 };
-  return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? rango[a.tipo] - rango[b.tipo] : por(a, b));
+  return [...l].sort((a, b) => por(a, b) || rango[a.tipo] - rango[b.tipo]);
 }
 
 function controlesOfertas(todas) {
