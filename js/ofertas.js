@@ -70,12 +70,21 @@
   const DESCUENTO_SEGUIMIENTO_MAX = 0.4;
   const enSeguimiento = f => typeof f[8] === "string" && f[8].includes("k");
 
+  /* Una tienda que baja muchos avisos con el mismo porcentaje el mismo dia cambio su lista de precios: no son ofertas (31/10,
+     OnCity: 148 avisos −3 %, 62 −5 % y 28 −11 %, y eran 58 de las 111 ofertas de la pestaña). Diez o mas bajas con el mismo
+     porcentaje entero, la misma tienda y la misma fecha de cambio. En el indice del 31/10 solo junta lotes de OnCity (y una
+     cuna de ComparaYa); ninguna otra tienda tenia mas de 6 ofertas iguales. */
+  const LOTE_MIN = 10;
+  const claveLote = f => f[3] + "|" + (f[10] || "") + "|" + Math.round((1 - f[1] / f[6]) * 100);
+
   function calcularOfertas(idx) {
     const propias = [], publicadas = [], seguimiento = [];
-    let descartadas = 0, tachadoFijo = 0, sospechosas = 0;
+    let descartadas = 0, tachadoFijo = 0, sospechosas = 0, enLote = 0;
     const hoy = Date.parse(String(idx.generado || "").slice(0, 10));
     const ref = C.referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
+    const lotes = new Map();
+    for (const f of filas) if (f[6] > f[1]) lotes.set(claveLote(f), (lotes.get(claveLote(f)) || 0) + 1);
     // El mismo producto (mismo codigo de modelo) publicado por otra tienda con mas datos: una tienda que no escribe la RAM o los
     // Hz en el titulo no deja afuera a un modelo cuya ficha otra si trae. Solo se mira a otra cuando a esta le falta el dato.
     const porModelo = new Map();
@@ -141,7 +150,10 @@
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer + EPS >= d.propia) {
         // Una baja de mas de 60% (de 40% si la trae un agregador, que arrastra precios viejos) es mas facil un error de carga que
         // una oferta: 31/10, una RTX 5080 «−70 %» y una 5070 Ti a $1.330.114 las dos, via ComparaYa. No es oferta ni se repite abajo.
-        if (1 - f[1] / ayer > (f[3] === AGREGADOR ? DESCUENTO_SEGUIMIENTO_MAX : DESCUENTO_MAX)) { sospechosas++; continue; }
+        // Mercado Libre tambien topa en 40% (056): sus paginas /p/ cambian de vendedor y la verificacion en la fuente falla en
+        // 42 de 183 (31/10: unos auriculares Usotso SA-723 «−51 %», $297.998 -> $147.053).
+        if (1 - f[1] / ayer > (f[3] === AGREGADOR || esMercadoLibre(f[2]) ? DESCUENTO_SEGUIMIENTO_MAX : DESCUENTO_MAX)) { sospechosas++; continue; }
+        if (lotes.get(claveLote(f)) >= LOTE_MIN) { enLote++; continue; }
         if (enSeguimiento(f)) { if (1 - f[1] / ayer <= DESCUENTO_SEGUIMIENTO_MAX) seguimiento.push(f); }
         else propias.push(f);
         continue;                     // una baja propia ya es noticia: no la repito abajo
@@ -182,7 +194,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas, ...seguimiento].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas, ...seguimiento].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, seguimiento, descartadas, sospechosas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, seguimiento, descartadas, sospechosas, enLote, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -287,7 +299,7 @@
     const mapa = m => [...m].map(([f, v]) => [ix(f), v]);
     const conGama = new Set([...r.categorias.keys(), ...r.contraModelo.keys(), ...r.cruceGen.keys()]);
     return { propias: r.propias.map(ix), publicadas: r.publicadas.map(ix), seguimiento: r.seguimiento.map(ix),
-      descartadas: r.descartadas, sospechosas: r.sospechosas, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
+      descartadas: r.descartadas, sospechosas: r.sospechosas, enLote: r.enLote, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
       cruces: [...r.cruces].map(ix), vigentes: [...r.vigentes].map(ix), contra: mapa(r.contra), notas: mapa(r.notas),
       categorias: mapa(r.categorias), masBarato: [...r.masBarato].map(([f, o]) => [ix(f), ix(o)]),
       contraModelo: mapa(r.contraModelo), cruceGen: mapa(r.cruceGen), gama: [...conGama].map(f => [ix(f), r.gama.get(f)]) };
@@ -296,14 +308,14 @@
     const fila = i => productos[i], lista = a => a.map(fila), set = a => new Set(lista(a));
     const mapa = a => new Map(a.map(([i, v]) => [productos[i], v]));
     return { propias: lista(c.propias), publicadas: lista(c.publicadas), seguimiento: lista(c.seguimiento), descartadas: c.descartadas,
-      sospechosas: c.sospechosas, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
+      sospechosas: c.sospechosas, enLote: c.enLote, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
       contra: mapa(c.contra), notas: mapa(c.notas), categorias: mapa(c.categorias),
       masBarato: new Map(c.masBarato.map(([i, o]) => [productos[i], productos[o]])),
       contraModelo: mapa(c.contraModelo), cruceGen: mapa(c.cruceGen), gama: mapa(c.gama) };
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, ficha, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, LOTE_MIN, familia, ficha, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

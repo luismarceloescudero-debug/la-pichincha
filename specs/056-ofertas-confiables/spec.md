@@ -25,11 +25,21 @@ sobre `https://pichinchadeldia.com.ar/indice.json`, antes y despues de cada PR.
 
 ## 2. OnCity en masa (PR 2)
 
-Pendiente.
+- El 31/10 OnCity bajo casi toda su lista con el mismo porcentaje: 148 avisos −3 %, 62 −5 %, 28 −11 %, 15 −4 % (todos con
+  `desde` = 31/10). Eran 58 de las 111 ofertas de la pestaña y 4 de las 10 de `ofertas.json`.
+- Regla (`LOTE_MIN` en `js/ofertas.js`): diez o mas bajas de la misma tienda, con el mismo porcentaje entero y la misma fecha de
+  cambio, son un cambio de lista y no ofertas (`enLote` cuenta las que habrian sido oferta). Medido el umbral: con 10 junta
+  52 de OnCity y una cuna de ComparaYa; ninguna otra tienda tenia mas de 6 ofertas iguales. Contar ±1 punto juntaba
+  bajas chicas reales de Venex, Gaming City y ComparaYa: se descarto.
+- No se exige una semana de historia para «seguimiento»: el sello «k» es justo lo que tiene menos de una semana, y la
+  regla de lote ya saca las 23 de OnCity.
+- Medido: con esta regla la pestaña pasa de 109 a 57 (OnCity de 58 a 7: quedan la HP 250 −14 %, las Acer TravelMate −13 % y −9 %, la
+  ThinkPad E14 −6 % y las Dell −10 %, que bajaron solas); `ofertas.json` pasa de 4 a 2 de OnCity.
 
 ## 4. Baja dudosa de Mercado Libre (PR 2)
 
-Pendiente.
+- Auriculares Usotso SA-723 «−51 %» ($297.998 -> $147.053), pagina /p/ multivendedor; la verificacion de ML falla en 42/183.
+- Las bajas propias de Mercado Libre topan en 40 %, como las de un agregador (`sospechosas`). Medido: sale solo la Usotso (57 -> 56 en la pestaña; deja `ofertas.json`).
 
 ## 3. No es hardware (PR 3)
 
