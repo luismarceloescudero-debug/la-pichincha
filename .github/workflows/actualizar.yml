@@ -220,6 +220,22 @@ jobs:
             python generar_paginas.py --indice indice.json --salida _sitio
           fi
 
+      # Un producto puede salir de la tienda entre el relevamiento y la publicacion (31/10: una RTX 3050 de Max Tecno y dos de
+      # Gaming City daban 404 en /precios/), y un push publica con el indice de la cache. Se abre cada enlace a tienda de las
+      # paginas (~2.800, unos 3 min, 4 a la vez por tienda) y solo lo que la tienda contesta 404 o 410 sale del indice; despues
+      # se rearman las paginas y la copia del indice del sitio. Lo demas (bloqueos, demoras) se publica como estaba.
+      - name: Sacar los enlaces rotos de /precios/
+        if: hashFiles('indice.json') != ''
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          python enlaces_rotos.py --sitio _sitio --salida rotos.json
+          if [ "$(python -c 'import json;print(len(json.load(open("rotos.json"))))')" != "0" ]; then
+            python filtrar_indice.py indice.json rotos.json
+            cp indice.json _sitio/
+            python generar_paginas.py --indice indice.json --salida _sitio
+          fi
+
       # Las series de precio por aviso (plan v2, D2): un fragmento chico por cada 1/64 de los avisos, que la pagina baja solo al
       # abrir el historial de uno. Salen del historial y del indice final (ya sin las ofertas caidas). Si falla, el sitio sale
       # igual y el boton dice que no pudo cargar.
