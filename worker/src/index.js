@@ -100,8 +100,9 @@ export function armarAcuse(para, remitente) {
 }
 
 // Un error (400, 404, 429) no se guarda: un «demasiadas busquedas» no tiene que quedar 15 minutos en el navegador.
+// Es una API JSON: sin referrer, y una CSP que no deja cargar nada si alguien la abre como pagina (057).
 const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { status: estado,
-  headers: { "Content-Type": "application/json; charset=utf-8", "X-Content-Type-Options": "nosniff", "Cache-Control": estado >= 400 ? "no-store" : "public, max-age=900", ...extra } });
+  headers: { "Content-Type": "application/json; charset=utf-8", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'", "Cache-Control": estado >= 400 ? "no-store" : "public, max-age=900", ...extra } });
 
 /* Atiende un pedido. deps: fetch, cache (con match/put, la Cache API), ahora() en ISO, tiempoMaximo por fuente en ms y
    crearMensaje(de, para, crudo), que arma el EmailMessage de cloudflare:email (en los tests, uno falso).

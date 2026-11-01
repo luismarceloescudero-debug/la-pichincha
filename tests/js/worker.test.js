@@ -312,6 +312,8 @@ test("una busqueda con una fuente caida se guarda 15 minutos, no 8 horas; un err
   assert.equal(malo.status, 400);
   assert.equal(malo.headers.get("Cache-Control"), "no-store");
   assert.equal(malo.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(malo.headers.get("Referrer-Policy"), "no-referrer");
+  assert.equal(malo.headers.get("Content-Security-Policy"), "default-src 'none'; frame-ancestors 'none'");
 });
 
 test("AliExpress y eBay juntos: se mezclan por precio", async () => {
