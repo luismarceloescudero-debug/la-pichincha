@@ -56,7 +56,7 @@ test("sin ofertas el feed sale igual, vacio y bien formado", () => {
 });
 
 test("el feed trae como mucho 20 entradas", () => {
-  const muchas = Array.from({ length: 30 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));   // cada una con su porcentaje: muchas iguales son un lote (056)
+  const muchas = Array.from({ length: 30 }, (_, i) => fila("Tablet Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));   // cada una con su porcentaje: muchas iguales son un lote (056)
   const xml = F.renderFeed({ ...IDX, productos: muchas }, { baseUrl: BASE });
   assert.equal((xml.match(/<item>/g) || []).length, 20);
 });
@@ -171,15 +171,15 @@ test("una oferta de gama alta al precio de la media lo dice en la descripcion de
 
 test("sin las publicaciones caidas: no entran al feed, a /hoy/ ni a la lista del canal, y entra la que sigue", () => {
   const caida = "https://t.test/caida";
-  const idx = { ...IDX, productos: [fila("Caida", 70000, { antes: 100000, url: caida }),
-                                    fila("Siguiente", 80000, { antes: 100000 }), ...IDX.productos] };
+  const idx = { ...IDX, productos: [fila("Tablet Caida", 70000, { antes: 100000, url: caida }),
+                                    fila("Tablet Siguiente", 80000, { antes: 100000 }), ...IDX.productos] };
   const sin = F.sinCaidas(idx, [caida]);
   assert.equal(sin.productos.some(f => f[2] === caida), false);
   assert.equal(idx.productos.some(f => f[2] === caida), true);     // el indice original no se toca
   assert.equal(F.listaParaCanal(sin, 10).some(o => o.url === caida), false);
   assert.equal(F.renderFeed(sin, { baseUrl: BASE }).includes("caida"), false);
   assert.equal(F.renderHoy(sin, { baseUrl: BASE }).includes("caida"), false);
-  assert.equal(F.listaParaCanal(sin, 10).some(o => o.nombre === "Siguiente"), true);
+  assert.equal(F.listaParaCanal(sin, 10).some(o => o.nombre === "Tablet Siguiente"), true);
 });
 
 test("sinCaidas sin lista devuelve el mismo indice", () => {
@@ -214,7 +214,7 @@ test("main sin --descartadas, o con el archivo roto, publica todo como antes", (
 test("main con --candidatas escribe solo la lista a verificar (hasta --max) y no genera el sitio", () => {
   const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
-  const muchas = Array.from({ length: 12 }, (_, i) => fila("Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));
+  const muchas = Array.from({ length: 12 }, (_, i) => fila("Tablet Producto " + i, 8000 + i, { antes: 10000 + i * 300 }));
   fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ ...IDX, productos: muchas }));
   F.main(["--indice", path.join(dir, "indice.json"), "--salida", path.join(dir, "s"),
           "--candidatas", path.join(dir, "c.json"), "--max", "5"]);
@@ -232,11 +232,11 @@ test("--candidatas ya sin las descartadas: la siguiente candidata ocupa el lugar
   const fs = require("node:fs"), os = require("node:os"), path = require("node:path");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "feed-"));
   const caida = "https://t.test/caida";
-  const idx = { ...IDX, productos: [fila("Caida", 70000, { antes: 100000, url: caida }), fila("Otra", 80000, { antes: 100000 })] };
+  const idx = { ...IDX, productos: [fila("Tablet Caida", 70000, { antes: 100000, url: caida }), fila("Tablet Otra", 80000, { antes: 100000 })] };
   fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify(idx));
   fs.writeFileSync(path.join(dir, "d.json"), JSON.stringify([caida]));
   F.main(["--indice", path.join(dir, "indice.json"), "--descartadas", path.join(dir, "d.json"), "--candidatas", path.join(dir, "c.json")]);
-  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8")).ofertas.map(o => o.nombre), ["Otra"]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, "c.json"), "utf8")).ofertas.map(o => o.nombre), ["Tablet Otra"]);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
