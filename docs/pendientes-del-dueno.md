@@ -188,7 +188,7 @@ afiliado. El código ya está hecho y probado con respuestas de ejemplo; **falta
 1. Creá la cuenta de desarrollador: https://developer.ebay.com/ (da 403 a programas automáticos; en el navegador abre).
 2. En «Application Keys» (https://developer.ebay.com/my/keys, pide iniciar sesión) generá el **keyset de Production**.
    Copiá `App ID (Client ID)` y `Cert ID (Client Secret)`.
-3. Afiliados: https://partnernetwork.ebay.com/ (abre bien) → «Join now» (https://partnernetwork.ebay.com/page/join).
+3. Afiliados: https://partnernetwork.ebay.com/ (abre bien) → «Join now» (https://partner.ebay.com/campaign-promo-signup/eBay-Partner-Network.brand).
    Cuando te aprueben, creá una campaña y copiá su número (`Campaign ID`). Es opcional: sin él, Afuera anda sin comisión.
 4. Cargá los secretos en el repo: **Settings → Secrets and variables → Actions → New repository secret**
    (https://github.com/luismarceloescudero-debug/la-pichincha/settings/secrets/actions, pide iniciar sesión).
