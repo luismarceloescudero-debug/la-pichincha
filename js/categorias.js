@@ -54,11 +54,11 @@
     // el monitor que viene dentro de un equipo o un lote no es un monitor
     equipoConMonitor: /^\s*(?:pc|computadora|computador|combo|kit|notebook|all\s?in\s?one|mini\s?pc|escritorio|puesto)\b/i,
     pc: /^\s*(?:pc|computadora|computador|all\s?in\s?one|mini\s?pc|equipo\s+armado)\b/i,
-    periferico: /^\s*combo\b.*\b(?:teclado|mouse|auricular)|^\s*(?:mouse|teclado|auricular|auriculares|headset|webcam|camara\s+web|parlante|parlantes|joystick|gamepad|control|mousepad|pad|microfono|silla|alfombrilla|volante|capturadora|impresora|router|switch|placa\s+de\s+sonido)\b/i,
-    notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|portatil|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
+    periferico: /^\s*(?:combo|kit)\b.*\b(?:teclado|mouse|auricular)|^\s*(?:mouse|teclado|auricular|auriculares|headset|webcam|camara\s+web|parlante|parlantes|joystick|gamepad|control|mousepad|pad|microfono|silla|alfombrilla|volante|capturadora|impresora|router|switch|placa\s+de\s+sonido)\b/i,
+    notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|port[aá]til|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
     smartphone: /\b(celular|smartphone|telefono|movil|iphone|redmi|poco\s?[a-z]\d|moto\s?(?:[gex]\d|edge|razr)|motorola\s+(?:edge|razr)|galaxy\s?(?:[samf]\d|z\s?(?:fold|flip))|honor\s?(?:\d|x\d|magic)|oppo\s?(?:reno|a\d|find)|vivo\s?[vyx]\d|oneplus|nothing\s+phone|zte\s?(?:blade|nubia)|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,
     // por el principio del titulo (antes que notebook/smartphone: "Memoria RAM Notebook SODIMM" es una memoria)
-    componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:amd|intel|ryzen))\b/i,
+    componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|mother(?:board)?|placa\s+madre|water\s?cool(?:er|ing)|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:amd|intel|ryzen))\b/i,
     componente: /\b(?:ddr[345]|nvme|geforce|radeon|rtx|gtx|lga\s?\d{3,4})\b/i
   };
 
@@ -75,6 +75,15 @@
     if (RE.componente.test(n)) return "componente";
     return "otro";
   }
+
+  /* Lo que cae en «otro» solo es oferta si es tecnologia (spec 056): el 31/10 la pestaña Ofertas mostraba tabletas
+     lavavajilla, una desmalezadora, una cuna, un destornillador, una tira de LED, un sillon y un smartwatch. Lista blanca
+     (TV, tablet, consola, proyector, UPS, red, audio, almacenamiento y lo que nombra hardware), y antes una lista negra para
+     lo que nombra una consola sin serlo («Sillón Gamer Ideal P/ Playstation»). Se mira sin tildes. */
+  const NO_TECNOLOGIA = /\b(?:sillon|cuna|destornillador(?:es)?|lavavajilla|desmalezadora|motoguadana|smartwatch|smart\s?band|reloj|tira\s+de\s+led)\b/;
+  const TECNOLOGIA = /\b(?:smart\s?tv|televisor|tv|tablet|ipad|kindle|tableta\s+(?:samsung|galaxy|lenovo|apple|xiaomi|amazon|tcl|huawei|motorola|alcatel)|consola|playstation|ps5|xbox|nintendo|proyector|ups|estabilizador|rack|pdu|nas|router|extensor|repetidor|access\s?point|mesh|wi-?fi|pendrive|usb|parlantes?|bafle|barra\s+de\s+sonido|soundbar|gabinete|ryzen|intel\s+core|nvidia|geforce|radeon|teclado|mouse)\b/;
+  const sinTildes = n => String(n).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const esTecnologia = nombre => { const n = sinTildes(nombre); return !NO_TECNOLOGIA.test(n) && TECNOLOGIA.test(n); };
 
   /* --- Que dice el titulo ------------------------------------------------- */
   const aGB = (n, u) => Math.round(parseFloat(n) * (/t/i.test(u) ? 1000 : 1));
@@ -307,7 +316,7 @@
     return ok(c, null);
   }
 
-  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, memoriaDe, hzDe, panelDe, pulgadasDe, aspectosDe, generacionesDe, aniosDe, referencia, evaluar };
+  const api = { ORDEN, ETIQUETAS, ETIQUETA, DESCUENTO, CUPO, MIN, categoriaDe, esTecnologia, memoriaDe, hzDe, panelDe, pulgadasDe, aspectosDe, generacionesDe, aniosDe, referencia, evaluar };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Categorias = api;
 })(this);

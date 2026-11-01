@@ -43,7 +43,16 @@ sobre `https://pichinchadeldia.com.ar/indice.json`, antes y despues de cada PR.
 
 ## 3. No es hardware (PR 3)
 
-Pendiente.
+- En «Otros» habia tabletas lavavajilla Sun, una desmalezadora, una cuna, un kit de destornilladores, una tira de LED, un
+  sillon «gamer» y un smartwatch; y hardware mal clasificado: una motherboard, dos watercoolings, un kit de teclado y
+  mouse y una Lenovo Yoga escrita «Ordenador Portátil» (con tilde).
+- `categoriaDe()` (`js/categorias.js`): motherboard, placa madre y watercooling son componentes; «kit … teclado/mouse» es
+  periferico; «portátil» con tilde es notebook.
+- `esTecnologia()`: lo que queda en «otro» solo es oferta si nombra tecnologia (TV, tablet, consola, proyector, UPS, red,
+  audio, almacenamiento, gabinete, procesador o placa). Antes, una lista negra para lo que nombra una consola sin serlo
+  («Sillón Gamer Ideal P/ Playstation»). Se cuentan en `noTecnologia`. No cambia el buscador: solo las ofertas.
+- Medido: la pestaña pasa de 56 a 46; «Otros» de 29 a 16, todo tecnologia. La motherboard (−15 %), un watercooling
+  (−12 %) y la Yoga siguen como oferta, ahora en su rubro.
 
 ## 5. Titulos y 6. Premium (PR 4)
 

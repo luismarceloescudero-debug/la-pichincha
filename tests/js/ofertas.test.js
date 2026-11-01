@@ -8,34 +8,34 @@ const fila = (nombre, precio, { lista = 0, antes = 0, sellos = "", url } = {}) =
   [nombre, precio, url || "https://t.test/" + encodeURIComponent(nombre), "cg", "", lista, antes, "", sellos, ""];
 
 test("una baja propia de al menos 3% y mil pesos es oferta propia", () => {
-  const idx = { productos: [fila("A", 9000, { antes: 10000 }), fila("B", 9900, { antes: 10000 }),
-                            fila("C", 99500, { antes: 100000 }), fila("D", 50000)] };
+  const idx = { productos: [fila("Tablet A", 9000, { antes: 10000 }), fila("Tablet B", 9900, { antes: 10000 }),
+                            fila("Tablet C", 99500, { antes: 100000 }), fila("Tablet D", 50000)] };
   const { propias, publicadas } = O.calcularOfertas(idx);
-  assert.deepEqual(propias.map(f => f[0]), ["A"]);          // B baja 1%, C baja 0,5%: no
+  assert.deepEqual(propias.map(f => f[0]), ["Tablet A"]);          // B baja 1%, C baja 0,5%: no
   assert.deepEqual(publicadas, []);
 });
 
 test("una rebaja publicada va entre 15% y 60% y desde 15.000 pesos; una propia no se repite como publicada", () => {
-  const idx = { productos: [fila("X", 20000, { lista: 30000 }), fila("Y", 20000, { lista: 21000 }),
-                            fila("Z", 10000, { lista: 20000 }), fila("W", 20000, { lista: 100000 }),
-                            fila("V", 20000, { lista: 30000, antes: 25000 })] };
+  const idx = { productos: [fila("Tablet X", 20000, { lista: 30000 }), fila("Tablet Y", 20000, { lista: 21000 }),
+                            fila("Tablet Z", 10000, { lista: 20000 }), fila("Tablet W", 20000, { lista: 100000 }),
+                            fila("Tablet V", 20000, { lista: 30000, antes: 25000 })] };
   const { propias, publicadas } = O.calcularOfertas(idx);
-  assert.deepEqual(publicadas.map(f => f[0]), ["X"]);       // Y poco, Z bajo el piso, W sospechosa
-  assert.deepEqual(propias.map(f => f[0]), ["V"]);
+  assert.deepEqual(publicadas.map(f => f[0]), ["Tablet X"]);       // Y poco, Z bajo el piso, W sospechosa
+  assert.deepEqual(propias.map(f => f[0]), ["Tablet V"]);
 });
 
 test("destacadas: primero las bajas propias, despues las publicadas, cada grupo por descuento", () => {
-  const idx = { productos: [fila("pub-20", 24000, { lista: 30000 }), fila("pub-40", 18000, { lista: 30000 }),
-                            fila("prop-10", 9000, { antes: 10000 }), fila("prop-30", 7000, { antes: 10000 })] };
-  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["prop-30", "prop-10", "pub-40", "pub-20"]);
+  const idx = { productos: [fila("Tablet pub-20", 24000, { lista: 30000 }), fila("Tablet pub-40", 18000, { lista: 30000 }),
+                            fila("Tablet prop-10", 9000, { antes: 10000 }), fila("Tablet prop-30", 7000, { antes: 10000 })] };
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Tablet prop-30", "Tablet prop-10", "Tablet pub-40", "Tablet pub-20"]);
   assert.deepEqual(O.destacadas(idx).map(o => o.tipo), ["propia", "propia", "publicada", "publicada"]);
   assert.equal(O.destacadas(idx, 2).length, 2);
 });
 
 test("destacadas deja afuera los enlaces que no son http(s)", () => {
-  const idx = { productos: [fila("js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
-                            fila("ok", 8000, { antes: 10000 })] };
-  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["ok"]);
+  const idx = { productos: [fila("Tablet js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
+                            fila("Tablet ok", 8000, { antes: 10000 })] };
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Tablet ok"]);
 });
 
 test("lo usado o de caja abierta no es oferta: ni en la lista ni en las destacadas", () => {
@@ -52,7 +52,7 @@ test("lo usado o de caja abierta no es oferta: ni en la lista ni en las destacad
 });
 
 test("destacadas trae el descuento y el ahorro de cada una", () => {
-  const [o] = O.destacadas({ productos: [fila("A", 7500, { antes: 10000 })] });
+  const [o] = O.destacadas({ productos: [fila("Tablet A", 7500, { antes: 10000 })] });
   assert.equal(Math.round(o.off * 100), 25);
   assert.equal(o.ahorro, 2500);
   assert.equal(o.antes, 10000);
@@ -127,9 +127,9 @@ test("lo que no llega al piso de gama no es oferta y se cuenta aparte", () => {
 });
 
 test("las compras internacionales no quedan afuera de destacadas: van despues de las locales y rotuladas", () => {
-  const idx = { productos: [fila("intl", 7000, { antes: 10000, sellos: "i" }), fila("local", 8000, { antes: 10000 })] };
+  const idx = { productos: [fila("Tablet intl", 7000, { antes: 10000, sellos: "i" }), fila("Tablet local", 8000, { antes: 10000 })] };
   const d = O.destacadas(idx);
-  assert.deepEqual(d.map(o => o.f[0]), ["local", "intl"]);
+  assert.deepEqual(d.map(o => o.f[0]), ["Tablet local", "Tablet intl"]);
   assert.deepEqual(d.map(o => !!o.internacional), [false, true]);
 });
 
@@ -570,10 +570,10 @@ test("destacadas: el mismo equipo con el procesador escrito distinto en dos tien
 
 test("una baja propia de mas de 60% no es oferta, y de mas de 40% tampoco si la trae un agregador (31/10: RTX 5080 «−70 %»)", () => {
   const ag = (n, precio, antes) => [n, precio, "https://t.test/" + n, "comparaya", "", 0, antes, "", "", ""];
-  const idx = { productos: [fila("grande", 3000, { antes: 10000 }), fila("normal", 6000, { antes: 10000 }),
-                            ag("agregador-46", 5400, 10000), ag("agregador-30", 7000, 10000)] };
+  const idx = { productos: [fila("Tablet grande", 3000, { antes: 10000 }), fila("Tablet normal", 6000, { antes: 10000 }),
+                            ag("Tablet agregador-46", 5400, 10000), ag("Tablet agregador-30", 7000, 10000)] };
   const r = O.calcularOfertas(idx);
-  assert.deepEqual(r.propias.map(f => f[0]), ["normal", "agregador-30"]);
+  assert.deepEqual(r.propias.map(f => f[0]), ["Tablet normal", "Tablet agregador-30"]);
   assert.equal(r.sospechosas, 2);
 });
 
@@ -655,4 +655,11 @@ test("Mercado Libre (056): una baja propia de mas de 40 % es dudosa (paginas /p/
   const ml = (n, precio) => [n, precio, "https://www.mercadolibre.com.ar/" + n + "/p/MLA1", "mercadolibre", "", 0, 100000, "", "", ""];
   assert.deepEqual(O.calcularOfertas({ productos: [ml("auriculares-hyperx-cloud-38", 62000), ml("auriculares-hyperx-cloud-45", 55000)] }).propias.map(f => f[0]),
                    ["auriculares-hyperx-cloud-38"]);
+});
+
+test("no es hardware (056): lo que cae en «Otros» y no es tecnologia no es oferta, aunque baje", () => {
+  const r = O.calcularOfertas({ productos: [fila("Sun Tabletas Lavavajilla Pro Expert 4 en 1 X38 Lavado Y Brillo", 16960, { antes: 20400 }),
+                                            fila("Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz", 1252000, { antes: 1500000 })] });
+  assert.deepEqual(r.propias.map(f => f[0]), ["Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz"]);
+  assert.equal(r.noTecnologia, 1);
 });

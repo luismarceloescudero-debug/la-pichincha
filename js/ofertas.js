@@ -79,7 +79,7 @@
 
   function calcularOfertas(idx) {
     const propias = [], publicadas = [], seguimiento = [];
-    let descartadas = 0, tachadoFijo = 0, sospechosas = 0, enLote = 0;
+    let descartadas = 0, tachadoFijo = 0, sospechosas = 0, enLote = 0, noTecnologia = 0;
     const hoy = Date.parse(String(idx.generado || "").slice(0, 10));
     const ref = C.referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
@@ -145,6 +145,7 @@
     for (const f of filas) {
       const g = gama.get(f);
       if (!g.pasa || masBarato.has(f)) { descartadas++; continue; }
+      if (g.categoria === "otro" && !C.esTecnologia(f[0])) { noTecnologia++; continue; }   // 056: ni lavavajilla ni desmalezadora
       const d = C.DESCUENTO[g.categoria];
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer + EPS >= d.propia) {
@@ -194,7 +195,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas, ...seguimiento].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas, ...seguimiento].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, seguimiento, descartadas, sospechosas, enLote, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, seguimiento, descartadas, sospechosas, enLote, noTecnologia, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -299,7 +300,7 @@
     const mapa = m => [...m].map(([f, v]) => [ix(f), v]);
     const conGama = new Set([...r.categorias.keys(), ...r.contraModelo.keys(), ...r.cruceGen.keys()]);
     return { propias: r.propias.map(ix), publicadas: r.publicadas.map(ix), seguimiento: r.seguimiento.map(ix),
-      descartadas: r.descartadas, sospechosas: r.sospechosas, enLote: r.enLote, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
+      descartadas: r.descartadas, sospechosas: r.sospechosas, enLote: r.enLote, noTecnologia: r.noTecnologia, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
       cruces: [...r.cruces].map(ix), vigentes: [...r.vigentes].map(ix), contra: mapa(r.contra), notas: mapa(r.notas),
       categorias: mapa(r.categorias), masBarato: [...r.masBarato].map(([f, o]) => [ix(f), ix(o)]),
       contraModelo: mapa(r.contraModelo), cruceGen: mapa(r.cruceGen), gama: [...conGama].map(f => [ix(f), r.gama.get(f)]) };
@@ -308,7 +309,7 @@
     const fila = i => productos[i], lista = a => a.map(fila), set = a => new Set(lista(a));
     const mapa = a => new Map(a.map(([i, v]) => [productos[i], v]));
     return { propias: lista(c.propias), publicadas: lista(c.publicadas), seguimiento: lista(c.seguimiento), descartadas: c.descartadas,
-      sospechosas: c.sospechosas, enLote: c.enLote, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
+      sospechosas: c.sospechosas, enLote: c.enLote, noTecnologia: c.noTecnologia, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
       contra: mapa(c.contra), notas: mapa(c.notas), categorias: mapa(c.categorias),
       masBarato: new Map(c.masBarato.map(([i, o]) => [productos[i], productos[o]])),
       contraModelo: mapa(c.contraModelo), cruceGen: mapa(c.cruceGen), gama: mapa(c.gama) };

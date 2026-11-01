@@ -259,3 +259,28 @@ test("MIN: los minimos de gama media estan en un solo lugar y son los del dueño
   assert.equal(ev("Celular Moto G05 4GB/128GB").pasa, false);
   assert.equal(ev("Celular Moto G15 6GB/64GB").pasa, false);
 });
+
+/* Spec 056: en Ofertas del 31/10 habia tabletas lavavajilla, una desmalezadora, una cuna y un destornillador, y hardware
+   que caia en «Otros» (una motherboard, watercoolings, una notebook escrita «Portátil»). */
+test("categoria (056): motherboard, watercooling y «Portátil» con tilde son lo que son", () => {
+  assert.equal(C.categoriaDe("Motherboard Gigabyte A520i Ac Socket Am4 Color Negro"), "componente");
+  assert.equal(C.categoriaDe("Placa Madre ASUS Prime B650M-A"), "componente");
+  assert.equal(C.categoriaDe("Watercooling Evolabs Cryogene Pro 240 Argb"), "componente");
+  assert.equal(C.categoriaDe("Ordenador Portátil Lenovo Yoga 7i 14 2k Oled I5-322 16 Gb 512 Gb"), "notebook");
+  assert.equal(C.categoriaDe("Kit teclado y mouse Trust Ody II blanco 25467"), "periferico");
+});
+
+test("esTecnologia (056): en «Otros» queda la tecnologia (TV, tablet, proyector, UPS, router) y no el resto", () => {
+  for (const n of ["Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz", "Televisor 43 Smart Philips FHD Titan Os 43PDF6910 Negro",
+                   "Tablet Blackview Link 8 127 18gb 256gb Android 15", "Tableta Samsung Galaxy Tab S10 Fe Plus De 128 Gb 8 Gb De Ram",
+                   "Proyector Yaber L2 Plus 1080P JBL Dolby Audio con Netflix CBK0037", "UPS Forza NT-1002A Int. 1000VA/500W 45-65Hz",
+                   "Extensor De Wi-fi 5 Tp-link Re305 Ac1200 Dual Band", "Combo Actualización AMD Ryzen 7 5700G 16GB",
+                   "Bafle Activo Mut MT-30A 850R RMS 30\" TWS", "Evolabs Luma X Evo-320Ab - Gabinete Gaming Con 4 Ventiladores Argb",
+                   "Consola PlayStation 5 Slim 1TB", "USB Kingston 128GB DataTraveler MicroDuo 3C"])
+    assert.ok(C.esTecnologia(n), n);
+  for (const n of ["Sun Tabletas Lavavajilla Pro Expert 4 en 1 X38 Lavado Y Brillo", "Tabletas para Maquina Lavavajilla Sun 3 en 1 20 unidades",
+                   "Desmalezadora motoguadaña multifunción 4en1 Montana mon-955", "Cuna Multifunción Mega Baby Aurora Balanceo Música Control Gris",
+                   "Kit Destornilladores Eléctricos Homecity 47 Piezas 4.8V Batería Litio", "Smartwatch Havit Rosa HVWTH-M9036",
+                   "Tira De Led Tp-Link Tapo L930-5 Multicolor Wifi", "Sillón Premium Gamer Ideal P/ Playstation,xbox, Gaming, Pc Negro Cuero Sintético"])
+    assert.ok(!C.esTecnologia(n), n);
+});
