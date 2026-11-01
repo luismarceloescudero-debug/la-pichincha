@@ -30,7 +30,7 @@ Verificado con la captura de los secretos de GitHub y una prueba en vivo del Wor
 | # | Estado |
 |---|---|
 | 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
-| 2 | 1 de 4 cartas enviada; los borradores restantes estan en Gmail |
+| 2 | Enviadas las 4 cartas (02/11) por correo y por Instagram y Facebook. Seguimiento: 16/11/2026 |
 | 3 | eBay: claves cargadas y busqueda en vivo OK (el 401 del 25/10 ya no aparece). Falta solo `EBAY_CAMPAIGN_ID` (hoy los links salen con `afiliado: false`) |
 | 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
 | 5 | Mercado Libre: clics confirmados. Cerrado |
