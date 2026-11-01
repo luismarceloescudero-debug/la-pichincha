@@ -97,3 +97,12 @@ test("titulo (056): la marca de la linea no se repite y «8000 DPI» no deja el 
 test("titulo (056): «Ordenador Portátil» es el tipo, no la marca", () => {
   assert.equal(T.de("Ordenador Portátil Lenovo Yoga 7i 14 2k Oled I5-322 16 Gb 512 Gb").titulo, "LENOVO YOGA 7I 14");   // el 14 sin comillas queda: en «HP 14» es el modelo
 });
+
+test("titulo (058): «SUPER» es parte del modelo de una placa, el combo dice su procesador (y sigue diciendo COMBO) y «de Escritorio» es el tipo", () => {
+  const t = n => T.tituloDe(n, T.tipoDe(n));
+  assert.equal(t("Tarjeta Gráfica Pny Geforce Rtx 4070 Ti Super 16gb Xlr8 Gaming"), "PNY RTX 4070 TI SUPER");
+  // indice del 31/10: los tres combos de Venex salian «COMBO ACTUALIZACIÓN AMD RYZEN 7» (dos iguales)
+  assert.equal(t("Combo Actualización AMD Ryzen 7 5700G 16GB"), "COMBO AMD RYZEN 7 5700G");
+  assert.equal(t("Combo Actualización AMD Ryzen 5 8600G 16GB"), "COMBO AMD RYZEN 5 8600G");
+  assert.equal(t("Computadora de Escritorio Dell Pro SFF U5-235 16GB SSD512GB W11P"), "DELL PRO SFF");
+});

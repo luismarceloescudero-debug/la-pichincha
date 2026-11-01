@@ -130,7 +130,7 @@
   // Lo que va adelante y el icono ya dice (o no suma): se saca del principio.
   const PREFIJO = new RegExp("^\\s*(?:(?:" + [
     "celular(?:es)?", "smartphone", "ordenador", "tel[eé]fono(?:\\s+celular)?", "notebook", "laptop", "netbook", "ultrabook", "port[aá]til",
-    "monitor(?:\\s+led)?", "smart\\s?tv", "televisor", "tv", "pc(?:\\s+de\\s+escritorio)?", "computadora", "equipo\\s+armado",
+    "monitor(?:\\s+led)?", "smart\\s?tv", "televisor", "tv", "pc(?:\\s+de\\s+escritorio)?", "computadora(?:\\s+de\\s+escritorio)?", "equipo\\s+armado",
     "all\\s?in\\s?one", "placa\\s+de\\s+v[ií]deo", "tarjeta\\s+(?:de\\s+)?v[ií]deo", "tarjeta\\s+gr[aá]fica", "placa\\s+madre",
     "mother\\s?board", "mother", "mainboard", "micro(?:procesador)?", "procesador", "cpu", "memoria(?:\\s+ram)?", "ram",
     "kit\\s+de\\s+memoria", "disco(?:\\s+s[oó]lido|\\s+r[ií]gido)?", "hd", "ext(?:erno)?\\.?", "unidad\\s+de\\s+estado\\s+s[oó]lido",
@@ -175,7 +175,9 @@
   function tituloDe(nombre, tipo) {
     const equipo = ["notebook", "pc", "celular", "tablet"].includes(tipo);
     let sin = pulgadas(nombre).replace(/[™®©]/g, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/\b80\s?\+?\s?plus(?:\s+(?:bronze|silver|gold|platinum|titanium|white))?\b/gi, " ")
-      .replace(/\bw(?:in(?:dows)?)?\s?1[01]\s?(?:home|pro|p)?\b/gi, " ").replace(/\bhdr\s?\d{2,4}\+?/gi, " ").replace(/\+/g, " ");
+      .replace(/\bw(?:in(?:dows)?)?\s?1[01]\s?(?:home|pro|p)?\b/gi, " ").replace(/\bhdr\s?\d{2,4}\+?/gi, " ").replace(/\+/g, " ")
+      // «Combo Actualización AMD Ryzen 7 5700G»: «Combo» queda (es un paquete, no el procesador solo) y el modelo entra (058).
+      .replace(/\bcombo\s+(?:de\s+)?actualizaci[oó]n(?:\s+pc)?\b/gi, "Combo");
     // En un equipo el procesador y la placa de video van en las chips: se sacan del titulo.
     if (equipo) { const c = cpuMatch(sin); if (c) sin = sin.replace(c.texto, " "); sin = sin.replace(GPU, " ").replace(/\b(?:intel|amd|nvidia)\b/gi, " "); }
     sin = sin.replace(PREFIJO, "");
@@ -188,7 +190,8 @@
       // Un numero suelto seguido de su unidad («256 Gb», «12 Ram») ya es un dato; en un monitor, un numero de 15 a 65
       // son las pulgadas («LG 27 UltraGear»), y en una memoria uno de 4 cifras, los MHz («DDR5 5600»).
       const numero = /^\d+(?:[.,]\d+)?$/.test(t);
-      const dato = esDato(t) || (numero && /^(?:gb|tb|g|hz|mhz|ghz|w|ram|ms|mah|dpi|″)$/i.test(sig))
+      // «SUPER» en una placa es parte del modelo (RTX 4070 Ti SUPER); en un monitor o un TV es ruido de panel (058).
+      const dato = (esDato(t) && !(tipo === "placa-video" && /^super$/i.test(t))) ||(numero && /^(?:gb|tb|g|hz|mhz|ghz|w|ram|ms|mah|dpi|″)$/i.test(sig))
         || (numero && (tipo === "monitor" || tipo === "tv") && +t.replace(",", ".") >= 15 && +t.replace(",", ".") <= 100)
         || (numero && tipo === "memoria" && t.length === 4);
       if (dato) {
