@@ -12,6 +12,15 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
   `privado/continuidad.md` con el estado nuevo: que se hizo, que falta, que comando sigue.
 - `privado/` no se commitea y no lleva secretos ni datos reales.
 
+## Automatizaciones de Claude Code (01/11, 059)
+
+- `.claude/settings.json` (se commitea) suma dos hooks a los de progreso de `settings.local.json`:
+  - `guardia.py` antes de cada comando: `gh workflow run`, `publicar_telegram.py` o las APIs de Telegram/Instagram
+    piden confirmacion (es decision del dueño); un `git commit` con tildes o eñes se frena.
+  - `test_del_archivo.py` despues de editar `js/<nombre>.js`: corre solo `tests/js/<nombre>.test.js` y avisa si falla.
+- Skills del proyecto: `/medir-indice` (reglas contra el indice publicado y contra `main`; usarla antes de un PR de
+  ofertas, categorias, titulos o premium) y `/cerrar-pr N` (solo la llama el dueño o se pide: CI, rebase, limpieza).
+
 ## Tests
 
 - Suite completa: `node --test "tests/js/*.test.js"`.
