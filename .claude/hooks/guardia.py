@@ -4,6 +4,8 @@
 Reglas fijas del proyecto que antes cuidaba solo la memoria del modelo:
 - Publicar (Telegram, Instagram) o disparar un workflow es decision del dueño: se pide confirmacion.
 - Los mensajes de commit van sin tildes ni eñes (compatibilidad de consola): se frena el commit.
+- Editar a mano un archivo generado (`package-lock.json`, lo de `_sitio/`) pide confirmacion: se regenera con npm o con
+  `tests/e2e/armar-sitio.sh`. `datos.json` y `consultas.json` NO entran: llevan datos curados a mano.
 
 Lee el JSON del hook por stdin y, si no aplica ninguna regla, no dice nada (el comando sigue).
 Solo stdlib.
@@ -21,6 +23,17 @@ PUBLICAR = [
 ]
 COMMIT = re.compile(r"\bgit\b(?:\s+-\S+(?:\s+\S+)?)*\s+commit\b")
 TILDES = re.compile(r"[áéíóúüñÁÉÍÓÚÜÑ]")
+
+
+GENERADOS = re.compile(r"(?:^|[\\/])(?:package-lock\.json|_sitio[\\/].+)$")
+
+
+def decidir_archivo(ruta):
+    """Para Edit/Write: ('ask', motivo) si el archivo es generado, o None."""
+    if GENERADOS.search(ruta or ""):
+        return "ask", ("Este archivo se genera (npm o armar-sitio.sh), no se edita a mano. Confirmá solo si el dueño "
+                       "lo pidio; si no, regeneralo con su comando.")
+    return None
 
 
 def decidir(comando):
@@ -42,8 +55,8 @@ def main():
         datos = json.load(sys.stdin)
     except ValueError:
         return 0
-    comando = (datos.get("tool_input") or {}).get("command") or ""
-    resultado = decidir(comando)
+    entrada = datos.get("tool_input") or {}
+    resultado = decidir(entrada["command"]) if entrada.get("command") else decidir_archivo(entrada.get("file_path"))
     if resultado:
         decision, motivo = resultado
         json.dump({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": decision,

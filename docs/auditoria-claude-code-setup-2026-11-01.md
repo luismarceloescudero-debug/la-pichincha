@@ -13,8 +13,8 @@ Skill: `claude-automation-recommender` (plugin `claude-code-setup` de Anthropic)
 
 | # | Tipo | Propuesta | Por que |
 |---|---|---|---|
-| 1 | Hook PreToolUse (Edit/Write) | Bloquear edicion manual de `datos.json`, `consultas.json`, `package-lock.json` | Los generan scripts; una edicion a mano rompe el indice |
-| 2 | Hook PostToolUse | Al editar un `.py` de la raiz, correr `tests/test_<nombre>.py` | Hoy solo se cubre `js/*.js`; hay 612 tests de Python |
+| 1 | Hook PreToolUse (Edit/Write) | Pedir confirmacion al editar a mano `package-lock.json` y `_sitio/` (HECHO) | Son generados. Correccion: `datos.json` y `consultas.json` llevan datos curados a mano, NO se frenan |
+| 2 | Hook PostToolUse | Al editar un `.py` de la raiz, correr `tests/test_<nombre>.py` (HECHO) | Hoy solo se cubre `js/*.js`; hay 612 tests de Python |
 | 3 | Subagente | `security-reviewer` para `worker/src` | Secretos de APIs, CORS, tope por IP, formulario `/contacto` |
 | 4 | Skill | `/e2e-local`: `armar-sitio.sh` + Playwright `--workers=1` | La receta esta repetida a mano en los informes de prueba |
 | 5 | MCP | Cloudflare (conectado el 01/11) | Revisar el Worker `pichincha-afuera` sin salir de la sesion |
