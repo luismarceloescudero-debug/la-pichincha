@@ -1,29 +1,52 @@
-# Auditoria 1: Claude Code Setup (01/11/2026)
+# Auditoria 1: Claude Code Setup, devolucion sobre la app (01/11/2026)
 
-Skill: `claude-automation-recommender` (plugin `claude-code-setup` de Anthropic), copiada a
-`.claude/skills/claude-automation-recommender/`. Es de solo lectura: este informe son recomendaciones, no cambios.
+Herramienta: skill `claude-automation-recommender` (plugin `claude-code-setup` de Anthropic), copiada a
+`.claude/skills/claude-automation-recommender/`. Mira el codigo y la forma de trabajar, no el sitio publicado
+(eso es la auditoria 2). Es de solo lectura: lo de abajo es lo que encontro, no cambios hechos.
 
-## Lo que el repo ya tiene (no se rehace)
+## Que es la app, medido en el repo
 
-- Hooks: `guardia.py` (PreToolUse, confirma publicar) y `test_del_archivo.py` (PostToolUse, test del `js/*.js` editado).
-- Skills del proyecto: `medir-indice`, `cerrar-pr`, `web-quality-audit`, `code-review`, speckit-*.
-- CI: `tests.yml`, `actualizar.yml`, `diagnostico.yml`, `worker.yml`.
+| Parte | Tamano | Nota |
+|---|---|---|
+| Sitio (`js/`) | 99 archivos js en el repo, ~5.300 lineas en `js/` | Scripts comunes, sin build ni dependencias (constitucion I) |
+| Python (raiz) | ~4.400 lineas, 56 archivos | Solo biblioteca estandar; arma indice, paginas y publicaciones |
+| Worker «Afuera» | ~590 lineas | Unica pieza con secretos; desplegado en Cloudflare |
+| Pruebas | 41 archivos JS (743 tests), 30 de Python (616 tests), 10 e2e (21 pruebas) | Todas pasan |
+| CI | 4 workflows: `tests`, `actualizar`, `diagnostico`, `worker` | `tests` corre tests, e2e y Lighthouse |
+| Especificaciones | 50 specs en `specs/`, 141 archivos `.md` | El proyecto se decide por escrito |
 
-## Recomendaciones (ordenadas por valor)
+## Lo que esta bien
 
-| # | Tipo | Propuesta | Por que |
+- Reglas fuertes y verificables: la constitucion (`.specify/memory/constitution.md`) fija estatico primero, datos honestos,
+  respeto a las fuentes. Los tests protegen varias (por ejemplo, que el JSON-LD no declare precios ni «Product»).
+- Automatizaciones propias ya puestas: `guardia.py` (frena publicar sin OK y commits con tildes), `test_del_archivo.py`,
+  skills `medir-indice` y `cerrar-pr`.
+- Pocas deudas visibles: 2 marcas TODO/FIXME/XXX en `js/`, `*.py` y `worker/src`.
+- Un solo punto de secretos (Worker + GitHub Actions), sin claves escritas en el codigo desplegado.
+
+## Riesgos y huecos encontrados
+
+| # | Hallazgo | Severidad | Evidencia |
 |---|---|---|---|
-| 1 | Hook PreToolUse (Edit/Write) | Pedir confirmacion al editar a mano `package-lock.json` y `_sitio/` (HECHO) | Son generados. Correccion: `datos.json` y `consultas.json` llevan datos curados a mano, NO se frenan |
-| 2 | Hook PostToolUse | Al editar un `.py` de la raiz, correr `tests/test_<nombre>.py` (HECHO) | Hoy solo se cubre `js/*.js`; hay 612 tests de Python |
-| 3 | Subagente | `security-reviewer` para `worker/src` | Secretos de APIs, CORS, tope por IP, formulario `/contacto` |
-| 4 | Skill | `/e2e-local`: `armar-sitio.sh` + Playwright `--workers=1` | La receta esta repetida a mano en los informes de prueba |
-| 5 | MCP | Cloudflare (conectado el 01/11) | Revisar el Worker `pichincha-afuera` sin salir de la sesion |
+| 1 | **La continuidad vive fuera del repo.** `privado/continuidad.md` no se commitea; en una sesion nueva en la nube no existe (hubo que reconstruirla) | Media | `privado/` ausente en el clon; regla del `CLAUDE.md` depende de ese archivo |
+| 2 | **Un solo desarrollador y mucha documentacion** (141 `.md`, 50 specs): el costo de mantener todo coherente cae en una persona | Media | Conteo de archivos |
+| 3 | **El Playwright fijado (1.64.1) no coincide con el Chromium del entorno cloud** (pide build 1248, hay 1243): los e2e no corren sin un config temporal | Baja | Corrida del 01/11; en la CI y en la PC del dueño no pasa |
+| 4 | **Los hooks cubrian solo `js/*.js`**; editar un `.py` no corria su test | Baja | Ya corregido en este PR |
+| 5 | **Edicion a mano de archivos generados** (`package-lock.json`, `_sitio/`) sin freno | Baja | Ya corregido en este PR (pide confirmacion) |
 
-Descartadas: Playwright MCP (ya se usa `@playwright/test`), context7 (el sitio usa solo la biblioteca estandar),
-release-notes (sin releases).
+Correccion a una recomendacion inicial: `datos.json` y `consultas.json` NO son generados puros, llevan datos curados a mano; no se frenan.
 
-## Hallazgo de entorno
+## Recomendaciones
 
-El Playwright fijado en `package.json` (1.64.1) pide el Chromium build 1248; el entorno cloud trae el 1243. En la nube
-hay que apuntar `executablePath` al Chromium instalado (config temporal fuera del repo). En la CI y en la PC del
-dueño no pasa.
+1. **Ya hecho en este PR:** hook de confirmacion para archivos generados y hook de test para `.py` de la raiz.
+2. **Subagente `security-reviewer` para `worker/src`:** es la unica pieza con secretos, CORS y el formulario. Prioridad media.
+3. **Skill `/e2e-local`:** guarda la receta `armar-sitio.sh` + Playwright `--workers=1`. Prioridad baja.
+4. **Copia de la continuidad en el repo:** un `docs/continuidad.md` sin datos sensibles (hoy `privado/` no sirve para sesiones en la nube). Decision del dueño.
+5. **Conector Cloudflare con acceso a la zona** (solo lectura): hoy el conector ve cuenta y Workers, no DNS ni Email Routing.
+
+No recomendado: Playwright MCP (ya se usa `@playwright/test`) ni context7 (el sitio no usa librerias externas).
+
+## Limites
+
+- Es una lectura del codigo y de la configuracion; no mide el sitio publicado ni la calidad de los datos de las tiendas.
+- No se reviso logica de negocio (ofertas, categorias, titulos): eso lo mide `/medir-indice`, pendiente.
