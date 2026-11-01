@@ -22,6 +22,26 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 ---
 
+## Estado al 01/11/2026 (sesion de auditoria)
+
+Verificado con la captura de los secretos de GitHub y una prueba en vivo del Worker. La pagina «Pendientes de La Pichincha»
+(https://claude.ai/artifact/31tfse3HEy4t53HqFtxfvG) tiene el mismo estado, con los pasos y enlaces directos para el celular.
+
+| # | Estado |
+|---|---|
+| 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
+| 2 | 1 de 4 cartas enviada; los borradores restantes estan en Gmail |
+| 3 | eBay: claves cargadas y busqueda en vivo OK (el 401 del 25/10 ya no aparece). Falta solo `EBAY_CAMPAIGN_ID` (hoy los links salen con `afiliado: false`) |
+| 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
+| 5 | Mercado Libre: clics confirmados. Cerrado |
+| 6 | Search Console: pendiente; el registro TXT se carga en Cloudflare (mas facil con el conector de la API de Cloudflare) |
+| 8 | Amazon: sitio declarado; la Creators API espera las 10 ventas |
+| 9 | Instagram: en pausa |
+| 10 | Tiendamia pidio hablar por telefono: llamada el lunes 02/11 |
+| 11 | Carritos de Tiendamia: conviene esperar la respuesta de la llamada |
+
+---
+
 ## 1. Activar el formulario de contacto
 
 **Qué se destraba:** el formulario de https://pichinchadeldia.com.ar/contacto/ (spec 046). Ya está publicado, igual que
