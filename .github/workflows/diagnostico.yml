@@ -62,7 +62,7 @@ jobs:
           base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
           curl -fsSL "$base/guardia.json" -o guardia-previa.json || echo '{}' > guardia-previa.json
           node guardia.js --indice indice.json --salida diagnostico-guardia.json --previa guardia-previa.json             --resumen "$GITHUB_STEP_SUMMARY" || echo "::warning::la guardia encontro una alarma (salida $?)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: diagnostico-enlaces
