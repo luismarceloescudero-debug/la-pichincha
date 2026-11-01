@@ -663,3 +663,13 @@ test("no es hardware (056): lo que cae en «Otros» y no es tecnologia no es ofe
   assert.deepEqual(r.propias.map(f => f[0]), ["Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz"]);
   assert.equal(r.noTecnologia, 1);
 });
+
+test("lote (056): un cambio de lista que deja el producto mas barato que en otras tiendas sigue siendo oferta contra el mismo modelo", () => {
+  // diez SSD de la tienda «zz» bajan 11 % el mismo dia (un lote); uno de ellos queda bajo la mediana de otras tres tiendas
+  const lote = Array.from({ length: 10 }, (_, k) => { const f = conTienda("SSD Kingston NV" + k + " 1TB NVMe Gen4", 89000, "zz", "NV" + k); f[6] = 100000; f[10] = "2026-10-31"; return f; });
+  const otras = [["cg", 110000], ["mx", 112000], ["vx", 115000]].map(([t, p]) => conTienda("SSD Kingston NV0 1TB NVMe Gen4", p, t, "NV0"));
+  const r = O.calcularOfertas({ productos: [...lote, ...otras] });
+  assert.equal(r.propias.length, 0);                                  // como baja propia, no: es un lote
+  assert.deepEqual([...r.contraModelo.keys()].map(f => f[3]), ["zz"]);   // contra el mismo modelo en otras tiendas, si
+  assert.ok(O.destacadas({ productos: [...lote, ...otras] }, 10).some(o => o.tipo === "modelo" && o.f[3] === "zz"));
+});

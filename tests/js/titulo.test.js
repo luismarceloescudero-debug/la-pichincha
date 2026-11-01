@@ -68,3 +68,32 @@ test("«SSD512GB» pegado es un dato y no parte del titulo (31/10: «HP SSD512GB
   assert.equal(t.titulo, "HP 250");
   assert.ok(t.chips.includes("512 GB SSD"));
 });
+
+/* Spec 056: titulos del indice del 31/10 que perdian el modelo o tomaban una unidad o el procesador como modelo. */
+test("titulo (056): ni «MHZ» ni el procesador hacen de modelo, y el modelo despues de los datos no se pierde", () => {
+  const t = n => T.de(n).titulo;
+  assert.equal(t("Memoria Ram Sodimm DDR5 - 16Gb 4800 Mhz Adata"), "ADATA");
+  assert.equal(t("Fuente Cooler Master 750W 80 Plus Gold Full Modular MWE V3 ATX 3.1 PCIe 5.1"), "COOLER MASTER MWE V3");
+  assert.equal(t("Fuente ASUS PRIME 750W 80 Plus Gold AP-750G Full Modular ATX 3.1 PCIe 5.1"), "ASUS PRIME AP-750G");
+  assert.equal(t("Notebook Lenovo 15.6 R7-7730U 16GB SSD512GB V15 Sin Sistema Operativo"), "LENOVO V15");
+  assert.equal(t("Notebook CX 15,6 U5-115U 16GB SSD512GB Sin Sistema Operativo"), "CX");
+  assert.equal(t("Notebook ThinkPad T14 Gen 6 Ryzen AI 5 PRO 16GB RAM 512 SSD 14\" Win 11 Pro 21QK0"), "LENOVO THINKPAD T14 GEN 6");
+  // el procesador escrito corto va en las chips
+  assert.ok(T.de("Notebook Lenovo 15.6 R7-7730U 16GB SSD512GB V15 Sin Sistema Operativo").chips.includes("Ryzen 7 7730U"));
+  assert.ok(T.de("Notebook CX 15,6 U5-115U 16GB SSD512GB Sin Sistema Operativo").chips.includes("Core Ultra 5 115U"));
+  assert.ok(T.de("Notebook HP 16 U7-366H 48GB 1TB RTX500 6GB ZBOOK XG2i W11P").chips.includes("Core Ultra 7 366H"));
+  // lo que ya andaba sigue igual
+  assert.equal(t("Notebook HP 15.6 C5-120U 16GB SSD512GB 250 Sin Sistema Operativo"), "HP 250");
+  assert.equal(t("Monitor Gamer Samsung Odyssey G8 G81SF 27\" UHD 4K QD-OLED 240Hz 0,03ms"), "SAMSUNG ODYSSEY G8 G81SF");
+  assert.equal(t("Notebook Lenovo ThinkPad E14 Gen 7 Core Ultra 5 225U 16GB 512GB SSD 14\" Sin Windows"), "LENOVO THINKPAD E14 GEN 7");
+});
+
+test("titulo (056): la marca de la linea no se repite y «8000 DPI» no deja el numero suelto", () => {
+  assert.equal(T.de("MacBook Apple 13\" Neo A18 Pro Chip 8gb 256ssd Indigo").titulo.split(" ").filter(w => w === "APPLE").length, 1);
+  assert.equal(T.de("MOUSE RAPTOR STORM GRIP 8000 DPI").titulo, "RAPTOR STORM GRIP");
+  assert.ok(T.de("Megáfono Portátil Gadnic Altavoz Bluetooth").chips.includes("Bluetooth"));
+});
+
+test("titulo (056): «Ordenador Portátil» es el tipo, no la marca", () => {
+  assert.equal(T.de("Ordenador Portátil Lenovo Yoga 7i 14 2k Oled I5-322 16 Gb 512 Gb").titulo, "LENOVO YOGA 7I 14");   // el 14 sin comillas queda: en «HP 14» es el modelo
+});
