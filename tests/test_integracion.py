@@ -74,7 +74,7 @@ class SitioArmado(unittest.TestCase):
 
     def test_se_publican_todas_las_paginas(self):
         for ruta in ("index.html", "precios/index.html", "hoy/index.html", "estado/index.html",
-                     "legal/index.html", "sin-red.html", "sitemap.xml", "robots.txt", "ofertas.xml",
+                     "legal/index.html", "404.html", "sin-red.html", "sitemap.xml", "robots.txt", "ofertas.xml",
                      "manifest.webmanifest", "sw.js"):
             self.assertTrue((self.sitio / ruta).exists(), ruta)
 
@@ -97,12 +97,24 @@ class SitioArmado(unittest.TestCase):
                 partes = urlsplit(enlace)
                 if partes.scheme or enlace.startswith(("#", "//")) or not partes.path:
                     continue
-                destino = (pagina.parent / unquote(partes.path)).resolve()
+                if partes.path.startswith("/"):          # desde la raiz del sitio (la 404 se sirve en cualquier URL)
+                    destino = (self.sitio / unquote(partes.path).lstrip("/")).resolve()
+                else:
+                    destino = (pagina.parent / unquote(partes.path)).resolve()
                 if partes.path.endswith("/"):
                     destino = destino / "index.html"
                 if not destino.exists():
                     rotos.append(f"{pagina.relative_to(self.sitio)} -> {enlace}")
         self.assertEqual(rotos, [])
+
+    def test_la_404_tiene_la_marca_y_lleva_a_la_portada_y_al_buscador(self):
+        html = (self.sitio / "404.html").read_text(encoding="utf-8")
+        self.assertIn('href="/css/sitio.css"', html)     # rutas desde la raiz: se sirve en cualquier URL que no existe
+        self.assertIn('<a class="marca-sitio" href="/"', html)
+        self.assertIn('href="/#buscar"', html)
+        self.assertIn('name="robots" content="noindex', html)
+        self.assertNotIn('rel="canonical"', html)
+        self.assertNotIn('href="../', html)
 
     def test_ninguna_pagina_queda_sin_la_politica_de_contenido(self):
         for pagina in self.paginas():
