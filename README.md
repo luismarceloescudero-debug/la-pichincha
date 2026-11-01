@@ -454,6 +454,14 @@ Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el
 canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
 rotulan.
 
+### Reel de Instagram (spec 045, todavía sin publicar)
+
+`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (~29 s) con las 10 ofertas:
+el descuento se estampa, el nombre se escribe en vivo, el precio cuenta hasta el de hoy y al final el link
+a `/hoy/` se escribe y se toca. Cada día cambia la paleta, el fondo y la transición. Necesita Chrome y
+ffmpeg. `--fotos 1900,8800` saca cuadros sueltos para revisar el diseño. No publica nada: eso queda para
+el job de Instagram del PR #126, que espera el OK del dueño.
+
 ## Fiabilidad por comercio
 
 Es dato propio, y por eso ComparaYa no lo puede mostrar: de las ofertas que este sitio

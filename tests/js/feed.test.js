@@ -282,3 +282,11 @@ test("el feed y /hoy/ no llaman baja verificada a lo que se sigue hace pocos dia
   assert.match(hoy, /−20% desde que lo seguimos, hace pocos días/);
   assert.doesNotMatch(hoy, /<s>\$80\.000<\/s>/, "no se tacha un precio de antes que no tiene una semana de historial");
 });
+
+// ---- La foto para el Reel (spec 045): solo una direccion https limpia ----
+test("la lista para el canal lleva la imagen https de la tienda y descarta una rara", () => {
+  const conFoto = (img) => { const f = fila("SSD Kingston 1TB", 90000, { antes: 120000 }); f[7] = img; return { ...IDX, productos: [f] }; };
+  assert.equal(F.listaParaCanal(conFoto("https://img.test/ssd.jpg"), 1)[0].imagen, "https://img.test/ssd.jpg");
+  assert.equal("imagen" in F.listaParaCanal(conFoto("http://img.test/ssd.jpg"), 1)[0], false);
+  assert.equal("imagen" in F.listaParaCanal(conFoto('https://img.test/a".jpg'), 1)[0], false);
+});
