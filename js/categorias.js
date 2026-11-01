@@ -53,7 +53,8 @@
     monitor: /^\s*monitor\b|\bmonitor\b/i,
     // el monitor que viene dentro de un equipo o un lote no es un monitor
     equipoConMonitor: /^\s*(?:pc|computadora|computador|combo|kit|notebook|all\s?in\s?one|mini\s?pc|escritorio|puesto)\b/i,
-    pc: /^\s*(?:pc|computadora|computador|all\s?in\s?one|mini\s?pc|equipo\s+armado)\b/i,
+    // OnCity escribe sus PCs «1Pc Gamer Ryzen 7 5700G + 16GB…» (058): eran «Otros» y su titulo «1PC». Solo con «gamer»: «1pc camera» no.
+    pc: /^\s*(?:1\s?pc\s+(?=gamer)|pc|computadora|computador|all\s?in\s?one|mini\s?pc|equipo\s+armado)\b/i,
     periferico: /^\s*(?:combo|kit)\b.*\b(?:teclado|mouse|auricular)|^\s*(?:mouse|teclado|auricular|auriculares|headset|webcam|camara\s+web|parlante|parlantes|joystick|gamepad|control|mousepad|pad|microfono|silla|alfombrilla|volante|capturadora|impresora|router|switch|placa\s+de\s+sonido)\b/i,
     notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|portatil|(?:ordenador|computadora)\s+port[aá]til|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
     smartphone: /\b(celular|smartphone|telefono|movil|iphone|redmi|poco\s?[a-z]\d|moto\s?(?:[gex]\d|edge|razr)|motorola\s+(?:edge|razr)|galaxy\s?(?:[samf]\d|z\s?(?:fold|flip))|honor\s?(?:\d|x\d|magic)|oppo\s?(?:reno|a\d|find)|vivo\s?[vyx]\d|oneplus|nothing\s+phone|zte\s?(?:blade|nubia)|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,

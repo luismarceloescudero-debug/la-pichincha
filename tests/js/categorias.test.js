@@ -291,3 +291,10 @@ test("categoria (056): un megafono, un proyector o una consola «portátil» no 
     assert.notEqual(C.categoriaDe(n), "notebook", n);
   assert.equal(C.categoriaDe("Ordenador Portátil HP 15 Core i5 16GB 512GB"), "notebook");
 });
+
+test("categoria (058): «1Pc Gamer» de OnCity es una PC completa, no «Otros»", () => {
+  const n = "1Pc Gamer Ryzen 7 5700G + 16GB + 480GB SSD + gráficos AMD Radeon™ VEGA SHARE";
+  assert.equal(C.categoriaDe(n), "pc");
+  // un producto que viene de a uno sigue siendo lo que es
+  assert.notEqual(C.categoriaDe("1pc single camera for baby monitor model sm50 sm70ptz"), "pc");
+});
