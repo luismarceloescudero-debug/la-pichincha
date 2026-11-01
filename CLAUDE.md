@@ -15,5 +15,5 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
 ## Tests
 
 - Suite completa: `node --test "tests/js/*.test.js"`.
-- `tests/js/generador.test.js` (skip-link) falla SOLO en Windows local por CRLF
-  (`core.autocrlf=true` sin `.gitattributes`). En CI (Linux, LF) pasa; no es de la tarea.
+- `tests/js/generador.test.js` (skip-link) acepta CRLF desde el 01/11 (058): la suite pasa entera tambien en Windows.
+- e2e en local: `npx playwright test --workers=1` si la PC tiene poca memoria (con los workers por defecto Chromium se cae).

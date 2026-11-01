@@ -392,7 +392,7 @@ test("cada pagina abre con «Saltar al contenido», que lleva al <main> (squirre
   for (const html of [G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx),
                       fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8")]) {
     const cuerpo = html.slice(html.indexOf("<body>"));
-    assert.match(cuerpo, /<a class="saltar" href="#contenido">Saltar al contenido<\/a>\n<main id="contenido"/);
+    assert.match(cuerpo, /<a class="saltar" href="#contenido">Saltar al contenido<\/a>\r?\n<main id="contenido"/);   // \r?: en Windows el checkout trae CRLF
     assert.ok(cuerpo.indexOf('class="saltar"') < cuerpo.search(/<(a|button|input)\b(?![^>]*class="saltar")/), "es lo primero que enfoca el teclado");
   }
 });
