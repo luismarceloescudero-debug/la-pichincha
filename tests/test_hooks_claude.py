@@ -56,6 +56,22 @@ def correr(modulo, entrada):
     return codigo, salida.getvalue(), error.getvalue()
 
 
+class GuardiaArchivos(unittest.TestCase):
+    def test_generados_piden_confirmacion(self):
+        for ruta in ["package-lock.json", "/repo/package-lock.json", "_sitio/index.html", "C:\\repo\\_sitio\\x.json"]:
+            self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
+
+    def test_lo_curado_a_mano_no_se_frena(self):
+        for ruta in ["datos.json", "consultas.json", "js/titulo.js", "package.json", "docs/x.md", None]:
+            self.assertIsNone(guardia.decidir_archivo(ruta), ruta)
+
+    def test_main_con_file_path(self):
+        codigo, salida, _ = correr(guardia, json.dumps({"tool_input": {"file_path": "package-lock.json"}}))
+        self.assertEqual(codigo, 0)
+        self.assertEqual(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], "ask")
+        self.assertEqual(correr(guardia, json.dumps({"tool_input": {"file_path": "datos.json"}})), (0, "", ""))
+
+
 class GuardiaMain(unittest.TestCase):
     def test_responde_en_el_formato_del_hook(self):
         codigo, salida, _ = correr(guardia, json.dumps({"tool_input": {"command": "gh workflow run x.yml"}}))
@@ -78,6 +94,11 @@ class TestDelArchivo(unittest.TestCase):
             os.makedirs(os.path.join(tmp, "js"))
             self.assertIsNone(test_del_archivo.test_de(os.path.join(tmp, "js", "sin_test.js")))
 
+    def test_py_de_la_raiz_con_su_test(self):
+        self.assertEqual(test_del_archivo.test_de(os.path.join(RAIZ, "modelo.py")),
+                         os.path.join(RAIZ, "tests", "test_modelo.py"))
+        self.assertIsNone(test_del_archivo.test_de(os.path.join(RAIZ, "tests", "test_modelo.py")))
+        self.assertIsNone(test_del_archivo.test_de(os.path.join(RAIZ, "archivo_sin_test.py")))
 
     def test_main_corre_el_test_y_avisa_si_falla(self):
         with tempfile.TemporaryDirectory() as tmp:
