@@ -30,7 +30,8 @@ Pruebas: JS 745/745, Python 617 OK, e2e 21/21 (con `--workers=1`). Buscar y Ofer
     `url` 528 KB, `nombre` 498 KB, `precio` 131 KB. La búsqueda **no muestra fotos**.
   - CPU: ~0,6 s de JS sin limitar, repartido en muchas funciones chicas (categorías, regex, normalizar 31.000 nombres); no hay un solo culpable.
   - Probado sin efecto: `content-visibility` en las filas y empezar a bajar el índice desde `index.html`. Se revirtieron.
-  - Opciones reales: **(a)** sacar `imagen` de `indice.json` (≈ −29 %, ~2,5 s menos, no alcanza para 2,5 s); **(b)** partir el índice por rubro
+  - **Hecho el 02/11 (spec 057, PR #209):** **(a)** sacó `imagen` de `indice.json`: índice comprimido 1.841 → 1.299 KB, LCP de Buscar 11,9-12,3 → 9,3-9,6 s y de Ofertas 12,9 → 11,0 s. El puntaje casi no cambia (el otro freno es la CPU, ~2 s).
+  - Opciones que quedan: **(b)** partir el índice por rubro
     (primer paso de `docs/plan-v3.md`); **(c)** buscar del lado del servidor en el Worker (D1/FTS5, ya prevista). Decisión del dueño.
 
 ### Medio
@@ -53,11 +54,11 @@ Pruebas: JS 745/745, Python 617 OK, e2e 21/21 (con `--workers=1`). Buscar y Ofer
 
 ## Worker `pichincha-afuera`
 - Sin claves en el código; CORS solo para `https://pichinchadeldia.com.ar` y localhost; `/enlace` rechaza `169.254.169.254` y `localhost`.
-- eBay responde en vivo; `afiliado: false` hasta desplegar con `EBAY_CAMPAIGN_ID` (secreto ya cargado). Tiendamia: `HTTP 403`, conocido.
+- eBay responde en vivo y, desde el despliegue del 02/11, con `afiliado: true` (`EBAY_CAMPAIGN_ID` cargado). Tiendamia: `HTTP 403`, conocido.
 
 ## Prioridad recomendada
 1. Decidir cómo adelgazar el índice (a, b o c): es lo único que impide verde en Buscar y Ofertas en celular.
-2. Desplegar el Worker para que eBay lleve la campaña.
+2. ~~Desplegar el Worker para que eBay lleve la campaña~~: hecho el 02/11.
 3. Caché y scripts bloqueantes, solo si se quiere más.
 
 ## Límites
