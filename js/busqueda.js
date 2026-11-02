@@ -71,8 +71,8 @@ function filtrosHtml() {
     `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${FILTROS.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
   return `<div class="of-fila" role="group" aria-label="Tienda"><span class="of-et" aria-hidden="true">Tienda</span>${tiendas || '<span class="sub">cargando…</span>'}</div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
-      <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo"></label>
-      <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo"></label></div>
+      <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo…"></label>
+      <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo…"></label></div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Gama</span>
       <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
     <div class="of-fila" role="group" aria-label="Sellos"><span class="of-et" aria-hidden="true">Sellos</span>
@@ -80,7 +80,7 @@ function filtrosHtml() {
         `<button class="of-chip" data-filtro="sello" data-valor="${l}" aria-pressed="${FILTROS.sellos.includes(l)}">${t}</button>`).join("")}
       <span class="sub chico">Solo ComparaYa y sus comercios informan envío y cuotas: un aviso sin sello no quiere decir que no lo tenga.</span></div>
     <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
-      <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil"></div>
+      <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil…"></div>
     <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
 }
 

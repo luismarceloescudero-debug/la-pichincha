@@ -85,7 +85,7 @@ h1{font-size:clamp(1.55rem,4vw,2.1rem);line-height:1.1;margin:0 0 6px;letter-spa
 h2{font-size:1.2rem;margin:0 0 4px;letter-spacing:-.02em;text-wrap:balance}
 h3{margin:0;font-size:1.02rem;letter-spacing:-.015em;text-wrap:balance}
 .sub{color:var(--ink-2);margin:0;max-width:66ch;font-size:.94rem}
-.meta{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 10px}
+.meta{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 10px}
 /* El JS completa el sello despues de pintar: se reservan las lineas que ocupa para que no empuje el titulo (CLS). */
 #sello{min-height:1lh}
 @media (max-width:820px){#sello{min-height:2lh}}
@@ -112,7 +112,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   transition:color .22s var(--curva),background .22s var(--curva)}
 .tab:hover{color:var(--ink)}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
-.tab .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);
+.tab .n{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);
   background:var(--bg);border-radius:5px;padding:0 5px}
 .tab[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
 
@@ -226,7 +226,7 @@ td.mejor{color:var(--good);font-weight:700}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
   box-shadow:var(--shadow);animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*70ms)}
 .tile.ok{border-color:var(--good);background:var(--good-soft)}
-.tile .k{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.tile .k{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .tile .v{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;letter-spacing:-.03em;margin:3px 0 1px;
   font-variant-numeric:tabular-nums}
 .tile.ok .v{color:var(--good)}
