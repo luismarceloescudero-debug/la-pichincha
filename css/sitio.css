@@ -890,3 +890,7 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .of-chip,.segmentos.chico button{min-height:44px;display:inline-flex;align-items:center}
 .ocard .tienda{display:flex;align-items:center;gap:6px;background:none;border-radius:0}
 .ocard .tienda .ico{flex:none}
+
+/* ---- Busqueda en celular: areas tactiles y menos trabajo de pintado ---- */
+/* Los links de «mismo modelo en otras tiendas» median 16-19 px de alto; WCAG 2.5.8 pide 24 px como minimo. */
+.mismo a{display:inline-flex;align-items:center;min-height:24px;padding-block:3px}
