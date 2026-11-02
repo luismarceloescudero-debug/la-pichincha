@@ -59,8 +59,8 @@
     notebook: /\b(notebook|netbook|laptop|macbook|chromebook|ultrabook|portatil|(?:ordenador|computadora)\s+port[aá]til|ideapad|thinkpad|thinkbook|vivobook|zenbook|victus|pavilion|probook|elitebook|inspiron|latitude|vostro|aspire|loq|legion\s?\d)(?![a-z])/i,
     smartphone: /\b(celular|smartphone|telefono|movil|iphone|redmi|poco\s?[a-z]\d|moto\s?(?:[gex]\d|edge|razr)|motorola\s+(?:edge|razr)|galaxy\s?(?:[samf]\d|z\s?(?:fold|flip))|honor\s?(?:\d|x\d|magic)|oppo\s?(?:reno|a\d|find)|vivo\s?[vyx]\d|oneplus|nothing\s+phone|zte\s?(?:blade|nubia)|realme|infinix|tecno\s(?:spark|camon|pova|phantom)|pixel\s?\d+)(?![a-z])/i,
     // por el principio del titulo (antes que notebook/smartphone: "Memoria RAM Notebook SODIMM" es una memoria)
-    componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|mother(?:board)?|placa\s+madre|water\s?cool(?:er|ing)|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:amd|intel|ryzen))\b/i,
-    componente: /\b(?:ddr[345]|nvme|geforce|radeon|rtx|gtx|lga\s?\d{3,4})\b/i
+    componenteInicio: /^\s*(?:memoria|ram|sodimm|ssd|disco|hdd|placa|vga|procesador|micro|fuente|gabinete|cooler|fan|disipador|refrigeracion|ventilador|pasta|gpu|tarjeta|mother(?:board)?|placa\s+madre|water\s?cool(?:er|ing)|kit\s+de\s+memoria|pendrive|cpu|combo\s+(?:actualizaci[oó]n|amd|intel|ryzen))\b/i,
+    componente: /\b(?:gabinete|ddr[345]|nvme|geforce|radeon|rtx|gtx|lga\s?\d{3,4})\b/i
   };
 
   function categoriaDe(nombre) {

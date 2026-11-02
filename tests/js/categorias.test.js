@@ -298,3 +298,9 @@ test("categoria (058): «1Pc Gamer» de OnCity es una PC completa, no «Otros»"
   // un producto que viene de a uno sigue siendo lo que es
   assert.notEqual(C.categoriaDe("1pc single camera for baby monitor model sm50 sm70ptz"), "pc");
 });
+
+test("categoria (060): un gabinete al final del titulo y el «Combo Actualización» son componentes, no «Otros»", () => {
+  assert.equal(C.categoriaDe("Evolabs Luma X EVO-320AB Gabinete"), "componente");
+  assert.equal(C.categoriaDe("Combo Actualización AMD Ryzen 5 5600G + Mother + 16GB"), "componente");
+  assert.equal(C.categoriaDe("Gabinete Gamer Kolink Observatory"), "componente");
+});
