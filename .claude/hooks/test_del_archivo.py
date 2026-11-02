@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Despues de editar js/<nombre>.js corre solo tests/js/<nombre>.test.js (hook PostToolUse).
 
+Un .json editado que no se puede leer tambien se avisa (una coma de mas rompe el sitio y la CI se entera tarde).
 Tambien para los .py de la raiz: al editar modelo.py corre `python -m unittest tests.test_modelo`.
 Si el test falla, devuelve el error al modelo (codigo 2) para que lo vea al instante, sin esperar a la CI.
 Si pasa, o el archivo no tiene test propio, no dice nada. Solo stdlib.
@@ -28,12 +29,29 @@ def test_de(ruta):
     return test if os.path.isfile(test) else None
 
 
+def json_roto(ruta):
+    """El mensaje de error si `ruta` es un .json que ya no se puede leer, o None (no es .json, no existe o esta bien)."""
+    if not (ruta or "").endswith(".json") or "node_modules" in ruta or not os.path.isfile(ruta):
+        return None
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            json.load(f)
+    except (ValueError, OSError) as e:
+        return os.path.basename(ruta) + " quedo con JSON invalido despues de la edicion: " + str(e)
+    return None
+
+
 def main():
     try:
         datos = json.load(sys.stdin)
     except ValueError:
         return 0
-    test = test_de((datos.get("tool_input") or {}).get("file_path"))
+    ruta = (datos.get("tool_input") or {}).get("file_path")
+    roto = json_roto(ruta)
+    if roto:
+        print(roto, file=sys.stderr)
+        return 2
+    test = test_de(ruta)
     if not test:
         return 0
     try:

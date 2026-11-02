@@ -3,18 +3,62 @@
     "PreToolUse": [
       {
         "matcher": "Bash|PowerShell",
-        "hooks": [ { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardia.py\"", "timeout": 10 } ]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardia.py\"",
+            "timeout": 10
+          }
+        ]
       },
       {
         "matcher": "Edit|Write|MultiEdit",
-        "hooks": [ { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardia.py\"", "timeout": 10 } ]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardia.py\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
-        "hooks": [ { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/test_del_archivo.py\"", "timeout": 90 } ]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/test_del_archivo.py\"",
+            "timeout": 90
+          }
+        ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/aviso_cierre.py\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node --test:*)",
+      "Bash(python -m unittest:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./worker/.dev.vars)",
+      "Read(./**/.dev.vars)"
     ]
   }
 }
