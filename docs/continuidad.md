@@ -1,0 +1,110 @@
+# Continuidad de La Pichincha
+
+Última actualización: 02/11/2026 (sesión de auditorías + setup).
+
+---
+
+## Estado del branch
+
+- Branch activo: `ccr-eaf2827b-dmk4yf`
+- Commits adelante de main: ~25 (listo para PR)
+- PR: **pendiente de crear**
+
+## Qué se hizo en las últimas sesiones (01–02/11)
+
+### Sesión 02/11 — auditorías + setup (esta sesión)
+- Auditoría de calidad web (`docs/auditoria-calidad-2026-11-02.html`): 12 hallazgos
+- Auditoría de setup de Claude Code (`docs/auditoria-setup-2026-11-02.html`): 9 hallazgos
+- Correcciones aplicadas del audit de calidad:
+  - Dark mode sin destello (index.html: inline style con color-scheme + background oscuro)
+  - `aria-label="Buscar productos"` en el input de búsqueda (js/busqueda.js)
+  - Links que abren pestaña nueva: `aria-label` con aviso "(nueva pestaña)" (js/busqueda.js)
+  - Focus visible en el buscador: box-shadow de 4px (css/sitio.css:247)
+  - h1 con texto accesible "Comparador de precios de hardware en Argentina" (index.html:88)
+  - Fuentes `.meta`, `.tab .n`, `.tile .k`: de .68–.72rem → .8rem (css/sitio.css)
+  - Placeholders de filtros sin `…` → corregidos (js/busqueda.js)
+- Correcciones aplicadas del audit de setup:
+  - `settings.json`: deny para Edit/Write de `.env*` y `.dev.vars` (sumado a los Read ya existentes)
+  - Skills instaladas: `vercel-labs/agent-skills@web-design-guidelines` (816K installs) y `addyosmani/web-quality-skills@web-quality-audit` (34.5K installs)
+- Revertido: `sw.js` sin índice en la precarga → diferido a **sesión VELOCIDAD**
+- Hooks mejorados (f97d288): freno a `git push --force`, `reset --hard`, secretos en commits, aviso al cerrar
+
+### Sesión 02/11 — índice sin fotos (spec 057)
+- `adelgazar_indice.js`: extrae los campos mínimos y descarta fotos del índice
+- Resultado: -29% de descarga en Buscar y Ofertas
+- Tests: `tests/js/adelgazar.test.js` (nuevo)
+
+### Sesión 01/11 — diseño final + eBay + hooks
+- Diseño D + F3 en tarjetas de Ofertas (`b7d66f1`)
+- eBay activado: `EBAY_CLIENT_ID`, `EBAY_CLIENT_SECRET`, `EBAY_CAMPAIGN_ID` cargados; Worker devuelve `afiliado: true`
+- Áreas táctiles de 24px en links "mismo modelo" de Búsqueda
+- Contraste del precio tachado y contadores de chips corregido
+- Indexador: descarta avisos con precio >= $100.000.000 (relleno)
+
+---
+
+## Qué falta (pendiente técnico)
+
+### Diferido a sesión VELOCIDAD (no tocar antes)
+- [ ] Juntar y minificar los 25 archivos JS (index.html:107-121 y 810-820)
+- [ ] `sw.js`: sacar `indice.json` de la precarga (solo se guarda al buscar por primera vez)
+- [ ] Alojar fuentes localmente (woff2 con preload) para eliminar Google Fonts externo
+- [ ] Generar noscript de fuentes desde plantilla (hoy duplicado manual en index.html:46)
+
+### Hallazgos de calidad pendientes (diferidos)
+- [ ] CSP: eliminar `unsafe-inline` en scripts (requiere mover DATOS a archivo externo)
+- [ ] Portada con contenido estático para SEO (links fijos a precios/ dentro de #vista)
+
+### Setup pendientes
+- [ ] **guardia.py**: agregar deny para `git push --force`, `git push origin main`, `git reset --hard`, archivos `.env` y `.dev.vars` (fork haiku en progreso al momento de escribir esto)
+- [ ] **test_del_archivo.py**: validar JSON al editar `*.json` de la raíz (mismo fork)
+- [ ] **`.mcp.json`**: el archivo existe pero con command incorrecto (`node` en vez de `npx`). Corregir manualmente:
+  ```json
+  {
+    "mcpServers": {
+      "playwright": {
+        "command": "npx",
+        "args": ["@playwright/mcp@latest", "--browser", "chromium", "--executablePath", "/opt/pw-browsers/chromium"],
+        "env": {}
+      }
+    }
+  }
+  ```
+- [ ] Skills de terceros pesadas (`speckit-*` x10, `reverse-engineer-anything`, etc.): moverlas a nivel usuario (`npx skills add ... -g`) para liberar contexto
+- [ ] Crear `.claude/agents/security-reviewer.md` limitado a `worker/src`
+
+### Pendientes del dueño (ver `docs/pendientes-del-dueno.md`)
+- [ ] Formulario de contacto: probar de punta a punta (secretos ya cargados)
+- [ ] AliExpress: cargar `ALIEXPRESS_APP_KEY`, `ALIEXPRESS_APP_SECRET`, `ALIEXPRESS_TRACKING_ID`
+- [ ] Google Search Console: agregar registro TXT en Cloudflare
+- [ ] Seguimiento tiendas (16/11): FullH4rd, Katech, Compra Cierta, Loquieroacá
+
+---
+
+## Comandos útiles para empezar
+
+```bash
+# Tests completos
+node --test "tests/js/*.test.js"
+python -m unittest
+
+# Test de un archivo específico
+node --test tests/js/busqueda.test.js
+
+# E2E (con poca memoria, un worker)
+npx playwright test --workers=1
+
+# Auditorías de diseño (skills ya instaladas)
+# /web-design-guidelines css/sitio.css index.html js/busqueda.js
+# /web-quality-audit
+
+# Medir índice antes de un PR de ofertas/categorías
+# /medir-indice
+```
+
+## Próxima sesión sugerida
+
+1. Verificar que el fork de guardia.py + test_del_archivo.py commiteó bien
+2. Crear el PR del branch `ccr-eaf2827b-dmk4yf`
+3. Publicar en Telegram si el PR está listo
+4. Sesión VELOCIDAD: bundle JS + sw.js sin índice + fuentes locales
