@@ -47,6 +47,30 @@ class Guardia(unittest.TestCase):
             self.assertEqual(decision, "deny", comando)
             self.assertIn("sin tildes", motivo)
 
+    def test_borrar_historia_pide_confirmacion(self):
+        for comando in ["git push --force origin main", "git push -f", "git push origin x --force-with-lease", "git reset --hard HEAD~1"]:
+            self.assertEqual(guardia.decidir(comando)[0], "ask", comando)
+        for comando in ["git push -u origin claude/x", "git reset --soft HEAD~1", "git status"]:
+            self.assertIsNone(guardia.decidir(comando), comando)
+
+    def test_secretos_piden_confirmacion(self):
+        for ruta in ["worker/.dev.vars", ".env", "app/.env.local", "C:\repo\.env"]:
+            self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
+        self.assertIsNone(guardia.decidir_archivo("js/env.js"))
+
+
+class JsonRoto(unittest.TestCase):
+    def test_avisa_si_el_json_quedo_invalido(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            malo, bueno = os.path.join(d, "malo.json"), os.path.join(d, "bueno.json")
+            open(malo, "w", encoding="utf-8").write('{"a": 1,}')
+            open(bueno, "w", encoding="utf-8").write('{"a": 1}')
+            self.assertIn("JSON invalido", test_del_archivo.json_roto(malo))
+            self.assertIsNone(test_del_archivo.json_roto(bueno))
+            self.assertIsNone(test_del_archivo.json_roto(os.path.join(d, "no_existe.json")))
+        self.assertIsNone(test_del_archivo.json_roto("js/x.js"))
+
 
 def correr(modulo, entrada):
     """Corre el main() del hook con `entrada` por stdin; devuelve (codigo, stdout, stderr)."""

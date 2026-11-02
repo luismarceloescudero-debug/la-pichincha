@@ -4,6 +4,7 @@
 Reglas fijas del proyecto que antes cuidaba solo la memoria del modelo:
 - Publicar (Telegram, Instagram) o disparar un workflow es decision del dueño: se pide confirmacion.
 - Los mensajes de commit van sin tildes ni eñes (compatibilidad de consola): se frena el commit.
+- Borrar historia (`git push --force`, `git reset --hard`) o tocar archivos de secretos (`.env*`, `.dev.vars`) pide confirmacion.
 - Editar a mano un archivo generado (`package-lock.json`, lo de `_sitio/`) pide confirmacion: se regenera con npm o con
   `tests/e2e/armar-sitio.sh`. `datos.json` y `consultas.json` NO entran: llevan datos curados a mano.
 
@@ -25,11 +26,18 @@ COMMIT = re.compile(r"\bgit\b(?:\s+-\S+(?:\s+\S+)?)*\s+commit\b")
 TILDES = re.compile(r"[áéíóúüñÁÉÍÓÚÜÑ]")
 
 
+DESTRUCTIVOS = [
+    (re.compile(r"\bgit\b[^|;&\n]*\bpush\b[^|;&\n]*(?:--force\b|--force-with-lease\b|\s-f\b)"), "empuja con fuerza y puede borrar historia del remoto"),
+    (re.compile(r"\bgit\b[^|;&\n]*\breset\b[^|;&\n]*--hard\b"), "descarta cambios sin commitear con reset --hard"),
+]
+SECRETOS = re.compile(r"(?:^|[\\/])(?:\.env(?:\.[^\\/]*)?|\.dev\.vars)$")
 GENERADOS = re.compile(r"(?:^|[\\/])(?:package-lock\.json|_sitio[\\/].+)$")
 
 
 def decidir_archivo(ruta):
     """Para Edit/Write: ('ask', motivo) si el archivo es generado, o None."""
+    if SECRETOS.search(ruta or ""):
+        return "ask", "Este archivo guarda secretos (.env / .dev.vars): no se edita sin que el dueño lo pida."
     if GENERADOS.search(ruta or ""):
         return "ask", ("Este archivo se genera (npm o armar-sitio.sh), no se edita a mano. Confirmá solo si el dueño "
                        "lo pidio; si no, regeneralo con su comando.")
@@ -43,6 +51,9 @@ def decidir(comando):
         if letras:
             return "deny", ("Mensaje de commit con tildes o eñes (" + " ".join(letras) + "): la regla del "
                             "proyecto es sin tildes. Reescribilo sin esas letras.")
+    for patron, que in DESTRUCTIVOS:
+        if patron.search(comando):
+            return "ask", "Este comando " + que + ". Confirmá solo si el dueño lo pidió en esta conversacion."
     for patron, que in PUBLICAR:
         if patron.search(comando):
             return "ask", ("Este comando " + que + ". Publicar o disparar workflows es decision del dueño: "
