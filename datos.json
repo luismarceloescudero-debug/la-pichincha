@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-28",
+  "actualizado": "2026-11-02",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -94,7 +94,8 @@
       ],
       "contras": [
         "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
-      ]
+      ],
+      "falla_desde": "2026-11-02"
     },
     {
       "id": "kingston-kvr",
@@ -155,9 +156,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
       "img": "img/corsair-lpx.jpg",
-      "precio": 262370,
-      "precio_lista": 291522,
-      "sin_impuestos": 237439,
+      "precio": 247791,
+      "precio_lista": 275323,
+      "sin_impuestos": 224245,
       "stock": "en stock",
       "titular": "La marca más probada, por treinta mil pesos más",
       "specs": {
@@ -553,6 +554,16 @@
           "ahora": 262370
         }
       ]
+    },
+    {
+      "fecha": "2026-11-02",
+      "cambios": [
+        {
+          "id": "corsair-lpx",
+          "antes": 262370,
+          "ahora": 247791
+        }
+      ]
     }
   ],
   "veredicto": [
@@ -579,7 +590,7 @@
     "kingston_retiro": 299249,
     "combo_gc": 460888,
     "combo_partido": 366238,
-    "ram_mas_barata": "adata-d35",
+    "ram_mas_barata": "corsair-lpx",
     "webcam_mas_barata": "brio100"
   },
   "marcas": {
