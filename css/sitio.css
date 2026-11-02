@@ -894,3 +894,7 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 /* ---- Busqueda en celular: areas tactiles y menos trabajo de pintado ---- */
 /* Los links de «mismo modelo en otras tiendas» median 16-19 px de alto; WCAG 2.5.8 pide 24 px como minimo. */
 .mismo a{display:inline-flex;align-items:center;min-height:24px;padding-block:3px}
+/* Contraste (Lighthouse, 01/11): el precio tachado sobre la franja roja y el contador de los chips quedaban en 4,35 y 3,59. */
+.ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{color:#fff}
+.of-chip .n{opacity:1;color:var(--ink-2)}
+.of-chip[aria-pressed="true"] .n{color:inherit}
