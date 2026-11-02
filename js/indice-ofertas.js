@@ -78,7 +78,9 @@ function programarOfertas(j) {
    feed RSS y el canal de Telegram. */
 const { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
-const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1 };
+const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1,
+  // Filtros plegados en el celular (diseno D+F3): la primera tarjeta se ve sin bajar una pantalla y media. En escritorio van abiertos.
+  filtros: typeof matchMedia === "function" ? matchMedia("(min-width: 621px)").matches : true };
 let OF_ACTUAL = [];
 
 const leerEstrellas = () => {
@@ -127,7 +129,7 @@ function controlesOfertas(todas) {
   const porCat = new Map(cuenta("cat"));
   const cats = Categorias.ORDEN.filter(c => porCat.has(c)).map(c => [c, porCat.get(c)]);
   const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
-  return `<div class="of-ctrl">
+  return `<details class="of-plegable"${OF.filtros ? " open" : ""}><summary>${icono("filtro")} Filtrar y ordenar</summary><div class="of-ctrl">
     <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}${n.seguimiento ? seg("tipo", "seguimiento", "En seguimiento", n.seguimiento) : ""}</div>
     <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
     <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
@@ -136,7 +138,7 @@ function controlesOfertas(todas) {
       <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
       <button class="of-chip" data-of="cruce:1" aria-pressed="${OF.cruce}" title="Ofertas reales de gama alta que cuestan lo mismo o menos que la mediana de la gama media">Gama alta al precio de media <span class="n">${todas.filter(o => o.cruce).length}</span></button>
       <button class="of-chip" data-of="marcadas:1" aria-pressed="${OF.marcadas}">★ Marcadas <span class="n">${ESTRELLAS.size}</span></button>
-    </div></div>`;
+    </div></div></details>`;
 }
 
 // Jerarquia (spec 055): no todo pesa igual. Cuanto pesa una tarjeta lo decide su descuento contra el resto de la lista que se
@@ -177,7 +179,7 @@ function cardOferta(o, i, desde) {
   const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
   const foto = fondo(f[7]);
   const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(nombreCompleto)}">
+  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" data-tienda="${esc(f[3])}" aria-label="${esc(nombreCompleto)}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
@@ -308,3 +310,9 @@ function alternarOferta(tarjeta) {
   if (b) b.setAttribute("aria-expanded", String(abierta));
   return abierta;
 }
+
+// Recuerda si la persona abrio o cerro los filtros, para que no se cierren solos al tocar un chip (toggle no burbujea: captura).
+if (typeof document !== "undefined") document.addEventListener("toggle", ev => {
+  const d = ev.target;
+  if (d && d.classList && d.classList.contains("of-plegable")) OF.filtros = d.open;
+}, true);
