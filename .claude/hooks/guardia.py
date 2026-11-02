@@ -27,8 +27,9 @@ TILDES = re.compile(r"[áéíóúüñÁÉÍÓÚÜÑ]")
 
 
 DESTRUCTIVOS = [
-    (re.compile(r"\bgit\b[^|;&\n]*\bpush\b[^|;&\n]*(?:--force\b|--force-with-lease\b|\s-f\b)"), "empuja con fuerza y puede borrar historia del remoto"),
-    (re.compile(r"\bgit\b[^|;&\n]*\breset\b[^|;&\n]*--hard\b"), "descarta cambios sin commitear con reset --hard"),
+    (re.compile(r"\bgit\b[^|;&\n]*\bpush\b[^|;&\n]*(?:--force\b|--force-with-lease\b|\s-f\b)"), "push con --force/-f borra historia del remoto de forma irreversible"),
+    (re.compile(r"\bgit\b[^|;&\n]*\bpush\b[^|;&\n]*\borigin\s+main(?![-\w])"), "push directo a main (usa una rama y un PR)"),
+    (re.compile(r"\bgit\b[^|;&\n]*\breset\b[^|;&\n]*--hard\b"), "reset --hard descarta cambios sin commitear de forma irreversible"),
 ]
 SECRETOS = re.compile(r"(?:^|[\\/])(?:\.env(?:\.[^\\/]*)?|\.dev\.vars)$")
 GENERADOS = re.compile(r"(?:^|[\\/])(?:package-lock\.json|_sitio[\\/].+)$")
@@ -37,7 +38,7 @@ GENERADOS = re.compile(r"(?:^|[\\/])(?:package-lock\.json|_sitio[\\/].+)$")
 def decidir_archivo(ruta):
     """Para Edit/Write: ('ask', motivo) si el archivo es generado, o None."""
     if SECRETOS.search(ruta or ""):
-        return "ask", "Este archivo guarda secretos (.env / .dev.vars): no se edita sin que el dueño lo pida."
+        return "deny", "Bloqueado: este archivo guarda secretos (.env / .dev.vars). No se edita; pediselo al dueño."
     if GENERADOS.search(ruta or ""):
         return "ask", ("Este archivo se genera (npm o armar-sitio.sh), no se edita a mano. Confirmá solo si el dueño "
                        "lo pidio; si no, regeneralo con su comando.")
@@ -53,7 +54,7 @@ def decidir(comando):
                             "proyecto es sin tildes. Reescribilo sin esas letras.")
     for patron, que in DESTRUCTIVOS:
         if patron.search(comando):
-            return "ask", "Este comando " + que + ". Confirmá solo si el dueño lo pidió en esta conversacion."
+            return "deny", "Bloqueado: " + que + ". Solo el dueño puede pedirlo directamente."
     for patron, que in PUBLICAR:
         if patron.search(comando):
             return "ask", ("Este comando " + que + ". Publicar o disparar workflows es decision del dueño: "
