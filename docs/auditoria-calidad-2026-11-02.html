@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoría de calidad web · 02/11/2026</title>
+<style>
+:root{--bg:#f7f7f4;--card:#fff;--ink:#1a1f29;--mut:#4e5767;--line:#d9dfe8;--bar:#0b4fd8;--alta:#b3261e;--media:#8a5a00;--baja:#2e6b3a;--altaf:#fde7e5;--mediaf:#fff1d6;--bajaf:#e3f3e6}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1117;--card:#161b23;--ink:#e9edf4;--mut:#aab3c2;--line:#2b323d;--bar:#6c9bff;--alta:#ff9d95;--media:#f3c25b;--baja:#7fd49a;--altaf:#3a1816;--mediaf:#33270d;--bajaf:#12301f}}
+body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:2rem;margin:0 0 8px}h2{font-size:1.4rem;margin:34px 0 12px}
+p{margin:6px 0}.mut{color:var(--mut)}
+.nota{display:grid;grid-template-columns:200px 1fr;gap:6px 16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+.nota b{font-size:1.1rem}.pista{background:var(--line);border-radius:999px;height:22px;overflow:hidden}
+.pista div{height:100%;background:var(--bar);color:#fff;font-weight:700;font-size:.9rem;line-height:22px;padding-left:10px;box-sizing:border-box}
+.razon{grid-column:1/-1;color:var(--mut);font-size:.95rem}
+.tabla{overflow-x:auto}table{border-collapse:collapse;width:100%;background:var(--card);font-size:.92rem}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}th{background:var(--bg)}
+code{font-size:.85rem;word-break:break-all}
+.p{font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.Alta{color:var(--alta);background:var(--altaf)}.Media{color:var(--media);background:var(--mediaf)}.Baja{color:var(--baja);background:var(--bajaf)}
+@media(max-width:640px){.nota{grid-template-columns:1fr}body{font-size:17px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Auditoría de calidad web: La Pichincha</h1>
+<p class="mut">02/11/2026 · solo lectura del código (index.html, js/, css, sw.js, worker). No se midió en navegador; se apoya en <code>docs/pruebas-2026-11-01.md</code>.</p>
+<p>El sitio está sólido: HTML con <code>lang</code>, enlace para saltar al contenido, pestañas con ARIA completo, modo oscuro, soporte para movimiento reducido y funcionamiento sin conexión.</p>
+<p>Lo que más pesa es la carga: unos 25 scripts sueltos sin juntar y un índice grande que se descarga al instalar el service worker.</p>
+<p>Lo demás son detalles chicos de accesibilidad (falta de etiqueta en el buscador, letra muy chica) y de seguridad de la página.</p>
+
+<h2>Notas</h2>
+<div class="nota"><b>Rendimiento</b><div class="pista"><div style="width:72%">72</div></div><p class="razon">25 archivos JS sin minificar ni juntar (index.html:107-121 y 810-820), precarga del índice completo en el service worker y hoja de fuentes externa que bloquea el dibujo. A favor: <code>font-display:optional</code>, imágenes con <code>loading=lazy</code> y la primera con <code>fetchpriority</code>.</p></div>
+<div class="nota"><b>Accesibilidad</b><div class="pista"><div style="width:84%">84</div></div><p class="razon">Muy buena base (skip-link, tabs con flechas, <code>aria-live</code>, foco visible, 44 px de toque). Restan el buscador sin etiqueta real, letras de 11 px y enlaces que abren pestaña sin avisar.</p></div>
+<div class="nota"><b>SEO</b><div class="pista"><div style="width:82%">82</div></div><p class="razon">Título, descripción, canonical, Open Graph, JSON-LD, sitemap y páginas estáticas por búsqueda. Restan que la portada se arma con JavaScript (vacía sin JS) y un h1 sin palabras clave.</p></div>
+<div class="nota"><b>Buenas prácticas</b><div class="pista"><div style="width:76%">76</div></div><p class="razon">CSP, referrer, SRI en la analítica y Worker con CORS acotado. Restan el <code>'unsafe-inline'</code> en scripts y no poder mandar encabezados reales desde GitHub Pages (ya conocido).</p></div>
+
+<h2>Hallazgos</h2>
+<div class="tabla"><table>
+<thead><tr><th>Archivo:línea</th><th>Qué pasa</th><th>Prioridad</th><th>Arreglo sugerido</th></tr></thead>
+<tbody>
+<tr><td><code>index.html:107-121</code> y <code>index.html:810-820</code></td><td>La página pide 25 archivos de código uno por uno, y el navegador espera a cada uno. Es como pedir 25 paquetes por separado en vez de uno.</td><td><span class="p Alta">Alta</span></td><td>Juntar y minificar en un solo bundle (o dos: núcleo y vistas) y cargarlo con <code>defer</code>. Ya anotado para la sesión de VELOCIDAD.</td></tr>
+<tr><td><code>sw.js:19</code></td><td>Al instalar la app se baja el índice entero de productos (más de 31.000 avisos), y como cada publicación cambia la versión, se vuelve a bajar entero cada vez, aunque no se use.</td><td><span class="p Alta">Alta</span></td><td>Sacar <code>indice.json</code> de <code>CASCARA</code> y dejar que se guarde cuando se pide por primera vez (ya lo hace el fetch de <code>sw.js:~42</code>).</td></tr>
+<tr><td><code>index.html:9</code></td><td>La política de seguridad deja correr cualquier script escrito dentro de la página (<code>'unsafe-inline'</code>). Si alguien lograra colar un texto, la política no lo frenaría. Además, una política puesta en <code>meta</code> no puede usar <code>frame-ancestors</code>.</td><td><span class="p Alta">Alta</span></td><td>Pasar el bloque <code>DATOS</code> (<code>index.html:122</code>) a un archivo <code>.json</code>/<code>.js</code> externo y quitar <code>'unsafe-inline'</code> de <code>script-src</code>, o usar hash.</td></tr>
+<tr><td><code>index.html:45</code></td><td>La hoja de fuentes de Google es de otro sitio y frena el dibujo de la página hasta llegar.</td><td><span class="p Media">Media</span></td><td>Alojar las fuentes en el sitio (woff2 con <code>preload</code>) o cargarla con <code>media="print" onload</code>.</td></tr>
+<tr><td><code>index.html:39-40</code></td><td>Antes de cargar el CSS, el fondo está fijo en claro. Quien usa modo oscuro ve un destello blanco al abrir.</td><td><span class="p Media">Media</span></td><td>Poner en ese estilo mínimo <code>color-scheme:light dark</code> y un <code>@media (prefers-color-scheme:dark)</code> con fondo <code>#0e1117</code>.</td></tr>
+<tr><td><code>js/busqueda.js:341</code></td><td>El cuadro de búsqueda no tiene etiqueta: solo un texto de ejemplo que desaparece al escribir. Un lector de pantalla no sabe para qué sirve.</td><td><span class="p Media">Media</span></td><td>Agregar <code>aria-label="Buscar productos"</code> al <code>input#q</code>.</td></tr>
+<tr><td><code>index.html:95</code></td><td>La portada está vacía hasta que corre el JavaScript. Un buscador que no ejecute JS ve solo el aviso de <code>noscript</code>.</td><td><span class="p Media">Media</span></td><td>Poner dentro de <code>#vista</code> un texto fijo con los productos más buscados y enlaces a <code>precios/</code>, que JS reemplaza.</td></tr>
+<tr><td><code>css/sitio.css:88</code>, <code>:229</code>, <code>:115</code></td><td>Hay letras de 0,68 a 0,72 rem (unos 11 px) en gris. Cuesta leerlas, sobre todo en celular.</td><td><span class="p Media">Media</span></td><td>Subir a 0,8 rem como mínimo en <code>.meta</code>, <code>.tile .k</code> y <code>.tab .n</code>.</td></tr>
+<tr><td><code>js/busqueda.js:298-303</code></td><td>Los enlaces a tiendas abren una pestaña nueva y no avisan. Quien usa lector de pantalla se desorienta.</td><td><span class="p Baja">Baja</span></td><td>Sumar al nombre accesible «(se abre en otra pestaña)» con <code>aria-label</code> o texto oculto. Ya anotado por squirrel (enlaces idénticos).</td></tr>
+<tr><td><code>css/sitio.css:247</code></td><td>Al enfocar el buscador se saca el contorno y solo cambia el color del borde. Para algunas personas ese cambio es muy sutil.</td><td><span class="p Baja">Baja</span></td><td>Dejar el <code>box-shadow</code> de foco más marcado, como ya hacen <code>css/sitio.css:692</code> y <code>:703</code> (anillo de 4 px).</td></tr>
+<tr><td><code>index.html:88</code></td><td>El título principal (h1) dice solo «La Pichincha». No dice qué es el sitio. A los buscadores les sirve más una frase.</td><td><span class="p Baja">Baja</span></td><td>Texto visible o accesible «Comparador de precios de hardware en Argentina» dentro del h1.</td></tr>
+<tr><td><code>index.html:46</code></td><td>La hoja de fuentes se repite dentro de <code>noscript</code> y arrastra una segunda copia de la URL larga; se mantiene a mano y puede desfasarse de la línea 45.</td><td><span class="p Baja">Baja</span></td><td>Generar ambas líneas desde una sola plantilla, o quitar el <code>noscript</code> si las fuentes pasan a alojarse localmente.</td></tr>
+</tbody></table></div>
+<p class="mut">Cada hallazgo se verificó leyendo el archivo indicado. Fuera de alcance por no poder medirse leyendo código: LCP/INP/CLS reales, contraste efectivo y tamaño del índice publicado.</p>
+</main>
+</body>
+</html>
