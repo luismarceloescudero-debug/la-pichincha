@@ -47,15 +47,21 @@ class Guardia(unittest.TestCase):
             self.assertEqual(decision, "deny", comando)
             self.assertIn("sin tildes", motivo)
 
-    def test_borrar_historia_pide_confirmacion(self):
+    def test_borrar_historia_se_frena(self):
         for comando in ["git push --force origin main", "git push -f", "git push origin x --force-with-lease", "git reset --hard HEAD~1"]:
-            self.assertEqual(guardia.decidir(comando)[0], "ask", comando)
+            self.assertEqual(guardia.decidir(comando)[0], "deny", comando)
         for comando in ["git push -u origin claude/x", "git reset --soft HEAD~1", "git status"]:
             self.assertIsNone(guardia.decidir(comando), comando)
 
-    def test_secretos_piden_confirmacion(self):
+    def test_push_a_main_se_frena(self):
+        for comando in ["git push origin main", "git push origin  main", "git push -u origin main"]:
+            self.assertEqual(guardia.decidir(comando)[0], "deny", comando)
+        for comando in ["git push origin main-backup", "git push origin feature/main-fix"]:
+            self.assertIsNone(guardia.decidir(comando), comando)
+
+    def test_secretos_se_frenan(self):
         for ruta in ["worker/.dev.vars", ".env", "app/.env.local", "C:\repo\.env"]:
-            self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
+            self.assertEqual(guardia.decidir_archivo(ruta)[0], "deny", ruta)
         self.assertIsNone(guardia.decidir_archivo("js/env.js"))
 
 
