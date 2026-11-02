@@ -43,8 +43,8 @@ auditoría 2). Corrida **después** de las correcciones de este PR (diseño D + 
 
 ## Recomendaciones que quedan
 
-1. **Adelgazar el índice** (decisión del dueño, ver auditoría 2): sacar `imagen` de `indice.json` o partirlo por rubro; la constitución y
-   `docs/plan-v3.md` ya prevén «partir el índice por rubro» como primer paso.
+1. **Adelgazar más el índice** (ver auditoría 2): `imagen` ya salió (spec 057, −29 %). Lo que queda es CPU (~2 s) y peso (1,3 MB). Partir por rubro
+   cambia qué resultados salen (una consulta como «samsung» no dice su rubro), así que necesita un diseño aparte; buscar en el Worker es la alternativa.
 2. **Copia de la continuidad dentro del repo** (`docs/continuidad.md`, sin datos sensibles).
 3. **Subagente `security-reviewer` para `worker/src`** y skill `/e2e-local`: prioridad baja.
 4. **Conector Cloudflare con acceso a la zona** (solo lectura): hoy ve cuenta y Workers, no DNS ni Email Routing.
