@@ -163,3 +163,23 @@ test("diseno D + F3: las tres familias de letra se piden en index.html y el CSS 
   const css = leer("css/sitio.css");
   for (const f of ["Barlow Condensed", "Bricolage Grotesque", "DM Mono"]) assert.ok(css.includes(f), f);
 });
+
+test("spec 057: la foto de la tarjeta sale de imagenes.json (el indice del sitio ya no la trae) y, sin ella, del propio indice", () => {
+  const f = fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000);
+  const { correr, els } = pagina([f]);
+  correr(`IMAGENES = { ${JSON.stringify(f[2])}: "https://img.test/ram.jpg" }`);
+  correr("pintarOfertas()");
+  assert.match(els["#resOf"].innerHTML, /background-image:url\(&quot;https:\/\/img\.test\/ram\.jpg&quot;\)/);
+  // sin imagenes.json ni foto en el indice: el icono del tipo, nunca una tarjeta rota
+  const sinFoto = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
+  sinFoto.correr("IMAGENES = {}");
+  sinFoto.correr("pintarOfertas()");
+  assert.match(sinFoto.els["#resOf"].innerHTML, /o-sin-img/);
+  // y con la foto en el propio indice (fixtures, indice completo) se usa esa
+  const conFoto = fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000);
+  conFoto[7] = "https://img.test/propia.jpg";
+  const p = pagina([conFoto]);
+  p.correr("IMAGENES = {}");
+  p.correr("pintarOfertas()");
+  assert.match(p.els["#resOf"].innerHTML, /propia\.jpg/);
+});

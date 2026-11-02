@@ -1,6 +1,8 @@
 /* --- Indice compartido: lo usan Buscar y Ofertas ---------------------
    Se baja una sola vez, recien cuando abris alguna de las dos. */
 let IDX = null, pidiendo = null, OFERTAS = null;
+// Fotos de las ofertas (spec 057): el indice que baja el navegador no las trae; viajan aparte, solo al abrir Ofertas.
+let IMAGENES = null, pidiendoImagenes = null;
 const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "fuente 650w", "webcam logitech"];
 /* Lo mas buscado, si el build lo trajo (BUSCADAS: agregado, con minimo de personas distintas y sin datos personales, spec 017
    fase 3); si no, las de siempre. Se pide al pintar: BUSCADAS lo define el bloque de datos, que carga despues de este script. */
@@ -21,6 +23,17 @@ function asegurarIndice(forzar) {
     })
     .finally(() => { pidiendo = null; });
   return pidiendo;
+}
+
+/* imagenes.json ({ url: foto }) lo arma adelgazar_indice.js junto con el indice. Si no esta o falla, las tarjetas usan la foto del propio
+   indice (si la trae) o el icono del tipo de producto: nunca rompe la pestaña. */
+function asegurarImagenes() {
+  if (IMAGENES) return Promise.resolve(IMAGENES);
+  if (!pidiendoImagenes) pidiendoImagenes = fetch("imagenes.json", { cache: "no-cache" })
+    .then(r => (r.ok ? r.json() : {})).catch(() => ({}))
+    .then(m => { IMAGENES = m && typeof m === "object" ? m : {}; return IMAGENES; })
+    .finally(() => { pidiendoImagenes = null; });
+  return pidiendoImagenes;
 }
 
 /* Las ofertas de todo el indice (un segundo de CPU en un telefono, Lighthouse del 24/10) no frenan la busqueda: se calculan cuando
@@ -177,7 +190,7 @@ function cardOferta(o, i, desde) {
       ? "Lo seguimos hace menos de una semana: el precio anterior es el más bajo que vimos desde entonces. Todavía no alcanza para decir que bajó contra sus 30 días."
       : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
   const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
-  const foto = fondo(f[7]);
+  const foto = fondo((IMAGENES && IMAGENES[f[2]]) || f[7]);
   const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
   return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" data-tienda="${esc(f[3])}" aria-label="${esc(nombreCompleto)}">
     ${img}
@@ -223,7 +236,7 @@ function animarCuentas() {
 
 function vistaOfertas() {
   setTimeout(async () => {
-    try { await asegurarIndice(); pintarOfertas(); }
+    try { await Promise.all([asegurarIndice(), asegurarImagenes()]); pintarOfertas(); }
     catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el índice"; }
   }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
