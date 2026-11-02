@@ -244,7 +244,8 @@ td.mejor{color:var(--good);font-weight:700}
 .buscador input{width:100%;font:500 1.05rem var(--font-sans);padding:15px 18px 15px 50px;
   border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
   box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s}
-.buscador input:focus{outline:none;border-color:var(--accent);box-shadow:var(--shadow-up)}
+.buscador input:focus{outline:none;border-color:var(--accent);box-shadow:var(--shadow-up),0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.solo-lector{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .buscador .ico{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:var(--ink-3)}
 .sugeridas{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
 .sug{all:unset;cursor:pointer;font:500 .82rem var(--font-sans);padding:6px 13px;border-radius:999px;

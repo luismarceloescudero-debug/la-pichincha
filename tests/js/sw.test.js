@@ -89,8 +89,9 @@ test("no toca otros origenes ni pedidos que no son GET", async () => {
 });
 
 test("la cascara trae lo necesario y no pasa de un tamano razonable de archivos", () => {
-  for (const f of ["./", "index.html", "css/sitio.css", "js/app.js", "js/analisis.js", "manifest.webmanifest", "sin-red.html", "indice.json"])
+  for (const f of ["./", "index.html", "css/sitio.css", "js/app.js", "js/analisis.js", "manifest.webmanifest", "sin-red.html"])
     assert.ok(SW.CASCARA.includes(f), f);
+  assert.ok(!SW.CASCARA.includes("indice.json"), "el indice de 31.000 avisos no se baja entero en cada instalacion: se guarda al pedirlo");
   assert.ok(SW.CASCARA.length < 40);
   assert.ok(SW.CASCARA.every(f => !/^https?:/.test(f)), "nada de otros origenes");
 });
@@ -105,7 +106,7 @@ test("al activar borra toda cache pichincha distinta de la actual y respeta las 
 test("al instalar guarda lo que puede y no se cae si algo falta", async () => {
   const guardadas = [];
   const cache = { put: async (p) => { guardadas.push(p); } };
-  const falla = "indice.json";
+  const falla = "sin-red.html";
   const fetchFalso = async p => { if (String(p).endsWith(falla)) throw new TypeError("sin indice"); return respuesta("ok"); };
   const ok = await SW.precargar(cache, fetchFalso, BASE);
   assert.ok(ok > 0 && ok < SW.CASCARA.length, "guardo todo menos lo que fallo");

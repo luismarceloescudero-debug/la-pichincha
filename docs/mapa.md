@@ -215,3 +215,8 @@ Rubros nuevos del catalogo (B5, spec 011) todavia esperan decisiones del dueño.
 `actualizar.yml` o `tests.yml`, un script o JSON nuevo, una llamada por `subprocess`, un archivo que cambia
 de dueño o una receta que deja de ser cierta. Los numeros de linea se corrigen cuando se toca ese archivo;
 un PR que cambia el flujo sin tocar este mapa no se mergea.
+
+## Hooks y permisos de Claude Code (02/11)
+- `guardia.py` ahora tambien pide confirmacion para `git push --force/-f`, `git reset --hard` y editar `.env*` / `.dev.vars`.
+- `aviso_cierre.py` (hook Stop) avisa si quedan archivos sin commitear. `test_del_archivo.py` avisa si un `.json` editado queda invalido.
+- `.claude/settings.json` suma `permissions`: permite tests y `git status/diff/log`, niega leer `.env*` y `.dev.vars`.

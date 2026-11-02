@@ -298,9 +298,9 @@ function pintarResultados(q) {
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
       <span class="nom">${Titulo.html(f[0], esc)}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
-      <span class="pre">${pesos(f[1])}</span>
+      <span class="pre">${pesos(f[1])}</span><span class="solo-lector"> (se abre en otra pestaña)</span>
     </a>` + (otras.length || compara ? `<div class="mismo">${otras.length ? `<span>También en</span>${otras.map(o =>
-      `<a href="${hrefTienda(o[2])}" target="_blank" rel="${relTienda(o[2])}">${esc(comercioDe(o))} ${pesos(o[1])}</a>${selloAfiliado(o[2])}`).join("")}` : ""}${compara}</div>` : "")
+      `<a href="${hrefTienda(o[2])}" target="_blank" rel="${relTienda(o[2])}">${esc(comercioDe(o))} ${pesos(o[1])}<span class="solo-lector"> (se abre en otra pestaña)</span></a>${selloAfiliado(o[2])}`).join("")}` : ""}${compara}</div>` : "")
       + historialHtml(f);
   }).join("");
 }
@@ -338,7 +338,7 @@ function vistaBuscar() {
 
   return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las ${IDX ? Object.keys(IDX.tiendas).length : 13} fuentes</h2>
     <p class="sub">Un solo cuadro sobre los catálogos de 12 tiendas de hardware (CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus, Katech, Max Tecno, The Gamer Shop, SCP Hardstore, Click Gaming y GoldenTech), más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados se ven en tres modos (Recomendación, Súper Oferta y Primera Línea) y se ordenan por precio, novedades o gama premium; con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
-    <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
+    <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" aria-label="Buscar productos" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${sugeridas().map(x => `<button class="sug">${esc(x)}</button>`).join("")}</div>
     ${ordenesHtml()}
