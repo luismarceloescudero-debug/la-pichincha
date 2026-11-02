@@ -22,6 +22,26 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 ---
 
+## Estado al 01/11/2026 (sesion de auditoria)
+
+Verificado con la captura de los secretos de GitHub y una prueba en vivo del Worker. La pagina «Pendientes de La Pichincha»
+(https://claude.ai/artifact/31tfse3HEy4t53HqFtxfvG) tiene el mismo estado, con los pasos y enlaces directos para el celular.
+
+| # | Estado |
+|---|---|
+| 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
+| 2 | Enviadas las 4 cartas (02/11) por correo y por Instagram y Facebook. Seguimiento: 16/11/2026 |
+| 3 | eBay: claves cargadas y busqueda en vivo OK (el 401 del 25/10 ya no aparece). Falta solo `EBAY_CAMPAIGN_ID` (hoy los links salen con `afiliado: false`) |
+| 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
+| 5 | Mercado Libre: clics confirmados. Cerrado |
+| 6 | Search Console: pendiente; el registro TXT se carga en Cloudflare (mas facil con el conector de la API de Cloudflare) |
+| 8 | Amazon: sitio declarado; la Creators API espera las 10 ventas |
+| 9 | Instagram: en pausa |
+| 10 | Tiendamia pidio hablar por telefono: llamada el lunes 02/11 |
+| 11 | Carritos de Tiendamia: conviene esperar la respuesta de la llamada |
+
+---
+
 ## 1. Activar el formulario de contacto
 
 **Qué se destraba:** el formulario de https://pichinchadeldia.com.ar/contacto/ (spec 046). Ya está publicado, igual que
@@ -168,7 +188,7 @@ afiliado. El código ya está hecho y probado con respuestas de ejemplo; **falta
 1. Creá la cuenta de desarrollador: https://developer.ebay.com/ (da 403 a programas automáticos; en el navegador abre).
 2. En «Application Keys» (https://developer.ebay.com/my/keys, pide iniciar sesión) generá el **keyset de Production**.
    Copiá `App ID (Client ID)` y `Cert ID (Client Secret)`.
-3. Afiliados: https://partnernetwork.ebay.com/ (abre bien) → «Join now» (https://partnernetwork.ebay.com/page/join).
+3. Afiliados: https://partnernetwork.ebay.com/ (abre bien) → «Join now» (https://partner.ebay.com/campaign-promo-signup/eBay-Partner-Network.brand).
    Cuando te aprueben, creá una campaña y copiá su número (`Campaign ID`). Es opcional: sin él, Afuera anda sin comisión.
 4. Cargá los secretos en el repo: **Settings → Secrets and variables → Actions → New repository secret**
    (https://github.com/luismarceloescudero-debug/la-pichincha/settings/secrets/actions, pide iniciar sesión).

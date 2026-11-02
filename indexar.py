@@ -685,6 +685,16 @@ def sin_repetir_agregador(filas, agregadores):
     return [f for f in filas if f[3] not in agregadores or clave_aviso(f[2]) not in directas]
 
 
+# Un precio de nueve cifras es el relleno que algunas tiendas dejan en avisos sin precio real (OnCity: $999.999.999). El mas
+# caro del indice es un TV de $46.000.000; con ocho cifras nada es creible, asi que a partir de $100.000.000 no entra.
+PRECIO_RELLENO = 100_000_000
+
+
+def sin_precio_de_relleno(filas):
+    """Las filas del indice sin las de precio de relleno (>= $100.000.000), que torcian medianas y busquedas. Conserva el orden."""
+    return [f for f in filas if f[1] < PRECIO_RELLENO]
+
+
 # --- Part number desde la ficha del producto (B3-bis) ----------------------------------------------------------
 
 def _dias(entrada, hoy):
@@ -977,6 +987,10 @@ def main(argv=None):
     antes_de_sacar = len(salida)
     salida = sin_repetir_agregador(salida, {k for k, v in fuentes.items() if v.get("segunda_opinion")})
     repetidos = antes_de_sacar - len(salida)
+    antes_de_relleno = len(salida)
+    salida = sin_precio_de_relleno(salida)
+    if antes_de_relleno != len(salida):
+        print("  " + str(antes_de_relleno - len(salida)) + " avisos con precio de relleno (>= $100.000.000) descartados")
     modelo.confirmar_codigos_de_tienda(salida, por_confirmar)   # el sku de WooCommerce, si otra tienda lo nombra
     modelo.completar_con_conocidos(salida)     # los avisos que nombran un codigo ya conocido
     if fichas or (carpeta / FICHAS).exists():

@@ -148,3 +148,18 @@ test("orden (056): «Mayor descuento» ordena toda la lista por descuento, sin v
   correr("OF.orden = 'precio'");
   assert.deepEqual(JSON.parse(correr("JSON.stringify(ofertasFiltradas().map(o => o.f[1]))")), [300000, 450000]);
 });
+
+test("diseno D + F3: cada tarjeta lleva su tienda para la paleta, y los filtros van en un «Filtrar y ordenar» plegable", () => {
+  const { correr, els } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
+  correr("pintarOfertas()");
+  assert.match(els["#resOf"].innerHTML, /<article class="ocard[^"]*" style="[^"]*" data-tienda="cg"/);
+  assert.match(els["#resOf"].innerHTML, /<details class="of-plegable"[^>]*><summary>.*Filtrar y ordenar<\/summary>/);
+  // en escritorio (matchMedia = true) arrancan abiertos; en el celular, cerrados
+  assert.match(els["#resOf"].innerHTML, /<details class="of-plegable" open>/);
+});
+
+test("diseno D + F3: las tres familias de letra se piden en index.html y el CSS las usa", () => {
+  for (const f of ["Barlow+Condensed", "Bricolage+Grotesque", "DM+Mono"]) assert.ok(HTML.includes(f), f);
+  const css = leer("css/sitio.css");
+  for (const f of ["Barlow Condensed", "Bricolage Grotesque", "DM Mono"]) assert.ok(css.includes(f), f);
+});

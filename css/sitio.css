@@ -804,3 +804,97 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
   .ocard.n-heroe .o-precios .ahora{font-size:2.1rem}
   .o-banda{padding:12px 16px}
 }
+
+/* ---- Diseno final D + F3 (diseno/final): cada linea de la tarjeta de Ofertas es una franja ---- */
+/* Ritmo D: titulo claro, precio en franja de color con letra blanca, ahorro en tinte, tienda con su color y acciones al pie.
+   Letras F3: Barlow Condensed para el porcentaje, Bricolage Grotesque para el texto, DM Mono para lo tecnico.
+   La franja del precio se oscurece con color-mix para que la letra blanca tenga contraste con cualquier color de tienda. */
+:root{--f-tit:"Bricolage Grotesque",var(--font-sans);--f-pct:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--f-tec:"DM Mono",var(--font-mono)}
+.ocard{--l1:var(--surface);--tint:var(--c-soft);--band:color-mix(in srgb,var(--c) 58%,#000);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));
+  --a1:color-mix(in srgb,var(--c) 72%,var(--ink));padding:0;gap:0;overflow:hidden;border-radius:18px;height:100%}
+.ocard>*{order:4}
+.ocard::before{display:none}
+.ogrid{align-items:stretch}
+/* paletas propias de las tiendas que la maqueta define (logo real) */
+.ocard[data-tienda="mercadolibre"]{--l1:#ffe600;--tint:#fff1a0;--band:#2459b5;--lite:#fff8c8;--a1:#2d3277}
+.ocard[data-tienda="mexx"]{--band:#c51112;--tint:#fdeeee;--lite:#fff5f5;--a1:#c51112}
+.ocard[data-tienda="scphardstore"]{--band:#623186;--tint:#f2e9f9;--lite:#f8f3fc;--a1:#623186}
+.ocard[data-tienda="oncity"]{--band:#064fd3;--tint:#e7effd;--lite:#f2f6ff;--a1:#064fd3}
+.ocard[data-tienda="coppel"]{--band:#1c42e8;--tint:#e9edfd;--lite:#f3f5ff;--a1:#1c42e8}
+.ocard[data-tienda="compragamer"]{--band:#d4180b;--tint:#fdedeb;--lite:#fff5f4;--a1:#d4180b}
+.ocard[data-tienda="naldo"]{--band:#e01b2b;--tint:#ffecee;--lite:#fff6f7;--a1:#e01b2b}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .ocard[data-tienda]{--l1:var(--surface);--tint:var(--c-soft);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));--a1:var(--c)}
+}
+:root[data-theme="dark"] .ocard[data-tienda]{--l1:var(--surface);--tint:var(--c-soft);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));--a1:var(--c)}
+/* 0 foto: blanca, contenida; sin foto, el icono del tipo de producto en vez de una caja vacia */
+.ocard .o-img{order:0;width:auto;margin:10px 10px 6px;border-radius:12px;aspect-ratio:1/.72;background-color:#fff;background-size:contain;background-repeat:no-repeat}
+.ocard .o-img.o-sin-img{background:var(--tint);color:var(--a1);font-size:2.6rem}
+/* cinta y estrella sobre la foto */
+.ocard .o-top{order:0;position:absolute;z-index:2;top:14px;left:14px;right:14px}
+.ocard .o-cinta{font:500 .68rem/1 var(--f-tec);letter-spacing:.06em;background:#14181f;color:#fff;border-radius:999px;padding:6px 11px;text-transform:uppercase}
+.ocard.propia .o-cinta,.ocard.n-heroe .o-cinta{color:#fff}
+.ocard .o-star{background:#fff;color:#4d5562;border-radius:999px;width:34px;height:34px;display:grid;place-items:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.ocard .o-star.on{color:#b36b00}
+/* 1: porcentaje y titulo, sobre fondo claro */
+.ocard .o-main{order:1;display:block;padding:2px 14px 8px;background:var(--l1)}
+.ocard .o-off{width:auto;height:auto;border-radius:0;background:none;display:block;transform:none;margin:0}
+.ocard .o-off::before{display:none}
+.ocard .o-off b{font:800 3rem/1 var(--f-pct);letter-spacing:-.01em;color:var(--a1)}
+.ocard.n-normal .o-off{width:auto;height:auto}.ocard.n-normal .o-off b{font-size:2.3rem}
+.ocard.n-fuerte .o-off{width:auto;height:auto}.ocard.n-fuerte .o-off b{font-size:3.3rem}
+.ocard.n-heroe{background:var(--surface);color:var(--ink);border-color:var(--band);box-shadow:0 0 0 3px color-mix(in srgb,var(--band) 70%,#e0a800),var(--shadow-up)}
+.ocard.n-heroe .o-off{width:auto;height:auto;background:none;padding:0;border-radius:0}
+.ocard.n-heroe .o-off b{font-size:4.2rem;color:var(--a1)}
+.ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:var(--ink)}
+.ocard.n-heroe .o-star{color:#4d5562}.ocard.n-heroe .o-star:hover{background:#fff}
+.ocard.n-heroe .tit-ico{color:var(--a1)}.ocard.n-heroe .tit-chip{background:var(--tint);color:var(--ink)}
+.ocard.n-heroe .acc{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.ocard.n-heroe .acc:hover{background:var(--a1);color:#fff;border-color:var(--a1)}
+.ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:var(--ink-2)}
+.ocard .o-nom{margin:4px 0 0;font:800 1.1rem/1.15 var(--f-tit);letter-spacing:-.01em;color:var(--ink)}
+.ocard .o-nom:has(> .tit){display:block;overflow:visible}
+.ocard .tit-nom{font:800 1.1rem/1.15 var(--f-tit);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-width:0}
+.ocard.abierta .tit-nom{-webkit-line-clamp:unset;display:block}
+.ocard .tit-chips{margin-top:4px}
+.ocard .tit-chip{font:500 .74rem/1.5 var(--f-tec);background:var(--tint);color:var(--ink)}
+/* 3: el precio, en la franja de color; nunca se corta */
+.ocard .o-precios{order:2;background:var(--band);color:#fff;padding:8px 14px;gap:2px 10px;align-items:baseline}
+.ocard .o-precios .ahora,.ocard.n-normal .o-precios .ahora,.ocard.n-fuerte .o-precios .ahora,.ocard.n-heroe .o-precios .ahora{
+  font:800 clamp(1.2rem,6vw,1.8rem)/1.05 var(--f-tit);letter-spacing:-.035em;color:#fff;white-space:nowrap;max-width:100%}
+.ocard.n-heroe .o-precios .ahora{font-size:clamp(1.3rem,6.6vw,2.2rem)}
+.ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{font:500 .8rem var(--f-tec);color:rgba(255,255,255,.88);text-decoration-thickness:1.5px}
+/* 4: ahorro, en tinte claro, con la cifra en verde */
+.ocard .o-ahorro{order:3;background:var(--lite);padding:7px 14px;font:500 .92rem var(--f-tit);color:var(--ink)}
+.ocard .o-ahorro b{font:800 1.2rem var(--f-tit);color:var(--good);letter-spacing:-.02em}
+.ocard .o-contra{padding:6px 14px 0;font-family:var(--f-tit)}
+.ocard .sello,.ocard .hp,.ocard .o-detalle{margin-left:14px;margin-right:14px}
+.ocard .o-detalle p{font-family:var(--f-tit)}
+/* 5: tienda con su color; las acciones quedan al pie, a la misma altura en toda la fila */
+.ocard .tienda{order:5;padding:10px 14px 0;font:800 1.05rem/1.1 var(--f-tit);letter-spacing:-.01em;color:var(--a1)}
+.ocard .o-acciones{order:6;margin-top:auto;padding:10px 14px 14px;flex-wrap:wrap}
+.ocard .o-acciones .acc{min-height:44px;padding:8px 10px;font-family:var(--f-tit);font-weight:700}
+/* el rotulo «afiliado» ya no parece un boton apagado: es una aclaracion chica debajo de los botones */
+.ocard .o-acciones .sello.afi{order:3;flex:1 0 100%;background:none;border:0;padding:0;margin:0;text-align:center;
+  font:500 .72rem var(--f-tit);letter-spacing:0;color:var(--ink-3)}
+.ocard .o-acciones .sello.afi::before{content:"Enlace de "}
+/* filtros plegados en el celular */
+.of-plegable{margin-bottom:14px}
+.of-plegable>summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface);cursor:pointer;font:700 .9rem var(--f-tit);color:var(--ink);list-style:none}
+.of-plegable>summary::-webkit-details-marker{display:none}
+.of-plegable>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.of-plegable[open]>summary{margin-bottom:12px}
+.of-plegable .of-ctrl{margin-bottom:0}
+/* 44 px de alto minimo en los controles de Ofertas (WCAG 2.5.8) */
+.of-chip,.segmentos.chico button{min-height:44px;display:inline-flex;align-items:center}
+.ocard .tienda{display:flex;align-items:center;gap:6px;background:none;border-radius:0}
+.ocard .tienda .ico{flex:none}
+
+/* ---- Busqueda en celular: areas tactiles y menos trabajo de pintado ---- */
+/* Los links de «mismo modelo en otras tiendas» median 16-19 px de alto; WCAG 2.5.8 pide 24 px como minimo. */
+.mismo a{display:inline-flex;align-items:center;min-height:24px;padding-block:3px}
+/* Contraste (Lighthouse, 01/11): el precio tachado sobre la franja roja y el contador de los chips quedaban en 4,35 y 3,59. */
+.ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{color:#fff}
+.of-chip .n{opacity:1;color:var(--ink-2)}
+.of-chip[aria-pressed="true"] .n{color:inherit}
