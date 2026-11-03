@@ -1,14 +1,18 @@
 # Continuidad de La Pichincha
 
-Última actualización: 02/11/2026 (sesión de auditorías + setup).
+Última actualización: 03/11/2026 (cierre del PR de auditorías y corrida manual a Telegram).
 
 ---
 
 ## Estado del branch
 
-- Branch activo: `ccr-eaf2827b-dmk4yf`
-- Commits adelante de main: ~25 (listo para PR)
-- PR: **pendiente de crear**
+- `main` en `185204b`: **#215 mergeado** (auditorías 02/11, diseño, índice sin fotos, eBay, hooks y skills). El branch
+  `ccr-eaf2827b-dmk4yf` ya está mergeado y se puede borrar.
+- Sin cron desde #212: una corrida de "Actualizar precios y publicar" por cada push a main (solo corrige el mensaje de
+  Telegram si el índice es del mismo día) y las manuales con `workflow_dispatch` (esas sí mandan mensaje nuevo).
+- 03/11 19:59 UTC: corrida manual lanzada a mano con `indexar=true` (run 41708364309) para rearmar el índice del 03/11
+  (el publicado era del 02/11) y publicar el mensaje nuevo en el canal.
+- PRs abiertos: solo #169 (Reel, frenado) y #126 (Instagram, frenado hasta la versión final).
 
 ## Qué se hizo en las últimas sesiones (01–02/11)
 
@@ -56,20 +60,9 @@
 - [ ] Portada con contenido estático para SEO (links fijos a precios/ dentro de #vista)
 
 ### Setup pendientes
-- [ ] **guardia.py**: agregar deny para `git push --force`, `git push origin main`, `git reset --hard`, archivos `.env` y `.dev.vars` (fork haiku en progreso al momento de escribir esto)
-- [ ] **test_del_archivo.py**: validar JSON al editar `*.json` de la raíz (mismo fork)
-- [ ] **`.mcp.json`**: el archivo existe pero con command incorrecto (`node` en vez de `npx`). Corregir manualmente:
-  ```json
-  {
-    "mcpServers": {
-      "playwright": {
-        "command": "npx",
-        "args": ["@playwright/mcp@latest", "--browser", "chromium", "--executablePath", "/opt/pw-browsers/chromium"],
-        "env": {}
-      }
-    }
-  }
-  ```
+- [x] **guardia.py**: frena `git push --force`, push a main, `git reset --hard` y secretos en commits (#214, `cae682f`).
+- [x] **test_del_archivo.py**: valida el JSON al editar `*.json` de la raíz (#214).
+- [x] **`.mcp.json`**: Playwright con `node` a su CLI global; Stitch queda deshabilitado (#215, `c87604f`).
 - [ ] Skills de terceros pesadas (`speckit-*` x10, `reverse-engineer-anything`, etc.): moverlas a nivel usuario (`npx skills add ... -g`) para liberar contexto
 - [ ] Crear `.claude/agents/security-reviewer.md` limitado a `worker/src`
 
@@ -104,7 +97,6 @@ npx playwright test --workers=1
 
 ## Próxima sesión sugerida
 
-1. Verificar que el fork de guardia.py + test_del_archivo.py commiteó bien
-2. Crear el PR del branch `ccr-eaf2827b-dmk4yf`
-3. Publicar en Telegram si el PR está listo
-4. Sesión VELOCIDAD: bundle JS + sw.js sin índice + fuentes locales
+1. Mirar el resultado de la corrida manual 41708364309 (indexado + Telegram del 03/11) y que no haya salido alarma de la guardia.
+2. Borrar la rama `ccr-eaf2827b-dmk4yf` (ya mergeada en #215).
+3. Sesión VELOCIDAD: bundle JS + sw.js sin índice + fuentes locales (ver "Diferido a sesión VELOCIDAD").
