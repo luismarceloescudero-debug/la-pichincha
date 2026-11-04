@@ -63,7 +63,7 @@ test("el feed trae como mucho 20 entradas", () => {
 
 test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", () => {
   const lista = F.listaParaCanal(IDX, 10);
-  assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", titulo: "KINGSTON", chips: ["1 TB"], icono: "disco", emoji: "💽", precio: 90000, antes: 120000, descuento: 25,
+  assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", titulo: "KINGSTON", prefijo: "Disco", chips: ["1 TB"], icono: "disco", emoji: "💽", precio: 90000, antes: 120000, descuento: 25,
     comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente", tienda: "cg" });
   assert.equal(lista.length, 2);
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
@@ -281,4 +281,44 @@ test("el feed y /hoy/ no llaman baja verificada a lo que se sigue hace pocos dia
   const hoy = F.renderHoy(IDX_SEG, { baseUrl: BASE });
   assert.match(hoy, /−20% desde que lo seguimos, hace pocos días/);
   assert.doesNotMatch(hoy, /<s>\$80\.000<\/s>/, "no se tacha un precio de antes que no tiene una semana de historial");
+});
+
+// ---- La foto para el Reel (spec 045) y la imagen de /hoy/ (spec 059): solo una direccion https limpia ----
+test("la lista para el canal lleva la imagen https de la tienda y descarta una rara", () => {
+  const conFoto = (img) => { const f = fila("SSD Kingston 1TB", 90000, { antes: 120000 }); f[7] = img; return { ...IDX, productos: [f] }; };
+  assert.equal(F.listaParaCanal(conFoto("https://img.test/ssd.jpg"), 1)[0].imagen, "https://img.test/ssd.jpg");
+  assert.equal("imagen" in F.listaParaCanal(conFoto("http://img.test/ssd.jpg"), 1)[0], false);
+  assert.equal("imagen" in F.listaParaCanal(conFoto('https://img.test/a".jpg'), 1)[0], false);
+});
+
+// ---- /hoy/ con el lenguaje del Reel v4 (spec 059) ----
+test("/hoy/: la de mayor descuento va como súper oferta, con su tipo adelante, chips y el precio de antes tachado", () => {
+  const idx = { ...IDX, productos: [fila("Monitor Samsung Odyssey G8 27 4K OLED 240Hz", 900000, { antes: 1000000 }),
+    fila("Teclado Mecanico VSG Alnilam Blanco RGB", 72990, { antes: 150887 }), ...IDX.productos] };
+  const html = F.renderHoy(idx, { baseUrl: BASE });
+  const sup = html.match(/<article class="h-super">[\s\S]*?<\/article>/)[0];
+  assert.match(sup, /★<\/span> Súper oferta <span/);
+  assert.match(sup, /<span class="h-tipo">Teclado<\/span> <span class="h-marca">VSG<\/span> ALNILAM/);
+  assert.match(sup, /<span class="sig">−<\/span><span class="num">52<\/span><span class="por">%<\/span>/);
+  assert.match(sup, /<span class="h-chip pr"><span aria-hidden="true">✦ <\/span>Mecánico<\/span>/);   // premium
+  assert.match(sup, /<span class="h-chip">RGB<\/span>/);
+  assert.match(sup, /<span class="sig">\$<\/span>72\.990<\/span><span class="h-antes"><s>\$150\.887<\/s>/);
+  assert.match(sup, /en <b>CompraGamer<\/b>/);
+  assert.match(sup, /aria-hidden="true"/);                       // el icono grande no repite el tipo al lector de pantalla
+  const lista = html.match(/<ol class="h-lista">[\s\S]*?<\/ol>/)[0];
+  assert.doesNotMatch(lista, /ALNILAM/);                         // la súper oferta no se repite en las tarjetas
+  assert.match(lista, /ODYSSEY/);
+});
+
+test("/hoy/: un dia flojo (menos de 20 %) no tiene súper oferta sino «La mejor del día»", () => {
+  const idx = { ...IDX, productos: [fila("Teclado Mecanico VSG Alnilam Blanco RGB", 90000, { antes: 100000 })] };
+  assert.match(F.renderHoy(idx, { baseUrl: BASE }), /★<\/span> La mejor del día <span/);
+});
+
+test("/hoy/: la súper oferta es la mejor de toda la lista, aunque venga despues de las cinco primeras", () => {
+  const productos = ["SSD Uno 1TB", "SSD Dos 1TB", "SSD Tres 1TB", "SSD Cuatro 1TB", "SSD Cinco 1TB"].map(n => fila(n, 80000, { antes: 100000 }));
+  productos.push(fila("Teclado Mecanico VSG Alnilam Blanco RGB", 72990, { antes: 150887, tienda: "cy" }));
+  const html = F.renderHoy({ ...IDX, productos }, { baseUrl: BASE });
+  assert.match(html.match(/<article class="h-super">[\s\S]*?<\/article>/)[0], /ALNILAM/);
+  assert.equal((html.match(/<ol class="h-lista">[\s\S]*?<\/ol>/)[0].match(/<li>/g) || []).length, 4);   // cinco en el cartel
 });
