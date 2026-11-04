@@ -8,11 +8,17 @@ Reglas fijas del proyecto que antes cuidaba solo la memoria del modelo:
 - Editar a mano un archivo generado (`package-lock.json`, lo de `_sitio/`) pide confirmacion: se regenera con npm o con
   `tests/e2e/armar-sitio.sh`. `datos.json` y `consultas.json` NO entran: llevan datos curados a mano.
 
+«Omitir permisos» (04/11, pedido del dueño): si la sesion corre en ese modo (`permission_mode` = `bypassPermissions`)
+o la variable `PICHINCHA_GUARDIA=omitir` esta puesta, lo que solo pedia confirmacion (workflows, Telegram, generados)
+sigue sin preguntar. Lo que se frena (tildes, historia, secretos) se sigue frenando, e Instagram sigue preguntando
+siempre: esta en pausa hasta que el dueño apruebe la app.
+
 Lee el JSON del hook por stdin y, si no aplica ninguna regla, no dice nada (el comando sigue).
 Solo stdlib.
 """
 
 import json
+import os
 import re
 import sys
 
@@ -62,6 +68,17 @@ def decidir(comando):
     return None
 
 
+INSTAGRAM = re.compile(r"graph\.(?:facebook|instagram)\.com")
+
+
+def omitir(datos, comando=""):
+    """True si el dueño dijo «Omitir permisos»: la sesion en ese modo o la variable PICHINCHA_GUARDIA=omitir.
+    Instagram no se omite nunca."""
+    if INSTAGRAM.search(comando or ""):
+        return False
+    return datos.get("permission_mode") == "bypassPermissions" or os.environ.get("PICHINCHA_GUARDIA", "").lower() == "omitir"
+
+
 def main():
     try:
         datos = json.load(sys.stdin)
@@ -71,6 +88,8 @@ def main():
     resultado = decidir(entrada["command"]) if entrada.get("command") else decidir_archivo(entrada.get("file_path"))
     if resultado:
         decision, motivo = resultado
+        if decision == "ask" and omitir(datos, entrada.get("command")):
+            return 0
         json.dump({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": decision,
                                           "permissionDecisionReason": motivo}}, sys.stdout, ensure_ascii=False)
     return 0

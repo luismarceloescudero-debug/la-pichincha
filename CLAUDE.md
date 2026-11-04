@@ -17,6 +17,8 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
 - `.claude/settings.json` (se commitea) suma dos hooks a los de progreso de `settings.local.json`:
   - `guardia.py` antes de cada comando: `gh workflow run`, `publicar_telegram.py` o las APIs de Telegram/Instagram
     piden confirmacion (es decision del dueño); un `git commit` con tildes o eñes se frena.
+    Con la sesion en «Omitir permisos» (o `PICHINCHA_GUARDIA=omitir`) no pregunta (04/11); lo que frena se sigue
+    frenando e Instagram pregunta siempre.
   - `test_del_archivo.py` despues de editar `js/<nombre>.js`: corre solo `tests/js/<nombre>.test.js` y avisa si falla.
 - Skills del proyecto: `/medir-indice` (reglas contra el indice publicado y contra `main`; usarla antes de un PR de
   ofertas, categorias, titulos o premium) y `/cerrar-pr N` (solo la llama el dueño o se pide: CI, rebase, limpieza).

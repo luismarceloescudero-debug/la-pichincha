@@ -108,6 +108,20 @@ class GuardiaMain(unittest.TestCase):
         self.assertEqual(codigo, 0)
         self.assertEqual(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], "ask")
 
+    def test_omitir_permisos_no_pregunta_pero_sigue_frenando(self):
+        modo = {"permission_mode": "bypassPermissions"}
+        self.assertEqual(correr(guardia, json.dumps({**modo, "tool_input": {"command": "gh workflow run x.yml"}})), (0, "", ""))
+        self.assertEqual(correr(guardia, json.dumps({**modo, "tool_input": {"file_path": "package-lock.json"}})), (0, "", ""))
+        # lo que se frena se sigue frenando, e Instagram pregunta siempre
+        for entrada in [{"command": "git push " + "--force"}, {"command": "curl https://graph.instagram.com/me"}, {"file_path": ".env"}]:
+            _, salida, _ = correr(guardia, json.dumps({**modo, "tool_input": entrada}))
+            self.assertIn(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], ("deny", "ask"), entrada)
+        with mock.patch.dict(os.environ, {"PICHINCHA_GUARDIA": "omitir"}):
+            self.assertEqual(correr(guardia, json.dumps({"tool_input": {"command": "python publicar_telegram.py x"}})), (0, "", ""))
+        with mock.patch.dict(os.environ, {"PICHINCHA_GUARDIA": ""}):
+            _, salida, _ = correr(guardia, json.dumps({"permission_mode": "default", "tool_input": {"command": "gh workflow run x.yml"}}))
+            self.assertEqual(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], "ask")
+
     def test_callado_si_no_aplica_o_la_entrada_es_rara(self):
         for entrada in [json.dumps({"tool_input": {"command": "ls"}}), json.dumps({}), "no es json"]:
             self.assertEqual(correr(guardia, entrada), (0, "", ""), entrada)
