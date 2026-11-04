@@ -314,9 +314,10 @@ jobs:
 
       # Guardia del indice (guardia.js): mide sobre el indice real bajas propias y, por categoria, avisos, "sin datos" y
       # ofertas, y lo compara con la medicion publicada de la corrida anterior. Con una alarma (18/10: 0 bajas propias
-      # en todo el indice) no se manda Telegram y se abre o comenta un issue con la etiqueta "guardia".
+      # en todo el indice) se abre o comenta un issue con la etiqueta "guardia"; el mensaje de Telegram sale igual: la
+      # calidad de una medicion avisa, no frena la publicacion (decision del dueno, 04/11).
       # El mensaje de Telegram que ya salio viaja con el sitio (spec 030): se copia antes de la guardia para que no se
-      # pierda si con alarma no se publica, o si un push no tiene que corregir nada.
+      # pierda en un push que no tiene que corregir nada.
       - name: Conservar el mensaje de Telegram anterior
         run: |
           base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
@@ -347,7 +348,7 @@ jobs:
         run: |
           gh label create guardia --color b60205 --description "La guardia del indice encontro algo que no cierra" --force
           echo "" >> alarma.md
-          echo "Corrida: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. No se mandó Telegram." >> alarma.md
+          echo "Corrida: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. El mensaje de Telegram se mandó igual: la alarma avisa, no frena." >> alarma.md
           n=$(gh issue list --label guardia --state open --json number -q '.[0].number')
           if [ -n "$n" ]; then gh issue comment "$n" --body-file alarma.md
           else gh issue create --title "Guardia del índice: algo no cierra" --label guardia --body-file alarma.md; fi
@@ -358,7 +359,7 @@ jobs:
       # 23/10: /hoy/ se arreglo a las 22:51 y el mensaje de las 22:06 siguio con la Lenovo repetida). Que mensaje
       # salio para que indice viaja con el sitio en telegram.json.
       - name: Publicar las pichinchas del dia en Telegram
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push') && steps.guardia.outputs.alarma != 'true'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

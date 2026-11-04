@@ -61,6 +61,13 @@ def _enlace(o, texto):
     return f"<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(texto))}</a>"
 
 
+def _precio(o, punta="", separador=" · "):
+    """El precio y, si tiene, el porcentaje en negrita: una publicacion a precio de siempre sale igual, sin inventar un −0 %."""
+    if o.get("sinRebaja") or not o.get("descuento"):
+        return f"<b>{pesos(o['precio'])}</b>"
+    return f"<b>{pesos(o['precio'])}</b>{separador}{punta}<b>−{o['descuento']}%</b>"
+
+
 def _pie_oferta(o):
     # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
     contra = f" {html.escape(o['contra'])}" if o.get("contra") else ""
@@ -75,7 +82,7 @@ def _heroe(o):
               f"{html.escape(emoji) if o.get('titulo') else emoji}<b>{_enlace(o, nombre)}</b>"]
     if o.get("chips"):
         lineas.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
-    lineas.append(f"<b>{pesos(o['precio'])}</b>  ·  <b>−{o['descuento']}%</b>{contra}")
+    lineas.append(_precio(o, separador="  ·  ") + contra)
     lineas.append(donde)
     lineas.append(BARRA)
     return "\n".join(lineas)
@@ -85,11 +92,11 @@ def _compacta(o):
     """El resto: una cita con el nombre, las caracteristicas en cursiva (mas apagadas) y el precio con el porcentaje en negrita."""
     emoji, nombre = _marca(o)
     donde, contra = _pie_oferta(o)
-    punta = "🔥 " if o["descuento"] >= 30 else "⚡ " if o["descuento"] >= 20 else ""
+    punta = "🔥 " if o.get("descuento", 0) >= 30 else "⚡ " if o.get("descuento", 0) >= 20 else ""
     cuerpo = [f"{html.escape(emoji) if o.get('titulo') else emoji}{_enlace(o, nombre)}"]
     if o.get("chips"):
         cuerpo.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
-    cuerpo.append(f"<b>{pesos(o['precio'])}</b> · {punta}<b>−{o['descuento']}%</b>{contra} {donde}")
+    cuerpo.append(_precio(o, punta) + f"{contra} {donde}")
     return "<blockquote>" + "\n".join(cuerpo) + "</blockquote>"
 
 
@@ -97,12 +104,17 @@ def mensaje(datos):
     """El texto (HTML de Telegram) con las ofertas, o None si no hay. Jerarquia (spec 055): la de mayor descuento va grande
     entre dos barras de color y el resto en citas compactas; no todo pesa igual. Se achica hasta entrar en el limite."""
     ofertas = datos.get("ofertas") or []
+    fecha = cuando(datos.get("generado", ""))
+    sitio = html.escape(datos.get("sitio", ""), quote=True)
     if not ofertas:
-        return None
-    cabeza = f"<b>Pichinchas del día</b> · precios del {cuando(datos.get('generado', ''))}\n"
+        # Sin nada para destacar el mensaje sale igual: la publicacion no depende de que hoy haya rebajas (dueno, 04/11).
+        return (f"<b>Pichinchas del día</b> · precios del {fecha}\n"
+                "Hoy no hay bajas para destacar. Precios y comparador actualizados en "
+                f"<a href=\"{sitio}\">La Pichincha</a>.")
+    cabeza = f"<b>Pichinchas del día</b> · precios del {fecha}\n"
     pie = (f"\nMás en <a href=\"{html.escape(datos.get('sitio', ''), quote=True)}\">La Pichincha</a>. "
            "Verificá en la tienda antes de comprar.")
-    mejor = max(range(len(ofertas)), key=lambda i: (ofertas[i]["descuento"], -i))
+    mejor = max(range(len(ofertas)), key=lambda i: (ofertas[i].get("descuento") or 0, -i))
     bloques = [_heroe(ofertas[mejor])] + [_compacta(o) for i, o in enumerate(ofertas) if i != mejor]
     while bloques and len(cabeza + "\n".join(bloques) + "\n" + pie) > LIMITE:
         if len(bloques) == 1:
@@ -181,7 +193,7 @@ def main(argv=None):
         solo_corregir and hoy and str(previo.get("generado", ""))[:10] == hoy)) else None
     texto = mensaje(datos)
     if texto is None:
-        print("Sin ofertas hoy: no se publica en Telegram")
+        print("Sin ofertas hoy: no hay mensaje para Telegram")
         escribir_estado(ruta_estado, mismo)
         return 0
     if mismo and mismo.get("texto") == texto:

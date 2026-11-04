@@ -80,14 +80,32 @@ class Mensaje(unittest.TestCase):
         self.assertIn("<blockquote>", resto)
         self.assertIn("⚡ <b>−20%</b>", resto)
 
-    def test_sin_ofertas_no_hay_mensaje(self):
-        self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
+    def test_sin_ofertas_el_mensaje_sale_igual_con_el_enlace_al_sitio(self):
+        # Decision del dueno (04/11): que haya o no rebajas reales, la publicacion sale.
+        texto = telegram.mensaje({**OFERTAS, "ofertas": []})
+        self.assertIn("Hoy no hay bajas para destacar", texto)
+        self.assertIn('<a href="https://ejemplo.test/la-pichincha/">La Pichincha</a>', texto)
+
+    def test_una_publicacion_a_precio_de_siempre_muestra_el_precio_sin_porcentaje(self):
+        plano = {"nombre": "Monitor AOC 24B2XH", "precio": 149999, "comercio": "Max Tecno", "url": "https://t.test/aoc",
+                 "sinRebaja": True}
+        texto = telegram.mensaje({**OFERTAS, "ofertas": [plano]})
+        self.assertIn("<b>$149.999</b>", texto)
+        self.assertNotIn("−0%", texto)
+        self.assertNotIn("%", texto.split("Verificá")[0].split("Pichinchas del día")[1])
 
     def test_no_pasa_el_limite_de_telegram(self):
         muchas = [{**OFERTAS["ofertas"][0], "nombre": "X" * 300, "url": f"https://t.test/{i}"} for i in range(40)]
         texto = telegram.mensaje({**OFERTAS, "ofertas": muchas})
         self.assertLessEqual(len(texto), 4096)
         self.assertIn("La Pichincha", texto)
+
+
+def respuesta(message_id):
+    """Lo que devuelve urlopen: la respuesta de Telegram con el mensaje que salio."""
+    r = mock.MagicMock()
+    r.__enter__.return_value.read.return_value = json.dumps({"ok": True, "result": {"message_id": message_id}}).encode()
+    return mock.MagicMock(return_value=r)
 
 
 class Publicacion(unittest.TestCase):
@@ -146,12 +164,15 @@ class Publicacion(unittest.TestCase):
         self.assertIn("bot is not a member", texto)
         self.assertNotIn("123:ABC", texto)
 
-    def test_sin_ofertas_no_manda_nada(self):
+    def test_sin_ofertas_manda_el_mensaje_que_avisa_que_no_hay_bajas(self):
+        # Antes no mandaba nada; el dueno pidio que la publicacion salga igual (04/11).
         self.ruta.write_text(json.dumps({**OFERTAS, "ofertas": []}), encoding="utf-8")
-        abrir = mock.Mock()
-        codigo, _ = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
+        abrir = respuesta(77)
+        codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
         self.assertEqual(codigo, 0)
-        abrir.assert_not_called()
+        enviado = json.loads(abrir.call_args[0][0].data.decode("utf-8"))
+        self.assertIn("Hoy no hay bajas para destacar", enviado["text"])
+        self.assertIn("Publicado en Telegram", texto)
 
     def test_sin_archivo_de_ofertas_no_falla(self):
         self.ruta.unlink()
@@ -159,13 +180,6 @@ class Publicacion(unittest.TestCase):
         codigo, _ = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
         self.assertEqual(codigo, 0)
         abrir.assert_not_called()
-
-
-def respuesta(message_id):
-    """Lo que devuelve urlopen: la respuesta de Telegram con el mensaje que salio."""
-    r = mock.MagicMock()
-    r.__enter__.return_value.read.return_value = json.dumps({"ok": True, "result": {"message_id": message_id}}).encode()
-    return mock.MagicMock(return_value=r)
 
 
 class UnMensajePorIndice(unittest.TestCase):

@@ -1,6 +1,6 @@
 # Continuidad de La Pichincha
 
-Última actualización: 04/11/2026 (corrida sin historial: bajas contra el índice anterior y guardia).
+Última actualización: 04/11/2026 (corrida sin historial; el mensaje de Telegram sale siempre).
 
 ---
 
@@ -17,6 +17,9 @@
   cuando no hay series y mide las bajas contra ella (sello k, «ayer $X»); la foto de hoy no se usa, así dos corridas el
   mismo día no inventan bajas (18/10). `guardia.js --reusado` deja anotado cuando midió un índice reusado de la cache.
   Tests: `tests/test_indexar_corrida.py` (5 nuevos), suite completa 625 + 750 en verde.
+- 04/11 (spec 058): **el mensaje de Telegram sale siempre**: la guardia ya no lo frena (avisa en el issue) y con
+  `ofertas.json` vacío se manda «Hoy no hay bajas para destacar» con el enlace al sitio. Una publicación sin descuento
+  muestra el precio sin «−0 %». Siguiente: spec 060 (revisión por suba previa, sello `x`, «estable hace N días»).
 - PRs abiertos: solo #169 (Reel, frenado) y #126 (Instagram, frenado hasta la versión final).
 
 ## Qué se hizo en las últimas sesiones (01–02/11)
