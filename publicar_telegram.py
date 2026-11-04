@@ -21,8 +21,13 @@ import html
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
+
+# Segundos de espera entre reintentos cuando la red falla antes de llegar a Telegram (04/11: un URLError
+# suelto dejo la corrida manual sin mensaje). Tres intentos en total.
+ESPERAS = (5, 15)
 
 LIMITE = 4096   # largo maximo de un mensaje de Telegram
 LARGO_TITULO = 100   # un titulo de Mercado Libre llega a 160 caracteres con todas sus palabras clave (19/10)
@@ -147,26 +152,36 @@ def pedir(token, metodo, campos):
     cuerpo = json.dumps(campos).encode("utf-8")
     pedido = urllib.request.Request(f"https://api.telegram.org/bot{token}/{metodo}", data=cuerpo,
                                     headers={"Content-Type": "application/json"}, method="POST")
-    try:
-        with urllib.request.urlopen(pedido, timeout=20) as r:
-            try:
-                resultado = json.loads(r.read().decode("utf-8")).get("result")
-            except (ValueError, TypeError, AttributeError):
-                resultado = None
-        return resultado if isinstance(resultado, dict) else {}
-    except urllib.error.HTTPError as e:
-        # Telegram explica el rechazo ("chat not found", "bot is not a member..."): se muestra para
-        # poder arreglarlo, pero nunca el token, por si apareciera en algun texto.
+    intentos = len(ESPERAS) + 1
+    for intento in range(1, intentos + 1):
         try:
-            motivo = json.loads(e.read().decode("utf-8", "replace")).get("description", "")
-        except (OSError, ValueError, AttributeError):
-            motivo = ""
-        motivo = motivo.replace(token, "***")[:200]
-        print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
-        return None
-    except (urllib.error.URLError, OSError) as e:
-        print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__})")
-        return None
+            with urllib.request.urlopen(pedido, timeout=20) as r:
+                try:
+                    resultado = json.loads(r.read().decode("utf-8")).get("result")
+                except (ValueError, TypeError, AttributeError):
+                    resultado = None
+            return resultado if isinstance(resultado, dict) else {}
+        except urllib.error.HTTPError as e:
+            # Telegram explica el rechazo ("chat not found", "bot is not a member..."): se muestra para
+            # poder arreglarlo, pero nunca el token, por si apareciera en algun texto. No se reintenta.
+            try:
+                motivo = json.loads(e.read().decode("utf-8", "replace")).get("description", "")
+            except (OSError, ValueError, AttributeError):
+                motivo = ""
+            motivo = motivo.replace(token, "***")[:200]
+            print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
+            return None
+        except (urllib.error.URLError, OSError) as e:
+            razon = getattr(e, "reason", e)
+            # Un corte por tiempo pudo llegar a publicar: reintentar duplicaria el mensaje en el canal.
+            # Una falla al conectar (DNS, red caida, conexion rechazada) no llego a Telegram: se reintenta.
+            por_tiempo = isinstance(razon, TimeoutError) or isinstance(e, TimeoutError)
+            if por_tiempo or intento == intentos:
+                detalle = str(razon).replace(token, "***")[:200]
+                cuantos = f", {intento} intentos" if intento > 1 else ""
+                print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__}: {detalle}{cuantos})")
+                return None
+            time.sleep(ESPERAS[intento - 1])
 
 
 def main(argv=None):
