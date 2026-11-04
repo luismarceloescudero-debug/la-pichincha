@@ -144,10 +144,14 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const enlace = o => { const e = P.enlaceTienda(o.f[2]);
     return `<a class="oferta" data-rubro="ofertas" href="${esc(e.url)}" rel="${e.afiliado ? "sponsored noopener" : "noopener"}">${T.html(o.f[0], esc)}</a>` +
       (e.afiliado ? ' <span class="rotulo">enlace de afiliado</span>' : ""); };
-  const lista = ofertas.map(o => `    <li>${enlace(o)}` +
-    (o.modelo ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: ${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
-      : o.tipo === "seguimiento" ? `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> en ${esc(comercioDeOferta(o, idx))}: −${Math.round(o.off * 100)}% desde que lo seguimos, hace pocos días</span>`
-      : `<span class="det"><b>${esc(G.pesos(o.f[1]))}</b> <s>${esc(G.pesos(o.antes))}</s> −${Math.round(o.off * 100)}% en ${esc(comercioDeOferta(o, idx))}</span>`) + `</li>`).join("\n");
+  // La lista completa (spec 060): la misma tarjeta de dos tonos que el cartel, con el enlace a la tienda en el nombre.
+  // El precio de antes se tacha solo si es un precio de antes de verdad; contra el modelo o en seguimiento se dice contra que.
+  const lista = ofertas.map(o => `    <li>${pctReel(o, "h-pct") || '<span class="h-pct"></span>'}<span class="h-txt">${enlace(o)}` +
+    `<span class="h-pre">${precio(o, "h-chico")}${!o.modelo && o.tipo !== "seguimiento" && o.off > 0 ? ` <s class="h-tachado">${esc(G.pesos(o.antes))}</s>` : ""}` +
+    ` <span class="h-donde">en <b>${esc(comercioDeOferta(o, idx))}</b></span></span>` +
+    (o.modelo ? `<span class="det">${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
+      : o.tipo === "seguimiento" ? `<span class="det">−${Math.round(o.off * 100)}% desde que lo seguimos, hace pocos días</span>` : "") +
+    `</span></li>`).join("\n");
   const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
   const descripcion = ofertas.length
     ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
@@ -211,11 +215,24 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-donde{font:600 .85rem var(--font-sans);color:var(--n-suave)}
 .hoy .h-pie{margin:0;padding:0 4px;font:600 .85rem/1.35 var(--font-sans);color:var(--n-suave);overflow-wrap:anywhere}
 .hoy .h-pie b{color:var(--n-amarillo);font-family:var(--font-mono)}
-.hoy ol.todas{padding-left:1.2em}
-.hoy ol.todas li{margin:0 0 12px}
-.hoy .det{display:block;font:500 .82rem var(--font-mono);color:var(--ink-2)}
-.hoy .det s{color:var(--ink-3)}
-.hoy .rotulo{font:500 .74rem var(--font-mono);color:var(--ink-3)}
+/* La lista completa (spec 060): las mismas tarjetas, con el nombre como enlace a la tienda */
+.hoy .h-todas h2{margin:0;padding:0 4px;font:700 2rem/.95 var(--f-tit);font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta)}
+.hoy .h-todas h2 span{color:var(--n-celeste)}
+.hoy .historia a.oferta{display:block;padding:0;margin:0;border:0;border-radius:6px;background:none;box-shadow:none;animation:none;
+  transform:none;color:var(--n-tinta);text-decoration:none}
+.hoy .historia a.oferta:hover .tit-nom{text-decoration:underline;text-decoration-color:var(--n-celeste);text-underline-offset:3px}
+.hoy .historia a.oferta:focus-visible{outline:2px solid var(--n-celeste);outline-offset:3px}
+.hoy .historia .tit-ico{color:var(--n-celeste);width:24px;height:24px}
+.hoy .historia .tit-txt{gap:6px}
+.hoy .historia .tit-nom{font:700 1.2rem/1.1 var(--f-tit);font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta);letter-spacing:0}
+.hoy .historia .tit-marca{color:var(--n-celeste)}
+.hoy .historia .tit-chips{gap:6px}
+.hoy .historia .tit-chip{padding:1px 9px 2px;border-radius:999px;font:700 .78rem/1.3 var(--font-sans);color:var(--n-celeste);
+  background:rgba(62,230,255,.12);border:2px solid rgba(62,230,255,.6)}
+.hoy .historia .tit-chip.pr{color:var(--n-fondo);border-color:transparent;background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste))}
+.hoy .h-tachado{font:700 .95rem var(--font-mono);color:var(--n-suave);text-decoration-color:var(--n-tachado);text-decoration-thickness:2px}
+.hoy .historia .det{display:block;font:600 .82rem/1.35 var(--font-sans);color:var(--n-suave)}
+.hoy .historia .rotulo{font:600 .74rem var(--font-mono);color:var(--n-suave)}
 </style>
 <body>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -227,9 +244,11 @@ ${heroe}
 ${tarjeta ? `    <ol class="h-lista">\n${tarjeta}\n    </ol>` : ""}
     <p class="h-pie">Todas con su link en<br><b>${esc(base.replace(/^https?:\/\//, ""))}/hoy</b></p>
   </section>
-  <p class="meta">La Pichincha · precios del ${esc(fecha)}</p>
-  <h2>Todas las ofertas de hoy</h2>
-${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
+  <section class="historia h-todas" aria-labelledby="todas-t">
+    <div class="h-cab"><span>La Pichincha</span><span>precios del ${esc(fecha)}</span></div>
+    <h2 id="todas-t">Todas las ofertas <span>de hoy</span></h2>
+${ofertas.length ? `    <ol class="h-lista todas">\n${lista}\n    </ol>` : `    <p class="h-pie">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
+  </section>
   <p><a class="acc" href="../">Buscar y comparar en La Pichincha</a> · <a href="${CANAL_TELEGRAM}" rel="noopener">Canal de Telegram</a></p>
   <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones. <a href="../estado/">Estado de las fuentes</a> · <a href="../legal/">Términos y privacidad</a> · <a href="../contacto/">Contacto</a>.</p>
 </main>

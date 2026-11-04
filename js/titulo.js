@@ -325,10 +325,15 @@
 
   /* El nombre para una pagina: icono, titulo y chips. `esc` es el escape de quien lo pinta (base.js o generador.js).
      El nombre completo queda en el title, para quien quiera leerlo entero. */
+  /* Con el lenguaje del Reel v4 (spec 060): la marca (la primera palabra del titulo) va en su color y las chips premium
+     llevan ✦ y el degradado, como en el cartel de /hoy/. */
   const html = (nombre, esc) => {
-    const t = de(nombre);
-    return `<span class="tit" title="${esc(t.completo)}">${svg(t.tipo, "ico tit-ico")}<span class="tit-txt"><b class="tit-nom">${esc(t.titulo)}</b>`
-      + (t.chips.length ? `<span class="tit-chips">${t.chips.map(c => `<span class="tit-chip">${esc(c)}</span>`).join("")}</span>` : "")
+    const t = de(nombre), corte = t.titulo.indexOf(" ");
+    const nom = corte < 0 ? `<span class="tit-marca">${esc(t.titulo)}</span>`
+      : `<span class="tit-marca">${esc(t.titulo.slice(0, corte))}</span>${esc(t.titulo.slice(corte))}`;
+    return `<span class="tit" title="${esc(t.completo)}">${svg(t.tipo, "ico tit-ico")}<span class="tit-txt"><b class="tit-nom">${nom}</b>`
+      + (t.chips.length ? `<span class="tit-chips">${t.chips.map(c => premium(c)
+        ? `<span class="tit-chip pr"><span aria-hidden="true">✦ </span>${esc(c)}</span>` : `<span class="tit-chip">${esc(c)}</span>`).join("")}</span>` : "")
       + `</span></span>`;
   };
 

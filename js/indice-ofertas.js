@@ -199,7 +199,7 @@ function cardOferta(o, i, desde) {
       <button class="o-star${marcada ? " on" : ""}" data-estrella="${esc(f[2])}" title="Marcar esta oferta" aria-label="Marcar esta oferta" aria-pressed="${marcada}">${marcada ? "★" : "☆"}</button>
     </div>
     <div class="o-main">
-      <div class="o-off" style="--p:${anillo}"><b data-n="${pct}">${pct}%</b></div>
+      <div class="o-off" style="--p:${anillo}"><b data-n="${pct}"><span class="sig">−</span><span class="num">${pct}</span><span class="por">%</span></b></div>
       <h3 class="o-nom"><button type="button" class="o-abrir" aria-expanded="false" aria-controls="od-${i}">${Titulo.html(f[0], esc)}</button></h3>
     </div>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""}</span>
@@ -222,12 +222,13 @@ function cardOferta(o, i, desde) {
 function animarCuentas() {
   const reducir = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.querySelectorAll(".ocard:not(.quieta) .o-off b[data-n]").forEach(b => {
-    const n = +b.dataset.n;
+    const n = +b.dataset.n, num = b.querySelector(".num");
+    if (!num) return;
     if (reducir) return;
     const t0 = performance.now();
     const paso = t => {
       const k = Math.min(1, (t - t0) / 650);
-      b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))) + "%";
+      num.textContent = Math.round(n * (1 - Math.pow(1 - k, 3)));   // el numero solo: el signo y el % tienen su color (spec 060)
       if (k < 1) requestAnimationFrame(paso);
     };
     requestAnimationFrame(paso);
