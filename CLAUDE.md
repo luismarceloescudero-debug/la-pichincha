@@ -19,6 +19,7 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
     piden confirmacion (es decision del dueño); un `git commit` con tildes o eñes se frena.
     Con la sesion en «Omitir permisos» (o `PICHINCHA_GUARDIA=omitir`) no pregunta (04/11); lo que frena se sigue
     frenando e Instagram pregunta siempre.
+    Trabajo en la app (mirar, buscar, testear, armar el sitio local, editar `_sitio/`) no pregunta nunca.
   - `test_del_archivo.py` despues de editar `js/<nombre>.js`: corre solo `tests/js/<nombre>.test.js` y avisa si falla.
 - Skills del proyecto: `/medir-indice` (reglas contra el indice publicado y contra `main`; usarla antes de un PR de
   ofertas, categorias, titulos o premium) y `/cerrar-pr N` (solo la llama el dueño o se pide: CI, rebase, limpieza).
