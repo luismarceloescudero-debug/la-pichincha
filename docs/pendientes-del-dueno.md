@@ -1,6 +1,6 @@
 # Pendientes que dependen de vos
 
-Última revisión: 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
+Última revisión: 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
 24/10 desde el entorno de trabajo: los que piden iniciar sesión o tienen anti-bots están marcados) y, cuando hay que
 escribirle a alguien, el **mensaje ya armado**. Entre `[CORCHETES]` va lo que tenés que completar vos.
 
@@ -15,7 +15,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 5 | Mercado Libre: confirmar clics | Saber si el link de afiliado cuenta | 2 min |
 | 6 | Google Search Console | Que Google lea el mapa del sitio y avise de errores | 10 min |
 | 7 | ~~OmniRoute: reconectar Claude~~ | Cerrado el 27/10: el respaldo ahora es FCC | — |
-| 8 | Amazon (más adelante) | Amazon en «Afuera» | cuando haya 10 ventas |
+| 8 | ~~Amazon afiliados~~ | Descartado el 04/11 por el requisito de ventas; opcional a futuro | — |
 | 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
 | 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
 | 11 | Tiendamia: armar los carritos de prueba | La base para encontrar cómo calcula Tiendamia el envío y los servicios | 15 min |
@@ -35,23 +35,24 @@ este disponible; no hay nada que hacer de tu lado.
 
 ---
 
-## Estado al 01/11/2026 (sesion de auditoria)
+## Estado al 04/11/2026
 
-Verificado con la captura de los secretos de GitHub y una prueba en vivo del Worker. La pagina «Pendientes de La Pichincha»
+Verificado el 01/11 con los secretos de GitHub y el Worker, y el 04/11 con las corridas de GitHub. La pagina «Pendientes de La Pichincha»
 (https://claude.ai/artifact/31tfse3HEy4t53HqFtxfvG) tiene el mismo estado, con los pasos y enlaces directos para el celular.
 
 | # | Estado |
 |---|---|
 | 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
-| 2 | Enviadas las 4 cartas (02/11) por correo y por Instagram y Facebook. Seguimiento: 16/11/2026 |
+| 2 | Enviadas las 4 cartas (02/11). **Katech respondió el 04/11** con su feed de productos (`https://katech.com.ar/feed/productos/`, formato Google Merchant, 2.094 productos): se está integrando al índice. FullH4rd, Compra Cierta y Loquieroacá: seguimiento el 16/11/2026 |
 | 3 | eBay: cerrado el 02/11. Claves y `EBAY_CAMPAIGN_ID` (5339237377) cargados, Worker desplegado y la busqueda en vivo devuelve `afiliado: true` |
 | 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
 | 5 | Mercado Libre: clics confirmados. Cerrado |
-| 6 | Search Console: pendiente; el registro TXT se carga en Cloudflare (mas facil con el conector de la API de Cloudflare) |
-| 8 | Amazon: sitio declarado; la Creators API espera las 10 ventas |
+| 6 | Search Console: **verificado** (Google lo verificó solo por Cloudflare) y sitemap leído «Correcto». Queda mirar «Indexación → Páginas» y mandar la captura |
+| 8 | Amazon: **descartado el 04/11** (decisión del dueño): pide ventas calificadas y no tiene sentido perseguirlas. Opcional a futuro |
 | 9 | Instagram: en pausa |
-| 10 | Tiendamia pidio hablar por telefono: llamada el lunes 02/11 |
-| 11 | Carritos de Tiendamia: conviene esperar la respuesta de la llamada |
+| 9 | Instagram: sigue en pausa. **Renovar el token antes del 22/12** (vence el del 23/10): generar uno nuevo en el panel de Meta y cargarlo en `INSTAGRAM_TOKEN` (paso a paso en la página de pendientes) |
+| 10 | Tiendamia: se habló por teléfono; se espera la respuesta por escrito. Seguimiento el 16/11/2026, igual que las cartas |
+| 11 | Carritos de Tiendamia: esperan a esa respuesta (si dan la regla o una API, no hacen falta) |
 
 ---
 
@@ -277,10 +278,11 @@ Ya no aplica: OmniRoute y OpenCode se desinstalaron el 27/10/2026 y el respaldo 
 
 ---
 
-## 8. Amazon (más adelante)
+## 8. Amazon (descartado el 04/11; opcional a futuro)
 
-La Creators API de Amazon exige **10 ventas calificadas en los últimos 30 días** con tu cuenta de afiliado, así que
-por ahora no corresponde.
+**Decisión del dueño (04/11/2026):** no se sigue con los afiliados de Amazon por el requisito de ventas. La Creators API
+exige **10 ventas calificadas en los últimos 30 días**, y la cuenta pide una venta calificada antes del 14/04/2027 para
+seguir abierta. Si se cierra, no hay que hacer nada. Lo de abajo queda solo como referencia si algún día se retoma.
 
 1. Programa de afiliados: https://affiliate-program.amazon.com/ (abre).
 2. Cuando la cuenta cumpla las 10 ventas, entrá a https://affiliate-program.amazon.com/creatorsapi (pide iniciar
