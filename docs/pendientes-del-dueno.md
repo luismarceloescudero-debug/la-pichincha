@@ -22,6 +22,19 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 ---
 
+## 04/11/2026: la corrida no manda Telegram si el indice sale sin historial
+
+El 03/11 la corrida manual rearmo el indice pero **no publico en Telegram**: la guardia del indice se despertó con «PCs
+completas: sin ofertas». La causa fue que el checkout de la rama `historial` no vino en esa corrida, y sin historial el
+indice sale con 0 bajas propias en todos los rubros (nadie bajo de precio, segun el indice). Con el arreglo de hoy eso no
+vuelve a pasar: sin historial, la baja se mide contra el indice de la corrida anterior (el precio que se conocia) y se
+cuenta como «ayer $X»; si tampoco hay indice anterior, la guardia lo dice como «sin historial» en vez de una alarma por
+categoria. Lo que todavia **no** se puede: si el checkout de `historial` falla, el indice de ese dia no guarda el historial
+de precios (la rama no se actualiza). Para recuperarlo alcanza con volver a correr la manual con «indexar» cuando la rama
+este disponible; no hay nada que hacer de tu lado.
+
+---
+
 ## Estado al 01/11/2026 (sesion de auditoria)
 
 Verificado con la captura de los secretos de GitHub y una prueba en vivo del Worker. La pagina «Pendientes de La Pichincha»

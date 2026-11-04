@@ -326,11 +326,17 @@ jobs:
       - name: Guardia del indice
         id: guardia
         continue-on-error: true
+        env:
+          REUSADO: ${{ steps.indexar.outcome == 'skipped' }}
         run: |
           base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
           curl -fsSL "$base/guardia.json" -o guardia-previa.json || echo '{}' > guardia-previa.json
           rc=0
-          node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json --ofertas _sitio/ofertas.json --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" || rc=$?
+          # Un push corre sobre la foto de las ofertas del sitio, no sobre este indice. Hay un caso real: el 03/11 el
+          # checkout de `historial` no vino, el indice salio con 0 bajas en todos los rubros y la guardia se despertó con
+          # «PCs completas: sin ofertas». Se deja anotado para no confundirlo con un indice medido en esta corrida.
+          reuso=""; if [ "$REUSADO" = "true" ]; then reuso="--reusado"; fi
+          node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json --ofertas _sitio/ofertas.json --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" $reuso || rc=$?
           if [ "$rc" -eq 3 ]; then echo "alarma=true" >> "$GITHUB_OUTPUT"; fi
 
       - name: Avisar la alarma de la guardia

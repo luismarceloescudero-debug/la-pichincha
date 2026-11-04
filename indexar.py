@@ -39,6 +39,7 @@ RAIZ = Path(__file__).resolve().parent
 TIENDAS = RAIZ / "tiendas.json"
 INDICE = RAIZ / "indice.json"
 HISTORIAL = RAIZ / "historial"    # la rama `historial`: un CSV por mes con los cambios
+FOTO = "foto.json"               # junto al historial: el indice de antes de hoy, de donde sale el "antes" sin historial
 SALUD = RAIZ / "salud.json"       # cuanto trajo cada fuente, para avisar si se cae
 AR = timezone(timedelta(hours=-3))  # Argentina no tiene horario de verano
 # Valor por defecto de cada campo de una fila del indice, en orden: nombre, precio,
@@ -53,6 +54,7 @@ REINTENTO_DIAS = 30   # una ficha que no trajo codigo se vuelve a mirar pasado e
 PODA_DIAS = 60        # lo guardado de un aviso que ya no se publica se descarta pasado este tiempo
 BLOQUEOS = (403, 429, 503)   # un bloqueo no se esquiva: se corta y se retoma otro dia (principio III)
 FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
+MAX_BAJA_FOTO = 2     # sin historial, una foto del doble de precio ya no es el mismo producto (cambio de variante)
 TOPE_VENDIDOS = 100   # puestos del orden «mas vendidos» de cada tienda que se guardan: mas abajo ya no dice nada (spec 019)
 
 for flujo in (sys.stdout, sys.stderr):
@@ -815,6 +817,31 @@ def probar(url):
 
 # --- Principal --------------------------------------------------------------
 
+def leer_foto(carpeta):
+    """El indice de antes de hoy que dejo la ultima corrida sin historial: {"generado", "precios": {(tienda, url): (nombre, precio)}}."""
+    try:
+        with (carpeta / FOTO).open(encoding="utf-8") as f:
+            datos = json.load(f)
+    except OSError:
+        return None
+    except ValueError:
+        (carpeta / FOTO).unlink(missing_ok=True)
+        return None
+    return {"generado": str(datos.get("generado", "")),
+            "precios": {(f[3], f[2]): (f[0], f[1]) for f in datos.get("productos", []) if len(f) >= 4}}
+
+
+def guardar_foto(carpeta, anterior):
+    """Deja el indice anterior como foto, para que la proxima corrida sin historial tenga contra que comparar."""
+    carpeta.mkdir(parents=True, exist_ok=True)
+    if not anterior:
+        return None
+    (carpeta / FOTO).write_text(json.dumps({"generado": anterior.get("generado", ""), "productos": [
+        [f[0], f[1], f[2], f[3]] for f in anterior.get("productos", []) if len(f) >= 4]},
+        ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return leer_foto(carpeta)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Arma el indice de busqueda.")
     ap.add_argument("--solo", metavar="FUENTE")
@@ -835,14 +862,19 @@ def main(argv=None):
         print("Opciones: " + ", ".join(fuentes))
         return 1
 
+    def filas_de(datos):
+        """Las filas de un indice o de la foto, ya completas y sin las URL que hoy no pasan."""
+        for fila in datos.get("productos", []):
+            fila = list(fila)[:14] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor (las bajas, vacias)
+            if url_valida(fila[2]):                           # un indice viejo no reintroduce una URL que hoy no pasa
+                fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
+                yield fila
+
     previo, relevado = {}, {}
+    anterior = None
     if INDICE.exists():
         anterior = json.loads(INDICE.read_text(encoding="utf-8"))
-        for fila in anterior.get("productos", []):
-            fila = list(fila)[:14] + FILA_VACIA[len(fila):]   # filas viejas: cada faltante con su valor (las bajas, vacias)
-            if not url_valida(fila[2]):                       # un indice viejo no reintroduce una URL que hoy no pasa
-                continue
-            fila[9] = fila[9] or modelo.modelo_de(fila[0])    # lo que vino de un catalogo se conserva
+        for fila in filas_de(anterior):
             previo.setdefault(fila[3], []).append(fila)
         # Cuando se relevo por ultima vez cada fuente. Lo que se reusa de una
         # fuente caida conserva esa hora: no es un precio de hoy. Un indice
@@ -857,7 +889,28 @@ def main(argv=None):
     carpeta = Path(args.historial)
     estado = historial.leer(carpeta)
     series = serie.cargar(carpeta)               # para la baja propia y los sellos de minimo y de rebaja inflada
+    if not series:
+        estado = {}                              # sin series no hay historial: el estado suelto no alcanza para medir bajas
     hoy = datetime.now(AR).date()
+
+    # Sin historial (el checkout de la rama `historial` se cae, o es la primera vez) no hay de donde sacar las bajas, los
+    # tachados ni el "desde": el indice sale con 0 bajas en todos los rubros. Pero el indice de la corrida anterior es el
+    # precio que se conocia: la baja contra el se cuenta igual («ayer $X», como el sello k de la spec 038). Ese indice se
+    # guarda como foto junto al historial, y una foto de un dia anterior se usa hasta que una corrida la reemplace. Si es de
+    # hoy no se toca: la segunda corrida del dia no inventa bajas contra la primera (18/10).
+    if series:
+        (carpeta / FOTO).unlink(missing_ok=True)           # volvio el historial: la foto no se usa mas
+        foto = None
+    else:
+        foto = leer_foto(carpeta)
+        if foto and foto["generado"][:10] >= hoy.isoformat():
+            foto = None                                  # la foto es de hoy: comparar contra ella es comparar contra hoy mismo
+        elif not foto:
+            foto = guardar_foto(carpeta, anterior)
+        if foto:
+            print("  " + GRIS + "sin historial: las bajas se miden contra el indice del " + foto["generado"][:10] + FIN)
+    precios_antes = foto["precios"] if foto else None
+
     # La baja propia se mide contra los precios de antes de hoy (serie.piso_previo): si el indexador corre dos veces en
     # el dia, la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
     vivos = historial.vivos_por_tienda(estado)
@@ -958,10 +1011,17 @@ def main(argv=None):
             # 33% a 58% de productos que seguiamos hacia 2 o 3 dias).
             if not rebaja_real or not lista or lista <= it["precio"] or not piso or it["precio"] > piso:
                 lista = 0
-            if propia:
-                bajaron += 1
             actuales[(clave, it["url"])] = it["precio"]
             desde = serie.desde_cuando(eventos, hoy, it["precio"])
+            # Sin historial, lo unico que se sabe es el precio de la foto de ayer: cuenta como baja en seguimiento si los dos
+            # precios son del mismo orden (una caja de RGB de $8.000 «ayer $5.000» no dice nada) y se cuenta como «ayer $X».
+            if precios_antes is not None and not propia:
+                antes = precios_antes.get((clave, it["url"]))
+                if antes and antes[1] > it["precio"] and antes[1] <= it["precio"] * MAX_BAJA_FOTO:
+                    propia, corto = antes[1], True
+                    desde = date.fromisoformat(foto["generado"][:10]) if foto["generado"] else desde
+            if propia:
+                bajaron += 1
             # Bajas de 7 y 31 dias (%): vacias si el historial no llega; 0 si no bajo. Van al final: el sitio lee por posicion.
             b7 = serie.baja_en(eventos, hoy, it["precio"], 7)
             b31 = serie.baja_en(eventos, hoy, it["precio"], 31)
@@ -1015,7 +1075,6 @@ def main(argv=None):
         "productos": salida,
     }
     INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-
     print("\n" + NEG + "Resumen" + FIN)
     for clave, (n, nota) in resumen.items():
         print("  " + fuentes[clave]["nombre"].ljust(14) + str(n).rjust(6)
@@ -1029,6 +1088,9 @@ def main(argv=None):
               "queda el de la tienda")
     if estado:
         print("  " + VERDE + OK + FIN + " " + str(bajaron) + " bajaron de precio segun el historial")
+    elif foto:
+        print("  " + VERDE + OK + FIN + " sin historial: " + str(bajaron) + " mas baratas que el indice del "
+              + foto["generado"][:10])
     else:
         print("  " + GRIS + "historial vacio: las bajas propias empiezan a contar "
               "desde la proxima corrida" + FIN)

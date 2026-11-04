@@ -1,6 +1,6 @@
 # Continuidad de La Pichincha
 
-Última actualización: 03/11/2026 (cierre del PR de auditorías y corrida manual a Telegram).
+Última actualización: 04/11/2026 (corrida sin historial: bajas contra el índice anterior y guardia).
 
 ---
 
@@ -10,8 +10,13 @@
   `ccr-eaf2827b-dmk4yf` ya está mergeado y se puede borrar.
 - Sin cron desde #212: una corrida de "Actualizar precios y publicar" por cada push a main (solo corrige el mensaje de
   Telegram si el índice es del mismo día) y las manuales con `workflow_dispatch` (esas sí mandan mensaje nuevo).
-- 03/11 19:59 UTC: corrida manual lanzada a mano con `indexar=true` (run 41708364309) para rearmar el índice del 03/11
-  (el publicado era del 02/11) y publicar el mensaje nuevo en el canal.
+- 03/11 19:59 UTC: corrida manual con `indexar=true` (run 41708364309). Rearmó el índice del 03/11, pero **no mandó Telegram**:
+  la guardia se despertó con «PCs completas: sin ofertas». Causa: en esa corrida falló el checkout de la rama `historial`
+  (`historial.inicio` vacío) y sin historia el índice sale con 0 bajas propias en todos los rubros (issue #217, comentado).
+- 04/11: **arreglo (PR de esta rama)**. `indexar.py` saca una foto del índice anterior (junto al historial, `historial/foto.json`)
+  cuando no hay series y mide las bajas contra ella (sello k, «ayer $X»); la foto de hoy no se usa, así dos corridas el
+  mismo día no inventan bajas (18/10). `guardia.js --reusado` deja anotado cuando midió un índice reusado de la cache.
+  Tests: `tests/test_indexar_corrida.py` (5 nuevos), suite completa 625 + 750 en verde.
 - PRs abiertos: solo #169 (Reel, frenado) y #126 (Instagram, frenado hasta la versión final).
 
 ## Qué se hizo en las últimas sesiones (01–02/11)
