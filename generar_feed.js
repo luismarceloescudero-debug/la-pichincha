@@ -217,8 +217,14 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-pie b{color:var(--n-amarillo);font-family:var(--font-mono)}
 /* Tarjetas alternadas (pedido del dueño 04/11): una con borde celeste y nombre blanco, la siguiente con borde rosa y
    nombre lila claro, para que dos vecinas no se vean iguales */
-.hoy .h-lista li:nth-child(even){border-color:rgba(255,95,174,.55)}
-.hoy .h-lista li:nth-child(even) .h-nom,.hoy .h-lista li:nth-child(even) .tit-nom{color:#f3b6ff}
+.hoy .h-lista li:nth-child(3n+2){border-color:rgba(255,110,182,.6)}
+.hoy .h-lista li:nth-child(3n){border-color:rgba(199,155,255,.75)}
+.hoy .h-lista li:nth-child(3n+2) .h-nom,.hoy .h-lista li:nth-child(3n+2) .tit-nom{color:#f3b6ff}
+.hoy .h-lista li:nth-child(3n) .h-nom,.hoy .h-lista li:nth-child(3n) .tit-nom{color:#ffc2e0}
+/* la tienda, destacada: pastilla llena con letra negra en negrita (celeste, rosa, lila en ciclo) */
+.hoy .h-donde b,.hoy .h-tienda b{display:inline-block;padding:1px 10px 2px;border-radius:999px;background:#3ee6ff;color:#120018;font-weight:800}
+.hoy .h-lista li:nth-child(3n+2) .h-donde b{background:#ff6eb6}
+.hoy .h-lista li:nth-child(3n) .h-donde b{background:#c79bff}
 /* La lista completa (spec 060): las mismas tarjetas, con el nombre como enlace a la tienda */
 .hoy .h-todas h2{margin:0;padding:0 4px;font:700 2rem/.95 var(--f-tit);font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta)}
 .hoy .h-todas h2 span{color:var(--n-celeste)}
