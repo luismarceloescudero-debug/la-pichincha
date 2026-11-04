@@ -41,10 +41,14 @@
   ];
   const POR_CATEGORIA = { smartphone: "celular", notebook: "notebook", monitor: "monitor", pc: "pc", componente: "componente", periferico: "accesorio", otro: "otro" };
 
+  const GPU_SUELTA = /\b(?:rtx|gtx)\s?\d{3,4}\b|\bradeon\s+rx\b|\brx\s?\d{4}\b|\barc\s+[ab]\d{3}\b/i;
+
   function tipoDe(nombre, categoria = C.categoriaDe(nombre)) {
     const t = TIPOS.find(([, re]) => re.test(nombre));
     // Los equipos los dice la categoria (mira mas que el principio); un componente o periferico, su primera palabra.
     if (["smartphone", "notebook", "monitor", "pc"].includes(categoria) && !(t && t[0] === "tablet")) return POR_CATEGORIA[categoria];
+    // Una placa sin «placa de video» al principio («GIGABYTE RTX 5080 16 GB», 31/10) tambien es una placa, no «Componente».
+    if (!t && categoria === "componente" && GPU_SUELTA.test(nombre)) return "placa-video";
     return t ? t[0] : POR_CATEGORIA[categoria] || "otro";
   }
 
@@ -109,6 +113,9 @@
     [/\b(?:intel\s+)?(?:core\s?)?i([3579])(?:[-\s_]?(\d{4,5}[a-z]{0,2}\d?))?(?![a-z\d])/i, m => `Core i${m[1]}${m[2] ? "-" + m[2].toUpperCase() : ""}`],
     [/\b(?:apple\s+)?(m[1-5])(\s?(?:pro|max|ultra))?(?![a-z\d])/i, m => `Apple ${m[1].toUpperCase()}${m[2] ? " " + m[2].trim().replace(/^./, c => c.toUpperCase()) : ""}`, /apple|macbook|imac|mac\s?mini|ipad/i],
     [/\b(?:intel\s+|amd\s+)?(celeron|pentium|athlon)\s?([a-z]?\d{3,5}[a-z]?)?(?![a-z\d])/i, m => m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() + (m[2] ? " " + m[2].toUpperCase() : "")],
+    // Como los abrevia OnCity: «R7-7730U» es un Ryzen 7 y «U5-115U» un Core Ultra 5 (056: hacian de modelo en el titulo)
+    [/\br([3579])-(\d{3,4}[a-z]{0,2})(?![a-z\d])/i, m => `Ryzen ${m[1]} ${m[2].toUpperCase()}`],
+    [/\bu([3579])-(\d{3}[a-z]{0,2})(?![a-z\d])/i, m => `Core Ultra ${m[1]} ${m[2].toUpperCase()}`],
     [/\b(snapdragon|dimensity|helio|exynos)\s?([a-z]?\d{3,4}\+?|\d\s?gen\s?\d)?/i, m => m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() + (m[2] ? " " + m[2].replace(/\s+/g, " ") : "")],
   ];
   const cpuMatch = n => { for (const [re, f, si] of CPUS) { const m = n.match(re); if (m && (!si || si.test(n))) return { texto: m[0], cpu: f(m) }; } return null; };
@@ -122,8 +129,8 @@
   /* --- El titulo: marca y modelo ---------------------------------------------- */
   // Lo que va adelante y el icono ya dice (o no suma): se saca del principio.
   const PREFIJO = new RegExp("^\\s*(?:(?:" + [
-    "celular(?:es)?", "smartphone", "tel[eé]fono(?:\\s+celular)?", "notebook", "laptop", "netbook", "ultrabook", "port[aá]til",
-    "monitor(?:\\s+led)?", "smart\\s?tv", "televisor", "tv", "pc(?:\\s+de\\s+escritorio)?", "computadora", "equipo\\s+armado",
+    "celular(?:es)?", "smartphone", "ordenador", "tel[eé]fono(?:\\s+celular)?", "notebook", "laptop", "netbook", "ultrabook", "port[aá]til",
+    "monitor(?:\\s+led)?", "smart\\s?tv", "televisor", "tv", "pc(?:\\s+de\\s+escritorio)?", "computadora(?:\\s+de\\s+escritorio)?", "equipo\\s+armado",
     "all\\s?in\\s?one", "placa\\s+de\\s+v[ií]deo", "tarjeta\\s+(?:de\\s+)?v[ií]deo", "tarjeta\\s+gr[aá]fica", "placa\\s+madre",
     "mother\\s?board", "mother", "mainboard", "micro(?:procesador)?", "procesador", "cpu", "memoria(?:\\s+ram)?", "ram",
     "kit\\s+de\\s+memoria", "disco(?:\\s+s[oó]lido|\\s+r[ií]gido)?", "hd", "ext(?:erno)?\\.?", "unidad\\s+de\\s+estado\\s+s[oó]lido",
@@ -138,13 +145,14 @@
   // Un token que ya es un dato (va en las chips) o ruido: el titulo termina antes.
   const DATO = [
     /^\d+(?:[.,]\d+)?″$/, /^\d+(?:[.,]\d+)?(?:gb|tb|mb)$/i, /^\d{1,3}(?:[.,]\d+)?(?:g|t)$/i, /^\d+\/\d+(?:gb|g|tb)?$/i, /^\d+\+\d+/,
+    /^(?:ssd|hdd|nvme|ram|ddr\d?)\d+(?:gb|tb)$/i,   // «SSD512GB», «RAM16GB»: tipo y capacidad pegados (31/10: «HP SSD512GB 250»)
     /^\(?\d+\s?x\s?\d+(?:mm|cm)?\)?$/i, /^\d{2,3}%$/,
     /^\d+(?:[.,]\d+)?(?:hz|mhz|ghz|ms|w|mah|mp|dpi|v|mm|cm|mt|kg|rpm|db|mt\/s)$/i, /^\d+(?:[.,]\d+)$/,
     /^(?:4k|5k|8k|uhd|fhd|qhd|wqhd|uwqhd|wqxga|wuxga|hd\+?|full|2k|2\.5k|1080p|1440p|2160p|720p)$/i,
     /^(?:qd-?oled|oled|amoled|qled|neo|super|ips|va|tn|mini-?led|miniled|led|lcd|retina)$/i,
     /^(?:[2345]g|lte|nfc|dual|sim|esim|wi-?fi\d*(?:-?e)?|wifi\d?e?|wf\d?e?|bluetooth|bt|usb(?:-c)?|tipo-?c|type-?c|hdmi|dp|displayport)$/i,
     /^(?:ddr\d|gddr\d|lpddr\d+x?|nvme|m\.2|sata|pcie|gen\d|am[345]|lga\d+|s1[27]\d\d|socket|atx|matx|m-atx|micro-atx|itx|mini-itx|e-atx)$/i,
-    /^(?:ram|rom|ssd|hdd|emmc|memoria|almacenamiento|gb|tb|nucleos|núcleos|cores|hilos|turbo|smartphone|celular|notebook|laptop)$/i,
+    /^(?:ram|rom|ssd|hdd|emmc|memoria|almacenamiento|gb|tb|so-?dimm|u?dimm|mhz|ghz|hz|mah|dpi|nucleos|núcleos|cores|hilos|turbo|smartphone|celular|notebook|laptop)$/i,
     /^(?:win\d*\w*|w1[01]\w*|windows|freedos|free|dos|linux|android|ios|chromeos|macos|sistema|operativo)$/i,
     /^\d+(?:gb|mb)\/s$/i, /^(?:gamer|gaming|mid|tower|switch|fans?|\d+fans?|tkl|vga|s\/\w*|c\/\w*)$/i,
     /^(?:g-?sync|freesync|hdr\d*|rgb|argb|backlight|retroiluminado|bateria|batería|recargable|inalambrico|inalámbrico|wireless|mecanico|mecánico)$/i,
@@ -159,11 +167,17 @@
   const esCodigo = t => /^(?=.*[a-z])(?=.*\d)[a-z0-9][a-z0-9-]{2,}$/i.test(t);
   const esInterno = t => /^\d{6,}$/.test(t) || /^0\d{4,}$/.test(t) || /^\d{3}-\d{6}$/.test(t) || /^(?:sku|cod|cód|art)[:.]?\d*$/i.test(t);
   const MAX_PALABRAS = 5, MIN_PALABRAS = 2;
+  // La marca de una linea que la tienda no escribe («Notebook ThinkPad T14 Gen 6», OnCity 31/10): se pone adelante.
+  const MARCA_DE_LINEA = [[/^(?:thinkpad|thinkbook|ideapad|yoga|legion|loq)$/i, "LENOVO"], [/^(?:vivobook|zenbook|expertbook)$/i, "ASUS"],
+    [/^(?:pavilion|victus|omen|probook|elitebook|zbook|omnibook)$/i, "HP"], [/^(?:inspiron|latitude|vostro|alienware)$/i, "DELL"],
+    [/^(?:aspire|nitro|predator|travelmate|extensa)$/i, "ACER"], [/^(?:macbook|imac)$/i, "APPLE"]];
 
   function tituloDe(nombre, tipo) {
     const equipo = ["notebook", "pc", "celular", "tablet"].includes(tipo);
     let sin = pulgadas(nombre).replace(/[™®©]/g, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/\b80\s?\+?\s?plus(?:\s+(?:bronze|silver|gold|platinum|titanium|white))?\b/gi, " ")
-      .replace(/\bw(?:in(?:dows)?)?\s?1[01]\s?(?:home|pro|p)?\b/gi, " ").replace(/\bhdr\s?\d{2,4}\+?/gi, " ").replace(/\+/g, " ");
+      .replace(/\bw(?:in(?:dows)?)?\s?1[01]\s?(?:home|pro|p)?\b/gi, " ").replace(/\bhdr\s?\d{2,4}\+?/gi, " ").replace(/\+/g, " ")
+      // «Combo Actualización AMD Ryzen 7 5700G»: «Combo» queda (es un paquete, no el procesador solo) y el modelo entra (058).
+      .replace(/\bcombo\s+(?:de\s+)?actualizaci[oó]n(?:\s+pc)?\b/gi, "Combo");
     // En un equipo el procesador y la placa de video van en las chips: se sacan del titulo.
     if (equipo) { const c = cpuMatch(sin); if (c) sin = sin.replace(c.texto, " "); sin = sin.replace(GPU, " ").replace(/\b(?:intel|amd|nvidia)\b/gi, " "); }
     sin = sin.replace(PREFIJO, "");
@@ -176,7 +190,8 @@
       // Un numero suelto seguido de su unidad («256 Gb», «12 Ram») ya es un dato; en un monitor, un numero de 15 a 65
       // son las pulgadas («LG 27 UltraGear»), y en una memoria uno de 4 cifras, los MHz («DDR5 5600»).
       const numero = /^\d+(?:[.,]\d+)?$/.test(t);
-      const dato = esDato(t) || (numero && /^(?:gb|tb|g|hz|mhz|ghz|w|ram|ms|mah|″)$/i.test(sig))
+      // «SUPER» en una placa es parte del modelo (RTX 4070 Ti SUPER); en un monitor o un TV es ruido de panel (058).
+      const dato = (esDato(t) && !(tipo === "placa-video" && /^super$/i.test(t))) ||(numero && /^(?:gb|tb|g|hz|mhz|ghz|w|ram|ms|mah|dpi|″)$/i.test(sig))
         || (numero && (tipo === "monitor" || tipo === "tv") && +t.replace(",", ".") >= 15 && +t.replace(",", ".") <= 100)
         || (numero && tipo === "memoria" && t.length === 4);
       if (dato) {
@@ -191,9 +206,13 @@
     // Sin un codigo de modelo («Monitor GIGABYTE 27″ QD-OLED … GO27Q24A»), se busca mas adelante.
     if (titulo.length && titulo.length < MAX_PALABRAS && !titulo.some(t => /\d/.test(t))) {
       // Un part number largo («RZ03-03392900-R311») no ayuda a leer: solo codigos cortos.
-      const cod = toks.slice(i).find(t => esCodigo(t) && t.length <= 10 && !esDato(t) && !esInterno(t) && !vistas.has(t.toLowerCase()));
-      if (cod) titulo.push(cod);
+      // Un codigo de dos («V3») solo vale con la sigla de la linea delante, en mayusculas: «MWE V3» (Cooler Master, 056).
+      const corto = k => /^[a-z]\d$/i.test(toks[k]) && k > i && /^[A-Z]{2,}$/.test(toks[k - 1]) && !esDato(toks[k - 1]) && !vistas.has(toks[k - 1].toLowerCase());
+      const j = toks.findIndex((t, k) => k >= i && (esCodigo(t) || corto(k)) && t.length <= 10 && !esDato(t) && !esInterno(t) && !vistas.has(t.toLowerCase()));
+      if (j >= 0) { if (corto(j)) titulo.push(toks[j - 1]); titulo.push(toks[j]); }
     }
+    const linea = titulo.length && MARCA_DE_LINEA.find(([re, marca]) => re.test(titulo[0]) && !titulo.some(t => t.toUpperCase() === marca));
+    if (linea) titulo.unshift(linea[1]);
     return (titulo.length ? titulo.join(" ") : (sin.trim() || pulgadas(nombre).trim()).split(/\s+/).slice(0, 4).join(" ")).toUpperCase();
   }
 
@@ -270,7 +289,7 @@
     const original = String(nombre || "");
     const categoria = C.categoriaDe(original);
     const tipo = tipoDe(original, categoria);
-    return { categoria, tipo, titulo: tituloDe(original, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).trim(),
+    return { categoria, tipo, titulo: tituloDe(original, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).replace(/[\s.]+$/, ""),
       emoji: EMOJI[tipo], etiqueta: NOMBRE_TIPO[tipo] };
   }
 

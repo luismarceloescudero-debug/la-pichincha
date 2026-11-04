@@ -96,7 +96,7 @@ test("main escribe guardia.json, el resumen y sale con 3 si hay alarma", () => {
   assert.match(fs.readFileSync(alarma, "utf8"), /0 bajas propias/);
   // sin alarma: 0 y sin archivo de alarma
   fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify({ ...sano(), productos: [
-    ...sano().productos, ...Array.from({ length: 12 }, (_, i) => fila("SSD Kingston NV" + (i + 10) + " 1TB NVMe Gen4", 90000, { antes: 120000 }))] }));
+    ...sano().productos, ...Array.from({ length: 12 }, (_, i) => fila("SSD Kingston NV" + (i + 10) + " 1TB NVMe Gen4", 90000, { antes: 120000 + i * 2000 }))] }));
   fs.rmSync(alarma);
   assert.equal(G.main(["--indice", path.join(dir, "indice.json"), "--salida", salida, "--alarma", alarma]), 0);
   assert.equal(fs.existsSync(alarma), false);
@@ -129,7 +129,7 @@ test("repetidas: dos ofertas publicadas del mismo modelo o familia son una alarm
 test("main con --ofertas frena la publicacion si se repite un modelo", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guardia-"));
   const indice = path.join(dir, "indice.json"), ofertas = path.join(dir, "ofertas.json");
-  const muchas = Array.from({ length: 12 }, (_, i) => fila(`SSD Marca${i} Modelo${i} 1TB NVMe`, 90000, { antes: 130000 }));
+  const muchas = Array.from({ length: 12 }, (_, i) => fila(`SSD Marca${i} Modelo${i} 1TB NVMe`, 90000, { antes: 130000 + i * 2000 }));
   fs.writeFileSync(indice, JSON.stringify({ ...sano(), productos: [...sano().productos, ...muchas] }));
   fs.writeFileSync(ofertas, JSON.stringify({ ofertas: [{ nombre: "SSD X 1TB Negro" }, { nombre: "SSD X 1TB Blanco" }] }));
   const log = console.log; console.log = () => {};

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>La Pichincha — todas las combinaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@1,500;1,700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+:root{--pag:#f4f6f9;--ink:#14181f;--ink2:#3d4552;--line:#d9dfe8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pag);color:var(--ink);font:16px/1.4 "Bricolage Grotesque",system-ui,sans-serif}
+.top{max-width:1240px;margin:0 auto;padding:22px 20px 6px}.top h1{margin:0 0 6px;font-size:1.6rem}.top p{margin:0 0 10px;color:var(--ink2);max-width:860px}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:0;z-index:20;background:var(--pag);padding:10px 0;border-bottom:1px solid var(--line)}
+.ctl label{font:600 .85rem system-ui}.ctl select{font:600 .95rem system-ui;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff}
+.bloque{max-width:1240px;margin:0 auto;padding:10px 20px 26px}
+.bloque h2{margin:14px 0 2px;font-size:1.25rem}.bloque .reg{margin:0 0 12px;color:var(--ink2);font-size:.92rem;max-width:900px}
+.fila{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px;align-items:start}
+.cel figcaption{font:600 .78rem system-ui;color:var(--ink2);margin:0 0 6px}.cel{margin:0}
+.tablita{max-width:1240px;margin:0 auto;padding:0 20px 20px}.tablita table{border-collapse:collapse;font-size:.85rem;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tablita td,.tablita th{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+
+/* ===== tarjeta ===== */
+.k{--bg:#fff;--a1:#0b4fd8;--a2:#0b4fd8;--panel:#0b4fd8;--on:#fff;--pale:#cfe0ff;--lite:#cfe0ff;--ink:#14181f;
+  border-radius:16px;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+.k .foto{background:#fff;margin:10px 10px 8px;border-radius:10px;aspect-ratio:1/.62;display:grid;place-items:center;padding:6px}
+.k .foto img{max-width:100%;max-height:100%;object-fit:contain}
+.k .pct{padding:0 14px;font:800 2.6rem/1 var(--fp);letter-spacing:-.01em}
+.k .sym{font-size:.5em;vertical-align:.55em;margin:0 2px;letter-spacing:0;font-family:var(--fs)}
+.k .ln{padding:6px 14px}
+.k .l1{font:800 1.08rem/1.15 var(--ft)}
+.k .l2{display:flex;flex-wrap:wrap;gap:5px;font:500 .78rem/1.3 var(--fc)}
+.k .l2 span{padding:0 7px;border-radius:6px}
+.k .l3{font:700 1.75rem/1.05 var(--fn);letter-spacing:-.03em}
+.k .l4{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;font:500 .9rem var(--fl)}
+.k .l4 s{opacity:.85}.k .l4 b{font:700 1.2rem var(--fn);letter-spacing:-.02em}
+.k .l5{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font:600 .88rem var(--fl);padding-bottom:12px}
+.k .prem{margin:4px 14px 2px;background:#14181f;border-radius:9px;padding:6px 9px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.k .prem b{font:800 .72rem var(--fc);letter-spacing:.08em;color:#ffcf33}.k .prem span{font:700 .72rem var(--ft);color:#ffe08a;border:1px solid rgba(255,207,51,.55);border-radius:999px;padding:0 7px}
+
+/* ---- familias de letra (columnas) ---- */
+.f1{--fp:"Bricolage Grotesque";--ft:"Bricolage Grotesque";--fc:"Bricolage Grotesque";--fn:"Bricolage Grotesque";--fl:"Bricolage Grotesque";--fs:"Bricolage Grotesque"}
+.f2{--fp:"Bricolage Grotesque";--ft:"Bricolage Grotesque";--fc:"DM Mono";--fn:"Bricolage Grotesque";--fl:"Bricolage Grotesque";--fs:"DM Mono"}
+.f3{--fp:"Barlow Condensed";--ft:"Bricolage Grotesque";--fc:"DM Mono";--fn:"Bricolage Grotesque";--fl:"Bricolage Grotesque";--fs:"DM Mono"}
+.f4{--fp:"Barlow Condensed";--ft:"Bricolage Grotesque";--fc:"DM Mono";--fn:"Bricolage Grotesque";--fl:"Fraunces";--fs:"DM Mono"}
+.f5{--fp:"Barlow Condensed";--ft:"Bricolage Grotesque";--fc:"DM Mono";--fn:"Space Grotesk";--fl:"Fraunces";--fs:"DM Mono"}
+.f4 .l4,.f4 .l5,.f5 .l4,.f5 .l5{font-style:italic}.f4 .l4 b,.f5 .l4 b{font-style:normal}
+.f1 .pct{font-size:2.3rem;font-weight:800}
+
+/* ---- A: claro alternado. 1 negro/negrita · 2 blanco/negrita sobre franja · 3 color solido · 4 negro/fino · 5 color ---- */
+.pA .l1{color:var(--ink)}
+.pA .l2{background:var(--a1);color:#fff;font-weight:700;margin:4px 0}.pA .l2 span{background:none;padding:0 4px}
+.pA .pct{color:var(--a1)}.pA .l3{color:var(--a1)}.pA .l4{color:var(--ink)}.pA .l5{color:var(--a2)}
+.pA .sym{color:var(--a2)}.pA .l2 .sym{color:#fff}
+/* ---- B: invertido. 1 blanco/negrita sobre franja · 2 negro/negrita sobre tinte · 3 color solido · 4 blanco sobre franja · 5 negro ---- */
+.pB .l1{background:var(--a1);color:#fff;margin-top:4px}
+.pB .l2{background:rgba(20,24,31,.1);color:var(--ink);font-weight:700}.pB .l2 span{background:none}
+.pB .pct{color:var(--a2)}.pB .l3{color:var(--a1)}.pB .l4{background:var(--a2);color:#fff;margin-top:2px}.pB .l5{color:var(--ink);padding-top:8px}
+.pB .sym{color:var(--a1)}.pB .l4 .sym{color:#fff}
+/* ---- C: tarjeta solida. toda del color de la tienda; 1 blanco/negrita · 2 negro/negrita sobre claro · 3 color claro · 4 blanco fino · 5 negro sobre claro ---- */
+.pC{background:var(--panel);color:var(--on)}
+.pC .pct{color:var(--on)}.pC .l1{color:var(--on)}
+.pC .l2{color:#14181f;font-weight:700}.pC .l2 span{background:var(--lite)}
+.pC .l3{color:var(--pale)}.pC .l4{color:var(--on)}.pC .l5{color:#14181f}.pC .l5>span:first-child{color:var(--pale);font-weight:800}.pC .l5 a.vo{background:var(--lite);padding:3px 10px;border-radius:999px;color:#14181f;text-decoration:none}
+.pC .sym{color:var(--pale)}
+/* ---- D: bloques. cada linea es una franja con su fondo: 1 negro/blanco · 2 negro/tinte · 3 blanco/color · 4 negro/claro · 5 blanco/color ---- */
+.pD{background:#fff}
+.pD .pct{background:#fff;color:var(--a1);padding-top:6px}
+.pD .l1{background:#fff;color:var(--ink)}
+.pD .l2{background:var(--bg);color:var(--ink);font-weight:700}.pD .l2 span{background:none}
+.pD .l3{background:var(--a1);color:#fff;padding-top:8px;padding-bottom:8px}
+.pD .l4{background:var(--lite);color:var(--ink);padding-top:7px;padding-bottom:7px}
+.pD .l5{background:var(--a2);color:#fff;padding-top:8px}
+.pD .sym{color:var(--a2)}.pD .l3 .sym{color:var(--bg)}.pD .l5 .sym{color:#fff}
+.premio{margin:0}
+.k a.vo{color:inherit;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:560px){.fila{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<header class="top">
+  <h1>Todas las combinaciones</h1>
+  <p><b>Regla:</b> el blanco se puede usar, pero <b>cada línea cambia color, peso y tipo de letra respecto de la anterior</b> (si el título es blanco y negrita, las características van en negro y negrita, con otra letra). Lo mismo para números y símbolos: el «$», el «−», el «%» y las flechas llevan otro color que el número que acompañan. Abajo hay <b>4 ritmos de líneas</b> (filas) por <b>5 juegos de familias de letra</b> (columnas dentro de cada fila). Elegí un producto arriba para ver cómo cambian la paleta y la foto de cada tienda.</p>
+  <div class="ctl"><label for="prod">Producto / tienda:</label><select id="prod"></select></div>
+</header>
+<section class="tablita"><table>
+<tr><th>Familias</th><th>Qué usa</th><th>Peso aprox. al alojarlas</th></tr>
+<tr><td><b>F1 · 1 familia</b></td><td>Bricolage Grotesque en todo</td><td>~90 KB</td></tr>
+<tr><td><b>F2 · 2 familias</b></td><td>Bricolage + DM Mono (características y símbolos)</td><td>~120 KB</td></tr>
+<tr><td><b>F3 · 3 familias</b></td><td>+ Barlow Condensed para el porcentaje</td><td>~150 KB</td></tr>
+<tr><td><b>F4 · 4 familias</b></td><td>+ Fraunces cursiva para etiquetas («ahorrás», tienda)</td><td>~220 KB</td></tr>
+<tr><td><b>F5 · 5 familias</b></td><td>+ Space Grotesk para precio y ahorro (la versión 6)</td><td>~280 KB</td></tr>
+</table></section>
+<div id="m"></div>
+<script>
+const D=[{"comercio": "Mercado Libre", "titulo": "USOTSO SA-723", "chips": [], "precio": 147053, "antes": 300108.16326530615, "descuento": 51, "foto": "https://http2.mlstatic.com/D_NQ_NP_964089-MLA84555659707_052025-F.jpg", "premium": [], "pal": {"bg": "#ffe600", "a1": "#2d3277", "a2": "#1d4fbf", "panel": "#ffe600", "on": "#14181f", "pale": "#2d3277", "lite": "#ffffff"}}, {"comercio": "Mexx", "titulo": "ASUS PRIME", "chips": ["750 W", "80+ Gold", "Modular"], "precio": 149999, "antes": 185183.95061728393, "descuento": 19, "foto": "https://mexx-img-2019.s3.amazonaws.com/tumb_Fuente-Asus-Prime-750W-80-Plus-Gold-Modular_49212_1.jpeg", "premium": [], "pal": {"bg": "#fdeeee", "a1": "#c51112", "a2": "#00838f", "panel": "#c51112", "on": "#ffffff", "pale": "#ffd9d9", "lite": "#ffd9d9"}}, {"comercio": "SCP Hardstore", "titulo": "MSI MODERN 14 H D2RMG", "chips": ["16 GB RAM", "512 GB SSD", "14″"], "precio": 1750413, "antes": 2108931.325301205, "descuento": 17, "foto": "https://www.scphardstore.com/wp-content/uploads/2026/09/8emFv_l-450x450.webp", "premium": [], "pal": {"bg": "#f2e9f9", "a1": "#623186", "a2": "#9333ea", "panel": "#623186", "on": "#ffffff", "pale": "#e7d3f7", "lite": "#e7d3f7"}}, {"comercio": "OnCity", "titulo": "MSI MAG 274QP", "chips": ["27″", "QHD", "QD-OLED", "240 Hz"], "precio": 1732599, "antes": 1946740.4494382022, "descuento": 11, "foto": "https://aremsaprod.vteximg.com.br/arquivos/ids/1416092/image-9934243692664e624f6e88852c0f102f0.jpg?v=639287867614370000", "premium": ["panel QD-OLED", "resolución 2.5K", "240 Hz"], "pal": {"bg": "#e7effd", "a1": "#064fd3", "a2": "#002532", "panel": "#064fd3", "on": "#ffffff", "pale": "#cfe0ff", "lite": "#cfe0ff"}}, {"comercio": "OnCity", "titulo": "HP 250", "chips": ["Core 5 120U", "16 GB RAM", "512 GB SSD"], "precio": 2025499, "antes": 2355231.395348837, "descuento": 14, "foto": "https://aremsaprod.vteximg.com.br/arquivos/ids/1348233/image-33c4fc24b802122df65a2359c8e2300c0.jpg?v=639219610605470000", "premium": [], "pal": {"bg": "#e7effd", "a1": "#064fd3", "a2": "#002532", "panel": "#064fd3", "on": "#ffffff", "pale": "#cfe0ff", "lite": "#cfe0ff"}}, {"comercio": "Coppel", "titulo": "MOTOROLA G MAX", "chips": ["8/256 GB"], "precio": 799999, "antes": 898875.2808988764, "descuento": 11, "foto": "https://coppelar.vteximg.com.br/arquivos/ids/2863399/1M735523F20260930121058.png?v=639275836794630000", "premium": [], "pal": {"bg": "#e9edfd", "a1": "#1c42e8", "a2": "#081754", "panel": "#1c42e8", "on": "#ffffff", "pale": "#f6e27a", "lite": "#f6e27a"}}, {"comercio": "Naldo", "titulo": "GOOGLE PIXEL 10A", "chips": ["8/128 GB", "5G"], "precio": 1645902, "antes": 1789023.9130434783, "descuento": 8, "foto": "https://naldoar.vteximg.com.br/arquivos/ids/243901/image-63eef014177248958a247d853d87b729.jpg?v=639287005202330000", "premium": [], "pal": {"bg": "#ffecee", "a1": "#e01b2b", "a2": "#404041", "panel": "#e01b2b", "on": "#ffffff", "pale": "#ffd0d4", "lite": "#ffd0d4"}}, {"comercio": "CompraGamer", "titulo": "ASUS PRIME AP-750G", "chips": ["750 W", "80+ Gold", "Modular"], "precio": 148000, "antes": 166292.13483146066, "descuento": 11, "foto": "https://imagenes.compragamer.com/productos/compragamer_Imganen_general_56551_Fuente_ASUS_PRIME_750W_80_Plus_Gold_AP-750G_Full_Modular_ATX_3.1_PCIe_5.1_1f0be02b-grn.jpg", "premium": [], "pal": {"bg": "#fdedeb", "a1": "#d4180b", "a2": "#006cad", "panel": "#d4180b", "on": "#ffffff", "pale": "#ffd3cf", "lite": "#ffd3cf"}}];
+const PAT=[
+ ["A","A · Claro alternado","1 título negro/negrita · 2 características blanco/negrita sobre franja de color · 3 precio en color sólido · 4 ahorro negro/fino · 5 tienda y link en el 2.º color de la tienda."],
+ ["B","B · Invertido","1 título blanco/negrita sobre franja · 2 características negro/negrita sobre tinte · 3 precio en color sólido · 4 ahorro blanco sobre franja del 2.º color · 5 tienda y link en negro."],
+ ["C","C · Tarjeta sólida","Toda la tarjeta del color de la tienda. 1 título blanco/negrita · 2 características negro/negrita sobre pastillas claras · 3 precio en el color claro · 4 ahorro blanco fino · 5 tienda y link en negro sobre pastilla."],
+ ["D","D · Bloques por línea","Cada línea es una franja con su fondo. 1 negro sobre blanco · 2 negro/negrita sobre tinte · 3 precio blanco sobre color fuerte · 4 ahorro negro sobre claro · 5 tienda y link blanco sobre el 2.º color."]
+];
+const FAM=["f1","f2","f3","f4","f5"],FN=["F1 · 1 familia","F2 · 2 familias","F3 · 3 familias","F4 · 4 familias","F5 · 5 familias"];
+const miles=n=>Math.round(n).toLocaleString("es-AR");
+const sel=document.getElementById("prod");
+D.forEach((p,i)=>{const o=document.createElement("option");o.value=i;o.textContent=p.comercio+" — "+p.titulo;sel.appendChild(o)});
+function card(p,pat,fam){
+  const pal=p.pal, st=`--bg:${pal.bg};--a1:${pal.a1};--a2:${pal.a2};--panel:${pal.panel};--on:${pal.on};--pale:${pal.pale};--lite:${pal.lite}`;
+  const chips=p.chips.map(c=>`<span>${c}</span>`).join("");
+  const prem=p.premium&&p.premium.length?`<div class="prem"><b>◆ PREMIUM</b>${p.premium.slice(0,3).map(s=>`<span>${s}</span>`).join("")}</div>`:"";
+  return `<article class="k ${fam} p${pat}" style="${st}">
+   <div class="foto"><img src="${p.foto}" alt="" referrerpolicy="no-referrer" loading="lazy"></div>
+   <div class="pct"><span class="sym">−</span>${p.descuento}<span class="sym">%</span></div>
+   <div class="ln l1">${p.titulo}</div>
+   <div class="ln l2">${chips||"<span>sin características</span>"}</div>
+   <div class="ln l3"><span class="sym">$</span>${miles(p.precio)}</div>
+   <div class="ln l4"><span>antes <s>$${miles(p.antes)}</s></span><span>ahorrás <b><span class="sym">$</span>${miles(p.antes-p.precio)}</b></span></div>
+   ${prem}
+   <div class="ln l5"><span>${p.comercio}</span><a href="#" onclick="return false" class="vo">Ver oferta <span class="sym">→</span></a></div>
+  </article>`;
+}
+function pintar(){
+  const p=D[sel.value];
+  document.getElementById("m").innerHTML=PAT.map(([k,t,r])=>`<section class="bloque"><h2>${t}</h2><p class="reg">${r}</p><div class="fila">${FAM.map((f,i)=>`<figure class="cel"><figcaption>${FN[i]}</figcaption>${card(p,k,f)}</figure>`).join("")}</div></section>`).join("");
+}
+sel.value=1;sel.onchange=pintar;pintar();
+</script>
+</body></html>

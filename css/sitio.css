@@ -85,7 +85,7 @@ h1{font-size:clamp(1.55rem,4vw,2.1rem);line-height:1.1;margin:0 0 6px;letter-spa
 h2{font-size:1.2rem;margin:0 0 4px;letter-spacing:-.02em;text-wrap:balance}
 h3{margin:0;font-size:1.02rem;letter-spacing:-.015em;text-wrap:balance}
 .sub{color:var(--ink-2);margin:0;max-width:66ch;font-size:.94rem}
-.meta{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 10px}
+.meta{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.11em;margin:0 0 10px}
 /* El JS completa el sello despues de pintar: se reservan las lineas que ocupa para que no empuje el titulo (CLS). */
 #sello{min-height:1lh}
 @media (max-width:820px){#sello{min-height:2lh}}
@@ -112,7 +112,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   transition:color .22s var(--curva),background .22s var(--curva)}
 .tab:hover{color:var(--ink)}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
-.tab .n{font-family:var(--font-mono);font-size:.72rem;color:var(--ink-3);
+.tab .n{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-3);
   background:var(--bg);border-radius:5px;padding:0 5px}
 .tab[aria-selected="true"] .n{color:var(--accent);background:var(--accent-soft)}
 
@@ -226,7 +226,7 @@ td.mejor{color:var(--good);font-weight:700}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
   box-shadow:var(--shadow);animation:entra .45s var(--curva) both;animation-delay:calc(var(--i,0)*70ms)}
 .tile.ok{border-color:var(--good);background:var(--good-soft)}
-.tile .k{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.tile .k{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .tile .v{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;letter-spacing:-.03em;margin:3px 0 1px;
   font-variant-numeric:tabular-nums}
 .tile.ok .v{color:var(--good)}
@@ -244,7 +244,8 @@ td.mejor{color:var(--good);font-weight:700}
 .buscador input{width:100%;font:500 1.05rem var(--font-sans);padding:15px 18px 15px 50px;
   border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
   box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s}
-.buscador input:focus{outline:none;border-color:var(--accent);box-shadow:var(--shadow-up)}
+.buscador input:focus{outline:none;border-color:var(--accent);box-shadow:var(--shadow-up),0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.solo-lector{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .buscador .ico{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:var(--ink-3)}
 .sugeridas{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
 .sug{all:unset;cursor:pointer;font:500 .82rem var(--font-sans);padding:6px 13px;border-radius:999px;
@@ -757,3 +758,144 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .o-nom .tit-nom{font-size:1.02rem}
 .oferta .tit-nom{color:var(--ink)}
 
+/* ---- Jerarquia de las ofertas (spec 055): no todo pesa igual ---- */
+/* Tres pesos segun el descuento (js/indice-ofertas.js, nivelOferta): heroe = bloque de color solido y precio grande,
+   fuerte = precio grande en verde, normal = quieta (precio en tinta, anillo chico). Los bloques llevan colores propios
+   (no los del tema) para que el texto blanco tenga contraste en claro y en oscuro. */
+:root{--bloque:#0f5132; --bloque-2:#2f7d52; --banda-0:#0b3b9c; --banda-1:#4c1d95}
+.ocard.n-normal .o-off{width:50px;height:50px}
+.ocard.n-normal .o-off::before{inset:5px}
+.ocard.n-normal .o-off b{font-size:.8rem}
+.ocard.n-normal .o-precios .ahora{font-size:1.2rem;color:var(--ink)}
+.ocard.n-normal .o-nom{font-weight:500}
+.ocard.n-normal::before{height:3px}
+.ocard.n-fuerte .o-off{width:72px;height:72px}
+.ocard.n-fuerte .o-off b{font-size:1.1rem}
+.ocard.n-fuerte .o-precios .ahora{font-size:1.85rem}
+.ocard.n-fuerte{border-color:var(--good)}
+.ocard.n-heroe{background:var(--bloque);border-color:var(--bloque);color:#fff;box-shadow:var(--shadow-up)}
+.ocard.n-heroe::before,.ocard.n-heroe.propia::before{background:var(--bloque-2);height:7px}
+.ocard.n-heroe:hover,.ocard.n-heroe.abierta,.ocard.n-heroe:has(.o-abrir:focus-visible){border-color:var(--bloque-2)}
+.ocard.n-heroe .o-cinta,.ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-precios .ahora,
+.ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:#fff}
+.ocard.n-heroe .o-precios .ahora{font-size:2.35rem;letter-spacing:-.045em;line-height:1}
+.ocard.n-heroe .o-precios .antes,.ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:rgba(255,255,255,.82)}
+.ocard.n-heroe .o-ahorro{font-size:1rem}
+.ocard.n-heroe .o-off{width:auto;height:auto;border-radius:12px;background:#fff;padding:6px 11px;transform:none}
+.ocard.n-heroe .o-off::before{display:none}
+.ocard.n-heroe .o-off b{font-size:1.65rem;letter-spacing:-.05em;color:var(--bloque)}
+.ocard.n-heroe:hover .o-off{transform:none}
+.ocard.n-heroe .tit-ico{color:#fff}
+.ocard.n-heroe .tit-chip{background:rgba(255,255,255,.16);color:#fff}
+.ocard.n-heroe .o-star{color:rgba(255,255,255,.85)}
+.ocard.n-heroe .o-star:hover{background:rgba(255,255,255,.14)}
+.ocard.n-heroe .acc{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5);color:#fff;box-shadow:none}
+.ocard.n-heroe .acc:hover{background:#fff;color:var(--bloque);border-color:#fff}
+.ocard.n-heroe :focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* Los botones no se cortan contra el borde de la tarjeta */
+.o-acciones{flex-wrap:wrap}
+.o-acciones .acc{min-width:0;flex:1 1 auto}
+/* Bloque de color a todo el ancho entre tramos de tarjetas: corta la grilla sin gritar */
+.o-banda{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px 20px;border-radius:14px;color:#fff;background:var(--banda-0)}
+.o-banda.b-1{background:var(--banda-1)}
+.o-banda b{font:700 1.15rem var(--font-sans);letter-spacing:-.01em}
+.o-banda span{font:600 .76rem var(--font-mono);opacity:.9}
+@media (max-width:620px){
+  .ocard.n-heroe .o-precios .ahora{font-size:2.1rem}
+  .o-banda{padding:12px 16px}
+}
+
+/* ---- Diseno final D + F3 (diseno/final): cada linea de la tarjeta de Ofertas es una franja ---- */
+/* Ritmo D: titulo claro, precio en franja de color con letra blanca, ahorro en tinte, tienda con su color y acciones al pie.
+   Letras F3: Barlow Condensed para el porcentaje, Bricolage Grotesque para el texto, DM Mono para lo tecnico.
+   La franja del precio se oscurece con color-mix para que la letra blanca tenga contraste con cualquier color de tienda. */
+:root{--f-tit:"Bricolage Grotesque",var(--font-sans);--f-pct:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--f-tec:"DM Mono",var(--font-mono)}
+.ocard{--l1:var(--surface);--tint:var(--c-soft);--band:color-mix(in srgb,var(--c) 58%,#000);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));
+  --a1:color-mix(in srgb,var(--c) 72%,var(--ink));padding:0;gap:0;overflow:hidden;border-radius:18px;height:100%}
+.ocard>*{order:4}
+.ocard::before{display:none}
+.ogrid{align-items:stretch}
+/* paletas propias de las tiendas que la maqueta define (logo real) */
+.ocard[data-tienda="mercadolibre"]{--l1:#ffe600;--tint:#fff1a0;--band:#2459b5;--lite:#fff8c8;--a1:#2d3277}
+.ocard[data-tienda="mexx"]{--band:#c51112;--tint:#fdeeee;--lite:#fff5f5;--a1:#c51112}
+.ocard[data-tienda="scphardstore"]{--band:#623186;--tint:#f2e9f9;--lite:#f8f3fc;--a1:#623186}
+.ocard[data-tienda="oncity"]{--band:#064fd3;--tint:#e7effd;--lite:#f2f6ff;--a1:#064fd3}
+.ocard[data-tienda="coppel"]{--band:#1c42e8;--tint:#e9edfd;--lite:#f3f5ff;--a1:#1c42e8}
+.ocard[data-tienda="compragamer"]{--band:#d4180b;--tint:#fdedeb;--lite:#fff5f4;--a1:#d4180b}
+.ocard[data-tienda="naldo"]{--band:#e01b2b;--tint:#ffecee;--lite:#fff6f7;--a1:#e01b2b}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .ocard[data-tienda]{--l1:var(--surface);--tint:var(--c-soft);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));--a1:var(--c)}
+}
+:root[data-theme="dark"] .ocard[data-tienda]{--l1:var(--surface);--tint:var(--c-soft);--lite:color-mix(in srgb,var(--c-soft) 55%,var(--surface));--a1:var(--c)}
+/* 0 foto: blanca, contenida; sin foto, el icono del tipo de producto en vez de una caja vacia */
+.ocard .o-img{order:0;width:auto;margin:10px 10px 6px;border-radius:12px;aspect-ratio:1/.72;background-color:#fff;background-size:contain;background-repeat:no-repeat}
+.ocard .o-img.o-sin-img{background:var(--tint);color:var(--a1);font-size:2.6rem}
+/* cinta y estrella sobre la foto */
+.ocard .o-top{order:0;position:absolute;z-index:2;top:14px;left:14px;right:14px}
+.ocard .o-cinta{font:500 .68rem/1 var(--f-tec);letter-spacing:.06em;background:#14181f;color:#fff;border-radius:999px;padding:6px 11px;text-transform:uppercase}
+.ocard.propia .o-cinta,.ocard.n-heroe .o-cinta{color:#fff}
+.ocard .o-star{background:#fff;color:#4d5562;border-radius:999px;width:34px;height:34px;display:grid;place-items:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.ocard .o-star.on{color:#b36b00}
+/* 1: porcentaje y titulo, sobre fondo claro */
+.ocard .o-main{order:1;display:block;padding:2px 14px 8px;background:var(--l1)}
+.ocard .o-off{width:auto;height:auto;border-radius:0;background:none;display:block;transform:none;margin:0}
+.ocard .o-off::before{display:none}
+.ocard .o-off b{font:800 3rem/1 var(--f-pct);letter-spacing:-.01em;color:var(--a1)}
+.ocard.n-normal .o-off{width:auto;height:auto}.ocard.n-normal .o-off b{font-size:2.3rem}
+.ocard.n-fuerte .o-off{width:auto;height:auto}.ocard.n-fuerte .o-off b{font-size:3.3rem}
+.ocard.n-heroe{background:var(--surface);color:var(--ink);border-color:var(--band);box-shadow:0 0 0 3px color-mix(in srgb,var(--band) 70%,#e0a800),var(--shadow-up)}
+.ocard.n-heroe .o-off{width:auto;height:auto;background:none;padding:0;border-radius:0}
+.ocard.n-heroe .o-off b{font-size:4.2rem;color:var(--a1)}
+.ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:var(--ink)}
+.ocard.n-heroe .o-star{color:#4d5562}.ocard.n-heroe .o-star:hover{background:#fff}
+.ocard.n-heroe .tit-ico{color:var(--a1)}.ocard.n-heroe .tit-chip{background:var(--tint);color:var(--ink)}
+.ocard.n-heroe .acc{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.ocard.n-heroe .acc:hover{background:var(--a1);color:#fff;border-color:var(--a1)}
+.ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:var(--ink-2)}
+.ocard .o-nom{margin:4px 0 0;font:800 1.1rem/1.15 var(--f-tit);letter-spacing:-.01em;color:var(--ink)}
+.ocard .o-nom:has(> .tit){display:block;overflow:visible}
+.ocard .tit-nom{font:800 1.1rem/1.15 var(--f-tit);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-width:0}
+.ocard.abierta .tit-nom{-webkit-line-clamp:unset;display:block}
+.ocard .tit-chips{margin-top:4px}
+.ocard .tit-chip{font:500 .74rem/1.5 var(--f-tec);background:var(--tint);color:var(--ink)}
+/* 3: el precio, en la franja de color; nunca se corta */
+.ocard .o-precios{order:2;background:var(--band);color:#fff;padding:8px 14px;gap:2px 10px;align-items:baseline}
+.ocard .o-precios .ahora,.ocard.n-normal .o-precios .ahora,.ocard.n-fuerte .o-precios .ahora,.ocard.n-heroe .o-precios .ahora{
+  font:800 clamp(1.2rem,6vw,1.8rem)/1.05 var(--f-tit);letter-spacing:-.035em;color:#fff;white-space:nowrap;max-width:100%}
+.ocard.n-heroe .o-precios .ahora{font-size:clamp(1.3rem,6.6vw,2.2rem)}
+.ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{font:500 .8rem var(--f-tec);color:rgba(255,255,255,.88);text-decoration-thickness:1.5px}
+/* 4: ahorro, en tinte claro, con la cifra en verde */
+.ocard .o-ahorro{order:3;background:var(--lite);padding:7px 14px;font:500 .92rem var(--f-tit);color:var(--ink)}
+.ocard .o-ahorro b{font:800 1.2rem var(--f-tit);color:var(--good);letter-spacing:-.02em}
+.ocard .o-contra{padding:6px 14px 0;font-family:var(--f-tit)}
+.ocard .sello,.ocard .hp,.ocard .o-detalle{margin-left:14px;margin-right:14px}
+.ocard .o-detalle p{font-family:var(--f-tit)}
+/* 5: tienda con su color; las acciones quedan al pie, a la misma altura en toda la fila */
+.ocard .tienda{order:5;padding:10px 14px 0;font:800 1.05rem/1.1 var(--f-tit);letter-spacing:-.01em;color:var(--a1)}
+.ocard .o-acciones{order:6;margin-top:auto;padding:10px 14px 14px;flex-wrap:wrap}
+.ocard .o-acciones .acc{min-height:44px;padding:8px 10px;font-family:var(--f-tit);font-weight:700}
+/* el rotulo «afiliado» ya no parece un boton apagado: es una aclaracion chica debajo de los botones */
+.ocard .o-acciones .sello.afi{order:3;flex:1 0 100%;background:none;border:0;padding:0;margin:0;text-align:center;
+  font:500 .72rem var(--f-tit);letter-spacing:0;color:var(--ink-3)}
+.ocard .o-acciones .sello.afi::before{content:"Enlace de "}
+/* filtros plegados en el celular */
+.of-plegable{margin-bottom:14px}
+.of-plegable>summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface);cursor:pointer;font:700 .9rem var(--f-tit);color:var(--ink);list-style:none}
+.of-plegable>summary::-webkit-details-marker{display:none}
+.of-plegable>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.of-plegable[open]>summary{margin-bottom:12px}
+.of-plegable .of-ctrl{margin-bottom:0}
+/* 44 px de alto minimo en los controles de Ofertas (WCAG 2.5.8) */
+.of-chip,.segmentos.chico button{min-height:44px;display:inline-flex;align-items:center}
+.ocard .tienda{display:flex;align-items:center;gap:6px;background:none;border-radius:0}
+.ocard .tienda .ico{flex:none}
+
+/* ---- Busqueda en celular: areas tactiles y menos trabajo de pintado ---- */
+/* Los links de «mismo modelo en otras tiendas» median 16-19 px de alto; WCAG 2.5.8 pide 24 px como minimo. */
+.mismo a{display:inline-flex;align-items:center;min-height:24px;padding-block:3px}
+/* Contraste (Lighthouse, 01/11): el precio tachado sobre la franja roja y el contador de los chips quedaban en 4,35 y 3,59. */
+.ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{color:#fff}
+.of-chip .n{opacity:1;color:var(--ink-2)}
+.of-chip[aria-pressed="true"] .n{color:inherit}

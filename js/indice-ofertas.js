@@ -1,6 +1,8 @@
 /* --- Indice compartido: lo usan Buscar y Ofertas ---------------------
    Se baja una sola vez, recien cuando abris alguna de las dos. */
 let IDX = null, pidiendo = null, OFERTAS = null;
+// Fotos de las ofertas (spec 057): el indice que baja el navegador no las trae; viajan aparte, solo al abrir Ofertas.
+let IMAGENES = null, pidiendoImagenes = null;
 const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", "fuente 650w", "webcam logitech"];
 /* Lo mas buscado, si el build lo trajo (BUSCADAS: agregado, con minimo de personas distintas y sin datos personales, spec 017
    fase 3); si no, las de siempre. Se pide al pintar: BUSCADAS lo define el bloque de datos, que carga despues de este script. */
@@ -23,25 +25,65 @@ function asegurarIndice(forzar) {
   return pidiendo;
 }
 
+/* imagenes.json ({ url: foto }) lo arma adelgazar_indice.js junto con el indice. Si no esta o falla, las tarjetas usan la foto del propio
+   indice (si la trae) o el icono del tipo de producto: nunca rompe la pestaña. */
+function asegurarImagenes() {
+  if (IMAGENES) return Promise.resolve(IMAGENES);
+  if (!pidiendoImagenes) pidiendoImagenes = fetch("imagenes.json", { cache: "no-cache" })
+    .then(r => (r.ok ? r.json() : {})).catch(() => ({}))
+    .then(m => { IMAGENES = m && typeof m === "object" ? m : {}; return IMAGENES; })
+    .finally(() => { pidiendoImagenes = null; });
+  return pidiendoImagenes;
+}
+
 /* Las ofertas de todo el indice (un segundo de CPU en un telefono, Lighthouse del 24/10) no frenan la busqueda: se calculan cuando
    el navegador queda libre, o enseguida si las pide la pestaña Ofertas o el modo Súper Oferta (ofertasListas). Al terminar,
    la pestaña muestra su numero y la busqueda vuelve a pintarse con «otra tienda lo tiene más barato». */
 function ofertasListas() {
   if (!OFERTAS && IDX) {
     OFERTAS = calcularOfertas(IDX);
-    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = OFERTAS.propias.length + OFERTAS.publicadas.length + OFERTAS.seguimiento.length; });
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = listaOfertas().length; });
   }
   return OFERTAS;
 }
+/* Con Web Worker el calculo no frena la pantalla (spec 054: en un celular eran varios segundos de corrido). Si el navegador no
+   tiene Worker, el worker falla o su indice no es el de la pagina, se calcula aca, cuando el navegador queda libre, como antes. */
 function programarOfertas(j) {
-  const correr = () => {
-    if (IDX !== j || OFERTAS) return;
-    ofertasListas();
+  const terminar = () => {
+    if (IDX !== j || !OFERTAS) return;
+    document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = listaOfertas().length; });
     if (typeof CONSULTA === "string" && CONSULTA.trim() && location.hash.slice(1) === "buscar" && typeof pintarResultados === "function")
       pintarResultados(CONSULTA);
   };
-  if (typeof requestIdleCallback === "function") requestIdleCallback(correr, { timeout: 4000 });
-  else setTimeout(correr, 300);
+  const enHilo = () => {
+    const correr = () => {
+      if (IDX !== j || OFERTAS) return;
+      ofertasListas();
+      terminar();
+    };
+    if (typeof requestIdleCallback === "function") requestIdleCallback(correr, { timeout: 4000 });
+    else setTimeout(correr, 300);
+  };
+  if (typeof Worker !== "function") return enHilo();
+  // Recien con la pagina cargada: un Worker creado en plena carga puede fallar al bajar su script (probado el 31/10).
+  const arrancar = () => {
+    let w;
+    try { w = new Worker("js/ofertas-worker.js"); } catch (e) { return enHilo(); }
+    const cerrar = () => { try { w.terminate(); } catch (e) { /* ya cerrado */ } };
+    w.onmessage = e => {
+      cerrar();
+      if (IDX !== j) return;
+      if (!e.data || !e.data.ok) return enHilo();
+      if (!OFERTAS) {                     // si la pestaña Ofertas lo pidio antes, ya se calculo aca
+        OFERTAS = Ofertas.decodificar(e.data.ofertas, j.productos);
+        terminar();
+      }
+    };
+    w.onerror = () => { cerrar(); enHilo(); };
+    w.postMessage({ url: new URL("indice.json", location.href).href, generado: j.generado, filas: j.productos.length });
+  };
+  if (document.readyState === "complete") arrancar();
+  else addEventListener("load", () => setTimeout(arrancar, 0), { once: true });
 }
 
 /* --- Ofertas: tarjetas que se filtran, se ordenan y se abren ------------
@@ -49,7 +91,9 @@ function programarOfertas(j) {
    feed RSS y el canal de Telegram. */
 const { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, calcularOfertas } = Ofertas;
 const POR_PAGINA = 24;
-const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1 };
+const OF = { tipo: "todas", orden: "descuento", com: "", cat: "", primera: false, cruce: false, marcadas: false, pagina: 1,
+  // Filtros plegados en el celular (diseno D+F3): la primera tarjeta se ve sin bajar una pantalla y media. En escritorio van abiertos.
+  filtros: typeof matchMedia === "function" ? matchMedia("(min-width: 621px)").matches : true };
 let OF_ACTUAL = [];
 
 const leerEstrellas = () => {
@@ -58,13 +102,14 @@ const leerEstrellas = () => {
 let ESTRELLAS = leerEstrellas();
 
 function listaOfertas() {
-  if (!ofertasListas()) return [];
+  if (!OFERTAS && !ofertasListas()) return [];
   if (OFERTAS._lista) return OFERTAS._lista;
   const nuevo = (f, ref, tipo) => ({ f, ref, tipo, off: 1 - f[1] / f[ref], ahorro: f[ref] - f[1],
     cruce: OFERTAS.cruces.has(f), vigente: OFERTAS.vigentes.has(f), contra: OFERTAS.contra.get(f), nota: OFERTAS.notas.get(f), niv: nivelMarca(f[0]), cat: OFERTAS.categorias.get(f).categoria, com: comercioDe(f) });
-  return (OFERTAS._lista = [...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
-                            ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
-                            ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))]);
+  // El mismo equipo en dos o tres tiendas (31/10: tres veces la Corsair SCUF) ocupa un solo lugar, el de la tienda mas barata.
+  return (OFERTAS._lista = Ofertas.unico([...OFERTAS.propias.map(f => nuevo(f, 6, "propia")),
+                                          ...OFERTAS.publicadas.map(f => nuevo(f, 5, "publicada")),
+                                          ...OFERTAS.seguimiento.map(f => nuevo(f, 6, "seguimiento"))].sort((a, b) => b.off - a.off)));
 }
 
 function ofertasFiltradas() {
@@ -77,9 +122,10 @@ function ofertasFiltradas() {
   if (OF.marcadas) l = l.filter(o => ESTRELLAS.has(o.f[2]));
   const por = { descuento: (a, b) => b.off - a.off, ahorro: (a, b) => b.ahorro - a.ahorro,
                 precio: (a, b) => a.f[1] - b.f[1] }[OF.orden];
-  // Cuando se ven todas, las bajas (propias y en seguimiento, que dicen su historial) van primero, y las rebajas publicadas despues.
+  // Un solo orden para toda la lista (056): antes las bajas iban primero y las rebajas publicadas despues, y al cargar mas
+  // volvian a aparecer tarjetas de 26 % y 19 % detras de las de 3 %. A igual valor, las bajas (que dicen su historial) primero.
   const rango = { propia: 0, seguimiento: 0, publicada: 1 };
-  return [...l].sort((a, b) => OF.tipo === "todas" && a.tipo !== b.tipo ? rango[a.tipo] - rango[b.tipo] : por(a, b));
+  return [...l].sort((a, b) => por(a, b) || rango[a.tipo] - rango[b.tipo]);
 }
 
 function controlesOfertas(todas) {
@@ -96,7 +142,7 @@ function controlesOfertas(todas) {
   const porCat = new Map(cuenta("cat"));
   const cats = Categorias.ORDEN.filter(c => porCat.has(c)).map(c => [c, porCat.get(c)]);
   const chip = (k, v, txt, cnt, on) => `<button class="of-chip" data-of="${k}:${esc(v)}" aria-pressed="${on}">${esc(txt)} <span class="n">${cnt}</span></button>`;
-  return `<div class="of-ctrl">
+  return `<details class="of-plegable"${OF.filtros ? " open" : ""}><summary>${icono("filtro")} Filtrar y ordenar</summary><div class="of-ctrl">
     <div class="segmentos chico">${seg("tipo", "todas", "Todas", n.todas)}${seg("tipo", "propia", "Bajaron de precio", n.propia)}${seg("tipo", "publicada", "Rebajas publicadas", n.publicada)}${n.seguimiento ? seg("tipo", "seguimiento", "En seguimiento", n.seguimiento) : ""}</div>
     <div class="segmentos chico">${seg("orden", "descuento", "Mayor descuento")}${seg("orden", "ahorro", "Mayor ahorro $")}${seg("orden", "precio", "Menor precio")}</div>
     <div class="of-fila"><span class="of-et">Comercio</span>${coms.map(([c, k]) => chip("com", c, c, k, OF.com === c)).join("")}</div>
@@ -105,7 +151,30 @@ function controlesOfertas(todas) {
       <button class="of-chip" data-of="primera:1" aria-pressed="${OF.primera}">${icono("trofeo")} Solo primera línea</button>
       <button class="of-chip" data-of="cruce:1" aria-pressed="${OF.cruce}" title="Ofertas reales de gama alta que cuestan lo mismo o menos que la mediana de la gama media">Gama alta al precio de media <span class="n">${todas.filter(o => o.cruce).length}</span></button>
       <button class="of-chip" data-of="marcadas:1" aria-pressed="${OF.marcadas}">★ Marcadas <span class="n">${ESTRELLAS.size}</span></button>
-    </div></div>`;
+    </div></div></details>`;
+}
+
+// Jerarquia (spec 055): no todo pesa igual. Cuanto pesa una tarjeta lo decide su descuento contra el resto de la lista que se
+// ve: las ~6 mejores son un bloque de color solido, las siguientes llevan el precio grande y el resto queda quieto. Hay pisos
+// (20 % y 15 %) para que un descuento chico no se vista de estrella cuando todo el dia es flojo.
+const HEROES = 6, PISO_HEROE = 20, PISO_FUERTE = 15, TRAMO = 8;
+let CORTES = { heroe: Infinity, fuerte: Infinity };
+function cortesDe(lista) {
+  const pcts = lista.map(o => Math.round(o.off * 100)).sort((a, b) => b - a);
+  const n = pcts.length;
+  if (!n) return { heroe: Infinity, fuerte: Infinity };
+  const heroe = Math.max(PISO_HEROE, pcts[Math.min(HEROES, n) - 1]);
+  const fuerte = Math.max(PISO_FUERTE, pcts[Math.min(Math.max(Math.ceil(n * 0.2), HEROES + 4), n) - 1]);   // el 20 %, y al menos 4 mas que los heroes
+  return { heroe, fuerte: Math.min(fuerte, heroe) };
+}
+const nivelOferta = pct => pct >= CORTES.heroe ? "heroe" : pct >= CORTES.fuerte ? "fuerte" : "normal";
+
+// Un bloque de color a todo el ancho entre tramos de tarjetas: corta la grilla y dice que viene (el rango del tramo que sigue).
+function bandaTramo(siguientes, n) {
+  const pcts = siguientes.map(o => Math.round(o.off * 100));
+  const mayor = Math.max(...pcts), menor = Math.min(...pcts);
+  const texto = mayor === menor ? `Ahora: ${mayor}% de descuento` : `Ahora: de ${mayor}% a ${menor}% de descuento`;
+  return `<div class="o-banda b-${n % 2}" aria-hidden="true"><b>${texto}</b><span>${siguientes.length} ${siguientes.length === 1 ? "oferta" : "ofertas"}</span></div>`;
 }
 
 function cardOferta(o, i, desde) {
@@ -113,15 +182,17 @@ function cardOferta(o, i, desde) {
   const pct = Math.round(o.off * 100);
   const anillo = Math.min(100, Math.round(o.off / DESCUENTO_MAX * 100));
   const marcada = ESTRELLAS.has(f[2]);
+  const nivel = nivelOferta(pct);
   const nivTxt = ["sin marca reconocida", "marca conocida", "primera línea"][o.niv];
   const origen = o.tipo === "propia"
     ? "El precio anterior es lo que valía en nuestro relevamiento previo: lo calculamos nosotros."
     : o.tipo === "seguimiento"
       ? "Lo seguimos hace menos de una semana: el precio anterior es el más bajo que vimos desde entonces. Todavía no alcanza para decir que bajó contra sus 30 días."
       : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
-  const foto = fondo(f[7]);
-  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(f[0])}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" aria-label="${esc(f[0])}">
+  const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
+  const foto = fondo((IMAGENES && IMAGENES[f[2]]) || f[7]);
+  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
+  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" data-tienda="${esc(f[3])}" aria-label="${esc(nombreCompleto)}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
@@ -165,7 +236,7 @@ function animarCuentas() {
 
 function vistaOfertas() {
   setTimeout(async () => {
-    try { await asegurarIndice(); pintarOfertas(); }
+    try { await Promise.all([asegurarIndice(), asegurarImagenes()]); pintarOfertas(); }
     catch (e) { const el = $("#estadoOf"); if (el) el.textContent = "no pude cargar el índice"; }
   }, 0);
   return `<div class="panel"><div class="panel-head"><h2>${icono("fuego")} Ofertas imperdibles</h2>
@@ -189,6 +260,7 @@ function pintarOfertas(append) {
     return;
   }
   OF_ACTUAL = ofertasFiltradas();
+  CORTES = cortesDe(OF_ACTUAL);
   const visibles = OF_ACTUAL.slice(0, OF.pagina * POR_PAGINA);
   const desde = append ? (OF.pagina - 1) * POR_PAGINA : 0;
   const ahorro = OF_ACTUAL.reduce((a, o) => a + o.ahorro, 0);
@@ -204,7 +276,7 @@ function pintarOfertas(append) {
   const resto = OF_ACTUAL.length - visibles.length;
   caja.innerHTML = controlesOfertas(todas)
     + (visibles.length
-      ? `<div class="ogrid">${visibles.map((o, i) => cardOferta(o, i, desde)).join("")}</div>`
+      ? `<div class="ogrid">${visibles.map((o, i) => (i && i % TRAMO === 0 ? bandaTramo(visibles.slice(i, i + TRAMO), i / TRAMO) : "") + cardOferta(o, i, desde)).join("")}</div>`
         + (resto > 0 ? `<div class="mas"><button class="acc" data-of="mas:1">Ver ${Math.min(POR_PAGINA, resto)} más · quedan ${resto}</button></div>` : "")
       : `<p class="sub">Ninguna oferta coincide con esos filtros. Probá sacando alguno.</p>`);
   animarCuentas();
@@ -251,3 +323,9 @@ function alternarOferta(tarjeta) {
   if (b) b.setAttribute("aria-expanded", String(abierta));
   return abierta;
 }
+
+// Recuerda si la persona abrio o cerro los filtros, para que no se cierren solos al tocar un chip (toggle no burbujea: captura).
+if (typeof document !== "undefined") document.addEventListener("toggle", ev => {
+  const d = ev.target;
+  if (d && d.classList && d.classList.contains("of-plegable")) OF.filtros = d.open;
+}, true);

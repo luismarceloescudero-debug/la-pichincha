@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-10-28",
+  "actualizado": "2026-11-04",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -67,7 +67,7 @@
       "precio": 223600,
       "precio_lista": 248444,
       "sin_impuestos": 202353,
-      "stock": "en stock",
+      "stock": "sin stock",
       "titular": "El mejor equilibrio de marca, latencia y garantía",
       "specs": {
         "Timings": "16-20-20",
@@ -94,7 +94,8 @@
       ],
       "contras": [
         "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
-      ]
+      ],
+      "falla_desde": "2026-11-02"
     },
     {
       "id": "kingston-kvr",
@@ -155,9 +156,9 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
       "img": "img/corsair-lpx.jpg",
-      "precio": 262370,
-      "precio_lista": 291522,
-      "sin_impuestos": 237439,
+      "precio": 251475,
+      "precio_lista": 279417,
+      "sin_impuestos": 227579,
       "stock": "en stock",
       "titular": "La marca más probada, por treinta mil pesos más",
       "specs": {
@@ -320,9 +321,9 @@
       },
       "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
       "img": "img/brio4k.jpg",
-      "precio": 261950,
-      "precio_lista": 291056,
-      "sin_impuestos": 216488,
+      "precio": 263600,
+      "precio_lista": 292889,
+      "sin_impuestos": 217851,
       "stock": "en stock",
       "titular": "Lo que no compraría",
       "specs": {
@@ -553,6 +554,41 @@
           "ahora": 262370
         }
       ]
+    },
+    {
+      "fecha": "2026-11-02",
+      "cambios": [
+        {
+          "id": "corsair-lpx",
+          "antes": 262370,
+          "ahora": 247791
+        }
+      ]
+    },
+    {
+      "fecha": "2026-11-03",
+      "cambios": [
+        {
+          "id": "corsair-lpx",
+          "antes": 247791,
+          "ahora": 249378
+        },
+        {
+          "id": "brio4k",
+          "antes": 261950,
+          "ahora": 263600
+        }
+      ]
+    },
+    {
+      "fecha": "2026-11-04",
+      "cambios": [
+        {
+          "id": "corsair-lpx",
+          "antes": 249378,
+          "ahora": 251475
+        }
+      ]
     }
   ],
   "veredicto": [
@@ -579,7 +615,7 @@
     "kingston_retiro": 299249,
     "combo_gc": 460888,
     "combo_partido": 366238,
-    "ram_mas_barata": "adata-d35",
+    "ram_mas_barata": "corsair-lpx",
     "webcam_mas_barata": "brio100"
   },
   "marcas": {

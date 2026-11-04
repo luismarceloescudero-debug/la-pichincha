@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Paginas de informacion: /estado/ (cuando se relevo cada fuente), /legal/ (terminos, privacidad y
-   afiliados) y, desde la spec 046, /contacto/ (el formulario que manda el Worker), /acerca/ y /.well-known/security.txt.
+   afiliados) y, desde la spec 046, /contacto/ (el formulario que manda el Worker), /acerca/ y /.well-known/security.txt; desde la 057, la 404.
 
    Uso: node generar_info.js --indice indice.json --salud salud.json --salida _sitio [--fiabilidad fiabilidad.json] [--base-url URL]
 
@@ -361,6 +361,42 @@ function renderAcerca({ baseUrl = BASE_URL } = {}) {
 `;
 }
 
+/* La 404 (GitHub Pages sirve /404.html en cualquier URL que no existe, en esa misma URL): por eso todas sus rutas van desde
+   la raiz («/css/...»), no relativas. Antes se veia la 404 de GitHub, sin la marca y con scroll horizontal en el celular. */
+const ESTILO_404 = `<style>
+.no-esta form{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.no-esta input{flex:1 1 12rem;min-width:0;font:500 1rem var(--font-sans);padding:12px 14px;border:1px solid var(--line);
+  border-radius:12px;background:var(--surface);color:var(--ink)}
+.no-esta input:focus{outline:none;border-color:var(--accent)}
+.no-esta button{font:600 1rem var(--font-sans);padding:12px 18px;border:0;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
+</style>`;
+
+function render404({ baseUrl = BASE_URL } = {}) {
+  const base = baseUrl.replace(/\/$/, "");
+  return cabeza({ titulo: "Página no encontrada | La Pichincha",
+    descripcion: "Esta dirección no existe en La Pichincha. Buscá el producto o volvé a la portada.",
+    canonica: `${base}/`, baseUrl: base, rel: "/", noindex: true })
+    .replace(/<link rel="canonical"[^>]*>\n/, "")           // una pagina que no existe no tiene direccion canonica
+    .replace("</head>", ESTILO_404 + "\n</head>") + `
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<main id="contenido" class="wrap info no-esta">
+  <p class="meta">Error 404</p>
+  <h1><a class="marca-sitio" href="/" title="Ir a la portada">La Pichincha</a></h1>
+  <h2>Esta página no existe</h2>
+  <p>La dirección está mal escrita o la página ya no está. Buscá el producto que querías ver o volvé a la portada.</p>
+  <form action="/#buscar" method="get" role="search">
+    <input name="q" type="search" aria-label="Buscar un producto" placeholder="Por ejemplo: ddr4 16gb" autocomplete="off">
+    <button type="submit">Buscar</button>
+  </form>
+  <p><a href="/">Ir a la portada</a> · <a href="/#buscar">Abrir el buscador</a> · <a href="/precios/">Precios por producto</a></p>
+  <p class="nota"><a href="/estado/">Estado de las fuentes</a> · <a href="/legal/">Términos y privacidad</a> · <a href="/contacto/">Contacto</a> · <a href="/acerca/">Acerca de</a></p>
+</main>
+</body>
+</html>
+`;
+}
+
 /* RFC 9116: Contact y Expires son obligatorios; Expires a un año de la corrida (cada publicacion lo renueva). */
 function securityTxt({ baseUrl = BASE_URL, ahora = new Date() } = {}) {
   const base = baseUrl.replace(/\/$/, "");
@@ -383,18 +419,19 @@ function main(argv) {
   escribir("legal", renderLegal({ baseUrl }));
   escribir("contacto", renderContacto({ baseUrl }));
   escribir("acerca", renderAcerca({ baseUrl }));
+  fs.writeFileSync(path.join(salida, "404.html"), render404({ baseUrl }), "utf8");
   fs.mkdirSync(path.join(salida, ".well-known"), { recursive: true });
   fs.writeFileSync(path.join(salida, ".well-known", "security.txt"), securityTxt({ baseUrl }), "utf8");
-  if (!fs.existsSync(indicePath)) { console.log("sin indice de precios: no se genera /estado/ (si /legal/, /contacto/, /acerca/ y security.txt)"); return 0; }
+  if (!fs.existsSync(indicePath)) { console.log("sin indice de precios: no se genera /estado/ (si /legal/, /contacto/, /acerca/, la 404 y security.txt)"); return 0; }
   const idx = JSON.parse(fs.readFileSync(indicePath, "utf8"));
   const salud = fs.existsSync(saludPath) ? JSON.parse(fs.readFileSync(saludPath, "utf8")) : null;
   let fiabilidad = null;                                   // opcional: sin ella (o rota) /estado/ sale sin esa seccion
   try { fiabilidad = JSON.parse(fs.readFileSync(arg("fiabilidad", path.join(__dirname, "fiabilidad.json")), "utf8")); } catch (_) { /* sin telemetria */ }
   escribir("estado", renderEstado(idx, salud, { baseUrl, fiabilidad }));
-  console.log(`paginas de informacion: /legal/, /contacto/, /acerca/, security.txt y /estado/ (${Object.keys(idx.tiendas || {}).length} fuentes)`);
+  console.log(`paginas de informacion: /legal/, /contacto/, /acerca/, 404, security.txt y /estado/ (${Object.keys(idx.tiendas || {}).length} fuentes)`);
   return 0;
 }
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));
 
-module.exports = { estadoFuentes, fiabilidadComercios, renderEstado, renderLegal, renderContacto, renderAcerca, securityTxt, main, ETIQUETAS, CONTACTO, MOTIVOS };
+module.exports = { estadoFuentes, fiabilidadComercios, renderEstado, renderLegal, renderContacto, renderAcerca, render404, securityTxt, main, ETIQUETAS, CONTACTO, MOTIVOS };

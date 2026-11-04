@@ -4,6 +4,7 @@
 <!-- solo-web -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="afuera-url" content="https://pichincha-afuera.mescudero-remitos-internos.workers.dev">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pichincha-afuera.mescudero-remitos-internos.workers.dev https://dolarapi.com https://mescudero.goatcounter.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- /solo-web -->
@@ -36,13 +37,13 @@
 <meta name="twitter:image" content="https://pichinchadeldia.com.ar/img/og.png">
 <script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+" crossorigin="anonymous"></script>
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:100%}[hidden]{display:none!important}</style>
+body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}@media (prefers-color-scheme:dark){:root{color-scheme:dark}body{background:#0e1117}}img{max-width:100%}[hidden]{display:none!important}</style>
 <!-- /solo-web -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=optional" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Mono:wght@400;500&display=optional"></noscript>
 <link rel="stylesheet" href="css/sitio.css">
 
 <svg style="display:none" aria-hidden="true">
@@ -57,6 +58,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-balanza" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M4 8h16M7 8l-3 6h6zM17 8l-3 6h6z"/></symbol>
   <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></symbol>
+  <symbol id="i-filtro" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
   <symbol id="i-subir" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
   <symbol id="i-flechaAbajo" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
   <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 3c3 4 6 5.5 6 9a6 6 0 0 1-12 0c0-2 1-3.5 2.5-5 .3 1.2 1 2 2 2.3C10 7.5 10.5 5 12 3z"/></symbol>
@@ -83,7 +85,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <main id="contenido" class="wrap">
   <p class="meta" id="sello">Precios verificados en cada sitio</p>
-  <h1><a class="marca-sitio" href="./" title="Ir a la portada">La Pichincha</a></h1>
+  <h1><a class="marca-sitio" href="./" title="Ir a la portada">La Pichincha<span class="solo-lector"> · Comparador de precios de hardware en Argentina</span></a></h1>
   <p class="sub"><strong>Hardware en Argentina. No lo más barato: lo que más rinde.</strong><span class="largo"> Buscá cualquier producto y armamos la comparativa, dónde conviene comprarlo y el veredicto con los precios de hoy; cada precio te lleva al producto en la web de la tienda.</span></p>
 
   <div class="tabs">
@@ -120,7 +122,7 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}img{max-width:10
 <script>
 /* === DATOS: generado por actualizar.py, no editar a mano === */
 const DATOS = {
- "actualizado": "2026-10-28",
+ "actualizado": "2026-11-04",
  "envio": {
   "cp": "5501",
   "zona": "Mendoza",
@@ -188,7 +190,7 @@ const DATOS = {
    "precio": 223600,
    "precio_lista": 248444,
    "sin_impuestos": 202353,
-   "stock": "en stock",
+   "stock": "sin stock",
    "titular": "El mejor equilibrio de marca, latencia y garantía",
    "specs": {
     "Timings": "16-20-20",
@@ -215,7 +217,8 @@ const DATOS = {
    ],
    "contras": [
     "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
-   ]
+   ],
+   "falla_desde": "2026-11-02"
   },
   {
    "id": "kingston-kvr",
@@ -276,9 +279,9 @@ const DATOS = {
    },
    "url": "https://compragamer.com/producto/Memoria_Corsair_DDR4_16GB_3200MHz_Vengeance_LPX_Black_CL16_15560",
    "img": "img/corsair-lpx.jpg",
-   "precio": 262370,
-   "precio_lista": 291522,
-   "sin_impuestos": 237439,
+   "precio": 251475,
+   "precio_lista": 279417,
+   "sin_impuestos": 227579,
    "stock": "en stock",
    "titular": "La marca más probada, por treinta mil pesos más",
    "specs": {
@@ -441,9 +444,9 @@ const DATOS = {
    },
    "url": "https://compragamer.com/producto/Webcam_Logitech_Brio_4K_UHD_RightLight_3_HDR_1080p_60FPS_720_90FPS_USB_C_20150",
    "img": "img/brio4k.jpg",
-   "precio": 261950,
-   "precio_lista": 291056,
-   "sin_impuestos": 216488,
+   "precio": 263600,
+   "precio_lista": 292889,
+   "sin_impuestos": 217851,
    "stock": "en stock",
    "titular": "Lo que no compraría",
    "specs": {
@@ -674,6 +677,41 @@ const DATOS = {
      "ahora": 262370
     }
    ]
+  },
+  {
+   "fecha": "2026-11-02",
+   "cambios": [
+    {
+     "id": "corsair-lpx",
+     "antes": 262370,
+     "ahora": 247791
+    }
+   ]
+  },
+  {
+   "fecha": "2026-11-03",
+   "cambios": [
+    {
+     "id": "corsair-lpx",
+     "antes": 247791,
+     "ahora": 249378
+    },
+    {
+     "id": "brio4k",
+     "antes": 261950,
+     "ahora": 263600
+    }
+   ]
+  },
+  {
+   "fecha": "2026-11-04",
+   "cambios": [
+    {
+     "id": "corsair-lpx",
+     "antes": 249378,
+     "ahora": 251475
+    }
+   ]
   }
  ],
  "veredicto": [
@@ -700,7 +738,7 @@ const DATOS = {
   "kingston_retiro": 299249,
   "combo_gc": 460888,
   "combo_partido": 366238,
-  "ram_mas_barata": "adata-d35",
+  "ram_mas_barata": "corsair-lpx",
   "webcam_mas_barata": "brio100"
  },
  "marcas": {
@@ -790,7 +828,7 @@ const DATOS = {
    "montech"
   ]
  },
- "verificado": "2026-10-28T12:15-03:00"
+ "verificado": "2026-11-04T12:46-03:00"
 };
 /* === FIN DATOS === */
 </script>

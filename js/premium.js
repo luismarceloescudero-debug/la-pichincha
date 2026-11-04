@@ -22,7 +22,8 @@
   const CHIP_ALTO = /snapdragon\s?8\s?(?:gen|elite)|dimensity\s?9\d{3}|tensor\s?g[3-9]|exynos\s?2[4-9]\d{2}/i;
 
   const nivelCpu = n => { let m;
-    if ((m = n.match(/\bcore\s?ultra\s?([3579])/i)) || (m = n.match(/\bryzen\s?(?:ai\s?)?([3579])\b/i)) || (m = n.match(/\b[ir]([3579])[-\s]?\d{4,5}[a-z]{0,2}\b/i))) return +m[1];
+    if ((m = n.match(/\bcore\s?ultra\s?([3579])/i)) || (m = n.match(/\bryzen\s?(?:ai\s?)?([3579])\b/i)) || (m = n.match(/\b[ir]([3579])[-\s]?\d{4,5}[a-z]{0,2}\b/i))
+      || (m = n.match(/\b[ur]([3579])-\d{3}[a-z]{0,2}\b/i))) return +m[1];   // «U7-366H» (Core Ultra 7) y «R7-250» (Ryzen 7), como los escribe OnCity
     if (/\bm[1-9]\s?(?:pro|max|ultra)\b/i.test(n)) return 9;
     return /\bm[1-9]\b/i.test(n) ? 5 : 0; };
 
@@ -49,10 +50,12 @@
       if (rom >= 2000) add(2, "almacenamiento de 2 TB", 1); else if (rom >= 1000) add(1, "almacenamiento de 1 TB", 1);
       const cpu = nivelCpu(n);
       if (cpu >= 9) add(3, "procesador de punta"); else if (cpu >= 7) add(1, "procesador de gama alta");
-      if (/ryzen\s?ai|core\s?ultra|snapdragon\s?x/i.test(n)) add(1, "procesador con NPU");
+      if (/ryzen\s?ai|core\s?ultra|snapdragon\s?x|\bu[3579]-\d{3}[a-z]{0,2}\b/i.test(n)) add(1, "procesador con NPU");
       if ((m = n.match(/\brtx\s?(\d{4})/i)) && +m[1] >= 4000) {
         if (+m[1] % 1000 >= 70) add(3, `placa RTX ${m[1]}`); else if (+m[1] % 1000 >= 60) add(2, `placa RTX ${m[1]}`);
       }
+      // las placas de estacion de trabajo (RTX 500 a 5000 Ada/Blackwell, en una ZBook o una ThinkPad P): certificadas para uso profesional
+      if ((m = n.match(/\brtx\s?(?:pro\s?)?([1-5]?000|500)(?:\s?ada|\s?blackwell)?\b/i))) add(2, `placa profesional RTX ${m[1]}`);
       if (oled) add(2, "pantalla OLED"); else if (/\b(?:2\.?5k|qhd|wqxga|2k|3k|4k|wuxga)\b/i.test(n)) add(1, "resolución alta");
       if (hz >= 120) add(1, `pantalla de ${hz} Hz`);
       if (nuevo) add(2, "última generación");
@@ -65,6 +68,12 @@
       if (hz >= 240) add(2, `${hz} Hz`); else if (hz >= 165) add(1, `${hz} Hz`);
       if (/hdr\s?(?:600|1000|1400)|displayhdr\s?(?:600|1000|1400)/i.test(n)) add(1, "HDR real");
       if (/thunderbolt/i.test(n)) add(1, "conectividad reciente");
+    } else if (categoria === "componente" && /^\s*fuente\b|\bpsu\b|power supply/i.test(n)) {
+      // Una fuente (056): 750 W Gold es la gama media de hoy y casi todas traen el conector PCIe 5.1 (ATX 3.1). Lo premium es la
+      // eficiencia (Platinum, Titanium); la potencia grande suma poco. Antes salian premium el 44 % de las fuentes del indice.
+      if (gama && gama.nivel === "alta") add(1, "gama alta de su tipo");
+      if ((m = n.match(/\b(platinum|titanium)\b/i))) add(3, `certificación ${m[1][0].toUpperCase()}${m[1].slice(1).toLowerCase()}`);
+      if ((m = n.match(/\b(\d{4})\s?w\b/i)) && +m[1] >= 1000) add(1, `${m[1]} W`);
     } else if (categoria === "componente") {
       if (gama && gama.nivel === "alta") add(3, "gama alta de su tipo");
       if ((m = n.match(/\brtx\s?(\d{4})/i))) {

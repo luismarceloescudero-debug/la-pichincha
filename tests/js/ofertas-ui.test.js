@@ -112,3 +112,74 @@ test("el detalle cerrado no se lee y el foco del botón resalta la tarjeta", () 
   assert.match(css, /\.ocard:has\(\.o-abrir:focus-visible\)/);
   assert.match(leer("js/indice-ofertas.js"), /btn\.setAttribute\("aria-pressed", String\(ESTRELLAS\.has\(u\)\)\)/);
 });
+
+test("jerarquia (spec 055): lo mejor del dia es un bloque solido, lo siguiente pesa mas y el resto queda quieto, con pisos", () => {
+  const { correr } = pagina([]);
+  // Un dia flojo (todo por debajo de los pisos): nada se disfraza de estrella.
+  assert.strictEqual(correr(`cortesDe([0.05, 0.08, 0.1].map(off => ({ off }))); nivelOferta(10)`), "normal");
+  // Con descuentos grandes, las ~6 mejores son heroes y las del 20 % siguiente llevan el precio grande.
+  correr(`CORTES = cortesDe(Array.from({ length: 30 }, (_, i) => ({ off: (50 - i) / 100 })))`);
+  assert.strictEqual(correr("nivelOferta(50)"), "heroe");
+  assert.strictEqual(correr("nivelOferta(45)"), "heroe");    // la 6.a mejor es 45 %: el corte de heroe
+  assert.strictEqual(correr("nivelOferta(44)"), "fuerte");   // y siguen 4 con el precio grande
+  assert.strictEqual(correr("nivelOferta(20)"), "normal");
+  const niveles = correr("[50, 49, 48, 47, 46, 45, 44, 43, 30, 21].map(nivelOferta).join()");
+  assert.strictEqual(niveles.split("heroe").length - 1, 6);
+});
+
+test("jerarquia (spec 055): entre tramos de 8 tarjetas va una banda de color con el rango de lo que sigue, sin tocar los indices", () => {
+  const { correr, els } = pagina(Array.from({ length: 10 }, (_, i) => fila(`Memoria Kingston Fury DDR5 ${16 + i}GB 6000MHz`, 100000 - i * 3000, 150000)));
+  correr("pintarOfertas()");
+  const html = els["#resOf"].innerHTML;
+  assert.strictEqual((html.match(/class="o-banda/g) || []).length, 1);   // 10 tarjetas: una banda, antes de la novena
+  assert.match(html, /Ahora: (de \d+% a \d+%|\d+%) de descuento/);
+  assert.match(html, /aria-hidden="true"><b>/);                          // decorativa: el dato esta en cada tarjeta
+  assert.strictEqual((html.match(/data-comparar-oferta="\d+"/g) || []).length, 10);
+  assert.match(html, /data-comparar-oferta="9"/);
+  assert.match(html, /class="ocard[^"]* n-(heroe|fuerte|normal)/);
+});
+
+test("orden (056): «Mayor descuento» ordena toda la lista por descuento, sin volver a empezar con las rebajas publicadas", () => {
+  const pub = (nombre, precio, lista) => { const f = fila(nombre, precio, 0); f[5] = lista; return f; };
+  const { correr } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 97000, 100000),            // baja propia de 3 %
+                             fila("Celular Motorola Edge 50 8GB 256GB", 450000, 500000),                  // baja propia de 10 %
+                             pub("Celular Motorola G85 8GB 256GB", 300000, 400000)]);                     // publicada de 25 %
+  assert.deepEqual(JSON.parse(correr("JSON.stringify(ofertasFiltradas().map(o => Math.round(o.off * 100)))")), [25, 10]);
+  correr("OF.orden = 'precio'");
+  assert.deepEqual(JSON.parse(correr("JSON.stringify(ofertasFiltradas().map(o => o.f[1]))")), [300000, 450000]);
+});
+
+test("diseno D + F3: cada tarjeta lleva su tienda para la paleta, y los filtros van en un «Filtrar y ordenar» plegable", () => {
+  const { correr, els } = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
+  correr("pintarOfertas()");
+  assert.match(els["#resOf"].innerHTML, /<article class="ocard[^"]*" style="[^"]*" data-tienda="cg"/);
+  assert.match(els["#resOf"].innerHTML, /<details class="of-plegable"[^>]*><summary>.*Filtrar y ordenar<\/summary>/);
+  // en escritorio (matchMedia = true) arrancan abiertos; en el celular, cerrados
+  assert.match(els["#resOf"].innerHTML, /<details class="of-plegable" open>/);
+});
+
+test("diseno D + F3: las tres familias de letra se piden en index.html y el CSS las usa", () => {
+  for (const f of ["Barlow+Condensed", "Bricolage+Grotesque", "DM+Mono"]) assert.ok(HTML.includes(f), f);
+  const css = leer("css/sitio.css");
+  for (const f of ["Barlow Condensed", "Bricolage Grotesque", "DM Mono"]) assert.ok(css.includes(f), f);
+});
+
+test("spec 057: la foto de la tarjeta sale de imagenes.json (el indice del sitio ya no la trae) y, sin ella, del propio indice", () => {
+  const f = fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000);
+  const { correr, els } = pagina([f]);
+  correr(`IMAGENES = { ${JSON.stringify(f[2])}: "https://img.test/ram.jpg" }`);
+  correr("pintarOfertas()");
+  assert.match(els["#resOf"].innerHTML, /background-image:url\(&quot;https:\/\/img\.test\/ram\.jpg&quot;\)/);
+  // sin imagenes.json ni foto en el indice: el icono del tipo, nunca una tarjeta rota
+  const sinFoto = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
+  sinFoto.correr("IMAGENES = {}");
+  sinFoto.correr("pintarOfertas()");
+  assert.match(sinFoto.els["#resOf"].innerHTML, /o-sin-img/);
+  // y con la foto en el propio indice (fixtures, indice completo) se usa esa
+  const conFoto = fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000);
+  conFoto[7] = "https://img.test/propia.jpg";
+  const p = pagina([conFoto]);
+  p.correr("IMAGENES = {}");
+  p.correr("pintarOfertas()");
+  assert.match(p.els["#resOf"].innerHTML, /propia\.jpg/);
+});

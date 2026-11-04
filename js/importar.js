@@ -401,7 +401,7 @@
   function pegarLinkHtml() {
     return `<div class="pegar-link">
         <h4>¿Ya lo encontraste? Pegá el link</h4>
-        <div class="pl-monedas" aria-live="polite"></div>
+        <div class="pl-monedas"></div>
         <label for="pl-link">Link del producto en Amazon, Tiendamia, Loquieroacá o eBay</label>
         <input id="pl-link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://tiendamia.com.ar/p/amz/…" aria-describedby="pl-ayuda">
         <small id="pl-ayuda" class="sub chico">De Tiendamia y Loquieroacá leemos el precio final de la página que pegás; de Amazon y eBay, solo por su API cuando esté activa.</small>

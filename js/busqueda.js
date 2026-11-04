@@ -22,7 +22,7 @@ function cargarGanadores() {
 }
 function ctxModos() {
   if (!CTX_MODOS || CTX_MODOS.idx !== IDX || CTX_MODOS.ganadores !== GANADORES)
-    CTX_MODOS = { idx: IDX, ganadores: GANADORES, ctx: Modos.preparar(IDX, nivelMarca, () => ofertasListas(), GANADORES) };
+    CTX_MODOS = { idx: IDX, ganadores: GANADORES, ctx: Modos.preparar(IDX, nivelMarca, () => ofertasListas(), GANADORES, () => !!OFERTAS) };
   return CTX_MODOS.ctx;
 }
 
@@ -71,8 +71,8 @@ function filtrosHtml() {
     `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${FILTROS.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
   return `<div class="of-fila" role="group" aria-label="Tienda"><span class="of-et" aria-hidden="true">Tienda</span>${tiendas || '<span class="sub">cargando…</span>'}</div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
-      <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo"></label>
-      <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo"></label></div>
+      <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo…"></label>
+      <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo…"></label></div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Gama</span>
       <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
     <div class="of-fila" role="group" aria-label="Sellos"><span class="of-et" aria-hidden="true">Sellos</span>
@@ -80,7 +80,7 @@ function filtrosHtml() {
         `<button class="of-chip" data-filtro="sello" data-valor="${l}" aria-pressed="${FILTROS.sellos.includes(l)}">${t}</button>`).join("")}
       <span class="sub chico">Solo ComparaYa y sus comercios informan envío y cuotas: un aviso sin sello no quiere decir que no lo tenga.</span></div>
     <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
-      <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil"></div>
+      <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil…"></div>
     <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
 }
 
@@ -298,9 +298,9 @@ function pintarResultados(q) {
     return `<a class="fila c-${t.color}${i === 0 ? " top" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
       <span class="nom">${Titulo.html(f[0], esc)}${marcas.length ? `<span class="sellos">${marcas.join("")}</span>` : ""}${quieto ? `<span class="precio-hist">${esc(quieto)}</span>` : ""}</span>
       <span class="tie">${sello}</span>
-      <span class="pre">${pesos(f[1])}</span>
+      <span class="pre">${pesos(f[1])}</span><span class="solo-lector"> (se abre en otra pestaña)</span>
     </a>` + (otras.length || compara ? `<div class="mismo">${otras.length ? `<span>También en</span>${otras.map(o =>
-      `<a href="${hrefTienda(o[2])}" target="_blank" rel="${relTienda(o[2])}">${esc(comercioDe(o))} ${pesos(o[1])}</a>${selloAfiliado(o[2])}`).join("")}` : ""}${compara}</div>` : "")
+      `<a href="${hrefTienda(o[2])}" target="_blank" rel="${relTienda(o[2])}">${esc(comercioDe(o))} ${pesos(o[1])}<span class="solo-lector"> (se abre en otra pestaña)</span></a>${selloAfiliado(o[2])}`).join("")}` : ""}${compara}</div>` : "")
       + historialHtml(f);
   }).join("");
 }
@@ -338,7 +338,7 @@ function vistaBuscar() {
 
   return `<div class="panel"><div class="panel-head"><h2>${icono("lupa")} Buscar en las ${IDX ? Object.keys(IDX.tiendas).length : 13} fuentes</h2>
     <p class="sub">Un solo cuadro sobre los catálogos de 12 tiendas de hardware (CompraGamer, Gaming City, Mexx, FullH4rd, Venex, Maximus, Katech, Max Tecno, The Gamer Shop, SCP Hardstore, Click Gaming y GoldenTech), más <strong>ComparaYa</strong> como segunda opinión, que agrega otros comercios como Mercado Libre, Frávega y OnCity. Los resultados se ven en tres modos (Recomendación, Súper Oferta y Primera Línea) y se ordenan por precio, novedades o gama premium; con ellos la app arma la <b>comparativa</b>, el <b>ranking de comercios</b> y el <b>veredicto</b> de lo que busques.</p></div>
-    <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
+    <div class="buscador">${icono("lupa")}<input type="search" id="q" value="${esc(CONSULTA)}" aria-label="Buscar productos" placeholder="Buscá lo que sea: ssd 1tb, ryzen 5, monitor 27…" autocomplete="off" spellcheck="false"></div>
     <div class="historial" id="hist"></div>
     <div class="sugeridas">${sugeridas().map(x => `<button class="sug">${esc(x)}</button>`).join("")}</div>
     ${ordenesHtml()}

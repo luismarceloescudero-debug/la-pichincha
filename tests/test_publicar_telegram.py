@@ -23,7 +23,8 @@ class Mensaje(unittest.TestCase):
         texto = telegram.mensaje(OFERTAS)
         self.assertIn("<b>Pichinchas del día</b>", texto)
         self.assertIn("precios del 09/10 08:12", texto)
-        self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>: $90.000 (−25%) en CompraGamer', texto)
+        self.assertIn('<b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', texto)
+        self.assertIn("<b>$90.000</b>  ·  <b>−25%</b>\nen CompraGamer", texto)
         self.assertIn('<a href="https://ejemplo.test/la-pichincha/">La Pichincha</a>', texto)
         self.assertIn("Verificá en la tienda antes de comprar", texto)
 
@@ -38,8 +39,8 @@ class Mensaje(unittest.TestCase):
         legible = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "titulo": "KINGSTON NV2", "chips": ["1 TB", "NVMe"], "emoji": "💽"},
                                           {**OFERTAS["ofertas"][1], "titulo": "<B>FURY</B>", "chips": ["16 GB"], "emoji": "💾"}]}
         texto = telegram.mensaje(legible)
-        self.assertIn('1. 💽 <a href="https://t.test/ssd">KINGSTON NV2 · 1 TB · NVMe</a>: $90.000 (−25%) en CompraGamer', texto)
-        self.assertIn("&lt;B&gt;FURY&lt;/B&gt; · 16 GB", texto)
+        self.assertIn('💽 <b><a href="https://t.test/ssd">KINGSTON NV2</a></b>\n<i>1 TB · NVMe</i>', texto)
+        self.assertIn("&lt;B&gt;FURY&lt;/B&gt;</a>\n<i>16 GB</i>", texto)
         self.assertNotIn("SSD Kingston 1TB", texto)
 
     def test_si_solo_hay_fecha_sin_hora_dice_la_fecha(self):
@@ -66,16 +67,45 @@ class Mensaje(unittest.TestCase):
         datos = {**OFERTAS, "ofertas": [{"nombre": "Router ASUS RT-AX52", "precio": 66700, "antes": 88000, "descuento": 24,
                                          "comercio": "The Gamer Shop", "url": "https://t.test/r", "tipo": "modelo",
                                          "contra": "bajo la mediana de otras 3 tiendas"}]}
-        self.assertIn("$66.700 (−24% bajo la mediana de otras 3 tiendas) en The Gamer Shop", telegram.mensaje(datos))
+        self.assertIn("<b>$66.700</b>  ·  <b>−24%</b> bajo la mediana de otras 3 tiendas\nen The Gamer Shop", telegram.mensaje(datos))
 
-    def test_sin_ofertas_no_hay_mensaje(self):
-        self.assertIsNone(telegram.mensaje({**OFERTAS, "ofertas": []}))
+    def test_la_de_mayor_descuento_va_destacada_y_el_resto_en_citas(self):
+        # spec 055: no todo pesa igual. La mejor del dia entre dos barras de color y el resto compacto, en <blockquote>.
+        texto = telegram.mensaje(OFERTAS)
+        self.assertIn("LA MEJOR DEL DÍA", texto)
+        self.assertEqual(texto.count(telegram.BARRA), 2)
+        heroe, resto = texto.split(telegram.BARRA)[1], texto.split(telegram.BARRA)[2]
+        self.assertIn("SSD Kingston 1TB", heroe)
+        self.assertNotIn("Fury", heroe)
+        self.assertIn("<blockquote>", resto)
+        self.assertIn("⚡ <b>−20%</b>", resto)
+
+    def test_sin_ofertas_el_mensaje_sale_igual_con_el_enlace_al_sitio(self):
+        # Decision del dueno (04/11): que haya o no rebajas reales, la publicacion sale.
+        texto = telegram.mensaje({**OFERTAS, "ofertas": []})
+        self.assertIn("Hoy no hay bajas para destacar", texto)
+        self.assertIn('<a href="https://ejemplo.test/la-pichincha/">La Pichincha</a>', texto)
+
+    def test_una_publicacion_a_precio_de_siempre_muestra_el_precio_sin_porcentaje(self):
+        plano = {"nombre": "Monitor AOC 24B2XH", "precio": 149999, "comercio": "Max Tecno", "url": "https://t.test/aoc",
+                 "sinRebaja": True}
+        texto = telegram.mensaje({**OFERTAS, "ofertas": [plano]})
+        self.assertIn("<b>$149.999</b>", texto)
+        self.assertNotIn("−0%", texto)
+        self.assertNotIn("%", texto.split("Verificá")[0].split("Pichinchas del día")[1])
 
     def test_no_pasa_el_limite_de_telegram(self):
         muchas = [{**OFERTAS["ofertas"][0], "nombre": "X" * 300, "url": f"https://t.test/{i}"} for i in range(40)]
         texto = telegram.mensaje({**OFERTAS, "ofertas": muchas})
         self.assertLessEqual(len(texto), 4096)
         self.assertIn("La Pichincha", texto)
+
+
+def respuesta(message_id):
+    """Lo que devuelve urlopen: la respuesta de Telegram con el mensaje que salio."""
+    r = mock.MagicMock()
+    r.__enter__.return_value.read.return_value = json.dumps({"ok": True, "result": {"message_id": message_id}}).encode()
+    return mock.MagicMock(return_value=r)
 
 
 class Publicacion(unittest.TestCase):
@@ -119,10 +149,61 @@ class Publicacion(unittest.TestCase):
     def test_si_telegram_falla_la_corrida_sigue_y_el_token_no_se_imprime(self):
         def falla(*a, **k):
             raise urllib.error.URLError("sin red")
-        codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, falla)
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, falla)
         self.assertEqual(codigo, 0)
         self.assertIn("::warning::", texto)
         self.assertNotIn("123:ABC", texto)
+
+    def test_una_falla_de_red_pasajera_se_reintenta_y_el_mensaje_sale(self):
+        # La corrida manual del 04/11 perdio el mensaje por un URLError suelto, sin reintento.
+        bien = respuesta(7)
+        intentos = []
+        def a_la_segunda(pedido, timeout=None):
+            intentos.append(pedido)
+            if len(intentos) == 1:
+                raise urllib.error.URLError(OSError("Temporary failure in name resolution"))
+            return bien(pedido, timeout=timeout)
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, a_la_segunda)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 2)
+        self.assertIn("Publicado en Telegram", texto)
+        self.assertNotIn("123:ABC", texto)
+
+    def test_si_la_red_sigue_caida_avisa_el_motivo_tras_los_reintentos(self):
+        intentos = []
+        def siempre(pedido, timeout=None):
+            intentos.append(pedido)
+            raise urllib.error.URLError(OSError("Network is unreachable 123:ABC"))
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, siempre)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 3)
+        self.assertIn("Network is unreachable", texto)
+        self.assertIn("3 intentos", texto)
+        self.assertNotIn("123:ABC", texto)
+
+    def test_un_corte_por_tiempo_no_se_reintenta_para_no_duplicar_el_mensaje(self):
+        # Si se corto esperando la respuesta, Telegram pudo haberlo publicado: reintentar lo duplicaria.
+        intentos = []
+        def lento(pedido, timeout=None):
+            intentos.append(pedido)
+            raise TimeoutError("timed out")
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, lento)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 1)
+        self.assertIn("::warning::", texto)
+
+    def test_un_rechazo_de_telegram_no_se_reintenta(self):
+        intentos = []
+        def rechazo(pedido, timeout=None):
+            intentos.append(pedido)
+            raise urllib.error.HTTPError(pedido.full_url, 400, "Bad Request", {}, io.BytesIO(b'{"description":"Bad"}'))
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, rechazo)
+        self.assertEqual(len(intentos), 1)
 
     def test_un_error_de_telegram_muestra_codigo_y_motivo_sin_el_token(self):
         def falla(pedido, timeout=None):
@@ -134,12 +215,15 @@ class Publicacion(unittest.TestCase):
         self.assertIn("bot is not a member", texto)
         self.assertNotIn("123:ABC", texto)
 
-    def test_sin_ofertas_no_manda_nada(self):
+    def test_sin_ofertas_manda_el_mensaje_que_avisa_que_no_hay_bajas(self):
+        # Antes no mandaba nada; el dueno pidio que la publicacion salga igual (04/11).
         self.ruta.write_text(json.dumps({**OFERTAS, "ofertas": []}), encoding="utf-8")
-        abrir = mock.Mock()
-        codigo, _ = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
+        abrir = respuesta(77)
+        codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
         self.assertEqual(codigo, 0)
-        abrir.assert_not_called()
+        enviado = json.loads(abrir.call_args[0][0].data.decode("utf-8"))
+        self.assertIn("Hoy no hay bajas para destacar", enviado["text"])
+        self.assertIn("Publicado en Telegram", texto)
 
     def test_sin_archivo_de_ofertas_no_falla(self):
         self.ruta.unlink()
@@ -147,13 +231,6 @@ class Publicacion(unittest.TestCase):
         codigo, _ = self.correr({"TELEGRAM_BOT_TOKEN": "t", "TELEGRAM_CHAT_ID": "c"}, abrir)
         self.assertEqual(codigo, 0)
         abrir.assert_not_called()
-
-
-def respuesta(message_id):
-    """Lo que devuelve urlopen: la respuesta de Telegram con el mensaje que salio."""
-    r = mock.MagicMock()
-    r.__enter__.return_value.read.return_value = json.dumps({"ok": True, "result": {"message_id": message_id}}).encode()
-    return mock.MagicMock(return_value=r)
 
 
 class UnMensajePorIndice(unittest.TestCase):
@@ -257,10 +334,10 @@ if __name__ == "__main__":
 class Categoria(unittest.TestCase):
     def test_la_linea_dice_la_categoria_cuando_el_dato_la_trae(self):
         datos = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "categoria": "Notebook"}]}
-        self.assertIn('1. <i>Notebook</i> · <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(datos))
+        self.assertIn('<i>Notebook</i> · <b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', telegram.mensaje(datos))
 
     def test_sin_categoria_la_linea_queda_como_antes(self):
-        self.assertIn('1. <a href="https://t.test/ssd">SSD Kingston 1TB</a>', telegram.mensaje(OFERTAS))
+        self.assertIn('<b><a href="https://t.test/ssd">SSD Kingston 1TB</a></b>', telegram.mensaje(OFERTAS))
 
 
 class TitulosLargos(unittest.TestCase):

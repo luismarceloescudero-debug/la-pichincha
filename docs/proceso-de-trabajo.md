@@ -49,6 +49,8 @@ No se aplica siempre la misma cadena: se elige **la mas chica que alcance** y se
 | Rendimiento | `performance-optimization` | `/webperf`, Lighthouse de la CI |
 | SEO de las paginas | `seo-audit`, `schema`, `programmatic-seo`, `site-architecture` | |
 | Calidad como contrato | `constraint-driven-development` | `CONSTRAINTS.md` |
+| Cambio de reglas de ofertas, categorias, titulos o premium | `/medir-indice` (antes del PR: numeros contra el indice publicado y contra `main`) | `superpowers:test-driven-development` |
+| Cerrar un PR | `/cerrar-pr N` (solo a pedido: espera la CI sin tuberia, rebase, limpieza, `git pull --ff-only`) | |
 | Cambio chico (texto, doc, correccion de una linea) | ninguna cadena: editar, correr tests, PR | |
 | Terminar | `superpowers:verification-before-completion` | `git-workflow-and-versioning`, `documentation-and-adrs` |
 

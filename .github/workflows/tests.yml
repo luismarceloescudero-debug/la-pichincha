@@ -64,7 +64,7 @@ jobs:
 
       - name: Cache de los navegadores
         id: navegadores
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
@@ -87,7 +87,7 @@ jobs:
       # El reporte HTML y, de las pruebas que fallan, capturas y trazas (test-results).
       - name: Guardar el reporte y las capturas
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-reporte
           path: |
@@ -146,7 +146,7 @@ jobs:
       # Los informes completos, para diagnosticar una medicion del runner sin repetirla.
       - name: Guardar los informes de Lighthouse
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lighthouse
           path: lh-*.json

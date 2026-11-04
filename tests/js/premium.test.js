@@ -40,7 +40,8 @@ test("premium: monitores por panel, resolucion y refresco; componentes por su ga
   assert.equal(pt("Placa De Video Gigabyte GeForce RTX 5080 Windforce OC 16g Gddr7").premium, true);
   assert.equal(pt("Placa de video Asus GeForce RTX 3050 6GB").premium, false);
   assert.equal(pt("Procesador AMD Ryzen 9 9950X").premium, true);
-  assert.equal(pt("Fuente Corsair 750W 80 Plus Gold").premium, true);
+  assert.equal(pt("Fuente Corsair 750W 80 Plus Gold").premium, false);        // 056: 750 W Gold es la gama media de hoy
+  assert.equal(pt("Fuente Corsair 850W 80 Plus Platinum").premium, true);
 });
 
 test("premium: perifericos y otros no tienen puntaje y no entran", () => {
@@ -99,4 +100,29 @@ test("ganadores: el archivo real de datos/ganadores.json se lee y reconoce a su 
   const real = JSON.parse(require("node:fs").readFileSync(require("node:path").join(__dirname, "../../datos/ganadores.json"), "utf8"));
   assert.ok(real.ganadores.length >= 13);
   assert.ok(P.ganadorDe("Placa de Video Gigabyte GeForce RTX 5090 Aorus 32G", real));
+});
+
+/* Spec 056: el 31/10 la Cooler Master MWE Gold V3 y la ASUS Prime 750W Gold (gama media) salian premium por «gama alta de su
+   tipo» + «PCIe 5.0» (44 % de las fuentes del indice); la HP ZBook de 48 GB con RTX 500 no sumaba nada. */
+test("premium (056): una fuente 750 W Gold con PCIe 5.1 es gama media, no premium; una Platinum o Titanium si", () => {
+  const ref = C.referencia([]);
+  const p = n => P.puntaje(n, ref, C.evaluar(n, ref));
+  assert.equal(p("Fuente Cooler Master 750W 80 Plus Gold Full Modular MWE V3 ATX 3.1 PCIe 5.1").premium, false);
+  assert.equal(p("Fuente ASUS PRIME 750W 80 Plus Gold AP-750G Full Modular ATX 3.1 PCIe 5.1").premium, false);
+  assert.ok(!p("Fuente ASUS PRIME 750W 80 Plus Gold AP-750G Full Modular ATX 3.1 PCIe 5.1").senales.includes("PCIe 5.0"));
+  assert.equal(p("Fuente Corsair HX1000i 1000W 80 Plus Platinum Full Modular ATX 3.1").premium, true);
+  assert.equal(p("Fuente Seasonic Prime TX-850 850W 80 Plus Titanium Modular").premium, true);
+  // un SSD PCIe 5 sigue sumando «PCIe 5.0»
+  assert.ok(p("SSD Samsung 9100 Pro 2TB NVMe PCIe 5.0").senales.includes("PCIe 5.0"));
+});
+
+test("premium (056): la HP ZBook con Core Ultra 7 escrito «U7-366H» y RTX 500 profesional es premium", () => {
+  const ref = C.referencia([]);
+  const n = "Notebook HP 16 U7-366H 48GB 1TB RTX500 6GB ZBOOK XG2i W11P", r = P.puntaje(n, ref, C.evaluar(n, ref));
+  assert.equal(r.premium, true, r.senales.join(" · "));
+  assert.ok(r.senales.includes("procesador con NPU"));
+  assert.ok(r.senales.includes("placa profesional RTX 500"));
+  // una notebook de oficina con Core Ultra 5 escrito corto no llega
+  const o = "Notebook HP 14 U5-325 16GB SSD512GB FHD AI 4 G2i W11P";
+  assert.equal(P.puntaje(o, ref, C.evaluar(o, ref)).premium, false);
 });

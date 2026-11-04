@@ -849,3 +849,12 @@ class SinRepetirAgregador(unittest.TestCase):
         filas = [repetida, directa, otra, ml]
         self.assertEqual(indexar.sin_repetir_agregador(filas, {"comparaya"}), [directa, otra, ml])
         self.assertEqual(indexar.sin_repetir_agregador(filas, set()), filas)
+
+class PrecioDeRelleno(unittest.TestCase):
+    def test_los_precios_de_nueve_cifras_no_entran(self):
+        real = ["TV LG 97 OLED", 46000000, "https://t.test/tv", "oncity"]
+        relleno = ["Placa", 999999999, "https://t.test/relleno", "oncity"]
+        justo = ["Algo", 99999999, "https://t.test/justo", "oncity"]
+        self.assertEqual(indexar.sin_precio_de_relleno([real, relleno, justo]), [real, justo])
+        self.assertEqual(indexar.sin_precio_de_relleno([]), [])
+

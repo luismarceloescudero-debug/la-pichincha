@@ -392,7 +392,7 @@ test("cada pagina abre con «Saltar al contenido», que lleva al <main> (squirre
   for (const html of [G.renderPagina({ q: "ddr4 16gb", slug: "ddr4-16gb" }, analisis, ctx),
                       fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8")]) {
     const cuerpo = html.slice(html.indexOf("<body>"));
-    assert.match(cuerpo, /<a class="saltar" href="#contenido">Saltar al contenido<\/a>\n<main id="contenido"/);
+    assert.match(cuerpo, /<a class="saltar" href="#contenido">Saltar al contenido<\/a>\r?\n<main id="contenido"/);   // \r?: en Windows el checkout trae CRLF
     assert.ok(cuerpo.indexOf('class="saltar"') < cuerpo.search(/<(a|button|input)\b(?![^>]*class="saltar")/), "es lo primero que enfoca el teclado");
   }
 });
@@ -400,7 +400,7 @@ test("cada pagina abre con «Saltar al contenido», que lleva al <main> (squirre
 test("el titulo «La Pichincha» es un link a la portada (boton de home)", () => {
   const fs = require("node:fs"), path = require("node:path");
   const html = fs.readFileSync(path.join(__dirname, "../../index.html"), "utf8");
-  assert.match(html, /<h1><a class="marca-sitio" href="\.\/"[^>]*>La Pichincha<\/a><\/h1>/);
+  assert.match(html, /<h1><a class="marca-sitio" href="\.\/"[^>]*>La Pichincha(?:<span class="solo-lector">[^<]*<\/span>)?<\/a><\/h1>/);
 });
 
 test("las paginas de /precios/ llevan el codigo de afiliado en Mercado Libre, con rel=sponsored y el rotulo; las otras tiendas no", () => {

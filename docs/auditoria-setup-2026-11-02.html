@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es-AR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auditoría del setup de Claude Code (02/11/2026)</title>
+<style>
+:root{--bg:#f6f7f9;--fg:#1d2733;--card:#fff;--bd:#d5dbe2;--mut:#5a6672;--bar:#2f6f8f;--alta:#b3261e;--media:#a15c00;--baja:#2e6b3a}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--fg:#e6eaee;--card:#1d242b;--bd:#35404a;--mut:#9aa7b3;--bar:#5aa7c8;--alta:#ff8a80;--media:#ffc266;--baja:#8fd19e}}
+body{margin:0;background:var(--bg);color:var(--fg);font:20px/1.55 system-ui,Segoe UI,sans-serif;padding:24px 16px}
+main{max-width:1100px;margin:auto}h1{font-size:2rem;margin:.2em 0}h2{margin-top:1.8em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px 20px;margin:12px 0}
+.nota{font-size:3rem;font-weight:700;color:var(--bar)}
+.fila{display:flex;align-items:center;gap:12px;margin:10px 0}.fila b{width:140px}
+.pista{flex:1;background:var(--bd);border-radius:8px;height:26px;overflow:hidden}.pista div{height:100%;background:var(--bar)}
+.fila span{width:60px;text-align:right}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:17px}
+th,td{border:1px solid var(--bd);padding:10px;vertical-align:top;text-align:left}th{background:var(--bg)}
+.p{font-weight:700;white-space:nowrap}.Alta{color:var(--alta)}.Media{color:var(--media)}.Baja{color:var(--baja)}
+code{font-size:.9em}.mut{color:var(--mut)}
+</style></head><body><main>
+<h1>Auditoría del setup de Claude Code</h1>
+<p class="mut">La Pichincha · 02/11/2026 · solo lectura · método: skill claude-automation-recommender</p>
+<div class="card"><div class="nota">7,5 / 10</div>
+<p>El setup propio es chico y sólido: dos hooks con tests, dos skills a medida y un CLAUDE.md corto. Cumple lo que promete.<br>
+Lo que falta es protección de lo irreversible (permisos, secretos, push a main) y que la continuidad no vive en el repo.<br>
+No repite la auditoría del 01/11: acá van solo hallazgos nuevos o que siguen abiertos.</p></div>
+
+<h2>Puntaje por área</h2>
+<div class="card">
+<div class="fila"><b>Hooks</b><div class="pista"><div style="width:75%"></div></div><span>7,5</span></div>
+<div class="fila"><b>Skills</b><div class="pista"><div style="width:80%"></div></div><span>8</span></div>
+<div class="fila"><b>MCP</b><div class="pista"><div style="width:40%"></div></div><span>4</span></div>
+<div class="fila"><b>Permisos</b><div class="pista"><div style="width:30%"></div></div><span>3</span></div>
+<div class="fila"><b>Documentación</b><div class="pista"><div style="width:85%"></div></div><span>8,5</span></div>
+</div>
+
+<h2>Lo que ya está bien</h2>
+<table><tr><th>Qué</th><th>Evidencia</th></tr>
+<tr><td>Freno a publicar sin OK del dueño</td><td><code>guardia.py</code> pide confirmación ante <code>gh workflow run</code>, <code>publicar_telegram.py</code> y las APIs de Telegram/Instagram.</td></tr>
+<tr><td>Commits sin tildes</td><td><code>guardia.py</code> los bloquea con "deny" y explica por qué.</td></tr>
+<tr><td>Archivos generados protegidos</td><td>Pide confirmación para <code>package-lock.json</code> y <code>_sitio/</code>; no frena <code>datos.json</code> (curado a mano).</td></tr>
+<tr><td>Test automático al editar</td><td><code>test_del_archivo.py</code> corre el test de <code>js/x.js</code> o <code>x.py</code>, con timeout y salida acotada a 40 líneas.</td></tr>
+<tr><td>Los hooks tienen tests</td><td><code>tests/test_hooks_claude.py</code> y <code>tests/js/guardia.test.js</code>.</td></tr>
+<tr><td>Skills a medida con buen control</td><td><code>cerrar-pr</code> es solo manual (<code>disable-model-invocation</code>); <code>medir-indice</code> trae su script <code>medir.js</code>.</td></tr>
+<tr><td>Documentación al día</td><td>CLAUDE.md de 28 líneas, sin duplicar el global; <code>docs/mapa.md</code> lista los hooks y skills.</td></tr>
+</table>
+
+<h2>Lo que falta o mejora</h2>
+<table><tr><th>Hallazgo</th><th>Por qué importa (simple)</th><th>Prioridad</th><th>Cómo arreglarlo</th></tr>
+<tr><td><code>.claude/settings.json</code> no tiene bloque <code>permissions</code> (ni allow, ni deny, ni ask).</td><td>Es como una casa sin cerraduras: todo depende de que cada vez alguien conteste "sí" o "no" a mano. Y si siempre se contesta "sí", nada frena nada.</td><td class="p Alta">Alta</td><td>Agregar <code>deny</code> para leer/editar <code>.env*</code> y <code>.dev.vars</code> del Worker, <code>ask</code> para <code>git push</code>, y <code>allow</code> para <code>node --test</code>, <code>python -m unittest</code> y <code>git status/diff/log</code>.</td></tr>
+<tr><td><code>guardia.py</code> no mira secretos ni <code>git push</code> a main, <code>--force</code> o <code>reset --hard</code>; solo publicación, tildes y archivos generados.</td><td>Hoy frena que se publique en Telegram por error, pero no que se borre historia o se suba una clave. Lo peor es justo lo que no se puede deshacer.</td><td class="p Alta">Alta</td><td>Sumar patrones en <code>decidir</code>: <code>git push</code> con <code>--force</code>/<code>-f</code> o hacia <code>main</code>, <code>reset --hard</code>; y en <code>decidir_archivo</code> rutas <code>.env</code> y <code>.dev.vars</code>. Agregar los casos a <code>test_hooks_claude.py</code>.</td></tr>
+<tr><td>La continuidad (<code>privado/continuidad.md</code>) sigue fuera del repo; no existe <code>docs/continuidad.md</code> (pendiente desde la auditoría del 01/11).</td><td>Si el trabajo sigue en otra máquina o en la nube, el modelo nuevo llega sin saber qué se venía haciendo y puede rehacer cosas.</td><td class="p Alta">Alta</td><td>Crear <code>docs/continuidad.md</code> (sin datos sensibles) y que CLAUDE.md apunte a él como respaldo.</td></tr>
+<tr><td>No hay <code>.mcp.json</code> en el repo.</td><td>Las herramientas (Playwright, Chrome DevTools) están solo en la PC de una persona; otra sesión o máquina no las tiene.</td><td class="p Media">Media</td><td>Commitear un <code>.mcp.json</code> mínimo con playwright (instalado con <code>npm -g</code> y <code>node</code>, no <code>npx</code>, por el timeout de 30 s).</td></tr>
+<tr><td>Los hooks de progreso viven en <code>settings.local.json</code> con rutas absolutas de <code>C:/Users/Usuario</code>; <code>launch.json</code> (ignorado) apunta al worktree <code>044-nombres-legibles</code>.</td><td>Si cambia la carpeta o la máquina, los hooks fallan en silencio y la vista previa apunta a algo que ya no existe.</td><td class="p Media">Media</td><td>Usar variables (<code>$HOME</code>) en esas rutas y borrar la entrada <code>web-044</code> de <code>launch.json</code>.</td></tr>
+<tr><td>Falta un hook que avise al terminar si quedaron cambios sin commitear (regla global de cierre).</td><td>La regla "nada queda sin commitear" depende de acordarse; un aviso automático no se olvida.</td><td class="p Media">Media</td><td>Hook <code>Stop</code> en <code>settings.json</code> que corra <code>git status --porcelain</code> y avise si hay algo.</td></tr>
+<tr><td><code>test_del_archivo.py</code> solo prueba <code>js/*.js</code> y <code>.py</code> de la raíz; un <code>tiendas.json</code> o <code>datos.json</code> roto no se detecta al editar.</td><td>Una coma de más rompe todo el sitio, y la CI se entera recién después de subir.</td><td class="p Media">Media</td><td>Ampliar el hook: si el archivo editado es un <code>*.json</code> de la raíz, hacer <code>json.load</code> y devolver código 2 si falla.</td></tr>
+<tr><td>Hay ~3.800 líneas de SKILL.md de terceros commiteadas (<code>speckit-*</code> x10, <code>reverse-engineer-anything</code>, <code>web-quality-audit</code>, <code>find-skills</code>, <code>code-review</code>, el propio recommender).</td><td>Sus descripciones se cargan en cada sesión y gastan contexto, aunque casi nunca se usen en este repo.</td><td class="p Baja">Baja</td><td>Dejar en el repo solo lo del proyecto (<code>cerrar-pr</code>, <code>medir-indice</code>, speckit) y pasar el resto a nivel usuario (<code>-g</code>).</td></tr>
+<tr><td>No hay subagentes (<code>.claude/agents/</code> no existe), aunque el Worker maneja los únicos secretos.</td><td>Una revisión de seguridad aparte del código del Worker detecta cosas que quien lo escribió ya no ve.</td><td class="p Baja">Baja</td><td>Crear <code>.claude/agents/security-reviewer.md</code> limitado a <code>worker/src</code> (ya recomendado el 01/11).</td></tr>
+</table>
+<p class="mut">Límites: solo lectura de configuración y código; no se midió cuánto contexto gastan realmente las skills ni se probó el hook con comandos reales. Si querés más recomendaciones de una categoría, pedilo.</p>
+</main></body></html>

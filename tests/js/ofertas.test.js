@@ -8,34 +8,34 @@ const fila = (nombre, precio, { lista = 0, antes = 0, sellos = "", url } = {}) =
   [nombre, precio, url || "https://t.test/" + encodeURIComponent(nombre), "cg", "", lista, antes, "", sellos, ""];
 
 test("una baja propia de al menos 3% y mil pesos es oferta propia", () => {
-  const idx = { productos: [fila("A", 9000, { antes: 10000 }), fila("B", 9900, { antes: 10000 }),
-                            fila("C", 99500, { antes: 100000 }), fila("D", 50000)] };
+  const idx = { productos: [fila("Tablet A", 9000, { antes: 10000 }), fila("Tablet B", 9900, { antes: 10000 }),
+                            fila("Tablet C", 99500, { antes: 100000 }), fila("Tablet D", 50000)] };
   const { propias, publicadas } = O.calcularOfertas(idx);
-  assert.deepEqual(propias.map(f => f[0]), ["A"]);          // B baja 1%, C baja 0,5%: no
+  assert.deepEqual(propias.map(f => f[0]), ["Tablet A"]);          // B baja 1%, C baja 0,5%: no
   assert.deepEqual(publicadas, []);
 });
 
 test("una rebaja publicada va entre 15% y 60% y desde 15.000 pesos; una propia no se repite como publicada", () => {
-  const idx = { productos: [fila("X", 20000, { lista: 30000 }), fila("Y", 20000, { lista: 21000 }),
-                            fila("Z", 10000, { lista: 20000 }), fila("W", 20000, { lista: 100000 }),
-                            fila("V", 20000, { lista: 30000, antes: 25000 })] };
+  const idx = { productos: [fila("Tablet X", 20000, { lista: 30000 }), fila("Tablet Y", 20000, { lista: 21000 }),
+                            fila("Tablet Z", 10000, { lista: 20000 }), fila("Tablet W", 20000, { lista: 100000 }),
+                            fila("Tablet V", 20000, { lista: 30000, antes: 25000 })] };
   const { propias, publicadas } = O.calcularOfertas(idx);
-  assert.deepEqual(publicadas.map(f => f[0]), ["X"]);       // Y poco, Z bajo el piso, W sospechosa
-  assert.deepEqual(propias.map(f => f[0]), ["V"]);
+  assert.deepEqual(publicadas.map(f => f[0]), ["Tablet X"]);       // Y poco, Z bajo el piso, W sospechosa
+  assert.deepEqual(propias.map(f => f[0]), ["Tablet V"]);
 });
 
 test("destacadas: primero las bajas propias, despues las publicadas, cada grupo por descuento", () => {
-  const idx = { productos: [fila("pub-20", 24000, { lista: 30000 }), fila("pub-40", 18000, { lista: 30000 }),
-                            fila("prop-10", 9000, { antes: 10000 }), fila("prop-30", 7000, { antes: 10000 })] };
-  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["prop-30", "prop-10", "pub-40", "pub-20"]);
+  const idx = { productos: [fila("Tablet pub-20", 24000, { lista: 30000 }), fila("Tablet pub-40", 18000, { lista: 30000 }),
+                            fila("Tablet prop-10", 9000, { antes: 10000 }), fila("Tablet prop-30", 7000, { antes: 10000 })] };
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Tablet prop-30", "Tablet prop-10", "Tablet pub-40", "Tablet pub-20"]);
   assert.deepEqual(O.destacadas(idx).map(o => o.tipo), ["propia", "propia", "publicada", "publicada"]);
   assert.equal(O.destacadas(idx, 2).length, 2);
 });
 
 test("destacadas deja afuera los enlaces que no son http(s)", () => {
-  const idx = { productos: [fila("js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
-                            fila("ok", 8000, { antes: 10000 })] };
-  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["ok"]);
+  const idx = { productos: [fila("Tablet js", 7000, { antes: 10000, url: "javascript:alert(1)" }),
+                            fila("Tablet ok", 8000, { antes: 10000 })] };
+  assert.deepEqual(O.destacadas(idx).map(o => o.f[0]), ["Tablet ok"]);
 });
 
 test("lo usado o de caja abierta no es oferta: ni en la lista ni en las destacadas", () => {
@@ -52,7 +52,7 @@ test("lo usado o de caja abierta no es oferta: ni en la lista ni en las destacad
 });
 
 test("destacadas trae el descuento y el ahorro de cada una", () => {
-  const [o] = O.destacadas({ productos: [fila("A", 7500, { antes: 10000 })] });
+  const [o] = O.destacadas({ productos: [fila("Tablet A", 7500, { antes: 10000 })] });
   assert.equal(Math.round(o.off * 100), 25);
   assert.equal(o.ahorro, 2500);
   assert.equal(o.antes, 10000);
@@ -127,9 +127,9 @@ test("lo que no llega al piso de gama no es oferta y se cuenta aparte", () => {
 });
 
 test("las compras internacionales no quedan afuera de destacadas: van despues de las locales y rotuladas", () => {
-  const idx = { productos: [fila("intl", 7000, { antes: 10000, sellos: "i" }), fila("local", 8000, { antes: 10000 })] };
+  const idx = { productos: [fila("Tablet intl", 7000, { antes: 10000, sellos: "i" }), fila("Tablet local", 8000, { antes: 10000 })] };
   const d = O.destacadas(idx);
-  assert.deepEqual(d.map(o => o.f[0]), ["local", "intl"]);
+  assert.deepEqual(d.map(o => o.f[0]), ["Tablet local", "Tablet intl"]);
   assert.deepEqual(d.map(o => !!o.internacional), [false, true]);
 });
 
@@ -566,4 +566,110 @@ test("destacadas: el mismo equipo con el procesador escrito distinto en dos tien
   // otra RAM sigue siendo otro equipo
   const c = fila("Notebook HP 250 15.6″ Core 5 120U 32GB 512GB", 1745000, { lista: 2000000 });   // 8 GB no pasa el minimo de notebook
   assert.equal(O.destacadas({ productos: [b, c] }, 10).length, 2);
+});
+
+test("una baja propia de mas de 60% no es oferta, y de mas de 40% tampoco si la trae un agregador (31/10: RTX 5080 «−70 %»)", () => {
+  const ag = (n, precio, antes) => [n, precio, "https://t.test/" + n, "comparaya", "", 0, antes, "", "", ""];
+  const idx = { productos: [fila("Tablet grande", 3000, { antes: 10000 }), fila("Tablet normal", 6000, { antes: 10000 }),
+                            ag("Tablet agregador-46", 5400, 10000), ag("Tablet agregador-30", 7000, 10000)] };
+  const r = O.calcularOfertas(idx);
+  assert.deepEqual(r.propias.map(f => f[0]), ["Tablet normal", "Tablet agregador-30"]);
+  assert.equal(r.sospechosas, 2);
+});
+
+test("unico: el mismo equipo repetido en la lista de la pestaña queda una vez, el de la tienda mas barata", () => {
+  const item = (f) => ({ f, ref: 6 });
+  const a = ["Mouse Corsair SCUF Envision Pro Inalambrico", 114299, "https://t/a", "fh", "", 0, 150000, "", "", "X1"];
+  const b = ["Mouse Corsair SCUF Envision Pro Inalambrico", 114899, "https://t/b", "fh", "", 0, 150000, "", "", "X1"];
+  const c = ["Teclado Logitech G515 TKL", 159483, "https://t/c", "scp", "", 0, 181704, "", "", "G515"];
+  assert.deepEqual(O.unico([item(b), item(a), item(c)]).map(o => o.f[2]), ["https://t/a", "https://t/c"]);
+});
+
+test("codificar y decodificar: el resultado del Worker vuelve con las filas del indice de la pagina (spec 054)", () => {
+  const productos = [...TRES([["cg", 80000], ["mx", 100000], ["vx", 104000]]), fila("Algo", 6000, { antes: 10000 }),
+                     conTienda("Memoria Kingston Fury DDR5 32GB 6000MHz", 130000, "zz", "KF560C36-32")];
+  const idx = { productos };
+  const r = O.calcularOfertas(idx);
+  const en_la_pagina = productos.map(f => [...f]);           // el indice que la pagina bajo por su cuenta: copias de las mismas filas
+  const d = O.decodificar(structuredClone(O.codificar(r, productos)), en_la_pagina);
+  assert.deepEqual(d.propias.map(f => f[0]), r.propias.map(f => f[0]));
+  assert.ok(d.propias.every(f => en_la_pagina.includes(f)), "las filas son las de la pagina, no copias del Worker");
+  assert.deepEqual([...d.contraModelo.keys()].map(f => f[2]), [...r.contraModelo.keys()].map(f => f[2]));
+  assert.ok([...d.contraModelo.keys()].every(f => en_la_pagina.includes(f)));
+  assert.deepEqual([...d.masBarato].map(([f, o]) => [f[2], o[2]]), [...r.masBarato].map(([f, o]) => [f[2], o[2]]));
+  assert.deepEqual([...d.categorias.values()], [...r.categorias.values()]);
+  for (const f of d.contraModelo.keys()) assert.ok(d.gama.get(f), "las filas con oferta traen su gama");
+  assert.deepEqual([d.descartadas, d.sospechosas, d.tachadoFijo], [r.descartadas, r.sospechosas, r.tachadoFijo]);
+});
+
+/* Spec 056: el indice publicado el 31/10 13:36 repitio la fuente ASUS Prime 750W Gold (Mexx sin codigo de modelo y
+   CompraGamer con 90YE00U1-B0SA00) y dos colores del mismo Corsair SCUF de FullH4rd. */
+const REPETIDAS = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "ofertas", "repetidas-2026-10-31.json"), "utf8"));
+const repetida = (tienda, re) => REPETIDAS.productos.find(f => f[3] === tienda && re.test(f[0]));
+
+test("ficha (056): la misma fuente con y sin el codigo en el titulo da la misma ficha, por sus datos", () => {
+  const mexx = repetida("mexx", /Asus Prime/), cg = repetida("compragamer", /AP-750G/);
+  assert.ok(O.ficha(mexx), "«ASUS PRIME» + 750 W + Gold + Modular alcanza para una ficha");
+  assert.equal(O.ficha(mexx), O.ficha(cg));
+  // otra certificacion u otra potencia siguen siendo otra fuente
+  assert.notEqual(O.ficha(fila("Fuente Asus Prime 750W 80 Plus Bronze Modular", 1)), O.ficha(mexx));
+  assert.notEqual(O.ficha(fila("Fuente Asus Prime 850W 80 Plus Gold Modular", 1)), O.ficha(mexx));
+  // sin numero en el titulo, dos datos no alcanzan (como «KINGSTON · 1 TB»)
+  assert.equal(O.ficha(fila("Fuente Asus Prime 750W 80 Plus Bronze", 1)), "");
+});
+
+test("familia (056): el mismo joystick en otro color (naranja, verde, acero) es la misma familia", () => {
+  const blanco = repetida("fullh4rd", /BLANCO/), naranja = repetida("fullh4rd", /NARANJA/);
+  assert.equal(O.familia(blanco), O.familia(naranja));
+  for (const color of ["VERDE", "ACERO", "ROSA", "VIOLETA", "AMARILLO", "CELESTE", "Orange", "Green", "Pink", "Purple"])
+    assert.equal(O.familia(fila("JOYSTICK GAMEPAD CORSAIR SCUF ENVISION PRO WIRELESS PC " + color, 1)), O.familia(blanco), color);
+  // «Gold» no es un color en una fuente: Bronze y Gold siguen separadas
+  assert.notEqual(O.familia(fila("Fuente Asus Prime 750W 80 Plus Gold", 1)), O.familia(fila("Fuente Asus Prime 750W 80 Plus Bronze", 1)));
+});
+
+test("destacadas (056): del indice del 31/10 sale una fuente ASUS Prime (la mas barata) y un solo SCUF", () => {
+  const lista = O.destacadas(REPETIDAS, 10);
+  assert.deepEqual(lista.map(o => [o.f[3], o.f[1]]).sort(), [["compragamer", 148000], ["fullh4rd", 114299]]);
+});
+
+/* Spec 056: OnCity bajo el 31/10 su lista entera con el mismo porcentaje; Mercado Libre trajo unos auriculares «−51 %». */
+const LOTES = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures", "ofertas", "lotes-2026-10-31.json"), "utf8"));
+
+test("lote (056): diez bajas o mas de una tienda con el mismo porcentaje el mismo dia son un cambio de lista, no ofertas", () => {
+  const r = O.calcularOfertas(LOTES);
+  const oncity = [...r.propias, ...r.seguimiento].filter(f => f[3] === "oncity");
+  assert.deepEqual(oncity.map(f => f[0]), [LOTES.productos[12][0]]);       // queda la HP 250, que bajo 14 % sola
+  assert.equal(r.enLote, 8);                     // los 4 restantes del lote ya no eran oferta por otra regla (minimos de su categoria)
+  // nueve iguales todavia pueden ser ofertas; otro dia u otra tienda no suman al lote
+  const n = (k, tienda = "cg", desde = "2026-10-31") => { const f = fila("SSD Kingston NV" + k + " 1TB NVMe Gen4", 89000, { antes: 100000 }); f[3] = tienda; f[10] = desde; return f; };
+  const nueve = Array.from({ length: 9 }, (_, k) => n(k));
+  assert.equal(O.calcularOfertas({ productos: nueve }).propias.length, 9);
+  assert.equal(O.calcularOfertas({ productos: [...nueve, n(9, "cg", "2026-10-30"), n(10, "mx")] }).propias.length, 11);
+  assert.equal(O.calcularOfertas({ productos: [...nueve, n(9)] }).propias.length, 0);
+});
+
+test("Mercado Libre (056): una baja propia de mas de 40 % es dudosa (paginas /p/ con otro vendedor), como en un agregador", () => {
+  const r = O.calcularOfertas(LOTES);
+  assert.ok(!r.propias.some(f => /Usotso/.test(f[0])));
+  assert.equal(r.sospechosas, 1);
+  const ml = (n, precio) => [n, precio, "https://www.mercadolibre.com.ar/" + n + "/p/MLA1", "mercadolibre", "", 0, 100000, "", "", ""];
+  assert.deepEqual(O.calcularOfertas({ productos: [ml("auriculares-hyperx-cloud-38", 62000), ml("auriculares-hyperx-cloud-45", 55000)] }).propias.map(f => f[0]),
+                   ["auriculares-hyperx-cloud-38"]);
+});
+
+test("no es hardware (056): lo que cae en «Otros» y no es tecnologia no es oferta, aunque baje", () => {
+  const r = O.calcularOfertas({ productos: [fila("Sun Tabletas Lavavajilla Pro Expert 4 en 1 X38 Lavado Y Brillo", 16960, { antes: 20400 }),
+                                            fila("Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz", 1252000, { antes: 1500000 })] });
+  assert.deepEqual(r.propias.map(f => f[0]), ["Smart TV TCL 55 55C6K Mini LED QLED 4K UHD Google TV 144Hz"]);
+  assert.equal(r.noTecnologia, 1);
+});
+
+test("lote (056): un cambio de lista que deja el producto mas barato que en otras tiendas sigue siendo oferta contra el mismo modelo", () => {
+  // diez SSD de la tienda «zz» bajan 11 % el mismo dia (un lote); uno de ellos queda bajo la mediana de otras tres tiendas
+  const lote = Array.from({ length: 10 }, (_, k) => { const f = conTienda("SSD Kingston NV" + k + " 1TB NVMe Gen4", 89000, "zz", "NV" + k); f[6] = 100000; f[10] = "2026-10-31"; return f; });
+  const otras = [["cg", 110000], ["mx", 112000], ["vx", 115000]].map(([t, p]) => conTienda("SSD Kingston NV0 1TB NVMe Gen4", p, t, "NV0"));
+  const r = O.calcularOfertas({ productos: [...lote, ...otras] });
+  assert.equal(r.propias.length, 0);                                  // como baja propia, no: es un lote
+  assert.deepEqual([...r.contraModelo.keys()].map(f => f[3]), ["zz"]);   // contra el mismo modelo en otras tiendas, si
+  assert.ok(O.destacadas({ productos: [...lote, ...otras] }, 10).some(o => o.tipo === "modelo" && o.f[3] === "zz"));
 });

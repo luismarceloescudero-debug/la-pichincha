@@ -16,7 +16,12 @@ http.createServer((req, res) => {
   if (!archivo.startsWith(RAIZ)) { res.writeHead(403).end(); return; }
   if (fs.existsSync(archivo) && fs.statSync(archivo).isDirectory()) archivo = path.join(archivo, "index.html");
   fs.readFile(archivo, (err, datos) => {
-    if (err) { res.writeHead(404, { "Content-Type": "text/plain" }).end("no existe"); return; }
+    if (err) {                                    // como GitHub Pages: la 404 del sitio, si esta armada, en la misma URL
+      fs.readFile(path.join(RAIZ, "404.html"), (e, html) => e
+        ? res.writeHead(404, { "Content-Type": "text/plain" }).end("no existe")
+        : res.writeHead(404, { "Content-Type": TIPOS[".html"] }).end(html));
+      return;
+    }
     res.writeHead(200, { "Content-Type": TIPOS[path.extname(archivo)] || "application/octet-stream" }).end(datos);
   });
 }).listen(Number(process.argv[2]) || 8091);

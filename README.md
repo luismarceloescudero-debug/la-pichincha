@@ -57,6 +57,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `docs/delegacion-modelos.md` | La tanda del 19/10/2026 con un modelo asignado por tarea: quien hizo cada una, cuanto tardo, y cuantos hallazgos reales y falsos dio cada modelo |
 | `docs/seguridad-zap.md` | Analisis pasivo del sitio publicado con OWASP ZAP (19/10/2026): cada alerta con su veredicto verificado, lo que no se puede arreglar en GitHub Pages y cuanto acertaron los modelos al clasificarlas |
 | `docs/auditoria-2026-10-30.md` | Auditoria exigente del 30/10/2026: Lighthouse en celular y escritorio antes y despues, accesibilidad, pruebas de punta a punta, seguridad, SEO y datos publicados; lo arreglado (PR #172 a #175) y lo que queda por prioridad |
+| `docs/pruebas-2026-11-01.md` | Pruebas completas del 01/11/2026 (sesion 058): tests, e2e, Lighthouse y squirrel, ofertas de la spec 056 contra el indice publicado, revision de diseño con web-design-reviewer y break-ui (solo informe para la sesion de diseño), contacto y Worker; arreglos #204 y #205 |
 | `docs/og-imagen.html` | Fuente de `img/og.png` |
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
@@ -445,7 +446,8 @@ Las ofertas del dia salen por dos canales, sin backend:
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
   `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el repo (Settings > Secrets and variables >
   Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
-  (no en cada push), y si Telegram falla el sitio sale igual. El token nunca se imprime.
+  o en la manual (no en cada push; desde el 02/11 no hay cron: el publicador se dispara a mano con
+  `gh workflow run actualizar.yml -f indexar=true`; para volver a programar, restaurar `schedule:` en el workflow), y si Telegram falla el sitio sale igual. El token nunca se imprime.
 - **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
   Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
   `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.

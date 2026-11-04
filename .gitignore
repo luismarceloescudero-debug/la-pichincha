@@ -24,4 +24,5 @@ privado/
 node_modules/
 test-results/
 playwright-report/
+auditoria-*.html
 !tests/fixtures/e2e/indice.json

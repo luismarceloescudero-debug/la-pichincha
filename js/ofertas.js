@@ -70,12 +70,21 @@
   const DESCUENTO_SEGUIMIENTO_MAX = 0.4;
   const enSeguimiento = f => typeof f[8] === "string" && f[8].includes("k");
 
+  /* Una tienda que baja muchos avisos con el mismo porcentaje el mismo dia cambio su lista de precios: no son ofertas (31/10,
+     OnCity: 148 avisos −3 %, 62 −5 % y 28 −11 %, y eran 58 de las 111 ofertas de la pestaña). Diez o mas bajas con el mismo
+     porcentaje entero, la misma tienda y la misma fecha de cambio. En el indice del 31/10 solo junta lotes de OnCity (y una
+     cuna de ComparaYa); ninguna otra tienda tenia mas de 6 ofertas iguales. */
+  const LOTE_MIN = 10;
+  const claveLote = f => f[3] + "|" + (f[10] || "") + "|" + Math.round((1 - f[1] / f[6]) * 100);
+
   function calcularOfertas(idx) {
     const propias = [], publicadas = [], seguimiento = [];
-    let descartadas = 0, tachadoFijo = 0;
+    let descartadas = 0, tachadoFijo = 0, sospechosas = 0, enLote = 0, noTecnologia = 0;
     const hoy = Date.parse(String(idx.generado || "").slice(0, 10));
     const ref = C.referencia(idx.productos);
     const filas = unaPorUrl(idx.productos).filter(f => !B.esUsado(f));   // usado, reacondicionado o de caja abierta: no es una oferta de lo nuevo
+    const lotes = new Map();
+    for (const f of filas) if (f[6] > f[1]) lotes.set(claveLote(f), (lotes.get(claveLote(f)) || 0) + 1);
     // El mismo producto (mismo codigo de modelo) publicado por otra tienda con mas datos: una tienda que no escribe la RAM o los
     // Hz en el titulo no deja afuera a un modelo cuya ficha otra si trae. Solo se mira a otra cuando a esta le falta el dato.
     const porModelo = new Map();
@@ -136,9 +145,16 @@
     for (const f of filas) {
       const g = gama.get(f);
       if (!g.pasa || masBarato.has(f)) { descartadas++; continue; }
+      if (g.categoria === "otro" && !C.esTecnologia(f[0])) { noTecnologia++; continue; }   // 056: ni lavavajilla ni desmalezadora
       const d = C.DESCUENTO[g.categoria];
       const ayer = f[6] || 0;
       if (ayer > f[1] && ayer - f[1] >= BAJA_MIN_PESOS && 1 - f[1] / ayer + EPS >= d.propia) {
+        // Una baja de mas de 60% (de 40% si la trae un agregador, que arrastra precios viejos) es mas facil un error de carga que
+        // una oferta: 31/10, una RTX 5080 «−70 %» y una 5070 Ti a $1.330.114 las dos, via ComparaYa. No es oferta ni se repite abajo.
+        // Mercado Libre tambien topa en 40% (056): sus paginas /p/ cambian de vendedor y la verificacion en la fuente falla en
+        // 42 de 183 (31/10: unos auriculares Usotso SA-723 «−51 %», $297.998 -> $147.053).
+        if (1 - f[1] / ayer > (f[3] === AGREGADOR || esMercadoLibre(f[2]) ? DESCUENTO_SEGUIMIENTO_MAX : DESCUENTO_MAX)) { sospechosas++; continue; }
+        if (lotes.get(claveLote(f)) >= LOTE_MIN) { enLote++; continue; }
         if (enSeguimiento(f)) { if (1 - f[1] / ayer <= DESCUENTO_SEGUIMIENTO_MAX) seguimiento.push(f); }
         else propias.push(f);
         continue;                     // una baja propia ya es noticia: no la repito abajo
@@ -179,7 +195,7 @@
     // el porque de cada modelo con generacion comparable, para que se entienda que califique o no como gama alta
     const notas = new Map([...propias, ...publicadas, ...seguimiento].filter(f => gama.get(f).nota).map(f => [f, gama.get(f).nota]));
     const categorias = new Map([...propias, ...publicadas, ...seguimiento].map(f => [f, gama.get(f)]));
-    return { propias, publicadas, seguimiento, descartadas, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
+    return { propias, publicadas, seguimiento, descartadas, sospechosas, enLote, noTecnologia, cruces, vigentes, contra, notas, categorias, medianas, masBarato, tachadoFijo, contraModelo, cruceGen, gama };   // sin recortar: cada uso filtra y pagina
   }
 
   /* Las mejores para publicar afuera (feed, canal, /hoy/). Cada categoria tiene lugar reservado (C.CUPO): primero
@@ -191,7 +207,7 @@
      sin Windows 11 Pro, y las dos salieron). Con codigo de modelo, el codigo. Sin codigo, el nombre normalizado como lo
      compara el buscador, sin lo que no cambia el equipo: sistema operativo, color, «#» y «nuevo». Otra RAM, otro disco u
      otro procesador siguen siendo otro equipo. */
-  const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna)\b/g;
+  const RUIDO_FAMILIA = /\b(?:win(?:d|dows)?\s?1[01](?:\s?(?:pro|home))?|w1[01](?:\s?(?:pro|home))?|free\s?dos|sin\s(?:sistema(?:\soperativo)?|so)|nuev[oa]|negr[oa]|black|blanc[oa]|white|gris|grey|gray|platead[oa]|silver|azul|blue|roj[oa]|red|luna|naranja|orange|verde|green|acero|ros[ae]|rosad[oa]|pink|violeta|purple|lila|amarill[oa]|yellow|celeste|turquesa|grafito|graphite)\b/g;
   const nombreFamilia = f => B.normalBusq(String(f[0] || "")).replace(/#/g, " ").replace(RUIDO_FAMILIA, " ").replace(/[^a-z0-9]+/g, " ").trim();
   function familia(f) {
     if (f[9]) return "modelo:" + f[9];
@@ -201,9 +217,20 @@
   /* La ficha legible (spec 044): marca y modelo mas lo que define la compra. Dos tiendas que escriben distinto el mismo
      equipo («HP 250 C5-120U 16GB SSD512GB» y «HP 250 Core 5 120U 16GB 512GB», 30/10) dan la misma ficha. Solo cuenta si
      el titulo tiene un modelo (un numero) y hay al menos dos datos: «KINGSTON · 1 TB» no alcanza para decir que es lo mismo. */
+  /* En un componente o periferico el codigo que repite un dato («AP-750G» con 750 W) no agrega nada: la misma fuente sin el
+     codigo en el titulo («Fuente Asus Prime 750W 80 Plus Gold Modular», Mexx, 31/10) es la misma. Sin numero en el titulo hacen
+     falta tres datos: «ASUS PRIME · 750 W · 80+ Gold · Modular» dice que es; «KINGSTON · 1 TB» no. */
   function ficha(f) {
     const t = T.de(f[0]), datos = t.chips.filter(c => !/″|Usado|Reacondicionado/.test(c));
-    return /\d/.test(t.titulo) && datos.length >= 2 ? t.tipo + "|" + t.titulo + "|" + datos.join("|") : "";
+    const clave = titulo => t.tipo + "|" + titulo + "|" + datos.join("|");
+    if (t.categoria === "componente" || t.categoria === "periferico") {
+      const nums = new Set(datos.flatMap(c => c.match(/\d+/g) || []));
+      const repite = w => /[a-z]/i.test(w) && /\d/.test(w) && w.match(/\d+/g).every(n => nums.has(n));
+      const palabras = t.titulo.split(" "), sin = palabras.filter(w => !repite(w));
+      if (sin.length >= 2 && sin.length < palabras.length || !/\d/.test(t.titulo))
+        if (/\d/.test(sin.join(" ")) ? datos.length >= 2 : datos.length >= 3) return clave(sin.join(" "));
+    }
+    return /\d/.test(t.titulo) && datos.length >= 2 ? clave(t.titulo) : "";
   }
 
   /* El mismo producto con el titulo escrito distinto (23/10: «Auricular In-Ear Tronsmart Ony Ace Pro Blanco» y «Auricular
@@ -219,6 +246,21 @@
     return corto.size > 0 && [...corto].filter(w => largo.has(w)).length / corto.size >= COMPARTIDAS_GEMELO;
   }
 
+  // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
+  // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
+  // Ademas, a igual precio y referencia, el gemelo con el titulo escrito distinto.
+  // Entre las del mismo producto queda la mas barata (30/10: la HP 250 salio de Max Tecno a $1.596.165 y Click Gaming la
+  // tenia a $1.545.000); a igual precio, la mejor ubicada.
+  const unico = lista => { const vistos = new Set(), porPrecio = new Map(), minimo = new Map();
+    const claves = o => [familia(o.f), ficha(o.f)].filter(Boolean);
+    for (const o of lista) for (const k of claves(o)) minimo.set(k, Math.min(minimo.get(k) ?? Infinity, o.f[1]));
+    return lista.filter(o => {
+      if (claves(o).some(k => o.f[1] > minimo.get(k))) return false;
+      const k = familia(o.f), fi = ficha(o.f), p = o.f[1] + "|" + (o.antes ?? o.f[o.ref]), w = palabras(o.f), mismos = porPrecio.get(p) || [];
+      if (vistos.has(k) || (fi && vistos.has(fi)) || mismos.some(x => gemelos(x, w))) return false;
+      vistos.add(k); if (fi) vistos.add(fi); porPrecio.set(p, [...mismos, w]); return true;
+    }); };
+
   function destacadas(idx, max = 20) {
     const { propias, publicadas, seguimiento, cruces, vigentes, contra, notas, gama, contraModelo } = calcularOfertas(idx);
     const rango = { alta: 2, media: 1 };
@@ -232,20 +274,6 @@
       || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
     const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),
       ...publicadas.map(f => nuevo(f, f[5], "publicada")), ...seguimiento.map(f => nuevo(f, f[6], "seguimiento"))].filter(o => esUrl(o.f[2]));
-    // El mismo equipo (misma familia: mismo codigo de modelo o, sin codigo, el mismo nombre sin sistema operativo ni color)
-    // ocupa un solo lugar, en una tienda o en varias: gana el mejor ubicado y el otro deja lugar al siguiente.
-    // Ademas, a igual precio y referencia, el gemelo con el titulo escrito distinto.
-    // Entre las del mismo producto queda la mas barata (30/10: la HP 250 salio de Max Tecno a $1.596.165 y Click Gaming la
-    // tenia a $1.545.000); a igual precio, la mejor ubicada.
-    const unico = lista => { const vistos = new Set(), porPrecio = new Map(), minimo = new Map();
-      const claves = o => [familia(o.f), ficha(o.f)].filter(Boolean);
-      for (const o of lista) for (const k of claves(o)) minimo.set(k, Math.min(minimo.get(k) ?? Infinity, o.f[1]));
-      return lista.filter(o => {
-        if (claves(o).some(k => o.f[1] > minimo.get(k))) return false;
-        const k = familia(o.f), fi = ficha(o.f), p = o.f[1] + "|" + o.antes, w = palabras(o.f), mismos = porPrecio.get(p) || [];
-        if (vistos.has(k) || (fi && vistos.has(fi)) || mismos.some(x => gemelos(x, w))) return false;
-        vistos.add(k); if (fi) vistos.add(fi); porPrecio.set(p, [...mismos, w]); return true;
-      }); };
     // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.
     const unicas = unico([...todas].sort(por));
     const grupos = new Map(C.ORDEN.map(c => [c, unicas.filter(o => o.categoria === c)]));
@@ -264,8 +292,31 @@
     return [...elegidas].sort((a, b) => C.ORDEN.indexOf(a.categoria) - C.ORDEN.indexOf(b.categoria) || por(a, b));
   }
 
+  /* Para calcular las ofertas en un Web Worker (js/ofertas-worker.js): el resultado de calcularOfertas lleva filas como claves
+     de Map y de Set, y una fila no sobrevive a postMessage (llega una copia). Se manda por posicion en `productos` y el
+     navegador vuelve a poner las filas de su propio indice. `gama` solo viaja para las filas que algun uso pide. */
+  function codificar(r, productos) {
+    const pos = new Map(productos.map((f, i) => [f, i])), ix = f => pos.get(f);
+    const mapa = m => [...m].map(([f, v]) => [ix(f), v]);
+    const conGama = new Set([...r.categorias.keys(), ...r.contraModelo.keys(), ...r.cruceGen.keys()]);
+    return { propias: r.propias.map(ix), publicadas: r.publicadas.map(ix), seguimiento: r.seguimiento.map(ix),
+      descartadas: r.descartadas, sospechosas: r.sospechosas, enLote: r.enLote, noTecnologia: r.noTecnologia, tachadoFijo: r.tachadoFijo, medianas: r.medianas,
+      cruces: [...r.cruces].map(ix), vigentes: [...r.vigentes].map(ix), contra: mapa(r.contra), notas: mapa(r.notas),
+      categorias: mapa(r.categorias), masBarato: [...r.masBarato].map(([f, o]) => [ix(f), ix(o)]),
+      contraModelo: mapa(r.contraModelo), cruceGen: mapa(r.cruceGen), gama: [...conGama].map(f => [ix(f), r.gama.get(f)]) };
+  }
+  function decodificar(c, productos) {
+    const fila = i => productos[i], lista = a => a.map(fila), set = a => new Set(lista(a));
+    const mapa = a => new Map(a.map(([i, v]) => [productos[i], v]));
+    return { propias: lista(c.propias), publicadas: lista(c.publicadas), seguimiento: lista(c.seguimiento), descartadas: c.descartadas,
+      sospechosas: c.sospechosas, enLote: c.enLote, noTecnologia: c.noTecnologia, tachadoFijo: c.tachadoFijo, medianas: c.medianas, cruces: set(c.cruces), vigentes: set(c.vigentes),
+      contra: mapa(c.contra), notas: mapa(c.notas), categorias: mapa(c.categorias),
+      masBarato: new Map(c.masBarato.map(([i, o]) => [productos[i], productos[o]])),
+      contraModelo: mapa(c.contraModelo), cruceGen: mapa(c.cruceGen), gama: mapa(c.gama) };
+  }
+
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, destacadas, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, familia, ficha, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, LOTE_MIN, familia, ficha, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

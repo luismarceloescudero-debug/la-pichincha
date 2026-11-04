@@ -21,8 +21,13 @@ import html
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
+
+# Segundos de espera entre reintentos cuando la red falla antes de llegar a Telegram (04/11: un URLError
+# suelto dejo la corrida manual sin mensaje). Tres intentos en total.
+ESPERAS = (5, 15)
 
 LIMITE = 4096   # largo maximo de un mensaje de Telegram
 LARGO_TITULO = 100   # un titulo de Mercado Libre llega a 160 caracteres con todas sus palabras clave (19/10)
@@ -46,33 +51,81 @@ def pesos(n):
     return "$" + f"{round(n):,}".replace(",", ".")
 
 
+BARRA = "🟩" * 8   # bloque de color solido: abre y cierra la oferta destacada, el resto va en citas (jerarquia, spec 055)
+
+
+def _marca(o):
+    """El emoji del tipo y el nombre (ya sin chips): MARCA Y MODELO (spec 044) o, de un ofertas.json viejo, categoria y titulo."""
+    if o.get("titulo"):
+        return (f"{o['emoji']} " if o.get("emoji") else ""), o["titulo"]
+    return (f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""), o["nombre"]
+
+
+def _enlace(o, texto):
+    # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
+    return f"<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(texto))}</a>"
+
+
+def _precio(o, punta="", separador=" · "):
+    """El precio y, si tiene, el porcentaje en negrita: una publicacion a precio de siempre sale igual, sin inventar un −0 %."""
+    if o.get("sinRebaja") or not o.get("descuento"):
+        return f"<b>{pesos(o['precio'])}</b>"
+    return f"<b>{pesos(o['precio'])}</b>{separador}{punta}<b>−{o['descuento']}%</b>"
+
+
+def _pie_oferta(o):
+    # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
+    contra = f" {html.escape(o['contra'])}" if o.get("contra") else ""
+    return (f"en {html.escape(o['comercio'])}" + (" (enlace de afiliado)" if o.get("afiliado") else ""), contra)
+
+
+def _heroe(o):
+    """La mejor del dia: titulo en mayusculas ya viene de titulo.js; precio y porcentaje en su propia linea, entre dos barras."""
+    emoji, nombre = _marca(o)
+    donde, contra = _pie_oferta(o)
+    lineas = [BARRA, "<b>🔥 LA MEJOR DEL DÍA</b>",
+              f"{html.escape(emoji) if o.get('titulo') else emoji}<b>{_enlace(o, nombre)}</b>"]
+    if o.get("chips"):
+        lineas.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
+    lineas.append(_precio(o, separador="  ·  ") + contra)
+    lineas.append(donde)
+    lineas.append(BARRA)
+    return "\n".join(lineas)
+
+
+def _compacta(o):
+    """El resto: una cita con el nombre, las caracteristicas en cursiva (mas apagadas) y el precio con el porcentaje en negrita."""
+    emoji, nombre = _marca(o)
+    donde, contra = _pie_oferta(o)
+    punta = "🔥 " if o.get("descuento", 0) >= 30 else "⚡ " if o.get("descuento", 0) >= 20 else ""
+    cuerpo = [f"{html.escape(emoji) if o.get('titulo') else emoji}{_enlace(o, nombre)}"]
+    if o.get("chips"):
+        cuerpo.append("<i>" + html.escape(" · ".join(o["chips"])) + "</i>")
+    cuerpo.append(_precio(o, punta) + f"{contra} {donde}")
+    return "<blockquote>" + "\n".join(cuerpo) + "</blockquote>"
+
+
 def mensaje(datos):
-    """El texto (HTML de Telegram) con las ofertas, o None si no hay. Se achica hasta entrar en el limite."""
+    """El texto (HTML de Telegram) con las ofertas, o None si no hay. Jerarquia (spec 055): la de mayor descuento va grande
+    entre dos barras de color y el resto en citas compactas; no todo pesa igual. Se achica hasta entrar en el limite."""
     ofertas = datos.get("ofertas") or []
+    fecha = cuando(datos.get("generado", ""))
+    sitio = html.escape(datos.get("sitio", ""), quote=True)
     if not ofertas:
-        return None
-    cabeza = f"<b>Pichinchas del día</b> · precios del {cuando(datos.get('generado', ''))}\n"
+        # Sin nada para destacar el mensaje sale igual: la publicacion no depende de que hoy haya rebajas (dueno, 04/11).
+        return (f"<b>Pichinchas del día</b> · precios del {fecha}\n"
+                "Hoy no hay bajas para destacar. Precios y comparador actualizados en "
+                f"<a href=\"{sitio}\">La Pichincha</a>.")
+    cabeza = f"<b>Pichinchas del día</b> · precios del {fecha}\n"
     pie = (f"\nMás en <a href=\"{html.escape(datos.get('sitio', ''), quote=True)}\">La Pichincha</a>. "
            "Verificá en la tienda antes de comprar.")
-    lineas = []
-    for i, o in enumerate(ofertas, 1):
-        # El nombre legible (spec 044): emoji del tipo, MARCA Y MODELO y las chips. Un ofertas.json de antes no los trae:
-        # entonces la categoria en cursiva y el titulo de la tienda, como siempre.
-        if o.get("titulo"):
-            cabeza_oferta = f"{o['emoji']} " if o.get("emoji") else ""
-            nombre = o["titulo"] + "".join(f" · {c}" for c in o.get("chips") or [])
-        else:
-            cabeza_oferta = f"<i>{html.escape(o['categoria'])}</i> · " if o.get("categoria") else ""
-            nombre = o["nombre"]
-        # `enlace` es el mismo link con el codigo de afiliado (generar_feed.js); se rotula, el orden no cambia.
-        lineas.append(f"{i}. {html.escape(cabeza_oferta) if o.get('titulo') else cabeza_oferta}<a href=\"{html.escape(o.get('enlace') or o['url'], quote=True)}\">{html.escape(acortar(nombre))}</a>: "
-                      f"{pesos(o['precio'])} (−{o['descuento']}%"
-                      # una oferta contra el mismo modelo dice contra que se compara (spec 035): no es un precio de antes
-                      + (f" {html.escape(o['contra'])}" if o.get("contra") else "") + f") en {html.escape(o['comercio'])}"
-                      + (" (enlace de afiliado)" if o.get("afiliado") else ""))
-    while lineas and len(cabeza + "\n".join(lineas) + "\n" + pie) > LIMITE:
-        lineas.pop()
-    return cabeza + "\n".join(lineas) + "\n" + pie if lineas else None
+    mejor = max(range(len(ofertas)), key=lambda i: (ofertas[i].get("descuento") or 0, -i))
+    bloques = [_heroe(ofertas[mejor])] + [_compacta(o) for i, o in enumerate(ofertas) if i != mejor]
+    while bloques and len(cabeza + "\n".join(bloques) + "\n" + pie) > LIMITE:
+        if len(bloques) == 1:
+            return None
+        bloques.pop()
+    return cabeza + "\n".join(bloques) + "\n" + pie if bloques else None
 
 
 def leer_json(ruta):
@@ -99,26 +152,36 @@ def pedir(token, metodo, campos):
     cuerpo = json.dumps(campos).encode("utf-8")
     pedido = urllib.request.Request(f"https://api.telegram.org/bot{token}/{metodo}", data=cuerpo,
                                     headers={"Content-Type": "application/json"}, method="POST")
-    try:
-        with urllib.request.urlopen(pedido, timeout=20) as r:
-            try:
-                resultado = json.loads(r.read().decode("utf-8")).get("result")
-            except (ValueError, TypeError, AttributeError):
-                resultado = None
-        return resultado if isinstance(resultado, dict) else {}
-    except urllib.error.HTTPError as e:
-        # Telegram explica el rechazo ("chat not found", "bot is not a member..."): se muestra para
-        # poder arreglarlo, pero nunca el token, por si apareciera en algun texto.
+    intentos = len(ESPERAS) + 1
+    for intento in range(1, intentos + 1):
         try:
-            motivo = json.loads(e.read().decode("utf-8", "replace")).get("description", "")
-        except (OSError, ValueError, AttributeError):
-            motivo = ""
-        motivo = motivo.replace(token, "***")[:200]
-        print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
-        return None
-    except (urllib.error.URLError, OSError) as e:
-        print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__})")
-        return None
+            with urllib.request.urlopen(pedido, timeout=20) as r:
+                try:
+                    resultado = json.loads(r.read().decode("utf-8")).get("result")
+                except (ValueError, TypeError, AttributeError):
+                    resultado = None
+            return resultado if isinstance(resultado, dict) else {}
+        except urllib.error.HTTPError as e:
+            # Telegram explica el rechazo ("chat not found", "bot is not a member..."): se muestra para
+            # poder arreglarlo, pero nunca el token, por si apareciera en algun texto. No se reintenta.
+            try:
+                motivo = json.loads(e.read().decode("utf-8", "replace")).get("description", "")
+            except (OSError, ValueError, AttributeError):
+                motivo = ""
+            motivo = motivo.replace(token, "***")[:200]
+            print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
+            return None
+        except (urllib.error.URLError, OSError) as e:
+            razon = getattr(e, "reason", e)
+            # Un corte por tiempo pudo llegar a publicar: reintentar duplicaria el mensaje en el canal.
+            # Una falla al conectar (DNS, red caida, conexion rechazada) no llego a Telegram: se reintenta.
+            por_tiempo = isinstance(razon, TimeoutError) or isinstance(e, TimeoutError)
+            if por_tiempo or intento == intentos:
+                detalle = str(razon).replace(token, "***")[:200]
+                cuantos = f", {intento} intentos" if intento > 1 else ""
+                print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__}: {detalle}{cuantos})")
+                return None
+            time.sleep(ESPERAS[intento - 1])
 
 
 def main(argv=None):
@@ -145,7 +208,7 @@ def main(argv=None):
         solo_corregir and hoy and str(previo.get("generado", ""))[:10] == hoy)) else None
     texto = mensaje(datos)
     if texto is None:
-        print("Sin ofertas hoy: no se publica en Telegram")
+        print("Sin ofertas hoy: no hay mensaje para Telegram")
         escribir_estado(ruta_estado, mismo)
         return 0
     if mismo and mismo.get("texto") == texto:
