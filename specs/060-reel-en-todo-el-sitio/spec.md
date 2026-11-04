@@ -28,6 +28,15 @@ una mancha de colores agrupados» y, sobre Comparativa, «dos grupos mismos colo
    el número. Se sacan las paletas por tienda de las tarjetas (cada tienda tenía su color: rompía la lectura por rol).
 6. `theme-color`, `manifest.webmanifest` y `sin-red.html` con la paleta nueva; `/precios/` pide Barlow Condensed.
 
+## Segunda vuelta (04/11, capturas marcadas por el dueño)
+
+- «Todo en blanco; negro en negrita, otros tamaños, otros colores; cada tarjeta o grupo con su color; me gusta el lila;
+  destacar la tienda». Queda: lila protagonista (marca, titulos de panel, franja del lema), rellenos fijos lila,
+  celeste, amarillo y rosa con letra negra en negrita (lema, botones de exportar, «Filtrar y ordenar», la tienda).
+- La tienda va en pastilla llena. Tarjetas de Ofertas, filas de Buscar y la lista de /hoy/ en ciclo de tres colores
+  (borde, nombre y tienda cambian juntos); en Comparativa los nombres alternan fila por medio.
+- Se saca un anillo viejo del porcentaje que se colaba en las bajas propias.
+
 ## Tema claro (decisión, sin consultar al dueño)
 
 Mismo lenguaje y mismos roles en tonos oscuros sobre lavanda (`#faf5fe`): el amarillo y el celeste neón no llegan a
