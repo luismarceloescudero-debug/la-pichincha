@@ -235,12 +235,12 @@ ${feed ? `<link rel="alternate" type="application/rss+xml" title="${esc(feed.tit
 <link rel="manifest" href="${rel}manifest.webmanifest">
 <link rel="icon" type="image/png" href="${rel}img/icono-192.png">
 <link rel="apple-touch-icon" href="${rel}img/apple-touch-icon.png">
-<meta name="theme-color" content="#0b4fd8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf5fe" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120018" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=optional"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=optional" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=optional"></noscript>
 <link rel="stylesheet" href="${rel}css/sitio.css">
 <script id="gc" data-goatcounter="https://mescudero.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+" crossorigin="anonymous"></script>
 ${grafo ? `<script type="application/ld+json">${jsonLd(grafo)}</script>
