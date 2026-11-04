@@ -115,11 +115,24 @@ const PREMIUM = [
 ];
 const chipPremium = chip => PREMIUM.some(re => re.test(String(chip)));
 
-/* Lo que pinta el Reel por oferta. Con un ofertas.json de antes de la spec 044 lo calcula desde el nombre. */
+/* v5 (04/11, el dueño): con un nombre corto («VSG ALNILAM») no se sabe que es; se le antepone el tipo en palabras, el de
+   js/titulo.js («TECLADO VSG ALNILAM»). Corto = dos palabras o menos; no se repite si el nombre ya lo dice, y no se pone
+   un tipo generico (componente, accesorio, producto). */
+const SIN_PREFIJO = new Set(["componente", "accesorio", "otro"]);
+const sinTildes = x => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+function prefijoTipo(titulo, tipo) {
+  const nombre = T.NOMBRE_TIPO[tipo];
+  if (!nombre || SIN_PREFIJO.has(tipo) || String(titulo).split(/\s+/).length > 2) return "";
+  return sinTildes(titulo).includes(sinTildes(nombre)) ? "" : nombre.toUpperCase() + " ";
+}
+
+/* Lo que pinta el Reel por oferta. Con un ofertas.json de antes de la spec 044 lo calcula desde el nombre.
+   `desde` es donde empieza la marca dentro del titulo (despues del tipo en palabras, si lo lleva). */
 function ofertasReel(datos, max = 10) {
   const lista = (datos.ofertas || []).slice(0, max).map(o => {
-    const t = T.de(o.nombre), chips = o.chips || t.chips;
-    return { titulo: sinCodigos(o.titulo || t.titulo, o.icono || t.tipo), chips, premium: chips.map(chipPremium), icono: o.icono || t.tipo,
+    const t = T.de(o.nombre), chips = o.chips || t.chips, icono = o.icono || t.tipo;
+    const titulo = sinCodigos(o.titulo || t.titulo, icono), pre = prefijoTipo(titulo, icono);
+    return { titulo: pre + titulo, desde: pre.length, tipo: T.NOMBRE_TIPO[icono] || "Producto", chips, premium: chips.map(chipPremium), icono,
       precio: o.precio, antes: o.antes, descuento: o.descuento, comercio: o.comercio,
       contra: o.contra || "", imagen: URL_FOTO.test(o.imagen || "") ? o.imagen : "", super: false };
   });
@@ -212,9 +225,20 @@ section{position:absolute;inset:0;display:none}
 .pct{display:inline-flex;align-items:baseline;white-space:nowrap;font:var(--p-tit) calc(260px * var(--esc))/0.82 var(--f-tit);letter-spacing:-.02em;
   transform-origin:20% 60%;text-shadow:0 6px 30px color-mix(in srgb,var(--fondo) 55%,transparent)}
 .pct .por{font-size:.82em;margin-left:.03em}
-.ico{display:block;flex:none;width:96px;height:96px;margin:22px 0 4px;color:var(--acento2)}
-.ico *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.tarjeta:not(:has(.foto.sin)) .ico{display:none}
+/* v5: el icono del tipo (el de js/titulo.js), grande, en una insignia redonda sobre la esquina de la foto: se sabe que es
+   sin mirar la foto con atencion. Sin foto, ocupa el lugar de la foto. */
+.tipo{position:absolute;z-index:2;right:196px;top:14px;width:162px;height:162px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--acento2),var(--acento3));border:6px solid var(--tarjeta);box-shadow:0 12px 34px rgba(0,0,0,.4)}
+.tipo .ico{width:100px;height:100px;color:var(--sobre)}
+.ico *{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tarjeta.super .tipo{top:84px}
+.tarjeta:has(.foto.sin) .tipo{right:52px;top:52px;width:230px;height:230px}
+.tarjeta:has(.foto.sin) .tipo .ico{width:140px;height:140px}
+.tarjeta.super:has(.foto.sin) .tipo{top:116px}
+.disp-plena .tipo{right:22px;top:22px}
+.disp-plena .tarjeta.super .tipo{top:118px}
+.disp-plena .tarjeta:has(.foto.sin) .tipo{right:52px;top:52px}
+.nom .tp{color:var(--acento3)}
 .nom{flex:none;margin-top:30px;font:var(--p-tit) calc(104px * var(--esc))/1 var(--f-tit);letter-spacing:-.005em;overflow-wrap:anywhere;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--tinta)}
 .nom .mc{color:var(--acento2)}
@@ -295,7 +319,7 @@ section{position:absolute;inset:0;display:none}
   <div class="cinta"><span>★</span><span>SÚPER OFERTA</span><span>★</span></div>
   <span class="pct"><span class="sig">−</span><span class="num"></span><span class="por">%</span></span>
   <img class="foto" alt="">
-  <svg class="ico" viewBox="0 0 24 24"></svg>
+  <span class="tipo"><svg class="ico" viewBox="0 0 24 24" role="img"></svg></span>
   <h2 class="nom"></h2>
   <p class="sub2"></p>
   <div class="precios"><span class="ahora"><span class="sig">$</span><span class="n"></span></span><span class="antes"><span class="a"></span><i></i></span></div>
@@ -342,6 +366,7 @@ function cargar(i) {
   $(".fotofondo").style.backgroundImage = ok ? 'url("' + o.imagen + '")' : "none";
   $(".pct .num", c).textContent = o.descuento;
   $(".ico", c).innerHTML = D.iconos[o.icono] || "";
+  $(".ico", c).setAttribute("aria-label", o.tipo);
   $(".ico", c).querySelectorAll("*").forEach(e => e.setAttribute("pathLength", "1"));
   $(".antes .a", c).textContent = o.antes ? "$" + miles(o.antes) : "";
   $(".tienda", c).innerHTML = "en <b></b>" + (o.contra ? " · " : "");
@@ -356,11 +381,12 @@ function cargar(i) {
   ah.style.fontSize = Math.min(tope, Math.floor(tope * libre / Math.max(1, ah.scrollWidth))) + "px";
 }
 
-/* El nombre: la marca (primera palabra) en acento2 y el resto en tinta, escrito hasta k letras. */
-function nombre(el, titulo, k) {
+/* El nombre, escrito hasta k letras: el tipo en palabras (si lo lleva) en acento3, la marca en acento2 y el resto en tinta. */
+function nombre(el, titulo, k, desde) {
   el.textContent = "";
-  const corte = titulo.indexOf(" ") < 0 ? titulo.length : titulo.indexOf(" ");
-  el.append(span("mc", titulo.slice(0, Math.min(k, corte))));
+  if (desde) el.append(span("tp", titulo.slice(0, Math.min(k, desde))));
+  const sp = titulo.indexOf(" ", desde), corte = sp < 0 ? titulo.length : sp;
+  if (k > desde) el.append(span("mc", titulo.slice(desde, Math.min(k, corte))));
   if (k > corte) el.append(document.createTextNode(titulo.slice(corte, k)));
 }
 
@@ -447,11 +473,12 @@ function pintar(t) {
     const pc = rebote(tramo(uu, 120, 480)), late = o.super && uu > 480 ? 0.05 * Math.sin((uu - 480) / 70) : 0;
     $(".pct", c).style.transform = "scale(" + (uu < 120 ? 0 : 0.3 + 0.7 * pc + late) + ") rotate(" + (-6 * (1 - pc)) + "deg)";
     $(".pct", c).style.filter = o.super && uu > 480 ? "drop-shadow(0 0 " + (22 + 16 * Math.sin((uu - 480) / 70)) + "px var(--acento3))" : "none";
-    // El icono se dibuja (solo sin foto)
+    // La insignia del tipo entra con rebote y su icono se dibuja
+    const ti = rebote(tramo(uu, 80, 420)); $(".tipo", c).style.transform = "scale(" + (uu < 80 ? 0 : 0.2 + 0.8 * ti) + ") rotate(" + (-20 * (1 - ti)) + "deg)";
     const di = salir(tramo(uu, 160, 640)); $(".ico", c).querySelectorAll("*").forEach(e => { e.style.strokeDasharray = "1"; e.style.strokeDashoffset = String(1 - di); });
     // El nombre se escribe en vivo
     const k = Math.round(o.titulo.length * tramo(uu, 260, 760)), escribiendo = k < o.titulo.length && uu >= 260;
-    nombre($(".nom", c), o.titulo, k);
+    nombre($(".nom", c), o.titulo, k, o.desde || 0);
     if (escribiendo || (uu > 760 && uu < 1000 && !o.super && Math.floor(uu / 120) % 2 === 0)) $(".nom", c).append(span("cursor", ""));
     // Las caracteristicas (el segundo titulo)
     caracteristicas($(".sub2", c), o, uu);
@@ -617,5 +644,5 @@ async function main(argv) {
   return 0;
 }
 
-module.exports = { estilo, estiloReel, ofertasReel, paginaReel, duracion, tiempos, sinCodigos, superDe, chipPremium, PALETAS, RITMOS, MS, TIPEO, PISO_SUPER, tipeoDe, main };
+module.exports = { estilo, estiloReel, ofertasReel, paginaReel, duracion, tiempos, sinCodigos, superDe, chipPremium, PALETAS, RITMOS, MS, TIPEO, PISO_SUPER, tipeoDe, prefijoTipo, main };
 if (require.main === module) main(process.argv.slice(2)).then(c => process.exit(c), e => { console.log(`::warning::No se pudo armar el Reel: ${e.message}`); process.exit(0); });

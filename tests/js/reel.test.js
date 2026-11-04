@@ -19,7 +19,7 @@ test("cada oferta lleva el nombre legible: el de ofertas.json o, si no viene, el
   assert.equal(a.titulo, "SAMSUNG GALAXY A17");
   assert.deepEqual(a.chips, ["8/256 GB", "5G", "6.7″"]);
   assert.equal(a.icono, "celular");
-  assert.equal(b.titulo, "KINGSTON NV2");
+  assert.equal(b.titulo, "DISCO KINGSTON NV2");   // v5: nombre corto, con el tipo adelante
   assert.equal(b.contra, "bajo la mediana de otras 3 tiendas");
   assert.equal(R.ofertasReel({ ofertas: Array(14).fill(DATOS.ofertas[0]) }).length, 10);
 });
@@ -129,4 +129,26 @@ test("v4: las caracteristicas premium se marcan (las que brillan en la super ofe
     assert.ok(!R.chipPremium(c), c);
   const [a] = R.ofertasReel({ ofertas: [{ nombre: "x", chips: ["27″", "QD-OLED"], titulo: "A B", icono: "monitor", precio: 1, antes: 2, descuento: 5, comercio: "X" }] });
   assert.deepEqual(a.premium, [false, true]);
+});
+
+/* --- v5 (04/11): el dueño no supo que era un teclado sin mirar la foto con atencion --- */
+test("v5: un nombre corto lleva el tipo en palabras adelante (el de js/titulo.js), sin repetirlo ni poner uno generico", () => {
+  assert.equal(R.prefijoTipo("VSG ALNILAM", "teclado"), "TECLADO ");
+  assert.equal(R.prefijoTipo("ADATA CL22", "memoria"), "MEMORIA ");
+  assert.equal(R.prefijoTipo("MOTOROLA G MAX", "celular"), "");           // tres palabras ya dicen bastante
+  assert.equal(R.prefijoTipo("GIGABYTE MONITOR", "monitor"), "");         // ya lo dice
+  assert.equal(R.prefijoTipo("ASUS PRIME", "componente"), "");             // generico: no suma
+  assert.equal(R.prefijoTipo("MSI GAMING", "cooler"), "REFRIGERACIÓN ");
+  const [a] = R.ofertasReel({ ofertas: [{ nombre: "Teclado Mecanico VSG Alnilam", titulo: "VSG ALNILAM", chips: ["Mecánico"], icono: "teclado",
+    precio: 1, antes: 2, descuento: 52, comercio: "X" }] });
+  assert.equal(a.titulo, "TECLADO VSG ALNILAM");
+  assert.equal(a.desde, 8);                                                   // la marca empieza despues del tipo
+  assert.equal(a.tipo, "Teclado");
+});
+
+test("v5: cada tarjeta trae la insignia con el icono del tipo, grande", () => {
+  const html = R.paginaReel(DATOS);
+  assert.match(html, /<span class="tipo"><svg class="ico"/);
+  assert.match(html, /\.tipo\{position:absolute;[^}]*width:162px;height:162px/);
+  assert.ok(html.includes('"celular":'));                                    // el SVG del tipo viaja en los datos
 });
