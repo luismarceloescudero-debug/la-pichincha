@@ -78,7 +78,7 @@
 - [ ] Formulario de contacto: probar de punta a punta (secretos ya cargados)
 - [ ] AliExpress: cargar `ALIEXPRESS_APP_KEY`, `ALIEXPRESS_APP_SECRET`, `ALIEXPRESS_TRACKING_ID`
 - [ ] Google Search Console: agregar registro TXT en Cloudflare
-- [ ] Seguimiento tiendas (16/11): FullH4rd, Katech, Compra Cierta, Loquieroacá
+- [ ] Seguimiento tiendas (16/11): FullH4rd, Compra Cierta, Loquieroacá (Katech respondio el 04/11 con su feed: integrado)
 
 ---
 

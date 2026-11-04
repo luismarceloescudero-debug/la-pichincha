@@ -9,7 +9,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | # | Pendiente | Qué se destraba | Tiempo |
 |---|---|---|---|
 | 1 | Activar el formulario de contacto | Que lleguen a tu Gmail los mensajes de /contacto/ sin publicar tu correo, y completar «Acerca de» | 15 min |
-| 2 | Escribir a FullH4rd, Katech, Compra Cierta y Loquieroacá | Cuatro tiendas que hoy no entran al índice o a «Afuera» | 15 min |
+| 2 | Escribir a FullH4rd, Katech, Compra Cierta y Loquieroacá (cartas enviadas el 02/11; **Katech respondió el 04/11 con su feed, ya integrado**) | Tres tiendas que hoy no entran al índice o a «Afuera» | esperar respuesta |
 | 3 | eBay (claves y afiliados) | «Afuera» con eBay: precios en vivo y comisión | 30 min + espera |
 | 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
 | 5 | Mercado Libre: confirmar clics | Saber si el link de afiliado cuenta | 2 min |
@@ -144,7 +144,7 @@ o que dejen pasar al indexador. Lo que se midió el 24/10:
 | Tienda | Qué pasa | Desde cuándo |
 |---|---|---|
 | FullH4rd | 0 productos en GitHub; su sitio da 403 también desde el entorno de trabajo | 8/10 (issue #6) |
-| Katech | **Desde el entorno de trabajo trae 2.552 productos; desde GitHub, 0.** Bloquea las IP de los servidores de GitHub | siempre (issue #55) |
+| Katech | **Resuelto el 04/11:** respondió la carta con su feed oficial (`https://katech.com.ar/feed/productos/`, 2.094 productos). El índice lo lee desde entonces; el primer índice con Katech sale en la próxima corrida | antes: siempre (issue #55) |
 | Compra Cierta | 0 productos (traía 27); desde el entorno de trabajo el dominio ni resuelve | 20/10 (issue #96) |
 | Loquieroacá | 403 en «Afuera» | siempre |
 

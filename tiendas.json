@@ -272,9 +272,9 @@
     "activa": true,
     "base": "https://katech.com.ar",
     "catalogo": {
-      "tipo": "woocommerce",
-      "por_pagina": 100,
-      "tope_paginas": 80
+      "tipo": "feed",
+      "url": "https://katech.com.ar/feed/productos/",
+      "permiso": "feed oficial que dio la tienda el 04/11/2026 (respuesta a la carta del 02/11)"
     },
     "lista_es_oferta": false
   },
