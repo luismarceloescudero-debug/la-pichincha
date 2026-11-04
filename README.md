@@ -456,6 +456,17 @@ Que es una oferta vive en `js/ofertas.js` y lo comparten la pestaña Ofertas, el
 canal. El orden nunca depende de comisiones; cuando haya enlaces de afiliado (F3.2) se
 rotulan.
 
+### Reel de Instagram (spec 045, todavía sin publicar)
+
+`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (~55 s, ritmo pausado) con
+las 10 ofertas: el descuento enorme se estampa, el nombre se escribe en vivo, el precio cuenta hasta el de hoy
+y al final el link a `/hoy/` se escribe y se toca. La súper oferta (la de mayor descuento, desde 20 %) escribe
+sus características letra por letra con brillo. Cada tarjeta lleva el icono del tipo en grande y, si el nombre es corto,
+el tipo en palabras («TECLADO VSG ALNILAM»). Cada día cambian la paleta (tres acentos que combinan), la
+letra, el ritmo, el fondo, la transición y la disposición. Necesita Chrome y ffmpeg. `--fotos 1900,8800` saca
+cuadros sueltos para revisar el diseño y `--ritmo agil|normal|pausado` fuerza un ritmo. No publica nada: eso queda para
+el job de Instagram del PR #126, que espera el OK del dueño.
+
 ## Fiabilidad por comercio
 
 Es dato propio, y por eso ComparaYa no lo puede mostrar: de las ofertas que este sitio
