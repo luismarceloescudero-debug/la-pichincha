@@ -9,7 +9,7 @@
   --good:#8a5300; --good-soft:#fff1cc; --bad:#b8125f;
   --warn:#9a4a00; --warn-soft:#fbeeda;
   --n-precio:#8a5300; --n-rosa:#b8125f; --n-celeste:#00708c; --n-tarjeta:#ffffff; --n-tarjeta2:#efe8ff;
-  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
+  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-titulo-3:#a3135c; --n-lila:#6a1b9a; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0a7677; --gc-soft:#d8f2f2;
   --mx:#a35707; --mx-soft:#fbeeda;
@@ -32,7 +32,7 @@
     --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
     --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
     --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -51,7 +51,7 @@
   --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
   --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
   --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -1045,11 +1045,49 @@ table.nov-tabla tbody tr:nth-child(even) th a{color:var(--n-titulo-2)}
 /* Alternar tambien tarjetas, filas y titulos (pedido del dueño 04/11: «lo mismo con los grupos, titulos, tarjetas»):
    una tarjeta o fila con borde lila y nombre en tinta, la siguiente con borde celeste y nombre en lila claro. Las mejores
    (heroe, primera de la busqueda) conservan su borde rosa. */
-.ogrid>.ocard:nth-child(even of .ocard):not(.n-heroe),.res>.fila:nth-child(even of .fila):not(.top){border-color:var(--n-borde-cel)}
-.ogrid>.ocard:nth-child(even of .ocard) .tit-nom,.res>.fila:nth-child(even of .fila) .tit-nom{color:var(--n-titulo-2)}
 /* los titulos de cada panel de Comparativa, alternados */
 #mas-vendido .panel-head h2{color:var(--ink)}
 #novedades .panel-head h2{color:var(--n-titulo-2)}
 #mas-buscado .panel-head h2{color:var(--n-precio)}
-.ogrid>.ocard.n-heroe:nth-child(even of .ocard.n-heroe){border-color:var(--n-celeste);box-shadow:0 0 30px color-mix(in srgb,var(--n-celeste) 35%,transparent)}
-.ogrid>.ocard.n-heroe:nth-child(even of .ocard.n-heroe) .tit-nom{color:var(--n-titulo-2)}
+
+/* ==== Mas variedad (pedido del dueño 04/11: «todo en blanco; negro en negrita, otros tamaños, otros colores; cada
+   tarjeta o grupo con su color; me gusta el lila; destacar la tienda») ====
+   Rellenos fijos (no cambian con el tema): con texto negro en negrita pasan 4,5:1 en claro y en oscuro. */
+:root{--f-lila:#c79bff;--f-cel:#3ee6ff;--f-ama:#ffd23f;--f-rosa:#ff6eb6;--f-tinta:#120018}
+/* encabezado: el sello en amarillo, la marca en lila, el lema en una franja lila con letra negra */
+#sello{color:var(--n-precio);font-weight:600}
+h1 .marca-sitio{color:var(--n-lila)}
+.wrap>.sub strong{display:inline-block;margin-top:8px;padding:5px 14px 6px;border-radius:12px;background:var(--f-lila);color:var(--f-tinta);
+  font-weight:800;font-size:1.02rem;line-height:1.35}
+.wrap>.sub .largo{color:var(--ink-2)}
+/* titulos de panel en lila con el icono rosa; la linea de cifras en rosa claro */
+.panel-head h2{color:var(--n-lila)}
+.estado{color:var(--n-titulo-3);font:500 .9rem/1.45 var(--font-sans)}
+/* los botones de exportar: cada uno lleno de su color, letra negra en negrita */
+.acciones .acc{border:0;color:var(--f-tinta);font-weight:800;box-shadow:none}
+.acciones .acc .ico{color:var(--f-tinta)}
+.acciones .acc:nth-child(4n+1){background:var(--f-lila)}
+.acciones .acc:nth-child(4n+2){background:var(--f-cel)}
+.acciones .acc:nth-child(4n+3){background:var(--f-ama)}
+.acciones .acc:nth-child(4n+4){background:var(--f-rosa)}
+.acciones .acc:hover{color:var(--f-tinta);filter:brightness(1.08)}
+.of-plegable>summary{background:var(--f-lila);color:var(--f-tinta);border:0;font-weight:800}
+.of-plegable>summary .ico{color:var(--f-tinta)}
+.filtros summary{color:var(--n-lila)}
+/* la tienda, destacada: pastilla llena con letra negra en negrita */
+.tienda,.fila .tie,.oferta .tie,.ocard .tienda{background:var(--f-cel);color:var(--f-tinta);border:0;font-weight:800}
+.tie .via{color:#3b0a57}
+.ocard .tienda{width:max-content;max-width:calc(100% - 28px);margin:10px 14px 0;padding:6px 14px;border-radius:999px;font-size:1.02rem}
+.ocard .tienda .ico{color:var(--f-tinta)}
+table.nov-tabla th small{display:inline-block;margin-top:5px;padding:2px 10px;border-radius:999px;background:var(--f-cel);color:var(--f-tinta);font-weight:800}
+/* cada tarjeta su color, en ciclo de tres: borde, nombre y pastilla de la tienda cambian juntos */
+.ogrid>.ocard:nth-child(3n+1 of .ocard):not(.n-heroe),.res>.fila:nth-child(3n+1 of .fila):not(.top){border-color:color-mix(in srgb,var(--f-lila) 75%,transparent)}
+.ogrid>.ocard:nth-child(3n+2 of .ocard):not(.n-heroe),.res>.fila:nth-child(3n+2 of .fila):not(.top){border-color:var(--n-borde-cel)}
+.ogrid>.ocard:nth-child(3n of .ocard):not(.n-heroe),.res>.fila:nth-child(3n of .fila):not(.top){border-color:color-mix(in srgb,var(--f-rosa) 60%,transparent)}
+.ogrid>.ocard.n-heroe:nth-child(3n+1 of .ocard){border-color:var(--f-rosa);box-shadow:0 0 30px color-mix(in srgb,var(--f-rosa) 40%,transparent)}
+.ogrid>.ocard.n-heroe:nth-child(3n+2 of .ocard){border-color:var(--f-cel);box-shadow:0 0 30px color-mix(in srgb,var(--f-cel) 35%,transparent)}
+.ogrid>.ocard.n-heroe:nth-child(3n of .ocard){border-color:var(--f-lila);box-shadow:0 0 30px color-mix(in srgb,var(--f-lila) 40%,transparent)}
+.ogrid>.ocard:nth-child(3n+2 of .ocard) .tit-nom,.res>.fila:nth-child(3n+2 of .fila) .tit-nom{color:var(--n-titulo-2)}
+.ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-titulo-3)}
+.ogrid>.ocard:nth-child(3n+2 of .ocard) .tienda,.res>.fila:nth-child(3n+2 of .fila) .tie{background:var(--f-lila)}
+.ogrid>.ocard:nth-child(3n of .ocard) .tienda,.res>.fila:nth-child(3n of .fila) .tie{background:var(--f-rosa)}
