@@ -39,7 +39,7 @@ class Mensaje(unittest.TestCase):
         legible = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "titulo": "KINGSTON NV2", "chips": ["1 TB", "NVMe"], "emoji": "💽"},
                                           {**OFERTAS["ofertas"][1], "titulo": "<B>FURY</B>", "chips": ["16 GB"], "emoji": "💾"}]}
         texto = telegram.mensaje(legible)
-        self.assertIn('💽 <b><a href="https://t.test/ssd">KINGSTON NV2</a></b>\n<i>1 TB · NVMe</i>', texto)
+        self.assertIn('💽 <b><a href="https://t.test/ssd">KINGSTON NV2</a></b>\n<i>✦ 1 TB · NVMe</i>', texto)
         self.assertIn("&lt;B&gt;FURY&lt;/B&gt;</a>\n<i>16 GB</i>", texto)
         self.assertNotIn("SSD Kingston 1TB", texto)
 
@@ -72,7 +72,7 @@ class Mensaje(unittest.TestCase):
     def test_la_de_mayor_descuento_va_destacada_y_el_resto_en_citas(self):
         # spec 055: no todo pesa igual. La mejor del dia entre dos barras de color y el resto compacto, en <blockquote>.
         texto = telegram.mensaje(OFERTAS)
-        self.assertIn("LA MEJOR DEL DÍA", texto)
+        self.assertIn("<b>★ SÚPER OFERTA ★</b>", texto)   # spec 059: la cinta del Reel v4 (25 %, pasa el piso de 20)
         self.assertEqual(texto.count(telegram.BARRA), 2)
         heroe, resto = texto.split(telegram.BARRA)[1], texto.split(telegram.BARRA)[2]
         self.assertIn("SSD Kingston 1TB", heroe)
@@ -140,9 +140,9 @@ class Publicacion(unittest.TestCase):
         cuerpo = json.loads(pedido.data.decode("utf-8"))
         self.assertEqual(cuerpo["chat_id"], "@pichinchas")
         self.assertEqual(cuerpo["parse_mode"], "HTML")
-        # La miniatura: la vista previa grande de la pagina /hoy/ del sitio.
+        # La miniatura: la vista previa grande del inicio del sitio; la de /hoy/ se pone despues de publicarlo (spec 059).
         self.assertNotIn("disable_web_page_preview", cuerpo)
-        self.assertEqual(cuerpo["link_preview_options"]["url"], OFERTAS["sitio"] + "hoy/")
+        self.assertEqual(cuerpo["link_preview_options"]["url"], OFERTAS["sitio"])
         self.assertTrue(cuerpo["link_preview_options"]["prefer_large_media"])
         self.assertIn("SSD Kingston 1TB", cuerpo["text"])
 
@@ -368,3 +368,63 @@ class TitulosLargos(unittest.TestCase):
         self.assertNotIn("Ip64", m)
         self.assertIn('<a href="https://t.test/p/MLA1">Celular Infinix Hot 60 Pro', m)
         self.assertIn("…</a>", m)
+
+
+class Reel(unittest.TestCase):
+    """Spec 059: el mensaje con el lenguaje del Reel v4 y, ya publicado el sitio, la imagen de /hoy/ en grande."""
+    ENV = {"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@pichinchas"}
+
+    def setUp(self):
+        self.dir = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.dir)
+        self.ruta, self.estado = self.dir / "ofertas.json", self.dir / "telegram.json"
+        self.ruta.write_text(json.dumps(OFERTAS), encoding="utf-8")
+
+    def correr(self, urlopen, estado):
+        self.estado.write_text(json.dumps(estado), encoding="utf-8")
+        salida = io.StringIO()
+        with mock.patch.dict(os.environ, self.ENV, clear=True), mock.patch.object(telegram.urllib.request, "urlopen", urlopen), \
+                redirect_stdout(salida):
+            self.assertEqual(telegram.main([str(self.ruta), "--vista", str(self.estado)]), 0)
+        return salida.getvalue()
+
+    def test_con_pocas_palabras_el_titulo_lleva_el_tipo_adelante(self):
+        datos = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "titulo": "VSG ALNILAM", "prefijo": "Teclado", "chips": ["Mecánico"],
+                                         "emoji": "⌨️"}]}
+        self.assertIn('⌨️ <b><a href="https://t.test/ssd">Teclado VSG ALNILAM</a></b>\n<i>✦ Mecánico</i>', telegram.mensaje(datos))
+
+    def test_un_dia_flojo_no_tiene_super_oferta(self):
+        datos = {**OFERTAS, "ofertas": [{**OFERTAS["ofertas"][0], "descuento": 12}]}
+        self.assertIn("<b>★ LA MEJOR DEL DÍA ★</b>", telegram.mensaje(datos))
+
+    def test_vista_edita_el_mensaje_de_este_indice_con_la_imagen_de_hoy(self):
+        abrir = respuesta(77)
+        salida = self.correr(abrir, {"generado": OFERTAS["generado"], "message_id": 77, "texto": "el texto que salio"})
+        pedido = abrir.call_args[0][0]
+        self.assertEqual(pedido.full_url, "https://api.telegram.org/bot123:ABC/editMessageText")
+        cuerpo = json.loads(pedido.data.decode("utf-8"))
+        self.assertEqual(cuerpo["message_id"], 77)
+        self.assertEqual(cuerpo["text"], "el texto que salio")              # el mismo texto: solo cambia la vista previa
+        previa = cuerpo["link_preview_options"]
+        self.assertEqual(previa["url"], OFERTAS["sitio"] + "hoy/?v=" + telegram.version(OFERTAS))
+        self.assertTrue(previa["prefer_large_media"] and previa["show_above_text"])
+        self.assertIn("imagen de /hoy/", salida)
+
+    def test_vista_no_toca_el_mensaje_de_otro_indice_ni_manda_uno_nuevo(self):
+        abrir = mock.MagicMock()
+        salida = self.correr(abrir, {"generado": "2026-10-08T08:00-03:00", "message_id": 77, "texto": "viejo"})
+        abrir.assert_not_called()
+        self.assertIn("Sin mensaje de este indice", salida)
+        self.correr(abrir, {})
+        abrir.assert_not_called()
+
+    def test_vista_tolera_que_el_mensaje_ya_tenga_esa_imagen(self):
+        def igual(*a, **k):
+            raise telegram.urllib.error.HTTPError("u", 400, "Bad Request", {},
+                                                  io.BytesIO(b'{"description": "Bad Request: message is not modified"}'))
+        salida = self.correr(igual, {"generado": OFERTAS["generado"], "message_id": 77, "texto": "t"})
+        self.assertNotIn("::warning::", salida)
+
+    def test_la_version_cambia_con_la_lista(self):
+        self.assertEqual(telegram.version(OFERTAS), telegram.version(json.loads(json.dumps(OFERTAS))))
+        self.assertNotEqual(telegram.version(OFERTAS), telegram.version({**OFERTAS, "ofertas": OFERTAS["ofertas"][:1]}))

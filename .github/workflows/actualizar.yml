@@ -278,6 +278,17 @@ jobs:
             done
           fi
 
+      # La imagen de vista previa de /hoy/ (spec 059): hoy/og.png con la super oferta y el diseño del Reel v4, sacada con
+      # Chrome sin ventana desde la lista final (ya verificada). Si sale bien, /hoy/ apunta a ella; si no, queda la imagen
+      # general del sitio. Nunca frena la publicacion.
+      - name: Armar la imagen de /hoy/
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          if [ -f _sitio/ofertas.json ]; then
+            node generar_vista_hoy.js _sitio/ofertas.json --salida _sitio || echo "::warning::No se armo la imagen de /hoy/"
+          fi
+
       # Fiabilidad del dato por comercio (fiabilidad.py): de lo que cada verificacion de arriba reviso, cuantas ofertas
       # estaban en pie, caidas o con otro precio y sin comprobar. Se suma una fila por comercio y dia a
       # historial/verificacion/AAAA-MM.csv (rama `historial`, no main) y se resume la ventana de 30 dias en
@@ -394,3 +405,29 @@ jobs:
     steps:
       - id: desplegar
         uses: actions/deploy-pages@v5
+
+      # spec 059: el mensaje de Telegram salio antes del despliegue, con la vista previa del inicio del sitio (el /hoy/
+      # publicado era el de la corrida anterior). Ya publicado el nuevo, se edita ese mismo mensaje (mismo texto) para que
+      # muestre arriba y en grande la imagen de /hoy/ de este indice. Solo si el mensaje es de este indice y la imagen existe.
+      - uses: actions/checkout@v7
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+        with:
+          sparse-checkout: |
+            publicar_telegram.py
+            sitio.json
+          sparse-checkout-cone-mode: false
+      - name: Poner la imagen del dia en el mensaje de Telegram
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          base=$(python3 -c 'import json;print(json.load(open("sitio.json"))["base_url"].rstrip("/"))')
+          sleep 30   # que la CDN de Pages ya sirva el sitio nuevo
+          if curl -fsSL "$base/ofertas.json" -o ofertas.json && curl -fsSL "$base/telegram.json" -o telegram.json \
+             && curl -fsI "$base/hoy/og.png" >/dev/null; then
+            python3 publicar_telegram.py ofertas.json --vista telegram.json
+          else
+            echo "Sin imagen de /hoy/ o sin mensaje: el mensaje queda con la vista previa general"
+          fi
