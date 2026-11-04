@@ -86,7 +86,7 @@ test("en el canal, una oferta de Mercado Libre trae el enlace de afiliado aparte
 
 test("en /hoy/ y el feed el enlace de Mercado Libre lleva el codigo, rel sponsored y el rotulo", () => {
   const html = F.renderHoy(IDX_ML, { baseUrl: BASE });
-  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658" rel="sponsored noopener"><span class="tit" title="SSD Samsung 990 2TB">[\s\S]*?SAMSUNG 990[\s\S]*?<\/a> <span class="rotulo">enlace de afiliado<\/span>/);
+  assert.match(html, /href="https:\/\/www\.mercadolibre\.com\.ar\/notebook-acer\/p\/MLA67221216\?matt_word=chococuyano&amp;matt_tool=31231658" rel="sponsored noopener"><span class="tit" title="SSD Samsung 990 2TB">[\s\S]*?<span class="tit-marca">SAMSUNG<\/span> 990[\s\S]*?<\/a> <span class="rotulo">enlace de afiliado<\/span>/);
   assert.equal((html.match(/enlace de afiliado/g) || []).length, 1);
   assert.match(html, /href="https:\/\/t\.test\/SSD%20Kingston%201TB" rel="noopener">/);
   const item = F.renderFeed(IDX_ML, { baseUrl: BASE }).match(/<item>[\s\S]*?<\/item>/g).find(i => i.includes("SSD Samsung 990 2TB"));

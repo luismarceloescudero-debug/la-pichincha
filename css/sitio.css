@@ -897,6 +897,8 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .of-chip[aria-pressed="true"] .n{color:inherit}
 
 /* ==== Lenguaje del Reel v4 en todo el sitio (spec 060) ====
+   Alternar, no amontonar (pedido del dueño, 04/11): celeste SOLO para la marca y la tienda; rosa para el tipo de producto,
+   los iconos y los titulos de categoria; amarillo solo para precios y descuentos; chips, botones y bordes en lila neutro.
    El mismo idioma del cartel de /hoy/ (spec 059): fondo violeta, tarjetas de dos tonos con borde celeste, titulos
    condensados en mayusculas y color por rol: el precio amarillo (ambar en claro), el «$», el «−» y el tachado rosa, la
    marca, el «%», la tienda y las chips celeste, las chips en pastilla y las premium con ✦ y degradado rosa-celeste.
@@ -913,17 +915,17 @@ h1{font-family:var(--f-cond);font-weight:800;text-transform:uppercase;letter-spa
 h1 .marca-sitio{background-image:linear-gradient(var(--n-celeste),var(--n-celeste))}
 h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .panel-head h2,.grupo{font-family:var(--f-cond);font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:1.45rem;line-height:1.1}
-.panel-head h2 .ico,.grupo .ico{color:var(--n-celeste)}
-.meta{color:var(--n-celeste)}
+.panel-head h2 .ico,.grupo .ico{color:var(--n-rosa)}
+.meta{color:var(--ink-2)}
 /* pestañas y botones de opcion: la elegida lleva la cinta rosa-celeste del cartel */
 .tablist,.segmentos{background:var(--surface-2);border:1px solid var(--line)}
 .tab[aria-selected="true"],.seg[aria-pressed="true"],.of-chip[aria-pressed="true"]{background:var(--n-cinta);color:var(--n-sobre);box-shadow:0 4px 16px var(--n-brillo)}
 .tab[aria-selected="true"] .n,.seg[aria-pressed="true"] .n{color:var(--n-sobre);background:color-mix(in srgb,var(--n-sobre) 14%,transparent)}
 .tab[aria-selected="true"] .ico,.seg[aria-pressed="true"] .ico{color:var(--n-sobre)}
-.tab .ico{color:var(--n-celeste)}
+.tab .ico{color:var(--ink-2)}
 .of-chip[aria-pressed="true"] .n{color:inherit}
 /* pastillas: sugeridas, historial, filtros, sellos y chips con borde */
-.sug,.hist,.of-chip{border:1.5px solid var(--n-borde-cel);background:color-mix(in srgb,var(--n-celeste) 9%,var(--surface));color:var(--accent)}
+.sug,.hist,.of-chip{border:1.5px solid var(--n-borde);background:var(--surface-2);color:var(--ink)}
 .sug:hover,.hist:hover,.of-chip:hover{background:var(--accent-soft);color:var(--accent);filter:none}
 .of-chip[aria-pressed="true"]{border-color:transparent}
 .hist.borrar{border-color:var(--line);background:var(--surface-2);color:var(--ink-2)}
@@ -931,17 +933,17 @@ h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .chip,.sello{border-radius:999px;border:1px solid var(--line);padding-inline:9px}
 .sello.primera{background:var(--n-cinta);color:var(--n-sobre);border-color:transparent}
 .sello.primera::before{content:"✦ "}
-.sello.baja{background:var(--accent);border-color:var(--accent)}
+.sello.baja{background:var(--n-rosa);border-color:var(--n-rosa);color:var(--n-sobre)}
 .sello.barato{background:var(--good);border-color:var(--good)}
 .sello.off2{border-color:color-mix(in srgb,var(--good) 45%,transparent)}
 .sello.ojo{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
 .chip.ok{border-color:color-mix(in srgb,var(--good) 45%,transparent)}
 /* el nombre legible: la marca celeste, el titulo condensado y las chips en pastilla */
-.tit-ico{color:var(--n-celeste)}
+.tit-ico{color:var(--n-rosa)}
 .tit-marca{color:var(--n-celeste)}
 .tit-nom{font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:.01em;font-size:1.08em;line-height:1.12}
-.tit-chip{border-radius:999px;padding:0 9px;font:600 .74rem/1.55 var(--font-sans);color:var(--accent);
-  background:color-mix(in srgb,var(--n-celeste) 10%,transparent);border:1.5px solid var(--n-borde-cel)}
+.tit-chip{border-radius:999px;padding:0 9px;font:600 .74rem/1.55 var(--font-sans);color:var(--ink-2);
+  background:var(--surface-2);border:1.5px solid var(--n-borde)}
 .tit-chip.pr{color:var(--n-sobre);background:var(--n-cinta);border-color:transparent}
 /* el precio: amarillo y condensado, con el «$» rosa; el tachado, rosa */
 .precio,.fila .pre,.oferta .ahora,.ocard .o-precios .ahora,.dprecio .v,.ult-p,.afv-precio,.tile .v{font-family:var(--f-cond);font-weight:800;letter-spacing:0;color:var(--n-precio)}
@@ -953,9 +955,9 @@ h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .tienda,.fila .tie,.oferta .tie{color:var(--accent);background:color-mix(in srgb,var(--n-celeste) 10%,transparent);border:1.5px solid var(--n-borde-cel)}
 /* tarjetas de dos tonos con borde celeste: comparativa, busqueda, ofertas, paneles */
 .card,.dcard,.fila,.oferta,.bloque,.tile,.ver-item,.ult,.franja,.afuera,.afuera-vivo,.filtros,.scroll,.dcab,.hp-cuerpo{
-  background:var(--n-tarjetas);border-color:var(--n-borde-cel)}
+  background:var(--n-tarjetas);border-color:var(--n-borde)}
 .card,.dcard,.fila,.oferta{border-width:2px;border-radius:18px}
-.fila,.oferta{border-left:2px solid var(--n-borde-cel)}
+.fila,.oferta{border-left:2px solid var(--n-borde)}
 .fila:hover,.oferta:hover,.card:hover,.dcard:hover{border-color:var(--n-celeste);box-shadow:0 0 22px color-mix(in srgb,var(--n-celeste) 25%,transparent)}
 .card .barra,.dcard::before{background:var(--n-cinta)}
 .card.dest,.dcard.mejor,.fila.top{border-color:var(--n-rosa);background:var(--n-tarjetas);box-shadow:0 0 26px var(--n-brillo)}
@@ -967,24 +969,24 @@ h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .tile.ok{border-color:var(--n-rosa);background:var(--n-tarjetas)}
 .tile.ok .v{color:var(--n-precio)}
 .mismo{background:var(--surface-2);border:1px solid var(--line);border-top:0}
-.puente,.consulta-activa{background:var(--n-tarjetas);border:2px solid var(--n-borde-cel)}
+.puente,.consulta-activa{background:var(--n-tarjetas);border:2px solid var(--n-borde)}
 td.foco{background:color-mix(in srgb,var(--n-celeste) 10%,transparent)}
 /* buscador: borde celeste al enfocar, como las chips */
-.buscador input{background:var(--surface);border:2px solid var(--n-borde-cel);border-radius:16px}
+.buscador input{background:var(--surface);border:2px solid var(--n-borde);border-radius:16px}
 .buscador input:focus{border-color:var(--n-celeste);box-shadow:0 0 0 4px color-mix(in srgb,var(--n-celeste) 22%,transparent),0 0 24px var(--n-brillo)}
-.buscador .ico{color:var(--n-celeste)}
-.acc{background:var(--surface);border:1.5px solid var(--n-borde-cel);color:var(--ink)}
-.acc .ico{color:var(--n-celeste)}
+.buscador .ico{color:var(--ink-2)}
+.acc{background:var(--surface);border:1.5px solid var(--n-borde);color:var(--ink)}
+.acc .ico{color:var(--n-rosa)}
 .acc:hover{border-color:var(--n-celeste);color:var(--accent);background:var(--accent-soft)}
 .acc:hover .ico{color:inherit}
 .filtros summary,.of-plegable>summary{color:var(--ink)}
-.filtros summary::before{color:var(--n-celeste)}
-.of-plegable>summary{background:var(--surface);border:1.5px solid var(--n-borde-cel)}
-.of-et{color:var(--accent)}
+.filtros summary::before{color:var(--n-rosa)}
+.of-plegable>summary{background:var(--surface);border:1.5px solid var(--n-borde)}
+.of-et{color:var(--ink-2)}
 /* Ofertas: la tarjeta del cartel. El % grande (− rosa, numero amarillo, % celeste), el precio amarillo sin franja de color,
    la tienda celeste. Las mejores (heroe) llevan el borde rosa con brillo, como la super oferta. */
 .ocard{--l1:transparent;--tint:color-mix(in srgb,var(--n-celeste) 12%,transparent);--band:transparent;--lite:transparent;--a1:var(--n-celeste);
-  background:var(--n-tarjetas);border:2px solid var(--n-borde-cel);border-radius:20px}
+  background:var(--n-tarjetas);border:2px solid var(--n-borde);border-radius:20px}
 .ocard:hover,.ocard.abierta,.ocard:has(.o-abrir:focus-visible),.ocard.propia:hover,.ocard.propia.abierta{border-color:var(--n-celeste)}
 .ocard .o-off b,.ocard.n-heroe .o-off b{font-family:var(--f-cond);font-weight:800;color:var(--n-precio);letter-spacing:-.01em}
 .o-off .sig{color:var(--n-rosa)}
@@ -997,32 +999,40 @@ td.foco{background:color-mix(in srgb,var(--n-celeste) 10%,transparent)}
 .ocard .o-ahorro b,.ocard.n-heroe .o-ahorro b{color:var(--n-precio);font-family:var(--f-cond)}
 .ocard .tienda{color:var(--accent);border:0;background:none;font-family:var(--font-sans);font-size:.98rem}
 .ocard .tit-nom{font-family:var(--f-cond);font-weight:700;text-transform:uppercase;font-size:1.25rem;letter-spacing:.01em;line-height:1.1}
-.ocard .tit-chip{font:600 .74rem/1.5 var(--font-sans);background:color-mix(in srgb,var(--n-celeste) 10%,transparent);color:var(--accent)}
+.ocard .tit-chip{font:600 .74rem/1.5 var(--font-sans);background:var(--surface-2);color:var(--ink-2)}
 .ocard .tit-chip.pr{background:var(--n-cinta);color:var(--n-sobre)}
-.ocard .o-cinta{background:#120018;color:#fff4ff;border:1.5px solid rgba(62,230,255,.6)}
+.ocard .o-cinta{background:#120018;color:#fff4ff;border:1.5px solid rgba(255,110,182,.7)}
 .ocard.n-heroe{background:var(--n-tarjetas);color:var(--ink);border:3px solid var(--n-rosa);box-shadow:0 0 30px var(--n-brillo)}
 .ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-ahorro{color:var(--ink)}
-.ocard.n-heroe .tit-ico{color:var(--n-celeste)}
-.ocard.n-heroe .tit-chip{background:color-mix(in srgb,var(--n-celeste) 10%,transparent);color:var(--accent)}
+.ocard.n-heroe .tit-ico{color:var(--n-rosa)}
+.ocard.n-heroe .tit-chip{background:var(--surface-2);color:var(--ink-2)}
 .ocard.n-heroe .tit-chip.pr{background:var(--n-cinta);color:var(--n-sobre)}
-.ocard.n-heroe .acc{background:var(--surface);border-color:var(--n-borde-cel);color:var(--ink)}
+.ocard.n-heroe .acc{background:var(--surface);border-color:var(--n-borde);color:var(--ink)}
 .ocard.n-heroe .acc:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--n-celeste)}
 .ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:var(--ink-2)}
 .o-banda,.o-banda.b-1{background:var(--n-cinta);color:var(--n-sobre)}
 .o-banda b{font-family:var(--f-cond);text-transform:uppercase;letter-spacing:.04em}
 .off{background:var(--n-rosa);color:var(--n-sobre)}
 .off.propia{background:var(--accent)}
-/* lo mas buscado / vendido / ultimo: los enlaces de las tablas, celeste */
-table.pt-tabla td a,table.nov-tabla a{color:var(--accent)}
+/* «También en»: el nombre de la tienda en tinta, para no amontonar celeste debajo de la tienda de la fila */
+.mismo a{color:var(--ink)}
 @media print{body{background:#fff}.precio::first-letter,.fila .pre::first-letter{color:#000}}
 /* Buscar en el celular: el buscador fijo deja ver el fondo, y el precio de cada fila pesa como en el cartel */
 @media (max-width:620px){.buscador{background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}
 .fila .pre{font-size:1.45rem;line-height:1}
 /* Lo mas vendido / lo ultimo y las tablas de /precios/: categoria condensada celeste, nombre en tinta, tienda celeste,
    precio amarillo con el «$» rosa */
-#novedades h3,#mas-vendido h3,.panel>h3{font-family:var(--f-cond);font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--n-celeste);font-size:1.2rem;margin:20px 0 8px}
-table.nov-tabla th a{color:var(--ink);font-weight:600;text-decoration-color:var(--n-borde-cel);text-underline-offset:3px}
+#novedades h3,#mas-vendido h3,.panel>h3{font-family:var(--f-cond);font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--n-rosa);font-size:1.2rem;margin:20px 0 8px}
+table.nov-tabla th a{color:var(--ink);font-weight:600;text-decoration-color:var(--n-borde);text-underline-offset:3px}
 table.nov-tabla th small{color:var(--accent);font-weight:600}
 table.pt-tabla td.num{font-family:var(--f-cond);font-weight:800;font-size:1.25rem;color:var(--n-precio)}
 table.pt-tabla td.num::first-letter{color:var(--n-rosa)}
 table.pt-tabla td.num small{font:400 .74rem var(--font-sans);color:var(--ink-3)}
+/* Alternar los grupos de Comparativa (pedido del dueño, 04/11: «dos grupos mismos colores»): un grupo con titulo y borde
+   rosa, el siguiente celeste; y dentro de cada grupo las filas intercaladas con otro tono, para que no sea una mancha. */
+#novedades>h3:nth-of-type(odd),#mas-vendido>h3:nth-of-type(odd){color:var(--n-rosa)}
+#novedades>h3:nth-of-type(even),#mas-vendido>h3:nth-of-type(even){color:var(--n-celeste)}
+#novedades>.scroll:nth-of-type(even),#mas-vendido>.scroll:nth-of-type(even){border:2px solid color-mix(in srgb,var(--n-rosa) 55%,transparent)}
+#novedades>.scroll:nth-of-type(odd),#mas-vendido>.scroll:nth-of-type(odd){border:2px solid var(--n-borde-cel)}
+table.nov-tabla tbody tr:nth-child(even){background:color-mix(in srgb,var(--n-fondo-alto) 55%,transparent)}
+table.nov-tabla tbody tr:hover{background:color-mix(in srgb,var(--n-fondo-alto) 80%,transparent)}
