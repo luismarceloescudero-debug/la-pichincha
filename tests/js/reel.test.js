@@ -80,3 +80,53 @@ test("el titulo del Reel es marca y nombre, sin codigos de modelo; las caracteri
   assert.match(html, /<p class="sub2"><\/p>/);
   assert.doesNotMatch(html, /class="chip"/);
 });
+
+/* --- v4 (04/11): mas lento, colores combinados, numeros enormes y la super oferta --- */
+const luz = hex => { const c = hex.match(/\w\w/g).map(x => parseInt(x, 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const contraste = (a, b) => { const [x, y] = [luz(a), luz(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+
+test("v4: cada paleta combina tres acentos y todos se leen sobre los dos tonos de la tarjeta (>= 3:1)", () => {
+  for (const p of R.PALETAS) {
+    assert.equal(new Set([p.acento, p.acento2, p.acento3]).size, 3, p.nombre);
+    for (const fondo of ["tarjeta", "tarjeta2"])
+      for (const k of ["tinta", "acento", "acento2", "acento3"])
+        assert.ok(contraste(p[k], p[fondo]) >= 3, `${p.nombre}: ${k} sobre ${fondo} = ${contraste(p[k], p[fondo]).toFixed(2)}`);
+    for (const k of ["acento2", "acento3"])
+      assert.ok(contraste(p.sobre, p[k]) >= 3, `${p.nombre}: sobre en ${k} = ${contraste(p.sobre, p[k]).toFixed(2)}`);
+  }
+});
+
+test("v4: mas lento que la v3 (2,3-3,1 s por oferta, ~29 s): cada ritmo deja la tarjeta mas tiempo", () => {
+  for (const r of R.RITMOS) assert.ok(r.oferta > 3100 && r.paso > 1, r.nombre);
+  assert.ok(R.duracion(10, R.RITMOS[0]) > 40000);
+  const html = R.paginaReel(DATOS, { ritmo: "agil" });
+  assert.match(html, /"paso":1\.5/);
+});
+
+test("v4: la super oferta es la de mayor descuento si llega al 20 %, una sola, y dura mas por su tipeo", () => {
+  const o = (descuento, chips = ["27″", "4K", "QD-OLED"]) => ({ nombre: "Monitor X", titulo: "SAMSUNG ODYSSEY G8", chips, icono: "monitor", precio: 1, antes: 2, descuento, comercio: "X" });
+  const lista = R.ofertasReel({ ofertas: [o(30), o(45), o(45), o(10)] });
+  assert.deepEqual(lista.map(x => x.super), [false, true, false, false]);
+  assert.equal(R.superDe(R.ofertasReel({ ofertas: [o(19), o(12)] })), -1);
+  const s = lista[1];
+  assert.equal(s.tipeo, R.tipeoDe(s.chips));
+  assert.equal(R.tipeoDe(["A"]), 600);                       // con pocas letras no se espera de mas
+  assert.equal(R.tipeoDe(["x".repeat(80)]), R.TIPEO);       // ni se pasa del tope
+  const r = R.RITMOS[1];
+  assert.deepEqual(R.tiempos(lista, r), [r.oferta, r.oferta + Math.round(s.tipeo * r.paso), r.oferta, r.oferta]);
+  assert.equal(R.duracion(lista, r), r.intro + 4 * r.oferta + Math.round(s.tipeo * r.paso) + r.cierre);
+  const html = R.paginaReel({ generado: "2026-11-04T10:00-03:00", ofertas: [o(30), o(45)] });
+  assert.match(html, /<i class="s"><b><\/b><\/i>/);           // su barra va con el color de la super oferta
+  assert.match(html, /SÚPER OFERTA/);
+  assert.match(html, /<span class="h">HASTA<\/span><span class="sig">−<\/span><span class="num">45<\/span><span class="por">%<\/span>/);
+});
+
+test("v4: las caracteristicas premium se marcan (las que brillan en la super oferta)", () => {
+  for (const c of ["QD-OLED", "4K", "240 Hz", "RTX 5070", "Ryzen AI 7 350", "Core i7", "Core Ultra 9", "DDR5", "2 TB", "32 GB RAM", "Mecánico", "15.1″ OLED 165 Hz"])
+    assert.ok(R.chipPremium(c), c);
+  for (const c of ["8/256 GB", "FHD", "IPS", "75 Hz", "RTX 3050", "Core i5", "DDR4", "512 GB SSD", "16 GB RAM", "SODIMM", "CL22", "7.1"])
+    assert.ok(!R.chipPremium(c), c);
+  const [a] = R.ofertasReel({ ofertas: [{ nombre: "x", chips: ["27″", "QD-OLED"], titulo: "A B", icono: "monitor", precio: 1, antes: 2, descuento: 5, comercio: "X" }] });
+  assert.deepEqual(a.premium, [false, true]);
+});

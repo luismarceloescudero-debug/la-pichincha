@@ -2,7 +2,7 @@
 /* El Reel de las Pichinchas del dia (spec 045): un video vertical 1080x1920 con las 10 ofertas de ofertas.json.
 
 Uso:
-    node generar_reel.js _sitio/ofertas.json [--salida _sitio] [--fps 30] [--chrome RUTA] [--solo-html]
+    node generar_reel.js _sitio/ofertas.json [--salida _sitio] [--fps 30] [--chrome RUTA] [--solo-html] [--ritmo agil|normal|pausado]
 
 Arma una pagina (instagram/reel-AAAA-MM-DD.html) que se pinta en funcion del tiempo (`pintar(ms)`), la abre en Chrome
 sin interfaz, saca un cuadro por cada 1/fps de segundo por el protocolo de DevTools (el WebSocket de Node 22+, sin
@@ -13,6 +13,8 @@ Formato: 9:16 (1080x1920) es lo que Instagram muestra entero en Reels e historia
 del medio (y 250-1500): arriba y abajo van los controles de Instagram, y la grilla del perfil recorta a 3:4.
 Cada dia cambian la paleta, la tipografia, el ritmo, el fondo, la transicion y la disposicion (`estilo`), siempre con
 contraste para leerse en el celular. De fondo va la foto del producto (la de la tienda, desenfocada) y, nitida, en la tarjeta.
+v4 (04/11, pedido del dueño): mas lento, colores combinados (cada paleta trae tres acentos y una tarjeta de dos tonos),
+el descuento y el precio enormes, y la super oferta del dia con sus caracteristicas escritas letra por letra con brillo.
 
 No publica nada: solo arma el archivo. Publicarlo es del job de Instagram (PR #126), que espera el OK del dueño. */
 "use strict";
@@ -24,15 +26,25 @@ const { spawn, execFileSync } = require("child_process");
 const T = require("./js/titulo.js");
 
 const ANCHO = 1080, ALTO = 1920;
-// El ritmo «normal»; cada dia elige uno de RITMOS.
-const MS = { intro: 3000, oferta: 2700, cierre: 4000 };   // el «normal»; 31/10: el dueño pidio mas lento, con 1,45 s por oferta no daba tiempo a leer
+/* Los ritmos. `oferta` es lo que dura cada tarjeta y `paso` cuanto se estira el armado (1 = el de la v1, 1,45 s):
+   el resto de la tarjeta queda quieta para leerla. v3 (31/10): 2,3 / 2,7 / 3,1 s por oferta. v4 (04/11): el dueño pidio
+   mas lento todavia, 3,4 / 3,9 / 4,4 s, y el armado tambien va mas despacio. */
+const MS = { intro: 3400, oferta: 3900, cierre: 4600, paso: 1.65 };   // el «normal»
 const RITMOS = [
-  { nombre: "agil", intro: 2600, oferta: 2300, cierre: 3600 },
+  { nombre: "agil", intro: 3000, oferta: 3400, cierre: 4200, paso: 1.5 },
   { nombre: "normal", ...MS },
-  { nombre: "pausado", intro: 3400, oferta: 3100, cierre: 4400 },
+  { nombre: "pausado", intro: 3800, oferta: 4400, cierre: 5000, paso: 1.8 },
 ];
+/* La super oferta suma este tiempo (en unidades de armado, se multiplica por `paso`): sus caracteristicas se escriben letra
+   por letra antes del precio. */
+const TIPEO = 1300, TIPEO_MIN = 600, POR_LETRA = 55;
+/* El tipeo de una super oferta: 55 unidades por letra de sus caracteristicas, entre 600 y 1300 (con pocas no se espera de mas). */
+const tipeoDe = chips => Math.max(TIPEO_MIN, Math.min(TIPEO, POR_LETRA * chips.join("").length));
+/* Super oferta = la de mayor descuento del Reel, si llega al piso de los «heroes» de la pestaña Ofertas (spec 055,
+   PISO_HEROE de js/indice-ofertas.js): un dia flojo no tiene super oferta. Una sola por Reel, para que destaque. */
+const PISO_SUPER = 20;
 // Juegos de letras de Google Fonts con acentos y ñ: titulo (condensada o de impacto), texto y numeros (monoespaciada).
-// `escala` iguala el ancho: una letra ancha (Archivo Black) va mas chica para que el nombre entre en tres lineas.
+// `escala` iguala el ancho: una letra ancha (Archivo Black) va mas chica para que el nombre entre en las lineas.
 const LETRAS = [
   { nombre: "plex", titulo: "IBM Plex Sans Condensed", peso: 700, texto: "IBM Plex Sans", mono: "IBM Plex Mono", escala: 1 },
   { nombre: "bebas", titulo: "Bebas Neue", peso: 400, texto: "Inter", mono: "JetBrains Mono", escala: 1.12 },
@@ -44,14 +56,23 @@ const LETRAS = [
 const DISPOSICIONES = ["tarjeta", "plena"];
 
 /* --- El estilo del dia ------------------------------------------------------- */
-// Paletas con contraste AA para texto grande sobre su fondo (tinta sobre fondo, acento sobre fondo).
+/* Paletas con contraste para texto grande (>= 3:1, lo prueba tests/js/reel.test.js): tinta y los tres acentos sobre la
+   tarjeta (dos tonos, `tarjeta` arriba y `tarjeta2` abajo), y `sobre` (el texto de la cinta de la super oferta) sobre
+   acento2 y acento3. Los acentos se combinan: acento = el precio y el numero del descuento; acento2 = la marca, el «%»,
+   las caracteristicas y la tienda; acento3 = el «$», el «−», lo premium y la super oferta. */
 const PALETAS = [
-  { nombre: "noche", fondo: "#0b1020", fondo2: "#1a2a6c", tinta: "#f5f7ff", suave: "#aab4d6", acento: "#5ee7a0", chip: "#22305e", tachado: "#ff8a8a" },
-  { nombre: "papel", fondo: "#fbf6ec", fondo2: "#f0e3c8", tinta: "#1d1a16", suave: "#5e5548", acento: "#c2410c", chip: "#efe2c6", tachado: "#9f1239" },
-  { nombre: "neon", fondo: "#120018", fondo2: "#3b0a57", tinta: "#fff4ff", suave: "#d7b8e6", acento: "#ffd23f", chip: "#43105f", tachado: "#ff7eb6" },
-  { nombre: "pizarra", fondo: "#0f1f1a", fondo2: "#1e4d3f", tinta: "#effaf5", suave: "#a7cfc0", acento: "#ffb347", chip: "#21463a", tachado: "#ff9b85" },
-  { nombre: "cielo", fondo: "#eaf3ff", fondo2: "#bcd8ff", tinta: "#0b1b33", suave: "#3f5675", acento: "#0b4fd8", chip: "#d3e5ff", tachado: "#b42318" },
-  { nombre: "atardecer", fondo: "#2a0f12", fondo2: "#7a2e1f", tinta: "#fff3ea", suave: "#f0c7b0", acento: "#ffd166", chip: "#5a2420", tachado: "#ffb4a2" },
+  { nombre: "noche", fondo: "#0b1020", fondo2: "#1a2a6c", tinta: "#f5f7ff", suave: "#aab4d6", acento: "#5ee7a0", acento2: "#ff7ad9", acento3: "#ffd23f",
+    tarjeta: "#121a45", tarjeta2: "#2a1250", sobre: "#0b1020", chip: "#22305e", tachado: "#ff8a8a" },
+  { nombre: "papel", fondo: "#fbf6ec", fondo2: "#f0e3c8", tinta: "#1d1a16", suave: "#5e5548", acento: "#c2410c", acento2: "#0e5a87", acento3: "#7c2d92",
+    tarjeta: "#fffdf7", tarjeta2: "#f6e7c8", sobre: "#ffffff", chip: "#efe2c6", tachado: "#9f1239" },
+  { nombre: "neon", fondo: "#120018", fondo2: "#3b0a57", tinta: "#fff4ff", suave: "#d7b8e6", acento: "#ffd23f", acento2: "#3ee6ff", acento3: "#ff5fae",
+    tarjeta: "#26063b", tarjeta2: "#0c1446", sobre: "#120018", chip: "#43105f", tachado: "#ff7eb6" },
+  { nombre: "pizarra", fondo: "#0f1f1a", fondo2: "#1e4d3f", tinta: "#effaf5", suave: "#a7cfc0", acento: "#ffb347", acento2: "#7fdcff", acento3: "#ff86a8",
+    tarjeta: "#143229", tarjeta2: "#1d2748", sobre: "#0f1f1a", chip: "#21463a", tachado: "#ff9b85" },
+  { nombre: "cielo", fondo: "#eaf3ff", fondo2: "#bcd8ff", tinta: "#0b1b33", suave: "#3f5675", acento: "#0b4fd8", acento2: "#b0136f", acento3: "#0d6e45",
+    tarjeta: "#ffffff", tarjeta2: "#dbe9ff", sobre: "#ffffff", chip: "#d3e5ff", tachado: "#b42318" },
+  { nombre: "atardecer", fondo: "#2a0f12", fondo2: "#7a2e1f", tinta: "#fff3ea", suave: "#f0c7b0", acento: "#ffd166", acento2: "#7ee6c8", acento3: "#ff9cc0",
+    tarjeta: "#3f1518", tarjeta2: "#2a1a45", sobre: "#2a0f12", chip: "#5a2420", tachado: "#ffb4a2" },
 ];
 const FONDOS = ["grilla", "rayas", "puntos"];
 const TRANSICIONES = ["deslizar", "zoom", "cortina"];
@@ -67,7 +88,6 @@ function estilo(fecha) {
 }
 
 /* --- Los datos ----------------------------------------------------------------- */
-const pesos = n => "$" + Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
 const fechaDe = datos => String(datos.generado || "").slice(0, 10);
 
 // La foto va en un src y en un url() de CSS: solo https, sin comillas, espacios ni parentesis.
@@ -84,33 +104,67 @@ function sinCodigos(titulo, tipo) {
   return (sin.length >= 2 ? sin.join(" ") : `${sin[0] || ""} ${T.NOMBRE_TIPO[tipo] || ""}`).trim().toUpperCase();
 }
 
+/* Una caracteristica premium: la que pone al producto arriba de su gama (las mismas señales que js/premium.js mira en el
+   titulo, en version de chip): panel OLED o Mini-LED, 4K, 144 Hz o mas, placa RTX/RX de gama alta, procesador 7 o 9 o con
+   NPU, DDR5, 1 TB o mas, 32 GB o mas de RAM, PCIe 5, Wi-Fi 7, teclado mecanico. Lo que no dice la chip no se inventa. */
+const PREMIUM = [
+  /oled|mini-?led/i, /\b(?:4k|uhd|2160p)\b/i, /\b(?:1[4-9]\d|[2-9]\d\d)\s?hz\b/i,
+  /\brtx\s?(?:[45]0[6-9]0|[45]0[6-9]0\s?ti)\b/i, /\brx\s?(?:7[89]00|90[67]0)/i,
+  /\b(?:core\s?(?:ultra\s?)?|i)[79]\b|\bryzen\s?(?:ai\s?)?[79]\b|\bryzen\s?ai\b|\bcore\s?ultra\b/i,
+  /\bddr5\b/i, /\b(?:[1-9]|[1-9]\d)\s?tb\b/i, /\b(?:32|48|64|96|128)\s?gb\b/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
+];
+const chipPremium = chip => PREMIUM.some(re => re.test(String(chip)));
+
 /* Lo que pinta el Reel por oferta. Con un ofertas.json de antes de la spec 044 lo calcula desde el nombre. */
 function ofertasReel(datos, max = 10) {
-  return (datos.ofertas || []).slice(0, max).map(o => {
-    const t = T.de(o.nombre);
-    return { titulo: sinCodigos(o.titulo || t.titulo, o.icono || t.tipo), chips: o.chips || t.chips, icono: o.icono || t.tipo,
+  const lista = (datos.ofertas || []).slice(0, max).map(o => {
+    const t = T.de(o.nombre), chips = o.chips || t.chips;
+    return { titulo: sinCodigos(o.titulo || t.titulo, o.icono || t.tipo), chips, premium: chips.map(chipPremium), icono: o.icono || t.tipo,
       precio: o.precio, antes: o.antes, descuento: o.descuento, comercio: o.comercio,
-      contra: o.contra || "", imagen: URL_FOTO.test(o.imagen || "") ? o.imagen : "" };
+      contra: o.contra || "", imagen: URL_FOTO.test(o.imagen || "") ? o.imagen : "", super: false };
   });
+  const s = superDe(lista);
+  if (s >= 0) { lista[s].super = true; lista[s].tipeo = tipeoDe(lista[s].chips); }
+  return lista;
 }
 
-const duracion = (n, ritmo = MS) => ritmo.intro + n * ritmo.oferta + ritmo.cierre;
+/* El indice de la super oferta (la de mayor descuento, la primera si empatan) o -1 si ninguna llega a PISO_SUPER. */
+function superDe(ofertas) {
+  let mejor = -1;
+  ofertas.forEach((o, i) => { if ((+o.descuento || 0) >= PISO_SUPER && (mejor < 0 || +o.descuento > +ofertas[mejor].descuento)) mejor = i; });
+  return mejor;
+}
+
+/* Cuanto dura cada tarjeta: la super oferta suma el tipeo de sus caracteristicas. */
+const tiempos = (ofertas, ritmo = MS) => ofertas.map(o => ritmo.oferta + (o.super ? Math.round(o.tipeo * ritmo.paso) : 0));
+/* La duracion total: con un numero, n ofertas comunes; con la lista, cuenta la super oferta. */
+const duracion = (ofertas, ritmo = MS) => ritmo.intro + (typeof ofertas === "number" ? ofertas * ritmo.oferta : tiempos(ofertas, ritmo).reduce((a, b) => a + b, 0)) + ritmo.cierre;
 
 /* --- La pagina ----------------------------------------------------------------- */
 const escHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-function paginaReel(datos, { sitio = "pichinchadeldia.com.ar/hoy" } = {}) {
-  const fecha = fechaDe(datos);
+/* El estilo con el que se arma: el del dia, o con otro ritmo si se pide (`--ritmo pausado`, para comparar). */
+function estiloReel(fecha, ritmo) {
   const est = estilo(fecha);
+  const r = RITMOS.find(x => x.nombre === ritmo);
+  return r ? { ...est, ritmo: r } : est;
+}
+
+function paginaReel(datos, { sitio = "pichinchadeldia.com.ar/hoy", ritmo } = {}) {
+  const fecha = fechaDe(datos);
+  const est = estiloReel(fecha, ritmo);
   const p = est.paleta;
   const ofertas = ofertasReel(datos);
   const iconos = Object.fromEntries([...new Set(ofertas.map(o => o.icono))].map(k => [k, T.ICONOS[k] || T.ICONOS.otro]));
   const dia = fecha ? `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}` : "";
+  const tope = Math.max(0, ...ofertas.map(o => +o.descuento || 0));
   // Los datos van como JSON dentro de un <script type="application/json">: se escapa «<» para que no cierre la etiqueta.
-  const ms = { intro: est.ritmo.intro, oferta: est.ritmo.oferta, cierre: est.ritmo.cierre };
+  const ms = { intro: est.ritmo.intro, cierre: est.ritmo.cierre, paso: est.ritmo.paso, dur: tiempos(ofertas, est.ritmo) };
   const L = est.letra, fam = f => f.replace(/ /g, "+");
   const fuentes = `family=${fam(L.titulo)}:wght@${L.peso}&family=${fam(L.texto)}:wght@600;700;800&family=${fam(L.mono)}:wght@500;700`;
   const json = JSON.stringify({ ofertas, iconos, dia, sitio, ms, transicion: est.transicion }).replace(/</g, "\\u003c");
+  const colores = ["fondo", "fondo2", "tinta", "suave", "acento", "acento2", "acento3", "tarjeta", "tarjeta2", "sobre", "chip", "tachado"]
+    .map(k => `--${k}:${p[k]}`).join(";");
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=${ANCHO}">
@@ -119,7 +173,7 @@ function paginaReel(datos, { sitio = "pichinchadeldia.com.ar/hoy" } = {}) {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fuentes}&display=block">
 <style>
 :root{--f-tit:"${L.titulo}",sans-serif;--f-txt:"${L.texto}",sans-serif;--f-mono:"${L.mono}",monospace;--p-tit:${L.peso};--esc:${L.escala};
-  --fondo:${p.fondo};--fondo2:${p.fondo2};--tinta:${p.tinta};--suave:${p.suave};--acento:${p.acento};--chip:${p.chip};--tachado:${p.tachado}}
+  ${colores}}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:${ANCHO}px;height:${ALTO}px;overflow:hidden;background:var(--fondo)}
 body{font-family:var(--f-txt);color:var(--tinta)}
@@ -130,82 +184,126 @@ body{font-family:var(--f-txt);color:var(--tinta)}
 .patron.rayas{background-image:repeating-linear-gradient(-45deg,var(--suave) 0 3px,transparent 3px 46px)}
 .patron.puntos{background-image:radial-gradient(var(--suave) 3.5px,transparent 4px);background-size:54px 54px}
 section{position:absolute;inset:0;display:none}
+/* Los simbolos y numeros enormes: cada parte con su color */
+.sig{color:var(--acento3)} .num{color:var(--acento)} .por{color:var(--acento2)}
 /* Franja segura: y 250-1500 */
 .marca{position:absolute;left:90px;right:90px;top:250px;display:flex;justify-content:space-between;align-items:center;
   font:700 34px var(--f-mono);letter-spacing:.12em;color:var(--acento)}
+.marca .d{color:var(--acento2)}
 .barras{position:absolute;left:90px;right:90px;top:200px;display:flex;gap:10px}
-.barras i{flex:1;height:8px;border-radius:4px;background:color-mix(in srgb,var(--suave) 35%,transparent);overflow:hidden}
-.barras i b{display:block;height:100%;width:0;background:var(--acento)}
-#intro h1{position:absolute;left:80px;right:60px;top:560px;font:var(--p-tit) calc(150px * var(--esc))/0.95 var(--f-tit);letter-spacing:-.02em}
+.barras i{flex:1;height:10px;border-radius:5px;background:color-mix(in srgb,var(--suave) 35%,transparent);overflow:hidden}
+.barras i b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acento),var(--acento2))}
+.barras i.s b{background:linear-gradient(90deg,var(--acento3),var(--acento2))}
+#intro h1{position:absolute;left:80px;right:60px;top:380px;font:var(--p-tit) calc(150px * var(--esc))/0.95 var(--f-tit);letter-spacing:-.02em}
 #intro h1 span{display:block}
-#intro .sub{position:absolute;left:90px;right:90px;top:920px;font:600 48px/1.3 var(--f-txt);color:var(--suave)}
-#intro .fecha{position:absolute;left:90px;top:1120px;font:700 56px var(--f-mono);color:var(--fondo);background:var(--acento);
-  padding:10px 26px;border-radius:18px}
-#oferta .tarjeta{position:absolute;left:60px;right:60px;top:330px;height:1200px;border-radius:56px;padding:60px 60px 56px;
+#intro h1 span:first-child{color:var(--tinta)} #intro h1 span:last-child{color:var(--acento2)}
+#intro .tope{position:absolute;left:80px;right:40px;top:700px;white-space:nowrap;font:var(--p-tit) calc(300px * var(--esc))/0.9 var(--f-tit);letter-spacing:-.02em}
+#intro .tope .h{font-size:.3em;letter-spacing:.04em;color:var(--tinta);margin-right:.15em;vertical-align:.9em}
+#intro .sub{position:absolute;left:90px;right:90px;top:1030px;font:600 48px/1.3 var(--f-txt);color:var(--suave)}
+#intro .sub b{color:var(--acento);font-weight:800}
+#intro .fecha{position:absolute;left:90px;top:1250px;font:700 56px var(--f-mono);color:var(--sobre);
+  background:linear-gradient(90deg,var(--acento3),var(--acento2));padding:10px 26px;border-radius:18px}
+#oferta .tarjeta{position:absolute;left:60px;right:60px;top:300px;height:1200px;border-radius:56px;padding:54px 60px 50px;
   display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;
-  background:color-mix(in srgb,var(--fondo) 72%,transparent);border:3px solid color-mix(in srgb,var(--suave) 40%,transparent);
-  backdrop-filter:blur(6px);will-change:transform,opacity,clip-path}
-.pct{display:inline-block;font:var(--p-tit) calc(140px * var(--esc))/1 var(--f-tit);color:var(--fondo);background:var(--acento);
-  padding:18px 34px 22px;border-radius:34px;transform-origin:20% 60%}
-.ico{display:block;flex:none;width:120px;height:120px;margin:30px 0 12px;color:var(--acento)}
+  background:linear-gradient(165deg,color-mix(in srgb,var(--tarjeta) 94%,transparent),color-mix(in srgb,var(--tarjeta2) 94%,transparent));
+  border:4px solid color-mix(in srgb,var(--acento2) 55%,transparent);
+  will-change:transform,opacity,clip-path}
+/* El descuento enorme: «−» acento3, numero acento, «%» acento2 */
+.pct{display:inline-flex;align-items:baseline;white-space:nowrap;font:var(--p-tit) calc(260px * var(--esc))/0.82 var(--f-tit);letter-spacing:-.02em;
+  transform-origin:20% 60%;text-shadow:0 6px 30px color-mix(in srgb,var(--fondo) 55%,transparent)}
+.pct .por{font-size:.82em;margin-left:.03em}
+.ico{display:block;flex:none;width:96px;height:96px;margin:22px 0 4px;color:var(--acento2)}
 .ico *{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.nom{flex:none;font:var(--p-tit) calc(106px * var(--esc))/1 var(--f-tit);letter-spacing:-.005em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.cursor{display:inline-block;width:.08em;height:.9em;margin-left:.06em;background:var(--acento);vertical-align:-.08em}
-/* El segundo titulo: las caracteristicas en una linea, mas chica que el nombre y del color del dia */
-.sub2{flex:none;margin-top:22px;font:600 46px/1.22 var(--f-txt);letter-spacing:.005em;color:var(--acento);
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.precios{margin-top:auto;display:flex;align-items:baseline;gap:8px 28px;flex-wrap:wrap}
-.ahora{font:700 120px/1 var(--f-mono);letter-spacing:-.02em}
-.antes{position:relative;font:600 46px var(--f-mono);color:var(--suave)}
-.antes i{position:absolute;left:-4px;top:52%;height:6px;width:0;background:var(--tachado);border-radius:3px}
-.tienda{margin-top:18px;font:600 40px/1.25 var(--f-txt);color:var(--suave)}
-.tienda b{color:var(--tinta)}
+.tarjeta:not(:has(.foto.sin)) .ico{display:none}
+.nom{flex:none;margin-top:30px;font:var(--p-tit) calc(104px * var(--esc))/1 var(--f-tit);letter-spacing:-.005em;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--tinta)}
+.nom .mc{color:var(--acento2)}
+.super .nom{text-shadow:0 0 30px color-mix(in srgb,var(--acento3) 55%,transparent)}
+/* Tarjeta con foto: el descuento comparte la fila con la foto y el nombre empieza debajo de ella */
+.disp-tarjeta .tarjeta:not(:has(.foto.sin)) .pct{font-size:calc(230px * var(--esc))}
+.disp-tarjeta .tarjeta:not(:has(.foto.sin)) .nom{margin-top:62px}
+.cursor{display:inline-block;width:.08em;height:.9em;margin-left:.06em;background:var(--acento3);vertical-align:-.08em}
+/* El segundo titulo: las caracteristicas, cada una en su pastilla; las premium en acento3 */
+.sub2{flex:none;margin:6px -24px 0;padding:18px 24px;display:flex;flex-wrap:wrap;gap:16px 14px;max-height:262px;overflow:hidden}
+.sub2>span{position:relative;display:inline-block;padding:8px 22px 10px;border-radius:999px;font:700 46px/1.1 var(--f-txt);white-space:nowrap;
+  color:var(--acento2);background:color-mix(in srgb,var(--acento2) 15%,transparent);border:3px solid color-mix(in srgb,var(--acento2) 60%,transparent)}
+.sub2>span.pr{color:var(--acento3);background:color-mix(in srgb,var(--acento3) 15%,transparent);border-color:var(--acento3)}
+/* Super oferta: la pastilla que se escribe brilla, y al completarse una premium pasa un destello */
+.sub2>span.escribe{box-shadow:0 0 34px color-mix(in srgb,var(--acento3) 75%,transparent);text-shadow:0 0 18px var(--acento3);border-color:var(--acento3);color:var(--tinta)}
+.sub2>span.brilla{color:var(--sobre);border-color:transparent;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.85) 50%,transparent 65%) var(--x,-100%) 0/300% 100% no-repeat,linear-gradient(90deg,var(--acento3),var(--acento2))}
+.sub2 .chispa{position:absolute;font:400 60px/1 var(--f-txt);color:var(--acento3);text-shadow:0 0 14px var(--acento3);pointer-events:none}
+.precios{margin-top:auto;display:flex;flex-direction:column;align-items:flex-start;gap:18px;width:100%}
+.ahora{display:block;white-space:nowrap;font:var(--p-tit) 260px/0.88 var(--f-tit);letter-spacing:-.02em;color:var(--acento);font-variant-numeric:tabular-nums}
+.ahora .sig{margin-right:.03em}
+.antes{position:relative;font:700 64px var(--f-mono);color:var(--suave)}
+.antes i{position:absolute;left:-4px;top:52%;height:7px;width:0;background:var(--tachado);border-radius:4px}
+.tienda{margin-top:14px;font:600 44px/1.25 var(--f-txt);color:var(--suave)}
+.tienda b{color:var(--acento2)}
+.cinta{display:none;position:absolute;left:0;right:0;top:0;height:86px;align-items:center;justify-content:center;gap:22px;
+  font:var(--p-tit) calc(56px * var(--esc))/1 var(--f-tit);letter-spacing:.16em;color:var(--sobre);
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.7) 50%,transparent 60%) var(--x,-100%) 0/300% 100% no-repeat,linear-gradient(90deg,var(--acento3),var(--acento2),var(--acento3))}
+#oferta .tarjeta.super{padding-top:116px;border-color:var(--acento3);box-shadow:0 0 70px color-mix(in srgb,var(--acento3) 45%,transparent)}
+.tarjeta.super .cinta{display:flex}
 #cierre h2{position:absolute;left:90px;right:90px;top:470px;font:800 120px/0.98 var(--f-txt);letter-spacing:-.02em}
+#cierre h2 .num{font-size:1.25em}
 #cierre .link{position:absolute;left:70px;right:70px;top:900px;font:700 50px var(--f-mono);color:var(--tinta);
   background:var(--chip);border:3px solid var(--acento);border-radius:28px;padding:34px 36px;overflow:hidden;white-space:nowrap}
 #cierre .onda{position:absolute;width:40px;height:40px;border-radius:50%;background:var(--acento);opacity:0;pointer-events:none}
-#cierre .bio{position:absolute;left:90px;right:90px;top:1110px;font:800 70px var(--f-txt);color:var(--acento)}
-#cierre .bio span{display:inline-block}
+#cierre .bio{position:absolute;left:90px;right:90px;top:1110px;font:800 70px var(--f-txt);color:var(--acento2)}
+#cierre .bio span{display:inline-block;color:var(--acento3)}
 #cierre .letra{position:absolute;left:90px;right:90px;top:1300px;font:600 34px/1.4 var(--f-txt);color:var(--suave)}
 /* La foto del producto: de fondo, desenfocada bajo un velo del color del dia; nitida en la tarjeta. */
 .fotofondo{position:absolute;inset:-60px;background:center/cover no-repeat;filter:blur(26px) saturate(1.25);opacity:0;transform:scale(1.08)}
 .velo{position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--fondo) 70%,transparent),color-mix(in srgb,var(--fondo) 88%,transparent))}
-.foto{position:absolute;right:52px;top:52px;width:280px;height:280px;object-fit:contain;background:#fff;border-radius:36px;padding:18px;
+.foto{position:absolute;right:52px;top:52px;width:250px;height:250px;object-fit:contain;background:#fff;border-radius:36px;padding:18px;
   box-shadow:0 18px 50px rgba(0,0,0,.35);opacity:0}
+.tarjeta.super .foto{top:116px}
+.disp-tarjeta .tarjeta.super .nom{-webkit-line-clamp:2}
 .foto.sin{display:none}
 /* Disposicion «plena»: sin caja, la foto grande arriba y el descuento encima */
-.disp-plena #oferta .tarjeta{background:transparent;border:none;backdrop-filter:none;padding-top:0}
-.disp-plena .foto{position:relative;right:auto;top:auto;width:100%;height:440px;margin:0 0 26px;order:-1;padding:30px;border-radius:44px}
-.disp-plena .pct{position:absolute;left:28px;top:28px;z-index:1;box-shadow:0 12px 40px rgba(0,0,0,.35)}
-.disp-plena .ico{display:none}
-/* Sin foto, el descuento vuelve a su lugar y el icono tambien */
-.disp-plena .tarjeta:has(.foto.sin){padding-top:60px}
-.disp-plena .tarjeta:has(.foto.sin) .pct{position:static;box-shadow:none}
-.disp-plena .tarjeta:has(.foto.sin) .ico{display:block}
+.disp-plena #oferta .tarjeta{background:transparent;border:none;box-shadow:none;padding-top:0}
+.disp-plena #oferta .tarjeta.super{padding-top:96px}
+.disp-plena .foto{position:relative;right:auto;top:auto;width:100%;height:360px;margin:0 0 6px;order:-1;padding:30px;border-radius:44px}
+.disp-plena .tarjeta.super .foto{top:auto;height:280px}
+.disp-plena .sub2>span{font-size:40px}
+.disp-plena .sub2{padding:12px 24px;gap:12px}
+.disp-plena .ahora{font-size:220px}
 .disp-plena .nom{-webkit-line-clamp:2}
+.disp-plena .pct{position:absolute;left:28px;top:220px;z-index:1;padding:6px 26px 14px;border-radius:36px;
+  background:color-mix(in srgb,var(--tarjeta) 92%,transparent);box-shadow:0 12px 40px rgba(0,0,0,.35);font-size:calc(200px * var(--esc))}
+.disp-plena .tarjeta.super .pct{top:236px}
+.disp-plena .cinta{border-radius:30px}
+.disp-plena .nom{margin-top:24px}
+/* Sin foto, el descuento vuelve a su lugar */
+.disp-plena .tarjeta:has(.foto.sin){padding-top:60px}
+.disp-plena .tarjeta.super:has(.foto.sin){padding-top:116px}
+.disp-plena .tarjeta:has(.foto.sin) .pct{position:static;box-shadow:none;background:none;padding:0;font-size:calc(260px * var(--esc))}
 </style></head>
 <body class="disp-${est.disposicion}"><div id="esc">
 <div class="fotofondo"></div><div class="velo"></div>
 <div class="patron ${est.fondo}"></div>
-<div class="barras">${ofertas.map(() => "<i><b></b></i>").join("")}</div>
+<div class="barras">${ofertas.map(o => `<i${o.super ? ' class="s"' : ""}><b></b></i>`).join("")}</div>
 <section id="intro">
   <div class="marca"><span>LA PICHINCHA</span><span class="d"></span></div>
   <h1><span>PICHINCHAS</span><span>DEL DÍA</span></h1>
-  <p class="sub">${ofertas.length} bajas de precio en hardware, verificadas en cada tienda.</p>
+  ${tope ? `<p class="tope"><span class="h">HASTA</span><span class="sig">−</span><span class="num">${tope}</span><span class="por">%</span></p>` : ""}
+  <p class="sub"><b>${ofertas.length}</b> bajas de precio en hardware, verificadas en cada tienda.</p>
   <span class="fecha"></span>
 </section>
 <section id="oferta"><div class="tarjeta">
-  <span class="pct"></span>
+  <div class="cinta"><span>★</span><span>SÚPER OFERTA</span><span>★</span></div>
+  <span class="pct"><span class="sig">−</span><span class="num"></span><span class="por">%</span></span>
   <img class="foto" alt="">
   <svg class="ico" viewBox="0 0 24 24"></svg>
   <h2 class="nom"></h2>
   <p class="sub2"></p>
-  <div class="precios"><span class="ahora"></span><span class="antes"><span class="a"></span><i></i></span></div>
+  <div class="precios"><span class="ahora"><span class="sig">$</span><span class="n"></span></span><span class="antes"><span class="a"></span><i></i></span></div>
   <p class="tienda"></p>
 </div></section>
 <section id="cierre">
   <div class="marca"><span>LA PICHINCHA</span><span class="d"></span></div>
-  <h2>Las ${ofertas.length}, con su link a la tienda</h2>
+  <h2>Las <span class="num">${ofertas.length}</span>, con su link a la tienda</h2>
   <div class="link"><span class="txt"></span><span class="cursor"></span></div>
   <span class="onda"></span>
   <p class="bio"><span>↗</span> Link en la bio</p>
@@ -221,107 +319,175 @@ const clamp = x => Math.max(0, Math.min(1, x));
 const tramo = (u, a, b) => clamp((u - a) / (b - a));
 const salir = x => 1 - Math.pow(1 - x, 3);                      // ease-out cubica
 const rebote = x => { const c = 1.70158, d = c + 1; return 1 + d * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
-const pesos = n => "$" + Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
+const miles = n => Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
 const mostrar = id => { for (const s of document.querySelectorAll("section")) s.style.display = s.id === id ? "block" : "none"; };
+const span = (clase, texto) => { const e = document.createElement("span"); if (clase) e.className = clase; e.textContent = texto; return e; };
 document.querySelectorAll(".marca .d").forEach(e => e.textContent = D.dia);
 $("#intro .fecha").textContent = "HOY " + D.dia;
+// Donde empieza cada tarjeta (la super oferta dura mas)
+const INI = [];
+D.ms.dur.reduce((a, d, i) => (INI[i] = a, a + d), D.ms.intro);
+const FIN = D.ms.intro + D.ms.dur.reduce((a, b) => a + b, 0);
 
 let actual = -1;
 function cargar(i) {
   if (i === actual) return;
   actual = i;
-  const o = D.ofertas[i], c = $("#oferta");
+  const o = D.ofertas[i], c = $("#oferta"), tj = $(".tarjeta", c);
+  tj.classList.toggle("super", !!o.super);
   // La foto: nitida en la tarjeta y desenfocada de fondo; sin foto (o si no bajo) queda el fondo del dia.
   const ok = o.imagen && FOTOS[i];
   $(".foto", c).classList.toggle("sin", !ok);
   if (ok) $(".foto", c).src = o.imagen;
   $(".fotofondo").style.backgroundImage = ok ? 'url("' + o.imagen + '")' : "none";
-  $(".pct", c).textContent = "−" + o.descuento + "%";
+  $(".pct .num", c).textContent = o.descuento;
   $(".ico", c).innerHTML = D.iconos[o.icono] || "";
   $(".ico", c).querySelectorAll("*").forEach(e => e.setAttribute("pathLength", "1"));
-  $(".sub2", c).textContent = o.chips.join("  ·  ");
-  $(".antes .a", c).textContent = o.antes ? pesos(o.antes) : "";
+  $(".antes .a", c).textContent = o.antes ? "$" + miles(o.antes) : "";
   $(".tienda", c).innerHTML = "en <b></b>" + (o.contra ? " · " : "");
   $(".tienda b", c).textContent = o.comercio;
   if (o.contra) $(".tienda", c).append(o.contra);
+  // El precio va lo mas grande que entra en el ancho de la tarjeta (se mide con el numero mas largo: el de antes).
+  const ah = $(".ahora", c), largo = miles(Math.max(o.antes || 0, o.precio));
+  const tope = document.body.classList.contains("disp-plena") ? 220 : 260;
+  ah.style.fontSize = tope + "px";
+  $(".n", ah).textContent = largo;
+  const libre = $(".precios", c).clientWidth || 840;
+  ah.style.fontSize = Math.min(tope, Math.floor(tope * libre / Math.max(1, ah.scrollWidth))) + "px";
+}
+
+/* El nombre: la marca (primera palabra) en acento2 y el resto en tinta, escrito hasta k letras. */
+function nombre(el, titulo, k) {
+  el.textContent = "";
+  const corte = titulo.indexOf(" ") < 0 ? titulo.length : titulo.indexOf(" ");
+  el.append(span("mc", titulo.slice(0, Math.min(k, corte))));
+  if (k > corte) el.append(document.createTextNode(titulo.slice(corte, k)));
+}
+
+/* Las caracteristicas. Comunes: entran de a una. Super oferta: se escriben letra por letra; la que se forma brilla con
+   chispas, y al completarse una premium pasa un destello y queda en el degradado de acento3 a acento2. */
+function caracteristicas(el, o, uu) {
+  el.textContent = "";
+  if (!o.super) {
+    o.chips.forEach((ch, j) => {
+      const s = span(o.premium[j] ? "pr" : "", ch), e = salir(tramo(uu, 720 + j * 90, 960 + j * 90));
+      s.style.opacity = e; s.style.transform = "translateY(" + (26 * (1 - e)) + "px)";
+      el.append(s);
+    });
+    return;
+  }
+  const total = o.chips.reduce((a, ch) => a + ch.length, 0) || 1, a = 760, b = 760 + o.tipeo - 200;
+  const k = Math.floor(total * tramo(uu, a, b));
+  let usado = 0;
+  for (let j = 0; j < o.chips.length; j++) {
+    const ch = o.chips[j], ve = Math.min(ch.length, k - usado);
+    if (ve <= 0 && !(j === 0 && uu >= a)) break;
+    const fin = a + (b - a) * (usado + ch.length) / total;     // cuando termina de escribirse esta
+    const s = span(o.premium[j] ? "pr" : "", ch.slice(0, Math.max(0, ve)));
+    if (ve < ch.length) {
+      s.classList.add("escribe");
+      const cur = span("cursor", ""); s.append(cur);
+      // dos chispas que giran alrededor de la pastilla que se escribe
+      for (let q = 0; q < 2; q++) {
+        const ang = uu / 90 + q * Math.PI, ch2 = span("chispa", "✦");
+        ch2.style.left = (50 + 46 * Math.cos(ang)) + "%"; ch2.style.top = (45 + 52 * Math.sin(ang)) + "%";
+        ch2.style.transform = "translate(-50%,-50%) scale(" + (0.6 + 0.5 * Math.abs(Math.sin(uu / 70 + q))) + ") rotate(" + (uu / 3) + "deg)";
+        s.append(ch2);
+      }
+    } else {
+      const pop = tramo(uu, fin, fin + 220);
+      s.style.transform = "scale(" + (1 + 0.16 * Math.sin(Math.PI * pop)) + ")";
+      if (o.premium[j]) { s.classList.add("brilla"); s.style.setProperty("--x", (160 - 260 * salir(tramo(uu, fin, fin + 520))) + "%"); s.prepend("✦ "); }
+    }
+    el.append(s);
+    usado += ch.length;
+    if (ve < ch.length) break;
+  }
 }
 
 /* Todo depende de t (ms): el mismo t da siempre el mismo cuadro. */
 function pintar(t) {
   const n = D.ofertas.length, ms = D.ms;
-  const fin = ms.intro + n * ms.oferta;
   $(".patron").style.transform = "translate(" + (-(t / 40) % 90) + "px," + (-(t / 55) % 90) + "px)";
-  document.querySelectorAll(".barras b").forEach((b, j) => {
-    b.style.width = (100 * clamp((t - ms.intro - j * ms.oferta) / ms.oferta)) + "%";
-  });
+  document.querySelectorAll(".barras b").forEach((b, j) => { b.style.width = (100 * clamp((t - INI[j]) / ms.dur[j])) + "%"; });
   $(".barras").style.opacity = t < ms.intro ? 0 : 1;
   if (t < ms.intro) {
     mostrar("intro");
     $(".fotofondo").style.opacity = 0;
     const h = document.querySelectorAll("#intro h1 span");
-    h.forEach((s, j) => { const p = salir(tramo(t, 150 + j * 170, 650 + j * 170)); s.style.transform = "translateY(" + (90 * (1 - p)) + "px)"; s.style.opacity = p; });
-    const sub = salir(tramo(t, 900, 1400)); $("#intro .sub").style.opacity = sub; $("#intro .sub").style.transform = "translateY(" + (30 * (1 - sub)) + "px)";
-    const f = rebote(tramo(t, 1200, 1650)); $("#intro .fecha").style.transform = "scale(" + (0.4 + 0.6 * f) + ")"; $("#intro .fecha").style.opacity = clamp(f * 2);
-    const out = tramo(t, ms.intro - 250, ms.intro); $("#intro").style.opacity = 1 - out;
+    h.forEach((s, j) => { const p = salir(tramo(t, 150 + j * 200, 750 + j * 200)); s.style.transform = "translateY(" + (90 * (1 - p)) + "px)"; s.style.opacity = p; });
+    const tp = $("#intro .tope");
+    if (tp) { const r = rebote(tramo(t, 700, 1250)); tp.style.opacity = clamp(r * 2); tp.style.transform = "scale(" + (0.3 + 0.7 * r) + ")"; tp.style.transformOrigin = "0 70%"; }
+    const sub = salir(tramo(t, 1150, 1650)); $("#intro .sub").style.opacity = sub; $("#intro .sub").style.transform = "translateY(" + (30 * (1 - sub)) + "px)";
+    const f = rebote(tramo(t, 1450, 1900)); $("#intro .fecha").style.transform = "scale(" + (0.4 + 0.6 * f) + ")"; $("#intro .fecha").style.opacity = clamp(f * 2);
+    const out = tramo(t, ms.intro - 300, ms.intro); $("#intro").style.opacity = 1 - out;
     return;
   }
-  if (t < fin) {
+  if (t < FIN) {
     mostrar("oferta");
-    const i = Math.floor((t - ms.intro) / ms.oferta), u = (t - ms.intro) % ms.oferta;
+    let i = 0; while (i < n - 1 && t >= INI[i + 1]) i++;
+    const u = t - INI[i], d = ms.dur[i];
     cargar(i);
-    const o = D.ofertas[i], c = $("#oferta"), tj = $(".tarjeta", c), uu = u * 1700 / ms.oferta;
+    const o = D.ofertas[i], c = $("#oferta"), tj = $(".tarjeta", c), uu = u / ms.paso;
+    const extra = o.super ? o.tipeo : 0;              // la super oferta corre el precio para despues del tipeo
     // Entrada y salida de la tarjeta segun la transicion del dia
-    const ent = salir(tramo(u, 0, 260)), sal = tramo(u, ms.oferta - 200, ms.oferta);
+    const ent = salir(tramo(u, 0, 320)), sal = tramo(u, d - 240, d);
     if (D.transicion === "zoom") { tj.style.transform = "scale(" + (0.85 + 0.15 * ent + 0.1 * sal) + ")"; tj.style.opacity = ent * (1 - sal); tj.style.clipPath = "none"; }
     else if (D.transicion === "cortina") { tj.style.transform = "none"; tj.style.opacity = 1 - sal; tj.style.clipPath = "inset(0 0 " + (100 * (1 - ent)) + "% 0 round 56px)"; }
     else { tj.style.transform = "translateX(" + (900 * (1 - ent) - 900 * sal * sal) + "px)"; tj.style.opacity = 1; tj.style.clipPath = "none"; }
+    // La cinta de la super oferta: un destello que la cruza cada 1,2 s
+    if (o.super) $(".cinta", c).style.setProperty("--x", (160 - 260 * ((u % 1200) / 1200)) + "%");
     // La foto aparece y se acerca despacio (efecto Ken Burns); de fondo, la misma foto desenfocada
     const fo = salir(tramo(uu, 60, 420));
     $(".foto", c).style.opacity = fo;
-    $(".foto", c).style.transform = "scale(" + (0.9 + 0.1 * fo + 0.04 * tramo(uu, 420, 1700)) + ")";
+    $(".foto", c).style.transform = "scale(" + (0.9 + 0.1 * fo + 0.04 * tramo(u, 420 * ms.paso, d)) + ")";
     $(".fotofondo").style.opacity = 0.9 * salir(tramo(u, 0, 300)) * (1 - 0.5 * sal);
-    $(".fotofondo").style.transform = "scale(" + (1.08 + 0.06 * tramo(u, 0, ms.oferta)) + ")";
-    // El descuento se estampa
-    const pc = rebote(tramo(uu, 120, 460)); $(".pct", c).style.transform = "scale(" + (uu < 120 ? 0 : 0.3 + 0.7 * pc) + ") rotate(" + (-6 * (1 - pc)) + "deg)";
-    // El icono se dibuja
+    $(".fotofondo").style.transform = "scale(" + (1.08 + 0.06 * tramo(u, 0, d)) + ")";
+    // El descuento se estampa; en la super oferta despues late con brillo
+    const pc = rebote(tramo(uu, 120, 480)), late = o.super && uu > 480 ? 0.05 * Math.sin((uu - 480) / 70) : 0;
+    $(".pct", c).style.transform = "scale(" + (uu < 120 ? 0 : 0.3 + 0.7 * pc + late) + ") rotate(" + (-6 * (1 - pc)) + "deg)";
+    $(".pct", c).style.filter = o.super && uu > 480 ? "drop-shadow(0 0 " + (22 + 16 * Math.sin((uu - 480) / 70)) + "px var(--acento3))" : "none";
+    // El icono se dibuja (solo sin foto)
     const di = salir(tramo(uu, 160, 640)); $(".ico", c).querySelectorAll("*").forEach(e => { e.style.strokeDasharray = "1"; e.style.strokeDashoffset = String(1 - di); });
     // El nombre se escribe en vivo
     const k = Math.round(o.titulo.length * tramo(uu, 260, 760)), escribiendo = k < o.titulo.length && uu >= 260;
-    $(".nom", c).textContent = o.titulo.slice(0, k);
-    if (escribiendo || (uu > 760 && uu < 1000 && Math.floor(uu / 120) % 2 === 0)) { const cur = document.createElement("span"); cur.className = "cursor"; $(".nom", c).append(cur); }
-    // El segundo titulo (las caracteristicas) entra deslizandose despues del nombre
-    const s2 = salir(tramo(uu, 720, 1000)); $(".sub2", c).style.opacity = s2; $(".sub2", c).style.transform = "translateY(" + (22 * (1 - s2)) + "px)";
+    nombre($(".nom", c), o.titulo, k);
+    if (escribiendo || (uu > 760 && uu < 1000 && !o.super && Math.floor(uu / 120) % 2 === 0)) $(".nom", c).append(span("cursor", ""));
+    // Las caracteristicas (el segundo titulo)
+    caracteristicas($(".sub2", c), o, uu);
     // El precio cuenta del de antes al de hoy, y el de antes se tacha
-    const pr = salir(tramo(uu, 760, 1180)), desde = o.antes || o.precio;
-    $(".ahora", c).textContent = pesos(desde + (o.precio - desde) * pr);
-    $(".ahora", c).style.opacity = clamp(tramo(uu, 700, 820));
-    $(".antes", c).style.opacity = clamp(tramo(uu, 980, 1100));
-    $(".antes i", c).style.width = "calc(" + (100 * salir(tramo(uu, 1100, 1320))) + "% + 8px)";
-    $(".tienda", c).style.opacity = clamp(tramo(uu, 1000, 1150));
+    const pr = salir(tramo(uu, 760 + extra, 1240 + extra)), desde = o.antes || o.precio;
+    $(".ahora .n", c).textContent = miles(desde + (o.precio - desde) * pr);
+    $(".ahora", c).style.opacity = clamp(tramo(uu, 700 + extra, 820 + extra));
+    $(".ahora", c).style.transform = "scale(" + (1 + 0.06 * Math.sin(Math.PI * tramo(uu, 1180 + extra, 1420 + extra))) + ")";
+    $(".ahora", c).style.transformOrigin = "0 80%";
+    $(".antes", c).style.opacity = clamp(tramo(uu, 980 + extra, 1100 + extra));
+    $(".antes i", c).style.width = "calc(" + (100 * salir(tramo(uu, 1100 + extra, 1320 + extra))) + "% + 8px)";
+    $(".tienda", c).style.opacity = clamp(tramo(uu, 1000 + extra, 1150 + extra));
     return;
   }
   mostrar("cierre");
   $(".fotofondo").style.opacity = 0;
-  const v = t - fin, cz = $("#cierre");
-  const h2 = salir(tramo(v, 0, 450)); $("h2", cz).style.opacity = h2; $("h2", cz).style.transform = "translateY(" + (60 * (1 - h2)) + "px)";
+  const v = t - FIN, cz = $("#cierre");
+  const h2 = salir(tramo(v, 0, 500)); $("h2", cz).style.opacity = h2; $("h2", cz).style.transform = "translateY(" + (60 * (1 - h2)) + "px)";
   // El link se escribe y se «toca»: una onda sale del link y abre
-  const lk = $(".link", cz), k = Math.round(D.sitio.length * tramo(v, 400, 1300));
+  const lk = $(".link", cz), k = Math.round(D.sitio.length * tramo(v, 450, 1450));
   lk.style.opacity = clamp(tramo(v, 300, 450));
   $(".txt", lk).textContent = D.sitio.slice(0, k);
-  $(".cursor", lk).style.opacity = v < 1300 || Math.floor(v / 200) % 2 ? 1 : 0;
-  const toque = tramo(v, 1450, 2050), on = $(".onda", cz);
+  $(".cursor", lk).style.opacity = v < 1450 || Math.floor(v / 200) % 2 ? 1 : 0;
+  const toque = tramo(v, 1650, 2300), on = $(".onda", cz);
   on.style.left = (90 + 700) + "px"; on.style.top = (900 + 40) + "px";
   on.style.opacity = toque > 0 && toque < 1 ? 0.55 * (1 - toque) : 0;
   on.style.transform = "translate(-50%,-50%) scale(" + (1 + 26 * salir(toque)) + ")";
-  lk.style.transform = "scale(" + (1 - 0.04 * Math.sin(Math.PI * tramo(v, 1450, 1650))) + ")";
+  lk.style.transform = "scale(" + (1 - 0.04 * Math.sin(Math.PI * tramo(v, 1650, 1850))) + ")";
   lk.style.background = toque > 0.15 ? "var(--acento)" : "var(--chip)";
   lk.style.color = toque > 0.15 ? "var(--fondo)" : "var(--tinta)";
-  const bio = salir(tramo(v, 1600, 2000)); $(".bio", cz).style.opacity = bio;
+  const bio = salir(tramo(v, 1850, 2250)); $(".bio", cz).style.opacity = bio;
   $(".bio span", cz).style.transform = "translate(" + (12 * Math.sin(v / 140)) + "px," + (-12 * Math.sin(v / 140)) + "px)";
-  $(".letra", cz).style.opacity = clamp(tramo(v, 1900, 2300));
+  $(".letra", cz).style.opacity = clamp(tramo(v, 2150, 2550));
 }
 window.pintar = pintar;
-window.DURACION = D.ms.intro + D.ofertas.length * D.ms.oferta + D.ms.cierre;
+window.DURACION = FIN + D.ms.cierre;
 // «#t=4000» pinta ese momento al abrir: sirve para revisar un cuadro con una captura de Chrome.
 const T0 = +(location.hash.match(/t=(\d+)/) || [0, 0])[1];
 // Se espera a las letras y a las fotos (cada una con 8 s de tope: una tienda lenta no frena el Reel, esa oferta va sin foto).
@@ -340,7 +506,6 @@ pintar(T0);
 `;
 }
 
-/* --- La captura ----------------------------------------------------------------- */
 const NAVEGADORES = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser",
   "C:/Program Files/Google/Chrome/Application/chrome.exe", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"];
 function navegador(dado) {
@@ -428,7 +593,8 @@ async function main(argv) {
   const fecha = fechaDe(datos), carpeta = path.join(salida, "instagram");
   fs.mkdirSync(carpeta, { recursive: true });
   const html = path.join(carpeta, `reel-${fecha}.html`);
-  fs.writeFileSync(html, paginaReel(datos), "utf8");
+  const ritmo = arg("ritmo");
+  fs.writeFileSync(html, paginaReel(datos, { ritmo }), "utf8");
   if (argv.includes("--solo-html")) { console.log(`Reel (solo la pagina): ${html}`); return 0; }
   const chrome = navegador(arg("chrome"));
   if (!chrome) { console.log("::warning::No hay Chrome: no se arma el Reel"); return 0; }
@@ -442,13 +608,14 @@ async function main(argv) {
     const { cuadros: n, total } = await capturar(html, cuadros, { chrome, fps });
     const mp4 = path.join(carpeta, `${fecha}.mp4`);
     video(cuadros, mp4, fps);
-    // Portada: el cuadro de la primera oferta ya armada (se ve el descuento, el nombre y el precio).
-    const r = estilo(fecha).ritmo, portada = Math.min(n - 1, Math.round((r.intro + r.oferta * 0.9) / 1000 * fps));
+    // Portada: la super oferta ya armada (si no hay, la primera): se ve el descuento enorme, el nombre y el precio.
+    const est = estiloReel(fecha, ritmo), r = est.ritmo, lista = ofertasReel(datos), dur = tiempos(lista, r), s = Math.max(0, superDe(lista));
+    const portada = Math.min(n - 1, Math.round((r.intro + dur.slice(0, s).reduce((a, b) => a + b, 0) + dur[s] * 0.9) / 1000 * fps));
     fs.copyFileSync(path.join(cuadros, `c${String(portada).padStart(5, "0")}.jpg`), path.join(carpeta, `${fecha}-portada.jpg`));
-    console.log(`Reel armado: ${mp4} (${(total / 1000).toFixed(1)} s, ${n} cuadros, estilo ${Object.values(estilo(fecha)).map(x => typeof x === "string" ? x : x.nombre).join("/")})`);
+    console.log(`Reel armado: ${mp4} (${(total / 1000).toFixed(1)} s, ${n} cuadros, estilo ${Object.values(est).map(x => typeof x === "string" ? x : x.nombre).join("/")})`);
   } finally { fs.rmSync(cuadros, { recursive: true, force: true }); }
   return 0;
 }
 
-module.exports = { estilo, ofertasReel, paginaReel, duracion, sinCodigos, PALETAS, MS, main };
+module.exports = { estilo, estiloReel, ofertasReel, paginaReel, duracion, tiempos, sinCodigos, superDe, chipPremium, PALETAS, RITMOS, MS, TIPEO, PISO_SUPER, tipeoDe, main };
 if (require.main === module) main(process.argv.slice(2)).then(c => process.exit(c), e => { console.log(`::warning::No se pudo armar el Reel: ${e.message}`); process.exit(0); });
