@@ -134,7 +134,8 @@ una fuente dada de baja con `"activa": false`.
 | FullH4rd | busquedas por termino | Open Graph |
 | Venex | categorias hoja del sitemap, paginadas con `?page=` | el precio de la tarjeta (contado efectivo) |
 | Maximus | cada pagina de cada categoria, listada en `sitemap-paginas.xml` (131) | el bloque de tarjetas que la pagina escribe en el servidor (`mxSeoSSR`): precio por transferencia o efectivo, 10% menos que el de lista |
-| The Gamer Shop, Max Tecno, Katech, SCP Hardstore, Click Gaming, GoldenTech | la Store API publica de WooCommerce (`/wp-json/wc/store/v1/products`), de a 100 y solo lo que esta en stock | la misma API: el precio especial por efectivo o transferencia (verificado en la pagina de un producto de cada una) |
+| Katech | su feed oficial de productos (Google Merchant, `https://katech.com.ar/feed/productos/`), que la tienda dio el 04/11 con permiso: un solo pedido, solo lo nuevo y en stock; si el feed tiene mas de 3 dias, falla como fuente | el mismo feed: `g:sale_price` si lo hay, si no `g:price` (verificado contra la pagina de un producto: coincide) |
+| The Gamer Shop, Max Tecno, SCP Hardstore, Click Gaming, GoldenTech | la Store API publica de WooCommerce (`/wp-json/wc/store/v1/products`), de a 100 y solo lo que esta en stock | la misma API: el precio especial por efectivo o transferencia (verificado en la pagina de un producto de cada una) |
 | OnCity, Carrefour, Naldo, Authogar, Pardo, Bringeri, Motorola, D'Ricco, Nuevas Hogar, Coppel, Compra Cierta, LG Shop, BGH | la API publica de catalogo de VTEX (`/api/catalog_system/pub/`): el arbol de categorias y la busqueda por cada categoria de tecnologia, de a 50, solo si su `robots.txt` no prohibe `/api/` | la misma API: el precio del vendedor por defecto, solo lo que tiene stock (`AvailableQuantity > 0`) |
 | ComparaYa | API publica por categoria | la misma API |
 | Mercado Libre ([spec 026](specs/026-mercado-libre-api/spec.md)) | su API oficial con el token de aplicacion (`ML_CLIENT_ID`, `ML_CLIENT_SECRET`): la busqueda del catalogo (`/products/search`) por 14 rubros de hardware, cada uno con su dominio, hasta 200 productos por rubro | `/products/{id}/items`: el vendedor mas barato que lo vende nuevo, en pesos y desde Argentina, y su `original_price` |
@@ -427,7 +428,8 @@ Las ofertas del dia salen por dos canales, sin backend:
   verificarlo (`/up/MLAU...` da 403 en toda la API, o la API falla) no se publica. En la prueba real del 19/10
   descarto 11 de 19 avisos de Mercado Libre entre las 40 candidatas: 5 con un precio que ya nadie tenia (la
   Zenbook 14 a $2.383.703 con el vendedor mas barato a $2.999.999), 5 `/up/` y uno que la API ya no encuentra.
-  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias), y las **VTEX** (las 13
+  Las tiendas **WooCommerce** se verifican por su Store API publica (precio y existencias) (Katech, que se lee por su
+  feed, por la pagina del producto, como el resto), y las **VTEX** (las 13
   que se leen directo y las que llegan por ComparaYa: OnCity, Naldo, Coppel...) por su API publica de catalogo (`docs/referencias.md`). El resto de lo que llega
   **por ComparaYa desde otra tienda** tiene que mostrar el precio publicado en la pagina de esa tienda (en el
   HTML o ya armada en Chrome); si no aparece o la tienda no se pudo abrir, no se publica. Prueba real del 19/10

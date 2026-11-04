@@ -654,6 +654,59 @@ def indexar_json(tienda):
     return items
 
 
+_G = "{http://base.google.com/ns/1.0}"
+FEED_VIEJO_DIAS = 3   # un feed que no se regenero en tres dias trae precios de otra semana: no entra como el del dia
+
+
+def _pesos_feed(texto):
+    """'943277.00 ARS' -> 943277 (los decimales con punto, como en Google Merchant); None si no es un precio en pesos."""
+    m = re.fullmatch(r"\s*(\d+(?:\.\d{1,2})?)\s*ARS\s*", texto or "")
+    return int(round(float(m.group(1)))) if m else None
+
+
+def item_feed(it):
+    """Un <item> de un feed de Google Merchant como fila del indice, o None si no sirve: solo lo nuevo, en stock y en
+    pesos. El precio rebajado (g:sale_price) manda y el g:price queda como lista. El g:mpn no se usa: en Katech es un
+    codigo interno de la tienda (MOT213, MEM1263), no el part number del fabricante, y ataria productos distintos."""
+    texto = lambda campo: (it.findtext(campo) or "").strip()
+    if texto(_G + "availability").lower().replace(" ", "_") != "in_stock":
+        return None
+    if texto(_G + "condition").lower() not in ("", "new"):       # usado o reacondicionado: el indice es de nuevos
+        return None
+    lista, rebajado = _pesos_feed(texto(_G + "price")), _pesos_feed(texto(_G + "sale_price"))
+    precio = rebajado if rebajado and lista and rebajado < lista else lista
+    nombre, url = texto(_G + "title") or texto("title"), texto("link") or texto(_G + "link")
+    if not precio or not nombre or not url:
+        return None
+    foto = texto(_G + "image_link")
+    return {"nombre": limpio(nombre), "precio": precio, "lista": lista if lista and lista > precio else None,
+            "url": url, "imagen": foto if foto.lower().startswith("https://") else "", "sellos": "", "sku": None}
+
+
+def indexar_feed(tienda, pedir=None, ahora=None):
+    """Catalogo servido por la propia tienda como feed de productos de Google Merchant (RSS 2.0 con g:price,
+    g:availability...), con su permiso: un solo pedido, sin leer fichas. Katech lo dio el 04/11 en respuesta a la carta
+    del 02/11. Un feed con la fecha de «Generado» de hace mas de FEED_VIEJO_DIAS dias falla como fuente (se reusa lo
+    anterior): sus precios no son los de hoy. `pedir` reemplaza a bajar() en los tests."""
+    import xml.etree.ElementTree as ET
+    crudo = (pedir or bajar)(tienda["catalogo"]["url"]).lstrip("﻿")
+    m = re.search(r"<!--\s*Generado:\s*(\d{4}-\d{2}-\d{2})", crudo[:2000])
+    if m:
+        dias = ((ahora or datetime.now(AR)).date() - date.fromisoformat(m.group(1))).days
+        if dias > FEED_VIEJO_DIAS:
+            raise RuntimeError(f"el feed se genero el {m.group(1)}, hace {dias} dias: no son precios de hoy")
+    canal = ET.fromstring(crudo.encode("utf-8")).find("channel")
+    if canal is None:
+        raise ValueError("el feed no tiene <channel>")
+    vistos, items = set(), []
+    for it in canal.iter("item"):
+        fila = item_feed(it)
+        if fila and fila["url"] not in vistos:
+            vistos.add(fila["url"])
+            items.append(fila)
+    return items
+
+
 # --- Un aviso, una vez ---------------------------------------------------------------------------------------------
 
 _SEGUIMIENTO = re.compile(r"^(utm_|gclid|fbclid|msclkid|ref=|source=|mc_|_hs)", re.I)
@@ -937,6 +990,8 @@ def main(argv=None):
                 items = indexar_woocommerce(fuente, args.max_paginas)
             elif tipo == "vtex":
                 items = indexar_vtex(fuente, args.max_paginas)
+            elif tipo == "feed":
+                items = indexar_feed(fuente)
             elif tipo == "mercadolibre":
                 items = [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
                          for it in mercadolibre.indexar(fuente, args.max_paginas)]
