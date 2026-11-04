@@ -9,7 +9,7 @@
   --good:#8a5300; --good-soft:#fff1cc; --bad:#b8125f;
   --warn:#9a4a00; --warn-soft:#fbeeda;
   --n-precio:#8a5300; --n-rosa:#b8125f; --n-celeste:#00708c; --n-tarjeta:#ffffff; --n-tarjeta2:#efe8ff;
-  --n-borde:#c9a9e3; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
+  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0a7677; --gc-soft:#d8f2f2;
   --mx:#a35707; --mx-soft:#fbeeda;
@@ -32,7 +32,7 @@
     --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
     --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
     --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-    --n-borde:#6a2f8f; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -51,7 +51,7 @@
   --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
   --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
   --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-  --n-borde:#6a2f8f; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -1036,3 +1036,6 @@ table.pt-tabla td.num small{font:400 .74rem var(--font-sans);color:var(--ink-3)}
 #novedades>.scroll:nth-of-type(odd),#mas-vendido>.scroll:nth-of-type(odd){border:2px solid var(--n-borde-cel)}
 table.nov-tabla tbody tr:nth-child(even){background:color-mix(in srgb,var(--n-fondo-alto) 55%,transparent)}
 table.nov-tabla tbody tr:hover{background:color-mix(in srgb,var(--n-fondo-alto) 80%,transparent)}
+/* Fila por medio, el nombre del producto cambia de color (pedido del dueño 04/11: «todos los nombres del mismo color»):
+   tinta y lila claro, para que una fila no se confunda con la siguiente. Sin tocar el celeste (tienda) ni el amarillo (precio). */
+table.nov-tabla tbody tr:nth-child(even) th a{color:var(--n-titulo-2)}
