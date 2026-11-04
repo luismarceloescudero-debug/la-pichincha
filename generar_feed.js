@@ -222,13 +222,14 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   transform:none;color:var(--n-tinta);text-decoration:none}
 .hoy .historia a.oferta:hover .tit-nom{text-decoration:underline;text-decoration-color:var(--n-celeste);text-underline-offset:3px}
 .hoy .historia a.oferta:focus-visible{outline:2px solid var(--n-celeste);outline-offset:3px}
-.hoy .historia .tit-ico{color:var(--n-celeste);width:24px;height:24px}
+.hoy .historia .tit-ico{color:var(--n-rosa);width:24px;height:24px}
 .hoy .historia .tit-txt{gap:6px}
 .hoy .historia .tit-nom{font:700 1.2rem/1.1 var(--f-tit);font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta);letter-spacing:0}
 .hoy .historia .tit-marca{color:var(--n-celeste)}
 .hoy .historia .tit-chips{gap:6px}
-.hoy .historia .tit-chip{padding:1px 9px 2px;border-radius:999px;font:700 .78rem/1.3 var(--font-sans);color:var(--n-celeste);
-  background:rgba(62,230,255,.12);border:2px solid rgba(62,230,255,.6)}
+/* en la lista las chips van en lila: el celeste queda para la marca y la tienda (alternar, no amontonar) */
+.hoy .historia .tit-chip{padding:1px 9px 2px;border-radius:999px;font:700 .78rem/1.3 var(--font-sans);color:var(--n-suave);
+  background:rgba(215,184,230,.10);border:2px solid rgba(215,184,230,.45)}
 .hoy .historia .tit-chip.pr{color:var(--n-fondo);border-color:transparent;background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste))}
 .hoy .h-tachado{font:700 .95rem var(--font-mono);color:var(--n-suave);text-decoration-color:var(--n-tachado);text-decoration-thickness:2px}
 .hoy .historia .det{display:block;font:600 .82rem/1.35 var(--font-sans);color:var(--n-suave)}
