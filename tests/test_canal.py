@@ -25,7 +25,12 @@ class EnLaAction(unittest.TestCase):
         paso = YML[YML.index("Publicar las pichinchas"):YML.index("upload-pages-artifact")]
         self.assertIn('if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi', paso)
         self.assertIn("--previo telegram-previo.json --estado _sitio/telegram.json $modo", paso)
-        self.assertIn("steps.guardia.outputs.alarma != 'true'", paso)
+
+    def test_una_alarma_de_la_guardia_no_frena_el_mensaje(self):
+        # Decision del dueno (04/11): que haya o no rebajas reales, la publicacion sale igual; la alarma avisa, no bloquea.
+        paso = YML[YML.index("Publicar las pichinchas"):YML.index("upload-pages-artifact")]
+        self.assertNotIn("steps.guardia.outputs.alarma", paso)
+        self.assertNotIn("alarma != 'true'", YML[YML.index("Publicar las pichinchas"):])
 
     def test_el_mensaje_anterior_se_conserva_aunque_no_se_publique(self):
         # Revision del 24/10: con alarma (paso salteado) o en un push sin nada que corregir, telegram.json desaparecia del sitio.

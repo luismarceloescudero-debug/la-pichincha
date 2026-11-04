@@ -166,7 +166,8 @@ function listaParaCanal(idx, max = 10) {
     // titulo, chips y tipo (spec 044): el nombre legible que muestran el canal y la imagen; `nombre` sigue siendo el de la tienda
     nombre: o.f[0], ...(({ titulo, chips, tipo, emoji }) => ({ titulo, chips, icono: tipo, emoji }))(T.de(o.f[0])), precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
     ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` }
-      : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" } : {}),
+      : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" }
+      : !o.off ? { sinRebaja: true } : {}),      // a precio de siempre: el mensaje muestra el producto sin inventar un −0 %
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
     tienda: o.f[3],
     ...(o.f[9] ? { modelo: o.f[9] } : {}),      // para que la guardia reconozca el mismo modelo en lo que se publica
