@@ -121,3 +121,15 @@ test("premium (059): las chips que ponen al producto arriba de su gama, como en 
   for (const c of ["Mecánico", "27″ · 4K", "QD-OLED", "240 Hz", "RTX 5070", "Ryzen AI 7 350", "DDR5", "1 TB", "32 GB"]) assert.ok(T.premium(c), c);
   for (const c of ["RGB", "8/256 GB", "16 GB RAM", "FHD", "IPS", "Core i5", "DDR4", "60 Hz"]) assert.ok(!T.premium(c), c);
 });
+
+test("titulo (04/11): «Rapid» de «Rapid IPS/VA» es el panel, no la marca; el nombre de Venex dice 274QP y se respeta", () => {
+  // Maximus, ofertas del 04/11
+  assert.equal(T.de('Monitor Gamer Rapid Ips 24" Msi Mag 245f X24 240hz Fhd 0.5ms - Hdmi/dp - Freesync').titulo, "MSI MAG 245F X24");
+  assert.equal(T.de('Monitor Gamer Rapid Ips 27" Msi Mag 272f X24 240hz Fhd 0.5ms - Hdmi-Dp').titulo, "MSI MAG 272F X24");
+  assert.equal(T.de('Monitor Gamer Rapid Va Msi 34" Mag 346cqdf Wqhd 240hz Curvo - Hdmi - 0.5ms').titulo, "MSI MAG 346CQDF");
+  assert.deepEqual(T.de('Monitor Gamer Rapid Ips 24" Msi Mag 245f X24 240hz Fhd 0.5ms - Hdmi/dp - Freesync').chips, ["24″", "FHD", "IPS", "240 Hz"]);
+  // Detras del modelo tambien es ficha
+  assert.equal(T.de("Monitor Gamer Curvo 27 Msi Mag 276cf 0.5ms 200hz Rapid Va").titulo, "MSI MAG 276CF");
+  // Venex: el enlace dice 274qd, pero el nombre del aviso dice 274QP (dato de la tienda, no se corrige)
+  assert.equal(T.de('Monitor Gamer MSI MAG 274QP X24 27" WQHD OLED 240Hz').titulo, "MSI MAG 274QP X24");
+});

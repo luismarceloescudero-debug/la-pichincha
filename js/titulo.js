@@ -193,7 +193,9 @@
       // «SUPER» en una placa es parte del modelo (RTX 4070 Ti SUPER); en un monitor o un TV es ruido de panel (058).
       const dato = (esDato(t) && !(tipo === "placa-video" && /^super$/i.test(t))) ||(numero && /^(?:gb|tb|g|hz|mhz|ghz|w|ram|ms|mah|dpi|″)$/i.test(sig))
         || (numero && (tipo === "monitor" || tipo === "tv") && +t.replace(",", ".") >= 15 && +t.replace(",", ".") <= 100)
-        || (numero && tipo === "memoria" && t.length === 4);
+        || (numero && tipo === "memoria" && t.length === 4)
+        // «Rapid IPS» / «Rapid VA» (MSI, Maximus 04/11) es el panel, no la marca: «RAPID MSI MAG 245F X24» → «MSI MAG 245F X24».
+        || (/^rapid$/i.test(t) && /^(?:ips|va|tn)$/i.test(sig));
       if (dato) {
         // Antes de tener marca y modelo, el dato se saltea; despues, el titulo termina (lo que sigue es ficha).
         if (titulo.length >= MIN_PALABRAS || (titulo.length && titulo.some(x => /\d/.test(x)))) { corte = i; break; }
