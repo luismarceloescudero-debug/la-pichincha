@@ -284,14 +284,39 @@
     }
   }
 
-  /* { categoria, tipo, titulo, chips, completo, emoji, etiqueta } */
+  /* El tipo que va adelante del titulo cuando el titulo solo no dice que es (spec 059, pedido del dueño 04/11):
+     «VSG ALNILAM» no se entiende, «Teclado VSG ALNILAM» si. Con 4 palabras o mas el modelo ya se explica; un tipo
+     generico («Producto», «Componente», «Accesorio») no ayuda y no se pone; si el titulo ya lo nombra, tampoco. */
+  const SIN_PREFIJO = new Set(["otro", "componente", "accesorio"]);
+  const prefijoDe = (titulo, tipo) => {
+    const nombre = NOMBRE_TIPO[tipo] || "";
+    if (!nombre || SIN_PREFIJO.has(tipo) || titulo.split(/\s+/).filter(Boolean).length > 3) return "";
+    return titulo.toLowerCase().includes(nombre.toLowerCase()) ? "" : nombre;
+  };
+
+  /* { categoria, tipo, titulo, prefijo, chips, completo, emoji, etiqueta } */
   function de(nombre) {
     const original = String(nombre || "");
     const categoria = C.categoriaDe(original);
     const tipo = tipoDe(original, categoria);
-    return { categoria, tipo, titulo: tituloDe(original, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).replace(/[\s.]+$/, ""),
+    const titulo = tituloDe(original, tipo);
+    return { categoria, tipo, titulo, prefijo: prefijoDe(titulo, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).replace(/[\s.]+$/, ""),
       emoji: EMOJI[tipo], etiqueta: NOMBRE_TIPO[tipo] };
   }
+
+  /* El titulo con su tipo adelante cuando hace falta: «Teclado VSG ALNILAM». */
+  const conTipo = nombre => { const t = de(nombre); return (t.prefijo ? t.prefijo + " " : "") + t.titulo; };
+
+  /* Una chip premium: la que pone al producto arriba de su gama (las mismas señales que el Reel, spec 045): panel OLED o
+     Mini-LED, 4K, 144 Hz o mas, placa RTX/RX de gama alta, procesador 7 o 9 o con NPU, DDR5, 1 TB o mas, 32 GB o mas,
+     PCIe 5, Wi-Fi 7, teclado mecanico. Solo mira la chip: lo que no dice no se inventa. */
+  const PREMIUM = [
+    /oled|mini-?led/i, /\b(?:4k|uhd|2160p)\b/i, /\b(?:1[4-9]\d|[2-9]\d\d)\s?hz\b/i,
+    /\brtx\s?(?:[45]0[6-9]0|[45]0[6-9]0\s?ti)\b/i, /\brx\s?(?:7[89]00|90[67]0)/i,
+    /\b(?:core\s?(?:ultra\s?)?|i)[79]\b|\bryzen\s?(?:ai\s?)?[79]\b|\bryzen\s?ai\b|\bcore\s?ultra\b/i,
+    /\bddr5\b/i, /\b(?:[1-9]|[1-9]\d)\s?tb\b/i, /\b(?:32|48|64|96|128)\s?gb\b/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
+  ];
+  const premium = chip => PREMIUM.some(re => re.test(String(chip)));
 
   /* Una linea de texto plano: «💻 LENOVO LEGION 5 15AKP10 · Ryzen AI 7 350 · RTX 5050» (feed, Telegram). */
   const linea = (nombre, { emoji = true } = {}) => { const t = de(nombre); return [(emoji ? t.emoji + " " : "") + t.titulo, ...t.chips].join(" · "); };
@@ -305,7 +330,7 @@
       + `</span></span>`;
   };
 
-  const api = { de, tipoDe, tituloDe, chipsDe, pulgadas, svg, linea, html, ICONOS, EMOJI, NOMBRE_TIPO };
+  const api = { de, conTipo, premium, tipoDe, tituloDe, chipsDe, pulgadas, svg, linea, html, ICONOS, EMOJI, NOMBRE_TIPO };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Titulo = api;
 })(this);

@@ -82,21 +82,64 @@ ${items.join("\n")}${items.length ? "\n" : ""}  </channel>
 `;
 }
 
-/* /hoy/: la pagina para historias de Instagram y para el link de la bio. Arriba, una tarjeta 9:16 con
-   las mejores del dia para sacarle captura (en Instagram el texto de una imagen no es un enlace); abajo,
-   todas con su enlace a la tienda, que es lo que abre el sticker de link. Mismas ofertas que el feed. */
+/* La super oferta (spec 059, como en el Reel v4): la de mayor descuento, la primera si empatan. Con 20 % o mas se
+   llama «Súper oferta» (el piso de los heroes de la pestaña Ofertas, spec 055); un dia flojo es «La mejor del día». */
+const PISO_SUPER = 20;
+const mejorDe = ofertas => ofertas.reduce((m, o, i) => (m < 0 || o.off > ofertas[m].off ? i : m), -1);
+
+/* El nombre en el lenguaje del Reel: el tipo adelante si el titulo tiene pocas palabras (rosa), la marca (celeste) y el
+   modelo; el nombre completo de la tienda queda en el title. */
+function nombreReel(nombre, esc) {
+  const t = T.de(nombre), corte = t.titulo.indexOf(" ");
+  const marca = corte < 0 ? t.titulo : t.titulo.slice(0, corte), resto = corte < 0 ? "" : t.titulo.slice(corte);
+  return `<span class="h-nom" title="${esc(t.completo)}">${t.prefijo ? `<span class="h-tipo">${esc(t.prefijo)}</span> ` : ""}` +
+    `<span class="h-marca">${esc(marca)}</span>${esc(resto)}</span>`;
+}
+
+/* Las chips: cada una en su pastilla; las premium con ✦ y el degradado rosa-celeste. */
+const chipsReel = (nombre, esc) => {
+  const chips = T.de(nombre).chips;
+  return chips.length ? `<span class="h-chips">${chips.map(c => T.premium(c)
+    ? `<span class="h-chip pr"><span aria-hidden="true">✦ </span>${esc(c)}</span>` : `<span class="h-chip">${esc(c)}</span>`).join("")}</span>` : "";
+};
+
+/* «−52 %» con cada parte en su color: el signo rosa, el numero amarillo y el % celeste. Sin rebaja no se inventa un −0 %. */
+const pctReel = (o, clase) => o.off > 0
+  ? `<span class="${clase}"><span class="sig">−</span><span class="num">${Math.round(o.off * 100)}</span><span class="por">%</span></span>` : "";
+
+/* /hoy/: la pagina del link de la bio y de la vista previa de Telegram. Arriba, el cartel del dia con el lenguaje del
+   Reel v4 (spec 059): la super oferta en grande y las siguientes en tarjetas; abajo, todas con su enlace a la tienda.
+   Mismas ofertas que el feed. */
 function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   const esc = G.esc;
   const fecha = P.fechaHora(idx.generado);
   const dia = fecha.split(" ")[0];
   const ofertas = O.destacadas(idx, max);
-  const linea = o => `${esc(G.pesos(o.f[1]))} · ${esc(comercioDeOferta(o, idx))}`;
-  const enTarjeta = ofertas.slice(0, EN_TARJETA);
-  const mejorOff = Math.max(...enTarjeta.map(o => o.off));
-  let marcada = false;   // solo una: la primera con el mayor descuento
-  const tarjeta = enTarjeta.map(o => `      <li${!marcada && o.off === mejorOff && (marcada = true) ? ' class="h-top"' : ""}><span class="h-pct">−${Math.round(o.off * 100)}%</span>` +
-    `<span class="h-nom">${T.html(o.f[0], esc)}</span><span class="h-pre">${linea(o)}</span></li>`).join("\n");
+  // La super oferta es la mejor de todas las de hoy (como en el Reel, que mira las 10); las tarjetas, las siguientes en orden.
+  const s = mejorDe(ofertas), sup = ofertas[s];
+  // El precio de antes solo se tacha si es un precio de antes de verdad: contra el mismo modelo se dice contra que se
+  // compara, y en seguimiento (menos de una semana de historial) no se afirma un precio anterior (spec 035 y 038).
+  const contra = o => o.modelo ? esc(O.textoContraModelo(o.modelo, G.pesos))
+    : o.tipo === "seguimiento" ? "desde que lo seguimos, hace pocos días"
+    : o.off > 0 ? `<s>${esc(G.pesos(o.antes))}</s>` : "";
+  const precio = (o, clase) => { const n = esc(G.pesos(o.f[1])).replace(/^\$/, "");
+    return `<span class="${clase}"><span class="sig">$</span>${n}</span>`; };
+  const icono = o => T.svg(T.de(o.f[0]).tipo, "h-svg").replace('role="img"', 'aria-hidden="true"');
+  const heroe = sup ? `    <article class="h-super">
+      <p class="h-cinta"><span aria-hidden="true">★</span> ${sup.off * 100 >= PISO_SUPER ? "Súper oferta" : "La mejor del día"} <span aria-hidden="true">★</span></p>
+      <div class="h-cuerpo">
+        ${pctReel(sup, "h-pct") || "<span></span>"}
+        <span class="h-icono">${icono(sup)}</span>
+        <h2>${nombreReel(sup.f[0], esc)}</h2>
+        ${chipsReel(sup.f[0], esc)}
+        <p class="h-precio">${precio(sup, "h-ahora")}<span class="h-antes">${contra(sup)}</span></p>
+        <p class="h-tienda">en <b>${esc(comercioDeOferta(sup, idx))}</b></p>
+      </div>
+    </article>` : "";
+  const resto = ofertas.filter((o, i) => i !== s).slice(0, EN_TARJETA - 1);
+  const tarjeta = resto.map(o => `      <li>${pctReel(o, "h-pct") || '<span class="h-pct"></span>'}<span class="h-txt"><span class="h-fila"><span class="h-ico">${icono(o)}</span>${nombreReel(o.f[0], esc)}</span>` +
+    `${chipsReel(o.f[0], esc)}<span class="h-pre">${precio(o, "h-chico")} <span class="h-donde">en <b>${esc(comercioDeOferta(o, idx))}</b></span></span></span></li>`).join("\n");
   // Los enlaces de afiliado (P.enlaceTienda) llevan su rotulo y rel="sponsored"; el orden no cambia (principio II).
   const enlace = o => { const e = P.enlaceTienda(o.f[2]);
     return `<a class="oferta" data-rubro="ofertas" href="${esc(e.url)}" rel="${e.afiliado ? "sponsored noopener" : "noopener"}">${T.html(o.f[0], esc)}</a>` +
@@ -110,26 +153,64 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
     ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
     : "Las mejores bajas de precio de hardware en Argentina, todos los días.";
   return G.cabeza({ titulo, descripcion, canonica: `${base}/hoy/`, baseUrl: base, rel: "../" }) + `
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=optional" media="print" onload="this.media='all'">
 <style>
-.hoy .historia{width:min(100%,420px);aspect-ratio:9/16;margin:6px auto 24px;padding:26px 22px;border-radius:22px;
-  background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;overflow:hidden}
-.hoy .h-cab{display:flex;justify-content:space-between;font:600 .8rem var(--font-mono);color:var(--accent)}
-.hoy .historia h1{font-size:2.3rem;line-height:1.02;margin:4px 0 2px;letter-spacing:-.02em}
-.hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;flex:1}
-.hoy .h-lista li{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:2px;align-items:start}
-.hoy .h-pct{grid-row:span 2;font:700 1.05rem var(--font-mono);color:var(--good);background:var(--good-soft);border-radius:10px;padding:6px 8px}
-.hoy .h-nom{font-size:.9rem;line-height:1.25;min-width:0}
-.hoy .h-pre{font:500 .8rem var(--font-mono);color:var(--ink-2)}
-/* Jerarquia (spec 055): la de mayor descuento es un bloque de color solido con el porcentaje grande; el resto queda chico. */
-.hoy .h-lista li.h-top{background:#0f5132;color:#fff;border-radius:14px;padding:8px 12px;margin:0 -4px}
-.hoy .h-top .h-pct{font-size:1.5rem;letter-spacing:-.05em;color:#0f5132;background:#fff;padding:6px 10px}
-.hoy .h-top .h-nom,.hoy .h-top .tit-nom{color:#fff}
-.hoy .h-top .tit-ico{color:#fff}
-.hoy .h-top .tit-chip{background:rgba(255,255,255,.16);color:#fff}
-.hoy .h-top .h-pre{font-size:.8rem;font-weight:700;color:#fff}
-.hoy .h-top .h-pre s,.hoy .h-top .h-pre *{color:rgba(255,255,255,.82)}
-.hoy .h-pie{margin:0;font-size:.78rem;color:var(--ink-3);overflow-wrap:anywhere}
-.hoy .h-pie b{color:var(--ink)}
+/* El cartel del dia con el lenguaje del Reel v4 (spec 059, paleta «neon» aprobada por el dueño el 04/11): fondo violeta
+   con rayas, tarjeta de dos tonos con borde rosa, el descuento y el precio enormes (signo rosa, numero amarillo, % celeste),
+   la marca y la tienda en celeste, las chips en pastillas. Los colores son fijos (no siguen el tema claro/oscuro): es un
+   cartel, y todos pasan 4,5:1 sobre su fondo. */
+.hoy .historia{--n-fondo:#120018;--n-fondo2:#3b0a57;--n-tinta:#fff4ff;--n-suave:#d7b8e6;--n-amarillo:#ffd23f;--n-celeste:#3ee6ff;
+  --n-rosa:#ff5fae;--n-tarjeta:#26063b;--n-tarjeta2:#0c1446;--n-tachado:#ff7eb6;
+  --f-tit:"Oswald","Bahnschrift","Roboto Condensed","Arial Narrow","Avenir Next Condensed",sans-serif;
+  width:min(100%,440px);margin:6px auto 24px;padding:22px 14px 20px;border-radius:24px;overflow:hidden;color:var(--n-tinta);
+  background:repeating-linear-gradient(-45deg,rgba(215,184,230,.12) 0 2px,transparent 2px 30px),
+    radial-gradient(120% 70% at 50% 28%,var(--n-fondo2),var(--n-fondo) 72%);
+  display:flex;flex-direction:column;gap:14px}
+.hoy .historia .sig{color:var(--n-rosa)} .hoy .historia .num{color:var(--n-amarillo)} .hoy .historia .por{color:var(--n-celeste);font-size:.82em}
+.hoy .h-cab{display:flex;justify-content:space-between;padding:0 4px;font:700 .8rem var(--font-mono);letter-spacing:.12em;color:var(--n-amarillo);text-transform:uppercase}
+.hoy .h-cab span+span{color:var(--n-celeste)}
+.hoy .historia h1{margin:0;padding:0 4px;font:700 2.7rem/.95 var(--f-tit);font-stretch:condensed;letter-spacing:-.01em;text-transform:uppercase;color:var(--n-tinta)}
+.hoy .historia h1 span{display:block;color:var(--n-celeste)}
+.hoy .h-nom{font-family:var(--f-tit);font-weight:700;font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta);overflow-wrap:anywhere}
+.hoy .h-tipo{color:var(--n-rosa)} .hoy .h-marca{color:var(--n-celeste)}
+.hoy .h-chips{display:flex;flex-wrap:wrap;gap:6px}
+.hoy .h-chip{padding:2px 10px 3px;border-radius:999px;font:700 .82rem/1.3 var(--font-sans);color:var(--n-celeste);
+  background:rgba(62,230,255,.12);border:2px solid rgba(62,230,255,.6)}
+.hoy .h-chip.pr{color:var(--n-fondo);border-color:transparent;background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste))}
+/* La super oferta */
+.hoy .h-super{border-radius:22px;overflow:hidden;border:3px solid var(--n-rosa);box-shadow:0 0 30px rgba(255,95,174,.45);
+  background:linear-gradient(165deg,var(--n-tarjeta),var(--n-tarjeta2))}
+.hoy .h-cinta{margin:0;padding:9px 8px 8px;text-align:center;font:700 1.15rem/1 var(--f-tit);font-stretch:condensed;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--n-fondo);background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste),var(--n-rosa))}
+.hoy .h-cuerpo{display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:14px 16px 16px;align-items:start}
+.hoy .h-super .h-pct{font:700 4.6rem/.85 var(--f-tit);font-stretch:condensed;letter-spacing:-.02em;white-space:nowrap;
+  text-shadow:0 4px 22px rgba(18,0,24,.55)}
+.hoy .h-icono{width:88px;height:88px;border-radius:20px;background:#fff;color:var(--n-fondo2);display:grid;place-items:center;
+  box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.hoy .h-icono svg{width:60px;height:60px}
+.hoy .h-super h2{grid-column:1/-1;margin:4px 0 0;font-size:2rem;line-height:1}
+.hoy .h-super .h-chips{grid-column:1/-1}
+.hoy .h-precio{grid-column:1/-1;margin:14px 0 0;display:flex;flex-direction:column;gap:4px}
+.hoy .h-ahora{font:700 min(3.7rem,15vw)/.9 var(--f-tit);font-stretch:condensed;letter-spacing:-.01em;color:var(--n-amarillo);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.hoy .h-antes{font:700 1.05rem var(--font-mono);color:var(--n-suave)}
+.hoy .h-antes s{text-decoration-color:var(--n-tachado);text-decoration-thickness:3px}
+.hoy .h-tienda{grid-column:1/-1;margin:0;font:600 1rem var(--font-sans);color:var(--n-suave)}
+.hoy .historia b{color:var(--n-celeste)}
+/* Las siguientes: tarjetas de dos tonos con borde celeste */
+.hoy .h-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.hoy .h-lista li{display:grid;grid-template-columns:4.6rem 1fr;gap:10px;align-items:start;padding:12px 12px 12px 8px;border-radius:18px;
+  background:linear-gradient(165deg,var(--n-tarjeta),var(--n-tarjeta2));border:2px solid rgba(62,230,255,.45)}
+.hoy .h-lista .h-pct{font:700 2.1rem/.9 var(--f-tit);font-stretch:condensed;letter-spacing:-.02em;white-space:nowrap;text-align:right}
+.hoy .h-txt{display:flex;flex-direction:column;gap:6px;min-width:0}
+.hoy .h-fila{display:flex;gap:8px;align-items:flex-start}
+.hoy .h-ico{flex:none;color:var(--n-celeste)} .hoy .h-ico svg{width:24px;height:24px;margin-top:1px}
+.hoy .h-lista .h-nom{font-size:1.2rem;line-height:1.1}
+.hoy .h-pre{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.hoy .h-chico{font:700 1.55rem/1 var(--f-tit);font-stretch:condensed;color:var(--n-amarillo);font-variant-numeric:tabular-nums}
+.hoy .h-donde{font:600 .85rem var(--font-sans);color:var(--n-suave)}
+.hoy .h-pie{margin:0;padding:0 4px;font:600 .85rem/1.35 var(--font-sans);color:var(--n-suave);overflow-wrap:anywhere}
+.hoy .h-pie b{color:var(--n-amarillo);font-family:var(--font-mono)}
 .hoy ol.todas{padding-left:1.2em}
 .hoy ol.todas li{margin:0 0 12px}
 .hoy .det{display:block;font:500 .82rem var(--font-mono);color:var(--ink-2)}
@@ -140,11 +221,10 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 <main id="contenido" class="wrap hoy">
   <section class="historia" aria-label="Tarjeta con las mejores ofertas de hoy">
-    <div class="h-cab"><span>La Pichincha</span><span>${esc(dia)}</span></div>
-    <h1>Pichinchas<br>del día</h1>
-    <ol class="h-lista">
-${tarjeta}
-    </ol>
+    <div class="h-cab"><span>La Pichincha</span><span>Hoy ${esc(dia)}</span></div>
+    <h1>Pichinchas <span>del día</span></h1>
+${heroe}
+${tarjeta ? `    <ol class="h-lista">\n${tarjeta}\n    </ol>` : ""}
     <p class="h-pie">Todas con su link en<br><b>${esc(base.replace(/^https?:\/\//, ""))}/hoy</b></p>
   </section>
   <p class="meta">La Pichincha · precios del ${esc(fecha)}</p>
@@ -164,12 +244,14 @@ ${ofertas.length ? `  <ol class="todas">\n${lista}\n  </ol>` : `  <p class="sub"
 function listaParaCanal(idx, max = 10) {
   return O.destacadas(idx, max).map(o => ({
     // titulo, chips y tipo (spec 044): el nombre legible que muestran el canal y la imagen; `nombre` sigue siendo el de la tienda
-    nombre: o.f[0], ...(({ titulo, chips, tipo, emoji }) => ({ titulo, chips, icono: tipo, emoji }))(T.de(o.f[0])), precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
+    nombre: o.f[0], ...(({ titulo, prefijo, chips, tipo, emoji }) => ({ titulo, ...(prefijo ? { prefijo } : {}), chips, icono: tipo, emoji }))(T.de(o.f[0])), precio: o.f[1], antes: Math.round(o.antes), descuento: Math.round(o.off * 100),
     ...(o.modelo ? { contra: `bajo la mediana de otras ${o.modelo.tiendas} tiendas` }
       : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" }
       : !o.off ? { sinRebaja: true } : {}),      // a precio de siempre: el mensaje muestra el producto sin inventar un −0 %
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
     tienda: o.f[3],
+    // la foto de la tienda para el Reel (spec 045) y la imagen de /hoy/ (spec 059): solo una direccion https sin comillas ni espacios
+    ...(/^https:\/\/[^\s"'()<>\\]+$/.test(o.f[7] || "") ? { imagen: o.f[7] } : {}),
     ...(o.f[9] ? { modelo: o.f[9] } : {}),      // para que la guardia reconozca el mismo modelo en lo que se publica
     // `url` queda como esta en el indice (verificar_ofertas.py la busca por ese valor); el canal abre `enlace`, con el afiliado.
     ...(P.enlaceTienda(o.f[2]).afiliado ? { enlace: P.enlaceTienda(o.f[2]).url, afiliado: true } : {}) }));   // la fuente del indice: verificar_ofertas.py la verifica a su manera

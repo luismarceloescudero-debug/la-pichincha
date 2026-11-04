@@ -106,3 +106,18 @@ test("titulo (058): «SUPER» es parte del modelo de una placa, el combo dice su
   assert.equal(t("Combo Actualización AMD Ryzen 5 8600G 16GB"), "COMBO AMD RYZEN 5 8600G");
   assert.equal(t("Computadora de Escritorio Dell Pro SFF U5-235 16GB SSD512GB W11P"), "DELL PRO SFF");
 });
+
+test("prefijo (059): con pocas palabras el titulo lleva adelante el tipo; con muchas, o sin tipo claro, no", () => {
+  assert.equal(T.de("Teclado Mecanico VSG Alnilam Blanco RGB").prefijo, "Teclado");          // «Teclado VSG ALNILAM»
+  assert.equal(T.de("Auriculares HyperX Cloud III").prefijo, "Auriculares");
+  assert.equal(T.de("Placa de Video Gigabyte RTX 5060 8GB").prefijo, "Placa de video");
+  assert.equal(T.de("Notebook Lenovo IdeaPad Slim 3 15IAH8 i5 16GB 512GB").prefijo, "");   // cinco palabras: ya se entiende
+  assert.equal(T.de("Gadnic Cosa Rara").prefijo, "");                                         // «Producto» no ayuda
+  assert.equal(T.conTipo("Teclado Mecanico VSG Alnilam Blanco RGB"), "Teclado VSG ALNILAM");
+  assert.equal(T.conTipo("Notebook Lenovo IdeaPad Slim 3 15IAH8 i5 16GB 512GB"), "LENOVO IDEAPAD SLIM 3 15IAH8");
+});
+
+test("premium (059): las chips que ponen al producto arriba de su gama, como en el Reel", () => {
+  for (const c of ["Mecánico", "27″ · 4K", "QD-OLED", "240 Hz", "RTX 5070", "Ryzen AI 7 350", "DDR5", "1 TB", "32 GB"]) assert.ok(T.premium(c), c);
+  for (const c of ["RGB", "8/256 GB", "16 GB RAM", "FHD", "IPS", "Core i5", "DDR4", "60 Hz"]) assert.ok(!T.premium(c), c);
+});
