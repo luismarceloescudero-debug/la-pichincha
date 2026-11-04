@@ -17,7 +17,7 @@ frenado: esta spec solo arma el video, no publica.
 
 - **9:16, 1080x1920**: se ve entero como Reel y como historia. Lo importante va en la franja y 250-1500 (arriba y abajo
   están los controles de Instagram; la grilla del perfil recorta a 3:4).
-- v4: ~43 s a 30 fps con el ritmo ágil (v3: ~29 s): intro (3 s) · 10 ofertas (3,4 s cada una, la súper oferta un poco más) · cierre (4,2 s). Barras de progreso como las historias.
+- ~55 s a 30 fps con el ritmo pausado, **el aprobado por el dueño el 04/11 para todos los días** (v3: ~29 s; la v4 ágil, 42 s, se descartó): intro (3,8 s) · 10 ofertas (4,4 s cada una, la súper oferta un poco más) · cierre (5 s). Barras de progreso como las historias.
 - Cada oferta: el descuento se estampa, el icono del tipo se dibuja, el nombre legible (spec 044) se escribe en vivo con
   cursor, las chips aparecen de a una, el precio cuenta del de antes al de hoy y el de antes se tacha. Si la oferta es
   contra el mismo modelo (spec 035) lo dice.
@@ -35,13 +35,38 @@ frenado: esta spec solo arma el video, no publica.
 - **Un estilo por día** (`estilo(fecha)`): 6 paletas con contraste para el celular (v4: cada una combina tres acentos y una
   tarjeta de dos tonos; la marca, el «%», las características y la tienda van en acento2, el precio en acento y lo premium en
   acento3; la prueba exige 3:1 sobre los dos tonos de la tarjeta), 6 juegos de letras de Google Fonts
-  (Plex, Bebas Neue, Anton, Archivo Black, Oswald, Barlow), 3 ritmos (v4, 04/11: ágil 3,4 s, normal 3,9 s, pausado 4,4 s por
+  (Plex, Bebas Neue, Anton, Archivo Black, Oswald, Barlow), el ritmo (desde el 04/11 siempre el pausado; ágil 3,4 s y normal 3,9 s quedan para `--ritmo`; pausado 4,4 s por
   oferta; v3 era 2,3/2,7/3,1. El armado se estira `paso` veces y el resto de la tarjeta queda quieta para leerla), 3 fondos, 3 transiciones y 2 disposiciones (tarjeta con la foto chica, o
   «plena» con la foto grande arriba). Cada parte avanza a su propio paso: dos días seguidos no se parecen y la misma fecha
   da siempre el mismo Reel.
 - **La foto del producto** (la de la tienda, que `generar_feed.js` suma a `ofertas.json` como `imagen`, solo https limpia):
   de fondo, desenfocada bajo un velo del color del día, y nítida en la tarjeta, con un acercamiento lento. Se espera a que
   baje (8 s de tope por foto); si no baja, esa oferta va sin foto.
+
+## v5 (04/11): se sabe qué es sin mirar la foto
+
+El dueño, al ver la portada v4: «si no miro con atención la foto del producto, no sé que es un teclado».
+
+- **Insignia del tipo**: el icono SVG de `js/titulo.js` (`ICONOS`, el mismo del sitio y de /hoy/) en un círculo de 162 px con
+  el degradado acento2→acento3, sobre la esquina de la foto. Sin foto ocupa su lugar (230 px). Entra con rebote.
+- **El tipo en palabras** (`prefijoTipo`): si el nombre tiene dos palabras o menos se le antepone `NOMBRE_TIPO` de
+  `js/titulo.js` en mayúsculas y en acento3 («TECLADO VSG ALNILAM», «MEMORIA ADATA CL22»). No se repite si el nombre ya lo
+  dice ni se pone uno genérico (componente, accesorio, producto). Las características son las chips de `js/titulo.js`
+  («Mecánico», «DDR4», «240 Hz»): no se inventa lo que el título no dice.
+
+## Los estilos, para reusarlos (Telegram u otra pieza)
+
+Todo vive en `generar_reel.js`; para llevar el mismo estilo a otra publicación se copia de ahí:
+
+- `PALETAS`: 6 paletas con `fondo`, `fondo2`, `tinta`, `suave`, `acento` (precio y número del descuento), `acento2` (marca,
+  «%», características, tienda), `acento3` («$», «−», lo premium, tipo en palabras), `tarjeta`/`tarjeta2` (los dos tonos de
+  la tarjeta), `sobre` (texto sobre acento2/acento3) y `tachado`. El contraste lo prueba `tests/js/reel.test.js`.
+- `LETRAS`: los 6 juegos de Google Fonts (título, texto y números) con su `escala`; `estilo(fecha)` elige paleta, letra,
+  fondo, transición y disposición del día.
+- Tamaños (en el CSS de `paginaReel`, lienzo de 1080 px de ancho): descuento `.pct` 230-260 px; precio `.ahora` hasta 260 px
+  ajustado al ancho; nombre `.nom` 104 px; chips `.sub2>span` 46 px en pastillas; insignia `.tipo` 162 px; tarjeta con
+  radio 56 px y borde de 4 px en acento2.
+- Datos: `ofertasReel` (título sin códigos + tipo, chips con `premium`, súper oferta), `superDe`, `chipPremium`, `prefijoTipo`.
 
 ## Cómo se arma
 

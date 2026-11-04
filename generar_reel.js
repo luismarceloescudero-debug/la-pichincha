@@ -35,6 +35,9 @@ const RITMOS = [
   { nombre: "normal", ...MS },
   { nombre: "pausado", intro: 3800, oferta: 4400, cierre: 5000, paso: 1.8 },
 ];
+/* 04/11: el dueño aprobo la version lenta como base y descarto la agil: todos los dias van con el pausado. Los otros quedan
+   para comparar con `--ritmo`. */
+const RITMO_DIA = RITMOS[2];
 /* La super oferta suma este tiempo (en unidades de armado, se multiplica por `paso`): sus caracteristicas se escriben letra
    por letra antes del precio. */
 const TIPEO = 1300, TIPEO_MIN = 600, POR_LETRA = 55;
@@ -83,7 +86,7 @@ function estilo(fecha) {
   const d = new Date(fecha + "T12:00:00Z");
   const n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5) || 0;
   const de = (lista, salto) => lista[(n * salto) % lista.length];
-  return { paleta: de(PALETAS, 1), letra: de(LETRAS, 5), ritmo: de(RITMOS, 1), fondo: de(FONDOS, 2),
+  return { paleta: de(PALETAS, 1), letra: de(LETRAS, 5), ritmo: RITMO_DIA, fondo: de(FONDOS, 2),
     transicion: TRANSICIONES[Math.floor(n / 2) % TRANSICIONES.length], disposicion: de(DISPOSICIONES, 1) };
 }
 

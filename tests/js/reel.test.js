@@ -42,10 +42,10 @@ test("sin ofertas no arma nada y no falla", async () => {
   assert.equal(await R.main([path.join(dir, "o.json"), "--salida", dir, "--solo-html"]), 0);
 });
 
-test("cada dia cambia tambien la letra, el ritmo y la disposicion; la duracion sigue al ritmo", () => {
+test("cada dia cambia tambien la letra y la disposicion; el ritmo es siempre el pausado (aprobado el 04/11)", () => {
   const dias = ["2026-10-30", "2026-10-31", "2026-11-01"].map(d => R.estilo(d));
   assert.equal(new Set(dias.map(e => e.letra.nombre)).size, 3);
-  assert.equal(new Set(dias.map(e => e.ritmo.nombre)).size, 3);
+  assert.deepEqual([...new Set(dias.map(e => e.ritmo.nombre))], ["pausado"]);
   assert.notEqual(dias[0].disposicion, dias[1].disposicion);
   const html = R.paginaReel(DATOS);
   assert.match(html, /fonts\.googleapis\.com\/css2\?family=/);
