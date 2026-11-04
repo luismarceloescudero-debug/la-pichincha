@@ -215,6 +215,10 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-donde{font:600 .85rem var(--font-sans);color:var(--n-suave)}
 .hoy .h-pie{margin:0;padding:0 4px;font:600 .85rem/1.35 var(--font-sans);color:var(--n-suave);overflow-wrap:anywhere}
 .hoy .h-pie b{color:var(--n-amarillo);font-family:var(--font-mono)}
+/* Tarjetas alternadas (pedido del dueño 04/11): una con borde celeste y nombre blanco, la siguiente con borde rosa y
+   nombre lila claro, para que dos vecinas no se vean iguales */
+.hoy .h-lista li:nth-child(even){border-color:rgba(255,95,174,.55)}
+.hoy .h-lista li:nth-child(even) .h-nom,.hoy .h-lista li:nth-child(even) .tit-nom{color:#f3b6ff}
 /* La lista completa (spec 060): las mismas tarjetas, con el nombre como enlace a la tienda */
 .hoy .h-todas h2{margin:0;padding:0 4px;font:700 2rem/.95 var(--f-tit);font-stretch:condensed;text-transform:uppercase;color:var(--n-tinta)}
 .hoy .h-todas h2 span{color:var(--n-celeste)}

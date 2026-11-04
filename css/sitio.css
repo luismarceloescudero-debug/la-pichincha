@@ -1039,3 +1039,17 @@ table.nov-tabla tbody tr:hover{background:color-mix(in srgb,var(--n-fondo-alto) 
 /* Fila por medio, el nombre del producto cambia de color (pedido del dueño 04/11: «todos los nombres del mismo color»):
    tinta y lila claro, para que una fila no se confunda con la siguiente. Sin tocar el celeste (tienda) ni el amarillo (precio). */
 table.nov-tabla tbody tr:nth-child(even) th a{color:var(--n-titulo-2)}
+/* el anillo viejo del porcentaje se colaba en las bajas propias (.ocard.propia .o-off pesaba mas): el % va solo */
+.ocard .o-off,.ocard.propia .o-off,.ocard.n-heroe .o-off{background:none}
+.ocard.n-fuerte{border-color:var(--n-borde)}
+/* Alternar tambien tarjetas, filas y titulos (pedido del dueño 04/11: «lo mismo con los grupos, titulos, tarjetas»):
+   una tarjeta o fila con borde lila y nombre en tinta, la siguiente con borde celeste y nombre en lila claro. Las mejores
+   (heroe, primera de la busqueda) conservan su borde rosa. */
+.ogrid>.ocard:nth-child(even of .ocard):not(.n-heroe),.res>.fila:nth-child(even of .fila):not(.top){border-color:var(--n-borde-cel)}
+.ogrid>.ocard:nth-child(even of .ocard) .tit-nom,.res>.fila:nth-child(even of .fila) .tit-nom{color:var(--n-titulo-2)}
+/* los titulos de cada panel de Comparativa, alternados */
+#mas-vendido .panel-head h2{color:var(--ink)}
+#novedades .panel-head h2{color:var(--n-titulo-2)}
+#mas-buscado .panel-head h2{color:var(--n-precio)}
+.ogrid>.ocard.n-heroe:nth-child(even of .ocard.n-heroe){border-color:var(--n-celeste);box-shadow:0 0 30px color-mix(in srgb,var(--n-celeste) 35%,transparent)}
+.ogrid>.ocard.n-heroe:nth-child(even of .ocard.n-heroe) .tit-nom{color:var(--n-titulo-2)}
