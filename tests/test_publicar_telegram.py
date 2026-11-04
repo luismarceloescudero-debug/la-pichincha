@@ -149,10 +149,61 @@ class Publicacion(unittest.TestCase):
     def test_si_telegram_falla_la_corrida_sigue_y_el_token_no_se_imprime(self):
         def falla(*a, **k):
             raise urllib.error.URLError("sin red")
-        codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, falla)
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, falla)
         self.assertEqual(codigo, 0)
         self.assertIn("::warning::", texto)
         self.assertNotIn("123:ABC", texto)
+
+    def test_una_falla_de_red_pasajera_se_reintenta_y_el_mensaje_sale(self):
+        # La corrida manual del 04/11 perdio el mensaje por un URLError suelto, sin reintento.
+        bien = respuesta(7)
+        intentos = []
+        def a_la_segunda(pedido, timeout=None):
+            intentos.append(pedido)
+            if len(intentos) == 1:
+                raise urllib.error.URLError(OSError("Temporary failure in name resolution"))
+            return bien(pedido, timeout=timeout)
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, a_la_segunda)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 2)
+        self.assertIn("Publicado en Telegram", texto)
+        self.assertNotIn("123:ABC", texto)
+
+    def test_si_la_red_sigue_caida_avisa_el_motivo_tras_los_reintentos(self):
+        intentos = []
+        def siempre(pedido, timeout=None):
+            intentos.append(pedido)
+            raise urllib.error.URLError(OSError("Network is unreachable 123:ABC"))
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, siempre)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 3)
+        self.assertIn("Network is unreachable", texto)
+        self.assertIn("3 intentos", texto)
+        self.assertNotIn("123:ABC", texto)
+
+    def test_un_corte_por_tiempo_no_se_reintenta_para_no_duplicar_el_mensaje(self):
+        # Si se corto esperando la respuesta, Telegram pudo haberlo publicado: reintentar lo duplicaria.
+        intentos = []
+        def lento(pedido, timeout=None):
+            intentos.append(pedido)
+            raise TimeoutError("timed out")
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            codigo, texto = self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, lento)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(len(intentos), 1)
+        self.assertIn("::warning::", texto)
+
+    def test_un_rechazo_de_telegram_no_se_reintenta(self):
+        intentos = []
+        def rechazo(pedido, timeout=None):
+            intentos.append(pedido)
+            raise urllib.error.HTTPError(pedido.full_url, 400, "Bad Request", {}, io.BytesIO(b'{"description":"Bad"}'))
+        with mock.patch.object(telegram, "ESPERAS", (0, 0)):
+            self.correr({"TELEGRAM_BOT_TOKEN": "123:ABC", "TELEGRAM_CHAT_ID": "@c"}, rechazo)
+        self.assertEqual(len(intentos), 1)
 
     def test_un_error_de_telegram_muestra_codigo_y_motivo_sin_el_token(self):
         def falla(pedido, timeout=None):
