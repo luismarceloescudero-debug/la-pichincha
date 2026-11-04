@@ -31,6 +31,16 @@ class Guardia(unittest.TestCase):
                         "curl https://graph.instagram.com/v21.0/me/media"]:
             self.assertEqual(guardia.decidir(comando)[0], "ask", comando)
 
+    def test_trabajo_en_la_app_no_pregunta(self):
+        for comando in ["grep -n TOKEN publicar_telegram.py", "python -m unittest tests.test_publicar_telegram",
+                        "node --test tests/js/feed.test.js && npx playwright test --workers=1",
+                        "bash tests/e2e/armar-sitio.sh", "gh run view 123 --log | grep Telegram", "git log -3 | head"]:
+            self.assertIsNone(guardia.decidir(comando), comando)
+        # si un tramo publica de verdad, se pregunta igual
+        for comando in ["grep x a.py && python publicar_telegram.py _sitio/ofertas.json", "node --test; gh workflow run a.yml"]:
+            self.assertEqual(guardia.decidir(comando)[0], "ask", comando)
+        self.assertIsNone(guardia.decidir_archivo("_sitio/hoy/index.html"))     # el sitio armado en local
+
     def test_lo_de_todos_los_dias_sigue_sin_preguntar(self):
         for comando in ["gh run list --workflow actualizar.yml --limit 5",
                         "gh pr checks 206 --watch",
@@ -88,7 +98,7 @@ def correr(modulo, entrada):
 
 class GuardiaArchivos(unittest.TestCase):
     def test_generados_piden_confirmacion(self):
-        for ruta in ["package-lock.json", "/repo/package-lock.json", "_sitio/index.html", "C:\\repo\\_sitio\\x.json"]:
+        for ruta in ["package-lock.json", "/repo/package-lock.json", "C:\\repo\\package-lock.json"]:
             self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
 
     def test_lo_curado_a_mano_no_se_frena(self):

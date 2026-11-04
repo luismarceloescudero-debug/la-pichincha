@@ -13,6 +13,11 @@ o la variable `PICHINCHA_GUARDIA=omitir` esta puesta, lo que solo pedia confirma
 sigue sin preguntar. Lo que se frena (tildes, historia, secretos) se sigue frenando, e Instagram sigue preguntando
 siempre: esta en pausa hasta que el dueño apruebe la app.
 
+Trabajo en la app (04/11, pedido del dueño): mirar, buscar, testear y armar el sitio local no preguntan nunca, aunque el
+comando nombre a Telegram o a un workflow (`grep publicar_telegram.py`, `node --test`, `python -m unittest`,
+`npx playwright test`, `bash tests/e2e/armar-sitio.sh`, `gh run view`...). Editar lo de `_sitio/` (el sitio armado en
+local, que no se sube) tampoco pregunta.
+
 Lee el JSON del hook por stdin y, si no aplica ninguna regla, no dice nada (el comando sigue).
 Solo stdlib.
 """
@@ -38,7 +43,19 @@ DESTRUCTIVOS = [
     (re.compile(r"\bgit\b[^|;&\n]*\breset\b[^|;&\n]*--hard\b"), "reset --hard descarta cambios sin commitear de forma irreversible"),
 ]
 SECRETOS = re.compile(r"(?:^|[\\/])(?:\.env(?:\.[^\\/]*)?|\.dev\.vars)$")
-GENERADOS = re.compile(r"(?:^|[\\/])(?:package-lock\.json|_sitio[\\/].+)$")
+GENERADOS = re.compile(r"(?:^|[\\/])package-lock\.json$")
+
+# Cada tramo del comando (separado por ; && || |) empieza con algo que solo mira, busca, testea o arma en local.
+TRABAJO = re.compile(r"^\s*(?:cd|ls|cat|head|tail|wc|grep|rg|find|echo|printf|sort|uniq|less|diff|"
+                     r"sed\s+-n|git\s+(?:status|diff|log|show|grep|fetch|branch)|"
+                     r"node\s+--test|python3?\s+-m\s+(?:unittest|pytest)|npx\s+playwright\s+test|npm\s+(?:ci|test)|"
+                     r"bash\s+tests/e2e/armar-sitio\.sh|gh\s+(?:run\s+(?:view|list|watch)|pr\s+(?:view|checks|list)|workflow\s+(?:view|list)))\b")
+
+
+def es_trabajo(comando):
+    """True si todo el comando es trabajo en la app: mirar, buscar, testear o armar el sitio local."""
+    tramos = [t for t in re.split(r"&&|\|\||;|\||\n", comando or "") if t.strip()]
+    return bool(tramos) and all(TRABAJO.match(t) for t in tramos)
 
 
 def decidir_archivo(ruta):
@@ -61,6 +78,8 @@ def decidir(comando):
     for patron, que in DESTRUCTIVOS:
         if patron.search(comando):
             return "deny", "Bloqueado: " + que + ". Solo el dueño puede pedirlo directamente."
+    if es_trabajo(comando):
+        return None
     for patron, que in PUBLICAR:
         if patron.search(comando):
             return "ask", ("Este comando " + que + ". Publicar o disparar workflows es decision del dueño: "
