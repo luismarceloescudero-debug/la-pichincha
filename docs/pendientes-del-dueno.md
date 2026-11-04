@@ -43,7 +43,7 @@ Verificado el 01/11 con los secretos de GitHub y el Worker, y el 04/11 con las c
 | # | Estado |
 |---|---|
 | 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
-| 2 | Enviadas las 4 cartas (02/11). **Katech respondió el 04/11** con su feed de productos (`https://katech.com.ar/feed/productos/`, formato Google Merchant, 2.094 productos): se está integrando al índice. FullH4rd, Compra Cierta y Loquieroacá: seguimiento el 16/11/2026 |
+| 2 | Enviadas las 4 cartas (02/11). **Katech respondió el 04/11** con su feed de productos (`https://katech.com.ar/feed/productos/`, formato Google Merchant, 2.094 productos): ya integrado al índice (PR #224); entra en la próxima corrida. FullH4rd, Compra Cierta y Loquieroacá: seguimiento el 16/11/2026 |
 | 3 | eBay: cerrado el 02/11. Claves y `EBAY_CAMPAIGN_ID` (5339237377) cargados, Worker desplegado y la busqueda en vivo devuelve `afiliado: true` |
 | 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
 | 5 | Mercado Libre: clics confirmados. Cerrado |
