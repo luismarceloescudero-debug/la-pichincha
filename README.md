@@ -458,10 +458,12 @@ rotulan.
 
 ### Reel de Instagram (spec 045, todavía sin publicar)
 
-`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (~29 s) con las 10 ofertas:
-el descuento se estampa, el nombre se escribe en vivo, el precio cuenta hasta el de hoy y al final el link
-a `/hoy/` se escribe y se toca. Cada día cambia la paleta, el fondo y la transición. Necesita Chrome y
-ffmpeg. `--fotos 1900,8800` saca cuadros sueltos para revisar el diseño. No publica nada: eso queda para
+`node generar_reel.js _sitio/ofertas.json` arma un video vertical 1080x1920 (43-55 s según el ritmo del día) con
+las 10 ofertas: el descuento enorme se estampa, el nombre se escribe en vivo, el precio cuenta hasta el de hoy
+y al final el link a `/hoy/` se escribe y se toca. La súper oferta (la de mayor descuento, desde 20 %) escribe
+sus características letra por letra con brillo. Cada día cambian la paleta (tres acentos que combinan), la
+letra, el ritmo, el fondo, la transición y la disposición. Necesita Chrome y ffmpeg. `--fotos 1900,8800` saca
+cuadros sueltos para revisar el diseño y `--ritmo agil|normal|pausado` fuerza un ritmo. No publica nada: eso queda para
 el job de Instagram del PR #126, que espera el OK del dueño.
 
 ## Fiabilidad por comercio
