@@ -100,6 +100,8 @@ function main(argv) {
   const idx = leer(arg("indice") || "indice.json");
   if (!idx) { console.log("sin indice: no hay nada que medir"); return 0; }
   const m = medir(idx);
+  // Con que se midio: el indice de la cache sirve si lo rearma esta corrida; si no, el sitio ya publica otro (con sus ofertas).
+  if (arg("reusado")) m.reusado = true;
   if (arg("ofertas")) m.repetidas = repetidas((leer(arg("ofertas")) || {}).ofertas);
   const lista = alarmas(m, arg("previa") ? leer(arg("previa")) : null);
   if (arg("salida")) fs.writeFileSync(arg("salida"), JSON.stringify(m), "utf8");

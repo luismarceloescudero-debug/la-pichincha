@@ -101,7 +101,6 @@ class Corrida(unittest.TestCase):
         self.pasar_a_ayer(4)
         indice, _ = self.correr([(1, 800), (2, 1000)], [(101, 500)])
         baja, quieto = self.fila(indice, "uno", 1), self.fila(indice, "uno", 2)
-        self.assertEqual(baja[6], 1000)
         self.assertIn("k", baja[8])
         self.assertEqual((quieto[6], "k" in quieto[8]), (0, False))
 
@@ -285,6 +284,50 @@ class Corrida(unittest.TestCase):
         self.assertEqual(self.fila(indice, "uno", 3)[10], hoy.isoformat())                            # cambio hoy
         self.assertEqual(self.fila(indice, "uno", 4)[10], "")                                         # nuevo: todavia no se afirma nada
         self.assertEqual(indice["historial"]["inicio"], (hoy - timedelta(days=45)).isoformat())
+
+    def sin_historial(self, uno, dos):
+        """El checkout de la rama `historial` que no vino: el indexador corre sin series."""
+        p = mock.patch.object(indexar.serie, "cargar", lambda carpeta: {})
+        p.start()
+        self.addCleanup(p.stop)
+        return self.correr(uno, dos)
+
+    def test_sin_historial_la_baja_se_mide_contra_el_indice_anterior(self):
+        # 03/11: el checkout de `historial` no vino, el indice salio con 0 bajas propias en todos los rubros y la guardia
+        # se despertó con «PCs completas: sin ofertas». El indice anterior es el precio de ayer: se cuenta igual.
+        self.correr([(1, 1000), (2, 900)], [(101, 500)])
+        self.pasar_a_ayer()
+        indice, _ = self.sin_historial([(1, 900), (2, 900)], [(101, 500)])
+        baja, quieto = self.fila(indice, "uno", 1), self.fila(indice, "uno", 2)
+        self.assertEqual(baja[6], 1000)
+        self.assertIn("k", baja[8])
+        self.assertEqual((quieto[6], "k" in quieto[8]), (0, False))
+        self.assertEqual(baja[10], (datetime.now(indexar.AR).date()).isoformat())   # el dia del indice contra el que comparo
+
+    def test_sin_historial_una_foto_con_el_doble_de_precio_no_es_una_baja(self):
+        # Una caja de RGB de $8.000 que ayer decia $5.000 por la variante, no un producto que bajo de precio.
+        self.correr([(1, 3000)], [(101, 500)])
+        self.pasar_a_ayer()
+        indice, _ = self.sin_historial([(1, 1000)], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 0)
+
+    def test_sin_historial_dos_veces_el_mismo_dia_inventa_una_sola_baja(self):
+        # La foto es el indice de la corrida anterior: si es de hoy, comparar contra el es comparar contra hoy mismo (18/10).
+        tiendas = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))
+        tiendas["dos"]["activa"] = False
+        (self.dir / "tiendas.json").write_text(json.dumps(tiendas), encoding="utf-8")
+        self.correr([(1, 1000)], None)                       # el indice de hoy, con el precio de hoy
+        self.sin_historial([(1, 900)], None)                 # sin indice de antes: no hay contra que comparar
+        indice, _ = self.sin_historial([(1, 800)], None)     # la foto es de hoy: no se compara contra ella
+        self.assertNotIn("k", self.fila(indice, "uno", 1)[8])
+
+    def test_con_historial_manda_el_historial_y_no_la_foto(self):
+        self.correr([(1, 900)], [(101, 500)])
+        self.pasar_a_ayer()
+        self.sin_historial([(1, 800)], [(101, 500)])         # sin historial: guarda la foto del indice de ayer
+        self.assertTrue((self.hist / "foto.json").exists())
+        indice, _ = self.correr([(1, 700)], [(101, 500)])    # vuelve el historial: manda la serie, no la foto
+        self.assertEqual(self.fila(indice, "uno", 1)[6], 0)  # la foto no agrega una baja que la serie no tiene
 
     def test_sin_historial_el_indice_no_inventa_fechas(self):
         indice, _ = self.correr([(1, 1000)], [(101, 500)])
