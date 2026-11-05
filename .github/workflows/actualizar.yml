@@ -364,6 +364,26 @@ jobs:
           if [ -n "$n" ]; then gh issue comment "$n" --body-file alarma.md
           else gh issue create --title "Guardia del índice: algo no cierra" --label guardia --body-file alarma.md; fi
 
+      # Aviso PRIVADO al dueno (spec 061), al instante: una tienda en 0 o con pocos productos (con el motivo y el arreglo que
+      # se aplico solo), el indexado que no termino o una alarma de la guardia. Va a TELEGRAM_CHAT_DUENO, nunca al canal.
+      # Sin ese secreto deja un ::warning:: con el texto del aviso y sigue. Un push que reusa el indice no avisa la salud
+      # (no la midio) ni la alarma (corre sobre la foto del sitio, como el issue de arriba).
+      - name: Avisar al dueno por Telegram (privado)
+        if: always()
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_DUENO: ${{ secrets.TELEGRAM_CHAT_DUENO }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          INDEXAR: ${{ steps.indexar.outcome }}
+          ALARMA: ${{ steps.guardia.outputs.alarma }}
+          EVENTO: ${{ github.event_name }}
+        run: |
+          args=""
+          if [ "$INDEXAR" = "success" ] || [ "$INDEXAR" = "failure" ]; then args="--salud salud.json --indexado $INDEXAR"; fi
+          if [ "$ALARMA" = "true" ] && [ "$EVENTO" != "push" ]; then args="$args --alarma alarma.md"; fi
+          if [ -n "$args" ]; then python avisar_dueno.py $args; else echo "Nada que avisar al dueno"; fi
+
       # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Un mensaje por indice: la
       # corrida programada y la que se lanza a mano lo mandan; un push nunca manda uno nuevo (asi no se repiten
       # mensajes en cada merge), pero si republica el mismo indice con otra lista corrige el que ya salio (spec 030,
@@ -431,3 +451,25 @@ jobs:
           else
             echo "Sin imagen de /hoy/ o sin mensaje: el mensaje queda con la vista previa general"
           fi
+
+  # spec 061: si algun job fallo (los tests, el armado o el despliegue), aviso PRIVADO al dueno por Telegram al instante.
+  # Va a TELEGRAM_CHAT_DUENO, nunca al canal; sin el secreto deja un ::warning:: y no falla.
+  avisar-falla:
+    needs: [decidir, tests, construir, publicar]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            avisar_dueno.py
+            publicar_telegram.py
+          sparse-checkout-cone-mode: false
+      - name: Avisar al dueno que fallo la corrida
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_DUENO: ${{ secrets.TELEGRAM_CHAT_DUENO }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NECESIDADES: ${{ toJSON(needs) }}
+        run: python3 avisar_dueno.py --corrida-fallida

@@ -11,6 +11,13 @@ from unittest import mock
 
 import indexar
 
+
+def setUpModule():
+    # spec 061: el reintento unico de una fuente espera ESPERA_REINTENTO segundos; en los tests no se espera
+    parche = mock.patch.object(indexar, "ESPERA_REINTENTO", 0)
+    parche.start()
+    unittest.addModuleCleanup(parche.stop)
+
 BASE = "https://tienda.test"
 
 
@@ -169,7 +176,10 @@ class Corrida(unittest.TestCase):
         self.correr([(1, 1000)], [(101, 500)])
         antes = len(self.filas())
         indice, salud = self.correr(None, [(101, 500)])
-        self.assertEqual(salud["fuentes"]["uno"], {"nombre": "Uno", "previo": 1, "ahora": 0, "estado": "fallo"})
+        # spec 061: el corte de red se reintento una vez y el informe dice el motivo
+        self.assertEqual(salud["fuentes"]["uno"], {"nombre": "Uno", "previo": 1, "ahora": 0, "estado": "fallo",
+                                                   "motivo": "red", "reintentada": True,
+                                                   "detalle": "OSError: sin conexion: https://uno.test/cat"})
         self.assertEqual(self.fila(indice, "uno", 1)[1], 1000)   # publica lo que ya tenia
         self.assertEqual(len(self.filas()), antes)
 
@@ -182,6 +192,43 @@ class Corrida(unittest.TestCase):
         self.assertEqual(salud["fuentes"]["uno"]["estado"], "fallo")
         self.assertEqual(sorted(f[1] for f in indice["productos"] if f[3] == "uno"), [1000, 2000])
         self.assertEqual(len(self.filas()), antes)
+
+    def test_e1_una_tienda_en_cero_se_reintenta_y_si_vuelve_entra_como_de_hoy(self):
+        # spec 061, E1 (Katech el 04/11: «0 productos fallo»): el primer intento trae 0, el reintento trae el catalogo.
+        self.correr([(1, 1000)], [(101, 500)])
+        pedidos = {"n": 0}
+        original = self.bajar
+
+        def una_vez_vacia(u):
+            if u == "https://uno.test/cat":
+                pedidos["n"] += 1
+                if pedidos["n"] == 1:
+                    return "[]"
+            return original(u)
+        self.catalogos = {"https://uno.test/cat": [{"id": 1, "nombre": "Producto 1", "precio": 900}],
+                          "https://dos.test/cat": [{"id": 101, "nombre": "Producto 101", "precio": 500}]}
+        with mock.patch.object(indexar, "bajar", una_vez_vacia), redirect_stdout(io.StringIO()):
+            self.assertEqual(indexar.main(["--historial", str(self.hist)]), 0)
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        salud = json.loads((self.dir / "salud.json").read_text(encoding="utf-8"))
+        self.assertEqual(pedidos["n"], 2)
+        self.assertEqual(self.fila(indice, "uno", 1)[1], 900)
+        self.assertEqual(salud["fuentes"]["uno"]["estado"], "ok")
+        self.assertEqual(salud["fuentes"]["uno"]["motivo"], "recuperada")
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], indice["generado"])
+
+    def test_e1_una_tienda_en_cero_dos_veces_usa_lo_anterior_con_su_fecha_vieja(self):
+        # Principio II: un precio viejo nunca sin decirlo. El relevado de la tienda queda en la fecha de antes y el sitio
+        # la muestra como «sin relevar hoy» (js/busqueda.js) y /estado/ como atrasada.
+        self.correr([(1, 1000)], [(101, 500)])
+        indice = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        indice["tiendas"]["uno"]["relevado"] = "2026-11-01T10:00-03:00"
+        (self.dir / "indice.json").write_text(json.dumps(indice), encoding="utf-8")
+        indice, salud = self.correr([], [(101, 500)])
+        self.assertEqual(self.fila(indice, "uno", 1)[1], 1000)
+        self.assertEqual(indice["tiendas"]["uno"]["relevado"], "2026-11-01T10:00-03:00")
+        self.assertEqual(salud["fuentes"]["uno"]["motivo"], "sin productos")
+        self.assertTrue(salud["fuentes"]["uno"]["reintentada"])
 
     def test_las_filas_reusadas_conservan_la_foto_y_los_sellos(self):
         cfg = json.loads((self.dir / "tiendas.json").read_text(encoding="utf-8"))

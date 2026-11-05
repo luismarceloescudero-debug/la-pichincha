@@ -11,6 +11,13 @@ from unittest import mock
 
 import indexar
 
+
+def setUpModule():
+    # spec 061: el reintento unico de una fuente espera ESPERA_REINTENTO segundos; en los tests no se espera
+    parche = mock.patch.object(indexar, "ESPERA_REINTENTO", 0)
+    parche.start()
+    unittest.addModuleCleanup(parche.stop)
+
 FICHA = (Path(__file__).resolve().parent / "fixtures" / "venex" / "ficha.html").read_text(encoding="utf-8")
 HOY = date(2026, 10, 15)
 SSD = "Disco Solido SSD Kingston A400 480GB SATA"
