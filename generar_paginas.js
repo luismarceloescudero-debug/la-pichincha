@@ -216,6 +216,8 @@ function cabeza({ titulo, descripcion, canonica, noindex, baseUrl, grafo, feed, 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="${SITIO.csp}">
+<meta name="sentry-dsn" content="${esc(SITIO.sentry_dsn || "")}">
+<script src="${rel}js/errores.js"></script>
 <title>${esc(titulo)}</title>
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${esc(canonica)}">

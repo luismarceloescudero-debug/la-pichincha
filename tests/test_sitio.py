@@ -81,6 +81,32 @@ class Afuera(unittest.TestCase):
             self.assertIn(SITIO["afuera_url"], connect)
 
 
+class Sentry(unittest.TestCase):
+    """Registro de errores (spec 061): el DSN vive en sitio.json, las paginas lo llevan en un meta y la CSP lo deja pasar."""
+
+    def test_el_dsn_esta_vacio_o_es_de_sentry(self):
+        dsn = SITIO["sentry_dsn"]
+        self.assertTrue(dsn == "" or re.fullmatch(r"https://[0-9a-f]+@o\d+\.ingest(\.[a-z]+)?\.sentry\.io/\d+", dsn), dsn)
+
+    def test_la_politica_deja_bajar_el_programa_y_mandar_los_errores(self):
+        script = re.search(r"script-src ([^;]+)", SITIO["csp"]).group(1).split()
+        self.assertIn("https://browser.sentry-cdn.com", script)
+        if SITIO["sentry_dsn"]:
+            origen = re.match(r"https://[^@]+@([^/]+)", SITIO["sentry_dsn"]).group(1)
+            connect = re.search(r"connect-src ([^;]+)", SITIO["csp"]).group(1).split()
+            self.assertIn(f"https://{origen}", connect)
+
+    def test_index_y_las_paginas_generadas_llevan_el_dsn_y_el_script(self):
+        html = (RAIZ / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(re.findall(r'<meta name="sentry-dsn" content="([^"]*)">', html), [SITIO["sentry_dsn"]])
+        self.assertIn('<script src="js/errores.js"></script>', html)
+        self.assertLess(html.index("js/errores.js"), html.index('src="js/buscador.js"'), "va antes que el resto")
+        js = 'process.stdout.write(require("./generar_paginas.js").cabeza({titulo:"t",descripcion:"d",canonica:"c",baseUrl:"b",rel:"../"}))'
+        salida = subprocess.run(["node", "-e", js], cwd=RAIZ, capture_output=True, text=True, check=True, encoding="utf-8")
+        self.assertIn(f'<meta name="sentry-dsn" content="{SITIO["sentry_dsn"]}">', salida.stdout)
+        self.assertIn('<script src="../js/errores.js"></script>', salida.stdout)
+
+
 class Icono(unittest.TestCase):
     """Sin <link rel="icon"> el navegador pide /favicon.ico, que no existe: un 404 en cada pagina."""
 
