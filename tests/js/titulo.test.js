@@ -133,3 +133,13 @@ test("titulo (04/11): «Rapid» de «Rapid IPS/VA» es el panel, no la marca; el
   // Venex: el enlace dice 274qd, pero el nombre del aviso dice 274QP (dato de la tienda, no se corrige)
   assert.equal(T.de('Monitor Gamer MSI MAG 274QP X24 27" WQHD OLED 240Hz').titulo, "MSI MAG 274QP X24");
 });
+
+test("titulo (05/11): «MagneticoMecanico» pegado se separa en chips, un monitor sin modelo no queda en la marca sola, y una chip que el titulo ya dice no se repite", () => {
+  const t = T.de("Teclado MagneticoMecanico Redragon K617 Fizz 60% Rapid Trigger 8K Hz Black RGB");
+  assert.equal(t.titulo, "REDRAGON K617 FIZZ");
+  assert.ok(t.chips.includes("Magnético") && t.chips.includes("Mecánico"));
+  const m = T.de("Monitor MSI 27″ Rapid IPS QHD 240Hz 0.5ms");
+  assert.equal(m.titulo, "MSI 27″ RAPID IPS");
+  assert.ok(!m.chips.includes("27″") && !m.chips.includes("IPS"), "lo que dice el titulo no se repite en las chips");
+  assert.equal(T.de("SSD Kingston 1TB").titulo, "KINGSTON", "fuera de monitores, la marca sola sigue como antes");
+});
