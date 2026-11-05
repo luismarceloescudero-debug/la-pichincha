@@ -72,20 +72,18 @@ test("sin grupos no hay panel", () => {
   assert.equal(N.novedadesHtml(null, h), "");
 });
 
-test("los nombres largos se acortan en la tabla y el texto se escapa", () => {
-  const largo = "Notebook " + "X".repeat(200);
+test("el nombre va como en Ofertas: titulo limpio y caracteristicas en pastillas, y el texto se escapa", () => {
   const g = [{ categoria: "notebook", etiqueta: "Notebooks", items: [
-    { nombre: largo, precio: 100, url: "https://t.test/a", tienda: "Mexx", resumen: "16 GB de RAM", ultimo: true },
-    { nombre: "Otra <b>", precio: 150, url: "https://t.test/b", tienda: "Mexx", resumen: "32 GB de RAM", ultimo: false }] }];
-  const esc = s => String(s).replace(/</g, "&lt;");
+    { nombre: "Notebook Gigabyte Gaming A16 i7-13620H 32GB 2TB RTX 5060", precio: 100, url: "https://t.test/a", tienda: "Mexx", resumen: "", ultimo: true },
+    { nombre: "Otra <b>", precio: 150, url: "https://t.test/b", tienda: "Mexx", resumen: "", ultimo: false }] }];
+  const esc = s => String(s).replace(/</g, "&lt;").replace(/"/g, "&quot;");
   const html = N.novedadesHtml(g, { esc, pesos: n => "$" + n, enlace: u => u, icono: () => "" });
-  assert.ok(html.includes("…"), "el nombre largo termina en puntos suspensivos");
+  assert.match(html, /<span class="tit-chip[^"]*">(?:<span aria-hidden="true">✦ <\/span>)?RTX 5060<\/span>/);
+  assert.match(html, /<span class="tit-chip[^"]*">(?:<span aria-hidden="true">✦ <\/span>)?32 GB RAM<\/span>/);
   assert.ok(!html.includes("<b>"), "el nombre se escapa");
+  assert.ok(!html.includes("Especificaciones"), "sin la columna que repetia el titulo");
   assert.match(html, /lo último/);
   assert.match(html, /\+50%/);
-  assert.ok(!html.includes("Especificaciones"), "sin la columna que repetia el titulo");
-  const conExtra = N.novedadesHtml([{ ...g[0], items: g[0].items.map(i => ({ ...i, extra: "1 TB <x>" })) }], { esc, pesos: n => "$" + n, enlace: u => u, icono: () => "" });
-  assert.match(conExtra, /<span class="esp">1 TB &lt;x&gt;<\/span>/);
 });
 
 test("«Lo más buscado» muestra solo los términos, cada uno con su comparativa, y escapa el texto", () => {

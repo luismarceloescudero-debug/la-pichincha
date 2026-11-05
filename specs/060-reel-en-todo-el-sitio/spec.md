@@ -58,7 +58,10 @@ Mismo lenguaje y mismos roles en tonos oscuros sobre lavanda (`#faf5fe`): el ama
   lila, rosa claro y menta (`--n-menta`, nuevo: #8dffc4 oscuro / #0b6b3d claro, 6:1 o mas); «Comparar» va relleno segun la fila
   (lila, rosa, amarillo) con letra negra; `.acc` en general lleva texto lila e icono rosa.
 - **Caracteristicas sin repetir el titulo**: la columna «Especificaciones» de Comparativa salia del mismo titulo («6 GB de
-  RAM · 128 GB»). Se quita; bajo el nombre solo va lo que el nombre a la vista no dice (`Especificaciones.resumenFuera`),
-  en una pastilla. Bateria, NFC o procesador no estan en el indice (solo hay titulo): queda como trabajo aparte.
+  RAM · 128 GB») y se quita. Bateria, NFC o procesador no estan en el indice (solo hay titulo): queda como trabajo aparte.
+- **Caracteristicas resaltadas** (el dueño, despues: «estan en el titulo, no se diferencian»): Comparativa pinta el nombre
+  con `Titulo.html`, como Ofertas: titulo limpio y cada caracteristica en su pastilla llena, letra negra en negrita,
+  girando menta, lila y rosa (las premium con ✦ y degradado). «Abrir», «Comparar», «Historial» y «Ahorrás» de las tarjetas
+  dejan el blanco: lila con icono rosa, y rosa claro.
 - El «titulo blanco que despues cambia de color» era el CSS viejo que el service worker anterior servia mientras llegaba el
   nuevo: pasa una vez despues de cada publicacion.

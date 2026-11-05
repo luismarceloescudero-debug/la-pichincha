@@ -1098,13 +1098,9 @@ table.nov-tabla th small{display:inline-block;margin-top:5px;padding:2px 10px;bo
    nombre van en una pastilla con borde; Comparar lleva su color segun la fila. */
 .acc{color:var(--n-lila)}
 .acc .ico{color:var(--n-rosa)}
-table.nov-tabla .esp{display:inline-block;margin-top:6px;padding:2px 10px;border:1.5px solid currentColor;border-radius:999px;
-  font:600 .85rem/1.4 var(--font-sans);color:var(--n-menta)}
 table.nov-tabla tbody tr:nth-child(3n+1) th a{color:var(--n-lila)}
 table.nov-tabla tbody tr:nth-child(3n+2) th a{color:var(--n-titulo-3)}
 table.nov-tabla tbody tr:nth-child(3n) th a{color:var(--n-menta)}
-table.nov-tabla tbody tr:nth-child(3n+2) .esp{color:var(--n-lila)}
-table.nov-tabla tbody tr:nth-child(3n) .esp{color:var(--n-titulo-3)}
 table.nov-tabla .acc{border:0;color:var(--f-tinta);font-weight:800;box-shadow:none}
 table.nov-tabla .acc .ico{color:var(--f-tinta)}
 table.nov-tabla tbody tr:nth-child(3n+1) .acc{background:var(--f-lila)}
@@ -1113,3 +1109,21 @@ table.nov-tabla tbody tr:nth-child(3n) .acc{background:var(--f-ama)}
 /* Ofertas y Buscar: la primera de cada tres tampoco va en blanco */
 .ogrid>.ocard:nth-child(3n+1 of .ocard) .tit-nom,.res>.fila:nth-child(3n+1 of .fila) .tit-nom{color:var(--n-lila)}
 .ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-menta)}
+
+/* ==== Las caracteristicas resaltadas (pedido del dueño 05/11: «estan en el titulo, no se diferencian o resaltan») ====
+   El nombre limpio arriba y cada caracteristica en su pastilla llena, letra negra en negrita, girando menta, lila y rosa
+   (el celeste queda para la tienda y el amarillo para el precio). Las premium conservan ✦ y el degradado. */
+:root{--f-menta:#8dffc4}
+.tit-chips .tit-chip:not(.pr){border:0;color:var(--f-tinta);font:700 .78rem/1.6 var(--font-sans);padding:1px 10px}
+.tit-chips .tit-chip:not(.pr):nth-child(3n+1){background:var(--f-menta)}
+.tit-chips .tit-chip:not(.pr):nth-child(3n+2){background:var(--f-lila)}
+.tit-chips .tit-chip:not(.pr):nth-child(3n){background:var(--f-rosa)}
+.tit-chips .tit-chip.pr{font-weight:800}
+table.nov-tabla th a{text-decoration:none;display:inline-block}
+table.nov-tabla th a .tit{display:flex;gap:8px;align-items:flex-start}
+table.nov-tabla th a .tit-nom{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+table.nov-tabla th a .tit-chips{margin-top:6px}
+/* los botones de las tarjetas tampoco en blanco: texto lila, icono rosa; «Ahorrás» en rosa claro */
+.ocard .o-acciones .acc,.ocard .hp-abrir,.ocard.n-heroe .acc{color:var(--n-lila)}
+.ocard .o-acciones .acc .ico,.ocard .hp-abrir .ico{color:var(--n-rosa)}
+.ocard .o-ahorro,.ocard.n-heroe .o-ahorro{color:var(--n-titulo-3)}
