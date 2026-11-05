@@ -1,6 +1,6 @@
 # Pendientes que dependen de vos
 
-Última revisión: 05/11/2026 (ítems 12 y 13, spec 061); 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
+Última revisión: 05/11/2026 (ítems 12 y 13, spec 061; ítem 1 cerrado); 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
 24/10 desde el entorno de trabajo: los que piden iniciar sesión o tienen anti-bots están marcados) y, cuando hay que
 escribirle a alguien, el **mensaje ya armado**. Entre `[CORCHETES]` va lo que tenés que completar vos.
 
@@ -8,7 +8,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 
 | # | Pendiente | Qué se destraba | Tiempo |
 |---|---|---|---|
-| 1 | Activar el formulario de contacto | Que lleguen a tu Gmail los mensajes de /contacto/ sin publicar tu correo, y completar «Acerca de» | 15 min |
+| 1 | ~~Activar el formulario de contacto~~ | Hecho: el aviso «[La Pichincha] Consulta de …» y el acuse de Resend «Recibimos tu consulta» llegan desde `hola@pichinchadeldia.com.ar` (prueba del 31/10, confirmada el 05/11) | — |
 | 2 | Escribir a FullH4rd, Katech, Compra Cierta y Loquieroacá (cartas enviadas el 02/11; **Katech respondió el 04/11 con su feed, ya integrado**) | Tres tiendas que hoy no entran al índice o a «Afuera» | esperar respuesta |
 | 3 | eBay (claves y afiliados) | «Afuera» con eBay: precios en vivo y comisión | 30 min + espera |
 | 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
