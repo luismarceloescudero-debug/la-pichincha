@@ -56,6 +56,7 @@ BLOQUEOS = (403, 429, 503)   # un bloqueo no se esquiva: se corta y se retoma ot
 FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
 MAX_BAJA_FOTO = 2     # sin historial, una foto del doble de precio ya no es el mismo producto (cambio de variante)
 TOPE_VENDIDOS = 100   # puestos del orden «mas vendidos» de cada tienda que se guardan: mas abajo ya no dice nada (spec 019)
+ESPERA_REINTENTO = 60   # spec 061: una tienda que trajo 0 o se corto la red se reintenta UNA vez, pasado este tiempo
 
 for flujo in (sys.stdout, sys.stderr):
     try:
@@ -79,10 +80,33 @@ VERDE, ROJO, GRIS, AMAR, NEG, FIN = (
     if _C else ("", "", "", "", "", ""))
 
 
+class BloqueoCloudflare(RuntimeError):
+    """La tienda contesto con el desafio de Cloudflare («Just a moment...», FullH4rd desde el 08/10). No se esquiva (ni
+    navegador automatizado ni proxies): la tienda se saltea hoy y se avisa al dueno (spec 061, error conocido E3)."""
+
+
+def _desafio_cloudflare(e):
+    """True si un HTTPError es el desafio de Cloudflare: la cabecera Cf-Mitigated: challenge o, sin ella, un 403/503 de un
+    servidor cloudflare con la pagina «Just a moment»."""
+    if not isinstance(e, urllib.error.HTTPError) or e.code not in (403, 429, 503):
+        return False
+    cabeceras = e.headers or {}
+    if str(cabeceras.get("cf-mitigated") or "").lower() == "challenge":
+        return True
+    if "cloudflare" not in str(cabeceras.get("server") or "").lower():
+        return False
+    try:
+        cuerpo = e.read(4000).decode("utf-8", "replace")
+    except (OSError, AttributeError, ValueError, TypeError):
+        return False
+    return "Just a moment" in cuerpo or "cf-chl" in cuerpo or "challenge-platform" in cuerpo
+
+
 def bajar(url):
     """Una pagina como texto. Un corte a mitad de respuesta (IncompleteRead) se reintenta una vez:
     es la red, no la tienda negandose; si se repite, sale como error de red (OSError) y la fuente
-    lo maneja como cualquier caida. Un 403 o un 429 no se reintentan: son una respuesta."""
+    lo maneja como cualquier caida. Un 403 o un 429 no se reintentan: son una respuesta. El desafio de
+    Cloudflare sale como BloqueoCloudflare, para que la tienda se saltee entera y se avise el motivo."""
     pedido = urllib.request.Request(url, headers={
         "User-Agent": UA, "Accept": "text/html,application/json,*/*",
         "Accept-Language": "es-AR,es;q=0.9"})
@@ -94,6 +118,54 @@ def bajar(url):
             if intento == 2:
                 raise OSError("respuesta cortada dos veces: " + url) from e
             time.sleep(PAUSA * 4)
+        except urllib.error.HTTPError as e:
+            if _desafio_cloudflare(e):
+                raise BloqueoCloudflare("desafio de Cloudflare (HTTP " + str(e.code) + "): no se esquiva") from e
+            raise
+
+
+def motivo_de(error):
+    """Por que fallo una fuente, en una palabra que entiende el aviso al dueno (spec 061): cloudflare (desafio antibots),
+    bloqueo (403/429/503: la tienda dijo que no), red (corte, DNS, tiempo) o error (cualquier otra cosa)."""
+    cadena, e = [], error
+    while e is not None and all(e is not x for x in cadena):    # el error y sus causas (raise ... from e)
+        cadena.append(e)
+        e = e.__cause__ or e.__context__
+    if any(isinstance(x, BloqueoCloudflare) or _desafio_cloudflare(x) for x in cadena):
+        return "cloudflare"          # el desafio manda aunque un lector lo haya envuelto en otro error
+    for error in cadena:
+        if isinstance(error, urllib.error.HTTPError):
+            return "bloqueo" if error.code in BLOQUEOS else "error"
+        if isinstance(error, RuntimeError) and "no se insiste" in str(error):
+            return "bloqueo"
+        if isinstance(error, (urllib.error.URLError, OSError, TimeoutError)):
+            return "red"
+    return "error"
+
+
+def relevar(leer, espera=None, dormir=None):
+    """Corre la lectura de una fuente con la regla fija de la spec 061 (error conocido E1): si trae 0 productos o se corta
+    la red, se espera `espera` segundos y se reintenta UNA vez. Un bloqueo (Cloudflare, 403, 429, 503) no se reintenta: es
+    una respuesta de la tienda (principio III). Devuelve (items, error, reintentada); con error, items es []."""
+    espera = ESPERA_REINTENTO if espera is None else espera
+    dormir = dormir or time.sleep
+    reintentada = False
+    for intento in (1, 2):
+        try:
+            items = leer()
+        except Exception as e:                       # una fuente caida no voltea el indice
+            if intento == 1 and motivo_de(e) == "red":
+                print("  " + AMAR + "! " + type(e).__name__ + ": se reintenta en " + str(espera) + " s" + FIN)
+                reintentada = True
+                dormir(espera)
+                continue
+            return [], e, reintentada
+        if items or intento == 2:
+            return items, None, reintentada
+        print("  " + AMAR + "! trajo 0 productos: se reintenta en " + str(espera) + " s" + FIN)
+        reintentada = True
+        dormir(espera)
+    return [], None, reintentada   # no se llega: el segundo intento siempre vuelve
 
 
 def numero(texto):
@@ -969,7 +1041,7 @@ def main(argv=None):
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
-    por_confirmar = []
+    por_confirmar, notas = [], {}                # notas: por que fallo cada fuente y si se reintento (spec 061)
     fichas = leer_fichas(carpeta)                # part numbers ya leidos de las fichas (B3-bis)
     for clave, fuente in fuentes.items():
         if (not fuente.get("activa", True) or (args.solo and clave != args.solo)
@@ -981,29 +1053,36 @@ def main(argv=None):
         print("\n" + NEG + fuente["nombre"] + FIN)
         t0 = time.time()
         tipo = fuente["catalogo"]["tipo"]
-        try:
+
+        def leer(fuente=fuente, tipo=tipo):
             if tipo == "json":
-                items = indexar_json(fuente)
-            elif tipo == "api":
-                items = indexar_api(fuente, args.max_paginas)
-            elif tipo == "woocommerce":
-                items = indexar_woocommerce(fuente, args.max_paginas)
-            elif tipo == "vtex":
-                items = indexar_vtex(fuente, args.max_paginas)
-            elif tipo == "feed":
-                items = indexar_feed(fuente)
-            elif tipo == "mercadolibre":
-                items = [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
-                         for it in mercadolibre.indexar(fuente, args.max_paginas)]
-            else:
-                items = indexar_listados(fuente, args.max_paginas)
-        except Exception as e:                       # una fuente caida no voltea el indice
-            print("  " + ROJO + FALLA + " " + type(e).__name__ + ": " + str(e)[:70] + FIN)
+                return indexar_json(fuente)
+            if tipo == "api":
+                return indexar_api(fuente, args.max_paginas)
+            if tipo == "woocommerce":
+                return indexar_woocommerce(fuente, args.max_paginas)
+            if tipo == "vtex":
+                return indexar_vtex(fuente, args.max_paginas)
+            if tipo == "feed":
+                return indexar_feed(fuente)
+            if tipo == "mercadolibre":
+                return [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
+                        for it in mercadolibre.indexar(fuente, args.max_paginas)]
+            return indexar_listados(fuente, args.max_paginas)
+
+        # spec 061: reintento unico ante 0 productos o un corte de red; un bloqueo no se reintenta. Si sigue sin productos,
+        # se usan los de la corrida anterior con su fecha de relevado vieja (principio II: /estado/ y el sitio la muestran).
+        items, error, reintentada = relevar(leer)
+        if error is not None:
+            motivo = motivo_de(error)
+            print("  " + ROJO + FALLA + " " + type(error).__name__ + ": " + str(error)[:70] + FIN)
+            notas[clave] = {"motivo": motivo, "detalle": (type(error).__name__ + ": " + str(error))[:160],
+                            "reintentada": reintentada}
             if clave in previo:
                 salida.extend(previo[clave])
-                resumen[clave] = (len(previo[clave]), "fallo, uso el anterior")
+                resumen[clave] = (len(previo[clave]), "fallo (" + motivo + "), uso el anterior")
             else:
-                resumen[clave] = (0, "fallo")
+                resumen[clave] = (0, "fallo (" + motivo + ")")
             relevados[clave] = 0
             continue
         # Ni "javascript:" ni comillas: la URL va a un href del sitio. Se filtra antes de contar, asi la salud de la fuente
@@ -1016,6 +1095,8 @@ def main(argv=None):
             # Un bloqueo en los listados no tira excepcion: cada pagina falla y se
             # corta. Cero productos es una fuente caida, no un catalogo vacio.
             print("  " + ROJO + FALLA + " no trajo ningun producto" + FIN)
+            notas[clave] = {"motivo": "sin productos", "reintentada": reintentada,
+                            "detalle": "0 productos" + (", tambien en el reintento" if reintentada else "")}
             if clave in previo:
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "sin productos, uso el anterior")
@@ -1037,6 +1118,8 @@ def main(argv=None):
         if puestos:
             print("  " + VERDE + OK + FIN + " lo mas vendido " + PUNTO + " " + str(len(puestos)) + " puestos")
         rebaja_real = bool(fuente.get("lista_es_oferta"))
+        if reintentada:
+            notas[clave] = {"motivo": "recuperada", "detalle": "anduvo en el reintento", "reintentada": True}
         relevados[clave] = len(items)
         frescas.add(clave)
         bajaron = 0
@@ -1112,7 +1195,7 @@ def main(argv=None):
         escribir_fichas(carpeta, fichas)
     generado = datetime.now(AR).isoformat(timespec="minutes")
     relevado.update(dict.fromkeys(frescas, generado))
-    informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado)
+    informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado, notas=notas)
     sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
     filas = historial.cambios(estado, actuales, sanas, generado[:10])
     ruta_csv = historial.escribir(carpeta, generado[:10], filas)

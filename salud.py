@@ -23,8 +23,10 @@ ETIQUETA = "salud-fuente"
 SALUD = Path(__file__).resolve().parent / "salud.json"
 
 
-def evaluar(vivos, relevados, nombres, fecha, umbral=UMBRAL):
-    """Compara lo que trajo cada fuente relevada hoy contra lo que tenia vivo."""
+def evaluar(vivos, relevados, nombres, fecha, umbral=UMBRAL, notas=None):
+    """Compara lo que trajo cada fuente relevada hoy contra lo que tenia vivo. `notas` (spec 061, de indexar.py): por
+    cada fuente, {"motivo", "detalle", "reintentada"}; se copian al informe para que el aviso al dueno diga el porque."""
+    notas = notas or {}
     fuentes = {}
     for clave, ahora in relevados.items():
         previo = vivos.get(clave, 0)
@@ -36,6 +38,9 @@ def evaluar(vivos, relevados, nombres, fecha, umbral=UMBRAL):
             estado = "ok"
         fuentes[clave] = {"nombre": nombres.get(clave, clave), "previo": previo,
                           "ahora": ahora, "estado": estado}
+        nota = notas.get(clave)
+        if nota:
+            fuentes[clave].update({k: nota[k] for k in ("motivo", "detalle", "reintentada") if k in nota})
     return {"fecha": fecha, "umbral": umbral, "fuentes": fuentes}
 
 

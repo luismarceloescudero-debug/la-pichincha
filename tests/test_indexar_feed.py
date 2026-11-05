@@ -12,6 +12,13 @@ from unittest import mock
 
 import indexar
 
+
+def setUpModule():
+    # spec 061: el reintento unico de una fuente espera ESPERA_REINTENTO segundos; en los tests no se espera
+    parche = mock.patch.object(indexar, "ESPERA_REINTENTO", 0)
+    parche.start()
+    unittest.addModuleCleanup(parche.stop)
+
 RAIZ = Path(__file__).resolve().parent.parent
 FEED = (RAIZ / "tests" / "fixtures" / "katech" / "feed.xml").read_text(encoding="utf-8")
 TIENDAS = json.loads((RAIZ / "tiendas.json").read_text(encoding="utf-8"))
