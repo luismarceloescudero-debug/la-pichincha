@@ -220,7 +220,8 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-lista li:nth-child(3n+2){border-color:rgba(255,110,182,.6)}
 .hoy .h-lista li:nth-child(3n){border-color:rgba(199,155,255,.75)}
 .hoy .h-lista li:nth-child(3n+2) .h-nom,.hoy .h-lista li:nth-child(3n+2) .tit-nom{color:#f3b6ff}
-.hoy .h-lista li:nth-child(3n) .h-nom,.hoy .h-lista li:nth-child(3n) .tit-nom{color:#ffc2e0}
+.hoy .h-lista li:nth-child(3n+1) .h-nom,.hoy .h-lista li:nth-child(3n+1) .tit-nom{color:#d9a6ff}
+.hoy .h-lista li:nth-child(3n) .h-nom,.hoy .h-lista li:nth-child(3n) .tit-nom{color:#8dffc4}
 /* la tienda, destacada: pastilla llena con letra negra en negrita (celeste, rosa, lila en ciclo) */
 .hoy .h-donde b,.hoy .h-tienda b{display:inline-block;padding:1px 10px 2px;border-radius:999px;background:#3ee6ff;color:#120018;font-weight:800}
 .hoy .h-lista li:nth-child(3n+2) .h-donde b{background:#ff6eb6}

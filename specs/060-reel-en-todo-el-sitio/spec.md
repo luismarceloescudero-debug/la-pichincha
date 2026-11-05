@@ -48,3 +48,17 @@ Mismo lenguaje y mismos roles en tonos oscuros sobre lavanda (`#faf5fe`): el ama
   `npx playwright test --workers=1` (21): en verde.
 - Lighthouse móvil sobre el índice publicado: accesibilidad 100 en la portada (claro), Ofertas y `/hoy/` (oscuro).
 - Capturas antes/después a 390 px en `privado/capturas/060/`.
+
+## Tercera vuelta (05/11, capturas del dueño desde el celular)
+
+- **Link de Telegram que abria «sin conexion»**: `sw.js` esperaba la red 4 s y, sin copia guardada, mostraba `sin-red.html`
+  aunque hubiera internet (4G lento, `/hoy/` abierto por primera vez). Ahora, sin copia, sigue esperando la red; la pagina de
+  sin conexion queda para cuando la red falla de verdad. Test nuevo en `tests/js/sw.test.js`.
+- **Sin blancos**: el titulo de «Lo mas vendido» (una regla vieja lo dejaba en `--ink`) va en lila; los nombres giran en
+  lila, rosa claro y menta (`--n-menta`, nuevo: #8dffc4 oscuro / #0b6b3d claro, 6:1 o mas); «Comparar» va relleno segun la fila
+  (lila, rosa, amarillo) con letra negra; `.acc` en general lleva texto lila e icono rosa.
+- **Caracteristicas sin repetir el titulo**: la columna «Especificaciones» de Comparativa salia del mismo titulo («6 GB de
+  RAM · 128 GB»). Se quita; bajo el nombre solo va lo que el nombre a la vista no dice (`Especificaciones.resumenFuera`),
+  en una pastilla. Bateria, NFC o procesador no estan en el indice (solo hay titulo): queda como trabajo aparte.
+- El «titulo blanco que despues cambia de color» era el CSS viejo que el service worker anterior servia mientras llegaba el
+  nuevo: pasa una vez despues de cada publicacion.

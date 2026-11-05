@@ -9,7 +9,7 @@
   --good:#8a5300; --good-soft:#fff1cc; --bad:#b8125f;
   --warn:#9a4a00; --warn-soft:#fbeeda;
   --n-precio:#8a5300; --n-rosa:#b8125f; --n-celeste:#00708c; --n-tarjeta:#ffffff; --n-tarjeta2:#efe8ff;
-  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-titulo-3:#a3135c; --n-lila:#6a1b9a; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
+  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-titulo-3:#a3135c; --n-lila:#6a1b9a; --n-menta:#0b6b3d; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0a7677; --gc-soft:#d8f2f2;
   --mx:#a35707; --mx-soft:#fbeeda;
@@ -32,7 +32,7 @@
     --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
     --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
     --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -51,7 +51,7 @@
   --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
   --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
   --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -1046,7 +1046,7 @@ table.nov-tabla tbody tr:nth-child(even) th a{color:var(--n-titulo-2)}
    una tarjeta o fila con borde lila y nombre en tinta, la siguiente con borde celeste y nombre en lila claro. Las mejores
    (heroe, primera de la busqueda) conservan su borde rosa. */
 /* los titulos de cada panel de Comparativa, alternados */
-#mas-vendido .panel-head h2{color:var(--ink)}
+#mas-vendido .panel-head h2{color:var(--n-lila)}
 #novedades .panel-head h2{color:var(--n-titulo-2)}
 #mas-buscado .panel-head h2{color:var(--n-precio)}
 
@@ -1091,3 +1091,25 @@ table.nov-tabla th small{display:inline-block;margin-top:5px;padding:2px 10px;bo
 .ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-titulo-3)}
 .ogrid>.ocard:nth-child(3n+2 of .ocard) .tienda,.res>.fila:nth-child(3n+2 of .fila) .tie{background:var(--f-lila)}
 .ogrid>.ocard:nth-child(3n of .ocard) .tienda,.res>.fila:nth-child(3n of .fila) .tie{background:var(--f-rosa)}
+
+/* ==== Tercera vuelta (pedido del dueño 05/11: «titulo en blanco, en caracteristicas se repite un color claro, Comparar de
+   nuevo blanco; ir alternando para no cansar la vista») ====
+   Sin blanco para nombres ni botones: los nombres giran en lila, rosa claro y menta; las especificaciones que no estan en el
+   nombre van en una pastilla con borde; Comparar lleva su color segun la fila. */
+.acc{color:var(--n-lila)}
+.acc .ico{color:var(--n-rosa)}
+table.nov-tabla .esp{display:inline-block;margin-top:6px;padding:2px 10px;border:1.5px solid currentColor;border-radius:999px;
+  font:600 .85rem/1.4 var(--font-sans);color:var(--n-menta)}
+table.nov-tabla tbody tr:nth-child(3n+1) th a{color:var(--n-lila)}
+table.nov-tabla tbody tr:nth-child(3n+2) th a{color:var(--n-titulo-3)}
+table.nov-tabla tbody tr:nth-child(3n) th a{color:var(--n-menta)}
+table.nov-tabla tbody tr:nth-child(3n+2) .esp{color:var(--n-lila)}
+table.nov-tabla tbody tr:nth-child(3n) .esp{color:var(--n-titulo-3)}
+table.nov-tabla .acc{border:0;color:var(--f-tinta);font-weight:800;box-shadow:none}
+table.nov-tabla .acc .ico{color:var(--f-tinta)}
+table.nov-tabla tbody tr:nth-child(3n+1) .acc{background:var(--f-lila)}
+table.nov-tabla tbody tr:nth-child(3n+2) .acc{background:var(--f-rosa)}
+table.nov-tabla tbody tr:nth-child(3n) .acc{background:var(--f-ama)}
+/* Ofertas y Buscar: la primera de cada tres tampoco va en blanco */
+.ogrid>.ocard:nth-child(3n+1 of .ocard) .tit-nom,.res>.fila:nth-child(3n+1 of .fila) .tit-nom{color:var(--n-lila)}
+.ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-menta)}
