@@ -1,4 +1,4 @@
-/* js/errores.js (spec 061): Sentry solo en el dominio publicado, sin datos de la persona y sin romper nada. */
+/* js/errores.js (spec 062): Sentry solo en el dominio publicado, sin datos de la persona y sin romper nada. */
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const E = require("../../js/errores.js");

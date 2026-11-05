@@ -82,7 +82,7 @@ class Afuera(unittest.TestCase):
 
 
 class Sentry(unittest.TestCase):
-    """Registro de errores (spec 061): el DSN vive en sitio.json, las paginas lo llevan en un meta y la CSP lo deja pasar."""
+    """Registro de errores (spec 062): el DSN vive en sitio.json, las paginas lo llevan en un meta y la CSP lo deja pasar."""
 
     def test_el_dsn_esta_vacio_o_es_de_sentry(self):
         dsn = SITIO["sentry_dsn"]
