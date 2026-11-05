@@ -450,6 +450,12 @@ Las ofertas del dia salen por dos canales, sin backend:
   Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
   o en la manual (no en cada push; desde el 02/11 no hay cron: el publicador se dispara a mano con
   `gh workflow run actualizar.yml -f indexar=true`; para volver a programar, restaurar `schedule:` en el workflow), y si Telegram falla el sitio sale igual. El token nunca se imprime.
+- **Avisos y arreglos automaticos** ([spec 061](specs/061-avisos-y-arreglos/spec.md)): `avisar_dueno.py` le avisa al dueño
+  por su chat PRIVADO de Telegram (secreto `TELEGRAM_CHAT_DUENO`, nunca al canal) cuando una tienda trae 0 o muy pocos
+  productos, salta la guardia o falla la corrida. Los errores conocidos se arreglan solos con reglas fijas: una tienda en 0
+  se reintenta una vez y si sigue en 0 quedan sus precios anteriores con su fecha; el 429 de Mercado Libre se espera; un
+  bloqueo de Cloudflare no se esquiva. La captura de errores del navegador (Sentry, `js/errores.js`) y el arreglo con
+  Claude (`arreglar-con-claude.yml`) estan listos y apagados.
 - **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
   Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
   `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.

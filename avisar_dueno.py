@@ -27,7 +27,13 @@ from pathlib import Path
 
 import publicar_telegram
 
-LIMITE = 3800          # por debajo de los 4096 de Telegram, con margen para el pie
+for flujo in (sys.stdout, sys.stderr):   # los emojis del aviso en una consola de Windows (cp1252)
+    try:
+        flujo.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
+LIMITE = 3800         # por debajo de los 4096 de Telegram, con margen para el pie
 LARGO_ALARMA = 1200    # la alarma de la guardia se resume: el detalle completo esta en el issue y en la corrida
 
 # Que quiere decir cada motivo de indexar.motivo_de(), dicho simple, y que hizo el sistema solo (catalogo de la spec 061).

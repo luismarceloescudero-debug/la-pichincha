@@ -1,0 +1,76 @@
+name: Arreglar con Claude (etapa 2, APAGADO)
+
+# spec 061, etapa 2: un error NUEVO (uno que no esta en el catalogo de errores conocidos de la spec) se le pasa a Claude
+# Code, que lo investiga y propone el arreglo en un PR. Nunca mergea solo: el PR pasa por la CI y por el dueno.
+#
+# Corre con la SUSCRIPCION del dueno (Claude Pro/Max), no con la API paga: usa CLAUDE_CODE_OAUTH_TOKEN, el token que da
+# `claude setup-token`. Esta APAGADO hasta que el dueno haga los dos pasos de la spec:
+#   1. cargar el secreto:      gh secret set CLAUDE_CODE_OAUTH_TOKEN      (pega el token de `claude setup-token`)
+#   2. prender el interruptor: gh variable set ARREGLO_CLAUDE --body si
+# Con eso, poner la etiqueta «arreglar-con-claude» a un issue (por ejemplo, uno de «salud-fuente» o «guardia») lo dispara.
+# Para apagarlo: gh variable set ARREGLO_CLAUDE --body no   (o borrar la variable).
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: arreglar-con-claude-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  arreglar:
+    # Las tres cosas: el interruptor prendido, la etiqueta justa y que la ponga el dueno (nadie mas gasta su suscripcion).
+    if: >-
+      vars.ARREGLO_CLAUDE == 'si' &&
+      github.event.label.name == 'arreglar-con-claude' &&
+      github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Sin el token no se hace nada
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Falta el secreto CLAUDE_CODE_OAUTH_TOKEN (claude setup-token): ver specs/061-avisos-y-arreglos/spec.md"
+            exit 1
+          fi
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Sos el arreglador automatico de La Pichincha (repo ${{ github.repository }}). Issue #${{ github.event.issue.number }}:
+            «${{ github.event.issue.title }}». Leelo con `gh issue view ${{ github.event.issue.number }}` y la corrida que enlaza.
+
+            Reglas fijas (no se negocian):
+            - Lee CLAUDE.md, CONSTRAINTS.md y specs/061-avisos-y-arreglos/spec.md antes de tocar nada.
+            - Si el error ya esta en el catalogo de errores conocidos de la spec 061, no hay nada que arreglar: comentalo en el
+              issue y termina.
+            - Un bloqueo de una tienda (Cloudflare, 403, 429) NO se esquiva: ni navegador automatizado ni proxies.
+            - Nada de Instagram ni de publicar en Telegram. No corras `gh workflow run` ni toques secretos.
+            - Arregla en una rama nueva con tests (`python -m unittest discover -s tests -t .` y
+              `node --test "tests/js/*.test.js"` en verde), commits en espanol sin tildes ni enies, y abri un PR que diga
+              «Arregla #${{ github.event.issue.number }}». No mergees: lo revisa el dueno.
+            - Si no estas seguro de la causa, no adivines: comenta en el issue lo que encontraste y que falta.
+          claude_args: |
+            --max-turns 40
