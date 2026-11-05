@@ -599,7 +599,7 @@ class Vtex(unittest.TestCase):
     def test_el_json_real_guardado_de_cada_tienda_vtex(self):
         """robots.txt, arbol y primera busqueda tal como los vio GitHub el 19/10 (diagnostico --vtex-catalogo)."""
         vtex = {k: t for k, t in TIENDAS.items() if not k.startswith("_") and t["catalogo"]["tipo"] == "vtex"}
-        self.assertGreaterEqual(len(vtex), 13)
+        self.assertGreaterEqual(len(vtex), 12)   # 13 hasta el 05/11: Compra Cierta paso a WordPress (CompraCiertaWordpress)
         con_busqueda = 0
         for clave, t in vtex.items():
             with self.subTest(clave):
@@ -617,7 +617,7 @@ class Vtex(unittest.TestCase):
                     self.assertTrue(indexar.url_valida(it["url"]))
                     self.assertGreaterEqual(it["precio"], 10000)
                     self.assertNotRegex(it["nombre"], r"[<>]|&[a-z#0-9]+;")
-        self.assertGreaterEqual(con_busqueda, 12)
+        self.assertGreaterEqual(con_busqueda, 11)   # 12 hasta el 05/11 (Compra Cierta salio de VTEX)
 
     def test_el_refid_vale_como_part_number_solo_con_forma_de_codigo(self):
         def skus(clave):
@@ -858,3 +858,26 @@ class PrecioDeRelleno(unittest.TestCase):
         self.assertEqual(indexar.sin_precio_de_relleno([real, relleno, justo]), [real, justo])
         self.assertEqual(indexar.sin_precio_de_relleno([]), [])
 
+
+
+class CompraCiertaWordpress(unittest.TestCase):
+    """05/11/2026: Compra Cierta dejo VTEX (su API devuelve la portada: JSONDecodeError) y paso a un WordPress propio con
+    tarjetas en las paginas de categoria. Fixture: tres tarjetas reales de /categoria/computacion/."""
+
+    def test_lee_nombre_precio_tachado_url_e_imagen(self):
+        cfg = json.loads((Path(__file__).parent.parent / "tiendas.json").read_text(encoding="utf-8"))["compracierta"]["catalogo"]
+        self.assertEqual(cfg["tipo"], "listados")
+        html = (Path(__file__).parent / "fixtures" / "compracierta" / "categoria-wp.html").read_text(encoding="utf-8")
+        t = indexar.tarjetas(html, cfg)
+        self.assertEqual(len(t), 3)
+        self.assertEqual(t[0]["nombre"], "Sillon Gamer Baires4 Fortnite Color Negro")
+        self.assertEqual((t[0]["precio"], t[0]["lista"]), (125743, 177834))   # «$125.743,76»: los centavos no cuentan
+        self.assertTrue(t[0]["url"].startswith("https://www.compracierta.com.ar/"))
+        self.assertTrue(t[0]["imagen"].startswith("https://www.compracierta.com.ar/cdn/"))
+
+    def test_recorre_solo_rubros_de_hardware_y_pagina_como_wordpress(self):
+        cfg = json.loads((Path(__file__).parent.parent / "tiendas.json").read_text(encoding="utf-8"))["compracierta"]
+        urls = indexar.listados(cfg)
+        self.assertIn("https://www.compracierta.com.ar/categoria/celulares-y-telefonos/celulares-y-smartphones/", urls)
+        self.assertFalse([u for u in urls if "impresion" in u or "electrodomesticos" in u])
+        self.assertEqual(cfg["catalogo"]["pagina"].format(listado=urls[0], n=2), urls[0] + "page/2/")

@@ -84,7 +84,14 @@
       }
     },
     "extractor": "itemprop",
-    "ficha": {"extractor": "mexx", "rubros": ["ram", "ssd"], "tope": 40},
+    "ficha": {
+      "extractor": "mexx",
+      "rubros": [
+        "ram",
+        "ssd"
+      ],
+      "tope": 40
+    },
     "lista_es_oferta": false
   },
   "fullh4rd": {
@@ -150,7 +157,11 @@
         "tipo": "sitemap",
         "url": "https://www.venex.com.ar/sitemap.xml",
         "contiene": "https://www.venex.com.ar/",
-        "excluye": [".html", ".htm", ".php"],
+        "excluye": [
+          ".html",
+          ".htm",
+          ".php"
+        ],
         "hojas": true
       },
       "pagina": "{listado}?page={n}",
@@ -163,7 +174,14 @@
         "imagen": "<img src=\"(products_images/thumb/[^\"]+)\""
       }
     },
-    "ficha": {"extractor": "venex", "rubros": ["ram", "ssd"], "tope": 40},
+    "ficha": {
+      "extractor": "venex",
+      "rubros": [
+        "ram",
+        "ssd"
+      ],
+      "tope": 40
+    },
     "lista_es_oferta": false
   },
   "comparaya": {
@@ -207,11 +225,21 @@
       },
       "usados": {
         "campo": "condition",
-        "valores": ["open_box", "used", "refurbished", "refurbished_international"]
+        "valores": [
+          "open_box",
+          "used",
+          "refurbished",
+          "refurbished_international"
+        ]
       },
       "sin_stock": {
         "campo": "availability",
-        "valores": ["out_of_stock", "sold_out", "discontinued", "unavailable"]
+        "valores": [
+          "out_of_stock",
+          "sold_out",
+          "discontinued",
+          "unavailable"
+        ]
       }
     },
     "extractor": null,
@@ -430,8 +458,32 @@
     "activa": true,
     "base": "https://www.compracierta.com.ar",
     "catalogo": {
-      "tipo": "vtex",
-      "tope_paginas": 50
+      "tipo": "listados",
+      "nota": "05/11/2026: dejo VTEX; ahora es un WordPress propio con tarjetas en las paginas de categoria",
+      "origen": {
+        "tipo": "terminos",
+        "plantilla": "https://www.compracierta.com.ar/categoria/{termino}/",
+        "terminos": [
+          "computacion/notebooks-y-accesorios/notebooks",
+          "computacion/monitores-y-accesorios",
+          "computacion/pc-de-escritorio",
+          "computacion/componentes-de-pc",
+          "computacion/almacenamiento",
+          "computacion/perifericos-de-pc",
+          "computacion/accesorios-para-pc-gaming",
+          "celulares-y-telefonos/celulares-y-smartphones"
+        ]
+      },
+      "pagina": "{listado}page/{n}/",
+      "desde": 1,
+      "tarjeta": "<article class=\"group",
+      "re": {
+        "url": "<a href=\"(https://www\\.compracierta\\.com\\.ar/[^\"]+)\" class=\"block\"",
+        "nombre": "<h3 class=\"line-clamp-2[^\"]*\">\\s*([^<]{6,200}?)\\s*</h3>",
+        "precio": "text-lg font-bold[^\"]*\">\\s*\\$([\\d.,]+)",
+        "lista": "line-through\">\\s*\\$([\\d.,]+)",
+        "imagen": "src=\"(https://www\\.compracierta\\.com\\.ar/cdn/[^\"]+)\""
+      }
     },
     "lista_es_oferta": false
   },
