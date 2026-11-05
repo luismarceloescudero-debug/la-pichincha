@@ -165,7 +165,9 @@ test("acerca: dice la filosofia del sitio, sin datos personales ni marcas pendie
   assert.match(html, /ofertas reales de hardware/);
   assert.match(html, /lo mejor, al mejor costo posible/);
   assert.match(html, /href="\.\.\/contacto\/"/);
-  assert.doesNotMatch(html, /@[a-z0-9-]+\.[a-z]/i, "ningun correo publicado");
+  // El DSN de Sentry (spec 062) lleva una «@» pero no es un correo: se saca antes de buscar.
+  const sinDsn = html.replace(/<meta name="sentry-dsn" content="[^"]*">/, "");
+  assert.doesNotMatch(sinDsn, /@[a-z0-9-]+\.[a-z]/i, "ningun correo publicado");
 });
 
 test("security.txt: Contact es el formulario y Expires vence a un año (RFC 9116)", () => {

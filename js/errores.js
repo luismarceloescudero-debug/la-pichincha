@@ -1,4 +1,4 @@
-/* Registro de errores con Sentry (spec 061): cuando la pagina se rompe en el celular o la compu de alguien, el error
+/* Registro de errores con Sentry (spec 062): cuando la pagina se rompe en el celular o la compu de alguien, el error
    (mensaje, archivo y linea) llega a Sentry y el dueño recibe un mail. Solo errores: sin grabar la sesion, sin medir
    rendimiento, sin IP, sin cookies y sin lo que la persona busco (la parte «?q=...» de las direcciones se borra).
 
