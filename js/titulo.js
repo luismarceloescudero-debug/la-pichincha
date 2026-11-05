@@ -155,7 +155,7 @@
     /^(?:ram|rom|ssd|hdd|emmc|memoria|almacenamiento|gb|tb|so-?dimm|u?dimm|mhz|ghz|hz|mah|dpi|nucleos|núcleos|cores|hilos|turbo|smartphone|celular|notebook|laptop)$/i,
     /^(?:win\d*\w*|w1[01]\w*|windows|freedos|free|dos|linux|android|ios|chromeos|macos|sistema|operativo)$/i,
     /^\d+(?:gb|mb)\/s$/i, /^(?:gamer|gaming|mid|tower|switch|fans?|\d+fans?|tkl|vga|s\/\w*|c\/\w*)$/i,
-    /^(?:g-?sync|freesync|hdr\d*|rgb|argb|backlight|retroiluminado|bateria|batería|recargable|inalambrico|inalámbrico|wireless|mecanico|mecánico)$/i,
+    /^(?:g-?sync|freesync|hdr\d*|rgb|argb|backlight|retroiluminado|bateria|batería|recargable|inalambrico|inalámbrico|wireless|mecanico|mecánico|magnetico|magnético)$/i,
     /^(?:con|c\/|de|para|y|sin|s\/|en|el|la|los|las|-|–|\||\/|\+|,|garantia|garantía|gtia|oficial|nuevo|nueva|original|ed\.?|edicion|edición|reacondicionad[oa]|usad[oa]|renewed|refurbished|outlet)$/i,
   ];
   // En una placa de video la marca del chip no suma al titulo: «MSI NVIDIA GEFORCE RTX 5070 TI» → «MSI RTX 5070 TI».
@@ -177,7 +177,9 @@
     let sin = pulgadas(nombre).replace(/[™®©]/g, "").replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/\b80\s?\+?\s?plus(?:\s+(?:bronze|silver|gold|platinum|titanium|white))?\b/gi, " ")
       .replace(/\bw(?:in(?:dows)?)?\s?1[01]\s?(?:home|pro|p)?\b/gi, " ").replace(/\bhdr\s?\d{2,4}\+?/gi, " ").replace(/\+/g, " ")
       // «Combo Actualización AMD Ryzen 7 5700G»: «Combo» queda (es un paquete, no el procesador solo) y el modelo entra (058).
-      .replace(/\bcombo\s+(?:de\s+)?actualizaci[oó]n(?:\s+pc)?\b/gi, "Combo");
+      .replace(/\bcombo\s+(?:de\s+)?actualizaci[oó]n(?:\s+pc)?\b/gi, "Combo")
+      // «Teclado MagneticoMecanico Redragon K617» (CompraGamer pega las dos palabras): son dos datos, van en las chips (05/11).
+      .replace(/magn[eé]tico(?=mec[aá]nico)/gi, "Magnético ");
     // En un equipo el procesador y la placa de video van en las chips: se sacan del titulo.
     if (equipo) { const c = cpuMatch(sin); if (c) sin = sin.replace(c.texto, " "); sin = sin.replace(GPU, " ").replace(/\b(?:intel|amd|nvidia)\b/gi, " "); }
     sin = sin.replace(PREFIJO, "");
@@ -213,6 +215,10 @@
       const j = toks.findIndex((t, k) => k >= i && (esCodigo(t) || corto(k)) && t.length <= 10 && !esDato(t) && !esInterno(t) && !vistas.has(t.toLowerCase()));
       if (j >= 0) { if (corto(j)) titulo.push(toks[j - 1]); titulo.push(toks[j]); }
     }
+    // Solo la marca («Monitor MSI 27″ Rapid IPS QHD 240Hz»: el aviso no trae modelo) no alcanza para saber cual es: se
+    // suman los primeros datos que siguen, hasta tres, para que el titulo diga «MSI 27″ RAPID IPS» (05/11).
+    if (titulo.length === 1 && !/\d/.test(titulo[0]) && corte >= 0 && (tipo === "monitor" || tipo === "tv"))
+      titulo.push(...toks.slice(corte).filter(t => !esInterno(t) && !/^(?:de|con|y|para|el|la)$/i.test(t)).slice(0, 3));
     const linea = titulo.length && MARCA_DE_LINEA.find(([re, marca]) => re.test(titulo[0]) && !titulo.some(t => t.toUpperCase() === marca));
     if (linea) titulo.unshift(linea[1]);
     return (titulo.length ? titulo.join(" ") : (sin.trim() || pulgadas(nombre).trim()).split(/\s+/).slice(0, 4).join(" ")).toUpperCase();
@@ -279,7 +285,7 @@
         (x = n.match(/\b(bronze|silver|gold|platinum|titanium)\b/i)) ? `80+ ${x[1][0].toUpperCase()}${x[1].slice(1).toLowerCase()}` : /80\s?\+?\s?plus/i.test(n) ? "80+" : "",
         /modul/i.test(n) ? (/semi/i.test(n) ? "Semimodular" : "Modular") : ""];
       case "mouse": return [...conectividad(n), (x = n.match(/\b(\d{3,5})\s?dpi\b/i)) ? `${x[1]} DPI` : "", /\brgb\b/i.test(n) ? "RGB" : ""];
-      case "teclado": return [/mec[aá]nic/i.test(n) ? "Mecánico" : "", ...conectividad(n),
+      case "teclado": return [/magn[eé]tic/i.test(n) ? "Magnético" : "", /mec[aá]nic/i.test(n) ? "Mecánico" : "", ...conectividad(n),
         (x = n.match(/\b(60|65|75|tkl)\s?%?(?![\w])/i)) ? (/\d/.test(x[1]) ? `${x[1]}%` : "TKL") : "", /\brgb\b/i.test(n) ? "RGB" : ""];
       case "auriculares": case "parlante": return [...conectividad(n), /\banc\b|cancelaci[oó]n/i.test(n) ? "ANC" : "", (x = n.match(/\b(\d{1,3})\s?w\b/i)) ? `${x[1]} W` : ""];
       default: return [...conectividad(n), (x = n.match(/\b(\d{1,4})\s?(gb|tb)\b/i)) ? `${x[1]} ${x[2].toUpperCase()}` : "", pulg(n)];
@@ -302,7 +308,10 @@
     const categoria = C.categoriaDe(original);
     const tipo = tipoDe(original, categoria);
     const titulo = tituloDe(original, tipo);
-    return { categoria, tipo, titulo, prefijo: prefijoDe(titulo, tipo), chips: chipsDe(original, tipo), completo: pulgadas(original).replace(/[\s.]+$/, ""),
+    // Una chip que el titulo ya dice («27″» en «MSI 27″ RAPID IPS») no se repite (pedido del dueño 05/11: no repetir).
+    const palabras = ` ${titulo.toLowerCase()} `;
+    const chips = chipsDe(original, tipo).filter(c => !palabras.includes(` ${c.toLowerCase()} `));
+    return { categoria, tipo, titulo, prefijo: prefijoDe(titulo, tipo), chips, completo: pulgadas(original).replace(/[\s.]+$/, ""),
       emoji: EMOJI[tipo], etiqueta: NOMBRE_TIPO[tipo] };
   }
 
