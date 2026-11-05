@@ -191,3 +191,11 @@ test("main escribe /contacto/, /acerca/ y /.well-known/security.txt aunque no ha
   assert.match(fs.readFileSync(path.join(dir, "acerca", "index.html"), "utf8"), /<h1>Acerca de La Pichincha<\/h1>/);
   assert.match(fs.readFileSync(path.join(dir, ".well-known", "security.txt"), "utf8"), /^Contact: https:\/\/ejemplo\.test\/la-pichincha\/contacto\/\n/);
 });
+
+test("spec 061: la privacidad nombra a Sentry solo con la captura de errores prendida", () => {
+  assert.doesNotMatch(I.renderLegal({ baseUrl: BASE, erroresDsn: "" }), /Sentry/);
+  const html = I.renderLegal({ baseUrl: BASE, erroresDsn: "https://0123456789abcdef@o1.ingest.sentry.io/2" });
+  assert.match(html, /<p id="errores"><b>Errores de la página\.<\/b>/);
+  assert.match(html, /Sale solo 10 de cada 100 errores y como mucho 3 por visita/);
+  assert.match(html, /ni tu dirección IP/);
+});

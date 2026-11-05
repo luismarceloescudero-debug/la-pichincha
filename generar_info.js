@@ -134,7 +134,15 @@ ${filas}
 `;
 }
 
-function renderLegal({ baseUrl = BASE_URL } = {}) {
+/* spec 061: el parrafo de errores solo sale con la captura prendida (sitio.json, errores_dsn): no se promete lo que no corre. */
+function parrafoErrores(dsn) {
+  if (!dsn) return "";
+  const E = require("./js/errores.js");
+  return `
+    <p id="errores"><b>Errores de la página.</b> Si algo de la página falla en tu navegador, se manda un aviso del error a Sentry, el servicio que usamos para enterarnos y arreglarlo. Sale solo ${Math.round(E.MUESTREO * 100)} de cada 100 errores y como mucho ${E.MAX_POR_VISITA} por visita. Lleva el tipo de error, el archivo y la línea, y la página sin lo que buscaste; se borran mails y números largos. No lleva cookies, ni tu dirección IP, ni nada que te identifique.</p>`;
+}
+
+function renderLegal({ baseUrl = BASE_URL, erroresDsn = SITIO.errores_dsn } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   return cabeza({ titulo: "Términos, privacidad y afiliados | La Pichincha",
     descripcion: "Cómo funciona La Pichincha: de dónde salen los precios, qué datos se miden y cómo se rotulan los enlaces de afiliado.",
@@ -154,7 +162,7 @@ function renderLegal({ baseUrl = BASE_URL } = {}) {
     <p>El sitio no tiene cuentas y no guarda datos personales. Las visitas, las búsquedas y los clics a tiendas se miden con GoatCounter, sin cookies y sin identificar a nadie, para saber qué se busca y qué sirve.</p>
     <p><b>Lo más buscado.</b> La portada muestra las búsquedas más frecuentes. Se calculan con conteos agregados de GoatCounter de los últimos ${Buscadas.VENTANA_DIAS} días (cuántas personas distintas hicieron cada búsqueda). Una búsqueda solo se publica si la hicieron al menos ${Buscadas.MINIMO_VISITANTES} personas distintas y corresponde a un producto del catálogo; se descartan las que parecen datos personales (mails, teléfonos, números largos o direcciones web). Se publica solo la lista, sin conteos, sin fechas y sin nada de quién buscó.</p>
     <p>Las preferencias (por ejemplo, el tema claro u oscuro) quedan solo en tu navegador.</p>
-    <p id="contacto"><b>Formulario de contacto.</b> Lo que escribís en <a href="../contacto/">Contacto</a> (tu nombre si lo ponés, tu correo, el motivo y el mensaje) se manda por correo a quien hace el sitio, solo para poder responderte. El sitio no lo guarda en ninguna base ni lo usa para otra cosa, y no pasa por GoatCounter. Si el envío sale bien, te mandamos un correo automático de confirmación («Recibimos tu consulta»): para eso tu dirección de correo pasa por Resend, el servicio que lo envía, solo para mandar ese aviso, y no se guarda.</p>
+    <p id="contacto"><b>Formulario de contacto.</b> Lo que escribís en <a href="../contacto/">Contacto</a> (tu nombre si lo ponés, tu correo, el motivo y el mensaje) se manda por correo a quien hace el sitio, solo para poder responderte. El sitio no lo guarda en ninguna base ni lo usa para otra cosa, y no pasa por GoatCounter. Si el envío sale bien, te mandamos un correo automático de confirmación («Recibimos tu consulta»): para eso tu dirección de correo pasa por Resend, el servicio que lo envía, solo para mandar ese aviso, y no se guarda.</p>${parrafoErrores(erroresDsn)}
   </section>
   <section>
     <h2 id="afiliados">Enlaces de afiliado</h2>
