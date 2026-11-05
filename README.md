@@ -454,8 +454,7 @@ Las ofertas del dia salen por dos canales, sin backend:
   por su chat PRIVADO de Telegram (secreto `TELEGRAM_CHAT_DUENO`, nunca al canal) cuando una tienda trae 0 o muy pocos
   productos, salta la guardia o falla la corrida. Los errores conocidos se arreglan solos con reglas fijas: una tienda en 0
   se reintenta una vez y si sigue en 0 quedan sus precios anteriores con su fecha; el 429 de Mercado Libre se espera; un
-  bloqueo de Cloudflare no se esquiva. La captura de errores del navegador (Sentry, `js/errores.js`) y el arreglo con
-  Claude (`arreglar-con-claude.yml`) estan listos y apagados.
+  bloqueo de Cloudflare no se esquiva. El arreglo con Claude (`arreglar-con-claude.yml`, etapa 2) esta listo y apagado.
 - **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
   Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
   `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.
