@@ -1127,3 +1127,28 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
 .ocard .o-acciones .acc,.ocard .hp-abrir,.ocard.n-heroe .acc{color:var(--n-lila)}
 .ocard .o-acciones .acc .ico,.ocard .hp-abrir .ico{color:var(--n-rosa)}
 .ocard .o-ahorro,.ocard.n-heroe .o-ahorro{color:var(--n-titulo-3)}
+
+/* ==== Al ver: animaciones al scrollear (pedido del dueño 05/11) ====
+   js/al-ver.js pone `anima` en <html> y `en-vista` en cada tarjeta, fila o renglon la primera vez que entra en pantalla.
+   Hasta ese momento la animacion espera en pausa (con su primer cuadro); despues corre una sola vez. Cada pieza tiene la
+   suya: el % cae y rebota, la tienda entra de costado, el icono gira y aparece, la premium salta y le pasa un destello.
+   Con «reducir movimiento» no hay `anima` (y la regla general apaga toda animacion): todo se ve quieto. */
+@keyframes av-cae{0%{opacity:0;transform:translateY(-40px) rotate(-10deg)}55%{opacity:1;transform:translateY(6px) rotate(3deg)}
+  75%{transform:translateY(-3px) rotate(-1deg)}100%{opacity:1;transform:none}}
+@keyframes av-tienda{0%{opacity:0;transform:translateX(-30px) skewX(-14deg)}70%{opacity:1;transform:translateX(5px) skewX(4deg)}100%{opacity:1;transform:none}}
+@keyframes av-ico{0%{opacity:0;transform:scale(.2) rotate(-220deg)}70%{opacity:1;transform:scale(1.2) rotate(14deg)}100%{opacity:1;transform:none}}
+@keyframes av-salta{0%{opacity:0;transform:scale(.55) translateY(8px)}60%{opacity:1;transform:scale(1.12)}100%{opacity:1;transform:none}}
+@keyframes av-brillo{from{background-position:-150% 0}to{background-position:250% 0}}
+.anima :is(.ogrid>.ocard,table.nov-tabla tbody tr,.res>.fila) :is(.o-off b,.tienda,.tie,.tit-ico,.tit-chip.pr){animation-play-state:paused}
+.anima :is(.ogrid>.ocard,table.nov-tabla tbody tr,.res>.fila) .o-off b{display:inline-block;animation:av-cae .75s var(--curva) .1s both paused}
+.anima :is(.ogrid>.ocard,.res>.fila) :is(.tienda,.tie){display:inline-flex;animation:av-tienda .6s var(--curva) .3s both paused}
+.anima table.nov-tabla tbody tr th small{display:inline-block;animation:av-tienda .6s var(--curva) .3s both paused}
+.anima :is(.ogrid>.ocard,table.nov-tabla tbody tr,.res>.fila) .tit-ico{animation:av-ico .7s var(--curva) both paused}
+.anima :is(.ogrid>.ocard,table.nov-tabla tbody tr,.res>.fila) .tit-chip.pr{animation:av-salta .5s var(--curva) both paused;
+  animation-delay:calc(.4s + var(--k,0) * 90ms)}
+.tit-chips .tit-chip.pr:nth-child(2){--k:1}.tit-chips .tit-chip.pr:nth-child(3){--k:2}.tit-chips .tit-chip.pr:nth-child(4){--k:3}.tit-chips .tit-chip.pr:nth-child(5){--k:4}
+.anima :is(.ogrid>.ocard,table.nov-tabla tbody tr,.res>.fila).en-vista :is(.o-off b,.tienda,.tie,.tit-ico,.tit-chip.pr),.anima table.nov-tabla tbody tr.en-vista th small{animation-play-state:running}
+.tit-chip.pr{position:relative;overflow:hidden}
+.anima .en-vista .tit-chip.pr::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.8) 50%,transparent 65%) no-repeat;background-size:60% 100%;
+  animation:av-brillo 1s ease-out both;animation-delay:calc(.8s + var(--k,0) * 90ms)}

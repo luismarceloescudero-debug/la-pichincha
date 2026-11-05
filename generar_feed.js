@@ -220,6 +220,15 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 .hoy .h-lista li:nth-child(3n+2){border-color:rgba(255,110,182,.6)}
 .hoy .h-lista li:nth-child(3n){border-color:rgba(199,155,255,.75)}
 .hoy .h-lista li:nth-child(3n+2) .h-nom,.hoy .h-lista li:nth-child(3n+2) .tit-nom{color:#f3b6ff}
+/* al scrollear (js/al-ver.js): el % cae, el icono gira, la tienda entra de costado; quieto sin «anima» */
+@keyframes av-cae{0%{opacity:0;transform:translateY(-40px) rotate(-10deg)}55%{opacity:1;transform:translateY(6px) rotate(3deg)}75%{transform:translateY(-3px)}100%{opacity:1;transform:none}}
+@keyframes av-tienda{0%{opacity:0;transform:translateX(-30px) skewX(-14deg)}70%{opacity:1;transform:translateX(5px) skewX(4deg)}100%{opacity:1;transform:none}}
+@keyframes av-ico{0%{opacity:0;transform:scale(.2) rotate(-220deg)}70%{opacity:1;transform:scale(1.2) rotate(14deg)}100%{opacity:1;transform:none}}
+.anima .hoy .h-lista>li .h-pct{display:inline-block;animation:av-cae .75s cubic-bezier(.2,.8,.2,1) .1s both paused}
+.anima .hoy .h-lista>li .tit-ico{animation:av-ico .7s cubic-bezier(.2,.8,.2,1) both paused}
+.anima .hoy .h-lista>li .h-donde b{animation:av-tienda .6s cubic-bezier(.2,.8,.2,1) .3s both paused}
+.anima .hoy .h-lista>li.en-vista :is(.h-pct,.tit-ico,.h-donde b){animation-play-state:running}
+@media (prefers-reduced-motion:reduce){.anima .hoy *{animation:none!important}}
 .hoy .h-lista li:nth-child(3n+1) .h-nom,.hoy .h-lista li:nth-child(3n+1) .tit-nom{color:#d9a6ff}
 .hoy .h-lista li:nth-child(3n) .h-nom,.hoy .h-lista li:nth-child(3n) .tit-nom{color:#8dffc4}
 /* la tienda, destacada: pastilla llena con letra negra en negrita (celeste, rosa, lila en ciclo) */
@@ -241,6 +250,8 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
 /* en la lista las chips van en lila: el celeste queda para la marca y la tienda (alternar, no amontonar) */
 .hoy .historia .tit-chip{padding:1px 9px 2px;border-radius:999px;font:700 .78rem/1.3 var(--font-sans);color:var(--n-suave);
   background:rgba(215,184,230,.10);border:2px solid rgba(215,184,230,.45)}
+/* las pastillas llenas del sitio (menta, lila, rosa) llevan letra negra tambien aca: con la tinta clara no se leian */
+.hoy .historia .tit-chips .tit-chip:not(.pr){color:#120018;border-color:transparent}
 .hoy .historia .tit-chip.pr{color:var(--n-fondo);border-color:transparent;background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste))}
 .hoy .h-tachado{font:700 .95rem var(--font-mono);color:var(--n-suave);text-decoration-color:var(--n-tachado);text-decoration-thickness:2px}
 .hoy .historia .det{display:block;font:600 .82rem/1.35 var(--font-sans);color:var(--n-suave)}
@@ -265,6 +276,7 @@ ${ofertas.length ? `    <ol class="h-lista todas">\n${lista}\n    </ol>` : `    
   <p class="nota">Precios con IVA y sin envío. Cambian rápido: verificá en la tienda antes de comprar. El orden no depende de comisiones. <a href="../estado/">Estado de las fuentes</a> · <a href="../legal/">Términos y privacidad</a> · <a href="../contacto/">Contacto</a>.</p>
 </main>
 <script src="../js/pagina.js"></script>
+<script src="../js/al-ver.js"></script>
 <script>${G.SCRIPT_MEDICION}</script>
 </body>
 </html>
