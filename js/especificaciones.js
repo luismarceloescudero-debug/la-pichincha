@@ -109,7 +109,14 @@
     return Object.entries(valores).map(([k, v]) => TEXTO[k](v)).join(" · ");
   }
 
-  const api = { CLAVES, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+  /* Lo que el titulo completo dice y el titulo que se muestra no (pedido del dueño 05/11: «si el titulo dice 6 GB 128 GB, no
+     repetirlo en caracteristicas»). Con el titulo entero a la vista no queda nada: "" y la ficha no muestra la linea. */
+  function resumenFuera(nombre, visible) {
+    const todo = clavesDe(nombre).valores, ya = clavesDe(visible).valores;
+    return Object.entries(todo).filter(([k, v]) => ya[k] !== v).map(([k, v]) => TEXTO[k](v)).join(" · ");
+  }
+
+  const api = { CLAVES, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen, resumenFuera };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

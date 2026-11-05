@@ -140,3 +140,10 @@ test("memorias de 32 y 64 GB tienen capacidad: un kit no se queda sin comparar",
   assert.deepEqual(E.clavesDe("Memoria Corsair DDR5 64GB (2x32GB) 6000MHz Vengeance").valores, { capacidad: 64, ddr: "ddr5" });
   assert.equal(E.mismas(["Memoria Kingston Fury DDR5 32GB 6000MHz"], ["Memoria Corsair DDR5 64GB (2x32GB) 6000MHz"]).coincide, false);
 });
+
+test("resumenFuera: no repite lo que el titulo a la vista ya dice (pedido del dueño 05/11)", () => {
+  const cel = "Celular Xiaomi Note 14 4G 128GB 6GB RAM Lime Green";
+  assert.equal(E.resumenFuera(cel, cel), "");
+  const pc = "PC Armada Intel Core i5 12400F 32GB RAM 1TB SSD RTX 4060 con un nombre larguisimo que se corta";
+  assert.equal(E.resumenFuera(pc, pc.slice(0, 40)), "1 TB · RTX 4060");
+});

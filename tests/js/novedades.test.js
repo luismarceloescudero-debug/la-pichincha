@@ -83,6 +83,9 @@ test("los nombres largos se acortan en la tabla y el texto se escapa", () => {
   assert.ok(!html.includes("<b>"), "el nombre se escapa");
   assert.match(html, /lo último/);
   assert.match(html, /\+50%/);
+  assert.ok(!html.includes("Especificaciones"), "sin la columna que repetia el titulo");
+  const conExtra = N.novedadesHtml([{ ...g[0], items: g[0].items.map(i => ({ ...i, extra: "1 TB <x>" })) }], { esc, pesos: n => "$" + n, enlace: u => u, icono: () => "" });
+  assert.match(conExtra, /<span class="esp">1 TB &lt;x&gt;<\/span>/);
 });
 
 test("«Lo más buscado» muestra solo los términos, cada uno con su comparativa, y escapa el texto", () => {

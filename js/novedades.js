@@ -35,7 +35,7 @@
         if (vistos.has(clave) || !e.mismas(f, f).aplica) continue;   // sin especificaciones legibles no hay con que comparar
         vistos.add(clave);
         items.push({ nombre: f[0], precio: f[1], url: f[2], tienda: (idx.tiendas[f[3]] || {}).nombre || f[3],
-          resumen: e.resumen(f), ultimo: novedad(f) === 0 });
+          resumen: e.resumen(f), extra: e.resumenFuera(f[0], corto(f[0])), ultimo: novedad(f) === 0 });
         if (items.length === porCategoria) break;
       }
       if (items.length >= MIN_PARA_COMPARAR) salida.push({ categoria, etiqueta, items });
@@ -86,7 +86,7 @@
         if (vistos.has(clave(f))) continue;
         vistos.add(clave(f));
         items.push({ nombre: f[0], precio: f[1], url: f[2], tienda: (idx.tiendas[f[3]] || {}).nombre || f[3],
-          resumen: e.resumen(f), puesto: orden.get(f), tiendas: n(f) });
+          resumen: e.resumen(f), extra: e.resumenFuera(f[0], corto(f[0])), puesto: orden.get(f), tiendas: n(f) });
         if (items.length === porCategoria) break;
       }
       if (items.length >= MIN_PARA_COMPARAR) salida.push({ categoria, etiqueta, items });
@@ -95,6 +95,8 @@
   }
 
   const corto = n => (n.length > 64 ? n.slice(0, 61) + "…" : n);
+  /* Las especificaciones van bajo el nombre y solo las que el nombre a la vista no dice: sin repetir «6 GB · 128 GB». */
+  const esp = i => (i.extra ? `<span class="esp">${String(i.extra).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])}</span>` : "");
 
   /* El panel de la portada. h = { esc, pesos, enlace, icono }. Sin grupos no sale nada. */
   function novedadesHtml(grupos, h) {
@@ -105,12 +107,12 @@
         const contra = i.precio === minimo ? "el más barato" : `+${Math.round((i.precio / minimo - 1) * 100)}%`;
         // Cuatro columnas y no seis: la tienda va bajo el nombre y lo que cuesta de mas bajo el precio (se lee bien en el celular).
         return `<tr><th scope="row"><a href="${h.enlace(i.url)}" target="_blank" rel="noopener">${h.esc(corto(i.nombre))}</a>`
-          + `${i.ultimo ? ' <span class="sello conocida">lo último</span>' : ""}<br><small>${h.esc(i.tienda)}</small></th>`
-          + `<td>${h.esc(i.resumen)}</td><td class="num">${h.pesos(i.precio)}<br><small>${h.esc(contra)}</small></td>`
+          + `${i.ultimo ? ' <span class="sello conocida">lo último</span>' : ""}<br><small>${h.esc(i.tienda)}</small>${esp(i)}</th>`
+          + `<td class="num">${h.pesos(i.precio)}<br><small>${h.esc(contra)}</small></td>`
           + `<td><button class="acc" data-comparar-fila="${h.esc(i.url)}" title="Compara solo con avisos de las mismas especificaciones">${h.icono("balanza")} Comparar</button></td></tr>`;
       };
       return `<h3>${h.esc(g.etiqueta)}</h3><div class="scroll"><table class="pt-tabla nov-tabla" aria-label="${h.esc("Lo último en " + g.etiqueta)}">`
-        + `<thead><tr><th scope="col">Producto y tienda</th><th scope="col">Especificaciones</th><th scope="col" class="num">Precio</th>`
+        + `<thead><tr><th scope="col">Producto y tienda</th><th scope="col" class="num">Precio</th>`
         + `<th scope="col">Comparar</th></tr></thead>`
         + `<tbody>${g.items.map(fila).join("")}</tbody></table></div>`;
     };
@@ -124,11 +126,11 @@
     if (!grupos || !grupos.length) return "";
     const tabla = g => {
       const fila = i => `<tr><th scope="row"><a href="${h.enlace(i.url)}" target="_blank" rel="noopener">${h.esc(corto(i.nombre))}</a>`
-        + `<br><small>n.º ${i.puesto} en ${h.esc(i.tienda)}${i.tiendas > 1 ? ` · entre las más vendidas de ${i.tiendas} tiendas` : ""}</small></th>`
-        + `<td>${h.esc(i.resumen)}</td><td class="num">${h.pesos(i.precio)}</td>`
+        + `<br><small>n.º ${i.puesto} en ${h.esc(i.tienda)}${i.tiendas > 1 ? ` · entre las más vendidas de ${i.tiendas} tiendas` : ""}</small>${esp(i)}</th>`
+        + `<td class="num">${h.pesos(i.precio)}</td>`
         + `<td><button class="acc" data-comparar-fila="${h.esc(i.url)}" title="Compara solo con avisos de las mismas especificaciones">${h.icono("balanza")} Comparar</button></td></tr>`;
       return `<h3>${h.esc(g.etiqueta)}</h3><div class="scroll"><table class="pt-tabla nov-tabla" aria-label="${h.esc("Lo más vendido en " + g.etiqueta)}">`
-        + `<thead><tr><th scope="col">Producto y tienda</th><th scope="col">Especificaciones</th><th scope="col" class="num">Precio</th>`
+        + `<thead><tr><th scope="col">Producto y tienda</th><th scope="col" class="num">Precio</th>`
         + `<th scope="col">Comparar</th></tr></thead>`
         + `<tbody>${g.items.map(fila).join("")}</tbody></table></div>`;
     };
