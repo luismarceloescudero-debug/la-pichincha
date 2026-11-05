@@ -20,7 +20,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
 | 11 | Tiendamia: armar los carritos de prueba | La base para encontrar cómo calcula Tiendamia el envío y los servicios | 15 min |
 | 12 | Avisos por Telegram a tu chat privado (spec 061) | Enterarte al instante si una tienda trae 0, salta la guardia o falla la corrida | 5 min |
-| 13 | (Opcional) Sentry y el arreglo con Claude (spec 061) | Ver los errores del navegador de la gente; que Claude proponga el arreglo de un error nuevo | 15 min |
+| 13 | (Opcional) El arreglo con Claude (spec 061, etapa 2) | Que Claude proponga el arreglo de un error nuevo | 10 min |
 
 ---
 
@@ -376,11 +376,7 @@ salta la guardia o si falla la corrida. Usa el mismo bot del canal. Falta un sol
 4. Listo. En la próxima corrida, si algo falla, te llega el aviso. Si el secreto falta, la corrida no se rompe: deja una
    advertencia amarilla en GitHub.
 
-## 13. (Opcional) Sentry y el arreglo con Claude (spec 061)
-
-**Sentry** (errores del navegador de la gente, plan gratis): está todo listo y apagado. Para prenderlo, creá la cuenta en
-sentry.io, un proyecto «Browser JavaScript», y en *Settings → Security & Privacy* prendé **Prevent Storing of IP
-Addresses**. Pasame el **DSN** (empieza con `https://` y termina en `/` y un número) y lo cargo yo.
+## 13. (Opcional) El arreglo con Claude (spec 061, etapa 2)
 
 **Claude arregla los errores nuevos** (etapa 2, con tu suscripción, no con la API paga): también está listo y apagado.
 

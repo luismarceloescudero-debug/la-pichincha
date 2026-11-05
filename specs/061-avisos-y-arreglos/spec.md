@@ -48,15 +48,10 @@ Lo que ya existía y se mantiene: el corte a mitad de respuesta (`IncompleteRead
 `salud.json` suma, por fuente con problemas, `motivo` (`cloudflare`, `bloqueo`, `red`, `sin productos`, `error`,
 `recuperada`), `detalle` y `reintentada`.
 
-### 3. Errores del navegador de la gente (Sentry plan gratis, APAGADO)
+### 3. Errores del navegador de la gente: fuera de esta spec
 
-`js/errores.js` (el primer script de `index.html`) escucha `window.onerror` y `unhandledrejection` y manda el error a
-Sentry armando a mano el «sobre» (envelope), sin bajar el SDK. Está **apagado** mientras el meta `errores-dsn` esté vacío.
-
-- Muestreo bajo: 1 de cada 10 errores (`MUESTREO`), como mucho 3 por visita y sin repetir el mismo.
-- Sin datos personales: sin cookies, sin usuario, `user.ip_address: null`, la dirección sin `?consulta` ni `#ancla`, y
-  el texto limpio de mails y números de 7 o más dígitos.
-- `/legal/#errores` explica todo esto, y solo aparece cuando la captura está prendida (`generar_info.js`).
+La captura de errores de JS con Sentry la arma la sesión aparte «sentry-setup» (el dueño ya creó la cuenta, org
+la-pichicha): plugin, proyecto, DSN, código en el sitio y `/legal/`. Esta spec no toca nada de Sentry.
 
 ### Lo que tiene que hacer el dueño (etapa 1)
 
@@ -64,10 +59,6 @@ Sentry armando a mano el «sobre» (envelope), sin bajar el SDK. Está **apagado
    navegador `https://api.telegram.org/bot<TOKEN>/getUpdates` (el token del bot, el mismo de `TELEGRAM_BOT_TOKEN`) y
    copiar el número que aparece en `"chat":{"id":...}`. Otra forma: escribirle a `@userinfobot`, que contesta con tu id.
 2. **Cargarlo**: `gh secret set TELEGRAM_CHAT_DUENO` y pegar el número.
-3. **(Opcional) Sentry**: crear una cuenta gratis en sentry.io, un proyecto «Browser JavaScript», y en *Settings →
-   Security & Privacy* prender **Prevent Storing of IP Addresses**. Pasar el DSN (`https://<clave>@oNNN.ingest...sentry.io/<n>`).
-   Con el DSN, el cambio es: `errores_dsn` en `sitio.json`, el meta `errores-dsn` de `index.html` y el host del DSN en
-   `connect-src` de la CSP (`sitio.json` e `index.html`). `tests/test_sitio.py` exige que los tres coincidan.
 
 ## Etapa 2 (documentada, APAGADA): Claude arregla los errores nuevos
 
@@ -94,6 +85,3 @@ solos cuando el error no está en el catálogo. Hoy la pone el dueño a mano, pa
 - `tests/test_avisos_y_arreglos.py`: reintento (E1), motivos, Cloudflare (E3), 429 de Mercado Libre (E2), salud con
   motivo y el aviso al dueño (sin secreto, nunca al canal, corrida fallida, cortes de largo).
 - `tests/test_indexar_corrida.py`: E1 de punta a punta (recupera en el reintento; dos veces en 0 usa lo anterior con su fecha).
-- `tests/js/errores.test.js`: DSN, limpieza de datos personales, pila de Chrome y Firefox, muestreo y tope, apagado sin DSN.
-- `tests/test_sitio.py` (`Errores`) y `tests/js/info.test.js`: el DSN coincide en `sitio.json`, `index.html` y la CSP;
-  `/legal/` nombra a Sentry solo con la captura prendida.
