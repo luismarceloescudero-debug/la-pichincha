@@ -34,8 +34,9 @@
     // compartido abre sin red la misma pagina, y las busquedas distintas no llenan la cache de copias.
     const clave = pedido.mode === "navigate" ? sinBusqueda(pedido.url) : pedido;
     const guardada = () => almacen.match(clave);
+    let enCurso;
     try {
-      const enCurso = fetch(pedido);
+      enCurso = fetch(pedido);
       // La copia se hace apenas llega, aunque la persona ya haya recibido lo guardado por la demora.
       // put falla con respuestas parciales (206) y otras: no se guarda y la persona la recibe igual.
       enCurso.then(r => { if (r && r.ok) return almacen.put(clave, r.clone()); }).catch(() => {});
@@ -45,6 +46,9 @@
     } catch (e) {
       const vieja = await guardada();
       if (vieja) return vieja;
+      // Sin copia, el limite no sirve de nada: si la red solo tarda (4G lento, el link de Telegram abierto
+      // por primera vez) se la sigue esperando, y la pagina de sin conexion queda para cuando falla de verdad.
+      try { const r = await enCurso; if (r) return r; } catch (e2) { /* fallo de verdad: sigue abajo */ }
       if (pedido.mode === "navigate") {
         const aviso = await almacen.match(new URL("sin-red.html", base).href);
         if (aviso) return aviso;

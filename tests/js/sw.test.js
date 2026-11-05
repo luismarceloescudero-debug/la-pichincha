@@ -49,6 +49,12 @@ test("si la red tarda mas del limite devuelve lo guardado, y despues actualiza l
   assert.equal(tienda[url("indice.json")].cuerpo, "recien llegado");
 });
 
+test("si la red tarda y no hay copia, espera la red: no muestra sin conexion (link de Telegram)", async () => {
+  const lenta = new Promise(r => setTimeout(() => r(respuesta("hoy")), 60));
+  const { env } = entorno(() => lenta, { [url("sin-red.html")]: respuesta("no disponible") });
+  assert.equal((await SW.responder(pedido("hoy/?v=1", { mode: "navigate" }), env)).cuerpo, "hoy");
+});
+
 test("un error del servidor no pisa lo guardado y se usa lo guardado", async () => {
   const { env, tienda } = entorno(() => respuesta("roto", 503), { [url("indice.json")]: respuesta("de ayer") });
   assert.equal((await SW.responder(pedido("indice.json"), env)).cuerpo, "de ayer");
