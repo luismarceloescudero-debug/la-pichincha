@@ -1,6 +1,6 @@
 # Pendientes que dependen de vos
 
-Última revisión: 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
+Última revisión: 05/11/2026 (ítems 12 y 13, spec 061); 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
 24/10 desde el entorno de trabajo: los que piden iniciar sesión o tienen anti-bots están marcados) y, cuando hay que
 escribirle a alguien, el **mensaje ya armado**. Entre `[CORCHETES]` va lo que tenés que completar vos.
 
@@ -19,6 +19,8 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 9 | Instagram (separado, en pausa) | Publicar la tarjeta del día | cuando lo retomes |
 | 10 | Tiendamia: pedir permiso para leer la cotización | Mostrar el envío y los servicios de importación sin que la persona pegue su carrito | 5 min + espera |
 | 11 | Tiendamia: armar los carritos de prueba | La base para encontrar cómo calcula Tiendamia el envío y los servicios | 15 min |
+| 12 | Avisos por Telegram a tu chat privado (spec 061) | Enterarte al instante si una tienda trae 0, salta la guardia o falla la corrida | 5 min |
+| 13 | (Opcional) Sentry y el arreglo con Claude (spec 061) | Ver los errores del navegador de la gente; que Claude proponga el arreglo de un error nuevo | 15 min |
 
 ---
 
@@ -359,3 +361,32 @@ Si el carrito dice «NO PERMITIDO · ADUANA» (pasó con un power bank), avisame
 ---
 
 Si querés, decime cuáles hacés primero y te acompaño con cada uno, un paso por vez.
+
+---
+
+## 12. Avisos por Telegram a tu chat privado (spec 061)
+
+Desde el 05/11 cada corrida te avisa **por privado** (nunca en el canal) si una tienda trae 0 productos o muy pocos, si
+salta la guardia o si falla la corrida. Usa el mismo bot del canal. Falta un solo dato: a qué chat mandártelo.
+
+1. En Telegram, buscá **@userinfobot** y mandale «hola». Te contesta con tu **Id** (un número, por ejemplo 123456789).
+2. Buscá el bot del canal (el que publica las pichinchas) y mandale «hola»: un bot no puede escribirte si vos no le
+   escribiste primero.
+3. En la terminal, dentro del repo: `gh secret set TELEGRAM_CHAT_DUENO` y pegá el número cuando lo pida.
+4. Listo. En la próxima corrida, si algo falla, te llega el aviso. Si el secreto falta, la corrida no se rompe: deja una
+   advertencia amarilla en GitHub.
+
+## 13. (Opcional) Sentry y el arreglo con Claude (spec 061)
+
+**Sentry** (errores del navegador de la gente, plan gratis): está todo listo y apagado. Para prenderlo, creá la cuenta en
+sentry.io, un proyecto «Browser JavaScript», y en *Settings → Security & Privacy* prendé **Prevent Storing of IP
+Addresses**. Pasame el **DSN** (empieza con `https://` y termina en `/` y un número) y lo cargo yo.
+
+**Claude arregla los errores nuevos** (etapa 2, con tu suscripción, no con la API paga): también está listo y apagado.
+
+1. En tu compu: `claude setup-token` (abre el navegador; entrás con tu cuenta de Claude y te da un token).
+2. `gh secret set CLAUDE_CODE_OAUTH_TOKEN` y pegá el token.
+3. `gh variable set ARREGLO_CLAUDE --body si` para prenderlo (`--body no` para apagarlo).
+4. Cuando quieras que Claude mire un error, ponele la etiqueta `arreglar-con-claude` al issue. Propone el arreglo en un
+   PR; no mergea solo.
+
