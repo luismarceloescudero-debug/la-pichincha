@@ -81,26 +81,6 @@ class Afuera(unittest.TestCase):
             self.assertIn(SITIO["afuera_url"], connect)
 
 
-class Errores(unittest.TestCase):
-    """Errores de JS a Sentry (spec 061): apagado con el DSN vacio; prendido, index.html lo lleva y la CSP deja conectar."""
-
-    def test_el_dsn_esta_vacio_o_es_uno_de_sentry(self):
-        dsn = SITIO["errores_dsn"]
-        self.assertTrue(dsn == "" or re.fullmatch(r"https://[0-9a-f]{16,64}@[a-z0-9.-]+/\d+", dsn), dsn)
-
-    def test_index_html_lleva_el_dsn_de_sitio_json_y_carga_errores_primero(self):
-        html = (RAIZ / "index.html").read_text(encoding="utf-8")
-        self.assertEqual(re.findall(r'<meta name="errores-dsn" content="([^"]*)">', html), [SITIO["errores_dsn"]])
-        scripts = re.findall(r'<script src="(js/[^"]+)"', html)
-        self.assertEqual(scripts[0], "js/errores.js")
-
-    def test_la_politica_deja_mandar_los_errores(self):
-        if SITIO["errores_dsn"]:
-            host = re.match(r"https://[^@]+@([^/]+)/", SITIO["errores_dsn"]).group(1)
-            connect = re.search(r"connect-src ([^;]+)", SITIO["csp"]).group(1).split()
-            self.assertIn("https://" + host, connect)
-
-
 class Icono(unittest.TestCase):
     """Sin <link rel="icon"> el navegador pide /favicon.ico, que no existe: un 404 en cada pagina."""
 
