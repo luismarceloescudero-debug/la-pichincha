@@ -65,3 +65,14 @@ Mismo lenguaje y mismos roles en tonos oscuros sobre lavanda (`#faf5fe`): el ama
   dejan el blanco: lila con icono rosa, y rosa claro.
 - El «titulo blanco que despues cambia de color» era el CSS viejo que el service worker anterior servia mientras llegaba el
   nuevo: pasa una vez despues de cada publicacion.
+
+## Animaciones al scrollear (05/11)
+
+- `js/al-ver.js` (portada y `/hoy/`, en la cascara del service worker): pone `anima` en `<html>` y `en-vista` en cada tarjeta,
+  fila de Comparativa o renglon de `/hoy/` la primera vez que entra en pantalla (IntersectionObserver; MutationObserver para
+  lo que se pinta despues).
+- `css/sitio.css` «Al ver»: el % cae y rebota (`av-cae`), la tienda entra de costado (`av-tienda`), el icono del producto gira y
+  aparece (`av-ico`), la caracteristica premium salta (`av-salta`) y le pasa un destello (`av-brillo`). Hasta verse, la animacion
+  espera en pausa; corre una sola vez.
+- Sin JavaScript, sin IntersectionObserver o con «reducir movimiento» no hay `anima`: todo quieto y a la vista.
+- Arreglo de paso: en `/hoy/` las pastillas llenas tenian la tinta clara del cartel (contraste 1,2:1); ahora letra negra.
