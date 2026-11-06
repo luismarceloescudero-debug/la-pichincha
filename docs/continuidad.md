@@ -76,7 +76,7 @@
 
 ### Pendientes del dueño (ver `docs/pendientes-del-dueno.md`)
 - [ ] Formulario de contacto: probar de punta a punta (secretos ya cargados)
-- [ ] AliExpress: cargar `ALIEXPRESS_APP_KEY`, `ALIEXPRESS_APP_SECRET`, `ALIEXPRESS_TRACKING_ID`
+- [ ] AliExpress (afiliado aprobado el 06/11): copiar el Tracking ID del portal, crear la app en `openservice.aliexpress.com` y cargar `ALIEXPRESS_APP_KEY`, `ALIEXPRESS_APP_SECRET`, `ALIEXPRESS_TRACKING_ID`
 - [ ] Google Search Console: agregar registro TXT en Cloudflare
 - [ ] Seguimiento tiendas (16/11): FullH4rd, Compra Cierta, Loquieroacá (Katech respondio el 04/11 con su feed: integrado)
 

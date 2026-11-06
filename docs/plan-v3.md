@@ -89,8 +89,9 @@ Todo lo que depende del dueño, con paso a paso, enlaces y mensajes armados: `do
 - **hecho** eBay en «Afuera» (25/10): con la exencion de Marketplace Account Deletion concedida, `/buscar` trae resultados
   reales con envio a Argentina y solo articulos nuevos (#143, #145). Los links todavia no llevan comision: falta el numero de
   campaña de eBay Partner Network (`EBAY_CAMPAIGN_ID`), cuando aprueben la solicitud.
-- **pendiente del dueño** AliExpress: registro en revision desde el 23/10 (de 1 hora a 2 dias habiles); despues, App Key,
-  App Secret y Tracking ID como secretos. Amazon Creators API cuando haya 10 ventas.
+- **pendiente del dueño** AliExpress: el programa de afiliados aprobo la cuenta (correo del 06/11, pedido el 23/10).
+  Falta copiar el Tracking ID del portal de afiliados, crear la aplicacion en `openservice.aliexpress.com` y cargar
+  App Key, App Secret y Tracking ID como secretos. Amazon Creators API: descartada el 04/11 (pedia 10 ventas).
 - **sin salida de nuestro lado** Tiendamia da HTTP 403 desde el Worker (era 200 el 23/10): es un bloqueo, no se esquiva.
   Se pide un feed o se la da de baja de «Afuera».
 
