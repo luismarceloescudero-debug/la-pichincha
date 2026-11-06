@@ -1,6 +1,6 @@
 # Pendientes que dependen de vos
 
-Última revisión: 05/11/2026 (ítems 12 y 13, spec 061; ítem 1 cerrado); 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
+Última revisión: 06/11/2026 (ítem 4: AliExpress aprobó el programa de afiliados); 05/11/2026 (ítems 12 y 13, spec 061; ítem 1 cerrado); 04/11/2026 (estado, ítems 2, 6, 8, 9, 10 y 11); 30/10/2026 (ítem 1); 24/10/2026 (el resto). Cada ítem dice **qué se destraba**, el **paso a paso**, los **enlaces** (revisados el
 24/10 desde el entorno de trabajo: los que piden iniciar sesión o tienen anti-bots están marcados) y, cuando hay que
 escribirle a alguien, el **mensaje ya armado**. Entre `[CORCHETES]` va lo que tenés que completar vos.
 
@@ -11,7 +11,7 @@ Ningún mensaje dice cifras de visitas ni de ventas que el sitio no tenga medida
 | 1 | ~~Activar el formulario de contacto~~ | Hecho: el aviso «[La Pichincha] Consulta de …» y el acuse de Resend «Recibimos tu consulta» llegan desde `hola@pichinchadeldia.com.ar` (prueba del 31/10, confirmada el 05/11) | — |
 | 2 | Escribir a FullH4rd, Katech, Compra Cierta y Loquieroacá (cartas enviadas el 02/11; **Katech respondió el 04/11 con su feed, ya integrado**) | Tres tiendas que hoy no entran al índice o a «Afuera» | esperar respuesta |
 | 3 | eBay (claves y afiliados) | «Afuera» con eBay: precios en vivo y comisión | 30 min + espera |
-| 4 | AliExpress (claves y afiliados) | «Afuera» con AliExpress, y comisión | 30 min + espera |
+| 4 | AliExpress: afiliado **aprobado** el 06/11; falta copiar el Tracking ID y crear la app de desarrollador | «Afuera» con AliExpress, y comisión | 20 min |
 | 5 | Mercado Libre: confirmar clics | Saber si el link de afiliado cuenta | 2 min |
 | 6 | Google Search Console | Que Google lea el mapa del sitio y avise de errores | 10 min |
 | 7 | ~~OmniRoute: reconectar Claude~~ | Cerrado el 27/10: el respaldo ahora es FCC | — |
@@ -47,7 +47,7 @@ Verificado el 01/11 con los secretos de GitHub y el Worker, y el 04/11 con las c
 | 1 | Secretos `CONTACTO_DESTINO`, `CONTACTO_REMITENTE` y `RESEND_API_KEY` cargados. Falta probar el formulario de punta a punta cuando se terminen de enviar las cartas |
 | 2 | Enviadas las 4 cartas (02/11). **Katech respondió el 04/11** con su feed de productos (`https://katech.com.ar/feed/productos/`, formato Google Merchant, 2.094 productos): ya integrado al índice (PR #224); entra en la próxima corrida. FullH4rd, Compra Cierta y Loquieroacá: seguimiento el 16/11/2026 |
 | 3 | eBay: cerrado el 02/11. Claves y `EBAY_CAMPAIGN_ID` (5339237377) cargados, Worker desplegado y la busqueda en vivo devuelve `afiliado: true` |
-| 4 | AliExpress: sin ningun `ALIEXPRESS_*` en los secretos; pendiente |
+| 4 | AliExpress: **el programa de afiliados te aprobó** (correo del 06/11/2026: «Estimado socio… inicie sesión en el Portal de Afiliados»). Falta entrar al portal y copiar el **Tracking ID**, crear la aplicación en `openservice.aliexpress.com` y cargar los tres secretos; hoy no hay ningún `ALIEXPRESS_*` cargado |
 | 5 | Mercado Libre: clics confirmados. Cerrado |
 | 6 | Search Console: **verificado** (Google lo verificó solo por Cloudflare) y sitemap leído «Correcto». Queda mirar «Indexación → Páginas» y mandar la captura |
 | 8 | Amazon: **descartado el 04/11** (decisión del dueño): pide ventas calificadas y no tiene sentido perseguirlas. Opcional a futuro |
@@ -235,8 +235,12 @@ No me pases las claves por acá: van solo en los secretos de GitHub.
 
 **Paso a paso:**
 
-1. Programa de afiliados: https://portals.aliexpress.com/ (abre) → registrate y esperá la aprobación. Ahí sale tu
-   **Tracking ID**.
+1. ~~Programa de afiliados: registrarse y esperar la aprobación.~~ **Hecho: te aprobaron** (correo del 06/11/2026,
+   «Estimado socio… inicie sesión en el Portal de Afiliados»). Lo que queda de este paso: entrar con tu cuenta a
+   https://portals.aliexpress.com/affiportals/web/home.htm (pide iniciar sesión) y copiar tu **Tracking ID**.
+   El portal también ofrece «Centro de publicidad», «Herramientas → SiteStripe» y «Herramientas → Generador de
+   enlaces» para armar links de a uno a mano: para el sitio no hacen falta, los links los arma el código solo con
+   el Tracking ID.
 2. Plataforma para desarrolladores: https://openservice.aliexpress.com/ (abre) → creá una aplicación del tipo
    «Affiliate / API» y pedí el permiso de «Affiliate». Copiá `App Key` y `App Secret`.
 3. Cargá los secretos (mismo lugar que en eBay):
