@@ -8,8 +8,9 @@
 
 - `main` en `185204b`: **#215 mergeado** (auditorías 02/11, diseño, índice sin fotos, eBay, hooks y skills). El branch
   `ccr-eaf2827b-dmk4yf` ya está mergeado y se puede borrar.
-- Sin cron desde #212: una corrida de "Actualizar precios y publicar" por cada push a main (solo corrige el mensaje de
-  Telegram si el índice es del mismo día) y las manuales con `workflow_dispatch` (esas sí mandan mensaje nuevo).
+- Cron diario RESTAURADO el 07/11 (estuvo apagado del 02 al 07/11, #212): 00:23 y 02:47 hora argentina (el segundo es respaldo y no repite el indice del dia),
+  mas una corrida por cada push a main (solo corrige el mensaje de Telegram si el índice es del mismo día) y las manuales con `workflow_dispatch`.
+  Instagram queda FUERA del camino: PRs 126 y 169 en borrador, sin pasos en el workflow, hasta que el dueño decida.
 - 03/11 19:59 UTC: corrida manual con `indexar=true` (run 41708364309). Rearmó el índice del 03/11, pero **no mandó Telegram**:
   la guardia se despertó con «PCs completas: sin ofertas». Causa: en esa corrida falló el checkout de la rama `historial`
   (`historial.inicio` vacío) y sin historia el índice sale con 0 bajas propias en todos los rubros (issue #217, comentado).
