@@ -38,6 +38,30 @@ test("elige solo lo premium de cada categoría, sin usados, internacionales ni r
   assert.ok(notebooks.items.length <= N.POR_CATEGORIA);
 });
 
+test("el mismo celular sin código escrito distinto en tres tiendas es uno solo y sale con la tienda más barata (07/11)", () => {
+  const idx = { tiendas: { ...TIENDAS, mt: { nombre: "Max Tecno" }, cc: { nombre: "Compra Cierta" } }, productos: [
+    fila("CELULAR SAMSUNG GALAXY S26 ULTRA 12/512GB 6.9\" 120 Hz D AMOLED NEGRO", 3721489, "mt"),
+    fila("Samsung Galaxy S26 Ultra 5G 512GB 12GB RAM 6.9 Pulgadas", 3409999, "cg"),
+    fila("Samsung Galaxy S26 Ultra 512gb 12gb Dual Sim", 2300000, "cc"),
+    fila("Celular Honor 600 Pro 5g Dual Sim 512 GB 12 GB Ram Blanco Dorado 200 Mp", 1750000, "cg"),
+  ] };
+  const cel = N.novedadesPorCategoria(idx, null).find(x => x.categoria === "smartphone");
+  assert.ok(cel, "hay celulares premium para comparar");
+  const s26 = cel.items.filter(i => /s26 ultra/i.test(i.nombre));
+  assert.equal(s26.length, 1, "el S26 Ultra 12/512 sale una sola vez");
+  assert.equal(s26[0].precio, 2300000, "y con la tienda más barata");
+  assert.equal(s26[0].tienda, "Compra Cierta");
+});
+
+test("otra memoria es otro equipo: el S26 Ultra de 256 GB no se junta con el de 512 GB", () => {
+  const idx = { tiendas: TIENDAS, productos: [
+    fila("Samsung Galaxy S26 Ultra 512gb 12gb Dual Sim", 2300000, "cg"),
+    fila("Samsung Galaxy S26 Ultra 256gb 12gb Dual Sim", 2050000, "mx"),
+  ] };
+  const cel = N.novedadesPorCategoria(idx, null).find(x => x.categoria === "smartphone");
+  assert.equal(cel && cel.items.length, 2);
+});
+
 test("cada item trae sus especificaciones clave, el precio y la tienda", () => {
   const notebooks = N.novedadesPorCategoria(IDX, null).find(x => x.categoria === "notebook");
   for (const i of notebooks.items) {

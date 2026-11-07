@@ -18,6 +18,22 @@
   const POR_CATEGORIA = 3;       // los que se comparan de frente
   const MIN_PARA_COMPARAR = 2;   // con uno solo no hay comparacion: la categoria no sale
 
+  /* Que modelo es, para que el mismo equipo en dos tiendas ocupe un solo lugar. Con codigo, el codigo. Sin codigo, el titulo
+     limpio (sin color, 5G, pulgadas ni «celular»: eso son las pastillas) mas las especificaciones clave que lee el titulo
+     (RAM y almacenamiento, procesador, panel...), asi «12/512GB 6.9" AMOLED NEGRO» y «5G 512GB 12GB RAM 6.9 Pulgadas» son el mismo
+     Galaxy S26 Ultra y «256GB» es otro (07/11: el S26 Ultra salia dos veces con otro precio en otra tienda). Sin ese
+     titulo limpio queda el nombre normalizado de siempre. */
+  const RELLENO = /\b(?:libre|liberado|desbloqueado|desbloq|celular|smartphone)\b/gi;
+  function modeloDe(f) {
+    const b = B();
+    if (f[9]) return f[9];
+    if (!T()) return b.normal(String(f[0]));
+    const titulo = b.normal(T().de(f[0]).titulo.replace(RELLENO, " "));
+    const { valores } = E().clavesDe(f[0]);
+    const specs = Object.entries(valores).map(([k, v]) => k + v).join("|");
+    return titulo + (specs ? "|" + specs : "");
+  }
+
   /* [{ categoria, etiqueta, items: [{ nombre, precio, url, tienda, resumen, ultimo }] }] */
   function novedadesPorCategoria(idx, ganadores, { porCategoria = POR_CATEGORIA, categorias = CATEGORIAS } = {}) {
     const m = M(), c = C(), e = E(), b = B();
@@ -30,9 +46,12 @@
       const candidatas = filas.filter(f => c.categoriaDe(f[0]) === categoria && ctx.premium(f[0]).premium);
       // Primero lo mas nuevo, despues el mayor puntaje premium y, a igual todo, el mas barato.
       candidatas.sort((a, z) => (novedad(z) - novedad(a) || 0) || (ctx.premium(z[0]).puntos - ctx.premium(a[0]).puntos) || (a[1] - z[1]));
+      // El mismo modelo en varias tiendas es uno solo, y de las tiendas queda la mas barata (como en Ofertas).
+      const masBarata = new Map();
+      for (const f of candidatas) { const k = modeloDe(f); if (!masBarata.has(k) || f[1] < masBarata.get(k)[1]) masBarata.set(k, f); }
       const vistos = new Set(), items = [];
-      for (const f of candidatas) {
-        const clave = f[9] || b.normal(String(f[0]));          // el mismo modelo en varias tiendas es uno solo
+      for (const g of candidatas) {
+        const clave = modeloDe(g), f = masBarata.get(clave);
         if (vistos.has(clave) || !e.mismas(f, f).aplica) continue;   // sin especificaciones legibles no hay con que comparar
         vistos.add(clave);
         items.push({ nombre: f[0], precio: f[1], url: f[2], tienda: (idx.tiendas[f[3]] || {}).nombre || f[3],
