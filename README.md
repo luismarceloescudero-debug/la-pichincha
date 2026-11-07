@@ -449,8 +449,7 @@ Las ofertas del dia salen por dos canales, sin backend:
   crear el bot con @BotFather, sumarlo como administrador del canal y cargar los secretos
   `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el repo (Settings > Secrets and variables >
   Actions). Sin ellos el paso no hace nada ni falla. Solo publica en la corrida programada
-  o en la manual (no en cada push; desde el 02/11 no hay cron: el publicador se dispara a mano con
-  `gh workflow run actualizar.yml -f indexar=true`; para volver a programar, restaurar `schedule:` en el workflow), y si Telegram falla el sitio sale igual. El token nunca se imprime.
+  o en la manual (no en cada push; el cron diario volvio el 07/11: 00:23 y, de respaldo, 02:47 hora argentina; tambien se dispara a mano con `gh workflow run actualizar.yml -f indexar=true`), y si Telegram falla el sitio sale igual. El token nunca se imprime.
 - **Avisos y arreglos automaticos** ([spec 061](specs/061-avisos-y-arreglos/spec.md)): `avisar_dueno.py` le avisa al dueño
   por su chat PRIVADO de Telegram (secreto `TELEGRAM_CHAT_DUENO`, nunca al canal) cuando una tienda trae 0 o muy pocos
   productos, salta la guardia o falla la corrida. Los errores conocidos se arreglan solos con reglas fijas: una tienda en 0
