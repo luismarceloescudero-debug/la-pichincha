@@ -167,6 +167,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   background:var(--surface-2);color:var(--ink-2)}
 .chip.ok{background:var(--good-soft);color:var(--good)}
 .chip.ojo{background:var(--warn-soft);color:var(--warn)}
+.chip.spec .eti{opacity:.7;font-weight:400}
+.chip.spec.sin{opacity:.6;border-style:dashed}
 .pie{margin-top:auto;padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ver{font-size:.84rem;font-weight:600;color:var(--c);display:inline-flex;align-items:center;gap:5px;
   transition:gap .2s var(--curva)}

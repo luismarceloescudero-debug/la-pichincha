@@ -58,17 +58,34 @@
   const ddrDe = n => { const m = String(n).match(/\bddr\s?([345])\b/i); return m ? `ddr${m[1]}` : ""; };
   const interfazDe = n => /\bnvme\b|\bm\.?2\b/i.test(n) ? "nvme" : /\bsata\b/i.test(n) ? "sata" : "";
 
-  /* { categoria, valores: { clave: valor } } solo con lo que el titulo dice. */
-  function clavesDe(nombre) {
-    const categoria = C.categoriaDe(nombre);
-    const nombres = CLAVES[categoria === "componente" && gpuDe(nombre) ? "placa" : categoria] || [];
+  /* Pantalla en pulgadas con la unidad escrita («6.9 Pulgadas», 15.6"): un numero suelto («IdeaPad 15») es modelo, no pantalla.
+     El monitor sigue usando C.pulgadasDe, que lee el numero solo porque ahi el titulo lo trae asi. */
+  function pantallaDe(nombre) {
+    const m = String(nombre).replace(/(\d),(\d)/g, "$1.$2").match(/(?<![\d.])(\d{1,2}(?:\.\d)?)\s?(?:"|”|″|''|′′|pulgadas|pulg\b|inch\b)/i);
+    const v = m ? parseFloat(m[1]) : 0;
+    return v >= 4 && v <= 100 ? v : 0;
+  }
+  const redDe = n => /(?<![\d.])5\s?g(?![a-z\d])/i.test(n) ? "5g" : /(?<![\d.])4\s?g(?![a-z\d])|\blte\b/i.test(n) ? "4g" : "";
+  const velocidadDe = n => { const m = String(n).match(/\b(\d{3,5})\s?mhz\b/i); return m ? +m[1] : 0; };
+
+  const categoriaClaves = (nombre, categoria) => (categoria === "componente" && gpuDe(nombre) ? "placa" : categoria);
+
+  function lectoresDe(nombre) {
     const mem = C.memoriaDe(nombre);
-    const lectores = {
+    return {
       pulgadas: () => C.pulgadasDe(nombre), panel: () => C.panelDe(nombre), hz: () => hzDe(nombre),
       resolucion: () => resolucionDe(nombre), cpu: () => cpuDe(nombre), gpu: () => gpuDe(nombre),
       ram: () => mem.ram, rom: () => mem.rom, capacidad: () => capacidadDe(nombre), vram: () => capacidadDe(nombre),
       ddr: () => ddrDe(nombre), interfaz: () => interfazDe(nombre),
+      pantalla: () => pantallaDe(nombre), red: () => redDe(nombre), velocidad: () => velocidadDe(nombre),
     };
+  }
+
+  /* { categoria, valores: { clave: valor } } solo con lo que el titulo dice. Es lo que decide si dos avisos son comparables. */
+  function clavesDe(nombre) {
+    const categoria = C.categoriaDe(nombre);
+    const nombres = CLAVES[categoriaClaves(nombre, categoria)] || [];
+    const lectores = lectoresDe(nombre);
     const valores = {};
     for (const k of nombres) { const v = lectores[k](); if (v) valores[k] = v; }
     return { categoria, valores };
@@ -109,7 +126,40 @@
     return Object.entries(valores).map(([k, v]) => TEXTO[k](v)).join(" · ");
   }
 
-  const api = { CLAVES, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+
+  /* --- Lo que se MUESTRA de un aviso (tarjetas y tabla de la Comparativa) -------------------------------------------
+     CLAVES decide si dos avisos son comparables; FICHA decide que se muestra de cada categoria, siempre las mismas y en el
+     mismo orden: antes cada tarjeta mostraba lo que su titulo daba la casualidad de decir (un Ryzen 7 en una y nada en otra).
+     Lo que el titulo no dice se muestra como «no informa», nunca se inventa (principio II). */
+  const FICHA = {
+    monitor: ["pulgadas", "panel", "hz", "resolucion"],
+    notebook: ["cpu", "ram", "rom", "gpu", "pantalla"],
+    pc: ["cpu", "ram", "rom", "gpu"],
+    smartphone: ["ram", "rom", "red", "pantalla"],
+    componente: ["capacidad", "ddr", "interfaz", "velocidad"],
+    placa: ["gpu", "vram"],
+  };
+  const ETIQUETA = { pulgadas: "Pantalla", pantalla: "Pantalla", panel: "Panel", hz: "Frecuencia", resolucion: "Resolución", cpu: "Procesador",
+    ram: "RAM", rom: "Almacenamiento", gpu: "Gráficos", capacidad: "Capacidad", ddr: "Tipo de memoria", interfaz: "Interfaz",
+    vram: "Memoria de video", red: "Red", velocidad: "Velocidad" };
+  TEXTO.pantalla = v => `${v}"`;
+  TEXTO.red = v => v.toUpperCase();
+  TEXTO.velocidad = v => `${v} MHz`;
+  const TEXTO_FICHA = { ...TEXTO, ram: v => `${v} GB` };   // la etiqueta ya dice «RAM»
+
+  /* { categoria, filas: [{ clave, etiqueta, valor, texto }] }: una fila por cada especificacion de la categoria; `texto` es "" si el titulo no la dice. */
+  function fichaDe(nombre) {
+    const categoria = C.categoriaDe(nombre);
+    const nombres = FICHA[categoriaClaves(nombre, categoria)] || [];
+    const lectores = lectoresDe(nombre);
+    const filas = nombres.map(clave => {
+      const valor = lectores[clave]();
+      return { clave, etiqueta: ETIQUETA[clave] || clave, valor: valor || null, texto: valor ? TEXTO_FICHA[clave](valor) : "" };
+    });
+    return { categoria, filas };
+  }
+
+  const api = { CLAVES, FICHA, ETIQUETA, fichaDe, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

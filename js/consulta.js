@@ -64,9 +64,30 @@ function bannerConsulta() {
     <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
 }
 
-function cardPick(p, i) {
+/* Las especificaciones que se muestran en TODAS las tarjetas y en la tabla (js/especificaciones.js, fichaDe): la union de lo que
+   dice alguno de los avisos, en el orden de la categoria. Una especificacion que ninguno dice no se muestra; si alguno la dice y
+   otro no, el otro dice «no informa» en vez de callarse (antes un Ryzen 7 salia en una tarjeta y en la vecina no). */
+function clavesFicha(picks) {
+  const fichas = picks.map(p => Especificaciones.fichaDe(p.m.f[0]).filas);
+  const claves = [];
+  for (const filas of fichas) for (const r of filas)
+    if (!claves.some(c => c.clave === r.clave) && fichas.some(fs => fs.some(x => x.clave === r.clave && x.valor))) claves.push({ clave: r.clave, etiqueta: r.etiqueta });
+  return claves;
+}
+const textoFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).texto || "";
+function cardsHtml(picks) {
+  const claves = clavesFicha(picks);
+  return picks.map((p, i) => cardPick(p, i, claves)).join("");
+}
+
+function cardPick(p, i, claves = clavesFicha([p])) {
   const f = p.m.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
-  const specs = Object.values(specsDe(f[0])).slice(0, 5);
+  // sin ficha para esta categoria (perifericos, «otros»): lo que lee Buscador.specsDe, como siempre
+  const fichaChips = claves.length
+    ? claves.map(c => { const v = textoFicha(f[0], c.clave);
+        return v ? `<span class="chip spec" title="${esc(c.etiqueta)}"><span class="eti">${esc(c.etiqueta)}</span> ${esc(v)}</span>`
+          : `<span class="chip spec sin" title="${esc(c.etiqueta)}: el aviso no lo dice"><span class="eti">${esc(c.etiqueta)}</span> no informa</span>`; }).join("")
+    : Object.values(specsDe(f[0])).slice(0, 5).map(v => `<span class="chip">${esc(v)}</span>`).join("");
   const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
@@ -75,7 +96,7 @@ function cardPick(p, i) {
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""} ${selloAfiliado(f[2])}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
-    <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
+    <div class="chips">${chipOjo(viejoDe(f))}${fichaChips}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
       `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
     <p class="razon">${esc(p.razon)}</p>${plus.length ? `
     <p class="plus">＋ ${plus.join(" · ")}</p>` : ""}
@@ -96,8 +117,10 @@ function franja(picks) {
 
 function tablaPicks(picks) {
   const A = ANALISIS, med = A.med;
+  const fichaClaves = clavesFicha(picks);
+  // sin ficha para la categoria: las filas que lee Buscador.specsDe, como siempre
   const specs = picks.map(p => specsDe(p.m.f[0]));
-  const claves = [...new Set(specs.flatMap(s => Object.keys(s)))];
+  const claves = fichaClaves.length ? [] : [...new Set(specs.flatMap(s => Object.keys(s)))];
   const precios = picks.map(p => p.m.f[1]), minP = Math.min(...precios);
   const maxNiv = Math.max(...picks.map(p => p.m.niv));
   const bajo = picks.map(p => Math.round((1 - p.m.f[1] / med) * 100)), maxBajo = Math.max(...bajo);
@@ -117,6 +140,7 @@ function tablaPicks(picks) {
   }));
   const plus = picks.map(p => Buscador.plusDe(p.m.f[8])), maxPlus = Math.max(...plus.map(x => x.length));
   if (maxPlus > 0) h += fila("Plus", plus.map(x => x.join(" · ") || "—"), plus.map(x => x.length === maxPlus));
+  fichaClaves.forEach(c => { h += fila(c.etiqueta, picks.map(p => esc(textoFicha(p.m.f[0], c.clave) || "no informa"))); });
   claves.forEach(k => { h += fila(k, specs.map(s => esc(s[k] || "—"))); });
   return h + "</tbody></table></div>" + (maxPlus > 0
     ? `<p class="sub">«—» no es que no lo tenga: la fuente no lo informa (envío y cuotas por aviso solo los publican ComparaYa y sus comercios).</p>` : "");
@@ -138,7 +162,7 @@ function vistaComparativaDin() {
     <div class="panel-head"><h2>${icono("balanza")} Comparativa: ${esc(CONSULTA)}</h2>
       <p class="sub">De ${A.total} avisos que coinciden, ${A.base.length} son comparables entre sí. Estas son las opciones que valen la pena y en qué se diferencian.</p></div>
     ${barraAcciones("comparativa")}
-    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    <div class="dgrid">${cardsHtml(A.picks)}</div>
     ${franja(A.picks)}
     <div class="panel-head" style="margin-top:26px"><h2>${icono("chip")} En qué se diferencian</h2>
       <p class="sub">Las especificaciones se leen del texto del aviso, así que algunas pueden faltar: abrí la ficha para confirmarlas.</p></div>

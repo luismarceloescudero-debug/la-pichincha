@@ -96,7 +96,7 @@ function recienteHtml(q) {
   if (!A) return "";
   return `<div class="panel-head" style="margin-top:6px"><h2>${icono("balanza")} Tu última búsqueda: ${esc(q)}</h2>
       <p class="sub">De ${A.total} avisos, ${A.base.length} son comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}. Precios de hoy.</p></div>
-    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    <div class="dgrid">${cardsHtml(A.picks)}</div>
     <p class="mas-reciente"><button class="acc" data-comparar="${esc(q)}">${icono("balanza")} Ver la comparativa completa, dónde comprar y el veredicto</button></p>`;
 }
 function pintarReciente() {
