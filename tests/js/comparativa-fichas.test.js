@@ -157,3 +157,19 @@ test("la comparacion por especificaciones va en la URL (?ref=) y se reproduce", 
   assert.deepEqual(P.leerUrl("?q=ssd&ref=javascript:alert(1)", ""), { q: "ssd", vista: "" }, "solo direcciones web");
   assert.deepEqual(P.leerUrl("?ref=https://a.test/x", ""), { q: "", vista: "" }, "sin consulta no hay referencia");
 });
+
+/* --- Spec 063, fase G: el mejor valor de cada fila de la tabla se resalta --- */
+test("la tabla resalta la RAM mas alta y no resalta cuando todos tienen lo mismo", () => {
+  const correr = app([
+    fila("Notebook Lenovo IdeaPad AMD Ryzen 7 5700U 16GB 512GB SSD 15.6\"", 900000, "cg"),
+    fila("Notebook HP 250 G9 Intel Core i5 1235U 32GB 512GB SSD", 1100000, "mx"),
+    fila("Notebook Asus Vivobook Intel Core i5 1235U 8GB 512GB SSD", 700000, "gc"),
+  ]);
+  correr('fijarConsulta("notebook")');
+  const tabla = correr("tablaPicks(ANALISIS.picks)");
+  const ram = tabla.match(/<tr><th>RAM<\/th>(.*?)<\/tr>/)[1];
+  assert.equal((ram.match(/class="mejor"/g) || []).length, 1);
+  assert.match(ram, /class="mejor">32 GB</);
+  const disco = tabla.match(/<tr><th>Almacenamiento<\/th>(.*?)<\/tr>/)[1];
+  assert.doesNotMatch(disco, /class="mejor"/, "512 GB en todas: no hay ganador");
+});

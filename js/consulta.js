@@ -98,6 +98,9 @@ function clavesFicha(picks) {
     if (!claves.some(c => c.clave === r.clave) && fichas.some(fs => fs.some(x => x.clave === r.clave && x.valor))) claves.push({ clave: r.clave, etiqueta: r.etiqueta });
   return claves;
 }
+const valorFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).valor;
+/* Donde un numero mas alto es mejor: en la tabla se resalta el mayor (la pantalla, por ejemplo, no entra: mas grande no es mejor). */
+const MAYOR_ES_MEJOR = new Set(["ram", "rom", "capacidad", "vram", "hz", "dpi", "potencia", "fps", "autonomia", "velocidad"]);
 const textoFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).texto || "";
 function cardsHtml(picks) {
   const claves = clavesFicha(picks);
@@ -165,7 +168,13 @@ function tablaPicks(picks) {
   }));
   const plus = picks.map(p => Buscador.plusDe(p.m.f[8])), maxPlus = Math.max(...plus.map(x => x.length));
   if (maxPlus > 0) h += fila("Plus", plus.map(x => x.join(" · ") || "—"), plus.map(x => x.length === maxPlus));
-  fichaClaves.forEach(c => { h += fila(c.etiqueta, picks.map(p => esc(textoFicha(p.m.f[0], c.clave) || "no informa"))); });
+  fichaClaves.forEach(c => {
+    // se resalta el mayor solo si todos los numeros se pueden comparar y no son todos iguales
+    const nums = picks.map(p => valorFicha(p.m.f[0], c.clave)).map(v => (typeof v === "number" ? v : null));
+    const validos = nums.filter(v => v !== null), max = Math.max(...validos);
+    const mejor = MAYOR_ES_MEJOR.has(c.clave) && validos.length >= 2 && new Set(validos).size > 1 ? nums.map(v => v === max) : null;
+    h += fila(c.etiqueta, picks.map(p => esc(textoFicha(p.m.f[0], c.clave) || "no informa")), mejor);
+  });
   claves.forEach(k => { h += fila(k, specs.map(s => esc(s[k] || "—"))); });
   return h + "</tbody></table></div>" + (maxPlus > 0
     ? `<p class="sub">«—» no es que no lo tenga: la fuente no lo informa (envío y cuotas por aviso solo los publican ComparaYa y sus comercios).</p>` : "");

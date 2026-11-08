@@ -217,10 +217,10 @@ function pintarResultados(q) {
     // Si la marca o el producto no estan en ninguna fuente, se dice asi y ya se arma la busqueda en cada tienda de afuera
     // (spec 020: solo enlaces, js/importar.js); el bloque trae el campo para pegar el link del que encuentre (spec 040).
     caja.innerHTML = `<p class="sub">Ninguna de las ${Object.keys(IDX.tiendas).length} tiendas del índice tiene «${esc(q)}». Si es un modelo, probá con la marca sola o con menos palabras.</p>
-      ${Importar.buscarAfueraHtml(q, { esc, icono })}`;
+      ${Importar.buscarAfueraHtml(Afuera.terminoAfuera(q), { esc, icono, original: q })}`;
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
-    pintarAfuera(q, null);
+    pintarAfuera(Afuera.terminoAfuera(q), null);
     return;
   }
   // La busqueda arma la comparativa, el ranking de comercios y el veredicto, y la
@@ -228,8 +228,8 @@ function pintarResultados(q) {
   // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
   fijarConsulta(q);
   const A = ANALISIS;
-  pintarAfuera(q, A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null,
-    Importar.buscarAfueraHtml(q, { esc, icono }));
+  pintarAfuera(Afuera.terminoAfuera(q), A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null,
+    Importar.buscarAfueraHtml(Afuera.terminoAfuera(q), { esc, icono, original: q }));
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.

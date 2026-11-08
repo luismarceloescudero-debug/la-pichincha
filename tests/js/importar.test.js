@@ -411,3 +411,11 @@ test("referenciaCarrito con impuestos y envio local: los nombra y Amazon suma lo
   const esperado = Math.round(99.99 * (187061 / 100.99) + 9250 + 267824 + 41225 + 22231).toLocaleString("es-AR");
   assert.ok(l.includes(`Comprado en Amazon saldría aprox. AR$ ${esperado} (US$ 99,99 al dólar de Tiendamia + los mismos envíos, servicios e impuestos)`), l);
 });
+
+test("buscarAfueraHtml avisa cuando el termino se tradujo al ingles y muestra el original", () => {
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const html = I.buscarAfueraHtml("headphones wireless aeroclip", { esc, original: "auriculares inalámbricos aeroclip" });
+  assert.match(html, /están en inglés, buscamos «headphones wireless aeroclip»/);
+  assert.match(html, /tu búsqueda: «auriculares inalámbricos aeroclip»/);
+  assert.doesNotMatch(I.buscarAfueraHtml("aeroclip", { esc, original: "aeroclip" }), /están en inglés/, "sin cambio no se avisa");
+});
