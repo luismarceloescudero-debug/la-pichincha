@@ -67,3 +67,16 @@ test("una especificacion que ninguna tarjeta dice no se muestra (no se llena de 
   correr('fijarConsulta("notebook")');
   assert.doesNotMatch(correr("tablaPicks(ANALISIS.picks)"), /<th>Gráficos<\/th>/);
 });
+
+test("fase B: la Comparativa de teclados muestra tecnologia y switch en cada tarjeta", () => {
+  const correr = app([
+    fila("Teclado Mecanico Razer BlackWidow V4 Green Switch", 250000, "cg"),
+    fila("Teclado Mecanico Redragon Kumara TKL Blue Switch USB", 60000, "mx"),
+    fila("Teclado Mecanico Logitech G413 TKL Cable", 90000, "gc"),
+  ]);
+  correr('fijarConsulta("teclado mecanico")');
+  const html = correr("vistaComparativaDin()");
+  assert.match(html, /<span class="eti">Tecnología<\/span> Mecánico/);
+  assert.match(html, /<span class="eti">Switch<\/span> Verde/);
+  assert.match(html, /<span class="eti">Switch<\/span> no informa/, "el G413 no dice el switch");
+});
