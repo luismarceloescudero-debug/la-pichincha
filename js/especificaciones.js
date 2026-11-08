@@ -255,7 +255,12 @@
     return { categoria, filas };
   }
 
-  const api = { CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+  /* Como se llama cada categoria en plural, y con que palabra se la nombra (para decirle a la persona «Solo auriculares»). */
+  const ETIQUETA_CATEGORIA = { notebook: "Notebooks", smartphone: "Celulares", monitor: "Monitores", pc: "PCs", componente: "Componentes",
+    placa: "Placas de video", auricular: "Auriculares", teclado: "Teclados", mouse: "Mouse", webcam: "Webcams", parlante: "Parlantes",
+    periferico: "Otros periféricos", otro: "Otros" };
+
+  const api = { ETIQUETA_CATEGORIA, categoriaDe, CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

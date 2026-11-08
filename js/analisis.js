@@ -69,7 +69,7 @@
   }
 
   function analizarConsulta(q, ctx) {
-    const { buscarTodo, buscarPorEspec, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia, desdeOferta } = ctx;
+    const { buscarTodo, buscarPorEspec, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia, desdeOferta, soloCategoria } = ctx;
   // Con una tarjeta de referencia (spec 063, fase C) el universo son los avisos de su categoria y sus especificaciones, de cualquier
   // marca; el texto de la consulta (que es el del modelo) solo decide que se excluye. Sin especificaciones suficientes: como siempre.
   const porEspec = referencia && buscarPorEspec ? buscarPorEspec(referencia) : null;
@@ -80,11 +80,24 @@
   const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, variante: 0, raros: 0, caros: 0, especificaciones: 0 };
   const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
+  // Una busqueda que junta productos de tipos distintos («Aero»: notebooks Gigabyte y auriculares Soundcore) tiene una mediana que no
+  // dice nada. Se cuenta de que tipos son TODOS los avisos encontrados (aunque la comparativa deje afuera los equipos completos) y, si hay
+  // mas de un tipo con peso, la persona puede elegir con cual quedarse. Los tipos sin nombre («otros», accesorios) no cuentan.
+  const Esp0 = especificaciones();
+  const catDe = m => Esp0.categoriaDe(m.f[0]);
+  const conteo = new Map();
+  for (const m of meta) { const c = catDe(m); if (c !== "otro" && c !== "periferico") conteo.set(c, (conteo.get(c) || 0) + 1); }
+  const mezcla = [...conteo].map(([categoria, n]) => ({ categoria, etiqueta: Esp0.ETIQUETA_CATEGORIA[categoria] || categoria, n })).sort((a, b) => b.n - a.n);
+  const hayMezcla = mezcla.length > 1 && mezcla[1].n >= 3 && mezcla[1].n >= crudo.length * 0.15;
+
   // Las compras internacionales no compiten en la comparativa, pero siguen en la
   // lista de Buscar con su sello: son otra forma de comprar, no otro producto.
+  // Con un tipo elegido (soloCategoria) se levantan las exclusiones que son de tipo: si pidio notebooks, los notebooks no son «equipos».
   const internacionales = [];
   const candidatas = meta.filter(m => {
+    if (soloCategoria && catDe(m) !== soloCategoria) { excl.tipo++; return false; }
     const motivo = motivoExclusion(m.n, nq, toks, m.f[8]);
+    if (motivo && soloCategoria && ["equipos", "tipo", "formato"].includes(motivo)) return true;
     if (motivo) { excl[motivo]++; if (motivo === "internacionales") internacionales.push(m); return false; }
     return true;
   });
@@ -207,13 +220,17 @@
   }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
 
   return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec, desdeOferta: !!desdeOferta,
+           categoria: catDe(mejor), mezcla: hayMezcla ? mezcla : null, soloCategoria: soloCategoria || "",
            primeras: base.filter(m => m.niv === 2) };
 }
 
   /* Que quedo afuera de la comparativa, en palabras. Lo usan el cartel de la Comparativa
      y las paginas por busqueda: el mismo texto en los dos lados. */
-  function partesExclusion(ex) {
+  // «Mas del triple» suele ser un equipo completo cuando se busca un componente; buscando auriculares o un celular, un pack o un lote.
+  const DE_EQUIPOS = new Set(["", "componente", "placa", "pc", "notebook", "monitor"]);
+  function partesExclusion(ex, categoria = "") {
     const n = (k, uno, varios) => ex[k] ? `${ex[k]} ${ex[k] > 1 ? varios : uno}` : null;
+    const equipos = DE_EQUIPOS.has(categoria);
     return [
       n("internacionales", "compra internacional (envío desde el exterior)", "compras internacionales (envío desde el exterior)"),
       ex.formato ? `${ex.formato} de notebook` : null,
@@ -225,7 +242,7 @@
       ex.usados ? `${ex.usados} usados u outlet` : null,
       ex.especificaciones ? `${ex.especificaciones} con otras especificaciones (no son la misma configuración)` : null,
       ex.raros ? `${ex.raros} muy por debajo del resto y sin marca conocida` : null,
-      ex.caros ? `${ex.caros} que cuestan más del triple (suelen ser equipos completos)` : null,
+      ex.caros ? `${ex.caros} que cuestan más del triple (${equipos ? "suelen ser equipos completos" : "suelen ser packs, lotes o un modelo de otra gama"})` : null,
     ].filter(Boolean);
   }
 

@@ -136,6 +136,15 @@ function vistaVeredicto() {
   return veredictoVacio(IDX ? "" : "Armando el veredicto de tu última búsqueda…");
 }
 
+/* La ultima busqueda no tiene avisos comparables: se dice, en vez de mostrar el veredicto de otra. Ofrece buscar afuera y volver a la anterior. */
+function veredictoSinResultados(q) {
+  const antes = IDX ? leerHist().find(x => x !== q && hayResultados(x)) : "";
+  return `<div class="panel"><div class="panel-head"><h2>${icono("trofeo")} Veredicto</h2>
+    <p class="sub">Tu última búsqueda, <b>«${esc(q)}»</b>, no tiene avisos comparables en las tiendas del índice, así que no hay veredicto para escribir. Probá con la marca sola o con menos palabras, o buscalo afuera.</p></div>
+    <p class="mas-reciente"><button class="acc" data-buscar-q="${esc(q)}">${icono("lupa")} Ver «${esc(q)}» en Buscar</button>
+    ${antes ? ` <button class="acc" data-comparar="${esc(antes)}">${icono("balanza")} Ver el veredicto de «${esc(antes)}»</button>` : ""}</p></div>`;
+}
+
 function veredictoVacio(aviso) {
   return `<div class="panel"><div class="panel-head"><h2>${icono("trofeo")} Veredicto</h2>
     <p class="sub">${esc(aviso || "Buscá un producto y el veredicto se escribe solo con los precios de hoy: qué comprar, dónde y qué descartar.")}</p></div>

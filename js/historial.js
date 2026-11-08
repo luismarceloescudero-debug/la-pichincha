@@ -21,7 +21,9 @@ function guardarHist(q) {
   const mejor = ANALISIS && CONSULTA === q ? ANALISIS.picks[0].m.f : null;
   const entrada = { ...(ya || {}), q, t: Date.now() };
   if (mejor) { entrada.p = mejor[1]; entrada.n = mejor[0].slice(0, 90); entrada.c = comercioDe(mejor); }
-  escribirHist([entrada, ...previo.filter(x => x.q !== q)].slice(0, TOPE_HIST));
+  // Lo que se guardo mientras se tipeaba («aero» antes de «aeroclip 2») es un fragmento de esta busqueda, no otra: se reemplaza.
+  const fragmento = x => x.q !== q && q.toLowerCase().startsWith(x.q.toLowerCase()) && Date.now() - (x.t || 0) < 3 * 60 * 1000;
+  escribirHist([entrada, ...previo.filter(x => x.q !== q && !fragmento(x))].slice(0, TOPE_HIST));
   pintarHist();
   pintarTira();
 }
@@ -111,11 +113,15 @@ function pintarReciente() {
 function abrirReciente(id) {
   const sigueAca = () => (location.hash.slice(1) || "comparativa") === id;
   asegurarIndice().then(() => {
-    if (!(CONSULTA && ANALISIS)) {
+    // Manda lo ultimo que la persona escribio o abrio (spec 063, fase D); recien sin eso, el historial y «Lo mas buscado».
+    if (ULTIMA_ESCRITA && ULTIMA_ESCRITA !== CONSULTA) fijarConsulta(ULTIMA_ESCRITA);
+    if (ULTIMA_ESCRITA && ANALISIS) guardarHist(ULTIMA_ESCRITA);       // ya no espera al temporizador de Buscar
+    if (!(CONSULTA && ANALISIS) && !ULTIMA_ESCRITA) {
       const q = consultaReciente();
       if (q) { fijarConsulta(q); RECIENTE_DE_BUSCADAS = !leerHist().includes(q); }
     }
-    if (sigueAca()) $("#vista").innerHTML = CONSULTA && ANALISIS ? vistaDinamica(id) : veredictoVacio("");
+    if (!sigueAca()) return;
+    $("#vista").innerHTML = CONSULTA && ANALISIS ? vistaDinamica(id) : ULTIMA_ESCRITA ? veredictoSinResultados(ULTIMA_ESCRITA) : veredictoVacio("");
   }).catch(() => { if (sigueAca()) $("#vista").innerHTML = veredictoVacio(""); });
 }
 
@@ -133,6 +139,7 @@ let comilonesUsados = 0;
 
 function borrarHistorial() {
   escribirHist([]);
+  ULTIMA_ESCRITA = "";
   limpiarConsulta();
   pintarHist();
   pintarTira();

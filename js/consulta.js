@@ -5,7 +5,10 @@
    lo escribe la propia busqueda. Sin consulta, Comparativa y Veredicto usan la
    busqueda mas reciente (spec 021, js/historial.js): ya no vuelve el analisis
    curado del primer relevamiento. Tiendas es una seccion de la Comparativa. */
-let CONSULTA = "", ANALISIS = null, REFERENCIA = null, DESDE_OFERTA = false;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
+let CONSULTA = "", ANALISIS = null, REFERENCIA = null, DESDE_OFERTA = false, SOLO_CATEGORIA = "";
+/* La ultima busqueda que la persona escribio o abrio, la haya o no con resultados. El Veredicto y la Comparativa se arman con ELLA, nunca con
+   una anterior que quedo guardada (spec 063, fase D: «Aero» tapaba a «aeroclip 2»). Solo borrar las busquedas la vacia. */
+let ULTIMA_ESCRITA = "";   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
 const DINAMICAS = ["comparativa", "veredicto"];
 let RECIENTE_DE_BUSCADAS = false;   // la consulta la puso el Veredicto con «Lo mas buscado», no la persona (js/historial.js)
 const LETRAS = ["A", "B", "C", "D"];
@@ -27,13 +30,15 @@ function marcaDe(nombre) { return Buscador.marcaDe(nombre, MARCAS_RE); }
 /* La logica vive en js/analisis.js: la comparten esta pagina y las paginas por busqueda. */
 function analizarConsulta(q) {
   return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe: f => OTRAS.get(f) || [],
-    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA, buscarPorEspec: buscarPorEspecificaciones, desdeOferta: DESDE_OFERTA });
+    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA, buscarPorEspec: buscarPorEspecificaciones, desdeOferta: DESDE_OFERTA, soloCategoria: SOLO_CATEGORIA });
 }
 
 /* `referencia` (opcional): la fila de la tarjeta desde la que se compara; la comparativa queda con sus mismas especificaciones. */
-function fijarConsulta(q, referencia = null, { desdeOferta = false } = {}) {
+function fijarConsulta(q, referencia = null, { desdeOferta = false, categoria = "" } = {}) {
   const t = q.trim();
   if (t.length < 2) return limpiarConsulta();
+  ULTIMA_ESCRITA = t;
+  SOLO_CATEGORIA = categoria;
   CONSULTA = t;
   REFERENCIA = referencia;
   DESDE_OFERTA = !!referencia && desdeOferta;     // viene de la pestaña Ofertas: ya muestra el mejor precio del modelo
@@ -42,7 +47,7 @@ function fijarConsulta(q, referencia = null, { desdeOferta = false } = {}) {
   if (!ANALISIS) { CONSULTA = ""; REFERENCIA = null; }
   marcarConsulta();
 }
-function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; DESDE_OFERTA = false; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; DESDE_OFERTA = false; SOLO_CATEGORIA = ""; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
 function marcarConsulta() {
   const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
   sincronizarUrl();
@@ -59,16 +64,28 @@ function notaEspecificaciones(A) {
   return ` <span class="nota-espec">Comparando solo con avisos de las mismas especificaciones: <b>${esc(e.resumen)}</b> (${e.comparables} ${e.comparables === 1 ? "aviso" : "avisos"}).${pocos}</span>`;
 }
 
+/* Una busqueda que junta tipos de producto distintos lo dice y deja elegir uno (o volver a ver todos). */
+function mezclaHtml() {
+  const A = ANALISIS;
+  if (A.soloCategoria) {
+    const nom = (A.mezcla || []).find(c => c.categoria === A.soloCategoria);
+    return `<p class="mezcla">Mostrando solo <b>${esc(nom ? nom.etiqueta.toLowerCase() : A.soloCategoria)}</b>. <button class="acc" data-solo-categoria="">Ver todo lo que coincide</button></p>`;
+  }
+  if (!A.mezcla) return "";
+  return `<p class="mezcla">Tu búsqueda junta productos de tipos distintos, y la mediana de precios no dice nada si se mezclan. ¿Cuál buscás?
+    ${A.mezcla.slice(0, 4).map(c => `<button class="sug" data-solo-categoria="${esc(c.categoria)}">${esc(c.etiqueta)} (${c.n})</button>`).join(" ")}</p>`;
+}
+
 function bannerConsulta() {
-  const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
+  const A = ANALISIS, partes = Analisis.partesExclusion(A.excl, A.categoria);
   // Comparando por caracteristicas desde una tarjeta: la «busqueda» es la del modelo, asi que se dice contra que se compara.
   if (REFERENCIA && A.espec && A.espec.porEspecificaciones)
     return `<div class="consulta-activa"><span class="txt">${icono("balanza")} Comparando <b>«${esc(REFERENCIA[0].slice(0, 70))}»</b> con otros productos de sus características
       de cualquier marca: ${A.base.length} comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
-      <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
+      <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>${mezclaHtml()}`;
   return `<div class="consulta-activa"><span class="txt">${icono("lupa")} ${RECIENTE_DE_BUSCADAS ? "Armado con lo más buscado" : "Armado para tu búsqueda"} <b>«${esc(CONSULTA)}»</b>:
     ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
-    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
+    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>${mezclaHtml()}`;
 }
 
 /* Las especificaciones que se muestran en TODAS las tarjetas y en la tabla (js/especificaciones.js, fichaDe): la union de lo que
@@ -222,9 +239,17 @@ function vistaVeredictoDin() {
       + (c1 ? ` Le sigue ${c1.nom} con ${pesos(c1.mejorItem.f[1])}, ${Math.round((c1.mejorItem.f[1] / c0.mejorItem.f[1] - 1) * 100)}% más.` : "")
       + ` Hay ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""} con opciones comparables.` });
 
+  const ficha = Especificaciones.fichaDe(f[0]).filas;
+  if (ficha.length) {
+    const dice = ficha.filter(r => r.texto), calla = ficha.filter(r => !r.texto);
+    items.push({ t: "Qué dice (y qué no) el aviso de la mejor compra.",
+      d: (dice.length ? `Dice: ${dice.map(r => `${r.etiqueta.toLowerCase()} ${r.texto}`).join(", ")}.` : "El título no dice ninguna especificación.")
+        + (calla.length ? ` No dice: ${calla.map(r => r.etiqueta.toLowerCase()).join(", ")}. Confirmalo en la ficha antes de pagar.` : "") });
+  }
   const descartar = [];
   if (A.excl.raros) descartar.push(`${A.excl.raros} avisos cuestan menos del 45% de lo habitual y no son de una marca que reconozcamos: suelen ser otro producto, un accesorio o una variante inferior.`);
-  if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: casi siempre son equipos completos que solo mencionan el componente en el nombre.`);
+  if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: ${["", "componente", "placa", "pc", "notebook", "monitor"].includes(A.categoria)
+    ? "casi siempre son equipos completos que solo mencionan el componente en el nombre." : "suelen ser packs, lotes o un modelo de otra gama."}`);
   if (A.excl.similares) descartar.push(`${A.excl.similares} avisos dicen «simil» o «similar»: no son lo que buscaste, por más parecido que sea.`);
   const caras = A.primeras.map(m => m.f[1]);
   if (caras.length > 1) {

@@ -324,6 +324,9 @@ function pintarResultados(q) {
 
 let guardarLuego = null;
 function consultar(q) {
+  // Lo que se escribe es la ultima busqueda desde ya, sin esperar a que se guarde en el historial (1,2 s despues): si se cambia de
+  // pestaña antes, el Veredicto tiene que armarse con esto y no con una busqueda vieja o con un fragmento de ella.
+  if (q.trim().length >= 2) ULTIMA_ESCRITA = q.trim();
   const campo = $("#q");
   if (campo && campo.value !== q) campo.value = q;
   pintarResultados(q);
