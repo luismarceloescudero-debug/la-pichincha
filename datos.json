@@ -304,7 +304,8 @@
       "contras": [
         "Resigna el autofoco y la calidad de lente de la C920S.",
         "No bajes de acá: la C270 y la Genius son 720p y ya se ven viejas en cualquier pantalla moderna."
-      ]
+      ],
+      "falla_desde": "2026-11-08"
     },
     {
       "id": "brio4k",
@@ -378,7 +379,8 @@
       "img": "img/gw911.jpg",
       "precio": 87399,
       "precio_lista": null,
-      "stock": "en stock"
+      "stock": "en stock",
+      "falla_desde": "2026-11-08"
     },
     {
       "id": "brio505",
@@ -617,7 +619,7 @@
     "combo_gc": 460888,
     "combo_partido": 366238,
     "ram_mas_barata": "corsair-lpx",
-    "webcam_mas_barata": "brio100"
+    "webcam_mas_barata": "c920s"
   },
   "marcas": {
     "_nota": "Juicio editorial, no dato de las tiendas. 'primera' son fabricantes con red de garantia y trayectoria larga; 'conocida' son marcas reales pero de segunda linea. Lo que no esta en ninguna de las dos no se castiga: solo no se destaca.",
