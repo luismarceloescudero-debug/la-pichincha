@@ -5,7 +5,7 @@
    lo escribe la propia busqueda. Sin consulta, Comparativa y Veredicto usan la
    busqueda mas reciente (spec 021, js/historial.js): ya no vuelve el analisis
    curado del primer relevamiento. Tiendas es una seccion de la Comparativa. */
-let CONSULTA = "", ANALISIS = null, REFERENCIA = null;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
+let CONSULTA = "", ANALISIS = null, REFERENCIA = null, DESDE_OFERTA = false;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
 const DINAMICAS = ["comparativa", "veredicto"];
 let RECIENTE_DE_BUSCADAS = false;   // la consulta la puso el Veredicto con «Lo mas buscado», no la persona (js/historial.js)
 const LETRAS = ["A", "B", "C", "D"];
@@ -27,21 +27,22 @@ function marcaDe(nombre) { return Buscador.marcaDe(nombre, MARCAS_RE); }
 /* La logica vive en js/analisis.js: la comparten esta pagina y las paginas por busqueda. */
 function analizarConsulta(q) {
   return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe: f => OTRAS.get(f) || [],
-    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA });
+    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA, buscarPorEspec: buscarPorEspecificaciones, desdeOferta: DESDE_OFERTA });
 }
 
 /* `referencia` (opcional): la fila de la tarjeta desde la que se compara; la comparativa queda con sus mismas especificaciones. */
-function fijarConsulta(q, referencia = null) {
+function fijarConsulta(q, referencia = null, { desdeOferta = false } = {}) {
   const t = q.trim();
   if (t.length < 2) return limpiarConsulta();
   CONSULTA = t;
   REFERENCIA = referencia;
+  DESDE_OFERTA = !!referencia && desdeOferta;     // viene de la pestaña Ofertas: ya muestra el mejor precio del modelo
   RECIENTE_DE_BUSCADAS = false;
   ANALISIS = analizarConsulta(t);
   if (!ANALISIS) { CONSULTA = ""; REFERENCIA = null; }
   marcarConsulta();
 }
-function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; DESDE_OFERTA = false; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
 function marcarConsulta() {
   const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
   sincronizarUrl();
@@ -53,12 +54,18 @@ function notaEspecificaciones(A) {
   const e = A.espec;
   if (!e) return "";
   if (!e.aplica) return ` <span class="nota-espec">No pudimos comparar por especificaciones: el título del aviso no las dice. Comparamos con toda la búsqueda.</span>`;
+  if (e.aproximada) return ` <span class="nota-espec">Hay pocos avisos con exactamente <b>${esc(e.resumen)}</b>: sumamos los de especificaciones parecidas (una cifra a la mitad o al doble). Las diferencias están en la tabla.</span>`;
   const pocos = e.pocos ? ` Hay pocos avisos con esta configuración: esto es todo lo que hay con exactamente esas especificaciones.` : "";
   return ` <span class="nota-espec">Comparando solo con avisos de las mismas especificaciones: <b>${esc(e.resumen)}</b> (${e.comparables} ${e.comparables === 1 ? "aviso" : "avisos"}).${pocos}</span>`;
 }
 
 function bannerConsulta() {
   const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
+  // Comparando por caracteristicas desde una tarjeta: la «busqueda» es la del modelo, asi que se dice contra que se compara.
+  if (REFERENCIA && A.espec && A.espec.porEspecificaciones)
+    return `<div class="consulta-activa"><span class="txt">${icono("balanza")} Comparando <b>«${esc(REFERENCIA[0].slice(0, 70))}»</b> con otros productos de sus características
+      de cualquier marca: ${A.base.length} comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
+      <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
   return `<div class="consulta-activa"><span class="txt">${icono("lupa")} ${RECIENTE_DE_BUSCADAS ? "Armado con lo más buscado" : "Armado para tu búsqueda"} <b>«${esc(CONSULTA)}»</b>:
     ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
     <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
@@ -92,7 +99,7 @@ function cardPick(p, i, claves = clavesFicha([p])) {
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
   return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
-    <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
+    <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>${p.esReferencia && p.clave !== "ref" ? '<span class="chip ok tu-eleccion">La que elegiste</span>' : ""}
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""} ${selloAfiliado(f[2])}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
@@ -151,8 +158,17 @@ function tablaPicks(picks) {
 function seccionPrecioPorTienda(picks) {
   const h = { esc, pesos, enlace: (f, texto, etiqueta) =>
     `<a href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}" aria-label="${esc(etiqueta)}">${texto}</a>${selloAfiliado(f[2])}` };
-  return picks.filter(p => p.porTienda).map((p, i) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
-    + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
+  // Solo donde hay con que comparar: un modelo en una sola tienda no necesita su tabla, y desde Ofertas (que ya muestra el mejor
+  // precio del modelo) la tarjeta de origen tampoco la repite.
+  return picks.map((p, i) => ({ p, i })).filter(({ p }) => p.porTienda && !p.porTienda.unico && !(ANALISIS.desdeOferta && p.esReferencia))
+    .map(({ p, i }) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
+      + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
+}
+
+function seccionPrecioPorTiendaConTitulo(picks) {
+  const cuerpo = seccionPrecioPorTienda(picks);
+  return cuerpo ? `<div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
+      <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>${cuerpo}` : "";
 }
 
 function vistaComparativaDin() {
@@ -167,9 +183,7 @@ function vistaComparativaDin() {
     <div class="panel-head" style="margin-top:26px"><h2>${icono("chip")} En qué se diferencian</h2>
       <p class="sub">Las especificaciones se leen del texto del aviso, así que algunas pueden faltar: abrí la ficha para confirmarlas.</p></div>
     ${tablaPicks(A.picks)}
-    <div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
-      <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>
-    ${seccionPrecioPorTienda(A.picks)}
+    ${seccionPrecioPorTiendaConTitulo(A.picks)}
     ${seccionComercios()}</div>`;
 }
 
@@ -249,7 +263,7 @@ function sincronizarUrl() {
   // El titulo dice lo que se busca: es lo que muestran la pestaña, el historial y un link compartido.
   const titulo = CONSULTA.trim() ? `${CONSULTA.trim()}: precios en Argentina | La Pichincha` : TITULO_SITIO;
   if (document.title !== titulo) document.title = titulo;
-  const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1));
+  const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1), REFERENCIA ? REFERENCIA[2] : "");
   if (destino === location.pathname + location.search + location.hash) return;
   try { history.replaceState(history.state, "", destino); } catch (e) { /* Safari limita las llamadas */ }
 }
@@ -257,5 +271,5 @@ function sincronizarUrl() {
 /* El link de lo que estas mirando: en Buscar vale lo que esta escrito. */
 function enlaceActual() {
   const q = CONSULTA || ($("#q") || {}).value || "";
-  return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1));
+  return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1), CONSULTA && REFERENCIA ? REFERENCIA[2] : "");
 }

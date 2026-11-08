@@ -164,7 +164,7 @@ function arrancar() {
     `La Pichincha · ${location.origin}${location.pathname} · precios de ${DATOS.actualizado}, con IVA, sin envío.`;
 
   const inicio = Pagina.leerUrl(location.search, location.hash);
-  if (inicio.q) { usarPrerender(); abrirConsultaDeUrl(inicio.q, inicio.vista); }
+  if (inicio.q) { usarPrerender(); abrirConsultaDeUrl(inicio.q, inicio.vista, inicio.ref); }
   else aplicar(inicio.vista);
 }
 arrancar();

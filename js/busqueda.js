@@ -142,6 +142,23 @@ function buscarTodo(q) {
   return g.filas;
 }
 
+/* «Comparar» desde una tarjeta (spec 063, fase C): todo el indice con la misma categoria y las mismas especificaciones que la tarjeta,
+   de cualquier marca, no el texto de su modelo. Si hay pocos, suma los avisos de especificaciones cercanas y lo dice (`aproximado`).
+   null si la tarjeta no dice las especificaciones suficientes: ahi se compara como siempre. Deja las otras tiendas del mismo modelo en OTRAS. */
+function buscarPorEspecificaciones(ref) {
+  if (!IDX || !ref) return null;
+  const iguales = Especificaciones.igualesA(ref);
+  if (!iguales.aplica) return null;
+  const agrupar = filtro => {
+    const g = Buscador.agruparPorModelo(Buscador.unaPorUrl(IDX.productos.filter(f => f[2] === ref[2] || filtro(f))), comercioDe);
+    return g;
+  };
+  let g = agrupar(iguales.exacta), aproximado = false;
+  if (g.filas.length < Especificaciones.MIN_COMPARABLES) { g = agrupar(iguales.cercana); aproximado = true; }
+  OTRAS = g.otras;
+  return { filas: g.filas, aproximado };
+}
+
 /* Si una consulta encuentra algo, sin agrupar ni tocar OTRAS: lo usa "Comparar" para elegir entre varias consultas. */
 function hayResultados(q) {
   const coincide = Buscador.filtroDe(q);

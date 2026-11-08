@@ -69,8 +69,11 @@
   }
 
   function analizarConsulta(q, ctx) {
-    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia } = ctx;
-  const crudo = buscarTodo(q);
+    const { buscarTodo, buscarPorEspec, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia, desdeOferta } = ctx;
+  // Con una tarjeta de referencia (spec 063, fase C) el universo son los avisos de su categoria y sus especificaciones, de cualquier
+  // marca; el texto de la consulta (que es el del modelo) solo decide que se excluye. Sin especificaciones suficientes: como siempre.
+  const porEspec = referencia && buscarPorEspec ? buscarPorEspec(referencia) : null;
+  const crudo = porEspec ? porEspec.filas : buscarTodo(q);
   if (!crudo.length) return null;
   const nq = normalBusq(q);
   const toks = nq.split(/\s+/).filter(Boolean);
@@ -91,9 +94,11 @@
   if (referencia) {
     const Esp = especificaciones();
     if (Esp.mismas(referencia, referencia).aplica) {
-      utiles = candidatas.filter(m => m.f[2] === referencia[2] || Esp.mismas(referencia, m.f).coincide);
+      // por especificaciones el universo ya es el correcto (y si es aproximado, se dejo entrar a proposito)
+      utiles = porEspec ? candidatas : candidatas.filter(m => m.f[2] === referencia[2] || Esp.mismas(referencia, m.f).coincide);
       excl.especificaciones = candidatas.length - utiles.length;
-      espec = { aplica: true, resumen: Esp.resumen(referencia), comparables: utiles.length, pocos: utiles.length < Esp.MIN_COMPARABLES };
+      espec = { aplica: true, resumen: Esp.resumen(referencia), comparables: utiles.length, pocos: utiles.length < Esp.MIN_COMPARABLES,
+        porEspecificaciones: !!porEspec, aproximada: !!(porEspec && porEspec.aproximado) };
     } else {
       espec = { aplica: false, resumen: "", comparables: candidatas.length, pocos: false };
     }
@@ -164,6 +169,23 @@
       razon: `La más cara de primera línea: ${pctSobre(alta)}% sobre la mejor compra. Solo si necesitás esas prestaciones.` }); }
   }
 
+  // La tarjeta desde la que se comparo siempre esta a la vista: se marca si ya es una de las opciones y, si no, se suma como la ultima.
+  // El mismo modelo en otra tienda cuenta (el aviso mas barato de un modelo representa a todos).
+  if (referencia) {
+    const esRef = m => m.f[2] === referencia[2] || (otrasDe ? otrasDe(m.f) : []).some(x => x[2] === referencia[2]);
+    const propia = picks.find(p => esRef(p.m));
+    if (propia) propia.esReferencia = true;
+    else {
+      const m = base.find(esRef);
+      if (m) {
+        if (picks.length >= 4) picks.splice(picks.findIndex(p => p.clave === "baja") >= 0 ? picks.findIndex(p => p.clave === "baja") : picks.length - 1, 1);
+        const dp = Math.round((m.f[1] / mejor.f[1] - 1) * 100);
+        picks.push({ clave: "ref", ico: "lupa", m, rol: "La que elegiste", rolCorto: "La que elegiste", esReferencia: true,
+          razon: dp === 0 ? "Es la misma que la mejor compra." : `${Math.abs(dp)}% ${dp > 0 ? "más cara" : "más barata"} que la mejor compra de esta comparación.` });
+      }
+    }
+  }
+
   // Precio por tienda de cada opcion: solo con lo que esta consulta considera comparable (mismo filtro que arriba).
   const admite = f => !motivoExclusion(normalBusq(f[0]), nq, toks, f[8]);
   for (const p of picks) p.porTienda = precioPorTienda(p.m.f, otrasDe ? otrasDe(p.m.f) : [], { comercioDe, pesos, fechaDe, admite });
@@ -184,7 +206,7 @@
       bajas: c.items.filter(m => m.f[6] > m.f[1]).length };
   }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
 
-  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec,
+  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec, desdeOferta: !!desdeOferta,
            primeras: base.filter(m => m.niv === 2) };
 }
 

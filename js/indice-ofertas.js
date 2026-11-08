@@ -314,7 +314,7 @@ function marcarEstrella(btn) {
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f);
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f, { desdeOferta: true });
 }
 
 /* Abrir o cerrar una tarjeta (patron disclosure): el nombre es el boton, con aria-expanded; un clic en cualquier

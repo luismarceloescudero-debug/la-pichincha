@@ -40,17 +40,20 @@ function alClicSaliente(ev) {
 document.addEventListener("click", alClicSaliente, true);
 document.addEventListener("auxclick", alClicSaliente, true);
 
+/* La fila del indice de un aviso por su direccion (?ref=), o null: sin ella la comparativa sale como una busqueda comun. */
+const filaDeAviso = ref => (ref && IDX && IDX.productos.find(f => f[2] === ref)) || null;
+
 /* Abrir un link con ?q=: se baja el indice, se arma la consulta y se muestra
    la pestaña del link. Sin resultados va al buscador con el termino escrito. */
-async function abrirConsultaDeUrl(q, vista) {
+async function abrirConsultaDeUrl(q, vista, ref = "") {
   $("#vista").innerHTML = `<p class="sub">Armando la comparación de «${esc(q)}»…</p>`;
   try { await asegurarIndice(); } catch (e) { return aplicar(vista); }
-  fijarConsulta(q);
+  fijarConsulta(q, filaDeAviso(ref));
   registrarBusqueda(q);
   // Se pinta ya y se reemplaza la entrada del historial en lugar de sumar una:
   // Atras vuelve a donde estaba la persona antes de abrir el link.
   const destino = ANALISIS ? (vista || "comparativa") : "buscar";
-  try { history.replaceState(history.state, "", Pagina.armarUrl(location.pathname, CONSULTA, destino)); } catch (e) {}
+  try { history.replaceState(history.state, "", Pagina.armarUrl(location.pathname, CONSULTA, destino, REFERENCIA ? REFERENCIA[2] : "")); } catch (e) {}
   aplicar(destino);
   if (ANALISIS) guardarHist(q);
   else consultar(q);              // sin resultados: el buscador lo dice, con el termino escrito
@@ -64,10 +67,10 @@ function alNavegar() {
   navegando = true;
   setTimeout(async () => {
     navegando = false;
-    const { q, vista } = Pagina.leerUrl(location.search, location.hash);
-    if (q !== CONSULTA) {
+    const { q, vista, ref = "" } = Pagina.leerUrl(location.search, location.hash);
+    if (q !== CONSULTA || ref !== (REFERENCIA ? REFERENCIA[2] : "")) {
       if (!q) limpiarConsulta();
-      else { try { await asegurarIndice(); fijarConsulta(q); } catch (e) { /* queda el curado */ } }
+      else { try { await asegurarIndice(); fijarConsulta(q, filaDeAviso(ref)); } catch (e) { /* queda el curado */ } }
     }
     aplicar(vista);
   }, 0);

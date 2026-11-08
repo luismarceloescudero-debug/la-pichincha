@@ -169,6 +169,30 @@
     return r;
   }
 
+  /* --- Buscar por caracteristicas (spec 063, fase C) ---------------------------------------------------------------
+     Desde una tarjeta, «Comparar» ya no busca el texto del modelo (solo encontraba el mismo producto en otras tiendas): busca en todo
+     el indice los avisos de la misma categoria con las mismas especificaciones. `exacta` pide que coincidan todas las que dice la
+     tarjeta; `cercana` deja pasar una cifra a la mitad o al doble (16 GB de RAM contra 32; 240 Hz contra 165) y la misma gama de
+     procesador, y se usa solo cuando de las exactas hay pocas. Lo que el otro aviso no dice nunca coincide (principio II). */
+  const NUMERICAS = new Set(["ram", "rom", "capacidad", "vram", "hz", "pulgadas", "pantalla", "dpi", "potencia", "fps"]);
+  function igualesA(ref) {
+    const a = clavesDe(ref[0]), claves = Object.keys(a.valores);
+    const aplica = claves.length >= minimoDe(a.categoria);
+    const comparar = (f, cerca) => {
+      const b = clavesDe(f[0]);
+      if (b.categoria !== a.categoria) return false;
+      return claves.every(k => {
+        const x = a.valores[k], y = b.valores[k];
+        if (y === undefined) return false;
+        if (x === y) return true;
+        if (!cerca) return false;
+        if (NUMERICAS.has(k) && typeof x === "number" && typeof y === "number") return y >= x / 2 && y <= x * 2;
+        return k === "cpu" && String(x).split("-")[0] === String(y).split("-")[0];
+      });
+    };
+    return { aplica, categoria: a.categoria, exacta: f => comparar(f, false), cercana: f => comparar(f, true) };
+  }
+
   const gb = n => (n >= 1000 && n % 1000 === 0 ? `${n / 1000} TB` : `${n} GB`);
   const RESOLUCION = { "4k": "4K", "2k": "2K (QHD)", fhd: "Full HD", uwqhd: "UWQHD" };
   const textoCpu = c => { const [fam, gen] = c.split("-");
@@ -231,7 +255,7 @@
     return { categoria, filas };
   }
 
-  const api = { CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+  const api = { CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

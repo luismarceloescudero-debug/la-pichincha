@@ -165,9 +165,9 @@ function borrarConAnimacion(boton, despues) {
 }
 /* Abre la comparativa de una busqueda guardada sin pasar por el buscador. `referencia` (opcional): la fila de la tarjeta
    desde la que se compara; la comparativa queda con sus mismas especificaciones (spec 017). */
-async function compararConsulta(q, referencia = null) {
+async function compararConsulta(q, referencia = null, opciones = {}) {
   try { await asegurarIndice(); } catch (e) { return; }
-  fijarConsulta(q, referencia);
+  fijarConsulta(q, referencia, opciones);
   if (!ANALISIS) return;
   guardarHist(q);
   registrarBusqueda(q);

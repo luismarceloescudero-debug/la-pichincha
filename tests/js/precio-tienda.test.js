@@ -302,7 +302,7 @@ test("la Comparativa de la app muestra el precio por tienda de cada opcion", () 
   assert.match(html, />\+12%</);          // 56000 contra 50000
   assert.match(html, />\+30%</);          // 65000 contra 50000
   assert.match(html, /<th scope="row">Mexx<\/th>/);
-  const solos = picks.filter(p => p.porTienda.unico).length;
-  assert.equal((html.match(/un solo comercio: no hay con qué comparar/g) || []).length, solos);
+  // spec 063: lo que esta en una sola tienda no repite su nota «un solo comercio» en cada tarjeta; solo se muestra donde hay con que comparar
+  assert.equal((html.match(/un solo comercio: no hay con qué comparar/g) || []).length, 0);
   assert.match(html, /target="_blank" rel="noopener"/);
 });

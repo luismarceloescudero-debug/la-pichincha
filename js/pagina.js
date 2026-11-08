@@ -4,17 +4,24 @@
   "use strict";
 
   const TOPE_Q = 100;          // un link no necesita mas para reproducir la busqueda
+  const TOPE_REF = 600;        // la direccion del aviso de referencia
   const TOPE_TERMINO = 60;     // GoatCounter agrupa por path: mas largo no aporta
 
   /* ?q=ssd+1tb#comparativa -> { q: "ssd 1tb", vista: "comparativa" } */
   function leerUrl(search, hash) {
-    const q = (new URLSearchParams(search || "").get("q") || "").replace(/\s+/g, " ").trim().slice(0, TOPE_Q);
-    return { q: q.length >= 2 ? q : "", vista: (hash || "").replace(/^#/, "") };
+    const params = new URLSearchParams(search || "");
+    const q = (params.get("q") || "").replace(/\s+/g, " ").trim().slice(0, TOPE_Q);
+    const r = { q: q.length >= 2 ? q : "", vista: (hash || "").replace(/^#/, "") };
+    // ?ref= es el aviso desde el que se comparo (spec 063): solo con una consulta y solo una direccion web
+    const ref = (params.get("ref") || "").trim();
+    if (r.q && /^https?:\/\//.test(ref) && ref.length <= TOPE_REF) r.ref = ref;
+    return r;
   }
 
-  function armarUrl(pathname, q, vista) {
+  function armarUrl(pathname, q, vista, ref = "") {
     const t = (q || "").trim();
-    return pathname + (t ? "?" + new URLSearchParams({ q: t }) : "") + (vista ? "#" + vista : "");
+    const params = t ? new URLSearchParams({ q: t, ...(ref && ref.length <= TOPE_REF ? { ref } : {}) }) : "";
+    return pathname + (t ? "?" + params : "") + (vista ? "#" + vista : "");
   }
 
   /* Argentina no tiene horario de verano: UTC-3 fijo (constitucion). Sin Intl.DateTimeFormat con zona
