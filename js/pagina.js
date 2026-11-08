@@ -18,6 +18,16 @@
     return r;
   }
 
+  /* Las fotos viajan aparte del indice (spec 057) partidas en REBANADAS_FOTO archivos (imagenes/N.json): la Comparativa baja solo
+     las rebanadas de las tarjetas que muestra. El build (adelgazar_indice.js) y el navegador usan esta misma cuenta. */
+  const REBANADAS_FOTO = 64;
+  function rebanadaFoto(url) {
+    let h = 5381;
+    const t = String(url || "");
+    for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+    return h % REBANADAS_FOTO;
+  }
+
   function armarUrl(pathname, q, vista, ref = "") {
     const t = (q || "").trim();
     const params = t ? new URLSearchParams({ q: t, ...(ref && ref.length <= TOPE_REF ? { ref } : {}) }) : "";
@@ -153,7 +163,7 @@
     return { url: u.toString(), afiliado: true };
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { REBANADAS_FOTO, rebanadaFoto, AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);

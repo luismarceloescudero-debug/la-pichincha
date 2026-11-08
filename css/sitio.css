@@ -171,7 +171,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .chip.spec.sin{opacity:.6;border-style:dashed}
 .mezcla{margin:8px 0 14px;font-size:.9rem;color:var(--ink-2)}
 .mezcla .sug,.mezcla .acc{margin-inline:2px}
-.tu-eleccion{margin-left:6px}
+.tu-eleccion{align-self:flex-start;margin:2px 0}
 .pie{margin-top:auto;padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ver{font-size:.84rem;font-weight:600;color:var(--c);display:inline-flex;align-items:center;gap:5px;
   transition:gap .2s var(--curva)}
@@ -1157,3 +1157,8 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
 .anima .en-vista .tit-chip.pr::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.8) 50%,transparent 65%) no-repeat;background-size:60% 100%;
   animation:av-brillo 1s ease-out both;animation-delay:calc(.8s + var(--k,0) * 90ms)}
+/* La foto de cada tarjeta de la Comparativa (spec 063): se completa despues; mientras tanto o sin foto queda el icono */
+.dcard .d-img{width:100%;aspect-ratio:1/.62;background:#fff center/contain no-repeat;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.dcard .d-img.sin-foto{background:var(--surface-2);color:var(--ink-3)}
+.dcard .d-img.sin-foto .ico{width:2rem;height:2rem}
+.dcard .d-img:not(.sin-foto) .ico{display:none}

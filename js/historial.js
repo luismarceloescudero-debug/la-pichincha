@@ -106,6 +106,7 @@ function pintarReciente() {
   if (!c) return;
   const q = !CONSULTA && IDX ? leerHist().find(x => hayResultados(x)) : "";   // en la portada, solo lo que buscaste vos
   c.innerHTML = q ? recienteHtml(q) : "";
+  pintarFotos();
 }
 
 /* El Veredicto sin consulta activa: espera el indice y se escribe con lo reciente. Si mientras tanto la persona busco otra

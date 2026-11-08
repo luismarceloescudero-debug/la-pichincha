@@ -116,6 +116,7 @@ function cardPick(p, i, claves = clavesFicha([p])) {
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
   return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
+    <div class="d-img${fondo(f[7]) ? "" : " sin-foto"}" data-foto="${esc(f[2])}"${fondo(f[7]) ? ` style="background-image:url(&quot;${fondo(f[7])}&quot;)"` : ""} role="img" aria-label="${esc(f[0])}">${icono("chip")}</div>
     <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>${p.esReferencia && p.clave !== "ref" ? '<span class="chip ok tu-eleccion">La que elegiste</span>' : ""}
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""} ${selloAfiliado(f[2])}</span>
@@ -191,6 +192,7 @@ function seccionPrecioPorTiendaConTitulo(picks) {
 function vistaComparativaDin() {
   const A = ANALISIS;
   setTimeout(pintarTira, 0);
+  setTimeout(pintarFotos, 0);
   return `<div class="panel"><div class="ultimas" id="ultimas">${tiraHtml(true)}</div>${bannerConsulta()}
     <div class="panel-head"><h2>${icono("balanza")} Comparativa: ${esc(CONSULTA)}</h2>
       <p class="sub">De ${A.total} avisos que coinciden, ${A.base.length} son comparables entre sí. Estas son las opciones que valen la pena y en qué se diferencian.</p></div>
