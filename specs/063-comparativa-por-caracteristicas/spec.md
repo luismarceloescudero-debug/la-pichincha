@@ -30,11 +30,16 @@ Notebooks, Teclado Razer, «monitor qhd 240hz» y «Aero».
 - **E. Fotos**: `adelgazar_indice.js` parte todas las fotos en 64 rebanadas (`imagenes/N.json`, por `Pagina.rebanadaFoto`) y la página
   baja solo las de las tarjetas que muestra (`pintarFotos`). Sin foto, queda el icono.
 
+- **F. Afuera en inglés** (`Afuera.terminoAfuera`): «Buscalo afuera» y «Afuera, en vivo» traducen categorías y características
+  (auriculares inalámbricos → headphones wireless), sueltan palabras de enlace y dejan marca, modelo y cifras; la pantalla lo avisa.
+- **G. Tabla**: se resalta el mayor valor de RAM, almacenamiento, Hz, DPI, etc. (`Especificaciones.MAYOR_ES_MEJOR`).
+- **H. Mejor compra con dos criterios**: primero marca y precio como siempre; entre avisos del mismo nivel que cuestan hasta un 15 % más
+  que el más barato gana el que trae más especificaciones, y la razón lo dice. Solo cuenta lo que el título dice.
+
 ## Lo que no hace
 
-- «Buscalo afuera» y «Afuera, en vivo» siguen buscando el texto crudo (traducir a inglés y usar marca, modelo y especificaciones queda
-  para otra spec).
-- No cambia qué se considera «mejor compra».
+- Marca y modelo del mejor aviso en «Buscalo afuera» y cambios en el Worker (`worker/src`): toda la traducción es del navegador.
+- Seguir precio, cuotas, envío y garantía (el índice no trae esos datos).
 
 ## Pruebas
 
