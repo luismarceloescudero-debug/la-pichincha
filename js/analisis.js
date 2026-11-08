@@ -134,7 +134,27 @@
   const piso = m => pisoDeGama(m.f[1], m.niv, med);
   const rec = [...base].sort((a, b) => (piso(a) - piso(b)) || (b.niv - a.niv) || (a.f[1] - b.f[1]));
   const porPrecio = [...base].sort((a, b) => a.f[1] - b.f[1]);
-  const mejor = rec[0];
+  // Mejor compra con dos criterios (spec 063, fase H): primero como siempre (que no este muy por debajo, el nivel de marca y el precio);
+  // despues, entre los avisos del MISMO nivel que cuestan hasta un 15 % mas que el mas barato, gana el que trae mas especificaciones
+  // (RAM, almacenamiento, Hz...). Solo cuenta lo que el titulo dice: lo que no dice no suma (principio II). A igual todo, el mas barato.
+  const TOLERANCIA_SPECS = 0.15;
+  const numerosDe = m => { const r = {}; for (const f of Esp0.fichaDe(m.f[0]).filas) if (Esp0.MAYOR_ES_MEJOR.has(f.clave) && typeof f.valor === "number") r[f.clave] = f; return r; };
+  function elegirMejor() {
+    const base0 = rec[0];
+    const tier = rec.filter(m => piso(m) === piso(base0) && m.niv === base0.niv && m.f[1] <= base0.f[1] * (1 + TOLERANCIA_SPECS) && catDe(m) === catDe(base0));
+    if (tier.length < 2) return { m: base0, mas: null };
+    const nums = new Map(tier.map(m => [m, numerosDe(m)]));
+    const maximo = {};
+    for (const n of nums.values()) for (const [k, f] of Object.entries(n)) maximo[k] = Math.max(maximo[k] || 0, f.valor);
+    const puntos = m => Object.entries(nums.get(m)).reduce((s, [k, f]) => s + f.valor / maximo[k], 0);
+    const mejorM = tier.reduce((g, m) => (puntos(m) > puntos(g) + 1e-9 ? m : g), base0);   // empate: queda el mas barato (tier va por precio)
+    if (mejorM === base0) return { m: base0, mas: null };
+    const a = nums.get(mejorM), b = nums.get(base0);
+    const mejoras = Object.keys(a).filter(k => !b[k] || a[k].valor > b[k].valor).map(k => `${a[k].etiqueta.toLowerCase()} (${a[k].texto}${b[k] ? ` contra ${b[k].texto}` : ""})`);
+    return { m: mejorM, mas: { pct: Math.round((mejorM.f[1] / base0.f[1] - 1) * 100), mejoras, contra: base0 } };
+  }
+  const elegido = elegirMejor();
+  const mejor = elegido.m;
   const barato = porPrecio[0] === mejor ? null : porPrecio[0];
   const marcaMejor = marcaDe(mejor.f[0]);
   const alt = rec.find(m => {
@@ -154,7 +174,8 @@
   picks.push({ clave: "mejor", ico: "trofeo", m: mejor,
     rol: barato ? "Mejor compra" : "Mejor compra y más barata", rolCorto: "Mejor compra",
     razon: `${mejor.niv === 2 ? "La marca más confiable" : mejor.niv === 1 ? "La marca más conocida" : "La mejor ubicada"} entre las opciones, al menor precio dentro de ese nivel: ${textoMed(mejor)} (mediana ${pesos(med)}).`
-      + (barato ? "" : " Además es la más barata de todas.") });
+      + (barato ? "" : " Además es la más barata de todas.")
+      + (elegido.mas ? ` Cuesta ${elegido.mas.pct}% más que la más barata de su nivel, pero trae más ${elegido.mas.mejoras.join(" y ")}.` : "") });
   if (barato) picks.push({ clave: "barato", ico: "flechaAbajo", m: barato, rol: "Más barata", rolCorto: "Más barata",
     razon: `La más barata de las comparables: ${pesos(mejor.f[1] - barato.f[1])} menos (${Math.round((1 - barato.f[1] / mejor.f[1]) * 100)}%) que la mejor compra.`
       + (barato.niv === 0 ? " No reconocemos la marca: mirá garantía y reseñas antes de pagar." : "")

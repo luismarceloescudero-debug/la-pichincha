@@ -260,7 +260,10 @@
     placa: "Placas de video", auricular: "Auriculares", teclado: "Teclados", mouse: "Mouse", webcam: "Webcams", parlante: "Parlantes",
     periferico: "Otros periféricos", otro: "Otros" };
 
-  const api = { ETIQUETA_CATEGORIA, categoriaDe, CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+  /* Donde un numero mas alto es mejor (la pantalla no entra: mas grande no es mejor). Lo usan la tabla (resalta el mayor) y la mejor compra. */
+  const MAYOR_ES_MEJOR = new Set(["ram", "rom", "capacidad", "vram", "hz", "dpi", "potencia", "fps", "autonomia", "velocidad"]);
+
+  const api = { MAYOR_ES_MEJOR, ETIQUETA_CATEGORIA, categoriaDe, CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

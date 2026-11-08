@@ -173,3 +173,33 @@ test("la tabla resalta la RAM mas alta y no resalta cuando todos tienen lo mismo
   const disco = tabla.match(/<tr><th>Almacenamiento<\/th>(.*?)<\/tr>/)[1];
   assert.doesNotMatch(disco, /class="mejor"/, "512 GB en todas: no hay ganador");
 });
+
+/* --- Spec 063, fase H: «Mejor compra» con marca y precio primero, y las especificaciones como desempate dentro de un 15 % --- */
+const lenovo = (modelo, ram, precio, tienda) => fila(`Notebook Lenovo ${modelo} Intel Core i5 1235U ${ram}GB 512GB SSD`, precio, tienda);
+
+test("entre avisos del mismo nivel y hasta 15 % mas caros, gana el que trae mas RAM y lo dice", () => {
+  const correr = app([lenovo("IdeaPad 1", 16, 800000, "cg"), lenovo("IdeaPad 3", 32, 880000, "mx"), lenovo("IdeaPad 5", 8, 790000, "gc")]);
+  correr('fijarConsulta("notebook lenovo")');
+  const mejor = correr("ANALISIS.picks[0]");
+  assert.match(mejor.m.f[0], /IdeaPad 3/, "32 GB por 10 % mas");
+  assert.match(mejor.razon, /Cuesta 11% más que la más barata de su nivel, pero trae más ram \(32 GB contra 8 GB\)/);
+  const barato = [...correr("ANALISIS.picks")].find(p => p.clave === "barato");
+  assert.match(barato.m.f[0], /IdeaPad 5/, "la mas barata sigue estando como opcion");
+});
+
+test("si la diferencia de precio pasa del 15 %, gana la mas barata aunque otra traiga mas", () => {
+  const correr = app([lenovo("IdeaPad 1", 16, 800000, "cg"), lenovo("IdeaPad 3", 32, 1000000, "mx"), lenovo("IdeaPad 5", 16, 810000, "gc")]);
+  correr('fijarConsulta("notebook lenovo")');
+  const mejor = correr("ANALISIS.picks[0]");
+  assert.match(mejor.m.f[0], /IdeaPad 1/);
+  assert.doesNotMatch(mejor.razon, /Cuesta/);
+});
+
+test("con las mismas especificaciones queda la mas barata; el que dice mas suma y el que no dice no suma", () => {
+  const correr = app([lenovo("IdeaPad 1", 16, 800000, "cg"), lenovo("IdeaPad 3", 16, 850000, "mx"), lenovo("IdeaPad 5", 16, 900000, "gc")]);
+  correr('fijarConsulta("notebook lenovo")');
+  assert.match(correr("ANALISIS.picks[0]").m.f[0], /IdeaPad 1/);
+  const mudos = app([fila("Notebook Lenovo IdeaPad 1", 800000, "cg"), fila("Notebook Lenovo IdeaPad 3 32GB 1TB", 850000, "mx"), fila("Notebook Lenovo IdeaPad 5", 900000, "gc")]);
+  mudos('fijarConsulta("notebook lenovo")');
+  assert.match(mudos("ANALISIS.picks[0]").m.f[0], /IdeaPad 3/, "el que dice 32 GB y 1 TB suma; los que callan no suman");
+});

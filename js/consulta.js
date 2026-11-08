@@ -100,7 +100,7 @@ function clavesFicha(picks) {
 }
 const valorFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).valor;
 /* Donde un numero mas alto es mejor: en la tabla se resalta el mayor (la pantalla, por ejemplo, no entra: mas grande no es mejor). */
-const MAYOR_ES_MEJOR = new Set(["ram", "rom", "capacidad", "vram", "hz", "dpi", "potencia", "fps", "autonomia", "velocidad"]);
+const MAYOR_ES_MEJOR = Especificaciones.MAYOR_ES_MEJOR;
 const textoFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).texto || "";
 function cardsHtml(picks) {
   const claves = clavesFicha(picks);
