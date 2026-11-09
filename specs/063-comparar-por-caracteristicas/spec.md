@@ -2,7 +2,7 @@
 
 **Creada**: 09/11/2026
 
-**Estado**: PLANIFICACIÓN. Nada de esto está implementado. Falta que el dueño responda las tres preguntas del final (cada una trae una recomendación por defecto).
+**Estado**: PLANIFICACIÓN. Nada de esto está implementado. El dueño respondió las tres preguntas el 09/11 (sección «Decisiones del dueño»); queda un dato por traer: un ejemplo de carrito por tienda para la fase 6b.
 
 **Pedido del dueño (09/11/2026)**: la Comparativa, el Veredicto, Ofertas y Buscar/Afuera comparan por texto y por tienda. Tienen que comparar **por características del tipo de producto**. Casos que trajo: «Celular Motorola Signature», tres tarjetas por categoría en la portada, el botón «Comparar» que abre «contra ninguno» o contra el mismo producto en otras tiendas, «monitor qhd 240hz», «Aero» / «aeroclip 2» y «notebook i5 16gb 512gb» (A y B son la misma notebook).
 
@@ -78,8 +78,8 @@ El bloque arma enlaces con el texto tal cual lo escribió la persona (`Importar.
 ### D3. Comparar = productos equivalentes de distintas marcas, no el mismo producto en distintas tiendas
 
 1. Se junta primero **por modelo** (una fila por modelo, la tienda más barata = «mejor oferta», lo que ya hace Ofertas con spec 028). El «mismo modelo» se reconoce por código de fabricante en el título (DB9V5AT, BA1U4LA, NL16-71G…), por familia + configuración y, si falta, por título limpio con la misma configuración. Los 5 Victus de CompraGamer pasan a 2 (RTX 3050 / RTX 4050).
-2. Las tarjetas de la Comparativa son **modelos distintos**. Se eligen entre los modelos equivalentes por **clase de características**, no por igualdad exacta: mismo tipo de procesador (i5/R5 de generación cercana), RAM ≥ y disco ≥, placa de la misma gama, pantalla del mismo rango, etc. Cada categoría define su «equivalencia» y su tolerancia en un solo lugar.
-3. Selección de las 3 tarjetas: (a) la mejor oferta del modelo de referencia; (b) el equivalente más barato **de otra marca**; (c) un escalón arriba (más RAM/disco/GPU) y/o uno abajo, rotulados con la diferencia exacta. Dos modelos con las mismas características y precio dentro del 5 % **no se muestran como dos opciones**: son uno solo («y N más iguales») y la tarjeta lista en qué se diferencian (pantalla, sistema operativo, peso) en vez de repetir.
+2. Las tarjetas de la Comparativa son **modelos distintos**. Regla del dueño (09/11): **distinta marca + al menos 2 características clave en común** (de las que el título dice) alcanza para compararlos; cuantas más comparten, más arriba salen. La misma marca con las mismas especificaciones es el mismo producto (punto 3). Cada categoría declara sus características clave y cuáles pesan más en un solo lugar.
+3. Selección de las 3 tarjetas: (a) la mejor oferta del modelo de referencia; (b) el equivalente más barato **de otra marca**; (c) un escalón arriba (más RAM/disco/GPU) y/o uno abajo, rotulados con la diferencia exacta. Dos avisos de la **misma marca con las mismas especificaciones** (aunque el título sea otro) **son un solo producto**: queda la tarjeta del mejor precio y una línea «y N avisos iguales» con sus tiendas. Distinta marca con las mismas especificaciones no se junta: son dos opciones, y la tarjeta muestra en qué se diferencian (pantalla, sistema operativo, peso). Eso resuelve el caso de las tarjetas A y B del 09/11 solo si las dos son de la misma marca; si son de marcas distintas (ASUS y «CX») se muestran como dos opciones y se aclara lo que las distingue.
 4. «Precio por tienda» queda como detalle del modelo elegido (una tabla o un plegable), no como una tarjeta ni como el modo principal de comparar.
 5. Cuando hay menos de 3 equivalentes se **relaja una característica por vez, y se dice cuál** («no hay otra notebook con i9 y RTX 4080 menores a $X; mostramos las más cercanas: i9 con RTX 4070»). Nunca queda «contra ninguno».
 
@@ -122,7 +122,8 @@ El bloque arma enlaces con el texto tal cual lo escribió la persona (`Importar.
 | **3 · Equivalentes (D3.2-3.5 y D4)** | Clases de equivalencia, selección de 3 modelos distintos, relajación rotulada, «Comparar» desde el perfil | portada (12 filas), Ofertas, botón por fila | alto: es el cambio de fondo; flag de corte para volver a lo anterior |
 | **4 · Perfil y Veredicto (D2)** | Perfil de la búsqueda, categorías ajenas fuera, última búsqueda separada del historial, Veredicto por características | Veredicto, Buscar | medio |
 | **5 · Ofertas (D5)** | Interruptor obligatorio/preferencia, cartel plegable | Ofertas | bajo |
-| **6 · Afuera (D6)** | Consulta limpia por idioma/categoría, perfil desde el Worker, comparación puesta en casa | Buscar, Veredicto | medio: toca el Worker (`worker/`) y su CSP |
+| **6a · Afuera (D6.1-D6.4)** | Consulta limpia por idioma/categoría, perfil desde el Worker | Buscar | medio: toca el Worker (`worker/`) y su CSP |
+| **6b · Veredicto sin avisos locales (D6.5-D6.8)** | Opciones de afuera, pegado del carrito por tienda, total puesto en casa, veredicto | Veredicto, Buscar | medio: necesita un ejemplo real de carrito por tienda (lo trae el dueño) |
 | **7 · Cierre** | E2E de los casos de oro, informe de `/medir-indice`, docs (`mapa.md`, README), continuidad | — | bajo |
 
 Orden y dependencias: 0 → 1 → 2 → 3; 4 puede ir en paralelo con 2 desde que 1 está; 5 necesita 3; 6 necesita 4. Si hay que recortar, el mínimo que arregla lo pedido es **1 + 2 + 3 + 4** (Fase 3 es la que elimina el «contra ninguno»).
@@ -132,7 +133,7 @@ Orden y dependencias: 0 → 1 → 2 → 3; 4 puede ir en paralelo con 2 desde qu
 1. De las 12 filas de «Lo último en tecnología», **12** abren una comparativa con **≥ 3 modelos distintos** (hoy 4 de 12 sirven, 4 abren «nada» y 4 abren «contra sí misma»), o el botón no se muestra y se dice por qué.
 2. «Celular Motorola Signature» muestra **≥ 3 tarjetas**, ninguna con el mismo modelo en otra tienda, y el aviso de $1.972.585 es la mejor compra o se explica por qué no (hoy sale 1 tarjeta y se oculta el más barato).
 3. Dos tarjetas de la misma categoría muestran **las mismas filas de características** (valor o «—»). En notebook: procesador, RAM, disco, placa, pantalla siempre presentes.
-4. En «notebook i5 16gb 512gb» las tarjetas A y B **no son el mismo equipo** (misma CPU/RAM/disco y ≤ 5 % de precio ⇒ uno solo, con sus diferencias).
+4. En «notebook i5 16gb 512gb» no hay dos tarjetas de la misma marca con las mismas especificaciones (queda la de menor precio); ASUS y «CX» (marcas distintas, mismo i5-1235U/16/512) se muestran como dos opciones con lo que las distingue a la vista.
 5. «Aero» no mezcla placas madre, ventiladores y auriculares: la categoría dominante se declara y el resto aparece como «otro tipo de producto».
 6. Después de buscar «aeroclip 2» (con o sin avisos locales), el Veredicto dice «aeroclip 2» o «no está en las tiendas del índice»; **nunca** una búsqueda anterior ni un texto parcial.
 7. «monitor qhd 240hz» desde una tarjeta OLED: comparables **≥ al total de monitores QHD 240 Hz** con el interruptor en «incluir otros paneles» (hoy 19 de 49).
@@ -146,8 +147,25 @@ Orden y dependencias: 0 → 1 → 2 → 3; 4 puede ir en paralelo con 2 desde qu
 - No se agrega una dependencia ni un build (principio I).
 - No se toca el relevamiento de tiendas (`indexar.py`) salvo que la Fase 6 pida un campo, y solo con la medición previa.
 
-## Preguntas abiertas para el dueño (cada una trae el valor por defecto con que arrancaría)
+## Decisiones del dueño (09/11/2026) — cierran las tres preguntas
 
-1. **Qué es «equivalente»**: ¿misma clase de procesador con RAM y disco **iguales o mayores** (recomendado: i5 compara con i5 y con R5, no con i3), o exactamente iguales? La primera da más opciones y es lo que pediste («buscar las mismas características en otras marcas»).
-2. **Mismo modelo en otras tiendas**: ¿se quita de las tarjetas y queda solo en «Precio por tienda» (recomendado, evita la redundancia que viste), o se deja una tarjeta aparte «Mejor oferta de este modelo»?
-3. **Búsquedas sin avisos locales** (como «aeroclip 2»): ¿el Veredicto se arma con lo de afuera (Worker) cuando exista, o solo dice «no está» y manda a Afuera? Recomendado: lo segundo en la primera versión y lo primero en la Fase 6.
+1. **Qué es «equivalente»**: dos modelos de **distinta marca** que comparten **2 o 3 características clave** de su categoría ya son comparables y se muestran. No hace falta igualdad exacta ni misma clase en todas. Si tienen **la misma marca y las mismas especificaciones** (aunque el título sea otro), son **el mismo producto**: queda **una sola tarjeta, la del mejor precio**. Efecto en el diseño: `Especificaciones.mismas` pasa de «todas las claves de la referencia» a un puntaje de coincidencias (mínimo 2 de las claves que el título dice) con la marca como desempate (D3.2-D3.3).
+2. **Mismo modelo en otras tiendas**: lo mismo que el punto 1. No se muestra una tarjeta por tienda; queda la del mejor precio y las demás tiendas van en «Precio por tienda» (D3.4). No hay tarjeta aparte de «mejor oferta del modelo».
+3. **Búsquedas sin avisos locales** («aeroclip 2»): **igual se calcula la mejor opción**, aunque sea de tiendas del extranjero. Para eso el sitio **pide la información de cada búsqueda y la persona copia y pega lo que muestra el carrito de cada tienda**; con eso se arma el veredicto (D6.5-D6.7). Esto no es una calculadora local (spec 040): el sitio no estima impuestos ni envío, usa lo que la tienda mostró.
+
+## Cómo queda el punto 3 (detalle de D6)
+
+5. **Veredicto sin avisos locales**: el Veredicto no dice «no está» y se corta. Arma el perfil del producto con lo que devuelve «Afuera, en vivo» (marca, línea, categoría) y arma una lista de **opciones de afuera** ordenadas por precio puesto en casa (nunca por comisión).
+6. **Pegar lo del carrito**: cada opción de afuera tiene un campo «Pegá lo que te muestra el carrito de {tienda}». El sitio lee del texto pegado precio del producto, envío, impuestos o servicios de importación y total, con su moneda (la misma idea que `Importar.referenciaCarrito` para Tiendamia, spec 039/041, ampliada a más tiendas y formatos). Lo que no se puede leer se dice («no encontramos el total: pegá el bloque completo») y no se inventa (principio II).
+7. **Veredicto**: con al menos una opción con total pegado, se escribe «la mejor opción es X: total puesto en casa $Y» contra las demás opciones de afuera y, si las hay, contra las locales equivalentes (D3). Con ninguna opción pegada, el Veredicto lista qué falta para cerrarlo (qué tienda y qué pegar), no un precio sin carrito. Se avisa que los datos son los que la persona pegó, con la fecha.
+8. **Privacidad**: el texto pegado se procesa en el navegador. No se guarda, no se envía al Worker ni a GoatCounter, y el historial no lo recuerda. Se descartan nombre, dirección y teléfono si aparecen en lo pegado (se muestran solo los importes).
+
+## Más criterios por estas respuestas
+
+10. Dos avisos de la misma marca y mismas especificaciones, con títulos distintos, dan **una sola tarjeta** (la de menor precio); con distinta marca y ≥ 2 características en común, dan **dos**.
+11. Para «aeroclip 2» (0 avisos locales) el Veredicto muestra opciones de afuera y, tras pegar el carrito de al menos una, dice cuál conviene y cuánto sale puesto en casa; probado con texto de carrito de ejemplo guardado en `tests/fixtures/`.
+12. Pegar un texto sin importes no rompe nada y no muestra un total inventado.
+
+## Preguntas que quedan (menores, con valor por defecto)
+
+- Qué tiendas de afuera entran en la primera versión del pegado de carrito: por defecto **Tiendamia, Amazon, eBay y AliExpress** (las que ya figuran en «Buscalo afuera»). Cada una necesita un ejemplo real de lo que muestra su carrito: **lo tiene que traer el dueño** (sin datos personales) para escribir el lector y sus tests.
