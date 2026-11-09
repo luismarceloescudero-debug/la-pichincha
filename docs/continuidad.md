@@ -21,6 +21,7 @@
 - 04/11 (spec 058): **el mensaje de Telegram sale siempre**: la guardia ya no lo frena (avisa en el issue) y con
   `ofertas.json` vacío se manda «Hoy no hay bajas para destacar» con el enlace al sitio. Una publicación sin descuento
   muestra el precio sin «−0 %». Siguiente: spec 060 (revisión por suba previa, sello `x`, «estable hace N días»).
+- 09/11: **spec 063 (planificacion, sin codigo)** en `specs/063-comparar-por-caracteristicas/`: comparar por caracteristicas (lector unico, modelo unico, equivalentes de otras marcas, perfil de la busqueda, Veredicto de la ultima busqueda, Afuera). Medida contra el indice del 09/11: 8 de 12 botones Comparar de la portada no sirven. Falta que el dueño responda 3 preguntas y arrancar por la fase 0 (casos de oro en rojo).
 - PRs abiertos: solo #169 (Reel, frenado) y #126 (Instagram, frenado hasta la versión final).
 
 ## Qué se hizo en las últimas sesiones (01–02/11)
