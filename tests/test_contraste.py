@@ -110,6 +110,14 @@ class Contraste(unittest.TestCase):
         sistema = dict(re.findall(r"--([\w-]+):\s*(#[0-9a-fA-F]{6})", CSS[inicio:CSS.index("}", inicio)]))
         self.assertEqual(sistema, self.TEMAS["oscuro"])
 
+    def test_el_celeste_es_uno_solo(self):
+        # Auditoria del 10/11 (D2): --f-cel era #3ee6ff fijo en los dos temas, o sea el celeste del tema oscuro
+        # metido tambien en el claro, donde el celeste de la marca y de la tienda es #00708c. Dos celestes para la
+        # misma idea. El celeste es de la marca y de la tienda, asi que ningun relleno fijo puede repetirlo.
+        celestes = {t["n-celeste"] for t in self.TEMAS.values()}
+        rellenos = dict(re.findall(r"--(f-[\w-]+):\s*(#[0-9a-fA-F]{6})", CSS))
+        self.assertEqual(sorted(celestes & set(rellenos.values())), [])
+
 
 if __name__ == "__main__":
     unittest.main()
