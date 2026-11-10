@@ -1,4 +1,4 @@
-# Spec 063: buscar sin bajar el índice entero
+# Spec 064: buscar sin bajar el índice entero
 
 **Estado**: propuesta. **Necesita una decisión del dueño** antes de escribir código (ver «La decisión»).
 **Origen**: hallazgo R1 de `docs/auditorias/2026-11-10.md` (gravedad alta). El dueño pidió que este arreglo vaya en su
