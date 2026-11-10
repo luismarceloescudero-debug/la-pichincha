@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tus pedidos contra la auditoría</title>
+<style>
+  :root{
+    --papel:#fbf9fd; --hoja:#ffffff; --hoja2:#f3ecfa;
+    --tinta:#180826; --tinta2:#4b3a5e; --tinta3:#6d5b80;
+    --linea:#e2d5ee; --linea2:#cdb8e0;
+    /* los cuatro roles del Reel v4, usados aca como dato */
+    --precio:#8a5300; --precio-f:#fff1cc;
+    --tienda:#00697f; --tienda-f:#def5fa;
+    --tipo:#a3135c; --tipo-f:#fbe4ee;
+    --neutro:#6a1b9a; --neutro-f:#efe8ff;
+    --bien:#0b6b3d; --bien-f:#dcfce7;
+    --alerta:#9a4a00; --alerta-f:#fbeeda;
+    --grave:#a4123f; --grave-f:#ffe4e6;
+    --sombra:0 1px 2px rgba(24,8,38,.05), 0 10px 30px -18px rgba(24,8,38,.35);
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-tema="claro"]){
+      --papel:#100018; --hoja:#1e0830; --hoja2:#2b0f42;
+      --tinta:#fdf3ff; --tinta2:#d6bde8; --tinta3:#b09ac4;
+      --linea:#452363; --linea2:#5c3280;
+      --precio:#ffd23f; --precio-f:#3a2608;
+      --tienda:#5ce1ff; --tienda-f:#0d2a38;
+      --tipo:#ff8ec4; --tipo-f:#3d1026;
+      --neutro:#d9a6ff; --neutro-f:#2a1145;
+      --bien:#8dffc4; --bien-f:#0d2c1c;
+      --alerta:#ffc46b; --alerta-f:#33220a;
+      --grave:#ff8fa8; --grave-f:#3a0d17;
+      --sombra:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -18px rgba(0,0,0,.9);
+      color-scheme:dark;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--papel); color:var(--tinta);
+    font:400 16px/1.62 var(--sans);
+    background-image:radial-gradient(120% 460px at 50% -120px,var(--hoja2),transparent 72%);
+    background-repeat:no-repeat;
+  }
+  .hoja{max-width:840px;margin:0 auto;padding:40px 20px 96px}
+  header.cab{border-bottom:1px solid var(--linea);padding-bottom:26px;margin-bottom:34px}
+  .sello{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--neutro);
+    display:inline-block;padding:6px 11px;border:1.5px solid var(--linea2);border-radius:999px;background:var(--hoja)}
+  h1{font-size:clamp(30px,6.4vw,44px);line-height:1.04;letter-spacing:-.025em;margin:16px 0 12px;font-weight:800;text-wrap:balance}
+  .bajada{font-size:clamp(17px,2.4vw,19px);color:var(--tinta2);margin:0;max-width:60ch;line-height:1.5}
+  .meta{margin:20px 0 0;font:500 12px/1.7 var(--mono);color:var(--tinta3);text-transform:uppercase;letter-spacing:.08em}
+  h2{font-size:clamp(22px,3.6vw,28px);line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;font-weight:800;text-wrap:balance}
+  h3{font-size:17px;line-height:1.3;margin:0 0 8px;letter-spacing:-.01em}
+  p{margin:0 0 14px;max-width:68ch}
+  section{margin:0 0 52px;scroll-margin-top:20px}
+  .num{font:700 12px/1 var(--mono);letter-spacing:.1em;color:var(--tipo);text-transform:uppercase}
+  hr{border:0;border-top:1px solid var(--linea);margin:0 0 20px}
+  a{color:var(--tienda);text-decoration-thickness:1px;text-underline-offset:2px}
+  code{font:500 .92em var(--mono);background:var(--hoja2);padding:1px 5px;border-radius:5px}
+  .cita{border-left:3px solid var(--tipo);background:var(--hoja);padding:14px 18px;border-radius:0 12px 12px 0;
+    margin:14px 0;box-shadow:var(--sombra);font-size:16.5px;line-height:1.55;color:var(--tinta)}
+  .cita q{quotes:"«" "»";font-style:italic}
+  .cita .fuente{display:block;margin-top:8px;font:500 11.5px/1.5 var(--mono);color:var(--tinta3);text-transform:uppercase;letter-spacing:.06em}
+  .tarjeta{background:var(--hoja);border:1.5px solid var(--linea);border-radius:16px;padding:20px 22px;box-shadow:var(--sombra);margin:16px 0}
+  .lista{list-style:none;padding:0;margin:0}
+  .lista li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--tinta2)}
+  .lista li::before{position:absolute;left:0;top:0;font-weight:800;font-family:var(--mono)}
+  .lista.bien li::before{content:"✓";color:var(--bien)}
+  .lista.mal li::before{content:"✕";color:var(--grave)}
+  .lista.ojo li::before{content:"!";color:var(--alerta)}
+  .chip{display:inline-block;font:700 10.5px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;
+    padding:5px 9px;border-radius:999px;border:1.5px solid transparent;white-space:nowrap}
+  .chip.alta{background:var(--grave-f);color:var(--grave);border-color:var(--grave)}
+  .chip.media{background:var(--alerta-f);color:var(--alerta);border-color:var(--alerta)}
+  .chip.baja{background:var(--tienda-f);color:var(--tienda);border-color:var(--tienda)}
+  .chip.rol{background:var(--hoja2);color:var(--tinta2);border-color:var(--linea2)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+  caption{text-align:left;font:500 12px/1.5 var(--mono);color:var(--tinta3);text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--linea);vertical-align:top}
+  thead th{font:700 11px/1.3 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--tinta3);background:var(--hoja2)}
+  tbody tr:last-child td{border-bottom:0}
+  td.dato,th.dato{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .cifra{font:800 13px/1.2 var(--mono);padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .cifra.precio{background:var(--precio-f);color:var(--precio)}
+  .cifra.tienda{background:var(--tienda-f);color:var(--tienda)}
+  .cifra.tipo{background:var(--tipo-f);color:var(--tipo)}
+  .cifra.neutro{background:var(--neutro-f);color:var(--neutro)}
+  .tabla-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--linea);border-radius:14px;background:var(--hoja)}
+  .debate{border:1.5px solid var(--linea);border-radius:18px;background:var(--hoja);box-shadow:var(--sombra);margin:22px 0;overflow:hidden}
+  .debate > header{padding:18px 22px 14px;border-bottom:1px solid var(--linea);background:var(--hoja2)}
+  .debate > header h3{margin:0;font-size:19px;letter-spacing:-.015em}
+  .debate > header p{margin:6px 0 0;font-size:14px;color:var(--tinta3);max-width:none}
+  .debate .cuerpo{padding:18px 22px 20px}
+  .postura{margin:0 0 16px;padding-left:16px;border-left:2.5px solid var(--linea2)}
+  .postura .quien{display:block;font:700 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--tinta3);margin-bottom:6px}
+  .postura.si{border-left-color:var(--tipo)}
+  .postura.no{border-left-color:var(--tienda)}
+  .veredicto{margin-top:6px;padding:14px 16px;border-radius:12px;background:var(--hoja2);border:1.5px solid var(--linea2)}
+  .veredicto .et{display:block;font:700 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--neutro);margin-bottom:7px}
+  .veredicto p{margin:0;font-size:15px}
+  .galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:18px 0 8px}
+  figure{margin:0}
+  figure a{display:block;border:1.5px solid var(--linea);border-radius:12px;overflow:hidden;background:var(--hoja);box-shadow:var(--sombra);transition:border-color .18s,transform .18s}
+  figure a:hover,figure a:focus-visible{border-color:var(--neutro);transform:translateY(-2px)}
+  figure img{display:block;width:100%;height:auto}
+  figcaption{font:500 11px/1.4 var(--mono);color:var(--tinta3);padding:6px 2px 0;text-transform:uppercase;letter-spacing:.05em}
+  .ruta{display:block;font:600 13px/1.6 var(--mono);background:var(--hoja);border:1.5px dashed var(--linea2);
+    border-radius:10px;padding:12px 14px;margin:10px 0;overflow-wrap:anywhere}
+  .tandas{display:grid;gap:14px;margin-top:18px}
+  .tanda{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--hoja);
+    border:1.5px solid var(--linea);border-radius:14px;padding:16px 18px;box-shadow:var(--sombra)}
+  .tanda .n{font:800 30px/1 var(--mono);color:var(--linea2);letter-spacing:-.04em}
+  .tanda h3{margin:0 0 4px}
+  .tanda p{margin:0;font-size:14.5px;color:var(--tinta2);max-width:none}
+  .pie{border-top:1px solid var(--linea);padding-top:20px;font-size:13.5px;color:var(--tinta3)}
+  .destacado{border:2px solid var(--tipo);border-radius:14px;padding:16px 18px;background:var(--hoja);box-shadow:var(--sombra)}
+  .destacado h3{color:var(--tipo)}
+  @media (max-width:560px){
+    .hoja{padding:26px 16px 72px}
+    .debate > header,.debate .cuerpo{padding-left:16px;padding-right:16px}
+    .tarjeta{padding:16px}
+    th,td{padding:9px 8px;font-size:13.5px}
+    .tanda{grid-template-columns:1fr;gap:8px}
+    .tanda .n{font-size:22px}
+  }
+  @media print{
+    body{background:#fff;color:#000}
+    .galeria,.debate{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="hoja">
+
+<header class="cab">
+  <span class="sello">Auditoría del 10/11 · lo que decidís vos</span>
+  <h1>Tus pedidos contra la auditoría</h1>
+  <p class="bajada">Los 14 pedidos que dejaste en el repo, qué se hizo con cada uno, qué encontró la auditoría del 10/11 y dónde las dos cosas chocan. Con los números que lo sostienen y sin darle la razón a nadie de antemano.</p>
+  <p class="meta">La Pichincha · 10/11/2026 · este archivo: docs/auditorias/pedidos-vs-auditoria.html</p>
+</header>
+
+<section id="capturas">
+  <hr><span class="num">01 · Dónde están las capturas</span>
+  <h2>Las 17 capturas, en tu carpeta</h2>
+  <p>Están en el proyecto, en <code>docs/auditorias/2026-11-10/</code>. La ruta completa:</p>
+  <span class="ruta">C:\Users\Usuario\Downloads\RAM COTIZACIONES\docs\auditorias\2026-11-10\</span>
+  <p>Se abren con doble clic, y las de abajo también abren en grande si las tocás. Son de celular (375&nbsp;px) y escritorio (1440&nbsp;px), en tema claro y oscuro. Las reduje a la mitad para que el repo no crezca 18&nbsp;MB: se ven bien, pero si querés una nítida para hacer zoom, se vuelven a sacar en un minuto.</p>
+
+  <div class="galeria">
+    <figure><a href="2026-11-10/portada-celular.png"><img src="2026-11-10/portada-celular.png" alt="Portada en celular" loading="lazy"></a><figcaption>Portada · celular</figcaption></figure>
+    <figure><a href="2026-11-10/portada-escritorio.png"><img src="2026-11-10/portada-escritorio.png" alt="Portada en escritorio" loading="lazy"></a><figcaption>Portada · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/ofertas-celular.png"><img src="2026-11-10/ofertas-celular.png" alt="Ofertas en celular" loading="lazy"></a><figcaption>Ofertas · celular</figcaption></figure>
+    <figure><a href="2026-11-10/ofertas-escritorio.png"><img src="2026-11-10/ofertas-escritorio.png" alt="Ofertas en escritorio" loading="lazy"></a><figcaption>Ofertas · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/buscar-celular.png"><img src="2026-11-10/buscar-celular.png" alt="Buscar en celular" loading="lazy"></a><figcaption>Buscar · celular</figcaption></figure>
+    <figure><a href="2026-11-10/buscar-escritorio.png"><img src="2026-11-10/buscar-escritorio.png" alt="Buscar en escritorio" loading="lazy"></a><figcaption>Buscar · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/veredicto-celular.png"><img src="2026-11-10/veredicto-celular.png" alt="Veredicto en celular" loading="lazy"></a><figcaption>Veredicto · celular</figcaption></figure>
+    <figure><a href="2026-11-10/veredicto-escritorio.png"><img src="2026-11-10/veredicto-escritorio.png" alt="Veredicto en escritorio" loading="lazy"></a><figcaption>Veredicto · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/tiendas-celular.png"><img src="2026-11-10/tiendas-celular.png" alt="Tiendas en celular" loading="lazy"></a><figcaption>Tiendas · celular</figcaption></figure>
+    <figure><a href="2026-11-10/tiendas-escritorio.png"><img src="2026-11-10/tiendas-escritorio.png" alt="Tiendas en escritorio" loading="lazy"></a><figcaption>Tiendas · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/hoy-celular.png"><img src="2026-11-10/hoy-celular.png" alt="Hoy en celular" loading="lazy"></a><figcaption>/hoy/ · celular</figcaption></figure>
+    <figure><a href="2026-11-10/hoy-escritorio.png"><img src="2026-11-10/hoy-escritorio.png" alt="Hoy en escritorio" loading="lazy"></a><figcaption>/hoy/ · escritorio</figcaption></figure>
+    <figure><a href="2026-11-10/portada-celular-oscuro.png"><img src="2026-11-10/portada-celular-oscuro.png" alt="Portada en tema oscuro" loading="lazy"></a><figcaption>Portada · oscuro</figcaption></figure>
+    <figure><a href="2026-11-10/ofertas-celular-oscuro.png"><img src="2026-11-10/ofertas-celular-oscuro.png" alt="Ofertas en tema oscuro" loading="lazy"></a><figcaption>Ofertas · oscuro</figcaption></figure>
+    <figure><a href="2026-11-10/hoy-celular-oscuro.png"><img src="2026-11-10/hoy-celular-oscuro.png" alt="Hoy en tema oscuro" loading="lazy"></a><figcaption>/hoy/ · oscuro</figcaption></figure>
+    <figure><a href="2026-11-10/ofertas-escritorio-oscuro.png"><img src="2026-11-10/ofertas-escritorio-oscuro.png" alt="Ofertas en escritorio, tema oscuro" loading="lazy"></a><figcaption>Ofertas · escritorio oscuro</figcaption></figure>
+    <figure><a href="2026-11-10/ficha-celular-lista.png"><img src="2026-11-10/ficha-celular-lista.png" alt="Resultados de busqueda en celular" loading="lazy"></a><figcaption>Resultados · celular</figcaption></figure>
+  </div>
+  <p style="margin-top:14px;font-size:14px;color:var(--tinta3)">El informe escrito está en <code>docs/auditorias/2026-11-10.md</code>. Los scripts que sacaron estas capturas y midieron todo quedaron en <code>privado/auditoria-2026-11-10/</code>, que no se sube al repo.</p>
+</section>
+
+<section id="pedidos">
+  <hr><span class="num">02 · Qué pediste</span>
+  <h2>Los pedidos, en orden</h2>
+  <p>Busqué en el repo todos los pedidos que quedaron registrados con tus palabras: en las specs, en los comentarios del CSS y del JS, y en las memorias del proyecto. Estos son los que tocan cómo se ve y cómo se usa el sitio; los de integración (AliExpress, eBay, full H4rd) quedan afuera porque no los toca la auditoría.</p>
+
+  <div class="tabla-scroll">
+  <table>
+    <caption>Pedidos registrados, del más viejo al más nuevo</caption>
+    <thead><tr><th>Cuándo</th><th>Qué pediste</th><th>Dónde está registrado</th></tr></thead>
+    <tbody>
+      <tr><td class="dato">15/10</td><td>Una sección de novedades que siga cada marca (Intel, AMD, Motorola, Samsung, ROG…)</td><td><code>specs/011</code></td></tr>
+      <tr><td class="dato">16/10</td><td>Reglas para decidir qué es una oferta de verdad: «la RAM es poca para el 2026»</td><td><code>specs/012</code></td></tr>
+      <tr><td class="dato">19/10</td><td>Tres filtros —Recomendación, Súper Oferta, Primera Línea— ordenados de mayor a menor precio</td><td><code>specs/013</code></td></tr>
+      <tr><td class="dato">21/10</td><td>La portada con lo más buscado, y comparar contra las mismas especificaciones, no contra la familia entera</td><td><code>specs/017</code></td></tr>
+      <tr><td class="dato">27/10</td><td>El importado como referencia de costo, sin calculadora</td><td><code>specs/039</code> y <code>040</code></td></tr>
+      <tr><td class="dato">30/10</td><td>Nombres legibles: icono del tipo, marca y modelo grandes, las specs aparte, sin códigos internos</td><td><code>specs/044</code></td></tr>
+      <tr><td class="dato">31/10</td><td>Más contraste entre título, características y precio; bloques de color que separen sin cansar</td><td><code>specs/055</code></td></tr>
+      <tr><td class="dato">02/11</td><td>Que el sitio cargue rápido en el celular (de ahí sale el índice sin fotos)</td><td><code>specs/057</code></td></tr>
+      <tr><td class="dato">04/11</td><td>El diseño del Reel en todo el sitio: se acabaron las letras blancas</td><td><code>specs/060</code></td></tr>
+      <tr><td class="dato">04/11</td><td>«Abusan del celeste»: combinar y alternar, que no sea una mancha</td><td><code>specs/060</code></td></tr>
+      <tr><td class="dato">04/11</td><td>Cada tarjeta o grupo con su color, el lila protagonista, la tienda destacada</td><td><code>specs/060</code>, 2ª vuelta</td></tr>
+      <tr><td class="dato">05/11</td><td>Sin blancos: nombres en lila, rosa y menta; «Comparar» con relleno; características en pastillas</td><td><code>specs/060</code>, 3ª vuelta</td></tr>
+      <tr><td class="dato">05/11</td><td>Animaciones al scrollear: el descuento cae, la tienda entra de costado, el icono gira</td><td><code>js/al-ver.js</code></td></tr>
+      <tr><td class="dato">05/11</td><td>Enterarte en el momento si la página se rompe en el celular de alguien</td><td><code>specs/061</code> y <code>062</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:26px">Las tres frases que más pesan en el diseño</h3>
+  <div class="cita"><q>También abusan del celeste […] combinar, alternar, que la vista de la página no sea una mancha de colores agrupados.</q><span class="fuente">04/11 · spec 060 · la cita que originó la alternancia</span></div>
+  <div class="cita"><q>Todo en blanco; negro en negrita, otros tamaños, otros colores; cada tarjeta o grupo con su color; me gusta el lila; destacar la tienda.</q><span class="fuente">04/11 · spec 060, segunda vuelta · la cita que originó el ciclo de tres colores</span></div>
+  <div class="cita"><q>Ir alternando para no cansar la vista.</q><span class="fuente">05/11 · spec 060, tercera vuelta · la cita que llevó el ciclo también a los nombres</span></div>
+</section>
+
+<section id="auditoria">
+  <hr><span class="num">03 · Qué encontró la auditoría</span>
+  <h2>Los ocho, de más grave a menos</h2>
+  <p>Todo medido con un navegador de verdad: celular de 375&nbsp;px y escritorio de 1440&nbsp;px, tema claro y oscuro, red real. Nada de esto es una impresión.</p>
+
+  <div class="tabla-scroll">
+  <table>
+    <thead><tr><th>#</th><th>Qué pasa</th><th>El número</th><th>Gravedad</th></tr></thead>
+    <tbody>
+      <tr><td class="dato">1</td><td>El índice que baja el navegador pesa 6,4&nbsp;MB y se baja entero cada vez que abrís Buscar u Ofertas</td><td class="dato">LCP 15.196&nbsp;ms en frío · 1.524&nbsp;ms en caliente</td><td><span class="chip alta">alta</span></td></tr>
+      <tr><td class="dato">2</td><td>La misma tienda sale de tres colores distintos en la misma lista</td><td class="dato">19 celestes / 19 lilas / 18 rosas</td><td><span class="chip alta">alta</span></td></tr>
+      <tr><td class="dato">3</td><td>Hay dos celestes para la misma idea: el de la marca y el relleno de la pastilla de tienda</td><td class="dato">#00708c vs #3ee6ff</td><td><span class="chip alta">alta</span></td></tr>
+      <tr><td class="dato">4</td><td>Se ve texto basura en pantalla: la escobita dice «F9F9» y las filas del feed muestran « A »</td><td class="dato">2 escapes rotos</td><td><span class="chip media">media</span></td></tr>
+      <tr><td class="dato">5</td><td>Los enlaces del pie miden 17&nbsp;px de alto y se tocan mal con el dedo</td><td class="dato">WCAG pide 24&nbsp;px</td><td><span class="chip media">media</span></td></tr>
+      <tr><td class="dato">6</td><td>El borde de las pastillas clicables casi no se ve</td><td class="dato">1,9:1 · WCAG pide 3:1</td><td><span class="chip media">media</span></td></tr>
+      <tr><td class="dato">7</td><td>El test de contraste no revisa los colores del Reel, aunque el CSS dice que sí</td><td class="dato">7 de 14 tokens sin cubrir</td><td><span class="chip media">media</span></td></tr>
+      <tr><td class="dato">8</td><td>Un test tiene un byte roto: no saca los scripts de la página y pasa igual</td><td class="dato">1 byte</td><td><span class="chip media">media</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="cara">
+  <hr><span class="num">04 · Cara a cara</span>
+  <h2>Dónde tus pedidos y la auditoría se pelean</h2>
+  <p>Vos pediste que no se den por buenas tus reglas. Así que acá van los cinco debates de verdad, cada uno con el argumento a favor y el argumento en contra, y qué me parece a mí y por qué. En dos de los cinco te doy la razón.</p>
+
+  <article class="debate">
+    <header>
+      <h3>1. «Celeste solo para la marca y la tienda»: ¿la regla está bien pensada?</h3>
+      <p>Es la regla que ordena toda la paleta. Vale la pena discutirla antes que nada.</p>
+    </header>
+    <div class="cuerpo">
+      <div class="postura si"><span class="quien">A favor de la regla</span>
+        <p>Un comparador se lee por <strong>quién vende</strong>: en la lista, lo que cambia entre dos filas casi iguales es la tienda. Darle a la tienda un solo color —y a nada más— convierte el color en un atajo: recorro la lista y veo de un vistazo dónde se repite la misma tienda. En la práctica funciona: el 70&nbsp;% de las pastillas de tienda quedaban en el mismo tono y el ojo las agrupaba solo.</p>
+      </div>
+      <div class="postura no"><span class="quien">En contra de la regla</span>
+        <p>La regla reserva el rosa para <em>el tipo de producto</em>. En una búsqueda de «rtx 5070», <strong>los 56 resultados son placas de video</strong>: el color del tipo es el mismo en toda la pantalla y no informa nada. O sea que la regla le asigna un color entero a una dimensión que, justo en la pantalla que más se usa, es constante. Y deja sin color la dimensión que sí varía dentro de una misma búsqueda: qué modelo es cada cosa, o cuál está en oferta.</p>
+      </div>
+      <div class="veredicto"><span class="et">Mi lectura</span>
+        <p><strong>La regla está bien a medias.</strong> Tiene razón en dos de los cuatro roles (celeste = tienda, amarillo = precio) y se equivoca en uno (rosa = tipo), porque le da un color a algo que no cambia. No propongo romperla: propongo <strong>corregirla</strong>. Dejá el celeste en la tienda y el amarillo en el precio; el rosa, en vez de marcar «esto es una placa de video» —que ya lo dice el título, el icono y la lista entera—, que marque lo que distingue un resultado de otro dentro de la misma búsqueda. Es la misma cantidad de color, mejor puesta.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="debate">
+    <header>
+      <h3>2. «Alternar para no cansar la vista»: la alternancia está en la escala equivocada</h3>
+      <p>Acá está el hallazgo más caro de la auditoría, y no es un problema de gusto: es un dato.</p>
+    </header>
+    <div class="cuerpo">
+      <div class="postura si"><span class="quien">Lo que pediste y se cumplió</span>
+        <p>El pedido del 04/11 era concreto: que dos bloques seguidos no fueran del mismo color. Eso se hizo y funciona. En Comparativa, un grupo va con título y borde rosa y el siguiente celeste, y las filas de adentro intercalan un tono. Ahí la alternancia hace su trabajo: separa secciones grandes, que es exactamente lo que te molestaba.</p>
+      </div>
+      <div class="postura no"><span class="quien">Lo que se agregó de más</span>
+        <p>Después se sumó una alternancia <strong>por posición</strong>: la primera tarjeta de cada tres va en un color, la segunda en otro, la tercera en otro. Eso no lo pediste a esa escala, y tiene un costo medible. En una búsqueda de «rtx 5070» con 56 resultados hay <strong>22 tiendas distintas</strong>, y la misma tienda aparece hasta en tres colores:</p>
+        <div class="tabla-scroll" style="margin:12px 0">
+        <table>
+          <thead><tr><th>Tienda</th><th class="dato">Avisos</th><th>Colores que le tocaron a su pastilla</th></tr></thead>
+          <tbody>
+            <tr><td>CompraGamer</td><td class="dato">6</td><td><span class="cifra tienda">celeste</span> <span class="cifra neutro">lila</span> <span class="cifra tipo">rosa</span></td></tr>
+            <tr><td>Max Tecno</td><td class="dato">6</td><td><span class="cifra neutro">lila</span> <span class="cifra tipo">rosa</span> <span class="cifra tienda">celeste</span></td></tr>
+            <tr><td>SCP Hardstore</td><td class="dato">4</td><td><span class="cifra tienda">celeste</span> <span class="cifra tipo">rosa</span> <span class="cifra neutro">lila</span></td></tr>
+            <tr><td>OnCity</td><td class="dato">2</td><td><span class="cifra tienda">celeste</span> <span class="cifra neutro">lila</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>Y hay algo peor, que es el argumento que me convence del todo: <strong>el color cambia cuando cambiás el orden</strong>. Probé ordenar la misma búsqueda por precio: <strong>33 de 45 productos cambiaron de color</strong> sin moverse de tienda ni de precio. O sea que el color no describe al producto: describe el lugar que ocupa en la lista en ese momento.</p>
+      </div>
+      <div class="veredicto"><span class="et">Mi lectura</span>
+        <p><strong>La alternancia sirve entre grupos y estorba entre tarjetas.</strong> No es que «esté mal» según tu regla; es que un color que cambia al reordenar no se puede aprender, y lo que no se puede aprender no se usa para nada. Dejá la alternancia de grupos de Comparativa tal cual está (esa sí resuelve lo que pediste) y sacá el ciclo de tres de las tarjetas. La variedad que buscabas se puede recuperar sin perder la identificación: que cada tienda tenga <em>su</em> color fijo, como ya lo tienen las 13 de Comparativa. Así hay color y además sirve.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="debate">
+    <header>
+      <h3>3. «Todo en blanco»: ese pedido está bien resuelto, y fue el que trajo el problema</h3>
+      <p>Es el caso donde la auditoría y vos coinciden, y donde conviene ver la cadena completa.</p>
+    </header>
+    <div class="cuerpo">
+      <div class="postura si"><span class="quien">El pedido</span>
+        <p>«Cuando muestra el listado completo de nuevo todas las letras son blancas». Tenías razón, y sigue teniendo razón: si todo pesa lo mismo, nada se lee. Hoy no queda nada en blanco por defecto.</p>
+      </div>
+      <div class="postura no"><span class="quien">La cadena</span>
+        <p>Para salir del blanco había que darle un color a cada parte de la tarjeta. Como el celeste ya estaba tomado por la tienda y el amarillo por el precio, lo que sobraba se repartió entre lila, rosa y menta. Y cuando hicieron falta <em>más</em> colores, en vez de repetir el mismo color se puso un ciclo. Ahí está el nudo: <strong>«sin blanco» + «celeste solo para tienda» empuja a inventar colores</strong>, y el invento terminó desordenando.</p>
+      </div>
+      <div class="veredicto"><span class="et">Mi lectura</span>
+        <p><strong>El pedido era correcto; la solución se pasó de rosca.</strong> Salir del blanco no obliga a cinco colores: obliga a que cada cosa tenga <em>un</em> color y un peso distinto. Con tres colores bien usados (tienda, precio, resto) alcanza y sobra.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="debate">
+    <header>
+      <h3>4. «Precios y porcentajes más grandes»: el porcentaje se comió al precio</h3>
+      <p>Pedido del 31/10, aplicado en la spec 055. La auditoría dice que en Buscar está al revés.</p>
+    </header>
+    <div class="cuerpo">
+      <div class="postura si"><span class="quien">A favor de como está</span>
+        <p>En Ofertas el gancho es el descuento: entrás a ver qué está barato, no a comparar dos placas. Que el «−52&nbsp;%» sea lo más grande de la tarjeta es coherente con la pestaña, y es lo que pediste.</p>
+      </div>
+      <div class="postura no"><span class="quien">En contra</span>
+        <p>En Buscar es al revés. Ahí estás decidiendo entre <strong>$1.237.024 y $1.350.000</strong>, no entre 12&nbsp;% y 18&nbsp;%. El porcentaje es un argumento; el precio es el dato. Hoy el porcentaje mide hasta 4,2&nbsp;rem y el precio 1,8&nbsp;rem: la vista te hace leer primero el argumento.</p>
+      </div>
+      <div class="veredicto"><span class="et">Mi lectura</span>
+        <p><strong>No hay una jerarquía única: hay dos vistas con dos prioridades.</strong> En Ofertas, el porcentaje adelante (como está). En Buscar, el precio adelante y el porcentaje como sello chico al lado. Son dos reglas de CSS y no rompen ninguna paleta.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="debate">
+    <header>
+      <h3>5. El índice de 6,4&nbsp;MB: es la tercera vez que aparece</h3>
+      <p>El único hallazgo que cambia la experiencia de todo el mundo en un celular. Y no es una cuestión de gusto.</p>
+    </header>
+    <div class="cuerpo">
+      <div class="postura si"><span class="quien">Lo que ya se hizo bien</span>
+        <p>El 02/11 lo detectaste vos («que cargue rápido en el celular») y la spec 057 hizo lo correcto: sacó las fotos del índice, que eran el 29&nbsp;% del peso. Bajó de 9,5&nbsp;MB sin comprimir a lo que hay hoy. No fue en vano.</p>
+      </div>
+      <div class="postura no"><span class="quien">Lo que falta</span>
+        <p>Igual sigue pesando <strong>6.689.410 bytes</strong>, y el navegador lo baja entero cada vez que abrís Buscar u Ofertas, para mostrarte el precio de una webcam. Medido: en frío, la primera pantalla de Ofertas tarda <strong>15,2 segundos</strong> en un celular; en caliente, 1,5. Esa diferencia es todo lo que hay entre un sitio que se siente instantáneo y uno que se siente roto.</p>
+      </div>
+      <div class="veredicto"><span class="et">Mi lectura</span>
+        <p><strong>Es el arreglo que más rinde de los ocho y el único que no admite discusión.</strong> Pero no es un retoque: toca el formato del índice, y con él el buscador, las ofertas, el worker y el feed. Merece su propia spec, no un PR de paso.</p>
+      </div>
+    </div>
+  </article>
+</section>
+
+<section id="plan">
+  <hr><span class="num">05 · Qué propongo</span>
+  <h2>En qué orden, y qué necesito de vos</h2>
+  <p>Separé lo que no necesita tu ojo de lo que sí. Las dos primeras tandas las puedo hacer solo; la tercera la quiero hablar con una captura delante.</p>
+
+  <div class="tandas">
+    <div class="tanda">
+      <span class="n">1</span>
+      <div>
+        <h3>Los errores, sin tocar el diseño</h3>
+        <p>El «F9F9» de la escobita y el « A » del feed (escapes rotos), el byte del test que no saca los scripts, y sumar los colores del Reel al test de contraste para que la CI avise si alguien los rompe. <strong>No cambia un píxel de lo que ya se ve bien</strong> y deja una red que hoy no existe. Es de una sentada.</p>
+      </div>
+    </div>
+    <div class="tanda">
+      <span class="n">2</span>
+      <div>
+        <h3>Accesibilidad</h3>
+        <p>El pie con enlaces de 24&nbsp;px y los bordes de las pastillas a 3:1. Detalles chicos, medibles, y el test de la tanda 1 los vigila.</p>
+      </div>
+    </div>
+    <div class="tanda">
+      <span class="n">3</span>
+      <div>
+        <h3>El color</h3>
+        <p>Sacar el ciclo de tres de las tarjetas, unificar los dos celestes y decidir qué hace el rosa (mi propuesta: que marque lo que distingue un resultado de otro). Antes de tocar una línea te muestro la misma pantalla con los colores nuevos y los viejos, lado a lado. <strong>Esto es lo único que cambia cómo se ve el sitio, y la decisión es tuya.</strong></p>
+      </div>
+    </div>
+    <div class="tanda">
+      <span class="n">4</span>
+      <div>
+        <h3>El peso, aparte</h3>
+        <p>El índice en pedazos o uno liviano para la lista, con caché en el teléfono. Es un proyecto propio: lo abro como spec cuando me digas, y no lo mezclo con los cambios de color.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="destacado" style="margin-top:26px">
+    <h3>Lo que necesito de vos</h3>
+    <ul class="lista ojo">
+      <li>Si arranco con la tanda 1 y la 2 ahora (son seguras y no cambian nada de lo que ves).</li>
+      <li>Si el rosa deja de marcar el tipo de producto y pasa a marcar lo que distingue un resultado de otro. Es la única parte de tu regla que propongo cambiar.</li>
+      <li>Si el precio pasa adelante del porcentaje en Buscar, dejando Ofertas como está.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="resumen">
+  <hr><span class="num">06 · En una línea</span>
+  <h2>Quién tenía razón en qué</h2>
+  <div class="tabla-scroll">
+  <table>
+    <thead><tr><th>Pedido tuyo</th><th>Veredicto</th></tr></thead>
+    <tbody>
+      <tr><td>Nombres legibles con icono y chips</td><td><span class="chip baja">tenías razón</span> bien resuelto, no tocar</td></tr>
+      <tr><td>Salir del blanco</td><td><span class="chip baja">tenías razón</span> la solución se pasó de colores</td></tr>
+      <tr><td>Alternar para que no sea una mancha</td><td><span class="chip baja">tenías razón</span> a escala de grupo; sobra a escala de tarjeta</td></tr>
+      <tr><td>Celeste solo para marca y tienda</td><td><span class="chip media">a medias</span> bien en tienda y precio, mal en tipo</td></tr>
+      <tr><td>Precios y porcentajes más grandes</td><td><span class="chip media">a medias</span> bien en Ofertas, al revés en Buscar</td></tr>
+      <tr><td>Cada tarjeta con su color</td><td><span class="chip alta">revisar</span> el color cambia al reordenar la lista</td></tr>
+      <tr><td>Que cargue rápido en el celular</td><td><span class="chip baja">tenías razón</span> se hizo la mitad; falta la otra</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<p class="pie">La Pichincha · auditoría del 10/11/2026 · el informe completo, con cada archivo y cada línea, está en <code>docs/auditorias/2026-11-10.md</code>. Este archivo no modifica el sitio: solo explica. Nada de lo que dice acá se aplicó todavía.</p>
+
+</div>
+</body>
+</html>
