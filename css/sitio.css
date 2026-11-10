@@ -245,6 +245,10 @@ td.mejor{color:var(--good);font-weight:700}
 .ver-item b{display:block;margin-bottom:5px}
 .ver-item p{margin:0;color:var(--ink-2);font-size:.92rem}
 .nota{margin-top:30px;font-size:.81rem;color:var(--ink-3);max-width:74ch}
+/* los enlaces del pie (estado, legal, contacto, acerca) median 17 px de alto y en el celular se tocaban mal; los del
+   pie son justo los legales, que la gente busca con el dedo. WCAG 2.5.8 exime a los que van dentro de una frase y por
+   eso la auditoria del 10/11 lo tomo como mejora y no como fallo, pero 24 px se ganan con dos lineas. */
+.nota a{display:inline-flex;align-items:center;min-height:24px;padding-inline:2px}
 .nota code{font-family:var(--font-mono);font-size:.95em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
 
 /* ---- Buscador ---- */
