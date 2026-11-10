@@ -12,6 +12,16 @@ import actualizar
 RAIZ = Path(__file__).resolve().parent.parent
 
 
+def bytes_de_control(ruta):
+    """Los bytes por debajo de 0x20 que no son tabulador, salto de linea ni retorno, y el 0x7f.
+
+    Un escape de CSS que se rompe queda asi: `\\1F9F9` (la escoba) escrito como caracter quedo en
+    `0x01` + `F9F9` y `\\203A` quedo en `0x83` + `A `; los dos se veian como texto basura en pantalla.
+    """
+    datos = ruta.read_bytes()
+    return [i for i, b in enumerate(datos) if (b < 0x20 and b not in (9, 10, 13)) or b == 0x7f]
+
+
 class VerificacionDeGoogle(unittest.TestCase):
     """El dueño verifico la propiedad en Search Console con esta etiqueta: si se borra, se pierde."""
 
@@ -56,6 +66,33 @@ class PaginaPrincipal(unittest.TestCase):
         # Fuera de los <script>: un buscador que no ejecuta JavaScript tiene que verlo.
         sin_scripts = re.sub(r"<script\b.*?</script>", "", html, flags=re.S)
         self.assertIn('<a href="precios/">', sin_scripts)
+
+
+class SinBytesDeControl(unittest.TestCase):
+    """Un escape de CSS o una expresion regular que se rompe al escribir el archivo deja un byte de control
+    que pasa desapercibido: en el CSS sale como texto basura (`F9F9` en la escobita) y en un test hace que
+    el test no pruebe nada (el `\\x08` que tenia el regex de los <script>)."""
+
+    CARPETAS = ("css", "tests")
+    SUFIJOS = (".css", ".py", ".js", ".html")
+
+    def test_el_sitio_y_los_tests_no_tienen_bytes_de_control(self):
+        revisados = 0
+        for carpeta in self.CARPETAS:
+            for ruta in sorted((RAIZ / carpeta).rglob("*")):
+                if ruta.is_file() and ruta.suffix in self.SUFIJOS:
+                    revisados += 1
+                    with self.subTest(archivo=str(ruta.relative_to(RAIZ))):
+                        self.assertEqual(bytes_de_control(ruta), [])
+        self.assertGreater(revisados, 10)   # si la busqueda no encuentra archivos, el test no prueba nada
+
+    def test_el_chequeo_ve_un_escape_roto(self):
+        # El test de arriba solo vale si este chequeo de verdad encuentra el byte. El ejemplo es el que
+        # estaba en pie: la escoba quedo escrita como 0x01 seguido de «F9F9».
+        with tempfile.TemporaryDirectory() as dir:
+            roto = Path(dir) / "roto.css"
+            roto.write_bytes(b'.escoba::before{content:"\x01F9F9"}\n.ok{content:"\203A "}\n')
+            self.assertEqual(bytes_de_control(roto), [roto.read_bytes().index(b"\x01")])
 
 
 class Construir(unittest.TestCase):
