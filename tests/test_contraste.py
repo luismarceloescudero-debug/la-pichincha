@@ -2,8 +2,9 @@
 claro y en tema oscuro (CONSTRAINTS.md). Lee las variables de css/sitio.css: cambiar un color que lo
 rompa hace fallar la CI.
 
-Desde la auditoria del 10/11 tambien cubre los tokens del Reel (--n-*), la pastilla de la tienda en las
-14 tiendas y el borde de los controles (1.4.11 pide 3:1 para el limite de un control)."""
+Desde la auditoria del 10/11 tambien cubre los tokens del Reel (--n-*) como texto, los rellenos fijos
+(--f-*) con su letra --f-tinta, la pastilla de la tienda en las 14 tiendas y el borde de los controles
+(1.4.11 pide 3:1 para el limite de un control)."""
 
 import re
 import unittest
@@ -18,6 +19,10 @@ CHIPS = ("cg", "gc", "mx", "fh", "cy", "vx", "mm", "tg", "mt", "kt", "sh", "ck",
 # Los roles del Reel v4 (spec 060): el color con que se pinta cada parte de la tarjeta.
 TEXTOS_REEL = ("n-precio", "n-rosa", "n-celeste", "n-lila", "n-menta", "n-titulo-2", "n-titulo-3")
 FONDOS_REEL = ("n-tarjeta", "n-tarjeta2", "bg", "surface", "surface-2")
+# Los rellenos fijos (--f-*): son los mismos en claro y en oscuro a proposito, y llevan letra --f-tinta
+# (botones de exportar, sello del encabezado, resumen plegable y chips de las tarjetas). Se leen del CSS
+# en vez de listarlos, asi un relleno nuevo tampoco se escapa del test.
+RELLENOS = dict(re.findall(r"--(f-[\w-]+):\s*(#[0-9a-fA-F]{6})", CSS))
 
 
 def variables(selector):
@@ -82,6 +87,16 @@ class Contraste(unittest.TestCase):
             for color in CHIPS:
                 with self.subTest(tema=tema, tienda=color):
                     self.assertGreaterEqual(round(contraste(t[color], t["n-sobre"]), 2), MINIMO)
+
+    def test_los_rellenos_fijos_se_leen_con_su_letra(self):
+        # La auditoria del 10/11 lo marco: el comentario del CSS decia que el test miraba «los colores del Reel»
+        # y los --f-* (constantes que no cambian con el tema) quedaban afuera. Ahora no.
+        self.assertIn("f-tinta", RELLENOS)
+        for relleno, color in sorted(RELLENOS.items()):
+            if relleno == "f-tinta":
+                continue
+            with self.subTest(relleno=relleno):
+                self.assertGreaterEqual(round(contraste(color, RELLENOS["f-tinta"]), 2), MINIMO)
 
     def test_el_borde_de_un_control_se_ve_sobre_su_relleno(self):
         # Con --n-borde (1,9:1) el limite de las pastillas clicables no se veia, y el relleno tampoco alcanza

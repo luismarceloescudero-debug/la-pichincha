@@ -902,7 +902,9 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
    El mismo idioma del cartel de /hoy/ (spec 059): fondo violeta, tarjetas de dos tonos con borde celeste, titulos
    condensados en mayusculas y color por rol: el precio amarillo (ambar en claro), el «$», el «−» y el tachado rosa, la
    marca, el «%», la tienda y las chips celeste, las chips en pastilla y las premium con ✦ y degradado rosa-celeste.
-   Los colores salen de las variables --n-* del tema (arriba), asi el claro y el oscuro pasan 4,5:1 (tests/test_contraste.py). */
+   Los colores salen de las variables --n-* del tema (arriba), asi el claro y el oscuro pasan 4,5:1. Lo vigila
+   tests/test_contraste.py: cada --n-* que se usa como texto contra las tarjetas y los fondos del tema, los rellenos
+   fijos --f-* contra --f-tinta, la pastilla de cada una de las 14 tiendas y el borde de control (3:1, WCAG 1.4.11). */
 :root{--f-cond:"Oswald","Barlow Condensed","Bahnschrift","Roboto Condensed","Arial Narrow",sans-serif;
   --n-tarjetas:linear-gradient(165deg,var(--n-tarjeta),var(--n-tarjeta2));
   --n-borde-cel:color-mix(in srgb,var(--n-celeste) 45%,transparent);
