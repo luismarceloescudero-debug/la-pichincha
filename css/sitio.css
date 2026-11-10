@@ -9,7 +9,7 @@
   --good:#8a5300; --good-soft:#fff1cc; --bad:#b8125f;
   --warn:#9a4a00; --warn-soft:#fbeeda;
   --n-precio:#8a5300; --n-rosa:#b8125f; --n-celeste:#00708c; --n-tarjeta:#ffffff; --n-tarjeta2:#efe8ff;
-  --n-borde:#c9a9e3; --n-titulo-2:#7a1fa8; --n-titulo-3:#a3135c; --n-lila:#6a1b9a; --n-menta:#0b6b3d; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
+  --n-borde:#c9a9e3; --n-borde-control:#7a4aa8; --n-titulo-2:#7a1fa8; --n-titulo-3:#a3135c; --n-lila:#6a1b9a; --n-menta:#0b6b3d; --n-brillo:rgba(184,18,95,.18); --n-sobre:#ffffff; --n-fondo-alto:#efe0fb;
   --cg:#6534e8; --cg-soft:#efe9ff;
   --gc:#0a7677; --gc-soft:#d8f2f2;
   --mx:#a35707; --mx-soft:#fbeeda;
@@ -32,7 +32,7 @@
     --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
     --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
     --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-    --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+    --n-borde:#6a2f8f; --n-borde-control:#a97fd6; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
     --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
     --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
     --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -51,7 +51,7 @@
   --ink-3:#bb9dce; --line:#4a2468; --accent:#3ee6ff; --accent-soft:#10294a;
   --good:#ffd23f; --good-soft:#3a2608; --bad:#ff7eb6; --warn:#ffb84d; --warn-soft:#3a1f0a;
   --n-precio:#ffd23f; --n-rosa:#ff6eb6; --n-celeste:#3ee6ff; --n-tarjeta:#26063b; --n-tarjeta2:#0c1446;
-  --n-borde:#6a2f8f; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
+  --n-borde:#6a2f8f; --n-borde-control:#a97fd6; --n-titulo-2:#f3b6ff; --n-titulo-3:#ffc2e0; --n-lila:#d9a6ff; --n-menta:#8dffc4; --n-brillo:rgba(255,95,174,.38); --n-sobre:#120018; --n-fondo-alto:#3b0a57;
   --cg:#a78bfa; --cg-soft:#241c3d; --gc:#5eead4; --gc-soft:#0f2d2c;
   --mx:#fbbf24; --mx-soft:#2e2311; --fh:#aab3c2; --fh-soft:#232a35;
   --cy:#f9a8d4; --cy-soft:#3a1024;
@@ -340,7 +340,7 @@ td.mejor{color:var(--good);font-weight:700}
 .oferta .tie{font:600 .72rem/1 var(--font-mono);color:var(--c);background:var(--c-soft);
   padding:5px 10px;border-radius:999px;white-space:nowrap}
 .oferta .via{color:var(--ink-2);font-weight:500}
-.oferta .via::before{content:"A ";opacity:.7}
+.oferta .via::before{content:"\203A ";opacity:.7}
 .oferta .precios{text-align:right;white-space:nowrap}
 .oferta .ahora{font-family:var(--font-mono);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;color:var(--ink);display:block}
@@ -499,7 +499,7 @@ td.mejor{color:var(--good);font-weight:700}
   box-shadow:-10px 6px 0 -6px #c98a4b88,-18px -4px 0 -8px #d9a06688;
   animation:comilon-cruza var(--dur,1.3s) linear forwards,comilon-gira .14s linear infinite}
 @keyframes comilon-gira{from{rotate:0deg}to{rotate:360deg}}
-.comilon.escoba::before{content:"F9F9";font-size:30px;line-height:34px;display:block;
+.comilon.escoba::before{content:"\1F9F9";font-size:30px;line-height:34px;display:block;
   animation:comilon-barre .2s ease-in-out infinite alternate}
 @keyframes comilon-barre{from{transform:rotate(-30deg)}to{transform:rotate(10deg)}}
 .hist.borrar{background:var(--surface-2);color:var(--ink-3)}
@@ -924,8 +924,10 @@ h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .tab[aria-selected="true"] .ico,.seg[aria-pressed="true"] .ico{color:var(--n-sobre)}
 .tab .ico{color:var(--ink-2)}
 .of-chip[aria-pressed="true"] .n{color:inherit}
-/* pastillas: sugeridas, historial, filtros, sellos y chips con borde */
-.sug,.hist,.of-chip{border:1.5px solid var(--n-borde);background:var(--surface-2);color:var(--ink)}
+/* pastillas: sugeridas, historial, filtros, sellos y chips con borde.
+   El borde es el que hace de limite del control: con --n-borde (1,9:1) no se veia, y el relleno solo tampoco alcanza
+   (--surface-2 sobre --bg da 1,1:1). --n-borde-control pasa 3:1 en los dos temas (WCAG 1.4.11, test_contraste.py). */
+.sug,.hist,.of-chip{border:1.5px solid var(--n-borde-control);background:var(--surface-2);color:var(--ink)}
 .sug:hover,.hist:hover,.of-chip:hover{background:var(--accent-soft);color:var(--accent);filter:none}
 .of-chip[aria-pressed="true"]{border-color:transparent}
 .hist.borrar{border-color:var(--line);background:var(--surface-2);color:var(--ink-2)}
@@ -942,8 +944,8 @@ h1 .marca-sitio:hover,h1 .marca-sitio:focus-visible{color:var(--n-celeste)}
 .tit-ico{color:var(--n-rosa)}
 .tit-marca{color:var(--n-celeste)}
 .tit-nom{font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:.01em;font-size:1.08em;line-height:1.12}
-.tit-chip{border-radius:999px;padding:0 9px;font:600 .74rem/1.55 var(--font-sans);color:var(--ink-2);
-  background:var(--surface-2);border:1.5px solid var(--n-borde)}
+.tit-chip{border-radius:999px;padding:0 9px;font:600 .74rem/1.55 var(--font-sans);color:var(--ink);
+  background:var(--surface-2);border:1.5px solid var(--n-borde-control)}
 .tit-chip.pr{color:var(--n-sobre);background:var(--n-cinta);border-color:transparent}
 /* el precio: amarillo y condensado, con el «$» rosa; el tachado, rosa */
 .precio,.fila .pre,.oferta .ahora,.ocard .o-precios .ahora,.dprecio .v,.ult-p,.afv-precio,.tile .v{font-family:var(--f-cond);font-weight:800;letter-spacing:0;color:var(--n-precio)}
@@ -1036,9 +1038,8 @@ table.pt-tabla td.num small{font:400 .74rem var(--font-sans);color:var(--ink-3)}
 #novedades>.scroll:nth-of-type(odd),#mas-vendido>.scroll:nth-of-type(odd){border:2px solid var(--n-borde-cel)}
 table.nov-tabla tbody tr:nth-child(even){background:color-mix(in srgb,var(--n-fondo-alto) 55%,transparent)}
 table.nov-tabla tbody tr:hover{background:color-mix(in srgb,var(--n-fondo-alto) 80%,transparent)}
-/* Fila por medio, el nombre del producto cambia de color (pedido del dueño 04/11: «todos los nombres del mismo color»):
-   tinta y lila claro, para que una fila no se confunda con la siguiente. Sin tocar el celeste (tienda) ni el amarillo (precio). */
-table.nov-tabla tbody tr:nth-child(even) th a{color:var(--n-titulo-2)}
+/* (Se saco la alternancia de color del NOMBRE de cada fila: cambiaba por posicion y no decia nada. Los grupos siguen
+   alternando titulo y borde, arriba, que es la alternancia que separa secciones de verdad.) */
 /* el anillo viejo del porcentaje se colaba en las bajas propias (.ocard.propia .o-off pesaba mas): el % va solo */
 .ocard .o-off,.ocard.propia .o-off,.ocard.n-heroe .o-off{background:none}
 .ocard.n-fuerte{border-color:var(--n-borde)}
@@ -1074,50 +1075,47 @@ h1 .marca-sitio{color:var(--n-lila)}
 .of-plegable>summary{background:var(--f-lila);color:var(--f-tinta);border:0;font-weight:800}
 .of-plegable>summary .ico{color:var(--f-tinta)}
 .filtros summary{color:var(--n-lila)}
-/* la tienda, destacada: pastilla llena con letra negra en negrita */
-.tienda,.fila .tie,.oferta .tie,.ocard .tienda{background:var(--f-cel);color:var(--f-tinta);border:0;font-weight:800}
-.tie .via{color:#3b0a57}
+/* la tienda, destacada: pastilla llena con el color de ESA tienda y letra en --n-sobre (blanca en claro, casi negra en
+   oscuro). Las 14 tiendas pasan 4,9:1 en los dos temas (tests/test_contraste.py). */
+.tienda,.fila .tie,.oferta .tie,.ocard .tienda{background:var(--c,var(--n-celeste));color:var(--n-sobre);border:0;font-weight:800}
+.tie .via{color:inherit;opacity:.88}
 .ocard .tienda{width:max-content;max-width:calc(100% - 28px);margin:10px 14px 0;padding:6px 14px;border-radius:999px;font-size:1.02rem}
-.ocard .tienda .ico{color:var(--f-tinta)}
-table.nov-tabla th small{display:inline-block;margin-top:5px;padding:2px 10px;border-radius:999px;background:var(--f-cel);color:var(--f-tinta);font-weight:800}
-/* cada tarjeta su color, en ciclo de tres: borde, nombre y pastilla de la tienda cambian juntos */
-.ogrid>.ocard:nth-child(3n+1 of .ocard):not(.n-heroe),.res>.fila:nth-child(3n+1 of .fila):not(.top){border-color:color-mix(in srgb,var(--f-lila) 75%,transparent)}
-.ogrid>.ocard:nth-child(3n+2 of .ocard):not(.n-heroe),.res>.fila:nth-child(3n+2 of .fila):not(.top){border-color:var(--n-borde-cel)}
-.ogrid>.ocard:nth-child(3n of .ocard):not(.n-heroe),.res>.fila:nth-child(3n of .fila):not(.top){border-color:color-mix(in srgb,var(--f-rosa) 60%,transparent)}
-.ogrid>.ocard.n-heroe:nth-child(3n+1 of .ocard){border-color:var(--f-rosa);box-shadow:0 0 30px color-mix(in srgb,var(--f-rosa) 40%,transparent)}
-.ogrid>.ocard.n-heroe:nth-child(3n+2 of .ocard){border-color:var(--f-cel);box-shadow:0 0 30px color-mix(in srgb,var(--f-cel) 35%,transparent)}
-.ogrid>.ocard.n-heroe:nth-child(3n of .ocard){border-color:var(--f-lila);box-shadow:0 0 30px color-mix(in srgb,var(--f-lila) 40%,transparent)}
-.ogrid>.ocard:nth-child(3n+2 of .ocard) .tit-nom,.res>.fila:nth-child(3n+2 of .fila) .tit-nom{color:var(--n-titulo-2)}
-.ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-titulo-3)}
-.ogrid>.ocard:nth-child(3n+2 of .ocard) .tienda,.res>.fila:nth-child(3n+2 of .fila) .tie{background:var(--f-lila)}
-.ogrid>.ocard:nth-child(3n of .ocard) .tienda,.res>.fila:nth-child(3n of .fila) .tie{background:var(--f-rosa)}
+.ocard .tienda .ico{color:var(--n-sobre)}
+table.nov-tabla th small{display:inline-block;margin-top:5px;padding:2px 10px;border-radius:999px;background:var(--c,var(--n-celeste));color:var(--n-sobre);font-weight:800}
+
+/* ==== Colores por rol, sin ciclos (auditoria del 10/11; decision del dueno) ====
+   Afuera el ciclo de tres por posicion: en una busqueda de 56 filas y 22 tiendas, la misma tienda salia celeste, lila y
+   rosa, y al ordenar por precio 33 de 45 filas cambiaban de color sin cambiar de tienda ni de precio. Un color que
+   cambia al reordenar no se puede aprender, y lo que no se aprende no sirve. Ahora cada tienda tiene SU color (--c, que
+   ya venia por fila) y se ve igual en Comparativa, Buscar y Ofertas.
+   Los roles quedan asi: el color de la tienda en la tienda; el amarillo en el precio y el descuento; el rosa en el
+   nombre del modelo, que es lo unico que distingue un resultado de otro dentro de la misma busqueda; y el lila neutro
+   en todo lo demas (iconos, titulos de categoria, chips, botones). Nada de colores por posicion. */
+.ogrid>.ocard:not(.n-heroe),.res>.fila:not(.top),.oferta{border-color:color-mix(in srgb,var(--c,var(--n-celeste)) 62%,transparent)}
+.ogrid>.ocard:not(.n-heroe):hover,.res>.fila:not(.top):hover{border-color:var(--c,var(--n-celeste))}
+/* la mejor del grupo no esta primera por suerte: lleva borde rosa porque gano */
+.ogrid>.ocard.n-heroe{border-color:var(--n-rosa);box-shadow:0 0 30px color-mix(in srgb,var(--n-rosa) 32%,transparent)}
+.tit-nom,table.nov-tabla th a{color:var(--n-rosa)}
+/* el icono del tipo y los de los paneles, en lila: dicen de que se trata, no cual conviene.
+   (los titulos de grupo de Comparativa NO entran aca: siguen alternando rosa y celeste por grupo, que es la
+   alternancia que separa secciones de verdad; esas reglas estan mas arriba y tienen mas peso.) */
+.tit-ico,.panel-head h2 .ico,.grupo .ico{color:var(--n-lila)}
 
 /* ==== Tercera vuelta (pedido del dueño 05/11: «titulo en blanco, en caracteristicas se repite un color claro, Comparar de
-   nuevo blanco; ir alternando para no cansar la vista») ====
-   Sin blanco para nombres ni botones: los nombres giran en lila, rosa claro y menta; las especificaciones que no estan en el
-   nombre van en una pastilla con borde; Comparar lleva su color segun la fila. */
+   nuevo blanco») ====
+   Sin blanco para nombres ni botones: los nombres van en rosa y «Comparar» en lila; las especificaciones que no estan en
+   el nombre van en una pastilla llena. */
 .acc{color:var(--n-lila)}
 .acc .ico{color:var(--n-rosa)}
-table.nov-tabla tbody tr:nth-child(3n+1) th a{color:var(--n-lila)}
-table.nov-tabla tbody tr:nth-child(3n+2) th a{color:var(--n-titulo-3)}
-table.nov-tabla tbody tr:nth-child(3n) th a{color:var(--n-menta)}
-table.nov-tabla .acc{border:0;color:var(--f-tinta);font-weight:800;box-shadow:none}
+table.nov-tabla .acc{border:0;background:var(--f-lila);color:var(--f-tinta);font-weight:800;box-shadow:none}
 table.nov-tabla .acc .ico{color:var(--f-tinta)}
-table.nov-tabla tbody tr:nth-child(3n+1) .acc{background:var(--f-lila)}
-table.nov-tabla tbody tr:nth-child(3n+2) .acc{background:var(--f-rosa)}
-table.nov-tabla tbody tr:nth-child(3n) .acc{background:var(--f-ama)}
-/* Ofertas y Buscar: la primera de cada tres tampoco va en blanco */
-.ogrid>.ocard:nth-child(3n+1 of .ocard) .tit-nom,.res>.fila:nth-child(3n+1 of .fila) .tit-nom{color:var(--n-lila)}
-.ogrid>.ocard:nth-child(3n of .ocard) .tit-nom,.res>.fila:nth-child(3n of .fila) .tit-nom{color:var(--n-menta)}
 
 /* ==== Las caracteristicas resaltadas (pedido del dueño 05/11: «estan en el titulo, no se diferencian o resaltan») ====
-   El nombre limpio arriba y cada caracteristica en su pastilla llena, letra negra en negrita, girando menta, lila y rosa
-   (el celeste queda para la tienda y el amarillo para el precio). Las premium conservan ✦ y el degradado. */
+   El nombre limpio arriba y cada caracteristica en su pastilla llena, letra negra en negrita. Un solo color para todas:
+   las caracteristicas no compiten con la tienda ni con el precio, y asi la pastilla siempre quiere decir lo mismo.
+   (el celeste queda para la marca y el amarillo para el precio) */
 :root{--f-menta:#8dffc4}
-.tit-chips .tit-chip:not(.pr){border:0;color:var(--f-tinta);font:700 .78rem/1.6 var(--font-sans);padding:1px 10px}
-.tit-chips .tit-chip:not(.pr):nth-child(3n+1){background:var(--f-menta)}
-.tit-chips .tit-chip:not(.pr):nth-child(3n+2){background:var(--f-lila)}
-.tit-chips .tit-chip:not(.pr):nth-child(3n){background:var(--f-rosa)}
+.tit-chips .tit-chip:not(.pr){border:0;background:var(--f-lila);color:var(--f-tinta);font:700 .78rem/1.6 var(--font-sans);padding:1px 10px}
 .tit-chips .tit-chip.pr{font-weight:800}
 table.nov-tabla th a{text-decoration:none;display:inline-block}
 table.nov-tabla th a .tit{display:flex;gap:8px;align-items:flex-start}

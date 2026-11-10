@@ -54,7 +54,7 @@ class PaginaPrincipal(unittest.TestCase):
     def test_enlaza_al_indice_de_precios_sin_depender_de_scripts(self):
         html = (RAIZ / "index.html").read_text(encoding="utf-8")
         # Fuera de los <script>: un buscador que no ejecuta JavaScript tiene que verlo.
-        sin_scripts = re.sub(r"<script.*?</script>", "", html, flags=re.S)
+        sin_scripts = re.sub(r"<script\b.*?</script>", "", html, flags=re.S)
         self.assertIn('<a href="precios/">', sin_scripts)
 
 
