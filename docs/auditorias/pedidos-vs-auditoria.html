@@ -100,6 +100,7 @@
   .veredicto{margin-top:6px;padding:14px 16px;border-radius:12px;background:var(--hoja2);border:1.5px solid var(--linea2)}
   .veredicto .et{display:block;font:700 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--neutro);margin-bottom:7px}
   .veredicto p{margin:0;font-size:15px}
+  .aclaracion{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--hoja2);border-left:3px solid var(--neutro);font-size:14px;line-height:1.5;color:var(--tinta2)}
   .galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:18px 0 8px}
   figure{margin:0}
   figure a{display:block;border:1.5px solid var(--linea);border-radius:12px;overflow:hidden;background:var(--hoja);box-shadow:var(--sombra);transition:border-color .18s,transform .18s}
@@ -117,6 +118,18 @@
   .pie{border-top:1px solid var(--linea);padding-top:20px;font-size:13.5px;color:var(--tinta3)}
   .destacado{border:2px solid var(--tipo);border-radius:14px;padding:16px 18px;background:var(--hoja);box-shadow:var(--sombra)}
   .destacado h3{color:var(--tipo)}
+  .frase{background:var(--hoja);border:1.5px solid var(--linea);border-radius:16px;padding:20px 22px;box-shadow:var(--sombra);margin:16px 0}
+  .frase blockquote{margin:0 0 16px;padding:12px 16px;border-left:3px solid var(--tipo);background:var(--hoja2);border-radius:0 10px 10px 0;font-size:16.5px;font-style:italic;line-height:1.5}
+  .frase .donde{display:block;font:700 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--tinta3);margin-bottom:10px}
+  .frase dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 16px;font-size:15px;line-height:1.55}
+  .frase dt{font:700 10.5px/1.9 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--neutro);white-space:nowrap}
+  .frase dd{margin:0;color:var(--tinta2);max-width:60ch}
+  .frase dd strong{color:var(--tinta)}
+  @media (max-width:560px){
+    .frase dl{grid-template-columns:1fr;gap:2px}
+    .frase dt{margin-top:10px}
+    .frase dd{max-width:none}
+  }
   @media (max-width:560px){
     .hoja{padding:26px 16px 72px}
     .debate > header,.debate .cuerpo{padding-left:16px;padding-right:16px}
@@ -198,10 +211,53 @@
   </table>
   </div>
 
-  <h3 style="margin-top:26px">Las tres frases que más pesan en el diseño</h3>
-  <div class="cita"><q>También abusan del celeste […] combinar, alternar, que la vista de la página no sea una mancha de colores agrupados.</q><span class="fuente">04/11 · spec 060 · la cita que originó la alternancia</span></div>
-  <div class="cita"><q>Todo en blanco; negro en negrita, otros tamaños, otros colores; cada tarjeta o grupo con su color; me gusta el lila; destacar la tienda.</q><span class="fuente">04/11 · spec 060, segunda vuelta · la cita que originó el ciclo de tres colores</span></div>
-  <div class="cita"><q>Ir alternando para no cansar la vista.</q><span class="fuente">05/11 · spec 060, tercera vuelta · la cita que llevó el ciclo también a los nombres</span></div>
+  <h3 style="margin-top:30px">Las tres frases que más pesan en el diseño</h3>
+  <p>Tres pedidos tuyos explican casi todo lo que se ve hoy. Leídos sueltos se prestan a confusión, así que cada uno va con lo que estabas mirando, lo que se entendió, lo que se construyó y cómo se lee ahora.</p>
+
+  <article class="frase">
+    <span class="donde">04/11 · spec 060 · el pedido que originó la alternancia</span>
+    <blockquote>«También abusan del celeste […] combinar, alternar, que la vista de la página no sea una mancha de colores agrupados.»</blockquote>
+    <dl>
+      <dt>Qué mirabas</dt>
+      <dd>La lista de Comparativa, con el nombre de cada tienda en la misma pastilla celeste, fila tras fila, sin nada que cortara.</dd>
+      <dt>Qué pediste</dt>
+      <dd>Que el celeste dejara de ser el color de todo y que el color combinara, para que la página respirara.</dd>
+      <dt>Qué se construyó</dt>
+      <dd>Un ciclo por posición: la primera tarjeta de cada tres en un color, la segunda en otro, la tercera en otro. Sirve para lo que pediste, pero quedó aplicado a dos escalas a la vez: entre <strong>bloques</strong> de Comparativa (que sí son grupos distintos) y entre <strong>tarjetas</strong> de una misma lista (que no lo son).</dd>
+      <dt>Cómo se lee ahora</dt>
+      <dd>El diagnóstico era correcto. El problema es que alternar entre tarjetas de una misma lista no separa nada: dos resultados vecinos no son dos grupos, son dos filas del mismo grupo. La alternancia rinde entre bloques, no entre filas.</dd>
+    </dl>
+  </article>
+
+  <article class="frase">
+    <span class="donde">04/11 · spec 060, segunda vuelta · el pedido que originó el ciclo de tres colores</span>
+    <blockquote>«Todo en blanco; negro en negrita, otros tamaños, otros colores; cada tarjeta o grupo con su color; me gusta el lila; destacar la tienda.»</blockquote>
+    <dl>
+      <dt>Qué mirabas</dt>
+      <dd>El listado completo, donde cada texto pesaba igual que el de al lado y no había por dónde entrar a leer.</dd>
+      <dt>Qué pediste</dt>
+      <dd>Cuatro cosas en una frase: salir del blanco, diferenciar por peso y tamaño, darle color propio a cada bloque y que la tienda se destacara. Y una preferencia: el lila.</dd>
+      <dt>Qué se construyó</dt>
+      <dd>Lila para los nombres, rosa para el tipo de producto y los títulos, menta para las características, y bordes que cambian de color según la posición de la tarjeta.</dd>
+      <dt>Cómo se lee ahora</dt>
+      <dd>El pedido era correcto y sigue siéndolo. Lo que se estiró fue la última parte: <strong>«cada tarjeta con su color»</strong> terminó significando que el color depende del lugar que ocupa la tarjeta, no de lo que la tarjeta dice. Hay una versión de esa misma idea que además informa: un color fijo por tienda. Da la variedad que pediste y encima sirve para algo.</dd>
+    </dl>
+  </article>
+
+  <article class="frase">
+    <span class="donde">05/11 · spec 060, tercera vuelta · el pedido que llevó el ciclo a los nombres</span>
+    <blockquote>«Ir alternando para no cansar la vista.»</blockquote>
+    <dl>
+      <dt>Qué mirabas</dt>
+      <dd>La pasada anterior, con los nombres ya en lila: el mismo color repetido en columna, tarjeta tras tarjeta, cansaba.</dd>
+      <dt>Qué pediste</dt>
+      <dd>Que no se repitiera siempre el mismo color, para descansar la vista.</dd>
+      <dt>Qué se construyó</dt>
+      <dd>El ciclo se extendió a los nombres de las características y a los chips, que pasaron a alternar menta, lila y rosa.</dd>
+      <dt>Cómo se lee ahora</dt>
+      <dd>El cansancio era real, pero se atacó por el lado equivocado. Lo que cansa no es que un color se repita: es que <strong>el mismo color signifique cosas distintas</strong>. Si el celeste siempre quiere decir «esta es la tienda», verlo veinte veces seguidas descansa; si el lila a veces es un nombre, a veces un borde y a veces un chip, cansa aunque esté variado.</dd>
+    </dl>
+  </article>
 </section>
 
 <section id="auditoria">
@@ -217,7 +273,7 @@
       <tr><td class="dato">2</td><td>La misma tienda sale de tres colores distintos en la misma lista</td><td class="dato">19 celestes / 19 lilas / 18 rosas</td><td><span class="chip alta">alta</span></td></tr>
       <tr><td class="dato">3</td><td>Hay dos celestes para la misma idea: el de la marca y el relleno de la pastilla de tienda</td><td class="dato">#00708c vs #3ee6ff</td><td><span class="chip alta">alta</span></td></tr>
       <tr><td class="dato">4</td><td>Se ve texto basura en pantalla: la escobita dice «F9F9» y las filas del feed muestran « A »</td><td class="dato">2 escapes rotos</td><td><span class="chip media">media</span></td></tr>
-      <tr><td class="dato">5</td><td>Los enlaces del pie miden 17&nbsp;px de alto y se tocan mal con el dedo</td><td class="dato">WCAG pide 24&nbsp;px</td><td><span class="chip media">media</span></td></tr>
+      <tr><td class="dato">5</td><td>Los enlaces del pie miden 17&nbsp;px de alto y se tocan mal con el dedo (medido en el sitio publicado y en el local, en celular y en escritorio)</td><td class="dato">WCAG 2.5.8 pide 24&nbsp;px, pero exime a los enlaces dentro de un texto: <strong>no es un fallo</strong>, es una mejora</td><td><span class="chip baja">baja</span></td></tr>
       <tr><td class="dato">6</td><td>El borde de las pastillas clicables casi no se ve</td><td class="dato">1,9:1 · WCAG pide 3:1</td><td><span class="chip media">media</span></td></tr>
       <tr><td class="dato">7</td><td>El test de contraste no revisa los colores del Reel, aunque el CSS dice que sí</td><td class="dato">7 de 14 tokens sin cubrir</td><td><span class="chip media">media</span></td></tr>
       <tr><td class="dato">8</td><td>Un test tiene un byte roto: no saca los scripts de la página y pasa igual</td><td class="dato">1 byte</td><td><span class="chip media">media</span></td></tr>
@@ -299,18 +355,19 @@
 
   <article class="debate">
     <header>
-      <h3>4. «Precios y porcentajes más grandes»: el porcentaje se comió al precio</h3>
-      <p>Pedido del 31/10, aplicado en la spec 055. La auditoría dice que en Buscar está al revés.</p>
+      <h3>4. «Precios y porcentajes más grandes»: hay dos vistas y cada una ya tiene la jerarquía que le corresponde</h3>
+      <p>Pedido del 31/10, aplicado en la spec 055. La auditoría dijo que en Buscar estaba al revés. Medido de nuevo, no lo está: la corrección es mía.</p>
     </header>
     <div class="cuerpo">
-      <div class="postura si"><span class="quien">A favor de como está</span>
-        <p>En Ofertas el gancho es el descuento: entrás a ver qué está barato, no a comparar dos placas. Que el «−52&nbsp;%» sea lo más grande de la tarjeta es coherente con la pestaña, y es lo que pediste.</p>
+      <div class="postura si"><span class="quien">Ofertas: el descuento adelante</span>
+        <p>Entrás a ver qué está barato, no a comparar dos placas. Ahí el «−20&nbsp;%» mide <strong>67,2&nbsp;px</strong> y el precio <strong>35,2&nbsp;px</strong>: el argumento pesa el doble que el dato, que es exactamente lo que hace un cartel de oferta. Es lo que pediste y está bien.</p>
       </div>
-      <div class="postura no"><span class="quien">En contra</span>
-        <p>En Buscar es al revés. Ahí estás decidiendo entre <strong>$1.237.024 y $1.350.000</strong>, no entre 12&nbsp;% y 18&nbsp;%. El porcentaje es un argumento; el precio es el dato. Hoy el porcentaje mide hasta 4,2&nbsp;rem y el precio 1,8&nbsp;rem: la vista te hace leer primero el argumento.</p>
+      <div class="postura no"><span class="quien">Buscar: el precio adelante, y ya lo está</span>
+        <p>En Buscar estás decidiendo entre <strong>$1.237.024 y $1.350.000</strong>, no entre 12&nbsp;% y 18&nbsp;%. Medí las 60 filas de una búsqueda real: el precio mide <strong>23,2&nbsp;px</strong>, el nombre 14,7&nbsp;px y <em>todos</em> los sellos —«11&nbsp;% OFF» incluido— 10,7&nbsp;px. El precio ya es lo más grande de la fila y el porcentaje ya es un sello chico al lado.</p>
+        <p class="aclaracion">Mi informe anterior decía que en Buscar el porcentaje medía 4,2&nbsp;rem contra 1,8&nbsp;rem del precio. Esos números son de la tarjeta de Ofertas, no de la fila de Buscar: mezclé las dos vistas y las presenté como una sola. La medición de arriba es la buena.</p>
       </div>
       <div class="veredicto"><span class="et">Mi lectura</span>
-        <p><strong>No hay una jerarquía única: hay dos vistas con dos prioridades.</strong> En Ofertas, el porcentaje adelante (como está). En Buscar, el precio adelante y el porcentaje como sello chico al lado. Son dos reglas de CSS y no rompen ninguna paleta.</p>
+        <p><strong>No hay nada que cambiar.</strong> Lo que propuse como «dos reglas de CSS que no rompen ninguna paleta» ya es el estado actual del sitio, y lo digo yo antes de que lo notes vos: una auditoría que no se corrige a sí misma no sirve para decidir.</p>
       </div>
     </div>
   </article>
@@ -336,8 +393,8 @@
 
 <section id="plan">
   <hr><span class="num">05 · Qué propongo</span>
-  <h2>En qué orden, y qué necesito de vos</h2>
-  <p>Separé lo que no necesita tu ojo de lo que sí. Las dos primeras tandas las puedo hacer solo; la tercera la quiero hablar con una captura delante.</p>
+  <h2>En qué orden va</h2>
+  <p>Cuatro tandas, de la que no cambia nada a la que cambia todo. Las dos primeras no se ven; la tercera sí, y va con captura antes y después.</p>
 
   <div class="tandas">
     <div class="tanda">
@@ -358,7 +415,7 @@
       <span class="n">3</span>
       <div>
         <h3>El color</h3>
-        <p>Sacar el ciclo de tres de las tarjetas, unificar los dos celestes y decidir qué hace el rosa (mi propuesta: que marque lo que distingue un resultado de otro). Antes de tocar una línea te muestro la misma pantalla con los colores nuevos y los viejos, lado a lado. <strong>Esto es lo único que cambia cómo se ve el sitio, y la decisión es tuya.</strong></p>
+        <p>Sacar el ciclo de tres de las tarjetas, devolverle a cada tienda su color fijo, unificar los dos celestes y mover el rosa a lo que distingue un resultado. <strong>Es lo único que cambia cómo se ve el sitio</strong>, así que va con la misma pantalla antes y después, para comparar. (El precio adelante en Buscar se cayó de la lista: medido, ya estaba así.)</p>
       </div>
     </div>
     <div class="tanda">
@@ -371,11 +428,15 @@
   </div>
 
   <div class="destacado" style="margin-top:26px">
-    <h3>Lo que necesito de vos</h3>
-    <ul class="lista ojo">
-      <li>Si arranco con la tanda 1 y la 2 ahora (son seguras y no cambian nada de lo que ves).</li>
-      <li>Si el rosa deja de marcar el tipo de producto y pasa a marcar lo que distingue un resultado de otro. Es la única parte de tu regla que propongo cambiar.</li>
-      <li>Si el precio pasa adelante del porcentaje en Buscar, dejando Ofertas como está.</li>
+    <h3>Lo que decidiste</h3>
+    <p style="margin-bottom:14px">Ya está aprobado, así que esto dejó de ser una pregunta y pasó a ser una lista de trabajo.</p>
+    <ul class="lista bien">
+      <li>Tanda 1 y tanda 2 van: errores y accesibilidad, sin cambiar nada de lo que se ve.</li>
+      <li>El ciclo de tres sale de las tarjetas. Cada tienda recupera un color fijo, como las 13 de Comparativa.</li>
+      <li>Tres colores alcanzan: tienda, precio y resto. No cinco.</li>
+      <li>El celeste queda en la tienda y el amarillo en el precio. El rosa deja de marcar el tipo de producto y pasa a marcar lo que distingue un resultado de otro dentro de la misma búsqueda.</li>
+      <li>En Buscar, el precio adelante y el porcentaje como sello chico al lado. Ofertas queda como está. <strong>Medido: ya está así</strong> (precio 23,2&nbsp;px, sellos 10,7&nbsp;px), no hace falta tocar el CSS.</li>
+      <li>El índice de 6,4&nbsp;MB va como spec propia, aparte de todo lo demás.</li>
     </ul>
   </div>
 </section>
@@ -391,8 +452,8 @@
       <tr><td>Salir del blanco</td><td><span class="chip baja">tenías razón</span> la solución se pasó de colores</td></tr>
       <tr><td>Alternar para que no sea una mancha</td><td><span class="chip baja">tenías razón</span> a escala de grupo; sobra a escala de tarjeta</td></tr>
       <tr><td>Celeste solo para marca y tienda</td><td><span class="chip media">a medias</span> bien en tienda y precio, mal en tipo</td></tr>
-      <tr><td>Precios y porcentajes más grandes</td><td><span class="chip media">a medias</span> bien en Ofertas, al revés en Buscar</td></tr>
-      <tr><td>Cada tarjeta con su color</td><td><span class="chip alta">revisar</span> el color cambia al reordenar la lista</td></tr>
+      <tr><td>Precios y porcentajes más grandes</td><td><span class="chip baja">tenías razón</span> Ofertas con el % adelante y Buscar con el precio adelante: las dos están bien</td></tr>
+      <tr><td>Cada tarjeta con su color</td><td><span class="chip baja">resuelto</span> pasa a color fijo por tienda</td></tr>
       <tr><td>Que cargue rápido en el celular</td><td><span class="chip baja">tenías razón</span> se hizo la mitad; falta la otra</td></tr>
     </tbody>
   </table>
