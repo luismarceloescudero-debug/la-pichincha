@@ -1059,8 +1059,11 @@ table.nov-tabla tbody tr:hover{background:color-mix(in srgb,var(--n-fondo-alto) 
 
 /* ==== Mas variedad (pedido del dueño 04/11: «todo en blanco; negro en negrita, otros tamaños, otros colores; cada
    tarjeta o grupo con su color; me gusta el lila; destacar la tienda») ====
-   Rellenos fijos (no cambian con el tema): con texto negro en negrita pasan 4,5:1 en claro y en oscuro. */
-:root{--f-lila:#c79bff;--f-cel:#3ee6ff;--f-ama:#ffd23f;--f-rosa:#ff6eb6;--f-tinta:#120018}
+   Rellenos fijos (no cambian con el tema): con letra --f-tinta en negrita pasan 4,5:1 en claro y en oscuro
+   (tests/test_contraste.py). El celeste NO esta en esta lista y no se usa como relleno de nada que no sea la marca o
+   la tienda: la pastilla de la tienda sale de var(--c) y, si no hay color de tienda, de --n-celeste. Asi hay un solo
+   celeste en todo el sitio, el del tema (auditoria del 10/11: con --f-cel eran dos, #3ee6ff y #00708c, la misma idea). */
+:root{--f-lila:#c79bff;--f-menta:#8dffc4;--f-ama:#ffd23f;--f-rosa:#ff6eb6;--f-tinta:#120018}
 /* encabezado: el sello en amarillo, la marca en lila, el lema en una franja lila con letra negra */
 #sello{color:var(--n-precio);font-weight:600}
 h1 .marca-sitio{color:var(--n-lila)}
@@ -1074,7 +1077,7 @@ h1 .marca-sitio{color:var(--n-lila)}
 .acciones .acc{border:0;color:var(--f-tinta);font-weight:800;box-shadow:none}
 .acciones .acc .ico{color:var(--f-tinta)}
 .acciones .acc:nth-child(4n+1){background:var(--f-lila)}
-.acciones .acc:nth-child(4n+2){background:var(--f-cel)}
+.acciones .acc:nth-child(4n+2){background:var(--f-menta)}
 .acciones .acc:nth-child(4n+3){background:var(--f-ama)}
 .acciones .acc:nth-child(4n+4){background:var(--f-rosa)}
 .acciones .acc:hover{color:var(--f-tinta);filter:brightness(1.08)}
@@ -1120,7 +1123,6 @@ table.nov-tabla .acc .ico{color:var(--f-tinta)}
    El nombre limpio arriba y cada caracteristica en su pastilla llena, letra negra en negrita. Un solo color para todas:
    las caracteristicas no compiten con la tienda ni con el precio, y asi la pastilla siempre quiere decir lo mismo.
    (el celeste queda para la marca y el amarillo para el precio) */
-:root{--f-menta:#8dffc4}
 .tit-chips .tit-chip:not(.pr){border:0;background:var(--f-lila);color:var(--f-tinta);font:700 .78rem/1.6 var(--font-sans);padding:1px 10px}
 .tit-chips .tit-chip.pr{font-weight:800}
 table.nov-tabla th a{text-decoration:none;display:inline-block}
