@@ -163,7 +163,7 @@
      ("7.68TB"): antes del numero no puede haber cifra, punto ni coma, o se leeria el "4" de "6X2.4TB" (11/11). */
   function ramRomDe(n) {
     const t = n.replace(/\b(?:rtx|gtx|rx|arc)\s?[a-z]?\d{3,4}\s?(?:ti super|ti|super|xtx|xt|gre)?\s+\d{1,2}gb\b/g, " ");
-    const caps = [...t.matchAll(/(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/gi)]
+    const caps = [...t.matchAll(/(?<!\d|\d[.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/gi)]
       .map(x => +x[1].replace(",", ".") * (x[2].toLowerCase() === "tb" ? 1000 : 1)).sort((a, b) => a - b);
     const gb = v => v >= 1000 ? v / 1000 + "tb" : v + "gb";
     if (caps.length >= 2 && caps[0] <= 64) return [gb(caps[0]), gb(caps[caps.length - 1])];
@@ -239,7 +239,7 @@
     const s = {};
     let m;
     if ((m = n.match(/\bddr([345])\b/i))) s["Tipo"] = "DDR" + m[1];
-    const caps = [...n.matchAll(/(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/gi)].map(x => x[1] + x[2].toUpperCase());
+    const caps = [...n.matchAll(/(?<!\d|\d[.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/gi)].map(x => x[1] + x[2].toUpperCase());
     if (caps.length) s["Capacidad"] = [...new Set(caps)].slice(0, 2).join(" + ");
     if ((m = n.match(/\b(\d{3,5})\s?mhz\b/i))) s["Velocidad"] = m[1] + " MHz";
     if ((m = n.match(/\bcl\s?(\d{2})\b/i))) s["Latencia"] = "CL" + m[1];
@@ -330,7 +330,7 @@
      El mismo producto en varias tiendas es el que comparte el MISMO codigo de modelo, exacto. Nunca por
      parecido de nombre. Si los nombres dicen capacidades distintas, tampoco se juntan. */
   const capacidadGB = nombre => {
-    const caps = [...String(nombre).replace(/(\d),(\d)/g, "$1.$2").matchAll(/(?<![\d.,])(\d+(?:\.\d+)?)\s?(gb|tb)(?![a-z\d])/gi)]
+    const caps = [...String(nombre).replace(/(\d),(\d)/g, "$1.$2").matchAll(/(?<!\d|\d[.,])(\d+(?:\.\d+)?)\s?(gb|tb)(?![a-z\d])/gi)]
       .map(m => Math.round(parseFloat(m[1]) * (m[2].toLowerCase() === "tb" ? 1000 : 1)));
     return caps.length ? Math.max(...caps) : 0;
   };

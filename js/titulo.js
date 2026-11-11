@@ -229,7 +229,7 @@
   /* Una capacidad con decimales («2.4TB», «7.68TB»). Antes del numero no puede haber otra cifra, un punto ni una coma:
      en «SAS HPE MSA PACK 6X2.4TB» la capacidad es la unidad (2.4 TB), no el «4» que sigue al punto (11/11, como
      capacidadDe de especificaciones.js). */
-  const CAPACIDAD = /(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/i;
+  const CAPACIDAD = /(?<!\d|\d[.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/i;
   const capacidad = n => {
     const m = String(n).match(CAPACIDAD);
     if (!m) return "";
@@ -237,7 +237,7 @@
     return /t/i.test(m[2]) ? `${+v.toFixed(2)} TB` : gb(v);
   };
   // La memoria de una placa o de un modulo, siempre en GB: «16 GB», «2.4 GB».
-  const EN_GB = /(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s?gb(?![a-z\d])/i;
+  const EN_GB = /(?<!\d|\d[.,])(\d{1,3}(?:[.,]\d{1,2})?)\s?gb(?![a-z\d])/i;
   const enGB = n => { const m = String(n).match(EN_GB); return m ? `${+m[1].replace(",", ".")} GB` : ""; };
   // Solo con la marca de pulgadas: «12 Ram» no es una pantalla de 12″.
   const pulg = n => { const m = pulgadas(n).match(/(?:^|[^\d.])(\d{1,2}(?:\.\d)?)″/); return m ? `${+m[1]}″` : ""; };
@@ -338,7 +338,7 @@
     /oled|mini-?led/i, /\b(?:4k|uhd|2160p)\b/i, /\b(?:1[4-9]\d|[2-9]\d\d)\s?hz\b/i,
     /\brtx\s?(?:[45]0[6-9]0|[45]0[6-9]0\s?ti)\b/i, /\brx\s?(?:7[89]00|90[67]0)/i,
     /\b(?:core\s?(?:ultra\s?)?|i)[79]\b|\bryzen\s?(?:ai\s?)?[79]\b|\bryzen\s?ai\b|\bcore\s?ultra\b/i,
-    /\bddr5\b/i, /(?<![\d.,])[1-9]\d*(?:[.,]\d+)?\s?tb(?![a-z\d])/i, /(?<![\d.,])(?:32|48|64|96|128)\s?gb(?![a-z\d])/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
+    /\bddr5\b/i, /(?<!\d|\d[.,])[1-9]\d*(?:[.,]\d+)?\s?tb(?![a-z\d])/i, /(?<!\d|\d[.,])(?:32|48|64|96|128)\s?gb(?![a-z\d])/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
   ];
   const premium = chip => PREMIUM.some(re => re.test(String(chip)));
 

@@ -261,6 +261,8 @@ test("memoriaDe (11/11): las capacidades con decimales se leen enteras, no desde
   // Lo que no cambio: la capacidad sin decimales y el «4G» de la red.
   assert.deepEqual(C.memoriaDe("Celular Moto G15 6GB/128GB"), { ram: 6, rom: 128 });
   assert.deepEqual(C.memoriaDe("Celular Samsung Galaxy A17 5G 8/256gb"), { ram: 8, rom: 256 });
+  // Una coma despues de la unidad no es un decimal: «16GB,512GB» sigue siendo RAM y disco.
+  assert.deepEqual(C.memoriaDe("Notebook 16GB,512GB"), { ram: 16, rom: 512 });
 });
 
 test("MIN: los minimos de gama media estan en un solo lugar y son los del dueño (smartphone: 6-8 GB de RAM y 128-256 GB)", () => {
