@@ -59,6 +59,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `docs/seguridad-zap.md` | Analisis pasivo del sitio publicado con OWASP ZAP (19/10/2026): cada alerta con su veredicto verificado, lo que no se puede arreglar en GitHub Pages y cuanto acertaron los modelos al clasificarlas |
 | `docs/auditoria-2026-10-30.md` | Auditoria exigente del 30/10/2026: Lighthouse en celular y escritorio antes y despues, accesibilidad, pruebas de punta a punta, seguridad, SEO y datos publicados; lo arreglado (PR #172 a #175) y lo que queda por prioridad |
 | `docs/pruebas-2026-11-01.md` | Pruebas completas del 01/11/2026 (sesion 058): tests, e2e, Lighthouse y squirrel, ofertas de la spec 056 contra el indice publicado, revision de diseño con web-design-reviewer y break-ui (solo informe para la sesion de diseño), contacto y Worker; arreglos #204 y #205 |
+| `docs/auditorias/2026-11-11.md` | Auditoria del codigo del 11/11/2026 (delegada a DeepSeek por LiteLLM con skills de ECC, hallazgos altos comprobados a mano): publicacion diaria, fallas silenciosas en Python, JavaScript del sitio y seguridad; solo diagnostico |
 | `docs/og-imagen.html` | Fuente de `img/og.png` |
 
 Las imagenes son material de los fabricantes y las tiendas, usadas como
