@@ -72,17 +72,18 @@ jobs:
       # Si los espejos de Ubuntu no contestan (el 11/11 cayeron security.ubuntu.com y archive.ubuntu.com por horas y
       # fallaban solo tipografias opcionales), se reintenta una vez y se sigue con un aviso: si de verdad falta una
       # libreria, los e2e fallan igual y cortan. Sin esto, una caida ajena trababa todos los PR y la publicacion.
+      # Cada intento con tope de 3 min: con el espejo caido apt no falla, se cuelga, y el job llegaba a su tope (PR #256).
       - name: Instalar Chromium con sus dependencias
         if: steps.navegadores.outputs.cache-hit != 'true'
         run: |
           npx playwright install chromium
-          npx playwright install-deps chromium || { sleep 30; npx playwright install-deps chromium; }             || echo "::warning::No se pudieron instalar las dependencias del sistema (espejo de Ubuntu caido): se sigue igual"
+          timeout 180 npx playwright install-deps chromium || { sleep 20; timeout 180 npx playwright install-deps chromium; }             || echo "::warning::No se pudieron instalar las dependencias del sistema (espejo de Ubuntu caido): se sigue igual"
 
       # Con la cache del navegador hay que instalar igual las librerias del sistema.
       - name: Instalar las dependencias del sistema
         if: steps.navegadores.outputs.cache-hit == 'true'
         run: |
-          npx playwright install-deps chromium || { sleep 30; npx playwright install-deps chromium; }             || echo "::warning::No se pudieron instalar las dependencias del sistema (espejo de Ubuntu caido): se sigue igual"
+          timeout 180 npx playwright install-deps chromium || { sleep 20; timeout 180 npx playwright install-deps chromium; }             || echo "::warning::No se pudieron instalar las dependencias del sistema (espejo de Ubuntu caido): se sigue igual"
 
       - name: Armar el sitio con el indice de prueba
         run: bash tests/e2e/armar-sitio.sh

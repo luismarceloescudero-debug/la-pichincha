@@ -63,7 +63,7 @@ class Reintento(unittest.TestCase):
     def test_un_espejo_de_ubuntu_caido_no_traba_los_e2e(self):
         # 11/11: security.ubuntu.com cayo por horas y trababa todos los PR. Se reintenta y se sigue con aviso.
         yml = (RAIZ / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
-        self.assertEqual(yml.count("npx playwright install-deps chromium || { sleep 30; npx playwright install-deps chromium; }"), 2)
+        self.assertEqual(yml.count("timeout 180 npx playwright install-deps chromium || { sleep 20; timeout 180 npx playwright install-deps chromium; }"), 2)
         self.assertNotIn("install --with-deps", yml)
 
 
