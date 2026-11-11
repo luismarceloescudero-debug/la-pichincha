@@ -87,7 +87,7 @@
   const esTecnologia = nombre => { const n = sinTildes(nombre); return !NO_TECNOLOGIA.test(n) && TECNOLOGIA.test(n); };
 
   /* --- Que dice el titulo ------------------------------------------------- */
-  const aGB = (n, u) => Math.round(parseFloat(n) * (/t/i.test(u) ? 1000 : 1));
+  const aGB = (n, u) => Math.round(parseFloat(String(n).replace(",", ".")) * (/t/i.test(u) ? 1000 : 1));
   const RAMS = new Set([2, 3, 4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64]);
   const ROMS = new Set([32, 64, 128, 256, 512, 1000, 1024, 2000]);
   const CAPACIDADES = new Set([...RAMS, ...ROMS, 120, 240, 250, 450, 480, 500, 960]);
@@ -100,15 +100,18 @@
       .replace(/\b(?:rtx|gtx|rx|arc|radeon|geforce)\s?[a-z]?\d{3,4}\s?(?:ti|super|xt|m)?\s+\d{1,2}\s?gb?\b/gi, " ")
       .replace(/\b(?:ryzen\s?(?:ai\s?)?|core\s?(?:ultra\s?)?|ultra\s?|i|r)[3579]\b/gi, " ");
     let m;
-    // con la G sola solo valen capacidades que existen: "8600G" y "3000G" son procesadores
-    const caps = [...n.matchAll(/(?<![\d.])(\d{1,4})\s?(gb?|tb)(?![a-z\d])/gi)]
+    // con la G sola solo valen capacidades que existen: "8600G" y "3000G" son procesadores. La capacidad puede venir con
+    // decimales ("7.68TB"): antes del numero no puede haber cifra, punto ni coma, o se leeria el "4" de "6X2.4TB" (11/11).
+    // Un decimal en GB no es una capacidad de memoria ("8.5Gb" es un DVD): los discos con decimales van en TB.
+    const caps = [...n.matchAll(/(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb?|tb)(?![a-z\d])/gi)]
+      .filter(x => !/[.,]/.test(x[1]) || /t/i.test(x[2]))
       .filter(x => !/^g$/i.test(x[2]) || CAPACIDADES.has(+x[1])).map(x => aGB(x[1], x[2])).sort((a, b) => a - b);
-    if ((m = n.match(/(\d{1,3})\s?gb?\s*(?:de\s*)?(?:memoria\s+)?ram\b/i) || n.match(/\bram\s*[:\-]?\s*(?:de\s*)?(\d{1,3})\s?gb/i))) {
-      const otras = caps.filter(c => c !== +m[1]);       // lo que no es la RAM es el almacenamiento
-      return { ram: +m[1], rom: otras.length ? otras[otras.length - 1] : 0 };
+    if ((m = n.match(/(\d{1,3}(?:[.,]\d+)?)\s?gb?\s*(?:de\s*)?(?:memoria\s+)?ram\b/i) || n.match(/\bram\s*[:\-]?\s*(?:de\s*)?(\d{1,3}(?:[.,]\d+)?)\s?gb/i))) {
+      const otras = caps.filter(c => c !== +m[1].replace(",", "."));       // lo que no es la RAM es el almacenamiento
+      return { ram: +m[1].replace(",", "."), rom: otras.length ? otras[otras.length - 1] : 0 };
     }
     // dos capacidades unidas por + o /, en cualquier orden y con la unidad en una, en las dos o en ninguna
-    if ((m = n.match(/(?<![\d.])(\d{1,4})\s?(gb?|tb)?\s*[+\/|]\s*(\d{1,4})\s?(gb?|tb)?(?![a-z\d])/i))) {
+    if ((m = n.match(/(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb?|tb)?\s*[+\/|]\s*(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb?|tb)?(?![a-z\d])/i))) {
       const a = aGB(m[1], m[2] || ""), b = aGB(m[3], m[4] || "");
       const [ram, rom] = a <= b ? [a, b] : [b, a];
       if (RAMS.has(ram) && (ROMS.has(rom) || /t/i.test((a <= b ? m[4] : m[2]) || ""))) return { ram, rom };
@@ -276,15 +279,15 @@
     return ok(categoria, alta ? "alta" : "media", { rom, vigente: alta && v.vigente, anterior: v.anterior, nota: v.nota, puntos });
   }
 
-  const capacidadMemoria = n => { const k = n.match(/\b(\d)\s?x\s?(\d{1,3})\s?gb\b/i); if (k) return +k[1] * +k[2];
-    const m = n.match(/\b(\d{1,3})\s?gb\b/i); return m ? +m[1] : 0; };
+  const capacidadMemoria = n => { const k = n.match(/(?<![\d.,])(\d)\s?x\s?(\d{1,3})\s?gb(?![a-z\d])/i); if (k) return +k[1] * +k[2];
+    const m = n.match(/(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s?gb(?![a-z\d])/i); return m ? +m[1].replace(",", ".") : 0; };
 
   /* Cada tipo de componente tiene sus propios requisitos: la VRAM es solo de las placas de video. */
   function componente(nombre) {
     const m = MIN.componente, n = String(nombre);
     let x;
     if (/\b(?:rtx|gtx|rx\s?\d{4}|radeon|geforce)\b|placa de video|tarjeta grafica/i.test(n)) {
-      const vram = (x = n.match(/\b(\d{1,2})\s?g(?:b)?\b/i)) ? +x[1] : 0;     // 16GB o 16G, como lo escribe cada tienda
+      const vram = (x = n.match(/(?<![\d.,])(\d{1,2}(?:[.,]\d{1,2})?)\s?g(?:b)?(?![a-z\d])/i)) ? +x[1].replace(",", ".") : 0;     // 16GB o 16G, como lo escribe cada tienda
       if (!vram) return ok("componente", null);
       if (vram < m.vram) return no("componente", `solo ${vram} GB de VRAM (mínimo ${m.vram})`);
       return ok("componente", vram >= m.vramAlta ? "alta" : "media");
