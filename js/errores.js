@@ -48,6 +48,18 @@
     return miga;
   }
 
+  /* Un error que no pasa por ningun archivo del sitio es de otro: el autocompletar de un navegador de Android
+     («xbrowser is not defined» en execute_auto_fill, Sentry LA-PICHINCHA-3 del 09/11) inyecta codigo anonimo, y
+     allowUrls no lo ataja porque no trae direccion. Sin pila (un mensaje suelto) no se descarta. */
+  function ajeno(evento) {
+    const valores = evento && evento.exception && evento.exception.values;
+    if (!valores || !valores.length) return false;
+    const archivos = valores.flatMap(v => ((v.stacktrace && v.stacktrace.frames) || []).map(f => f.filename || ""));
+    return archivos.length > 0 && !archivos.some(a => /^https?:\/\//.test(a));
+  }
+
+  const antesDeMandar = evento => (ajeno(evento) ? null : limpiar(evento));
+
   function opciones(dsn, ubicacion) {
     return {
       dsn,
@@ -56,7 +68,7 @@
       allowUrls: [ubicacion.origin],
       denyUrls: [/^(chrome|moz|safari)(-web)?-extension:/],
       maxBreadcrumbs: 20,
-      beforeSend: limpiar,
+      beforeSend: antesDeMandar,
       beforeBreadcrumb: limpiarMiga,
     };
   }
@@ -101,7 +113,7 @@
     return true;
   }
 
-  const api = { VERSION_SDK, SDK, INTEGRIDAD, DOMINIO, sinConsulta, activo, limpiar, limpiarMiga, opciones, arrancar };
+  const api = { VERSION_SDK, SDK, INTEGRIDAD, DOMINIO, sinConsulta, activo, limpiar, limpiarMiga, ajeno, antesDeMandar, opciones, arrancar };
   if (typeof module === "object" && module.exports) module.exports = api;
   else { raiz.Errores = api; try { arrancar(raiz); } catch (e) { /* nunca rompe la pagina */ } }
 })(this);

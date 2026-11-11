@@ -86,3 +86,19 @@ test("sinConsulta deja pasar lo que no es texto", () => {
   assert.equal(E.sinConsulta(undefined), undefined);
   assert.equal(E.sinConsulta("/precios/rtx-5060/"), "/precios/rtx-5060/");
 });
+
+test("los errores de scripts ajenos (sin archivo del sitio) no se mandan", () => {
+  // Sentry LA-PICHINCHA-3 (09/11): el autocompletar de un navegador de Android inyecta codigo anonimo.
+  const ajeno = { exception: { values: [{ type: "ReferenceError", value: "xbrowser is not defined",
+    stacktrace: { frames: [{ filename: "<anonymous>", function: "execute_auto_fill" }] } }] } };
+  assert.equal(E.ajeno(ajeno), true);
+  assert.equal(E.antesDeMandar(ajeno), null);
+  // Uno del sitio sigue llegando (y limpio).
+  const propio = { request: { url: "https://pichinchadeldia.com.ar/?q=x" }, exception: { values: [{ type: "TypeError", value: "x",
+    stacktrace: { frames: [{ filename: "<anonymous>" }, { filename: "https://pichinchadeldia.com.ar/js/busqueda.js" }] } }] } };
+  assert.equal(E.ajeno(propio), false);
+  assert.equal(E.antesDeMandar(propio).request.url, "https://pichinchadeldia.com.ar/");
+  // Sin pila (un mensaje suelto, la prueba de #probar-errores) no se descarta.
+  assert.equal(E.ajeno({ message: "Prueba de errores de La Pichincha" }), false);
+  assert.equal(E.opciones("https://k@o1.ingest.us.sentry.io/2", PUBLICADO).beforeSend, E.antesDeMandar);
+});
