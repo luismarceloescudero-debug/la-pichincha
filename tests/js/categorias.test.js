@@ -249,6 +249,20 @@ test("memoriaDe: la memoria de la placa de video y el numero del procesador no s
   assert.deepEqual(C.memoriaDe("Notebook Hp 15-Fc0235la R3-7320u Amd 15\"8/512gb"), { ram: 8, rom: 512 });
 });
 
+test("memoriaDe (11/11): las capacidades con decimales se leen enteras, no desde el punto", () => {
+  // «6X2.4TB» son unidades de 2.4 TB: antes no se leia nada (o se leia el «4» de despues del punto).
+  assert.deepEqual(C.memoriaDe("SAS HPE MSA PACK 6X2.4TB"), { ram: 0, rom: 2400 });
+  assert.deepEqual(C.memoriaDe("SSD 7.68TB U.2"), { ram: 0, rom: 7680 });
+  assert.deepEqual(C.memoriaDe("HDD 1.2TB SAS"), { ram: 0, rom: 1200 });
+  assert.deepEqual(C.memoriaDe("Notebook 16GB 1.5TB"), { ram: 16, rom: 1500 });
+  assert.deepEqual(C.memoriaDe("Disco 2,4TB"), { ram: 0, rom: 2400 });
+  // Un decimal en GB no es una capacidad de memoria: «8.5Gb» es un DVD, no 9 GB de RAM.
+  assert.deepEqual(C.memoriaDe("Dvd Dual Layer New Akira Print 8.5Gb"), { ram: 0, rom: 0 });
+  // Lo que no cambio: la capacidad sin decimales y el «4G» de la red.
+  assert.deepEqual(C.memoriaDe("Celular Moto G15 6GB/128GB"), { ram: 6, rom: 128 });
+  assert.deepEqual(C.memoriaDe("Celular Samsung Galaxy A17 5G 8/256gb"), { ram: 8, rom: 256 });
+});
+
 test("MIN: los minimos de gama media estan en un solo lugar y son los del dueño (smartphone: 6-8 GB de RAM y 128-256 GB)", () => {
   const s = C.MIN.smartphone;
   assert.deepEqual([s.ramMin, s.ram, s.rom, s.romAlta, s.bateria, s.hz], [6, 8, 128, 256, 4500, 90]);

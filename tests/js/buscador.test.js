@@ -252,6 +252,15 @@ test("specsDe lee lo que dice el nombre", () => {
     { Pantalla: '27"', Refresco: "165 Hz", "Resolución": "FHD" });
 });
 
+test("specsDe y capacidadGB (11/11): la capacidad con decimales no se corta en el punto", () => {
+  assert.deepEqual(B.specsDe("SSD 7.68TB U.2"), { Capacidad: "7.68TB" });
+  assert.deepEqual(B.specsDe("SAS HPE MSA PACK 6X2.4TB"), { Capacidad: "2.4TB" });
+  assert.equal(B.capacidadGB("SAS HPE MSA PACK 6X2.4TB"), 2400);
+  assert.equal(B.capacidadGB("SSD 7.68TB U.2"), 7680);
+  assert.equal(B.capacidadGB("SSD 1TB"), 1000);
+  assert.equal(B.capacidadGB("Memoria 16GB"), 16);
+});
+
 test("motivoExclusion respeta lo que pide la busqueda", () => {
   const m = (nombre, q) => {
     const nq = B.normalBusq(q);

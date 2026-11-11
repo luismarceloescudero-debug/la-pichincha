@@ -226,6 +226,19 @@
 
   /* --- Las chips: lo que define la compra ------------------------------------- */
   const gb = n => n >= 1000 ? `${+(n / 1000).toFixed(1)} TB` : `${n} GB`;
+  /* Una capacidad con decimales («2.4TB», «7.68TB»). Antes del numero no puede haber otra cifra, un punto ni una coma:
+     en «SAS HPE MSA PACK 6X2.4TB» la capacidad es la unidad (2.4 TB), no el «4» que sigue al punto (11/11, como
+     capacidadDe de especificaciones.js). */
+  const CAPACIDAD = /(?<![\d.,])(\d{1,4}(?:[.,]\d{1,3})?)\s?(gb|tb)(?![a-z\d])/i;
+  const capacidad = n => {
+    const m = String(n).match(CAPACIDAD);
+    if (!m) return "";
+    const v = +m[1].replace(",", ".");
+    return /t/i.test(m[2]) ? `${+v.toFixed(2)} TB` : gb(v);
+  };
+  // La memoria de una placa o de un modulo, siempre en GB: «16 GB», «2.4 GB».
+  const EN_GB = /(?<![\d.,])(\d{1,3}(?:[.,]\d{1,2})?)\s?gb(?![a-z\d])/i;
+  const enGB = n => { const m = String(n).match(EN_GB); return m ? `${+m[1].replace(",", ".")} GB` : ""; };
   // Solo con la marca de pulgadas: «12 Ram» no es una pantalla de 12″.
   const pulg = n => { const m = pulgadas(n).match(/(?:^|[^\d.])(\d{1,2}(?:\.\d)?)″/); return m ? `${+m[1]}″` : ""; };
   const resolucion = n => /\b(?:3440\s?x\s?1440|uwqhd)\b/i.test(n) ? "UWQHD" : /\b(?:5k)\b/i.test(n) ? "5K"
@@ -269,16 +282,16 @@
       case "celular": case "tablet":
         return [m.ram && m.rom ? `${m.ram}/${gb(m.rom)}` : m.rom ? gb(m.rom) : "", /\b5g\b/i.test(n) ? "5G" : "",
           pulg(n), /amoled|oled/i.test(n) ? panel(n) : "", cpu(n)].slice(0, 4);
-      case "placa-video": return [(x = n.match(/\b(\d{1,2})\s?gb\b/i)) ? `${x[1]} GB` : "", (x = n.match(/\bg?ddr(\d)x?\b/i)) ? x[0].toUpperCase() : ""];
+      case "placa-video": return [enGB(n), (x = n.match(/\bg?ddr(\d)x?\b/i)) ? x[0].toUpperCase() : ""];
       case "procesador": return [socket(n), (x = n.match(/\b(\d{1,2})\s?(?:nucleos|núcleos|cores|c)\b/i)) ? `${x[1]} núcleos` : "",
         (x = n.match(/\b(\d(?:\.\d{1,2})?)\s?ghz\b/i)) ? `${+x[1]} GHz` : ""];
       case "mother": return [socket(n), (x = n.match(/\bddr([345])\b/i)) ? `DDR${x[1]}` : "",
         (x = n.match(/\b(e-atx|micro-?atx|m-?atx|mini-?itx|itx|atx)\b/i)) ? ({ "MICRO-ATX": "mATX", "MICROATX": "mATX", "M-ATX": "mATX", "MATX": "mATX" }[x[1].toUpperCase()] || x[1].toUpperCase()) : "",
         /wi-?fi|\bwf\d/i.test(n) ? "Wi-Fi" : ""];
-      case "memoria": return [(x = n.match(/\b(\d{1,3})\s?gb\b/i)) ? `${x[1]} GB` : "", (x = n.match(/\bddr([345])\b/i)) ? `DDR${x[1]}` : "",
+      case "memoria": return [enGB(n), (x = n.match(/\bddr([345])\b/i)) ? `DDR${x[1]}` : "",
         (x = n.match(/\b(\d{4,5})\s?(?:mhz|mt\/s)\b/i) || n.match(/\bddr[345]\s+(\d{4})\b/i)) ? `${x[1]} MHz` : "",
         (x = n.match(/\bcl\s?(\d{2})\b/i)) ? `CL${x[1]}` : "", /so-?dimm/i.test(n) ? "SODIMM" : ""];
-      case "disco": return [(x = n.match(/\b(\d{1,4})\s?(gb|tb)\b/i)) ? gb(x[2].toLowerCase() === "tb" ? +x[1] * 1000 : +x[1]) : "",
+      case "disco": return [capacidad(n),
         /nvme/i.test(n) ? "NVMe" : /\bm\.?2\b/i.test(n) ? "M.2" : /\bsata\b/i.test(n) ? "SATA" : "", (x = n.match(/\b(?:gen|pcie)\s?([345])\b/i)) ? `Gen${x[1]}` : "",
         /\bhdd\b|r[ií]gido/i.test(n) ? "HDD" : "", /\bext(?:erno)?\b|usb/i.test(n) && !/m\.?2/i.test(n) ? "Externo" : ""];
       case "fuente": return [(x = n.match(/\b(\d{3,4})\s?w\b/i)) ? `${x[1]} W` : "",
@@ -288,7 +301,7 @@
       case "teclado": return [/magn[eé]tic/i.test(n) ? "Magnético" : "", /mec[aá]nic/i.test(n) ? "Mecánico" : "", ...conectividad(n),
         (x = n.match(/\b(60|65|75|tkl)\s?%?(?![\w])/i)) ? (/\d/.test(x[1]) ? `${x[1]}%` : "TKL") : "", /\brgb\b/i.test(n) ? "RGB" : ""];
       case "auriculares": case "parlante": return [...conectividad(n), /\banc\b|cancelaci[oó]n/i.test(n) ? "ANC" : "", (x = n.match(/\b(\d{1,3})\s?w\b/i)) ? `${x[1]} W` : ""];
-      default: return [...conectividad(n), (x = n.match(/\b(\d{1,4})\s?(gb|tb)\b/i)) ? `${x[1]} ${x[2].toUpperCase()}` : "", pulg(n)];
+      default: return [...conectividad(n), capacidad(n), pulg(n)];
     }
   }
 
@@ -325,7 +338,7 @@
     /oled|mini-?led/i, /\b(?:4k|uhd|2160p)\b/i, /\b(?:1[4-9]\d|[2-9]\d\d)\s?hz\b/i,
     /\brtx\s?(?:[45]0[6-9]0|[45]0[6-9]0\s?ti)\b/i, /\brx\s?(?:7[89]00|90[67]0)/i,
     /\b(?:core\s?(?:ultra\s?)?|i)[79]\b|\bryzen\s?(?:ai\s?)?[79]\b|\bryzen\s?ai\b|\bcore\s?ultra\b/i,
-    /\bddr5\b/i, /\b(?:[1-9]|[1-9]\d)\s?tb\b/i, /\b(?:32|48|64|96|128)\s?gb\b/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
+    /\bddr5\b/i, /(?<![\d.,])[1-9]\d*(?:[.,]\d+)?\s?tb(?![a-z\d])/i, /(?<![\d.,])(?:32|48|64|96|128)\s?gb(?![a-z\d])/i, /\bpcie\s?5|\bgen\s?5\b/i, /\bwi-?fi\s?7\b/i, /mec[aá]nico/i,
   ];
   const premium = chip => PREMIUM.some(re => re.test(String(chip)));
 

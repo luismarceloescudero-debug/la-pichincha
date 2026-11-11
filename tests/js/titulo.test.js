@@ -134,6 +134,32 @@ test("titulo (04/11): «Rapid» de «Rapid IPS/VA» es el panel, no la marca; el
   assert.equal(T.de('Monitor Gamer MSI MAG 274QP X24 27" WQHD OLED 240Hz').titulo, "MSI MAG 274QP X24");
 });
 
+test("capacidad con decimales (11/11): el chip dice la capacidad de la unidad, no lo que sigue al punto", () => {
+  // «PACK 6X2.4TB» son unidades de 2.4 TB: salia el chip «4 TB», encima marcado premium. Un dato falso.
+  assert.deepEqual(T.chipsDe("SAS HPE MSA PACK 6X2.4TB", "otro"), ["2.4 TB"]);
+  assert.deepEqual(T.chipsDe("SSD 7.68TB U.2", "disco"), ["7.68 TB"]);
+  assert.deepEqual(T.de("HDD 1.2TB SAS").chips, ["1.2 TB", "HDD"]);
+  // La coma decimal tambien: el sitio muestra el punto.
+  assert.deepEqual(T.chipsDe("Disco 2,4TB", "disco"), ["2.4 TB"]);
+  assert.deepEqual(T.chipsDe("Pendrive 0.5TB", "disco"), ["0.5 TB"]);
+});
+
+test("capacidad sin decimales (11/11): sigue igual, y un kit no suma las dos unidades", () => {
+  assert.deepEqual(T.chipsDe("SSD 1TB", "disco"), ["1 TB"]);
+  assert.deepEqual(T.chipsDe("SSD 2 TB", "disco"), ["2 TB"]);
+  assert.deepEqual(T.de("Memoria 16GB").chips, ["16 GB"]);
+  assert.deepEqual(T.chipsDe("Memoria RAM 2.4GB", "memoria"), ["2.4 GB"]);
+  const kit = T.de("Kit 2x16GB");
+  assert.ok(kit.chips.includes("16 GB"), "el chip es la capacidad de cada modulo");
+  assert.ok(!kit.chips.some(c => /32 GB/.test(c)), "el kit no inventa el total");
+});
+
+test("premium y decimales (11/11): 1 TB o mas sigue siendo premium, 0.5 TB no", () => {
+  for (const c of ["2.4 TB", "7.68 TB", "1.2 TB", "1 TB", "10 TB", "128 GB"]) assert.ok(T.premium(c), c);
+  for (const c of ["0.5 TB", "0.9 TB", "16 GB", "8/256 GB"]) assert.ok(!T.premium(c), c);
+  assert.ok(!T.premium(T.chipsDe("Pendrive 0.5TB", "disco")[0]), "0.5 TB no es premium");
+});
+
 test("titulo (05/11): «MagneticoMecanico» pegado se separa en chips, un monitor sin modelo no queda en la marca sola, y una chip que el titulo ya dice no se repite", () => {
   const t = T.de("Teclado MagneticoMecanico Redragon K617 Fizz 60% Rapid Trigger 8K Hz Black RGB");
   assert.equal(t.titulo, "REDRAGON K617 FIZZ");
