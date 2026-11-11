@@ -88,7 +88,33 @@ def url_corrida():
 
 
 def gh(*args):
-    return subprocess.run(["gh", *args], check=True, capture_output=True, text=True).stdout
+    return subprocess.run(["gh", *args], check=True, capture_output=True, text=True,
+                          timeout=60).stdout
+
+
+def detalle(e):
+    """Una linea con el motivo del fallo de `gh`, para el ::warning:: del workflow."""
+    if isinstance(e, subprocess.CalledProcessError):
+        texto = e.stderr or e.stdout or f"gh salio con {e.returncode}"
+    else:
+        texto = str(e)
+    return " ".join(str(texto).split())[:500] or "sin detalle"
+
+
+def avisar(lista, url):
+    gh("label", "create", ETIQUETA, "--color", "d93f0b",
+       "--description", "Una fuente de precios trajo menos de lo esperado", "--force")
+    abiertos = {i["title"]: i["number"] for i in json.loads(
+        gh("issue", "list", "--label", ETIQUETA, "--state", "open", "--json", "number,title",
+           "--limit", "100") or "[]")}
+    for a in lista:
+        t, c = titulo(a), cuerpo(a, url)
+        if t in abiertos:
+            gh("issue", "comment", str(abiertos[t]), "--body", c)
+            print("comentado #" + str(abiertos[t]) + ": " + t)
+        else:
+            gh("issue", "create", "--title", t, "--body", c, "--label", ETIQUETA)
+            print("abierto: " + t)
 
 
 def main(argv=None):
@@ -110,19 +136,12 @@ def main(argv=None):
             print("# " + titulo(a) + "\n\n" + cuerpo(a, url) + "\n")
         return 0
 
-    gh("label", "create", ETIQUETA, "--color", "d93f0b",
-       "--description", "Una fuente de precios trajo menos de lo esperado", "--force")
-    abiertos = {i["title"]: i["number"] for i in json.loads(
-        gh("issue", "list", "--label", ETIQUETA, "--state", "open", "--json", "number,title",
-           "--limit", "100") or "[]")}
-    for a in lista:
-        t, c = titulo(a), cuerpo(a, url)
-        if t in abiertos:
-            gh("issue", "comment", str(abiertos[t]), "--body", c)
-            print("comentado #" + str(abiertos[t]) + ": " + t)
-        else:
-            gh("issue", "create", "--title", t, "--body", c, "--label", ETIQUETA)
-            print("abierto: " + t)
+    try:
+        avisar(lista, url)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as e:
+        # Un 403/429 de la API de GitHub (o un gh que no contesta) no puede dejar el sitio sin
+        # publicar ese dia: se avisa en el resumen y la corrida sigue (P1).
+        print("::warning::No se pudo avisar en GitHub: " + detalle(e))
     return 0
 
 

@@ -1,6 +1,7 @@
 import io
 import json
 import shutil
+import subprocess
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -86,6 +87,37 @@ class Main(unittest.TestCase):
         self.ruta.write_text(json.dumps(salud.evaluar({"a": 1}, {"a": 1}, {}, FECHA)), encoding="utf-8")
         self.correr()
         self.assertEqual(self.llamadas, [])
+
+    def test_si_gh_falla_avisa_y_la_corrida_sigue(self):
+        # P1: un 403/429 de la API de GitHub (o un gh que no contesta) no puede cortar la publicacion.
+        fallos = [subprocess.CalledProcessError(1, ["gh", "issue", "create"], output="", stderr="HTTP 403"),
+                  subprocess.TimeoutExpired(["gh", "issue", "create"], 60)]
+
+        def gh_roto(e):
+            def gh(*args):
+                self.llamadas.append(args)
+                raise e
+            return gh
+
+        for fallo in fallos:
+            with self.subTest(fallo=type(fallo).__name__):
+                self.llamadas = []
+                with mock.patch.object(salud, "gh", gh_roto(fallo)), redirect_stdout(io.StringIO()) as out:
+                    self.assertEqual(salud.main([str(self.ruta)]), 0)
+                self.assertIn("::warning::No se pudo avisar en GitHub", out.getvalue())
+
+    def test_la_lista_que_falla_no_abre_issues_de_mas(self):
+        def gh(*args):
+            if args[:2] == ("issue", "list"):
+                raise subprocess.CalledProcessError(1, ["gh", *args], output="", stderr="HTTP 429")
+            self.llamadas.append(args)
+            return ""
+
+        with mock.patch.object(salud, "gh", gh), redirect_stdout(io.StringIO()):
+            self.assertEqual(salud.main([str(self.ruta)]), 0)
+        self.assertEqual(self.llamadas, [("label", "create", salud.ETIQUETA, "--color", "d93f0b",
+                                          "--description", "Una fuente de precios trajo menos de lo esperado",
+                                          "--force")])
 
     def test_sin_archivo_avisa_el_indexado_caido(self):
         self.ruta.unlink()

@@ -108,8 +108,13 @@ jobs:
           else
             git add datos.json index.html
             git commit -m "Actualizacion automatica de precios [skip ci]"
+            # Un merge durante los ~55 min de la corrida deja el push en non-fast-forward (P3): se rebasa
+            # primero. Y si aun asi falla (conflicto, red), no frena la publicacion: los precios de hoy
+            # viajan en el sitio igual y la corrida siguiente los vuelve a relevar.
+            git pull --rebase
             git push
           fi
+        continue-on-error: true
 
       # Si una tienda se cae o bloquea la IP del runner, el indice anterior
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
@@ -145,8 +150,10 @@ jobs:
 
       # Una corrida manual con menos paginas no escribe historia: veria como
       # bajas los productos que no llego a recorrer.
+      # El historial es un extra: si el push choca con un merge, el sitio se publica igual (P3).
       - name: Guardar el historial de precios
         if: steps.indexar.outcome == 'success' && (inputs.paginas || '12') == '12'
+        continue-on-error: true
         working-directory: historial
         run: |
           git config user.name "github-actions[bot]"
@@ -156,11 +163,15 @@ jobs:
             echo "sin cambios en el historial"
           else
             git commit -m "Precios del $(TZ=America/Argentina/Buenos_Aires date +%F)"
+            git pull --rebase
             git push
           fi
 
+      # El aviso no puede frenar la publicacion (P1): si la API de GitHub contesta 403/429, el paso queda
+      # amarillo y el sitio se publica igual. salud.py ya atrapa el error y deja el ::warning::.
       - name: Avisar si una fuente se cayo
         if: github.event_name == 'schedule' && steps.indexar.outcome != 'skipped'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: python salud.py salud.json
