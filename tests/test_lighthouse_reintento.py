@@ -53,6 +53,13 @@ class Reintento(unittest.TestCase):
         self.assertIn(".github/lighthouse-corrida.sh npx --yes lighthouse@", yml)
         self.assertIn("node .github/lighthouse.js lh-*.json > lighthouse.txt || falla=1", yml)
 
+    def test_el_puntaje_corta_en_pr_pero_no_frena_la_publicacion(self):
+        # P6: en un PR el umbral corta; llamado desde actualizar.yml solo avisa.
+        yml = (RAIZ / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        paso = yml[yml.index("- name: Medir con Lighthouse"):]
+        paso = paso[:paso.index("run: |")]
+        self.assertIn("continue-on-error: ${{ github.event_name != 'pull_request' }}", paso)
+
 
 if __name__ == "__main__":
     unittest.main()

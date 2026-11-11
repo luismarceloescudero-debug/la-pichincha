@@ -123,7 +123,11 @@ jobs:
           node generar_info.js --indice _sitio/indice.json --salud no-hay.json --salida _sitio
           node generar_portada.js --salida _sitio
 
+      # En un PR el umbral corta (CONSTRAINTS.md, no se baja). Llamado desde actualizar.yml, un puntaje bajo queda
+      # como aviso y no frena la publicacion diaria: la portada oscila 83-95 entre corridas sin cambio de codigo (P6,
+      # docs/auditorias/2026-11-11.md) y con eso no se puede decidir si hay precios nuevos.
       - name: Medir con Lighthouse
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
         run: |
           python -m http.server 8080 --directory _sitio >/dev/null 2>&1 &
           sleep 2
