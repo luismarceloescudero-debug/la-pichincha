@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-10",
+  "actualizado": "2026-11-11",
   "envio": {
     "cp": "5501",
     "zona": "Mendoza",
@@ -64,10 +64,10 @@
       },
       "url": "https://compragamer.com/producto/Memoria_Adata_DDR4_16GB_3200MHz_XPG_Gammix_D35_Black_CL16_17151",
       "img": "img/adata-d35.jpg",
-      "precio": 223600,
-      "precio_lista": 248444,
-      "sin_impuestos": 202353,
-      "stock": "sin stock",
+      "precio": 225000,
+      "precio_lista": 250000,
+      "sin_impuestos": 203620,
+      "stock": "en stock",
       "titular": "El mejor equilibrio de marca, latencia y garantía",
       "specs": {
         "Timings": "16-20-20",
@@ -94,8 +94,7 @@
       ],
       "contras": [
         "El perfil CL16 corre a 1,35 V y se habilita con XMP en la BIOS; sin activarlo queda en JEDEC CL22."
-      ],
-      "falla_desde": "2026-11-02"
+      ]
     },
     {
       "id": "kingston-kvr",
@@ -238,7 +237,7 @@
       },
       "url": "https://www.venex.com.ar/perifericos/webcams/webcam-logitech-c920s-fhd-stereo-c-tapa.html",
       "img": "img/c920s.jpg",
-      "precio": 135999,
+      "precio": 139999,
       "stock": "en stock",
       "titular": "La que compraría",
       "specs": {
@@ -612,6 +611,21 @@
           "ahora": 268240
         }
       ]
+    },
+    {
+      "fecha": "2026-11-11",
+      "cambios": [
+        {
+          "id": "adata-d35",
+          "antes": 223600,
+          "ahora": 225000
+        },
+        {
+          "id": "c920s",
+          "antes": 135999,
+          "ahora": 139999
+        }
+      ]
     }
   ],
   "veredicto": [
@@ -633,12 +647,12 @@
     }
   ],
   "calculado": {
-    "adata_punto": 230239,
-    "adata_domicilio": 235258,
+    "adata_punto": 231639,
+    "adata_domicilio": 236658,
     "kingston_retiro": 299249,
     "combo_gc": 460888,
-    "combo_partido": 366238,
-    "ram_mas_barata": "corsair-lpx",
+    "combo_partido": 371638,
+    "ram_mas_barata": "adata-d35",
     "webcam_mas_barata": "c920s"
   },
   "marcas": {
