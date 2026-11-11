@@ -15,6 +15,31 @@
   const pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
   const unir = l => (l.length > 1 ? l.slice(0, -1).join(", ") + " y " + l[l.length - 1] : l.join(""));
 
+  /* --- El termino que va a las tiendas de afuera (spec 063, fase F) -----------------------------------------------------
+     eBay, AliExpress, Amazon y Tiendamia indexan en ingles: «auriculares inalambricos» no encuentra nada y «wireless headphones» si.
+     Se traducen las palabras de categoria y de caracteristica; marca, modelo, cifras y unidades (rtx 5060, 16gb, 27") quedan como
+     estan, y las palabras de enlace en español se sueltan. Lo que no esta en la tabla pasa tal cual: no se inventa nada. */
+  const FRASES = [["placa de video", "graphics card"], ["tarjeta de video", "graphics card"], ["tarjeta grafica", "graphics card"],
+    ["memoria ram", "ram memory"], ["disco solido", "ssd"], ["disco rigido", "hard drive"], ["camara web", "webcam"], ["fuente de poder", "power supply"],
+    ["placa madre", "motherboard"], ["pasta termica", "thermal paste"], ["silla gamer", "gaming chair"], ["con cable", "wired"], ["sin cable", "wireless"],
+    ["cancelacion de ruido", "noise cancelling"], ["teclado mecanico", "mechanical keyboard"]];
+  const PALABRAS = { auricular: "headphones", auriculares: "headphones", audifonos: "headphones", audifono: "headphones", inalambrico: "wireless",
+    inalambricos: "wireless", inalambrica: "wireless", teclado: "keyboard", mecanico: "mechanical", mecanica: "mechanical", raton: "mouse", parlante: "speaker",
+    parlantes: "speaker", celular: "smartphone", celulares: "smartphone", telefono: "smartphone", notebook: "laptop", notebooks: "laptop",
+    memoria: "memory", procesador: "processor", gabinete: "pc case", fuente: "power supply", gamer: "gaming", camara: "camera", pulgadas: "inch",
+    pulgada: "inch", negro: "black", negra: "black", blanco: "white", blanca: "white", azul: "blue", rojo: "red", roja: "red", verde: "green",
+    cargador: "charger", cable: "cable", impresora: "printer", tablet: "tablet", consola: "console", mochila: "backpack", reloj: "watch" };
+  const VACIAS = new Set(["de", "para", "con", "y", "el", "la", "los", "las", "un", "una", "por", "en", "del"]);
+  const sinTildes = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  function terminoAfuera(q) {
+    let t = ` ${sinTildes(q).replace(/\s+/g, " ").trim()} `;
+    for (const [es, en] of FRASES) t = t.split(` ${es} `).join(` ${en} `);
+    const salida = t.trim().split(" ").filter(Boolean).filter(w => !VACIAS.has(w)).map(w => PALABRAS[w] || w);
+    // dos palabras iguales seguidas («wireless wireless») no aportan
+    return salida.filter((w, i) => w !== salida[i - 1]).join(" ").slice(0, 100) || String(q).trim();
+  }
+
   /* La consulta al Worker; "" si no hay Worker configurado (sitio.json afuera_url) o no hay termino. */
   function urlConsulta(base, q) {
     const t = typeof q === "string" ? q.trim() : "";
@@ -59,7 +84,7 @@
       + `<p class="sub chico">${pie ? pie + " " : ""}El orden es por precio, nunca por comisión. Los precios son de cada tienda; impuestos y envío a Argentina aparte salvo que se indique.</p>${pegarLink}</section>`;
   }
 
-  const api = { NOMBRES, urlConsulta, afueraHtml };
+  const api = { NOMBRES, urlConsulta, afueraHtml, terminoAfuera };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Afuera = api;
 })(this);

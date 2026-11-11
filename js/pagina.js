@@ -4,17 +4,34 @@
   "use strict";
 
   const TOPE_Q = 100;          // un link no necesita mas para reproducir la busqueda
+  const TOPE_REF = 600;        // la direccion del aviso de referencia
   const TOPE_TERMINO = 60;     // GoatCounter agrupa por path: mas largo no aporta
 
   /* ?q=ssd+1tb#comparativa -> { q: "ssd 1tb", vista: "comparativa" } */
   function leerUrl(search, hash) {
-    const q = (new URLSearchParams(search || "").get("q") || "").replace(/\s+/g, " ").trim().slice(0, TOPE_Q);
-    return { q: q.length >= 2 ? q : "", vista: (hash || "").replace(/^#/, "") };
+    const params = new URLSearchParams(search || "");
+    const q = (params.get("q") || "").replace(/\s+/g, " ").trim().slice(0, TOPE_Q);
+    const r = { q: q.length >= 2 ? q : "", vista: (hash || "").replace(/^#/, "") };
+    // ?ref= es el aviso desde el que se comparo (spec 063): solo con una consulta y solo una direccion web
+    const ref = (params.get("ref") || "").trim();
+    if (r.q && /^https?:\/\//.test(ref) && ref.length <= TOPE_REF) r.ref = ref;
+    return r;
   }
 
-  function armarUrl(pathname, q, vista) {
+  /* Las fotos viajan aparte del indice (spec 057) partidas en REBANADAS_FOTO archivos (imagenes/N.json): la Comparativa baja solo
+     las rebanadas de las tarjetas que muestra. El build (adelgazar_indice.js) y el navegador usan esta misma cuenta. */
+  const REBANADAS_FOTO = 64;
+  function rebanadaFoto(url) {
+    let h = 5381;
+    const t = String(url || "");
+    for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+    return h % REBANADAS_FOTO;
+  }
+
+  function armarUrl(pathname, q, vista, ref = "") {
     const t = (q || "").trim();
-    return pathname + (t ? "?" + new URLSearchParams({ q: t }) : "") + (vista ? "#" + vista : "");
+    const params = t ? new URLSearchParams({ q: t, ...(ref && ref.length <= TOPE_REF ? { ref } : {}) }) : "";
+    return pathname + (t ? "?" + params : "") + (vista ? "#" + vista : "");
   }
 
   /* Argentina no tiene horario de verano: UTC-3 fijo (constitucion). Sin Intl.DateTimeFormat con zona
@@ -146,7 +163,7 @@
     return { url: u.toString(), afiliado: true };
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { REBANADAS_FOTO, rebanadaFoto, AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);

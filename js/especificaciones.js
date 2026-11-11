@@ -16,8 +16,18 @@
     smartphone: ["ram", "rom"],
     componente: ["capacidad", "ddr", "interfaz"],
     placa: ["gpu", "vram"],      // una placa de video es un componente, pero se compara por chip y memoria
+    // Perifericos (spec 063, fase B): el tipo de producto (auricular, teclado...) es parte de la comparacion, y vale lo que el titulo dice.
+    auricular: ["tipo", "conexion"],
+    teclado: ["tecnologia", "formato", "conexion"],
+    mouse: ["conexion", "dpi"],
+    webcam: ["resolucion", "fps"],
+    parlante: ["conexion", "potencia"],
   };
+  const PERIFERICOS = new Set(["auricular", "teclado", "mouse", "webcam", "parlante"]);
   const MIN_CLAVES = 2;      // con menos de dos especificaciones leidas la tarjeta no alcanza para comparar con justicia
+  // Un periferico ya trae su tipo de producto como parte de la comparacion (un teclado mecanico contra teclados mecanicos): con una
+  // sola especificacion mas alcanza. Un equipo o un monitor sigue pidiendo dos.
+  const minimoDe = categoria => (PERIFERICOS.has(categoria) ? 1 : MIN_CLAVES);
   const MIN_COMPARABLES = 3; // menos que esto: la comparativa lo dice en vez de mezclar familias
 
   const resolucionDe = n => /\b(?:3440\s?x\s?1440|uwqhd)\b/i.test(n) ? "uwqhd"
@@ -58,17 +68,83 @@
   const ddrDe = n => { const m = String(n).match(/\bddr\s?([345])\b/i); return m ? `ddr${m[1]}` : ""; };
   const interfazDe = n => /\bnvme\b|\bm\.?2\b/i.test(n) ? "nvme" : /\bsata\b/i.test(n) ? "sata" : "";
 
-  /* { categoria, valores: { clave: valor } } solo con lo que el titulo dice. */
-  function clavesDe(nombre) {
-    const categoria = C.categoriaDe(nombre);
-    const nombres = CLAVES[categoria === "componente" && gpuDe(nombre) ? "placa" : categoria] || [];
+  /* Pantalla en pulgadas con la unidad escrita («6.9 Pulgadas», 15.6"): un numero suelto («IdeaPad 15») es modelo, no pantalla.
+     El monitor sigue usando C.pulgadasDe, que lee el numero solo porque ahi el titulo lo trae asi. */
+  function pantallaDe(nombre) {
+    const m = String(nombre).replace(/(\d),(\d)/g, "$1.$2").match(/(?<![\d.])(\d{1,2}(?:\.\d)?)\s?(?:"|”|″|''|′′|pulgadas|pulg\b|inch\b)/i);
+    const v = m ? parseFloat(m[1]) : 0;
+    return v >= 4 && v <= 100 ? v : 0;
+  }
+  const redDe = n => /(?<![\d.])5\s?g(?![a-z\d])/i.test(n) ? "5g" : /(?<![\d.])4\s?g(?![a-z\d])|\blte\b/i.test(n) ? "4g" : "";
+  const velocidadDe = n => { const m = String(n).match(/\b(\d{3,5})\s?mhz\b/i); return m ? +m[1] : 0; };
+
+  /* --- Perifericos (spec 063, fase B) --------------------------------------------------------------------------------
+     categorias.js los junta a todos en «periferico» (y a los que no empiezan con la palabra, en «otro»). Aca se separa el tipo de
+     producto leyendo el titulo: unos auriculares no se comparan con un teclado. Un accesorio (funda, cable, repuesto) o un combo
+     no es ninguno de los dos y queda como estaba. */
+  const sinTildes = n => String(n).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const TIPOS_PERIFERICO = [
+    ["auricular", /\b(?:auricular(?:es)?|audifonos?|headset|headphones?|earbuds?|earphones?|aeroclip|aerofit|airpods|freebuds|tws)\b/],
+    ["teclado", /\b(?:teclado|keyboard)\b/],
+    ["mouse", /\b(?:mouse|raton)\b/],
+    ["webcam", /\b(?:webcam|camara web)\b/],
+    ["parlante", /\b(?:parlantes?|speaker|bafle|soundbar|barra de sonido)\b/],
+  ];
+  const NO_ES_PERIFERICO = /^\s*(?:funda|fundas|case|estuche|cable|adaptador|soporte|base|almohadillas?|repuesto|combo|kit)\b|mouse\s?pad|pad\s?mouse|alfombrilla/;
+  function subtipoDe(nombre) {
+    const n = sinTildes(nombre);
+    if (NO_ES_PERIFERICO.test(n)) return "";
+    let mejor = "", pos = 1e9;
+    for (const [tipo, re] of TIPOS_PERIFERICO) { const x = n.search(re); if (x >= 0 && x < pos) { pos = x; mejor = tipo; } }
+    return mejor;
+  }
+  const tipoAuricularDe = n => { const t = sinTildes(n);
+    return /aeroclip|\bclip\b|open[- ]?ear|aerofit/.test(t) ? "clip" : /in[- ]?ear|earbuds?|\bbuds\b|airpods|\btws\b|intraural/.test(t) ? "in-ear"
+      : /over[- ]?ear|on[- ]?ear|diadema|headset|circumaural|headphones?/.test(t) ? "diadema" : ""; };
+  const conexionDe = n => { const t = sinTildes(n);
+    return /inalambric|wireless|bluetooth|\bbt\s?\d|2\.4\s?g/.test(t) ? "inalambrico" : /\bcable\b|alambric|\bwired\b|3\.5\s?mm|\bjack\b|\busb\b/.test(t) ? "cable" : ""; };
+  const ancDe = n => /\banc\b|cancelacion (?:activa )?de ruido|noise[- ]?cancel/.test(sinTildes(n)) ? "anc" : "";
+  const autonomiaDe = n => { const m = sinTildes(n).match(/(?<![\d.])(\d{1,3})\s?(?:h|hs|hrs|horas)\b/); return m && +m[1] >= 2 && +m[1] <= 200 ? +m[1] : 0; };
+  const tecnologiaDe = n => { const t = sinTildes(n); return /mecanic/.test(t) ? "mecanico" : /membrana/.test(t) ? "membrana" : ""; };
+  const formatoTecladoDe = n => { const t = sinTildes(n);
+    return /\btkl\b|tenkeyless|\b80\s?%|sin (?:teclado )?numeric/.test(t) ? "tkl" : /\b75\s?%/.test(t) ? "75%" : /\b65\s?%/.test(t) ? "65%" : /\b60\s?%/.test(t) ? "60%"
+      : /\b100\s?%|full[- ]?size|\bcompleto\b/.test(t) ? "100%" : ""; };
+  const COLORES_SWITCH = { red: "rojo", rojo: "rojo", blue: "azul", azul: "azul", brown: "marron", marron: "marron", green: "verde", verde: "verde",
+    black: "negro", negro: "negro", yellow: "amarillo", amarillo: "amarillo", silver: "plata", plata: "plata" };
+  const switchDe = n => { const t = sinTildes(n), c = "red|rojo|blue|azul|brown|marron|green|verde|black|negro|yellow|amarillo|silver|plata";
+    const m = t.match(new RegExp(`\\b(${c})\\s+switch`)) || t.match(new RegExp(`switch(?:es)?\\s+(?:color\\s+)?(${c})\\b`)); return m ? COLORES_SWITCH[m[1]] : ""; };
+  const dpiDe = n => { const m = String(n).replace(/(\d)[.,](\d{3})\b/g, "$1$2").match(/(\d{3,6})\s?dpi/i); return m ? +m[1] : 0; };
+  const fpsDe = n => { const m = String(n).match(/(\d{2,3})\s?fps/i); return m ? +m[1] : 0; };
+  const potenciaDe = n => { const m = String(n).match(/(?<![\d.])(\d{1,4})\s?w(?:atts?)?\b/i); return m ? +m[1] : 0; };
+  const gamerDe = n => /\bgamer\b|\bgaming\b/.test(sinTildes(n)) ? "gamer" : "";
+
+  const categoriaClaves = (nombre, categoria) => (categoria === "componente" && gpuDe(nombre) ? "placa" : categoria);
+
+  /* La categoria de categorias.js, salvo en perifericos y «otros», donde manda el tipo de producto que dice el titulo. */
+  function categoriaDe(nombre) {
+    const base = C.categoriaDe(nombre);
+    return base === "periferico" || base === "otro" ? subtipoDe(nombre) || base : base;
+  }
+
+  function lectoresDe(nombre) {
     const mem = C.memoriaDe(nombre);
-    const lectores = {
+    return {
       pulgadas: () => C.pulgadasDe(nombre), panel: () => C.panelDe(nombre), hz: () => hzDe(nombre),
       resolucion: () => resolucionDe(nombre), cpu: () => cpuDe(nombre), gpu: () => gpuDe(nombre),
       ram: () => mem.ram, rom: () => mem.rom, capacidad: () => capacidadDe(nombre), vram: () => capacidadDe(nombre),
       ddr: () => ddrDe(nombre), interfaz: () => interfazDe(nombre),
+      pantalla: () => pantallaDe(nombre), red: () => redDe(nombre), velocidad: () => velocidadDe(nombre),
+      tipo: () => tipoAuricularDe(nombre), conexion: () => conexionDe(nombre), anc: () => ancDe(nombre), autonomia: () => autonomiaDe(nombre),
+      tecnologia: () => tecnologiaDe(nombre), formato: () => formatoTecladoDe(nombre), switch: () => switchDe(nombre),
+      dpi: () => dpiDe(nombre), fps: () => fpsDe(nombre), potencia: () => potenciaDe(nombre), gamer: () => gamerDe(nombre),
     };
+  }
+
+  /* { categoria, valores: { clave: valor } } solo con lo que el titulo dice. Es lo que decide si dos avisos son comparables. */
+  function clavesDe(nombre) {
+    const categoria = categoriaDe(nombre);
+    const nombres = CLAVES[categoriaClaves(nombre, categoria)] || [];
+    const lectores = lectoresDe(nombre);
     const valores = {};
     for (const k of nombres) { const v = lectores[k](); if (v) valores[k] = v; }
     return { categoria, valores };
@@ -80,7 +156,7 @@
   function mismas(ref, f) {
     const a = clavesDe(ref[0]);
     const claves = Object.keys(a.valores);
-    if (claves.length < MIN_CLAVES) return { aplica: false, coincide: true, ok: [], faltan: [], distintas: [] };
+    if (claves.length < minimoDe(a.categoria)) return { aplica: false, coincide: true, ok: [], faltan: [], distintas: [] };
     const b = clavesDe(f[0]);
     const r = { aplica: true, ok: [], faltan: [], distintas: [] };
     if (b.categoria !== a.categoria) { r.distintas = claves; r.coincide = false; return r; }
@@ -91,6 +167,30 @@
     }
     r.coincide = !r.faltan.length && !r.distintas.length;
     return r;
+  }
+
+  /* --- Buscar por caracteristicas (spec 063, fase C) ---------------------------------------------------------------
+     Desde una tarjeta, «Comparar» ya no busca el texto del modelo (solo encontraba el mismo producto en otras tiendas): busca en todo
+     el indice los avisos de la misma categoria con las mismas especificaciones. `exacta` pide que coincidan todas las que dice la
+     tarjeta; `cercana` deja pasar una cifra a la mitad o al doble (16 GB de RAM contra 32; 240 Hz contra 165) y la misma gama de
+     procesador, y se usa solo cuando de las exactas hay pocas. Lo que el otro aviso no dice nunca coincide (principio II). */
+  const NUMERICAS = new Set(["ram", "rom", "capacidad", "vram", "hz", "pulgadas", "pantalla", "dpi", "potencia", "fps"]);
+  function igualesA(ref) {
+    const a = clavesDe(ref[0]), claves = Object.keys(a.valores);
+    const aplica = claves.length >= minimoDe(a.categoria);
+    const comparar = (f, cerca) => {
+      const b = clavesDe(f[0]);
+      if (b.categoria !== a.categoria) return false;
+      return claves.every(k => {
+        const x = a.valores[k], y = b.valores[k];
+        if (y === undefined) return false;
+        if (x === y) return true;
+        if (!cerca) return false;
+        if (NUMERICAS.has(k) && typeof x === "number" && typeof y === "number") return y >= x / 2 && y <= x * 2;
+        return k === "cpu" && String(x).split("-")[0] === String(y).split("-")[0];
+      });
+    };
+    return { aplica, categoria: a.categoria, exacta: f => comparar(f, false), cercana: f => comparar(f, true) };
   }
 
   const gb = n => (n >= 1000 && n % 1000 === 0 ? `${n / 1000} TB` : `${n} GB`);
@@ -109,7 +209,61 @@
     return Object.entries(valores).map(([k, v]) => TEXTO[k](v)).join(" · ");
   }
 
-  const api = { CLAVES, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
+
+  /* --- Lo que se MUESTRA de un aviso (tarjetas y tabla de la Comparativa) -------------------------------------------
+     CLAVES decide si dos avisos son comparables; FICHA decide que se muestra de cada categoria, siempre las mismas y en el
+     mismo orden: antes cada tarjeta mostraba lo que su titulo daba la casualidad de decir (un Ryzen 7 en una y nada en otra).
+     Lo que el titulo no dice se muestra como «no informa», nunca se inventa (principio II). */
+  const FICHA = {
+    monitor: ["pulgadas", "panel", "hz", "resolucion"],
+    notebook: ["cpu", "ram", "rom", "gpu", "pantalla"],
+    pc: ["cpu", "ram", "rom", "gpu"],
+    smartphone: ["ram", "rom", "red", "pantalla"],
+    componente: ["capacidad", "ddr", "interfaz", "velocidad"],
+    placa: ["gpu", "vram"],
+    auricular: ["tipo", "conexion", "anc", "autonomia"],
+    teclado: ["tecnologia", "formato", "conexion", "switch"],
+    mouse: ["conexion", "dpi", "gamer"],
+    webcam: ["resolucion", "fps"],
+    parlante: ["conexion", "potencia"],
+  };
+  const ETIQUETA = { pulgadas: "Pantalla", pantalla: "Pantalla", panel: "Panel", hz: "Frecuencia", resolucion: "Resolución", cpu: "Procesador",
+    ram: "RAM", rom: "Almacenamiento", gpu: "Gráficos", capacidad: "Capacidad", ddr: "Tipo de memoria", interfaz: "Interfaz",
+    vram: "Memoria de video", red: "Red", velocidad: "Velocidad",
+    tipo: "Tipo", conexion: "Conexión", anc: "Ruido", autonomia: "Autonomía", tecnologia: "Tecnología", formato: "Formato", switch: "Switch",
+    dpi: "Sensor", fps: "Cuadros", potencia: "Potencia", gamer: "Uso" };
+  TEXTO.pantalla = v => `${v}"`;
+  TEXTO.red = v => v.toUpperCase();
+  TEXTO.velocidad = v => `${v} MHz`;
+  Object.assign(TEXTO, {
+    tipo: v => ({ clip: "De clip (abiertos)", "in-ear": "In-ear", diadema: "Con diadema" })[v] || v,
+    conexion: v => (v === "inalambrico" ? "Inalámbrico" : "Con cable"), anc: () => "Cancelación de ruido", autonomia: v => `${v} h`,
+    tecnologia: v => (v === "mecanico" ? "Mecánico" : "Membrana"), formato: v => (v === "tkl" ? "TKL (sin numérico)" : v === "100%" ? "Completo (100%)" : v),
+    switch: v => v[0].toUpperCase() + v.slice(1), dpi: v => `${v.toLocaleString("es-AR")} DPI`, fps: v => `${v} fps`, potencia: v => `${v} W`, gamer: () => "Gamer",
+  });
+  const TEXTO_FICHA = { ...TEXTO, ram: v => `${v} GB` };   // la etiqueta ya dice «RAM»
+
+  /* { categoria, filas: [{ clave, etiqueta, valor, texto }] }: una fila por cada especificacion de la categoria; `texto` es "" si el titulo no la dice. */
+  function fichaDe(nombre) {
+    const categoria = categoriaDe(nombre);
+    const nombres = FICHA[categoriaClaves(nombre, categoria)] || [];
+    const lectores = lectoresDe(nombre);
+    const filas = nombres.map(clave => {
+      const valor = lectores[clave]();
+      return { clave, etiqueta: ETIQUETA[clave] || clave, valor: valor || null, texto: valor ? TEXTO_FICHA[clave](valor) : "" };
+    });
+    return { categoria, filas };
+  }
+
+  /* Como se llama cada categoria en plural, y con que palabra se la nombra (para decirle a la persona «Solo auriculares»). */
+  const ETIQUETA_CATEGORIA = { notebook: "Notebooks", smartphone: "Celulares", monitor: "Monitores", pc: "PCs", componente: "Componentes",
+    placa: "Placas de video", auricular: "Auriculares", teclado: "Teclados", mouse: "Mouse", webcam: "Webcams", parlante: "Parlantes",
+    periferico: "Otros periféricos", otro: "Otros" };
+
+  /* Donde un numero mas alto es mejor (la pantalla no entra: mas grande no es mejor). Lo usan la tabla (resalta el mayor) y la mejor compra. */
+  const MAYOR_ES_MEJOR = new Set(["ram", "rom", "capacidad", "vram", "hz", "dpi", "potencia", "fps", "autonomia", "velocidad"]);
+
+  const api = { MAYOR_ES_MEJOR, ETIQUETA_CATEGORIA, categoriaDe, CLAVES, FICHA, ETIQUETA, fichaDe, minimoDe, subtipoDe, igualesA, MIN_CLAVES, MIN_COMPARABLES, clavesDe, mismas, resumen };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Especificaciones = api;
 })(this);

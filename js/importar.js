@@ -462,8 +462,10 @@
   const fecha = iso => iso.split("-").reverse().join("/");
 
   /* El bloque con la busqueda ya armada en cada fuente (y en la tienda oficial verificada, si la hay). Solo enlaces. */
-  function buscarAfueraHtml(termino, { esc, icono = () => "", oficiales = OFICIALES }) {
+  function buscarAfueraHtml(termino, { esc, icono = () => "", oficiales = OFICIALES, original = "" }) {
     const t = normalTermino(termino);
+    // el termino ya viene traducido (Afuera.terminoAfuera): se dice, para que la persona sepa que busco y pueda corregirlo
+    const traducido = original && normalTermino(original) !== t ? ` Como las tiendas de afuera están en inglés, buscamos «${esc(t)}» (tu búsqueda: «${esc(normalTermino(original))}»).` : "";
     const fuentes = FUENTES.map(f => `<li><a href="${esc(urlBusqueda(f, t))}" target="_blank" rel="${f.afiliado ? "sponsored noopener" : "noopener"}">${icono("fuera")} ${esc(f.nombre)}</a>
         ${f.afiliado ? '<span class="rotulo">enlace de afiliado · <a href="legal/#afiliados">qué es</a></span>' : ""}
         <span class="sub chico">${esc(f.texto)}</span></li>`);
@@ -471,7 +473,7 @@
         <span class="sub chico">Tienda oficial de ${esc(o.marca)}: envía a Argentina según <a href="${esc(o.envios)}" target="_blank" rel="noopener">su página de envíos</a> (verificado el ${esc(fecha(o.verificado))}).</span></li>`);
     return `<section class="afuera" aria-labelledby="afuera-tit">
       <h3 id="afuera-tit">Buscalo afuera: la búsqueda ya está armada</h3>
-      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda.</p>
+      <p class="sub chico">Cada enlace abre en otra pestaña la búsqueda de «${esc(t)}» en esa tienda.${traducido}</p>
       <ul class="afuera-lista">${[...fuentes, ...propias].join("")}</ul>
       ${pegarLinkHtml()}</section>`;
   }

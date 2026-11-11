@@ -36,6 +36,22 @@ function asegurarImagenes() {
   return pidiendoImagenes;
 }
 
+/* Las fotos de la Comparativa (spec 063): cada tarjeta lleva la direccion de su aviso en data-foto y esto la completa pidiendo solo las
+   rebanadas (imagenes/N.json) que hacen falta. Sin rebanada, sin red o sin foto queda el icono: nunca rompe la tarjeta. */
+const REBANADAS_PEDIDAS = new Map();
+function fotoRebanada(n) {
+  if (!REBANADAS_PEDIDAS.has(n)) REBANADAS_PEDIDAS.set(n, fetch(`imagenes/${n}.json`)
+    .then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(m => (m && typeof m === "object" ? m : {})));
+  return REBANADAS_PEDIDAS.get(n);
+}
+async function pintarFotos() {
+  const huecos = [...document.querySelectorAll("[data-foto].sin-foto")];
+  await Promise.all(huecos.map(async el => {
+    const url = el.dataset.foto, foto = fondo((await fotoRebanada(Pagina.rebanadaFoto(url)))[url]);
+    if (foto && el.isConnected) { el.style.backgroundImage = `url("${foto}")`; el.classList.remove("sin-foto"); }
+  }));
+}
+
 /* Las ofertas de todo el indice (un segundo de CPU en un telefono, Lighthouse del 24/10) no frenan la busqueda: se calculan cuando
    el navegador queda libre, o enseguida si las pide la pestaña Ofertas o el modo Súper Oferta (ofertasListas). Al terminar,
    la pestaña muestra su numero y la busqueda vuelve a pintarse con «otra tienda lo tiene más barato». */
@@ -314,7 +330,7 @@ function marcarEstrella(btn) {
 function compararOferta(i) {
   const o = OF_ACTUAL[i];
   if (!o) return;
-  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f);
+  compararConsulta(Buscador.consultaDeOferta(o.f[0], hayResultados), o.f, { desdeOferta: true });
 }
 
 /* Abrir o cerrar una tarjeta (patron disclosure): el nombre es el boton, con aria-expanded; un clic en cualquier

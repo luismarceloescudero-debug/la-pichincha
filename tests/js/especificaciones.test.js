@@ -141,3 +141,49 @@ test("memorias de 32 y 64 GB tienen capacidad: un kit no se queda sin comparar",
   assert.equal(E.mismas(["Memoria Kingston Fury DDR5 32GB 6000MHz"], ["Memoria Corsair DDR5 64GB (2x32GB) 6000MHz"]).coincide, false);
 });
 
+
+/* --- Spec 063, fase B: perifericos --- */
+const AERO = "Auriculares Soundcore Aeroclip 2 by Anker Bluetooth";
+
+test("perifericos: el tipo de producto sale del titulo, aunque no empiece con la palabra", () => {
+  assert.equal(E.clavesDe(AERO).categoria, "auricular");
+  assert.equal(E.clavesDe("Soundcore Aeroclip Open-Ear Inalambricos").categoria, "auricular");
+  assert.equal(E.clavesDe("Teclado Mecanico Razer BlackWidow V4 Green Switch").categoria, "teclado");
+  assert.equal(E.clavesDe("Gamer Mouse Logitech G502 Hero").categoria, "mouse");
+  assert.equal(E.clavesDe("Parlante JBL Flip 6 Bluetooth 30W").categoria, "parlante");
+});
+
+test("perifericos: un accesorio, un combo o un mousepad no es ninguno de esos productos", () => {
+  for (const n of ["Funda para auriculares Soundcore", "Combo Teclado y Mouse Logitech MK270", "Mouse Pad Gamer XL", "Cable para teclado mecanico"])
+    assert.ok(!["auricular", "teclado", "mouse"].includes(E.clavesDe(n).categoria), n);
+});
+
+test("auriculares: tipo (clip, in-ear, diadema) y conexion; la cancelacion de ruido y las horas se muestran", () => {
+  assert.deepEqual(E.clavesDe(AERO).valores, { tipo: "clip", conexion: "inalambrico" });
+  const f = E.fichaDe("Auriculares Sony WF-1000XM5 In-Ear Bluetooth ANC 24 horas").filas;
+  assert.deepEqual(f.map(r => r.texto), ["In-ear", "Inalámbrico", "Cancelación de ruido", "24 h"]);
+  assert.equal(E.clavesDe("Auriculares Gamer HyperX Cloud II Cable USB").valores.tipo, undefined, "si el titulo no dice el tipo, no se inventa");
+});
+
+test("teclados: tecnologia, formato, conexion y color de switch", () => {
+  const v = E.clavesDe("Teclado Mecanico Redragon Kumara 87 TKL Blue Switch USB").valores;
+  assert.deepEqual(v, { tecnologia: "mecanico", formato: "tkl", conexion: "cable" });
+  assert.equal(E.fichaDe("Teclado Mecanico Razer BlackWidow V4 Green Switch").filas.find(r => r.clave === "switch").texto, "Verde");
+});
+
+test("un teclado mecanico se compara con teclados mecanicos, no con uno de membrana ni con un mouse", () => {
+  const ref = ["Teclado Mecanico Razer BlackWidow V4 Green Switch"];
+  assert.equal(E.mismas(ref, ["Teclado Mecanico Redragon Kumara Blue Switch"]).coincide, true);
+  assert.equal(E.mismas(ref, ["Teclado Logitech K120 Membrana USB"]).coincide, false);
+  assert.equal(E.mismas(ref, ["Mouse Mecanico Gamer"]).coincide, false);
+});
+
+test("auriculares de clip: comparan con auriculares de clip inalambricos, no con una diadema con cable", () => {
+  assert.equal(E.mismas([AERO], ["Soundcore Aeroclip Open-Ear Inalambricos"]).coincide, true);
+  assert.equal(E.mismas([AERO], ["Auriculares Gamer HyperX Cloud II Diadema Cable"]).coincide, false);
+});
+
+test("un periferico con una sola especificacion ya se puede comparar; un equipo sigue pidiendo dos", () => {
+  assert.equal(E.mismas(["Teclado Mecanico Razer BlackWidow"], ["Teclado Mecanico Redragon Kumara"]).aplica, true);
+  assert.equal(E.mismas(['Monitor Gamer 27"'], ['Monitor OLED 27" QHD 240Hz']).aplica, false);
+});

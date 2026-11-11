@@ -5,7 +5,10 @@
    lo escribe la propia busqueda. Sin consulta, Comparativa y Veredicto usan la
    busqueda mas reciente (spec 021, js/historial.js): ya no vuelve el analisis
    curado del primer relevamiento. Tiendas es una seccion de la Comparativa. */
-let CONSULTA = "", ANALISIS = null, REFERENCIA = null;   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
+let CONSULTA = "", ANALISIS = null, REFERENCIA = null, DESDE_OFERTA = false, SOLO_CATEGORIA = "";
+/* La ultima busqueda que la persona escribio o abrio, la haya o no con resultados. El Veredicto y la Comparativa se arman con ELLA, nunca con
+   una anterior que quedo guardada (spec 063, fase D: «Aero» tapaba a «aeroclip 2»). Solo borrar las busquedas la vacia. */
+let ULTIMA_ESCRITA = "";   // REFERENCIA: la tarjeta desde la que se comparo (spec 017); una busqueda nueva la borra
 const DINAMICAS = ["comparativa", "veredicto"];
 let RECIENTE_DE_BUSCADAS = false;   // la consulta la puso el Veredicto con «Lo mas buscado», no la persona (js/historial.js)
 const LETRAS = ["A", "B", "C", "D"];
@@ -27,21 +30,24 @@ function marcaDe(nombre) { return Buscador.marcaDe(nombre, MARCAS_RE); }
 /* La logica vive en js/analisis.js: la comparten esta pagina y las paginas por busqueda. */
 function analizarConsulta(q) {
   return Analisis.analizarConsulta(q, { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe: f => OTRAS.get(f) || [],
-    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA });
+    fechaDe: f => IDX ? Pagina.precioFecha((IDX.tiendas[f[3]] || {}).relevado, IDX.generado) : "", referencia: REFERENCIA, buscarPorEspec: buscarPorEspecificaciones, desdeOferta: DESDE_OFERTA, soloCategoria: SOLO_CATEGORIA });
 }
 
 /* `referencia` (opcional): la fila de la tarjeta desde la que se compara; la comparativa queda con sus mismas especificaciones. */
-function fijarConsulta(q, referencia = null) {
+function fijarConsulta(q, referencia = null, { desdeOferta = false, categoria = "" } = {}) {
   const t = q.trim();
   if (t.length < 2) return limpiarConsulta();
+  ULTIMA_ESCRITA = t;
+  SOLO_CATEGORIA = categoria;
   CONSULTA = t;
   REFERENCIA = referencia;
+  DESDE_OFERTA = !!referencia && desdeOferta;     // viene de la pestaña Ofertas: ya muestra el mejor precio del modelo
   RECIENTE_DE_BUSCADAS = false;
   ANALISIS = analizarConsulta(t);
   if (!ANALISIS) { CONSULTA = ""; REFERENCIA = null; }
   marcarConsulta();
 }
-function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
+function limpiarConsulta() { CONSULTA = ""; ANALISIS = null; REFERENCIA = null; DESDE_OFERTA = false; SOLO_CATEGORIA = ""; RECIENTE_DE_BUSCADAS = false; marcarConsulta(); }
 function marcarConsulta() {
   const t = $(".tabs"); if (t) t.dataset.consulta = CONSULTA ? "1" : "0";
   sincronizarUrl();
@@ -53,29 +59,72 @@ function notaEspecificaciones(A) {
   const e = A.espec;
   if (!e) return "";
   if (!e.aplica) return ` <span class="nota-espec">No pudimos comparar por especificaciones: el título del aviso no las dice. Comparamos con toda la búsqueda.</span>`;
+  if (e.aproximada) return ` <span class="nota-espec">Hay pocos avisos con exactamente <b>${esc(e.resumen)}</b>: sumamos los de especificaciones parecidas (una cifra a la mitad o al doble). Las diferencias están en la tabla.</span>`;
   const pocos = e.pocos ? ` Hay pocos avisos con esta configuración: esto es todo lo que hay con exactamente esas especificaciones.` : "";
   return ` <span class="nota-espec">Comparando solo con avisos de las mismas especificaciones: <b>${esc(e.resumen)}</b> (${e.comparables} ${e.comparables === 1 ? "aviso" : "avisos"}).${pocos}</span>`;
 }
 
-function bannerConsulta() {
-  const A = ANALISIS, partes = Analisis.partesExclusion(A.excl);
-  return `<div class="consulta-activa"><span class="txt">${icono("lupa")} ${RECIENTE_DE_BUSCADAS ? "Armado con lo más buscado" : "Armado para tu búsqueda"} <b>«${esc(CONSULTA)}»</b>:
-    ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
-    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>`;
+/* Una busqueda que junta tipos de producto distintos lo dice y deja elegir uno (o volver a ver todos). */
+function mezclaHtml() {
+  const A = ANALISIS;
+  if (A.soloCategoria) {
+    const nom = (A.mezcla || []).find(c => c.categoria === A.soloCategoria);
+    return `<p class="mezcla">Mostrando solo <b>${esc(nom ? nom.etiqueta.toLowerCase() : A.soloCategoria)}</b>. <button class="acc" data-solo-categoria="">Ver todo lo que coincide</button></p>`;
+  }
+  if (!A.mezcla) return "";
+  return `<p class="mezcla">Tu búsqueda junta productos de tipos distintos, y la mediana de precios no dice nada si se mezclan. ¿Cuál buscás?
+    ${A.mezcla.slice(0, 4).map(c => `<button class="sug" data-solo-categoria="${esc(c.categoria)}">${esc(c.etiqueta)} (${c.n})</button>`).join(" ")}</p>`;
 }
 
-function cardPick(p, i) {
+function bannerConsulta() {
+  const A = ANALISIS, partes = Analisis.partesExclusion(A.excl, A.categoria);
+  // Comparando por caracteristicas desde una tarjeta: la «busqueda» es la del modelo, asi que se dice contra que se compara.
+  if (REFERENCIA && A.espec && A.espec.porEspecificaciones)
+    return `<div class="consulta-activa"><span class="txt">${icono("balanza")} Comparando <b>«${esc(REFERENCIA[0].slice(0, 70))}»</b> con otros productos de sus características
+      de cualquier marca: ${A.base.length} comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
+      <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>${mezclaHtml()}`;
+  return `<div class="consulta-activa"><span class="txt">${icono("lupa")} ${RECIENTE_DE_BUSCADAS ? "Armado con lo más buscado" : "Armado para tu búsqueda"} <b>«${esc(CONSULTA)}»</b>:
+    ${A.total} avisos, ${A.base.length} comparables en ${A.comercios.length} comercios.${partes.length ? ` Dejamos afuera ${partes.join(", ")}.` : ""}${notaEspecificaciones(A)}</span>
+    <button class="acc" data-cambiar-consulta>${icono("lupa")} Cambiar búsqueda</button></div>${mezclaHtml()}`;
+}
+
+/* Las especificaciones que se muestran en TODAS las tarjetas y en la tabla (js/especificaciones.js, fichaDe): la union de lo que
+   dice alguno de los avisos, en el orden de la categoria. Una especificacion que ninguno dice no se muestra; si alguno la dice y
+   otro no, el otro dice «no informa» en vez de callarse (antes un Ryzen 7 salia en una tarjeta y en la vecina no). */
+function clavesFicha(picks) {
+  const fichas = picks.map(p => Especificaciones.fichaDe(p.m.f[0]).filas);
+  const claves = [];
+  for (const filas of fichas) for (const r of filas)
+    if (!claves.some(c => c.clave === r.clave) && fichas.some(fs => fs.some(x => x.clave === r.clave && x.valor))) claves.push({ clave: r.clave, etiqueta: r.etiqueta });
+  return claves;
+}
+const valorFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).valor;
+/* Donde un numero mas alto es mejor: en la tabla se resalta el mayor (la pantalla, por ejemplo, no entra: mas grande no es mejor). */
+const MAYOR_ES_MEJOR = Especificaciones.MAYOR_ES_MEJOR;
+const textoFicha = (nombre, clave) => (Especificaciones.fichaDe(nombre).filas.find(r => r.clave === clave) || {}).texto || "";
+function cardsHtml(picks) {
+  const claves = clavesFicha(picks);
+  return picks.map((p, i) => cardPick(p, i, claves)).join("");
+}
+
+function cardPick(p, i, claves = clavesFicha([p])) {
   const f = p.m.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" };
-  const specs = Object.values(specsDe(f[0])).slice(0, 5);
+  // sin ficha para esta categoria (perifericos, «otros»): lo que lee Buscador.specsDe, como siempre
+  const fichaChips = claves.length
+    ? claves.map(c => { const v = textoFicha(f[0], c.clave);
+        return v ? `<span class="chip spec" title="${esc(c.etiqueta)}"><span class="eti">${esc(c.etiqueta)}</span> ${esc(v)}</span>`
+          : `<span class="chip spec sin" title="${esc(c.etiqueta)}: el aviso no lo dice"><span class="eti">${esc(c.etiqueta)}</span> no informa</span>`; }).join("")
+    : Object.values(specsDe(f[0])).slice(0, 5).map(v => `<span class="chip">${esc(v)}</span>`).join("");
   const sello = ["sin marca reconocida", "marca conocida", "primera línea"][p.m.niv];
   const antes = f[5] && f[5] > f[1] ? `<span class="antes">${pesos(f[5])}</span>` : "";
   const plus = Buscador.plusDe(f[8]);          // lo que suma a favor, solo si la fuente lo informa: no cambia el orden
   return `<a class="dcard c-${t.color}${p.clave === "mejor" ? " mejor" : ""}" style="--i:${i}" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">
-    <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>
+    <div class="d-img${fondo(f[7]) ? "" : " sin-foto"}" data-foto="${esc(f[2])}"${fondo(f[7]) ? ` style="background-image:url(&quot;${fondo(f[7])}&quot;)"` : ""} role="img" aria-label="${esc(f[0])}">${icono("chip")}</div>
+    <span class="rol"><b class="letra">${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</span>${p.esReferencia && p.clave !== "ref" ? '<span class="chip ok tu-eleccion">La que elegiste</span>' : ""}
     <h3>${esc(f[0])}</h3>
     <span class="tienda">${icono("store")} ${esc(comercioDe(f))}${f[4] ? ` · vía ${esc(t.nombre)}` : ""} ${selloAfiliado(f[2])}</span>
     <div><span class="precio">${pesos(f[1])}</span>${antes}</div>
-    <div class="chips">${chipOjo(viejoDe(f))}${specs.map(v => `<span class="chip">${esc(v)}</span>`).join("")}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
+    <div class="chips">${chipOjo(viejoDe(f))}${fichaChips}<span class="chip${p.m.niv === 2 ? " ok" : ""}">${sello}</span>${sellosDe(f[8]).filter(([, texto]) => !plus.includes(texto)).map(([clase, texto]) =>
       `<span class="chip${clase === "off2" ? " ok" : clase === "ojo" ? " ojo" : ""}">${texto}</span>`).join("")}</div>
     <p class="razon">${esc(p.razon)}</p>${plus.length ? `
     <p class="plus">＋ ${plus.join(" · ")}</p>` : ""}
@@ -96,8 +145,10 @@ function franja(picks) {
 
 function tablaPicks(picks) {
   const A = ANALISIS, med = A.med;
+  const fichaClaves = clavesFicha(picks);
+  // sin ficha para la categoria: las filas que lee Buscador.specsDe, como siempre
   const specs = picks.map(p => specsDe(p.m.f[0]));
-  const claves = [...new Set(specs.flatMap(s => Object.keys(s)))];
+  const claves = fichaClaves.length ? [] : [...new Set(specs.flatMap(s => Object.keys(s)))];
   const precios = picks.map(p => p.m.f[1]), minP = Math.min(...precios);
   const maxNiv = Math.max(...picks.map(p => p.m.niv));
   const bajo = picks.map(p => Math.round((1 - p.m.f[1] / med) * 100)), maxBajo = Math.max(...bajo);
@@ -117,6 +168,13 @@ function tablaPicks(picks) {
   }));
   const plus = picks.map(p => Buscador.plusDe(p.m.f[8])), maxPlus = Math.max(...plus.map(x => x.length));
   if (maxPlus > 0) h += fila("Plus", plus.map(x => x.join(" · ") || "—"), plus.map(x => x.length === maxPlus));
+  fichaClaves.forEach(c => {
+    // se resalta el mayor solo si todos los numeros se pueden comparar y no son todos iguales
+    const nums = picks.map(p => valorFicha(p.m.f[0], c.clave)).map(v => (typeof v === "number" ? v : null));
+    const validos = nums.filter(v => v !== null), max = Math.max(...validos);
+    const mejor = MAYOR_ES_MEJOR.has(c.clave) && validos.length >= 2 && new Set(validos).size > 1 ? nums.map(v => v === max) : null;
+    h += fila(c.etiqueta, picks.map(p => esc(textoFicha(p.m.f[0], c.clave) || "no informa")), mejor);
+  });
   claves.forEach(k => { h += fila(k, specs.map(s => esc(s[k] || "—"))); });
   return h + "</tbody></table></div>" + (maxPlus > 0
     ? `<p class="sub">«—» no es que no lo tenga: la fuente no lo informa (envío y cuotas por aviso solo los publican ComparaYa y sus comercios).</p>` : "");
@@ -127,25 +185,33 @@ function tablaPicks(picks) {
 function seccionPrecioPorTienda(picks) {
   const h = { esc, pesos, enlace: (f, texto, etiqueta) =>
     `<a href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}" aria-label="${esc(etiqueta)}">${texto}</a>${selloAfiliado(f[2])}` };
-  return picks.filter(p => p.porTienda).map((p, i) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
-    + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
+  // Solo donde hay con que comparar: un modelo en una sola tienda no necesita su tabla, y desde Ofertas (que ya muestra el mejor
+  // precio del modelo) la tarjeta de origen tampoco la repite.
+  return picks.map((p, i) => ({ p, i })).filter(({ p }) => p.porTienda && !p.porTienda.unico && !(ANALISIS.desdeOferta && p.esReferencia))
+    .map(({ p, i }) => `<h3 class="pt-titulo">${LETRAS[i]} · ${esc(p.rolCorto)}: ${esc(p.m.f[0])}</h3>`
+      + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
+}
+
+function seccionPrecioPorTiendaConTitulo(picks) {
+  const cuerpo = seccionPrecioPorTienda(picks);
+  return cuerpo ? `<div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
+      <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>${cuerpo}` : "";
 }
 
 function vistaComparativaDin() {
   const A = ANALISIS;
   setTimeout(pintarTira, 0);
+  setTimeout(pintarFotos, 0);
   return `<div class="panel"><div class="ultimas" id="ultimas">${tiraHtml(true)}</div>${bannerConsulta()}
     <div class="panel-head"><h2>${icono("balanza")} Comparativa: ${esc(CONSULTA)}</h2>
       <p class="sub">De ${A.total} avisos que coinciden, ${A.base.length} son comparables entre sí. Estas son las opciones que valen la pena y en qué se diferencian.</p></div>
     ${barraAcciones("comparativa")}
-    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    <div class="dgrid">${cardsHtml(A.picks)}</div>
     ${franja(A.picks)}
     <div class="panel-head" style="margin-top:26px"><h2>${icono("chip")} En qué se diferencian</h2>
       <p class="sub">Las especificaciones se leen del texto del aviso, así que algunas pueden faltar: abrí la ficha para confirmarlas.</p></div>
     ${tablaPicks(A.picks)}
-    <div class="panel-head" style="margin-top:26px"><h2>${icono("store")} Precio por tienda</h2>
-      <p class="sub">El mismo modelo en cada tienda, con cuánto más cuesta contra la más barata y la fecha de cada precio. Solo se comparan avisos del mismo modelo y la misma variante; varios avisos de una tienda cuentan como una.</p></div>
-    ${seccionPrecioPorTienda(A.picks)}
+    ${seccionPrecioPorTiendaConTitulo(A.picks)}
     ${seccionComercios()}</div>`;
 }
 
@@ -184,9 +250,17 @@ function vistaVeredictoDin() {
       + (c1 ? ` Le sigue ${c1.nom} con ${pesos(c1.mejorItem.f[1])}, ${Math.round((c1.mejorItem.f[1] / c0.mejorItem.f[1] - 1) * 100)}% más.` : "")
       + ` Hay ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""} con opciones comparables.` });
 
+  const ficha = Especificaciones.fichaDe(f[0]).filas;
+  if (ficha.length) {
+    const dice = ficha.filter(r => r.texto), calla = ficha.filter(r => !r.texto);
+    items.push({ t: "Qué dice (y qué no) el aviso de la mejor compra.",
+      d: (dice.length ? `Dice: ${dice.map(r => `${r.etiqueta.toLowerCase()} ${r.texto}`).join(", ")}.` : "El título no dice ninguna especificación.")
+        + (calla.length ? ` No dice: ${calla.map(r => r.etiqueta.toLowerCase()).join(", ")}. Confirmalo en la ficha antes de pagar.` : "") });
+  }
   const descartar = [];
   if (A.excl.raros) descartar.push(`${A.excl.raros} avisos cuestan menos del 45% de lo habitual y no son de una marca que reconozcamos: suelen ser otro producto, un accesorio o una variante inferior.`);
-  if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: casi siempre son equipos completos que solo mencionan el componente en el nombre.`);
+  if (A.excl.caros) descartar.push(`${A.excl.caros} avisos cuestan más del triple de lo habitual: ${["", "componente", "placa", "pc", "notebook", "monitor"].includes(A.categoria)
+    ? "casi siempre son equipos completos que solo mencionan el componente en el nombre." : "suelen ser packs, lotes o un modelo de otra gama."}`);
   if (A.excl.similares) descartar.push(`${A.excl.similares} avisos dicen «simil» o «similar»: no son lo que buscaste, por más parecido que sea.`);
   const caras = A.primeras.map(m => m.f[1]);
   if (caras.length > 1) {
@@ -225,7 +299,7 @@ function sincronizarUrl() {
   // El titulo dice lo que se busca: es lo que muestran la pestaña, el historial y un link compartido.
   const titulo = CONSULTA.trim() ? `${CONSULTA.trim()}: precios en Argentina | La Pichincha` : TITULO_SITIO;
   if (document.title !== titulo) document.title = titulo;
-  const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1));
+  const destino = Pagina.armarUrl(location.pathname, CONSULTA, location.hash.slice(1), REFERENCIA ? REFERENCIA[2] : "");
   if (destino === location.pathname + location.search + location.hash) return;
   try { history.replaceState(history.state, "", destino); } catch (e) { /* Safari limita las llamadas */ }
 }
@@ -233,5 +307,5 @@ function sincronizarUrl() {
 /* El link de lo que estas mirando: en Buscar vale lo que esta escrito. */
 function enlaceActual() {
   const q = CONSULTA || ($("#q") || {}).value || "";
-  return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1));
+  return location.origin + Pagina.armarUrl(location.pathname, q, location.hash.slice(1), CONSULTA && REFERENCIA ? REFERENCIA[2] : "");
 }

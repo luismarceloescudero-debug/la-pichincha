@@ -21,7 +21,9 @@ function guardarHist(q) {
   const mejor = ANALISIS && CONSULTA === q ? ANALISIS.picks[0].m.f : null;
   const entrada = { ...(ya || {}), q, t: Date.now() };
   if (mejor) { entrada.p = mejor[1]; entrada.n = mejor[0].slice(0, 90); entrada.c = comercioDe(mejor); }
-  escribirHist([entrada, ...previo.filter(x => x.q !== q)].slice(0, TOPE_HIST));
+  // Lo que se guardo mientras se tipeaba («aero» antes de «aeroclip 2») es un fragmento de esta busqueda, no otra: se reemplaza.
+  const fragmento = x => x.q !== q && q.toLowerCase().startsWith(x.q.toLowerCase()) && Date.now() - (x.t || 0) < 3 * 60 * 1000;
+  escribirHist([entrada, ...previo.filter(x => x.q !== q && !fragmento(x))].slice(0, TOPE_HIST));
   pintarHist();
   pintarTira();
 }
@@ -96,7 +98,7 @@ function recienteHtml(q) {
   if (!A) return "";
   return `<div class="panel-head" style="margin-top:6px"><h2>${icono("balanza")} Tu última búsqueda: ${esc(q)}</h2>
       <p class="sub">De ${A.total} avisos, ${A.base.length} son comparables en ${A.comercios.length} comercio${A.comercios.length > 1 ? "s" : ""}. Precios de hoy.</p></div>
-    <div class="dgrid">${A.picks.map(cardPick).join("")}</div>
+    <div class="dgrid">${cardsHtml(A.picks)}</div>
     <p class="mas-reciente"><button class="acc" data-comparar="${esc(q)}">${icono("balanza")} Ver la comparativa completa, dónde comprar y el veredicto</button></p>`;
 }
 function pintarReciente() {
@@ -104,6 +106,7 @@ function pintarReciente() {
   if (!c) return;
   const q = !CONSULTA && IDX ? leerHist().find(x => hayResultados(x)) : "";   // en la portada, solo lo que buscaste vos
   c.innerHTML = q ? recienteHtml(q) : "";
+  pintarFotos();
 }
 
 /* El Veredicto sin consulta activa: espera el indice y se escribe con lo reciente. Si mientras tanto la persona busco otra
@@ -111,11 +114,15 @@ function pintarReciente() {
 function abrirReciente(id) {
   const sigueAca = () => (location.hash.slice(1) || "comparativa") === id;
   asegurarIndice().then(() => {
-    if (!(CONSULTA && ANALISIS)) {
+    // Manda lo ultimo que la persona escribio o abrio (spec 063, fase D); recien sin eso, el historial y «Lo mas buscado».
+    if (ULTIMA_ESCRITA && ULTIMA_ESCRITA !== CONSULTA) fijarConsulta(ULTIMA_ESCRITA);
+    if (ULTIMA_ESCRITA && ANALISIS) guardarHist(ULTIMA_ESCRITA);       // ya no espera al temporizador de Buscar
+    if (!(CONSULTA && ANALISIS) && !ULTIMA_ESCRITA) {
       const q = consultaReciente();
       if (q) { fijarConsulta(q); RECIENTE_DE_BUSCADAS = !leerHist().includes(q); }
     }
-    if (sigueAca()) $("#vista").innerHTML = CONSULTA && ANALISIS ? vistaDinamica(id) : veredictoVacio("");
+    if (!sigueAca()) return;
+    $("#vista").innerHTML = CONSULTA && ANALISIS ? vistaDinamica(id) : ULTIMA_ESCRITA ? veredictoSinResultados(ULTIMA_ESCRITA) : veredictoVacio("");
   }).catch(() => { if (sigueAca()) $("#vista").innerHTML = veredictoVacio(""); });
 }
 
@@ -133,6 +140,7 @@ let comilonesUsados = 0;
 
 function borrarHistorial() {
   escribirHist([]);
+  ULTIMA_ESCRITA = "";
   limpiarConsulta();
   pintarHist();
   pintarTira();
@@ -165,9 +173,9 @@ function borrarConAnimacion(boton, despues) {
 }
 /* Abre la comparativa de una busqueda guardada sin pasar por el buscador. `referencia` (opcional): la fila de la tarjeta
    desde la que se compara; la comparativa queda con sus mismas especificaciones (spec 017). */
-async function compararConsulta(q, referencia = null) {
+async function compararConsulta(q, referencia = null, opciones = {}) {
   try { await asegurarIndice(); } catch (e) { return; }
-  fijarConsulta(q, referencia);
+  fijarConsulta(q, referencia, opciones);
   if (!ANALISIS) return;
   guardarHist(q);
   registrarBusqueda(q);

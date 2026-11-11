@@ -121,3 +121,25 @@ test("Tiendamia: el envio y los servicios van en el carrito y se dice asi (no «
   assert.ok(!html.includes("US$ 0,00"));
   assert.match(html, />Tiendamia</);
 });
+
+/* --- Spec 063, fase F: el termino que va a las tiendas de afuera --- */
+test("terminoAfuera traduce categoria y caracteristicas al ingles y deja marca, modelo y cifras", () => {
+  const T = A.terminoAfuera;
+  assert.equal(T("auriculares inalámbricos soundcore aeroclip 2"), "headphones wireless soundcore aeroclip 2");
+  assert.equal(T("teclado mecánico razer"), "mechanical keyboard razer");
+  assert.equal(T("placa de video rtx 5060 16gb"), "graphics card rtx 5060 16gb");
+  assert.equal(T('monitor gamer 27 pulgadas 240hz'), "monitor gaming 27 inch 240hz");
+  assert.equal(T("notebook ryzen 7 16gb"), "laptop ryzen 7 16gb");
+});
+
+test("terminoAfuera suelta las palabras de enlace en español y no repite", () => {
+  assert.equal(T2("fuente de poder 750w para pc"), "power supply 750w pc");
+  assert.equal(T2("auricular audifonos bluetooth"), "headphones bluetooth");
+});
+
+test("terminoAfuera deja pasar lo que no conoce y nunca devuelve vacio", () => {
+  assert.equal(A.terminoAfuera("Motorola Signature"), "motorola signature");
+  assert.equal(A.terminoAfuera("de la"), "de la", "si todo eran palabras de enlace, queda lo escrito");
+  assert.ok(A.terminoAfuera("x".repeat(300)).length <= 100);
+});
+const T2 = q => A.terminoAfuera(q);

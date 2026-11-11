@@ -83,6 +83,13 @@ function arrancar() {
     const quitar = ev.target.closest("[data-olvidar]");
     if (quitar) { ev.stopPropagation(); return olvidar(quitar.dataset.olvidar); }
 
+    // una busqueda que junta tipos de producto: quedarse con uno (o volver a ver todos), sin tocar lo escrito
+    const solo = ev.target.closest("[data-solo-categoria]");
+    if (solo && CONSULTA) { fijarConsulta(CONSULTA, REFERENCIA, { desdeOferta: DESDE_OFERTA, categoria: solo.dataset.soloCategoria }); return aplicar(location.hash.slice(1) || "comparativa"); }
+    // «Ver en Buscar» una busqueda sin resultados: va al buscador con lo escrito
+    const buscarQ = ev.target.closest("[data-buscar-q]");
+    if (buscarQ) { ir("buscar", true); return setTimeout(() => consultar(buscarQ.dataset.buscarQ), 60); }
+
     const comparar = ev.target.closest("[data-comparar]");
     if (comparar) return compararConsulta(comparar.dataset.comparar);
     const compararEnFila = ev.target.closest("[data-comparar-fila]");
@@ -164,7 +171,7 @@ function arrancar() {
     `La Pichincha · ${location.origin}${location.pathname} · precios de ${DATOS.actualizado}, con IVA, sin envío.`;
 
   const inicio = Pagina.leerUrl(location.search, location.hash);
-  if (inicio.q) { usarPrerender(); abrirConsultaDeUrl(inicio.q, inicio.vista); }
+  if (inicio.q) { usarPrerender(); abrirConsultaDeUrl(inicio.q, inicio.vista, inicio.ref); }
   else aplicar(inicio.vista);
 }
 arrancar();

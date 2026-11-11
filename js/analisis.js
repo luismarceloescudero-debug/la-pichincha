@@ -69,19 +69,35 @@
   }
 
   function analizarConsulta(q, ctx) {
-    const { buscarTodo, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia } = ctx;
-  const crudo = buscarTodo(q);
+    const { buscarTodo, buscarPorEspec, colorDe, comercioDe, marcaDe, nivelMarca, pesos, otrasDe, fechaDe, referencia, desdeOferta, soloCategoria } = ctx;
+  // Con una tarjeta de referencia (spec 063, fase C) el universo son los avisos de su categoria y sus especificaciones, de cualquier
+  // marca; el texto de la consulta (que es el del modelo) solo decide que se excluye. Sin especificaciones suficientes: como siempre.
+  const porEspec = referencia && buscarPorEspec ? buscarPorEspec(referencia) : null;
+  const crudo = porEspec ? porEspec.filas : buscarTodo(q);
   if (!crudo.length) return null;
   const nq = normalBusq(q);
   const toks = nq.split(/\s+/).filter(Boolean);
   const excl = { internacionales: 0, formato: 0, usados: 0, equipos: 0, similares: 0, accesorios: 0, tipo: 0, variante: 0, raros: 0, caros: 0, especificaciones: 0 };
   const meta = crudo.map(f => ({ f, n: normalBusq(f[0]), niv: nivelMarca(f[0]) }));
 
+  // Una busqueda que junta productos de tipos distintos («Aero»: notebooks Gigabyte y auriculares Soundcore) tiene una mediana que no
+  // dice nada. Se cuenta de que tipos son TODOS los avisos encontrados (aunque la comparativa deje afuera los equipos completos) y, si hay
+  // mas de un tipo con peso, la persona puede elegir con cual quedarse. Los tipos sin nombre («otros», accesorios) no cuentan.
+  const Esp0 = especificaciones();
+  const catDe = m => Esp0.categoriaDe(m.f[0]);
+  const conteo = new Map();
+  for (const m of meta) { const c = catDe(m); if (c !== "otro" && c !== "periferico") conteo.set(c, (conteo.get(c) || 0) + 1); }
+  const mezcla = [...conteo].map(([categoria, n]) => ({ categoria, etiqueta: Esp0.ETIQUETA_CATEGORIA[categoria] || categoria, n })).sort((a, b) => b.n - a.n);
+  const hayMezcla = mezcla.length > 1 && mezcla[1].n >= 3 && mezcla[1].n >= crudo.length * 0.15;
+
   // Las compras internacionales no compiten en la comparativa, pero siguen en la
   // lista de Buscar con su sello: son otra forma de comprar, no otro producto.
+  // Con un tipo elegido (soloCategoria) se levantan las exclusiones que son de tipo: si pidio notebooks, los notebooks no son «equipos».
   const internacionales = [];
   const candidatas = meta.filter(m => {
+    if (soloCategoria && catDe(m) !== soloCategoria) { excl.tipo++; return false; }
     const motivo = motivoExclusion(m.n, nq, toks, m.f[8]);
+    if (motivo && soloCategoria && ["equipos", "tipo", "formato"].includes(motivo)) return true;
     if (motivo) { excl[motivo]++; if (motivo === "internacionales") internacionales.push(m); return false; }
     return true;
   });
@@ -91,9 +107,11 @@
   if (referencia) {
     const Esp = especificaciones();
     if (Esp.mismas(referencia, referencia).aplica) {
-      utiles = candidatas.filter(m => m.f[2] === referencia[2] || Esp.mismas(referencia, m.f).coincide);
+      // por especificaciones el universo ya es el correcto (y si es aproximado, se dejo entrar a proposito)
+      utiles = porEspec ? candidatas : candidatas.filter(m => m.f[2] === referencia[2] || Esp.mismas(referencia, m.f).coincide);
       excl.especificaciones = candidatas.length - utiles.length;
-      espec = { aplica: true, resumen: Esp.resumen(referencia), comparables: utiles.length, pocos: utiles.length < Esp.MIN_COMPARABLES };
+      espec = { aplica: true, resumen: Esp.resumen(referencia), comparables: utiles.length, pocos: utiles.length < Esp.MIN_COMPARABLES,
+        porEspecificaciones: !!porEspec, aproximada: !!(porEspec && porEspec.aproximado) };
     } else {
       espec = { aplica: false, resumen: "", comparables: candidatas.length, pocos: false };
     }
@@ -116,7 +134,27 @@
   const piso = m => pisoDeGama(m.f[1], m.niv, med);
   const rec = [...base].sort((a, b) => (piso(a) - piso(b)) || (b.niv - a.niv) || (a.f[1] - b.f[1]));
   const porPrecio = [...base].sort((a, b) => a.f[1] - b.f[1]);
-  const mejor = rec[0];
+  // Mejor compra con dos criterios (spec 063, fase H): primero como siempre (que no este muy por debajo, el nivel de marca y el precio);
+  // despues, entre los avisos del MISMO nivel que cuestan hasta un 15 % mas que el mas barato, gana el que trae mas especificaciones
+  // (RAM, almacenamiento, Hz...). Solo cuenta lo que el titulo dice: lo que no dice no suma (principio II). A igual todo, el mas barato.
+  const TOLERANCIA_SPECS = 0.15;
+  const numerosDe = m => { const r = {}; for (const f of Esp0.fichaDe(m.f[0]).filas) if (Esp0.MAYOR_ES_MEJOR.has(f.clave) && typeof f.valor === "number") r[f.clave] = f; return r; };
+  function elegirMejor() {
+    const base0 = rec[0];
+    const tier = rec.filter(m => piso(m) === piso(base0) && m.niv === base0.niv && m.f[1] <= base0.f[1] * (1 + TOLERANCIA_SPECS) && catDe(m) === catDe(base0));
+    if (tier.length < 2) return { m: base0, mas: null };
+    const nums = new Map(tier.map(m => [m, numerosDe(m)]));
+    const maximo = {};
+    for (const n of nums.values()) for (const [k, f] of Object.entries(n)) maximo[k] = Math.max(maximo[k] || 0, f.valor);
+    const puntos = m => Object.entries(nums.get(m)).reduce((s, [k, f]) => s + f.valor / maximo[k], 0);
+    const mejorM = tier.reduce((g, m) => (puntos(m) > puntos(g) + 1e-9 ? m : g), base0);   // empate: queda el mas barato (tier va por precio)
+    if (mejorM === base0) return { m: base0, mas: null };
+    const a = nums.get(mejorM), b = nums.get(base0);
+    const mejoras = Object.keys(a).filter(k => !b[k] || a[k].valor > b[k].valor).map(k => `${a[k].etiqueta.toLowerCase()} (${a[k].texto}${b[k] ? ` contra ${b[k].texto}` : ""})`);
+    return { m: mejorM, mas: { pct: Math.round((mejorM.f[1] / base0.f[1] - 1) * 100), mejoras, contra: base0 } };
+  }
+  const elegido = elegirMejor();
+  const mejor = elegido.m;
   const barato = porPrecio[0] === mejor ? null : porPrecio[0];
   const marcaMejor = marcaDe(mejor.f[0]);
   const alt = rec.find(m => {
@@ -136,7 +174,8 @@
   picks.push({ clave: "mejor", ico: "trofeo", m: mejor,
     rol: barato ? "Mejor compra" : "Mejor compra y más barata", rolCorto: "Mejor compra",
     razon: `${mejor.niv === 2 ? "La marca más confiable" : mejor.niv === 1 ? "La marca más conocida" : "La mejor ubicada"} entre las opciones, al menor precio dentro de ese nivel: ${textoMed(mejor)} (mediana ${pesos(med)}).`
-      + (barato ? "" : " Además es la más barata de todas.") });
+      + (barato ? "" : " Además es la más barata de todas.")
+      + (elegido.mas ? ` Cuesta ${elegido.mas.pct}% más que la más barata de su nivel, pero trae más ${elegido.mas.mejoras.join(" y ")}.` : "") });
   if (barato) picks.push({ clave: "barato", ico: "flechaAbajo", m: barato, rol: "Más barata", rolCorto: "Más barata",
     razon: `La más barata de las comparables: ${pesos(mejor.f[1] - barato.f[1])} menos (${Math.round((1 - barato.f[1] / mejor.f[1]) * 100)}%) que la mejor compra.`
       + (barato.niv === 0 ? " No reconocemos la marca: mirá garantía y reseñas antes de pagar." : "")
@@ -164,6 +203,23 @@
       razon: `La más cara de primera línea: ${pctSobre(alta)}% sobre la mejor compra. Solo si necesitás esas prestaciones.` }); }
   }
 
+  // La tarjeta desde la que se comparo siempre esta a la vista: se marca si ya es una de las opciones y, si no, se suma como la ultima.
+  // El mismo modelo en otra tienda cuenta (el aviso mas barato de un modelo representa a todos).
+  if (referencia) {
+    const esRef = m => m.f[2] === referencia[2] || (otrasDe ? otrasDe(m.f) : []).some(x => x[2] === referencia[2]);
+    const propia = picks.find(p => esRef(p.m));
+    if (propia) propia.esReferencia = true;
+    else {
+      const m = base.find(esRef);
+      if (m) {
+        if (picks.length >= 4) picks.splice(picks.findIndex(p => p.clave === "baja") >= 0 ? picks.findIndex(p => p.clave === "baja") : picks.length - 1, 1);
+        const dp = Math.round((m.f[1] / mejor.f[1] - 1) * 100);
+        picks.push({ clave: "ref", ico: "lupa", m, rol: "La que elegiste", rolCorto: "La que elegiste", esReferencia: true,
+          razon: dp === 0 ? "Es la misma que la mejor compra." : `${Math.abs(dp)}% ${dp > 0 ? "más cara" : "más barata"} que la mejor compra de esta comparación.` });
+      }
+    }
+  }
+
   // Precio por tienda de cada opcion: solo con lo que esta consulta considera comparable (mismo filtro que arriba).
   const admite = f => !motivoExclusion(normalBusq(f[0]), nq, toks, f[8]);
   for (const p of picks) p.porTienda = precioPorTienda(p.m.f, otrasDe ? otrasDe(p.m.f) : [], { comercioDe, pesos, fechaDe, admite });
@@ -184,14 +240,18 @@
       bajas: c.items.filter(m => m.f[6] > m.f[1]).length };
   }).sort((a, b) => (b.conPrimera - a.conPrimera) || (a.mejorItem.f[1] - b.mejorItem.f[1]));
 
-  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec,
+  return { q, total: crudo.length, base, med, picks, comercios, excl, internacionales, espec, desdeOferta: !!desdeOferta,
+           categoria: catDe(mejor), mezcla: hayMezcla ? mezcla : null, soloCategoria: soloCategoria || "",
            primeras: base.filter(m => m.niv === 2) };
 }
 
   /* Que quedo afuera de la comparativa, en palabras. Lo usan el cartel de la Comparativa
      y las paginas por busqueda: el mismo texto en los dos lados. */
-  function partesExclusion(ex) {
+  // «Mas del triple» suele ser un equipo completo cuando se busca un componente; buscando auriculares o un celular, un pack o un lote.
+  const DE_EQUIPOS = new Set(["", "componente", "placa", "pc", "notebook", "monitor"]);
+  function partesExclusion(ex, categoria = "") {
     const n = (k, uno, varios) => ex[k] ? `${ex[k]} ${ex[k] > 1 ? varios : uno}` : null;
+    const equipos = DE_EQUIPOS.has(categoria);
     return [
       n("internacionales", "compra internacional (envío desde el exterior)", "compras internacionales (envío desde el exterior)"),
       ex.formato ? `${ex.formato} de notebook` : null,
@@ -203,7 +263,7 @@
       ex.usados ? `${ex.usados} usados u outlet` : null,
       ex.especificaciones ? `${ex.especificaciones} con otras especificaciones (no son la misma configuración)` : null,
       ex.raros ? `${ex.raros} muy por debajo del resto y sin marca conocida` : null,
-      ex.caros ? `${ex.caros} que cuestan más del triple (suelen ser equipos completos)` : null,
+      ex.caros ? `${ex.caros} que cuestan más del triple (${equipos ? "suelen ser equipos completos" : "suelen ser packs, lotes o un modelo de otra gama"})` : null,
     ].filter(Boolean);
   }
 

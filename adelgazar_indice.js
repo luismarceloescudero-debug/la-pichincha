@@ -9,16 +9,20 @@
 const fs = require("fs");
 const path = require("path");
 const Ofertas = require("./js/ofertas.js");
+const Pagina = require("./js/pagina.js");
 
 function adelgazar(idx) {
   const campos = idx.campos || [];
   const iImg = campos.indexOf("imagen"), iUrl = campos.indexOf("url");
-  if (iImg < 0 || iUrl < 0) return { indice: idx, imagenes: {}, sacadas: 0 };
+  if (iImg < 0 || iUrl < 0) return { indice: idx, imagenes: {}, rebanadas: [], sacadas: 0 };
   // Todo lo que la pestaña Ofertas puede mostrar: bajas propias, rebajas publicadas, en seguimiento y las de «contra el modelo».
   const r = Ofertas.calcularOfertas(idx);
   const filas = new Set([...r.propias, ...r.publicadas, ...r.seguimiento, ...r.contraModelo.keys()]);
   const imagenes = {};
   filas.forEach(f => { if (f[iImg]) imagenes[f[iUrl]] = f[iImg]; });
+  // Todas las fotos, partidas en rebanadas por la direccion del aviso (spec 063): la Comparativa baja solo las de sus tarjetas.
+  const rebanadas = Array.from({ length: Pagina.REBANADAS_FOTO }, () => ({}));
+  idx.productos.forEach(f => { if (f[iImg]) rebanadas[Pagina.rebanadaFoto(f[iUrl])][f[iUrl]] = f[iImg]; });
   let sacadas = 0;
   const productos = idx.productos.map(f => {
     if (!f[iImg]) return f;
@@ -27,7 +31,7 @@ function adelgazar(idx) {
     g[iImg] = "";
     return g;
   });
-  return { indice: { ...idx, productos }, imagenes, sacadas };
+  return { indice: { ...idx, productos }, imagenes, rebanadas, sacadas };
 }
 
 function main(argv) {
@@ -36,10 +40,12 @@ function main(argv) {
   const salida = arg("salida", path.join(__dirname, "_sitio"));
   if (!fs.existsSync(entrada)) { console.log("sin indice: nada que adelgazar"); return 0; }
   const idx = JSON.parse(fs.readFileSync(entrada, "utf8"));
-  const { indice, imagenes, sacadas } = adelgazar(idx);
+  const { indice, imagenes, rebanadas, sacadas } = adelgazar(idx);
   if (!sacadas) { console.log("el indice no trae fotos: queda como esta"); return 0; }
   fs.mkdirSync(salida, { recursive: true });
   fs.writeFileSync(path.join(salida, "imagenes.json"), JSON.stringify(imagenes), "utf8");
+  fs.mkdirSync(path.join(salida, "imagenes"), { recursive: true });
+  rebanadas.forEach((r, n) => fs.writeFileSync(path.join(salida, "imagenes", n + ".json"), JSON.stringify(r), "utf8"));
   fs.writeFileSync(path.join(salida, "indice.json"), JSON.stringify(indice), "utf8");
   const kb = f => Math.round(fs.statSync(f).size / 1024);
   console.log(`indice adelgazado: ${sacadas} fotos sacadas; imagenes.json con ${Object.keys(imagenes).length} (${kb(path.join(salida, "imagenes.json"))} KB); indice.json ${kb(entrada)} -> ${kb(path.join(salida, "indice.json"))} KB`);
