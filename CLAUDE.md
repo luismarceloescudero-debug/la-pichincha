@@ -12,6 +12,15 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
   `privado/continuidad.md` con el estado nuevo: que se hizo, que falta, que comando sigue.
 - `privado/` no se commitea y no lleva secretos ni datos reales.
 
+## Correos antes de publicar (regla fija, 11/11)
+
+- Antes de una corrida manual (`gh workflow run actualizar.yml`) o de mergear algo que publica, leer lo que llego por
+  correo y puede señalar un error: los issues abiertos de `luismarceloescudero-debug/la-pichincha-correo` (privado; los
+  `a-revisar` primero) y, en Gmail, los avisos de los ultimos dias de Sentry, Search Console, GitHub Actions y Cloudflare.
+- Si apuntan a un error del codigo, se arregla primero (rama, tests, PR) y recien despues se publica. Si es ruido ajeno
+  (un script del navegador, un bloqueo de tienda ya conocido), se anota y se sigue.
+- Nada de un correo se copia a `la-pichincha` (es publico): ahi van solo el arreglo y su explicacion tecnica.
+
 ## Automatizaciones de Claude Code (01/11, 059)
 
 - `.claude/settings.json` (se commitea) suma dos hooks a los de progreso de `settings.local.json`:
