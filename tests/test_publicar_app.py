@@ -27,6 +27,18 @@ class Manifiesto(unittest.TestCase):
         for icono in self.m["icons"]:
             self.assertFalse(icono["src"].startswith(("/", "http")), icono["src"])
 
+    def test_lo_que_pide_la_tienda_de_apps(self):
+        # Plan v4, fase 3: id estable (la tienda y Chrome identifican la app con el), accesos directos con rutas
+        # relativas que existen en el sitio, categoria y orientacion vertical.
+        self.assertEqual(self.m["id"], "./")
+        self.assertEqual(self.m["orientation"], "portrait")
+        self.assertIn("shopping", self.m["categories"])
+        destinos = [s["url"] for s in self.m["shortcuts"]]
+        self.assertEqual(destinos, ["hoy/", "./?q="])
+        for s in self.m["shortcuts"]:
+            self.assertTrue(s["name"] and s["short_name"])
+            self.assertFalse(s["url"].startswith(("/", "http")), s["url"])
+
     def test_los_colores_son_los_del_sitio(self):
         css = (RAIZ / "css" / "sitio.css").read_text(encoding="utf-8")
         self.assertIn(self.m["theme_color"].lower(), css.lower())
