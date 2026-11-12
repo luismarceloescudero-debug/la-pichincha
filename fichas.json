@@ -831,6 +831,14 @@
 "dia": "2026-10-15",
 "mpn": null
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-adata-ddr5-8gb-5600mhz-cl46.html": {
+"dia": "2026-11-12",
+"mpn": "AD5U56008G-S"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengance-rs-ddr4-8gb-3200mhz-rgb-cl16.html": {
+"dia": "2026-11-12",
+"mpn": "CMG8GX4M1E3200C16"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengance-rs-ddr4-8gb-3200mhz.html": {
 "dia": "2026-10-15",
 "mpn": "CMG8GX4M1E3200C16"
@@ -843,13 +851,33 @@
 "dia": "2026-10-15",
 "mpn": "CMH32GX5M2D6000Z38"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-32gb2x16gb-6000mhz-cl38.html": {
+"dia": "2026-11-12",
+"mpn": "CMK32GX5M2D6000Z38"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-16gb-5600mhz-black-cl40.html": {
+"dia": "2026-11-12",
+"mpn": "CMK16GX5M1B5600C40"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-16gb-6000mhz-cl38.html": {
 "dia": "2026-10-16",
 "mpn": "CMK16GX5M1D6000Z38"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-16gb-6000mhz-rgb-cl38.html": {
+"dia": "2026-11-12",
+"mpn": "CMH16GX5M1D6000Z38"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-32gb-6000mhz-white-rgb-cl38.html": {
 "dia": "2026-10-16",
 "mpn": "CMH32GX5M2D6000Z38W"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-32gb2x16gb-6000mhz-white-rgb-cl38.html": {
+"dia": "2026-11-12",
+"mpn": "CMH32GX5M2D6000Z38W"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-lpx-ddr4-8gb-3200mhz-cl16.html": {
+"dia": "2026-11-12",
+"mpn": "CMK8GX4M1E3200C16"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-ddr2-2gb-800mhz-kimota.html": {
 "dia": "2026-10-15",
@@ -883,6 +911,10 @@
 "dia": "2026-10-21",
 "mpn": "KF560C36BBE2-16"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-armor-ddr4-16gb-3200mhz-white.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-armor-ddr4-16gb-3200mhz.html": {
 "dia": "2026-10-15",
 "mpn": null
@@ -890,6 +922,10 @@
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-armor-ddr4-8gb-3200mhz-black.html": {
 "dia": "2026-10-15",
 "mpn": "HSC408U32I2"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-armour-ddr4-16gb-3200mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-ddr3-4gb-1600mhz.html": {
 "dia": "2026-10-15",
@@ -915,12 +951,24 @@
 "dia": "2026-10-15",
 "mpn": null
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-future-ddr4-16gb-3200mhz-rgb.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-hiker-16gb-3200mhz.html": {
 "dia": "2026-10-15",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-hiker-16gb-5600mhz.html": {
 "dia": "2026-10-29",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-hiker-ddr4-16gb-3200mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-hiker-ddr5-16gb-5600mhz.html": {
+"dia": "2026-11-12",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kimota-ddr4-16gb-3200mhz.html": {
@@ -955,9 +1003,17 @@
 "dia": "2026-10-15",
 "mpn": "KVR32N22D8/16WP"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-ddr4-16gb-3200mhz.html": {
+"dia": "2026-11-12",
+"mpn": "KVR32N22D8/16WP"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-5600mhz-negra-1.html": {
 "dia": "2026-10-21",
 "mpn": "KF556C36BBE-16"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-6000mhz-negra-rgb-cl36.html": {
+"dia": "2026-11-12",
+"mpn": "KF560C36BBE2A-16"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-kingston-fury-beast-ddr5-16gb-6400mhz-cl32.html": {
 "dia": "2026-10-21",
@@ -1048,6 +1104,10 @@
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-hiker-ddr4-8gb-3200mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-hiker-ddr5-16gb-5600mhz.html": {
 "dia": "2026-11-12",
 "mpn": null
 },
