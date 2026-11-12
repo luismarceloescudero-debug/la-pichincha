@@ -12,6 +12,8 @@
      variables responde 503. Campo trampa, tiempo minimo desde que se cargo el formulario y un tope propio por IP.
    - Spec 053: con el secreto RESEND_API_KEY, tras mandar el mensaje se manda un acuse de texto fijo a quien escribio (por Resend);
      la respuesta suma acuse: true/false. Sin la clave todo sigue como antes.
+   - Spec 065: GET /vigia corre los chequeos del sitio (worker/src/vigia.js) y devuelve el resultado: sirve para mirarlo a mano
+     despues de un despliegue. El aviso al dueno lo manda el Cron Trigger (scheduled), no esta ruta.
    - CORS solo para el sitio y localhost; cache de 8 horas por consulta o por enlace; tope de 30 pedidos por minuto por IP. */
 import Buscadas from "../../js/buscadas.js";
 import Importar from "../../js/importar.js";
@@ -21,6 +23,7 @@ import * as aliexpress from "./fuentes/aliexpress.js";
 import * as amazon from "./fuentes/amazon.js";
 import * as tiendamia from "./fuentes/tiendamia.js";
 import { parsearFichaLoquieroaca } from "./fuentes/loquieroaca.js";
+import { ESPERA_RUTA_MS, revisar as revisarSitio, vigilar } from "./vigia.js";
 
 const FUENTES = [["ebay", ebay], ["aliexpress", aliexpress], ["amazon", amazon], ["tiendamia", tiendamia]];
 const CACHE_SEG = 8 * 3600;                    // entre 6 y 12 h: los precios de afuera no cambian por minuto
@@ -109,6 +112,7 @@ const json = (datos, estado, extra) => new Response(JSON.stringify(datos), { sta
    El tope por IP y los tokens viven en esta instancia (un isolate del Worker). */
 export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMensaje }) {
   const porIp = new Map(), contactosPorIp = new Map(), acusesPorCorreo = new Map(), tokens = new Map();
+  let ultimoVigia = null;      // spec 065: GET /vigia repetido no vuelve a pedir el sitio
 
   function excedido(ip, ms, mapa = porIp, tope = TOPE, ventana = VENTANA_MS) {
     if (mapa.size > 5000) mapa.clear();         // no crece sin limite en un isolate que vive mucho
@@ -266,15 +270,31 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     } catch (e) { console.warn("acuse: Resend no respondio"); return false; }
   }
 
+  /* Spec 065: GET /vigia mira el sitio publicado y devuelve { cuando, ok, fallas }. No manda nada: el aviso al dueno sale
+     del Cron Trigger, para que nadie pueda hacer sonar el Telegram pidiendo esta ruta. Se guarda el ultimo resultado medio
+     minuto (y ?fresco=1 lo saltea) por si el tope por IP deja pasar varias seguidas. */
+  async function vigia(env, h, fresco) {
+    const ms = Date.parse(ahora());
+    let datos;
+    if (!fresco && ultimoVigia && ms - ultimoVigia.ms < ESPERA_RUTA_MS) datos = ultimoVigia.datos;
+    else {
+      datos = await revisarSitio({ fetch, ahora, env });
+      ultimoVigia = { ms, datos };
+    }
+    return json(datos, 200, { ...h, "Cache-Control": "no-store" });
+  }
+
   return async function atender(request, env) {
     const url = new URL(request.url), origen = request.headers.get("Origin"), esContacto = url.pathname === "/contacto";
+    const esVigia = url.pathname === "/vigia";
     const h = cors(origen, esContacto);
-    if (url.pathname !== "/buscar" && url.pathname !== "/enlace" && !esContacto) return json({ error: "no existe" }, 404, h);
+    if (url.pathname !== "/buscar" && url.pathname !== "/enlace" && !esContacto && !esVigia) return json({ error: "no existe" }, 404, h);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
     if (request.method !== (esContacto ? "POST" : "GET")) return json({ error: esContacto ? "solo POST" : "solo GET" }, 405, h);
     const fecha = ahora(), ms = Date.parse(fecha), ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
     if (excedido(ip, ms)) return json({ error: "demasiadas busquedas" }, 429, { ...h, "Retry-After": "60" });
     if (esContacto) return contacto(request, env, h, fecha, ms, ip);
+    if (esVigia) return vigia(env, h, url.searchParams.get("fresco") === "1");
     return url.pathname === "/buscar" ? buscar(url, env, h, fecha, ms) : enlace(url, env, h, fecha);
   };
 }
@@ -286,5 +306,14 @@ export default {
     const crearMensaje = async (de, para, crudo) => { const { EmailMessage } = await import("cloudflare:email"); return new EmailMessage(de, para, crudo); };
     if (!instancia) instancia = crearAtender({ fetch: (u, i) => fetch(u, i), cache: caches.default, ahora: () => new Date().toISOString(), crearMensaje });
     return instancia(request, env);
+  },
+
+  /* Spec 065: el Cron Trigger de Cloudflare (cada 5 minutos, ver wrangler.toml) corre el vigia del sitio y, si algo se
+     rompio, avisa al chat privado del dueno. Los cron de GitHub se atrasan hasta una hora; los de Cloudflare no. */
+  async scheduled(evento, env, ctx) {
+    const r = await vigilar({ fetch: (u, i) => fetch(u, i), cache: caches.default, ahora: () => new Date().toISOString(), env });
+    console.log("vigia: " + (!r.corrio ? "apagado" : r.ok ? "el sitio anda" : "fallas: " + r.fallas.map(f => f.id).join(", "))
+      + (r.avisado ? " (aviso mandado)" : ""));
+    return r;
   },
 };

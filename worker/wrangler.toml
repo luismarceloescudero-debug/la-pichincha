@@ -7,6 +7,18 @@ main = "src/index.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
 
+# Spec 065: el vigia del sitio. Cloudflare lo corre cada 5 minutos (los cron de GitHub se atrasan hasta una hora): mira la
+# portada, /hoy/, una ficha de /precios/, que indice.json sea de hoy y, con APP_PUBLICADA = "si", assetlinks.json. Si algo
+# falla avisa al chat privado del dueno por Telegram (secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_DUENO, que carga
+# .github/workflows/worker.yml). GET /vigia devuelve el mismo resultado sin mandar nada, para mirarlo a mano.
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+VIGIA = "si"                                    # interruptor general: "no" lo apaga entero
+VIGIA_BASE = "https://pichinchadeldia.com.ar"   # se puede apuntar a otro lado (un sitio de prueba) sin tocar el codigo
+APP_PUBLICADA = "no"                            # pasa a "si" cuando la app (Fase 3) publique assetlinks.json
+
 # Sin destination_address: el Worker manda al correo verificado de CONTACTO_DESTINO (un secreto: la direccion personal no
 # se escribe en el repo). Con destination_address solo podria mandar a esa direccion.
 [[send_email]]
