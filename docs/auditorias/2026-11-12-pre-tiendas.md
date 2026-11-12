@@ -20,7 +20,7 @@ van por PR chico, con test que primero falla.
 
 - Lighthouse y axe en vivo, y el estado de la CI. Los últimos números del repo son del 01/11 (CI 98-100) y del
   11/11 (la portada del runner oscila 83-96: P6 de `docs/auditorias/2026-11-11.md`).
-- `/medir-indice` contra el índice publicado (necesita bajar 9,5 MB). Último número anotado: 04/11, pestaña
+- `/medir-indice` contra el índice publicado (necesita bajar el índice publicado: 6,7 MB, 1,4 MB comprimido, medido el 12/11). Último número anotado: 04/11, pestaña
   Ofertas 116 y 0 repetidas.
 - Las pruebas de punta a punta: no hay `node_modules` en esta copia y no se instaló nada. Corren en cada PR.
 
@@ -34,7 +34,7 @@ van por PR chico, con test que primero falla.
 | Seguridad | 0 altas ni medias; CSP sin `unsafe-inline` nuevo | **Amarillo** | `workers_dev` abierto y tope en memoria (A9); el resto es lo aceptado en `CONSTRAINTS.md` |
 | Producción | qué pasa si cae Pages, el Worker o una tienda: todo tiene respuesta | **Rojo** | el índice se sigue escribiendo sin `os.replace` y una fuente caída borra un rubro (A7) |
 | Reglas del índice | ofertas, repetidas y premium dentro de lo medido en `main` | **No medida** | hay que correr `/medir-indice` en una sesión con red |
-| PWA instalable | manifiesto completo (`id`, `screenshots`, `shortcuts`), funciona sin red | **Rojo** | faltan los tres campos y no hay `assetlinks.json` (A1, A2) |
+| PWA instalable | manifiesto completo (`id`, `screenshots`, `shortcuts`), funciona sin red | **Amarillo** | `id`, `shortcuts` y `assetlinks.json` resueltos en la fase 3 (rama v4-f3-twa); faltan las capturas (A2) |
 | Legal y datos | privacidad con URL fija, contacto real, Ley 25.326 | **Rojo** | no hay correo público ni derechos del titular (A6); el buscador manda el término sin filtrar (A8) |
 | Diseño | la pantalla de inicio se entiende en 5 segundos | **Rojo** | el porcentaje sigue más grande que el precio (A10, D4 del 11/11) |
 
@@ -42,7 +42,8 @@ van por PR chico, con test que primero falla.
 
 ### P0 — frena el lanzamiento
 
-- **A1. No existe `/.well-known/assetlinks.json` ni nada que lo genere.** `publicar_app.py` copia el manifiesto,
+- **A1. [Resuelto en la fase 3, rama v4-f3-twa: `publicar_app.py` escribe `assetlinks.json` desde `sitio.json`; falta
+  cargar la huella cuando exista la app en Play.] No existe `/.well-known/assetlinks.json` ni nada que lo genere.** `publicar_app.py` copia el manifiesto,
   `sw.js`, los iconos y `datos/ganadores.json` (`publicar_app.py:23-28`) y no escribe la prueba de dominio. Sin
   ese archivo la TWA abre con barra de direcciones y Play no valida el sitio. Tampoco hay `.nojekyll`. Dato a
   favor: `/.well-known/security.txt` se publica desde el 31/10 y responde 200 (según la continuidad), así que el
@@ -50,7 +51,8 @@ van por PR chico, con test que primero falla.
 
 ### P1 — antes de producción
 
-- **A2. Manifiesto incompleto.** `manifest.webmanifest` no tiene `id`, `screenshots` ni `shortcuts`. Lo demás está
+- **A2. Manifiesto incompleto.** [`id` y `shortcuts` resueltos en la fase 3; quedan las `screenshots`.]
+  `manifest.webmanifest` no tiene `id`, `screenshots` ni `shortcuts`. Lo demás está
   bien y probado: `name`, `lang`, `display: standalone`, rutas relativas, iconos 192/512/maskable que existen y
   miden lo que declaran (`tests/test_publicar_app.py:18-46`). Las capturas piden fotos reales del teléfono
   (plan, sección 8) y todavía no hay ninguna en `img/`.
