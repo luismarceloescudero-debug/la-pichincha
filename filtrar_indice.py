@@ -11,6 +11,8 @@ aparecen ni en la pestana Ofertas ni en el buscador ni en el feed. Sin lista, o 
 import json
 import sys
 
+import archivos
+
 
 def filtrar(datos, caidas):
     """(datos sin las filas caidas, cuantas se sacaron). No modifica 'datos'."""
@@ -37,8 +39,7 @@ def main(argv=None):
         return 0
     nuevo, sacadas = filtrar(datos, caidas)
     if sacadas:
-        with open(argv[0], "w", encoding="utf-8") as f:
-            json.dump(nuevo, f, ensure_ascii=False, separators=(",", ":"))
+        archivos.escribir_atomico(argv[0], json.dumps(nuevo, ensure_ascii=False, separators=(",", ":")))
     print(f"Índice sin publicaciones caídas: {sacadas} fila(s) sacada(s)")
     return 0
 
