@@ -123,6 +123,9 @@ test("la privacidad explica cómo ejercer los derechos del titular (Ley 25.326 a
   assert.match(html, /acceso/);
   assert.match(html, /rectificaci/);
   assert.match(html, /supresi/);
+  assert.match(html, /10 días corridos/);
+  assert.match(html, /5 días hábiles/);
+  assert.match(html, /Agencia de Acceso a la Información Pública/);
 });
 
 /* --- Spec 046: /contacto/, /acerca/ y security.txt --- */
