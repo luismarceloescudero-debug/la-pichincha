@@ -112,6 +112,19 @@ test("la privacidad explica lo más buscado con el mismo mínimo y la misma vent
   assert.match(html, /datos personales/);
 });
 
+test("la privacidad incluye un correo de contacto real", () => {
+  const html = I.renderLegal({ baseUrl: BASE });
+  assert.match(html, /hola@pichinchadeldia\.com\.ar/);
+});
+
+test("la privacidad explica cómo ejercer los derechos del titular (Ley 25.326 arts. 14-16)", () => {
+  const html = I.renderLegal({ baseUrl: BASE });
+  assert.match(html, /Ley 25\.326/);
+  assert.match(html, /acceso/);
+  assert.match(html, /rectificaci/);
+  assert.match(html, /supresi/);
+});
+
 /* --- Spec 046: /contacto/, /acerca/ y security.txt --- */
 const cargarWorker = () => import(path.join(__dirname, "..", "..", "worker", "src", "index.js").replace(/\\/g, "/").replace(/^([A-Za-z]):/, "file:///$1:"));
 
