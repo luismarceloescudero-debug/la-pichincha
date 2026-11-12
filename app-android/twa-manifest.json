@@ -22,7 +22,20 @@
   },
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "Pichinchas del día",
+      "shortName": "Del día",
+      "url": "https://pichinchadeldia.com.ar/hoy/",
+      "chosenIconUrl": "https://pichinchadeldia.com.ar/img/icono-192.png"
+    },
+    {
+      "name": "Buscar un precio",
+      "shortName": "Buscar",
+      "url": "https://pichinchadeldia.com.ar/?q=",
+      "chosenIconUrl": "https://pichinchadeldia.com.ar/img/icono-192.png"
+    }
+  ],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://pichinchadeldia.com.ar/manifest.webmanifest",
   "fallbackType": "customtabs",
@@ -35,7 +48,7 @@
   "isMetaQuest": false,
   "fullScopeUrl": "https://pichinchadeldia.com.ar/",
   "minSdkVersion": 21,
-  "orientation": "default",
+  "orientation": "portrait",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],

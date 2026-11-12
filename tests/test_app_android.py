@@ -14,7 +14,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 RAIZ = Path(__file__).resolve().parent.parent
 PAQUETE = "ar.com.pichinchadeldia.app"
@@ -154,6 +154,14 @@ class ManifiestoDeLaApp(unittest.TestCase):
         self.assertEqual(self.twa["webManifestUrl"], f"{self.base}/manifest.webmanifest")
         self.assertEqual(self.twa["fullScopeUrl"], f"{self.base}/")
         self.assertTrue(self.twa["startUrl"].startswith("/"))
+
+    def test_los_accesos_directos_y_la_orientacion_son_los_del_sitio(self):
+        # Bubblewrap arma la app desde este archivo, no desde el manifiesto web: si no coinciden, la app sale sin los
+        # accesos directos del sitio (revision final, 12/11).
+        self.assertEqual(self.twa["orientation"], self.web["orientation"])
+        web = [(s["name"], s["short_name"], urljoin(self.base + "/", s["url"])) for s in self.web["shortcuts"]]
+        twa = [(s["name"], s["shortName"], s["url"]) for s in self.twa["shortcuts"]]
+        self.assertEqual(twa, web)
 
     def test_el_nombre_y_el_boton_se_llaman_como_el_sitio(self):
         self.assertEqual(self.twa["name"], self.web["name"])
