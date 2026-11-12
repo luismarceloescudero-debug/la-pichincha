@@ -47,6 +47,8 @@ jobs:
 
       # La clave de subida va en secretos (base64 del .keystore). Sin ella se compila igual con una clave de
       # prueba, para ver que el envoltorio anda: ese AAB no sirve para Play y se avisa en el resumen.
+      # La contrasena NO pasa por GITHUB_ENV (quedaria a mano de todos los pasos): cada paso que la usa la lee del
+      # secreto en su propio env (revision final, 12/11).
       - name: Preparar la clave de firma
         env:
           PLAY_UPLOAD_KEYSTORE: ${{ secrets.PLAY_UPLOAD_KEYSTORE }}
@@ -58,28 +60,40 @@ jobs:
             keytool -genkeypair -keystore app-android/android.keystore -alias android -storetype PKCS12 \
               -storepass prueba -keypass prueba -keyalg RSA -keysize 2048 -validity 1 \
               -dname "CN=prueba, O=prueba" >/dev/null 2>&1
-            echo "CLAVE=prueba" >> "$GITHUB_ENV"
           else
             echo "SIN_FIRMA=0" >> "$GITHUB_ENV"
             echo "$PLAY_UPLOAD_KEYSTORE" | base64 -d > app-android/android.keystore
-            echo "CLAVE=$PLAY_UPLOAD_PASSWORD" >> "$GITHUB_ENV"
           fi
+
+      # Bubblewrap pregunta por el JDK y el SDK si no tiene su config, y el proyecto Android no esta en el repo (ver
+      # app-android/.gitignore): `update` lo genera desde twa-manifest.json. Sin esto la corrida se cuelga en una pregunta.
+      - name: Configurar Bubblewrap y generar el proyecto Android
+        working-directory: app-android
+        run: |
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "${ANDROID_HOME:-$ANDROID_SDK_ROOT}" > ~/.bubblewrap/config.json
+          bubblewrap update --skipVersionUpgrade
 
       # --skipPwaValidation: la validacion de Bubblewrap baja la PWA con Chrome y depende de la red del runner.
       # La instalabilidad del sitio se mide aparte, en el job lighthouse de tests.yml.
       - name: Compilar y firmar el AAB
         working-directory: app-android
+        env:
+          PLAY_UPLOAD_PASSWORD: ${{ secrets.PLAY_UPLOAD_PASSWORD }}
         run: |
           # Bubblewrap toma las claves del almacen por entorno: no se pasan por la linea de comandos (quedarian
           # escritas en el log de la corrida).
-          export BUBBLEWRAP_KEYSTORE_PASSWORD="$CLAVE"
-          export BUBBLEWRAP_KEY_PASSWORD="$CLAVE"
+          export BUBBLEWRAP_KEYSTORE_PASSWORD="${PLAY_UPLOAD_PASSWORD:-prueba}"
+          export BUBBLEWRAP_KEY_PASSWORD="${PLAY_UPLOAD_PASSWORD:-prueba}"
           bubblewrap build --skipPwaValidation
 
       - name: Sacar la huella del certificado y verificar que la app es nuestra
         working-directory: app-android
+        env:
+          PLAY_UPLOAD_PASSWORD: ${{ secrets.PLAY_UPLOAD_PASSWORD }}
+          PISTA: ${{ inputs.pista || 'interna' }}
         run: |
-          huella=$(keytool -list -v -keystore android.keystore -alias android -storepass "$CLAVE" 2>/dev/null \
+          huella=$(keytool -list -v -keystore android.keystore -alias android -storepass "${PLAY_UPLOAD_PASSWORD:-prueba}" 2>/dev/null \
             | grep -m1 'SHA256:' | cut -d: -f2- | tr -d ' \r')
           if [ -z "$huella" ]; then echo "::error::No se pudo leer la huella SHA-256 del certificado"; exit 1; fi
           echo "$huella" > huella.txt
@@ -101,7 +115,7 @@ jobs:
             echo ""
             echo "Assetlinks publicado ahora mismo: $publicado"
             echo ""
-            echo "El AAB queda como artefacto de esta corrida. Se sube a mano desde Play Console, pista «${{ inputs.pista || 'interna' }}»."
+            echo "El AAB queda como artefacto de esta corrida. Se sube a mano desde Play Console, pista «$PISTA»."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Guardar el AAB, el APK de prueba y la huella
@@ -120,3 +134,8 @@ jobs:
             echo "::warning::El AAB de esta corrida esta firmado con una clave de prueba: falta cargar PLAY_UPLOAD_KEYSTORE y PLAY_UPLOAD_PASSWORD."
           fi
           echo "Bajar el AAB de los artefactos y subirlo a Play Console (pista interna). Pasar a produccion es decision del dueno."
+
+      # El almacen de claves no queda en el disco del runner, pase lo que pase en los pasos anteriores.
+      - name: Borrar la clave de firma
+        if: always()
+        run: rm -f app-android/android.keystore
