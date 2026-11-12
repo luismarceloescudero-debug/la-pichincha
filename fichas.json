@@ -87,6 +87,10 @@
 "dia": "2026-10-15",
 "mpn": "ASU650SS-1TT-R"
 },
+"https://www.mexx.com.ar/productos-rubro/almacenamiento/49897-memoria-sd-64-gb-canvas-go-plus-gen4-kingston-4k.html": {
+"dia": "2026-11-12",
+"mpn": "SDG4/64GB"
+},
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/49898-memoria-sd-128-gb-canvas-go-plus-gen4-kingston-4k.html": {
 "dia": "2026-10-15",
 "mpn": "SDG4/128GB"
@@ -503,6 +507,14 @@
 "dia": "2026-10-15",
 "mpn": "SXS2000/2000G"
 },
+"https://www.venex.com.ar/almacenamiento-portatil/discos-externos/ssd-externo-kingston-xs2000-2tb-usb-c-2000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SXS2000/2000G"
+},
+"https://www.venex.com.ar/almacenamiento-portatil/microsd/memoria-micro-sd-128gb-kingston-canvas-select-plus-g3-c10-c-adap-150mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SDCS3/128GB"
+},
 "https://www.venex.com.ar/almacenamiento-portatil/microsd/memoria-micro-sd-128gb-kingston-canvas-select-plus-g3-c10-c-adap.html": {
 "dia": "2026-10-15",
 "mpn": "SDCS3/128GB"
@@ -627,12 +639,48 @@
 "dia": "2026-10-15",
 "mpn": "AGAMMIXS70B-1T-CS"
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-legend-860-1tb-m2-nvme-pcie-40-6000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SLEG-860-1000GCS"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-legend-900-pro-1tb-m2-nvme-pcie-40-7400mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SLEG-900P-1TCS"
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-spectrix-s65g-2tb-m-2-nvme-6000mb-s.html": {
 "dia": "2026-10-28",
 "mpn": "SSPECTRIXS65G-2000G-CI"
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-spectrix-s65g-2tb-m2-nvme-6000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SSPECTRIXS65G-2000G-CI"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-su650-480gb-sata-iii-25-520mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "ASU650SS-480GT-R"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-xpg-gammix-s70-blade-512gb-m2-nvme-pcie-40-7400mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "AGAMMIXS70B-512G-CS"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-xpg-mars-980-blade-1tb-m2-nvme-pcie-50-14000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SMAR-980B-1TCS"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-xpg-mars-980-blade-2tb-m2-nvme-pcie-50-14000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SMAR-980B-2TCS"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-adata-xpg-spectrix-s65g-1tb-m2-nvme-pcie-40-6000mb-s-rgb.html": {
+"dia": "2026-11-12",
+"mpn": "SSPECTRIXS65G-1000G-CI"
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-crucial-e100-2tb-m-2-nvme-5000mb-s.html": {
 "dia": "2026-10-21",
+"mpn": "CT2000E100SSD8"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-crucial-e100-2tb-m2-nvme-5000mb-s.html": {
+"dia": "2026-11-12",
 "mpn": "CT2000E100SSD8"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-120gb-wave-sata.html": {
@@ -647,37 +695,129 @@
 "dia": "2026-10-15",
 "mpn": null
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-future-x-lite-2tb-m2-nvme-pcie-40-7100mb-s-con-disipador.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-m-2-nvme-wave-2280mb-s.html": {
 "dia": "2026-10-15",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-256gb-m2-nvme-pcie-30-2280mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-512gb-m2-nvme-pcie-30-2500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-s-120gb-sata-iii-25-550mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-s-240gb-sata-iii-25-550mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-s-480gb-sata-iii-25-550mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-hiksemi-wave-s-960gb-sata-iii-25-550mb-s.html": {
+"dia": "2026-11-12",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-512gb-m-2-nvme-kc3000-7000mb-s.html": {
 "dia": "2026-10-15",
 "mpn": "SKC3000S/512G"
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-a400-240gb-sata-iii-25-500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SA400S37/240G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-a400-480gb-sata-iii-25-500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SA400S37/480G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-a400-960gb-sata-iii-25-500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SA400S37/960G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-fury-renegade-2tb-m2-nvme-pcie-40-7300mb-s-con-disipador.html": {
+"dia": "2026-11-12",
+"mpn": "SFYRDK/2000G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-fury-renegade-g5-1tb-m2-nvme-pcie-50-14200mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SFYR2S/1T0"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-kc3000-512gb-m2-nvme-pcie-40-7000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SKC3000S/512G"
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-m-2-nvme-2280-kc3000-7000mb-s.html": {
 "dia": "2026-10-15",
 "mpn": "SKC3000D/2048G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-nv3-1tb-m2-nvme-pcie-40-6000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SNV3S/1000G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-nv3-2tb-m2-nvme-pcie-40-6000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SNV3S/2000G"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-kingston-nv3-4tb-m2-nvme-pcie-40-6000mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "SNV3S/4000G"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-klevv-cras-c925g-1tb-m-2-nvme-7400mb-s.html": {
 "dia": "2026-10-15",
 "mpn": null
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-klevv-cras-c925g-1tb-m2-nvme-7400mb-s.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-msi-spatium-s270-240gb-sata-iii-25-500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "S78-440N070-P83"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-msi-spatium-s270-480gb-sata-iii-25-500mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "S78-440E350-P83"
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-patriot-burst-elite-480gb-sata-iii-2-5.html": {
 "dia": "2026-10-15",
+"mpn": "9SE00108-PBE480GS25SSDR"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-patriot-burst-elite-480gb-sata-iii-25-450mb-s.html": {
+"dia": "2026-11-12",
 "mpn": "9SE00108-PBE480GS25SSDR"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-samsung-990-evo-plus-1tb-m-2-nvme-7150mb-s.html": {
 "dia": "2026-10-15",
 "mpn": "MZ-V9S1T0B/AM"
 },
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-samsung-990-evo-plus-1tb-m2-nvme-pcie-40-7150mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "MZ-V9S1T0B/AM"
+},
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-samsung-990-evo-plus-2tb-m-2-nvme-pcie-4-0-7250mb-s.html": {
 "dia": "2026-10-15",
+"mpn": "MZ-V9S2T0B/AM"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-samsung-990-evo-plus-2tb-m2-nvme-pcie-40-7250mb-s.html": {
+"dia": "2026-11-12",
 "mpn": "MZ-V9S2T0B/AM"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-wd-green-sn3000-2tb-nvme-5000mb-s.html": {
 "dia": "2026-10-15",
 "mpn": "WDS200T4G0E"
+},
+"https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solido-ssd-wd-green-sn350-2tb-m2-nvme-pcie-30-3200mb-s.html": {
+"dia": "2026-11-12",
+"mpn": "WDS200T3G0C"
 },
 "https://www.venex.com.ar/componentes-de-pc/discos-solidos-ssd/disco-solifo-ssd-adata-2tb-m2-nvme-gammix-s70-blade-7400mb-s.html": {
 "dia": "2026-10-15",
@@ -887,8 +1027,28 @@
 "dia": "2026-10-17",
 "mpn": "KCP432SS8/8"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-ddr4-8gb-3200mhz-kingston-12v.html": {
+"dia": "2026-11-12",
+"mpn": "KCP432SS8/8"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-ddr5-16gb-5600mhz-hiksemi-hiker.html": {
 "dia": "2026-10-17",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-ddr3-hiker-8gb-1600mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-ddr4-16gb-3200mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-hiker-ddr3-4gb-1600mhz.html": {
+"dia": "2026-11-12",
+"mpn": null
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-hiksemi-hiker-ddr4-8gb-3200mhz.html": {
+"dia": "2026-11-12",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-kimota-ddr4-16gb-3200mhz.html": {
@@ -898,6 +1058,10 @@
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-kimota-ddr4-8gb-3200mhz.html": {
 "dia": "2026-10-17",
 "mpn": "D4SD8G32-KIM"
+},
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-notebook-sodimm-kingston-ddr5-8gb-5600mhz-cl46.html": {
+"dia": "2026-11-12",
+"mpn": "KVR56S46BS6-8"
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/notebook/memoria-ram-sodimm-ddr5-8gb-5600mhz-kingston-cl46.html": {
 "dia": "2026-10-17",
