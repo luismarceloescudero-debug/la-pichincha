@@ -1,0 +1,10 @@
+# La clave de subida y lo que compila Bubblewrap no se commitean: la clave va en los secretos de GitHub
+# (PLAY_UPLOAD_KEYSTORE y PLAY_UPLOAD_PASSWORD) y el resto se genera en cada corrida.
+*.keystore
+*.jks
+*.aab
+*.apk
+gradle/
+app/
+build/
+huella.txt

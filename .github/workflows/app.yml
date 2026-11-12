@@ -1,0 +1,122 @@
+name: App Android
+
+# La app es el mismo sitio envuelto (TWA, fase 3 del plan v4): este workflow compila el AAB con Bubblewrap, lo
+# firma con la clave de subida y deja el AAB y la huella SHA-256 del certificado como artefactos para bajar.
+# Subirlo a Play (pista interna) es a mano, desde Play Console: no hay cuenta todavia y publicar en una tienda
+# nunca es automatico (decision del dueno). La version de la app solo cambia cuando cambia la cascara (icono,
+# nombre, permisos), no con cada precio: eso lo arregla el sitio solo.
+on:
+  workflow_dispatch:
+    inputs:
+      pista:
+        description: "Pista de Play a la que va el AAB (se sube a mano desde Play Console); vacio = solo compilar"
+        default: "interna"
+  push:
+    tags:
+      - "app-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  # Lo mismo que corre en cada PR: no se compila una app de un codigo que no pasa los tests.
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  compilar:
+    needs: [tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      # Bubblewrap compila con el SDK de Android y el JDK que ya trae el runner; solo se fija la version de Java.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Version exacta: la constitucion no suma dependencias sin fijarlas. Para subirla, se cambia aca y se
+      # prueba la corrida a mano.
+      - name: Instalar Bubblewrap
+        run: npm install --global @bubblewrap/cli@1.24.1
+
+      # La clave de subida va en secretos (base64 del .keystore). Sin ella se compila igual con una clave de
+      # prueba, para ver que el envoltorio anda: ese AAB no sirve para Play y se avisa en el resumen.
+      - name: Preparar la clave de firma
+        env:
+          PLAY_UPLOAD_KEYSTORE: ${{ secrets.PLAY_UPLOAD_KEYSTORE }}
+          PLAY_UPLOAD_PASSWORD: ${{ secrets.PLAY_UPLOAD_PASSWORD }}
+        run: |
+          if [ -z "$PLAY_UPLOAD_KEYSTORE" ] || [ -z "$PLAY_UPLOAD_PASSWORD" ]; then
+            echo "::warning::Sin PLAY_UPLOAD_KEYSTORE o PLAY_UPLOAD_PASSWORD: se compila con una clave de prueba. Este AAB no se puede subir a Play."
+            echo "SIN_FIRMA=1" >> "$GITHUB_ENV"
+            keytool -genkeypair -keystore app-android/android.keystore -alias android -storetype PKCS12 \
+              -storepass prueba -keypass prueba -keyalg RSA -keysize 2048 -validity 1 \
+              -dname "CN=prueba, O=prueba" >/dev/null 2>&1
+            echo "CLAVE=prueba" >> "$GITHUB_ENV"
+          else
+            echo "SIN_FIRMA=0" >> "$GITHUB_ENV"
+            echo "$PLAY_UPLOAD_KEYSTORE" | base64 -d > app-android/android.keystore
+            echo "CLAVE=$PLAY_UPLOAD_PASSWORD" >> "$GITHUB_ENV"
+          fi
+
+      # --skipPwaValidation: la validacion de Bubblewrap baja la PWA con Chrome y depende de la red del runner.
+      # La instalabilidad del sitio se mide aparte, en el job lighthouse de tests.yml.
+      - name: Compilar y firmar el AAB
+        working-directory: app-android
+        run: |
+          # Bubblewrap toma las claves del almacen por entorno: no se pasan por la linea de comandos (quedarian
+          # escritas en el log de la corrida).
+          export BUBBLEWRAP_KEYSTORE_PASSWORD="$CLAVE"
+          export BUBBLEWRAP_KEY_PASSWORD="$CLAVE"
+          bubblewrap build --skipPwaValidation
+
+      - name: Sacar la huella del certificado y verificar que la app es nuestra
+        working-directory: app-android
+        run: |
+          huella=$(keytool -list -v -keystore android.keystore -alias android -storepass "$CLAVE" 2>/dev/null \
+            | grep -m1 'SHA256:' | cut -d: -f2- | tr -d ' \r')
+          if [ -z "$huella" ]; then echo "::error::No se pudo leer la huella SHA-256 del certificado"; exit 1; fi
+          echo "$huella" > huella.txt
+          base=$(python3 -c 'import json;print(json.load(open("../sitio.json"))["base_url"].rstrip("/"))')
+          publicado=$(curl -fsSL "$base/.well-known/assetlinks.json" || echo '[]')
+          if ! printf '%s' "$publicado" | grep -q "$huella"; then
+            echo "::warning::La huella de este AAB no esta en $base/.well-known/assetlinks.json: la app va a abrir con la barra del navegador. Se carga en app_android.huellas_sha256 de sitio.json y se vuelve a publicar el sitio."
+          fi
+          {
+            echo "### App Android"
+            echo ""
+            echo "Huella SHA-256 del certificado de firma:"
+            echo '```'
+            echo "$huella"
+            echo '```'
+            echo ""
+            echo "Va en \`app_android.huellas_sha256\` de \`sitio.json\` (asi la publica \`publicar_app.py\`) y, cuando"
+            echo "exista Play App Signing, tambien la que muestre Play Console (son dos: subida y Play)."
+            echo ""
+            echo "Assetlinks publicado ahora mismo: $publicado"
+            echo ""
+            echo "El AAB queda como artefacto de esta corrida. Se sube a mano desde Play Console, pista «${{ inputs.pista || 'interna' }}»."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guardar el AAB, el APK de prueba y la huella
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-android
+          path: |
+            app-android/*.aab
+            app-android/*.apk
+            app-android/huella.txt
+          retention-days: 90
+
+      - name: Recordar que publicar es a mano
+        run: |
+          if [ "$SIN_FIRMA" = "1" ]; then
+            echo "::warning::El AAB de esta corrida esta firmado con una clave de prueba: falta cargar PLAY_UPLOAD_KEYSTORE y PLAY_UPLOAD_PASSWORD."
+          fi
+          echo "Bajar el AAB de los artefactos y subirlo a Play Console (pista interna). Pasar a produccion es decision del dueno."

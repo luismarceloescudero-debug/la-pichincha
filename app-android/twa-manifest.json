@@ -1,0 +1,43 @@
+{
+  "packageId": "ar.com.pichinchadeldia.app",
+  "host": "pichinchadeldia.com.ar",
+  "name": "La Pichincha",
+  "launcherName": "Pichincha",
+  "display": "standalone",
+  "themeColor": "#3b0a57",
+  "themeColorDark": "#120018",
+  "navigationColor": "#120018",
+  "navigationColorDark": "#120018",
+  "navigationDividerColor": "#120018",
+  "navigationDividerColorDark": "#120018",
+  "backgroundColor": "#120018",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://pichinchadeldia.com.ar/img/icono-512.png",
+  "maskableIconUrl": "https://pichinchadeldia.com.ar/img/icono-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://pichinchadeldia.com.ar/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://pichinchadeldia.com.ar/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1.0.0"
+}
