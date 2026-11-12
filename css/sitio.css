@@ -114,7 +114,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .tablist{display:flex;gap:4px;position:relative;overflow-x:auto;scrollbar-width:none;
   background:var(--surface-2);border-radius:12px;padding:4px}
 .tablist::-webkit-scrollbar{display:none}
-.tab{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;
+.tab{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;min-height:48px;box-sizing:border-box;
   padding:9px 16px;border-radius:9px;font-size:.9rem;font-weight:500;color:var(--ink-2);
   display:flex;align-items:center;justify-content:center;gap:7px;
   transition:color .22s var(--curva),background .22s var(--curva)}
@@ -325,7 +325,7 @@ td.mejor{color:var(--good);font-weight:700}
 .segmentos{display:flex;gap:4px;background:var(--surface-2);border-radius:12px;padding:4px;
   margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
 .segmentos::-webkit-scrollbar{display:none}
-.seg{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;padding:9px 16px;
+.seg{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;white-space:nowrap;min-height:48px;box-sizing:border-box;padding:9px 16px;
   border-radius:9px;font:500 .88rem var(--font-sans);color:var(--ink-2);
   display:flex;align-items:center;justify-content:center;gap:7px;transition:color .22s var(--curva),background-color .22s var(--curva),box-shadow .22s var(--curva)}
 .seg:hover{color:var(--ink)}
@@ -778,19 +778,19 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .ocard.n-normal .o-off{width:50px;height:50px}
 .ocard.n-normal .o-off::before{inset:5px}
 .ocard.n-normal .o-off b{font-size:.8rem}
-.ocard.n-normal .o-precios .ahora{font-size:1.2rem;color:var(--ink)}
+.ocard.n-normal .o-precios .ahora{font-size:1.6rem;color:var(--ink)}
 .ocard.n-normal .o-nom{font-weight:500}
 .ocard.n-normal::before{height:3px}
 .ocard.n-fuerte .o-off{width:72px;height:72px}
 .ocard.n-fuerte .o-off b{font-size:1.1rem}
-.ocard.n-fuerte .o-precios .ahora{font-size:1.85rem}
+.ocard.n-fuerte .o-precios .ahora{font-size:2.3rem}
 .ocard.n-fuerte{border-color:var(--good)}
 .ocard.n-heroe{background:var(--bloque);border-color:var(--bloque);color:#fff;box-shadow:var(--shadow-up)}
 .ocard.n-heroe::before,.ocard.n-heroe.propia::before{background:var(--bloque-2);height:7px}
 .ocard.n-heroe:hover,.ocard.n-heroe.abierta,.ocard.n-heroe:has(.o-abrir:focus-visible){border-color:var(--bloque-2)}
 .ocard.n-heroe .o-cinta,.ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-precios .ahora,
 .ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:#fff}
-.ocard.n-heroe .o-precios .ahora{font-size:2.35rem;letter-spacing:-.045em;line-height:1}
+.ocard.n-heroe .o-precios .ahora{font-size:2.8rem;letter-spacing:-.045em;line-height:1}
 .ocard.n-heroe .o-precios .antes,.ocard.n-heroe .o-contra,.ocard.n-heroe .o-detalle p{color:rgba(255,255,255,.82)}
 .ocard.n-heroe .o-ahorro{font-size:1rem}
 .ocard.n-heroe .o-off{width:auto;height:auto;border-radius:12px;background:#fff;padding:6px 11px;transform:none}
@@ -814,7 +814,7 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .o-banda b{font:700 1.15rem var(--font-sans);letter-spacing:-.01em}
 .o-banda span{font:600 .76rem var(--font-mono);opacity:.9}
 @media (max-width:620px){
-  .ocard.n-heroe .o-precios .ahora{font-size:2.1rem}
+  .ocard.n-heroe .o-precios .ahora{font-size:2.5rem}
   .o-banda{padding:12px 16px}
 }
 
@@ -841,12 +841,12 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .ocard .o-main{order:1;display:block;padding:2px 14px 8px;background:var(--l1)}
 .ocard .o-off{width:auto;height:auto;border-radius:0;background:none;display:block;transform:none;margin:0}
 .ocard .o-off::before{display:none}
-.ocard .o-off b{font:800 3rem/1 var(--f-pct);letter-spacing:-.01em;color:var(--a1)}
-.ocard.n-normal .o-off{width:auto;height:auto}.ocard.n-normal .o-off b{font-size:2.3rem}
-.ocard.n-fuerte .o-off{width:auto;height:auto}.ocard.n-fuerte .o-off b{font-size:3.3rem}
+.ocard .o-off b{font:800 1.5rem/1 var(--f-pct);letter-spacing:-.01em;color:var(--a1)}
+.ocard.n-normal .o-off{width:auto;height:auto}.ocard.n-normal .o-off b{font-size:1.3rem}
+.ocard.n-fuerte .o-off{width:auto;height:auto}.ocard.n-fuerte .o-off b{font-size:1.7rem}
 .ocard.n-heroe{background:var(--surface);color:var(--ink);border-color:var(--band);box-shadow:0 0 0 3px color-mix(in srgb,var(--band) 70%,#e0a800),var(--shadow-up)}
 .ocard.n-heroe .o-off{width:auto;height:auto;background:none;padding:0;border-radius:0}
-.ocard.n-heroe .o-off b{font-size:4.2rem;color:var(--a1)}
+.ocard.n-heroe .o-off b{font-size:2rem;color:var(--a1)}
 .ocard.n-heroe .o-nom,.ocard.n-heroe .tit-nom,.ocard.n-heroe .o-ahorro,.ocard.n-heroe .o-ahorro b{color:var(--ink)}
 .ocard.n-heroe .o-star{color:#4d5562}.ocard.n-heroe .o-star:hover{background:#fff}
 .ocard.n-heroe .tit-ico{color:var(--a1)}.ocard.n-heroe .tit-chip{background:var(--tint);color:var(--ink)}
@@ -894,7 +894,7 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 
 /* ---- Busqueda en celular: areas tactiles y menos trabajo de pintado ---- */
 /* Los links de «mismo modelo en otras tiendas» median 16-19 px de alto; WCAG 2.5.8 pide 24 px como minimo. */
-.mismo a{display:inline-flex;align-items:center;min-height:24px;padding-block:3px}
+.mismo a{display:inline-flex;align-items:center;min-height:48px;padding-block:3px}
 /* Contraste (Lighthouse, 01/11): el precio tachado sobre la franja roja y el contador de los chips quedaban en 4,35 y 3,59. */
 .ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{color:#fff}
 .of-chip .n{opacity:1;color:var(--ink-2)}
