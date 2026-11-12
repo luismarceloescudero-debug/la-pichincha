@@ -78,6 +78,13 @@ function crearTraer(fetch) {
   };
 }
 
+/* Una falla suelta (un timeout, un 503 de un segundo) se reintenta una vez antes de contarla: son ~1.150 pedidos por dia
+   a GitHub Pages y uno aislado no tiene que despertar al dueno (revision final de Fable, 12/11). */
+async function conReintento(chequeo) {
+  const primera = await chequeo();
+  return primera ? chequeo() : null;
+}
+
 async function revisarPagina(traer, base, pagina) {
   try {
     const r = await traer(base + pagina.ruta, { headers: { Accept: "text/html" } });
@@ -114,7 +121,7 @@ async function revisarAssetlinks(traer, base, env) {
   const pagina = { id: "assetlinks", titulo: "La prueba de la app (assetlinks.json)" };
   try {
     const r = await traer(base + ASSETLINKS, { headers: { Accept: "application/json" } });
-    if (!r.ok) return falla(pagina, `respondió ${r.status}: falta el archivo (¿.nojekyll en la carpeta .well-known?)`);
+    if (!r.ok) return falla(pagina, `respondió ${r.status}: falta el archivo (¿publicar_app.py lo dejo en _sitio/.well-known?)`);
     let datos;
     try { datos = JSON.parse(await r.text()); } catch (e) { return falla(pagina, "no es JSON"); }
     const nuestro = Array.isArray(datos) && datos.some(e => e && e.target && e.target.namespace === "android_app"
@@ -132,9 +139,9 @@ export async function revisar({ fetch, ahora, env = {} }) {
   const base = String(env.VIGIA_BASE || BASE).replace(/\/+$/, "");
   const traer = crearTraer(fetch);
   const fallas = (await Promise.all([
-    ...PAGINAS.map(p => revisarPagina(traer, base, p)),
-    revisarIndice(traer, base, ms),
-    revisarAssetlinks(traer, base, env),
+    ...PAGINAS.map(p => conReintento(() => revisarPagina(traer, base, p))),
+    conReintento(() => revisarIndice(traer, base, ms)),
+    conReintento(() => revisarAssetlinks(traer, base, env)),
   ])).filter(Boolean);
   return { cuando, ok: fallas.length === 0, fallas };
 }
@@ -185,8 +192,17 @@ export async function avisar(texto, { fetch, env = {} }) {
   }
 }
 
-async function leerEstado(cache) {
+/* Donde vive lo ultimo que se aviso. Con el binding VIGIA_KV (worker/wrangler.toml), en KV: es global, y la cache de
+   Cloudflare no (cada centro de datos tiene la suya y el cron no corre siempre en el mismo). Sin KV, en la cache, pero
+   como mucho 6 horas: lo peor es un aviso de mas, nunca un «volvio a andar» de un problema de hace dias. */
+export const CACHE_ESTADO_SEG = 6 * 3600;
+
+async function leerEstado(cache, env) {
   try {
+    if (env.VIGIA_KV) {
+      const texto = await env.VIGIA_KV.get(CLAVE_ESTADO);
+      return texto ? JSON.parse(texto) : null;
+    }
     const r = await cache.match(CLAVE_ESTADO);
     return r ? JSON.parse(await r.text()) : null;
   } catch (e) {
@@ -194,10 +210,16 @@ async function leerEstado(cache) {
   }
 }
 
-async function guardarEstado(cache, estado) {
+async function guardarEstado(cache, env, estado, anterior) {
+  const texto = JSON.stringify(estado);
   try {
-    await cache.put(CLAVE_ESTADO, new Response(JSON.stringify(estado), { headers: { "Content-Type": "application/json",
-      "Cache-Control": "max-age=2592000" } }));
+    if (env.VIGIA_KV) {
+      // KV tiene tope de escrituras por dia: se escribe solo cuando algo cambio.
+      if (!anterior || JSON.stringify(anterior) !== texto) await env.VIGIA_KV.put(CLAVE_ESTADO, texto);
+      return;
+    }
+    await cache.put(CLAVE_ESTADO, new Response(texto, { headers: { "Content-Type": "application/json",
+      "Cache-Control": `max-age=${CACHE_ESTADO_SEG}` } }));
   } catch (e) {
     console.warn("vigia: no se pudo guardar el estado");
   }
@@ -211,12 +233,12 @@ export async function vigilar({ fetch, cache, ahora, env = {} }) {
     return { corrio: false, cuando: ahora(), ok: true, fallas: [], avisado: false };
   }
   const resultado = await revisar({ fetch, ahora, env });
-  const anterior = await leerEstado(cache);
+  const anterior = await leerEstado(cache, env);
   const texto = textoAviso(resultado, anterior, Date.parse(resultado.cuando));
   const avisado = texto ? await avisar(texto, { fetch, env }) : false;
   // Si el aviso no salio no se anota: la proxima corrida lo vuelve a intentar (y queda la advertencia en el log).
   if (texto && !avisado) return { ...resultado, avisado: false, texto };
-  await guardarEstado(cache, { huella: huella(resultado), avisado: avisado ? Date.parse(resultado.cuando) : (anterior && anterior.avisado) || 0,
-    fallas: resultado.fallas.map(f => f.id) });
+  await guardarEstado(cache, env, { huella: huella(resultado), avisado: avisado ? Date.parse(resultado.cuando) : (anterior && anterior.avisado) || 0,
+    fallas: resultado.fallas.map(f => f.id) }, anterior);
   return { ...resultado, avisado, texto };
 }

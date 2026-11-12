@@ -41,8 +41,11 @@ cosa no se toma como sitio andando.
   corrida lo reintenta en cuanto se carguen.
 - **Interruptor general.** `VIGIA = "no"` en `worker/wrangler.toml` apaga todo (por defecto está prendido).
 - **No manda nada desde HTTP.** `GET /vigia` corre los mismos chequeos y devuelve `{ cuando, ok, fallas }` sin tocar
-  Telegram: nadie puede hacer sonar el teléfono del dueño pidiendo una ruta. `?fresco=1` saltea el medio minuto de
-  recordado que tiene la ruta para no repetir los pedidos.
+  Telegram: nadie puede hacer sonar el teléfono del dueño pidiendo una ruta. La ruta recuerda el último resultado medio
+  minuto, sin excepción, para que un pedido anónimo no multiplique pedidos al sitio.
+- **Estado.** Con el binding KV `VIGIA_KV` lo último que se avisó vive en KV (global, se escribe solo cuando cambia);
+  sin él, en la cache de Cloudflare como mucho 6 horas (puede repetir algún aviso: cada centro de datos tiene la suya).
+- **Reintento.** Cada chequeo que falla se repite una vez antes de contarlo: un timeout aislado no avisa.
 
 ## Dónde vive el estado (y por qué no hay base todavía)
 
@@ -73,7 +76,7 @@ curl -s https://pichincha-afuera.mescudero-remitos-internos.workers.dev/vigia
 {"cuando":"2026-11-12T12:00:00.000Z","ok":true,"fallas":[]}
 ```
 
-Para probar el aviso sin romper nada: apuntar `VIGIA_BASE` a un sitio que falle (o pedir `?fresco=1` justo cuando algo
+Para probar el aviso sin romper nada: apuntar `VIGIA_BASE` a un sitio que falle (o pedir `/vigia` justo cuando algo
 está mal) y mirar el log del Worker (`wrangler tail`). El mensaje dice qué chequeo falló y con qué detalle.
 
 ## Lo que sigue (del plan v4, sección 7.6; no entra acá)
@@ -90,4 +93,4 @@ está mal) y mirar el log del Worker (`wrangler tail`). El mensaje dice qué che
 cinco chequeos (caído, 404, 200 que no es el sitio, sin respuesta, índice de ayer / de anteayer / con gracia de
 madrugada), `assetlinks` apagado y prendido, el texto del aviso (primero, repetido, recordatorio, vuelta a andar), el envío
 al chat privado y nunca al canal, la corrida completa con estado, la cache rota, el interruptor `VIGIA`, y la ruta `/vigia`
-(sin Telegram, con `?fresco=1` y con el medio minuto de recordado).
+(sin Telegram y con el medio minuto de recordado), el estado en KV, la cache de 6 horas y el reintento.

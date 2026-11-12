@@ -272,11 +272,11 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
 
   /* Spec 065: GET /vigia mira el sitio publicado y devuelve { cuando, ok, fallas }. No manda nada: el aviso al dueno sale
      del Cron Trigger, para que nadie pueda hacer sonar el Telegram pidiendo esta ruta. Se guarda el ultimo resultado medio
-     minuto (y ?fresco=1 lo saltea) por si el tope por IP deja pasar varias seguidas. */
-  async function vigia(env, h, fresco) {
+     minuto, sin excepcion: asi un pedido anonimo no multiplica pedidos al sitio (revision final, 12/11). */
+  async function vigia(env, h) {
     const ms = Date.parse(ahora());
     let datos;
-    if (!fresco && ultimoVigia && ms - ultimoVigia.ms < ESPERA_RUTA_MS) datos = ultimoVigia.datos;
+    if (ultimoVigia && ms - ultimoVigia.ms < ESPERA_RUTA_MS) datos = ultimoVigia.datos;
     else {
       datos = await revisarSitio({ fetch, ahora, env });
       ultimoVigia = { ms, datos };
@@ -294,7 +294,7 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     const fecha = ahora(), ms = Date.parse(fecha), ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
     if (excedido(ip, ms)) return json({ error: "demasiadas busquedas" }, 429, { ...h, "Retry-After": "60" });
     if (esContacto) return contacto(request, env, h, fecha, ms, ip);
-    if (esVigia) return vigia(env, h, url.searchParams.get("fresco") === "1");
+    if (esVigia) return vigia(env, h);
     return url.pathname === "/buscar" ? buscar(url, env, h, fecha, ms) : enlace(url, env, h, fecha);
   };
 }
