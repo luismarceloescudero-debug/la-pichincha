@@ -21,6 +21,11 @@ const SITIO = require("./sitio.json");
 const BASE_URL = SITIO.base_url;
 const MAX_FEED = 20;
 const MAX_HOY = 10, EN_TARJETA = 5;
+/* Plan v4, seccion 8: en estas fechas /hoy/ suma un bloque con lo que bajo de verdad contra el piso de 30 dias.
+   Para el Hot Sale (mayo 2027) se agrega otra fila. Las fechas son del dia del indice (YYYY-MM-DD, ambas incluidas). */
+const ESPECIALES = [{ desde: "2026-11-20", hasta: "2026-12-01", nombre: "Black Friday" }];
+const MAX_ESPECIAL = 20;
+const especialDe = dia => ESPECIALES.find(e => dia >= e.desde && dia <= e.hasta) || null;
 const CANAL_TELEGRAM = SITIO.canal_telegram;
 
 const xml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
@@ -110,12 +115,18 @@ const pctReel = (o, clase) => o.off > 0
 /* /hoy/: la pagina del link de la bio y de la vista previa de Telegram. Arriba, el cartel del dia con el lenguaje del
    Reel v4 (spec 059): la super oferta en grande y las siguientes en tarjetas; abajo, todas con su enlace a la tienda.
    Mismas ofertas que el feed. */
-function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
+function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY, diaISO = String(idx.generado || "").slice(0, 10) } = {}) {
   const base = baseUrl.replace(/\/$/, "");
   const esc = G.esc;
   const fecha = P.fechaHora(idx.generado);
   const dia = fecha.split(" ")[0];
   const ofertas = O.destacadas(idx, max);
+  // Bloque especial (Black Friday): solo bajas propias, o sea contra el piso de 30 dias y no contra el «antes» de la tienda.
+  const especial = especialDe(diaISO);
+  const reales = especial
+    ? O.destacadas(idx, 500).filter(o => o.tipo === "propia" && !o.internacional && o.off > 0)
+      .sort((a, b) => b.off - a.off || b.ahorro - a.ahorro).slice(0, MAX_ESPECIAL)
+    : [];
   // La super oferta es la mejor de todas las de hoy (como en el Reel, que mira las 10); las tarjetas, las siguientes en orden.
   const s = mejorDe(ofertas), sup = ofertas[s];
   // El precio de antes solo se tacha si es un precio de antes de verdad: contra el mismo modelo se dice contra que se
@@ -152,8 +163,24 @@ function renderHoy(idx, { baseUrl = BASE_URL, max = MAX_HOY } = {}) {
     (o.modelo ? `<span class="det">${esc(O.textoContraModelo(o.modelo, G.pesos))}</span>`
       : o.tipo === "seguimiento" ? `<span class="det">−${Math.round(o.off * 100)}% desde que lo seguimos, hace pocos días</span>` : "") +
     `</span></li>`).join("\n");
-  const titulo = `Pichinchas del día · ${dia} | La Pichincha`;
-  const descripcion = ofertas.length
+  // El bloque especial: la misma tarjeta de la lista completa, pero con el piso de 30 dias a la vista.
+  const filaEspecial = o => `    <li>${pctReel(o, "h-pct")}<span class="h-txt">${enlace(o)}` +
+    `<span class="h-pre">${precio(o, "h-chico")} <s class="h-tachado">${esc(G.pesos(o.antes))}</s>` +
+    ` <span class="h-donde">en <b>${esc(comercioDeOferta(o, idx))}</b></span></span>` +
+    `<span class="det">Piso de los 30 días anteriores: ${esc(G.pesos(o.antes))} · bajó ${Math.round(o.off * 100)} %</span></span></li>`;
+  const bloqueEspecial = especial && reales.length ? `  <section class="historia h-todas bf" aria-labelledby="bf-t">
+    <div class="h-cab"><span>${esc(especial.nombre)}</span><span>hasta el ${esc(especial.hasta.slice(8, 10) + "/" + especial.hasta.slice(5, 7))}</span></div>
+    <h2 id="bf-t">${esc(especial.nombre)}: <span>lo que bajó de verdad</span></h2>
+    <p class="h-pie">Comparamos contra el precio más bajo de los últimos 30 días, no contra el precio «antes» que pone la tienda.</p>
+    <ol class="h-lista todas">
+${reales.map(filaEspecial).join("\n")}
+    </ol>
+  </section>
+` : "";
+  const titulo = bloqueEspecial ? `${especial.nombre}: lo que bajó de verdad · ${dia} | La Pichincha` : `Pichinchas del día · ${dia} | La Pichincha`;
+  const descripcion = bloqueEspecial
+    ? `${especial.nombre}: las ${reales.length} mayores bajas de hardware en Argentina contra el precio más bajo de los últimos 30 días, con precios del ${fecha}.`
+    : ofertas.length
     ? `Las ${ofertas.length} mejores bajas de precio de hardware en Argentina, con precios del ${fecha}.`
     : "Las mejores bajas de precio de hardware en Argentina, todos los días.";
   return G.cabeza({ titulo, descripcion, canonica: `${base}/hoy/`, baseUrl: base, rel: "../" }) + `
@@ -267,7 +294,7 @@ ${heroe}
 ${tarjeta ? `    <ol class="h-lista">\n${tarjeta}\n    </ol>` : ""}
     <p class="h-pie">Todas con su link en<br><b>${esc(base.replace(/^https?:\/\//, ""))}/hoy</b></p>
   </section>
-  <section class="historia h-todas" aria-labelledby="todas-t">
+${bloqueEspecial}  <section class="historia h-todas" aria-labelledby="todas-t">
     <div class="h-cab"><span>La Pichincha</span><span>precios del ${esc(fecha)}</span></div>
     <h2 id="todas-t">Todas las ofertas <span>de hoy</span></h2>
 ${ofertas.length ? `    <ol class="h-lista todas">\n${lista}\n    </ol>` : `    <p class="h-pie">Hoy no hay bajas para destacar. Volvé mañana o buscá lo que necesitás en el comparador.</p>`}
