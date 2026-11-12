@@ -15,6 +15,7 @@ catalogo (json, api y listados) y cualquier tienda nueva cae en alguna.
 """
 
 import argparse
+import archivos
 import html
 import math
 import http.client
@@ -851,7 +852,7 @@ def escribir_fichas(carpeta, cache):
             return
     except OSError:
         pass
-    ruta.write_text(texto, encoding="utf-8")
+    archivos.escribir_atomico(ruta, texto)
 
 
 def completar_con_fichas(tienda, items, cache, hoy, pedir=None, dormir=time.sleep):
@@ -961,9 +962,9 @@ def guardar_foto(carpeta, anterior):
     carpeta.mkdir(parents=True, exist_ok=True)
     if not anterior:
         return None
-    (carpeta / FOTO).write_text(json.dumps({"generado": anterior.get("generado", ""), "productos": [
+    archivos.escribir_atomico(carpeta / FOTO, json.dumps({"generado": anterior.get("generado", ""), "productos": [
         [f[0], f[1], f[2], f[3]] for f in anterior.get("productos", []) if len(f) >= 4]},
-        ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        ensure_ascii=False, separators=(",", ":")))
     return leer_foto(carpeta)
 
 
@@ -1199,7 +1200,7 @@ def main(argv=None):
     sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
     filas = historial.cambios(estado, actuales, sanas, generado[:10])
     ruta_csv = historial.escribir(carpeta, generado[:10], filas)
-    SALUD.write_text(json.dumps(informe, ensure_ascii=False, indent=1), encoding="utf-8")
+    archivos.escribir_atomico(SALUD, json.dumps(informe, ensure_ascii=False, indent=1))
 
     datos = {
         "generado": generado,
@@ -1212,7 +1213,7 @@ def main(argv=None):
         "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
         "productos": salida,
     }
-    INDICE.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    archivos.escribir_atomico(INDICE, json.dumps(datos, ensure_ascii=False, separators=(",", ":")))
     print("\n" + NEG + "Resumen" + FIN)
     for clave, (n, nota) in resumen.items():
         print("  " + fuentes[clave]["nombre"].ljust(14) + str(n).rjust(6)
