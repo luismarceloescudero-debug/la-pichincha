@@ -326,7 +326,47 @@ test("la ruta /vigia no repite los chequeos si se la pide dos veces seguidas", a
   assert.equal((await (await pedir()).json()).ok, true);
   assert.equal(llamadas.length, primeros, "la segunda sale de lo ultimo, sin volver a pedir el sitio");
   await pedir("/vigia?fresco=1");
-  assert.ok(llamadas.length > primeros, "?fresco=1 fuerza la revision");
+  assert.equal(llamadas.length, primeros, "?fresco=1 ya no fuerza nada: cada pedido anonimo no puede multiplicar pedidos al sitio");
+});
+
+/* --- Revision final (Fable, 12/11): estado en KV, reintento y cache corta --- */
+
+function kvFalso(inicial = {}) {
+  const m = new Map(Object.entries(inicial)), puts = [];
+  return { m, puts, get: async k => (m.has(k) ? m.get(k) : null), put: async (k, v) => { puts.push(k); m.set(k, v); } };
+}
+
+test("con el binding VIGIA_KV el estado vive en KV (la cache de Cloudflare no se comparte entre centros de datos)", async () => {
+  const { vigilar } = await cargar("vigia.js");
+  const kv = kvFalso(), cache = cacheFalsa(), enviados = [];
+  const roto = fetchSitio(sitioSano({ [BASE + "/hoy/"]: new Response("no", { status: 500 }) }));
+  const f = async (u, i) => { if (String(u).includes("api.telegram.org")) { enviados.push(1); return new Response('{"ok":true}'); } return roto(u, i); };
+  const env = { TELEGRAM_BOT_TOKEN: "123:abc", TELEGRAM_CHAT_DUENO: "999", VIGIA_KV: kv };
+  await vigilar({ fetch: f, cache, ahora: () => AHORA, env });
+  await vigilar({ fetch: f, cache, ahora: () => new Date(Date.parse(AHORA) + 5 * 60 * 1000).toISOString(), env });
+  assert.equal(enviados.length, 1, "el mismo problema se avisa una sola vez");
+  assert.equal(cache.m.size, 0, "con KV no se usa la cache");
+  assert.equal(kv.puts.length, 1, "KV se escribe solo cuando el estado cambia (tiene tope de escrituras por dia)");
+});
+
+test("sin KV la cache guarda el estado como mucho 6 horas: nunca un «volvio a andar» de hace dias", async () => {
+  const { vigilar, CLAVE_ESTADO } = await cargar("vigia.js");
+  let control = "";
+  const cache = { match: async () => undefined, put: async (k, r) => { if (k === CLAVE_ESTADO) control = r.headers.get("Cache-Control"); } };
+  const roto = fetchSitio(sitioSano({ [BASE + "/hoy/"]: new Response("no", { status: 500 }) }));
+  const f = async (u, i) => (String(u).includes("api.telegram.org") ? new Response('{"ok":true}') : roto(u, i));
+  await vigilar({ fetch: f, cache, ahora: () => AHORA, env: { TELEGRAM_BOT_TOKEN: "123:abc", TELEGRAM_CHAT_DUENO: "999" } });
+  const seg = Number((/max-age=(\d+)/.exec(control) || [])[1]);
+  assert.ok(seg > 0 && seg <= 6 * 3600, `max-age ${seg}`);
+});
+
+test("una falla suelta se reintenta una vez antes de contarla (un timeout aislado no despierta al dueno)", async () => {
+  const { revisar } = await cargar("vigia.js");
+  let veces = 0;
+  const f = fetchSitio(sitioSano({ [BASE + "/hoy/"]: () => (++veces === 1 ? new Response("no", { status: 503 }) : hoy()) }));
+  const r = await revisar({ fetch: f, ahora: () => AHORA });
+  assert.equal(r.ok, true);
+  assert.equal(veces, 2);
 });
 
 test("en modo /vigia la fecha del indice no avisa pero si se informa (la ruta sirve para verificar a mano)", async () => {
