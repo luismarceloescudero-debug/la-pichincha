@@ -51,7 +51,7 @@ jobs:
 
       - name: Tests del Worker
         if: steps.cuenta.outputs.lista == 'si'
-        run: node --test tests/js/worker.test.js
+        run: node --test tests/js/worker.test.js tests/js/vigia.test.js
 
       - name: Desplegar
         if: steps.cuenta.outputs.lista == 'si'
@@ -76,9 +76,16 @@ jobs:
           CONTACTO_REMITENTE: ${{ secrets.CONTACTO_REMITENTE }}
           # Spec 053: el acuse de recibo por Resend. Sin este secreto no se manda acuse y el formulario sigue como antes.
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          # Spec 065: el aviso del vigia. Van al chat PRIVADO del dueno con el bot del canal (los mismos secretos de la
+          # spec 061); TELEGRAM_CHAT_ID es solo para no mandar nunca al canal publico. Sin ellos el vigia corre igual y
+          # deja el aviso en el log.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_DUENO: ${{ secrets.TELEGRAM_CHAT_DUENO }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           for nombre in EBAY_CLIENT_ID EBAY_CLIENT_SECRET EBAY_CAMPAIGN_ID ALIEXPRESS_APP_KEY ALIEXPRESS_APP_SECRET \
-                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET CONTACTO_DESTINO CONTACTO_REMITENTE RESEND_API_KEY; do
+                        ALIEXPRESS_TRACKING_ID AMAZON_CREATORS_ID AMAZON_CREATORS_SECRET CONTACTO_DESTINO CONTACTO_REMITENTE RESEND_API_KEY \
+                        TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_DUENO TELEGRAM_CHAT_ID; do
             valor="${!nombre}"
             if [ -n "$valor" ]; then
               printf '%s' "$valor" | $WRANGLER secret put "$nombre" >/dev/null
