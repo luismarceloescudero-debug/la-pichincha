@@ -191,8 +191,9 @@ function cardOferta(o, i, desde) {
       : "El precio anterior es el tachado que publica el comercio: tomalo como referencia, no como verdad.";
   const nombreCompleto = Titulo.de(f[0]).completo;   // sin el punto suelto del final que dejan algunas tiendas
   const foto = fondo((IMAGENES && IMAGENES[f[2]]) || f[7]);
-  const img = foto ? `<div class="o-img" style="background-image:url(&quot;${foto}&quot;)" title="${esc(nombreCompleto)}"></div>` : `<div class="o-img o-sin-img">${icono("fuera")}</div>`;
-  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}" style="--i:${i - desde}" data-tienda="${esc(f[3])}" aria-label="${esc(nombreCompleto)}">
+  // Con foto: un <img> con su src (la URL ya pasó por fondo()). Sin foto: no se reserva ningun bloque; la tarjeta marca sin-foto.
+  const img = foto ? `<img class="o-img" src="${esc(foto)}" alt="" loading="lazy" decoding="async" title="${esc(nombreCompleto)}">` : "";
+  return `<article class="ocard c-${t.color} ${o.tipo} n-${nivel}${i < desde ? " quieta" : ""}${foto ? "" : " sin-foto"}" style="--i:${i - desde}" data-tienda="${esc(f[3])}" aria-label="${esc(nombreCompleto)}">
     ${img}
     <div class="o-top">
       <span class="o-cinta">${o.tipo === "propia" ? icono("flechaAbajo") + " bajó de precio" : o.tipo === "seguimiento" ? icono("flechaAbajo") + " bajó desde que lo seguimos" : icono("fuego") + " rebaja publicada"}</span>
