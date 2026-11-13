@@ -100,6 +100,9 @@ jobs:
       # estampada en el sitio publicado, no en el repo.
       - name: Guardar los cambios de precio
         if: github.event_name != 'push'
+        # F0: main queda protegida con el check tests obligatorio; el bot no puede saltarla y este push es opcional
+        # (los precios de hoy viajan en el sitio igual). Si el push falla, no frena la publicacion.
+        continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

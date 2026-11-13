@@ -101,7 +101,7 @@ Unico gasto unico previsto: **Google Play USD 25** (bloqueado, ver seccion 11).
 
 | Fase | Que | Terminado cuando | Quien |
 |---|---|---|---|
-| F0 (1 dia) | Proteger `main` (S1); Telegram solo si indexar OK (D5); borrar log de aviso (W9) | `gh api .../protection` responde 200 y exige `Tests`; un push directo a main es rechazado | Claude, con OK del dueño para el ruleset |
+| F0 (1 dia) | **S1 HECHO el 13/11** (ruleset `proteger-main`, check `tests` obligatorio). Falta: Telegram solo si indexar OK (D5); borrar log de aviso (W9) | `gh api repos/.../rules/branches/main` lista `required_status_checks`; un push directo a main es rechazado | Claude |
 | F1 (2-3 dias) | Compuerta de publicacion (D1-D4) + tope de borrado (D3) + tests | Con un indice fixture donde una tienda cae 70 %, el workflow **no publica** y avisa; test automatico que lo prueba | Claude |
 | F2 (2 dias) | Pipeline: errores tragados D6-D14, escrituras atomicas D11/D16 | 0 `except` que devuelvan vacio sin contar; tests de cada uno | Claude |
 | F3 (1 dia) | KV del vigia + observability + alarma de frescura | El vigia avisa una vez (no repite) y detecta un indice de >30 h simulado | Dueño (1 comando KV) + Claude |
