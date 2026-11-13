@@ -42,7 +42,7 @@ Se leyo la linea citada de cada hallazgo. **V** = confirmado; **corregido** = el
 
 Cuatro hallazgos **nuevos** de esta pasada:
 
-- **C2 (Alta, arreglo en el PR 274)**: `actualizar.yml` quedo **invalido** el 13/11 a las 19:38 UTC: el paso "Guardar los cambios de precio" tenia dos `continue-on-error` (commit `5bb5d13`). GitHub rechaza el archivo entero: 4 publicaciones seguidas fallaron sin correr ni un job, y la corrida diaria tampoco iba a salir. `Tests` paso en verde porque no valida los workflows, y el aviso de "fallo la corrida" vive **dentro** del archivo roto, asi que nadie se entero.
+- **C2 (Alta, ARREGLADO el 13/11 en el PR 274)**: `actualizar.yml` quedo **invalido** el 13/11 a las 19:38 UTC: el paso "Guardar los cambios de precio" tenia dos `continue-on-error` (commit `5bb5d13`). GitHub rechaza el archivo entero: 4 publicaciones seguidas fallaron sin correr ni un job, y la corrida diaria tampoco iba a salir. `Tests` paso en verde porque no valida los workflows, y el aviso de "fallo la corrida" vive **dentro** del archivo roto, asi que nadie se entero.
 - **C3 (Media)**: el ruleset exige solo `tests`. `e2e` y `lighthouse` no son obligatorios: GitHub deja mergear con esos dos en rojo. Hoy el freno es solo la costumbre.
 - **C4 (Baja)**: con `main` protegida, el bot ya no puede commitear `datos.json` (el paso falla y sigue). El sitio sale bien igual, pero el `datos.json` del repo se va quedando viejo (ultimo commit del bot: 12/11). Hay que decidir si se guarda en la rama `historial` (que no esta protegida) o se deja asi. Recomendado: rama `historial`.
 
@@ -64,7 +64,7 @@ Regla: una fase es **uno o varios PR chicos**; se cierra con sus tests, su fila 
 
 ### F0. Destrabar la publicacion y el freno de Telegram (hoy, horas)
 
-- **Que cambia**: (a) sacar el `continue-on-error` repetido (C2, PR 274). (b) Que un workflow invalido no pueda entrar: paso con `actionlint` en `tests.yml`. (c) D5: el paso "Publicar las pichinchas del dia en Telegram" suma `steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'`. (d) W9: `avisar_dueno.py:125-126` imprime solo "aviso no enviado".
+- **Que cambia**: (a) sacar el `continue-on-error` repetido (C2): **hecho**, PR 274 mergeado y la publicacion volvio a correr. (b) Que un workflow invalido no pueda entrar: paso con `actionlint` en `tests.yml`. (c) D5: el paso "Publicar las pichinchas del dia en Telegram" suma `steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'`. (d) W9: `avisar_dueno.py:125-126` imprime solo "aviso no enviado".
 - **Archivos**: `.github/workflows/actualizar.yml`, `.github/workflows/tests.yml`, `avisar_dueno.py`.
 - **Test**: `tests/test_canal.py` (ya lee el paso de Telegram) afirma la condicion nueva; un test que carga los 6 workflows y falla con una clave repetida; `tests/test_avisos_y_arreglos.py` para W9.
 - **Terminado cuando**: la corrida por push posterior al merge muestra sus jobs y termina en verde; `actionlint` falla en una rama de prueba con la clave repetida.
@@ -212,7 +212,7 @@ Recordatorio medido (memoria del 12/11): delegar a modelos gratis fallo 3 de 4 v
 **Los 7 criterios de desbloqueo de Google Play** (todos juntos, medidos y anotados en `docs/`):
 
 1. CI en verde **14 dias seguidos** (`Tests` y `Actualizar precios y publicar`), sin rojas por causa propia. *Hoy: el contador arranca de cero el 13/11 por C2.*
-2. **0 hallazgos de severidad alta abiertos** en la auditoria. *Hoy: S1 cerrado; quedan D1 a D5 y C2.*
+2. **0 hallazgos de severidad alta abiertos** en la auditoria. *Hoy: S1 y C2 cerrados; quedan D1 a D5.*
 3. Lighthouse movil **>= 95 en rendimiento** y 100 en las otras tres, en `/` y `/?q=ssd%201tb`, mediana de 3. *Hoy: la portada da 87-89 en la CI.*
 4. Vigia con **KV activo** y una alarma de prueba recibida.
 5. `main` **protegida**. *Cumplido el 13/11.*
@@ -256,7 +256,7 @@ Otros: Black Friday 20/11, reel (espera el OK), AAIP antes de juntar correos, `I
 
 | # | PR | Fase | Toca |
 |---|---|---|---|
-| 1 | Clave repetida del workflow | F0 | `actualizar.yml` |
+| 1 | Clave repetida del workflow (**hecho**, PR 274) | F0 | `actualizar.yml` |
 | 2 | `actionlint` + test de claves repetidas | F0 | `tests.yml`, `tests/` |
 | 3 | Telegram no sale con alarma ni con indexado fallido (D5) + W9 | F0 | `actualizar.yml`, `avisar_dueno.py` |
 | 4 | `defer` + indice temprano con `?q=` | F1 | `index.html`, `js/indice-ofertas.js` |
