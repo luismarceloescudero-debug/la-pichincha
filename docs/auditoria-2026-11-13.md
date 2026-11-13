@@ -1,6 +1,6 @@
 # Auditoria completa de La Pichincha — 13/11/2026
 
-Estado: COMPLETA (v1). Bloque 1 codigo y repo, bloque 2 E2E/accesibilidad/ZAP, bloque 3 skills de SEO, calidad, diseno, CI y pruebas. S1 cerrado el 13/11.
+Estado: COMPLETA (v1, con tercera pasada de verificacion al final). Bloque 1 codigo y repo, bloque 2 E2E/accesibilidad/ZAP, bloque 3 skills de SEO, calidad, diseno, CI y pruebas. S1 cerrado el 13/11.
 
 Base ya medida (traspaso de la sesion anterior): tests JS 818/818 y Python 744 OK (3 salteados); sitemap 200 URLs todas 200;
 indice.json 6,69 MB crudo / 1,35 MB gzip; Lighthouse movil en `/`: Accesibilidad 100, Buenas practicas 100, SEO 100.
@@ -148,6 +148,17 @@ Informes completos en la carpeta de notas de la sesion. **V** = lo verifique ley
 | N-H1 | Baja | plugin ECC 2.2.3 | `ecc:harness-audit` falla (`Cannot find module '@iarna/toml'`); `ecc:quality-gate` no controla nada (no hay linter) | Reparar la instalacion del plugin o sacar las skills | R |
 
 Puntaje de `ecc:production-audit`: 72/100 (69 con los topes de su rubrica por S1 y D4/D5: "Risky"). Posible falso positivo descartado: un error de CSP de Google Fonts que reporto la skill de diseno viene de `axe.min.js` inyectado por el propio auditor; las cargas limpias dan 0 errores (coincide con la consola limpia de produccion del 13/11).
+
+## Tercera pasada: verificacion contra el codigo (13/11, noche)
+
+Antes de cerrar `docs/plan-definitivo.md` (v3) se releyo la linea citada de cada hallazgo que el plan usa para decidir. El detalle esta en la seccion 1 del plan. Resumen:
+
+- **Pasan de R a V**: N-SEO2, N-UX2, N-CI5 (acciones por etiqueta, sin Dependabot), D2, D4.
+- **Corregidos**: N-CAL1 (el indice se baja a proposito recien al abrir Buscar u Ofertas, `js/indice-ofertas.js:1-2`; un `preload` fijo no corresponde, y el 31/10 `defer` mejoro el FCP pero no el LCP); N-CAL2 (el precache del indice en `sw.js:19` es lo que permite buscar sin conexion: no es un defecto); N-DS1 (`:root` aparece 13 veces, no 5); "pendiente de medir Lighthouse de rendimiento" (la CI ya lo mide y corta en 90, `.github/lighthouse.js:16`); la "alarma de frescura" ya existe en el vigia (`worker/src/vigia.js:98-112`).
+- **D5, peor de lo anotado**: `guardia.js` sale con 3 para que no salga Telegram, pero el paso de Telegram no mira `steps.guardia.outputs.alarma`.
+- **Nuevos**: C2 (Alta) `actualizar.yml` invalido desde el 13/11 19:38 UTC por un `continue-on-error` repetido: 4 publicaciones fallidas sin jobs, arreglo en el PR 274. C3 (Media) el ruleset exige solo `tests`; `e2e` y `lighthouse` no son obligatorios. C4 (Baja) con `main` protegida el bot ya no commitea `datos.json`. T3 (Media) `ConChromeReal` de `tests/test_verificar_ofertas.py` es intermitente en la CI.
+- **C1 con mas datos**: 12 corridas programadas del 08 al 13/11 arrancaron entre las 10:29 y las 11:41 UTC (programadas 03:23): 7 a 8 h tarde todos los dias.
+- **Siguen sin verificar**: N-SEO3, N-SEO4, N-SEO5, N-A11Y1, N-TIPO1 (salvo Oswald), N-UX4, N-UX5, N-H1, D7-D13 y D15-D18.
 
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.
