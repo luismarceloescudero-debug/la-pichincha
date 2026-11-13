@@ -160,7 +160,7 @@ Antes de cerrar `docs/plan-definitivo.md` (v3) se releyo la linea citada de cada
 - **C1 con mas datos**: 12 corridas programadas del 08 al 13/11 arrancaron entre las 10:29 y las 11:41 UTC (programadas 03:23): 7 a 8 h tarde todos los dias.
 - **Siguen sin verificar**: N-SEO3, N-SEO4, N-SEO5, N-A11Y1, N-TIPO1 (salvo Oswald), N-UX4, N-UX5, N-H1, D7-D13 y D15-D18.
 
-## Bloque 4: mercado, Solotodo por dentro (13/11, analisis manual, REA no pudo correr)
+## Bloque 4: mercado, Solotodo por dentro (13/11, `grep` manual y REA)
 
 Solo se leyeron artefactos publicos (la portada y los 25 scripts estaticos); nada contra `/search` (su `robots.txt` lo prohibe) ni pruebas ofensivas. **Observado:**
 
@@ -172,7 +172,9 @@ Solo se leyeron artefactos publicos (la portada y los 25 scripts estaticos); nad
 
 **Inferido (sin probar):** separan la API del front para escalar cada lado por su cuenta y sirven HTML renderizado para el SEO. Coincide con el plan: portada con HTML ya armado (F7) y un Worker aparte para lo dinamico.
 
-**No cubierto:** otros comparadores (Pricecompare y los de Argentina), sus APIs reales y su SEO por pagina. Queda pendiente junto con una corrida real de REA cuando Node este actualizado.
+**REA (corrida real):** completo en archivos, parcial en semantica; no detecto ningun pedido de red de Solotodo (el `grep` si: API y medios). Sobre nuestro `js/` (30 archivos) marco 12 relaciones de pedidos. Aporta poco en sitios web.
+
+**No cubierto:** otros comparadores (Pricecompare y los de Argentina), sus APIs reales y su SEO por pagina.
 
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.

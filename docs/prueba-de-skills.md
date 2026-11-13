@@ -37,13 +37,13 @@ Regla: solo se marca **probada** la herramienta que se corrio de verdad. Todas l
 | `karpathy-guidelines` (2) | Aplicada para revisar el plan | Util como freno a la sobreingenieria; se le sumaron las reglas 5 y 6 del dueno el 13/11 | **Dejar** |
 | `ponytail` (2) | Aplicada a plan y diffs | Sirve para revisar planes | **Usar solo** para revisar planes o diffs |
 | `remotion-best-practices` (2) | Leida | **No aplica**: es un router de videos; `becario-reels` ya cubre los reels | **Usar solo** para reels |
+| `reverse-engineer-anything` | **Probada (13/11).** Con un Node portatil 24.22.3 (el de la PC es 24.16.0 y REA pide 24.22.1+) se corrio `analyze-javascript-application` sobre los 25 scripts de Solotodo y sobre nuestro `js/` (30 archivos). Cobertura completa de archivos, pero **parcial** en semantica: Solotodo 483.464 nodos y 473 hallazgos, nuestro `js/` 49.099 nodos y 84 hallazgos; la familia `request` dio 0 relaciones en Solotodo (no vio su API, que el `grep` si encontro) y 12 en el nuestro. Pensada para Electron/Node: en bundles web da conteos, no endpoints | **Usar solo** para apps Electron/Node o binarios; en sitios web alcanza con `grep` y el navegador |
 
 ## No corridas
 
 | Herramienta | Motivo |
 |---|---|
 | Strix (`penetration-testing-with-strix`, etc.) | Bloqueada: pide clave de modelo (no hay y no se paga). Reemplazada por ZAP en Docker |
-| `reverse-engineer-anything` | **Corrida a medias (13/11, despues del reclamo del dueno).** Se bajaron los 25 scripts publicos de Solotodo y se corrio `npx rea-agents analyze-javascript-application`, pero REA se nego a arrancar: pide Node 24.22.1 o mas y la PC tiene 24.16.0 (el skill prohibe instalar Node por su cuenta). El analisis se hizo a mano con `grep` sobre los mismos archivos (ver auditoria, Bloque 4). Para correrla de verdad: actualizar Node |
 | Lighthouse oficial de **Rendimiento** (puntaje 0-100) | El MCP de Lighthouse lo excluye; hay que correr el CLI de Lighthouse. Queda como criterio de desbloqueo de Google Play |
 
 ## Lo que sirvio de verdad (orden)
