@@ -591,8 +591,7 @@ td.mejor{color:var(--good);font-weight:700}
 .o-acciones{display:flex;gap:8px;margin-top:2px}
 .o-acciones .acc{flex:1;justify-content:center;padding:8px 10px}
 
-.o-img{flex:none;width:100%;aspect-ratio:1;background-size:cover;background-position:center;background-color:var(--surface-2);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center}
-.o-img.o-sin-img{color:var(--ink-3);font-size:2rem}
+.o-img{flex:none;width:100%;aspect-ratio:1;background-color:var(--surface-2);border-radius:8px 8px 0 0;object-fit:cover}
 .mas{display:flex;justify-content:center;margin-top:20px}
 @media (max-width:620px){.ogrid{grid-template-columns:1fr}.of-et{min-width:100%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -829,8 +828,9 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 .ocard::before{display:none}
 .ogrid{align-items:stretch}
 /* 0 foto: blanca, contenida; sin foto, el icono del tipo de producto en vez de una caja vacia */
-.ocard .o-img{order:0;width:auto;margin:10px 10px 6px;border-radius:12px;aspect-ratio:1/.72;background-color:#fff;background-size:contain;background-repeat:no-repeat}
-.ocard .o-img.o-sin-img{background:var(--tint);color:var(--a1);font-size:2.6rem}
+.ocard .o-img{order:0;display:block;width:auto;margin:10px 10px 6px;border-radius:12px;aspect-ratio:1/.72;background:#fff;object-fit:contain}
+/* Sin foto no hay bloque: la cinta y la estrella van en una fila arriba, sin tapar el precio */
+.ocard.sin-foto .o-top{position:static;padding:12px 14px 0;display:flex;justify-content:space-between;align-items:center;gap:8px}
 /* cinta y estrella sobre la foto */
 .ocard .o-top{order:0;position:absolute;z-index:2;top:14px;left:14px;right:14px}
 .ocard .o-cinta{font:500 .68rem/1 var(--f-tec);letter-spacing:.06em;background:#14181f;color:#fff;border-radius:999px;padding:6px 11px;text-transform:uppercase}

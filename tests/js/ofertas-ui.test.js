@@ -65,7 +65,8 @@ test("una imagen con comillas no inyecta CSS en la tarjeta, y la planilla CSV no
   correr("pintarOfertas()");
   const html = els["#resOf"].innerHTML;
   assert.doesNotMatch(html, /position:fixed/);
-  assert.match(html, /url\(&quot;https:\/\/img\.test\/g85\.jpg&quot;\)/);
+  assert.match(html, /<img class="o-img" src="https:\/\/img\.test\/g85\.jpg"/);
+  assert.equal((html.match(/<img class="o-img"/g) || []).length, 1, "la URL mala no se pinta como foto");
   assert.equal(correr('csvCampo("=HYPERLINK(\\"https://evil\\")")'), '"\'=HYPERLINK(""https://evil"")"');
   assert.equal(correr('csvCampo("Memoria 16GB")'), '"Memoria 16GB"');
   assert.equal(correr("esc(\"a'b\")"), "a&#39;b");
@@ -169,12 +170,13 @@ test("spec 057: la foto de la tarjeta sale de imagenes.json (el indice del sitio
   const { correr, els } = pagina([f]);
   correr(`IMAGENES = { ${JSON.stringify(f[2])}: "https://img.test/ram.jpg" }`);
   correr("pintarOfertas()");
-  assert.match(els["#resOf"].innerHTML, /background-image:url\(&quot;https:\/\/img\.test\/ram\.jpg&quot;\)/);
-  // sin imagenes.json ni foto en el indice: el icono del tipo, nunca una tarjeta rota
+  assert.match(els["#resOf"].innerHTML, /<img class="o-img" src="https:\/\/img\.test\/ram\.jpg"/);
+  // sin imagenes.json ni foto en el indice: no se reserva bloque de foto y la tarjeta marca sin-foto (nunca una tarjeta rota)
   const sinFoto = pagina([fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000)]);
   sinFoto.correr("IMAGENES = {}");
   sinFoto.correr("pintarOfertas()");
-  assert.match(sinFoto.els["#resOf"].innerHTML, /o-sin-img/);
+  assert.match(sinFoto.els["#resOf"].innerHTML, /class="ocard [^"]*sin-foto/);
+  assert.doesNotMatch(sinFoto.els["#resOf"].innerHTML, /o-img/);
   // y con la foto en el propio indice (fixtures, indice completo) se usa esa
   const conFoto = fila("Memoria Kingston Fury DDR5 32GB 6000MHz", 100000, 130000);
   conFoto[7] = "https://img.test/propia.jpg";
