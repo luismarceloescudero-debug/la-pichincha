@@ -40,11 +40,13 @@ Se leyo la linea citada de cada hallazgo. **V** = confirmado; **corregido** = el
 | N-T1 (`retries: 1` tapa la intermitencia) | V: `playwright.config.js:12` | F1 |
 | S1 | V en vivo: `gh api .../rules/branches/main` devuelve `deletion`, `non_fast_forward` y `required_status_checks: tests` | Cerrado. Ver C3 |
 
-Tres hallazgos **nuevos** de esta pasada:
+Cuatro hallazgos **nuevos** de esta pasada:
 
 - **C2 (Alta, arreglo en el PR 274)**: `actualizar.yml` quedo **invalido** el 13/11 a las 19:38 UTC: el paso "Guardar los cambios de precio" tenia dos `continue-on-error` (commit `5bb5d13`). GitHub rechaza el archivo entero: 4 publicaciones seguidas fallaron sin correr ni un job, y la corrida diaria tampoco iba a salir. `Tests` paso en verde porque no valida los workflows, y el aviso de "fallo la corrida" vive **dentro** del archivo roto, asi que nadie se entero.
 - **C3 (Media)**: el ruleset exige solo `tests`. `e2e` y `lighthouse` no son obligatorios: GitHub deja mergear con esos dos en rojo. Hoy el freno es solo la costumbre.
 - **C4 (Baja)**: con `main` protegida, el bot ya no puede commitear `datos.json` (el paso falla y sigue). El sitio sale bien igual, pero el `datos.json` del repo se va quedando viejo (ultimo commit del bot: 12/11). Hay que decidir si se guarda en la rama `historial` (que no esta protegida) o se deja asi. Recomendado: rama `historial`.
+
+- **T3 (Media)**: `tests/test_verificar_ofertas.py` (`ConChromeReal`) es intermitente en la CI: en el PR 274 fallo una vez (`('viva', 'estatica') != ('caida', 'renderizada')`) y en local pasa. Cuando Chrome no llega a renderizar, el codigo cae a la revision estatica **sin decirlo**: es el mismo hueco de D18. Como `tests` es el check obligatorio, un fallo al azar traba cualquier merge. Va con F1 (junto a N-T1).
 
 **Sin verificar** (reportado por una skill, nadie lo midio de nuevo): N-SEO3 (13 pares de paginas casi iguales), N-SEO4, N-SEO5, N-A11Y1 (32 de 66 controles bajo 44 px), N-TIPO1 salvo Oswald, N-UX4, N-UX5, N-H1, D7-D13 y D15-D18 (los verifico solo el agente de revision). Ninguno decide el orden de las fases: se verifican al empezar la fase que los toca.
 
@@ -258,7 +260,7 @@ Otros: Black Friday 20/11, reel (espera el OK), AAIP antes de juntar correos, `I
 | 2 | `actionlint` + test de claves repetidas | F0 | `tests.yml`, `tests/` |
 | 3 | Telegram no sale con alarma ni con indexado fallido (D5) + W9 | F0 | `actualizar.yml`, `avisar_dueno.py` |
 | 4 | `defer` + indice temprano con `?q=` | F1 | `index.html`, `js/indice-ofertas.js` |
-| 5 | N-T1: `page.clock` y sin `retries` | F1 | `tests/e2e/`, `playwright.config.js` |
+| 5 | N-T1 y T3: `page.clock`, sin `retries`, y espera firme en el test con Chrome real | F1 | `tests/e2e/`, `playwright.config.js`, `tests/test_verificar_ofertas.py` |
 | 6 a 9 | D3, D1, D2, D4 (uno cada uno) | F2 | `filtrar_indice.py`, `indexar.py`, `actualizar.yml` |
 | 10 | KV + observability + `HORA_MINIMA` | F3 | `worker/` |
 | 11 | El Worker dispara la corrida (si hay token) | F3 | `worker/` |
