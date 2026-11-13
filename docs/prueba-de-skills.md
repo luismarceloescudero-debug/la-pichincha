@@ -43,7 +43,7 @@ Regla: solo se marca **probada** la herramienta que se corrio de verdad. Todas l
 | Herramienta | Motivo |
 |---|---|
 | Strix (`penetration-testing-with-strix`, etc.) | Bloqueada: pide clave de modelo (no hay y no se paga). Reemplazada por ZAP en Docker |
-| `reverse-engineer-anything` | No hizo falta: los comparadores publicos no entregan un artefacto que cambie el plan |
+| `reverse-engineer-anything` | **Corrida a medias (13/11, despues del reclamo del dueno).** Se bajaron los 25 scripts publicos de Solotodo y se corrio `npx rea-agents analyze-javascript-application`, pero REA se nego a arrancar: pide Node 24.22.1 o mas y la PC tiene 24.16.0 (el skill prohibe instalar Node por su cuenta). El analisis se hizo a mano con `grep` sobre los mismos archivos (ver auditoria, Bloque 4). Para correrla de verdad: actualizar Node |
 | Lighthouse oficial de **Rendimiento** (puntaje 0-100) | El MCP de Lighthouse lo excluye; hay que correr el CLI de Lighthouse. Queda como criterio de desbloqueo de Google Play |
 
 ## Lo que sirvio de verdad (orden)

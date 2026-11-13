@@ -160,5 +160,19 @@ Antes de cerrar `docs/plan-definitivo.md` (v3) se releyo la linea citada de cada
 - **C1 con mas datos**: 12 corridas programadas del 08 al 13/11 arrancaron entre las 10:29 y las 11:41 UTC (programadas 03:23): 7 a 8 h tarde todos los dias.
 - **Siguen sin verificar**: N-SEO3, N-SEO4, N-SEO5, N-A11Y1, N-TIPO1 (salvo Oswald), N-UX4, N-UX5, N-H1, D7-D13 y D15-D18.
 
+## Bloque 4: mercado, Solotodo por dentro (13/11, analisis manual, REA no pudo correr)
+
+Solo se leyeron artefactos publicos (la portada y los 25 scripts estaticos); nada contra `/search` (su `robots.txt` lo prohibe) ni pruebas ofensivas. **Observado:**
+
+- Es una app Next.js (Turbopack) con Material UI: 25 scripts, 1,8 MB sin comprimir, y la portada llega con 410 KB de HTML ya armado (el contenido viene en la primera respuesta).
+- La API esta en otro dominio (`api.solotodo.com`, REST estilo Django con `rest-auth`) y las imagenes en `media.solotodo.com`. Las rutas del cliente apuntan a `products/`, `categories/` y `stores/`.
+- Los 25 scripts van con `defer`/`preload` (35 etiquetas de ese tipo en la cabecera); nosotros tenemos 28 scripts **sincronos** (N-CAL1).
+- Marca las condiciones del producto con `schema.org` (Nuevo, Usado, Reacondicionado, Caja abierta, Danado) y suma GTM, gtag, pixel de Facebook, customer.io y acceso con Google.
+- Su `robots.txt` solo bloquea `/search`: dejan indexar todo lo demas.
+
+**Inferido (sin probar):** separan la API del front para escalar cada lado por su cuenta y sirven HTML renderizado para el SEO. Coincide con el plan: portada con HTML ya armado (F7) y un Worker aparte para lo dinamico.
+
+**No cubierto:** otros comparadores (Pricecompare y los de Argentina), sus APIs reales y su SEO por pagina. Queda pendiente junto con una corrida real de REA cuando Node este actualizado.
+
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.
