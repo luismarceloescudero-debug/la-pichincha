@@ -89,16 +89,26 @@ Lectura simple: el servidor contesta al toque (39-45 ms) pero el elemento mas gr
 - Pendiente de medir: Lighthouse de rendimiento "oficial" (el de DevTools MCP excluye performance) y escritorio.
 
 ## UX y diseno
-(se completa: ux-audit, break-ui, impeccable, design-debt-audit, critique-visual-hierarchy, design-token-audit)
+Recorrido real con Playwright en el sitio armado en local (indice de prueba), movil 375x812 y escritorio 1366x768, 11 rutas cada uno,
+con "datos feos" en la busqueda: 60 repeticiones de una palabra con enie y tilde, 30 emojis, `<script>alert(1)</script>` y una busqueda sin resultados.
+- Sin scroll horizontal en ninguna de las 22 combinaciones. El `<script>` de la busqueda no se refleja en la pagina (sin XSS).
+- U1 (Baja): con busquedas muy largas o de emojis el navegador registra un `400` en un pedido (esperable: validacion de largo). Conviene verificar que el usuario vea un mensaje y no una lista vacia muda. Arreglo: texto "Esa busqueda es demasiado larga" si el pedido da 400.
+- Las auditorias de diseno ya hechas (`docs/auditorias/2026-11-13-ux-ofertas.md`, A3/A10 mergeados) no se repiten. Las skills de diseno (impeccable, design-debt-audit, critique-visual-hierarchy, design-token-audit, ux-audit completo) **no se corrieron** en esta pasada: ver `docs/prueba-de-skills.md`.
 
 ## Accesibilidad
-Lighthouse movil en `/`: 100 (traspaso). Falta recorrer con la skill `accessibility` y axe en `/?q=`.
+- axe-core 4.10.2 sobre las mismas 22 combinaciones: **0 violaciones** en todas. Lighthouse movil en `/` (produccion): 100 (traspaso).
+- No hay hallazgos de accesibilidad abiertos. Falta una prueba con lector de pantalla real (manual).
 
 ## SEO
-Sitemap 200/200, robots, security.txt, assetlinks, manifest y sw en 200; Lighthouse SEO 100 (traspaso). Falta seo-audit, schema y site-architecture.
+- Produccion: la portada trae 1 bloque JSON-LD, `canonical` a la raiz y `title` propio; sitemap 200 URLs todas 200; robots, security.txt, assetlinks, manifest y sw en 200; Lighthouse SEO 100.
+- E1 (Info): `/?q=...` cambia el titulo solo en el navegador (el HTML estatico trae el titulo generico y canonical a `/`): las busquedas no compiten como paginas propias, lo cual es correcto. El SEO de cola larga vive en las paginas generadas (`/precios/...`).
+- E2 (Baja): `Cache-Control: max-age=600` en todo (lo fija GitHub Pages); `indice.json` baja 1,35 MB comprimido en cada visita nueva. Arreglo estructural en el plan (Cloudflare delante con cache largo y purga al publicar).
+- No se corrieron seo-audit, schema ni site-architecture completos (ver `docs/prueba-de-skills.md`).
 
 ## Pruebas
-JS 818/818 verde (4,4 s); Python 744 OK, 3 salteados (22 s) (traspaso). Falta E2E local con Playwright y datos feos.
+- JS 818/818 verde (4,4 s); Python 744 OK, 3 salteados (22 s) (traspaso).
+- E2E Playwright local (`bash tests/e2e/armar-sitio.sh` + `npx playwright test --workers=1`, 13/11): **primera vuelta 14 de 22, segunda 22 de 22**; los 8 que fallaron la primera vez pasan sueltos y en la repeticion. T1 (Media): **hay pruebas intermitentes** (arranque en frio del servidor o del navegador); coincide con los issues #5/#6 del repo privado. Arreglo: `retries: 1` ya esta en CI; sumar espera explicita a que el servidor responda antes de abrir el navegador y guardar el trace de los fallos como artefacto.
+- T2 (Baja): en local, cada pagina registra un error de consola `Connecting to 'https://fonts.googleapis.com/...'` (CSP `connect-src`); en produccion la portada con `?q=` salio sin errores de consola el 13/11. Revisar si el CSS de la fuente se pide por `fetch` en alguna ruta.
 
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.
