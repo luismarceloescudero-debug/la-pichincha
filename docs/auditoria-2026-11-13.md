@@ -1,6 +1,6 @@
 # Auditoria completa de La Pichincha — 13/11/2026
 
-Estado: EN CURSO. Bloque 1 cargado (codigo: seguridad y fallas silenciosas, CI y repo, rendimiento). Faltan E2E, accesibilidad, diseno y mercado.
+Estado: COMPLETA (v1). Bloque 1 codigo y repo, bloque 2 E2E/accesibilidad/ZAP, bloque 3 skills de SEO, calidad, diseno, CI y pruebas. S1 cerrado el 13/11.
 
 Base ya medida (traspaso de la sesion anterior): tests JS 818/818 y Python 744 OK (3 salteados); sitemap 200 URLs todas 200;
 indice.json 6,69 MB crudo / 1,35 MB gzip; Lighthouse movil en `/`: Accesibilidad 100, Buenas practicas 100, SEO 100.
@@ -116,6 +116,38 @@ con "datos feos" en la busqueda: 60 repeticiones de una palabra con enie y tilde
 `zap-baseline.py` (pasivo) de `ghcr.io/zaproxy/zaproxy:stable` contra `tests/e2e/armar-sitio.sh` servido en local. Nunca contra produccion ni terceros.
 12 alertas: 7 medias (CSP sin fallback, comodin, `unsafe-inline` en script y estilo, sin cabecera anti-clickjacking, SRI faltante, sin token anti-CSRF), 2 bajas, 3 informativas.
 **Son las mismas familias del analisis del 19/10** (`docs/seguridad-zap.md`): CSP por `<meta>` y cabeceras que GitHub Pages no deja poner (S2, y se resuelven con Cloudflare delante, fase F4). Unica diferencia: "sin token anti-CSRF" en el formulario de contacto: no aplica, porque el formulario no usa cookies ni sesion; el freno real es W1/W2 (limites y Turnstile). Ninguna alerta nueva exige arreglo propio.
+
+## Bloque 3: lo que encontraron las skills (segunda tanda, 13/11)
+
+Informes completos en la carpeta de notas de la sesion. **V** = lo verifique leyendo el codigo o la pagina; **R** = reportado por la skill, sin verificar por mi.
+
+| ID | Sev. | Donde | Hallazgo | Arreglo | |
+|---|---|---|---|---|---|
+| N-CAL1 | Alta | `index.html:9,109-123,874-885` | **28 scripts sincronos** y `indice.json` se pide recien a ~7,8 s en movil con throttling; DOMContentLoaded ~10,6 s. El LCP de 1,9 s mide solo el cascaron: el contenido util llega mucho despues. Corrige la lectura de P1 | `defer` en todos, pedir el indice temprano (`preload`), partir el indice (fase F7) | V (conteo de 28) |
+| N-SEO1 | Alta | `generar_paginas.js:274` (`pie()`) | Ninguna de las 198 paginas de `/precios/` enlaza de vuelta al hub `/precios/` | Miga visible con enlace al hub (resuelve tambien N-SEO2) | V |
+| N-SEO2 | Media | `generar_paginas.js:204` | `BreadcrumbList` en el JSON-LD pero 0 migas visibles | Miga visible | R |
+| N-SEO3 | Media | paginas `/precios/` | 13 pares casi iguales (Jaccard >= 0,8), 5 identicos (`rtx-5070-ti` y `rtx-5070-ti-16gb`) | 301 o canonical | R |
+| N-SEO4 | Media | `/precios/` | El hub es una pagina con 199 enlaces; los rubros (`notebook-*` ~70, `monitor-*` ~60) no tienen URL propia | Hubs por rubro | R |
+| N-SEO5 | Baja | varios | 23 titulos > 60 caracteres; mismo `og:image` en 200 paginas; `lang="es"` vs `es-AR`; `SearchAction` retirado por Google | Limpiar | R |
+| N-CI1 | Media | `.github/workflows/arreglar-con-claude.yml:62-63` | El titulo del issue se mete directo en el prompt con permisos de escritura (inyeccion). Hoy apagado | Pasar por variable de entorno y no por interpolacion, antes de prender `ARREGLO_CLAUDE` | V |
+| N-CI2 | Media | `actualizar.yml:31-35` | Permisos de escritura (`contents`, `pages`, `id-token`, `issues`) para todos los jobs | Permisos minimos por job | V |
+| N-CI3 | Media | `actualizar.yml:429-447` | Sin prueba de humo despues de publicar | `curl` a `/` y a `indice.json` con umbral de tamano | R |
+| N-CI4 | Media | `worker.yml:55-60`, `wrangler.toml` | Despliega el Worker sin prueba de humo ni rollback; sin `observability` | `curl /health` + `wrangler rollback` | V |
+| N-CI5 | Baja | workflows | `id-token` sobrante; acciones fijadas por etiqueta y no por SHA; `VIGIA_KV` comentado | Fijar por SHA (Dependabot) | R |
+| N-CAL2 | Baja | `sw.js:19` | Precachea `indice.json` de 6,7 MB en la instalacion | Precache solo de la portada; el indice por demanda | V |
+| N-A11Y1 | Media | controles | 32 de 66 controles miden < 44 px (ninguno < 24 px); boton `Comparar` 33 px; foco del buscador debil (`css/sitio.css:259`) | Alto minimo 44 px en movil | R |
+| N-TIPO1 | Media | `css/sitio.css` | Cuerpo de 14 px, 23 tamanos distintos, ~300 textos de 10,7-12,5 px; 3 familias pedidas sin usar (Barlow, Bricolage, DM Mono); `Oswald` usada sin cargarse (`:914`) | Escala tipografica de 6-7 pasos; sacar familias | V (Oswald) / R |
+| N-UX1 | Alta | `css/sitio.css:370`, `js/historial.js:39` | El chip del historial no tiene tope de ancho: una busqueda larga o una URL pegada genera scroll horizontal en 375 px y queda guardada | `max-width` y `text-overflow` en `.hist`; recortar al guardar | V |
+| N-UX2 | Alta | `js/consulta.js:106` | La tabla de Comparativa desborda sin foco por teclado (axe Serious) y tiene un `<th>` vacio | Contenedor con `tabindex=0`, `role=region` y titulo | R |
+| N-UX3 | Media | `css/sitio.css:455` | `--bad-soft` no esta definido: la barra de Veredicto se ve sin fondo | Definir el token | V |
+| N-UX4 | Media | `css/sitio.css:622`, `:899`, `:386`, `:275` | "Tambien en..." desalineado 14 px; sellos de 10,7 px y nombre de tienda de 11,5 px | Alinear y subir a >= 12 px | R |
+| N-UX5 | Media | portada movil | El primer resultado de Buscar queda a ~1.200 px (155 px de pestanas y buscador fijos); el degrade marca pestana activa, segmento activo y sello premium | Compactar cabecera; un solo uso del degrade | R |
+| N-DS1 | Baja | `css/sitio.css` | `:root` declarado 5 veces; 4 tokens duplicados; `--good` marron en claro y amarillo en oscuro; 297 espaciados con px literal | Consolidar tokens y variables de espaciado | R |
+| N-T1 | Media | `tests/e2e/contacto.spec.js:18`, `:65` | **Causa de la intermitencia hallada**: el mock del Worker responde 429 si `espera < 3000`; con la PC cargada el clic llega pasados los 3 s y el test ve "Listo". Reproducido con `--workers=8 --repeat-each=4` (4 fallos de 88). Ademas `retries: 1` en CI (`playwright.config.js:12`) tapa la intermitencia | `page.clock` y `fastForward(3200)` en lugar de `waitForTimeout` (ahorra ~10 s); sacar el retry cuando quede estable | V |
+| N-T2 | Info | `webServer.url` | La espera al servidor ya existe: el T1 original ("sumar espera al servidor") se retira | - | V |
+| N-H1 | Baja | plugin ECC 2.2.3 | `ecc:harness-audit` falla (`Cannot find module '@iarna/toml'`); `ecc:quality-gate` no controla nada (no hay linter) | Reparar la instalacion del plugin o sacar las skills | R |
+
+Puntaje de `ecc:production-audit`: 72/100 (69 con los topes de su rubrica por S1 y D4/D5: "Risky"). Posible falso positivo descartado: un error de CSP de Google Fonts que reporto la skill de diseno viene de `axe.min.js` inyectado por el propio auditor; las cargas limpias dan 0 errores (coincide con la consola limpia de produccion del 13/11).
 
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.
