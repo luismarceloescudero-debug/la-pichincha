@@ -27,7 +27,7 @@ El agente de seguridad **no encontro nada alto** en el Worker, `pagina.js`, `err
 
 | ID | Sev. | Donde | Evidencia | Arreglo |
 |---|---|---|---|---|
-| S1 | Alta | Repo GitHub, rama `main` | `gh api repos/.../branches/main/protection` = 404 "Branch not protected" | Ruleset: exigir el check `Tests`, PR obligatorio, sin force-push (gratis) |
+| S1 | Alta (CERRADO 13/11) | Repo GitHub, rama `main` | Estaba sin proteccion (`.../protection` = 404). Ruleset `proteger-main` creado el 13/11: sin borrado ni force-push, check `tests` obligatorio, bypass solo admin. El push del bot a `main` (`actualizar.yml:115`) paso a `continue-on-error` porque GitHub no deja a Actions como excepcion | Hecho; verificar con `gh api repos/.../rules/branches/main` |
 | W1 | Media | `worker/src/index.js:238-240`, `:243` | `espera` la manda el cliente; el tope de 5 mensajes/10 min vive en memoria del isolate | Rate Limiting nativo de Cloudflare + Turnstile en `/contacto/`; firmar la hora de carga |
 | W2 | Media | `index.js:259-267`, `:101-102` | El acuse sale al correo que escribe el usuario; tope 1/hora por direccion y por isolate, se evade con `victima+a@` | Acuse detras de Turnstile, normalizar `+tag`, tope global diario (Resend 100/dia) |
 | W3 | Media | `index.js:117-122`, `:168-176` | `if (mapa.size > 5000) mapa.clear()` vacia el limite de todos; cada `q` nuevo dispara hasta 4 pedidos a eBay/AliExpress/Amazon/Tiendamia | Rate limiting nativo, agrupar IPv6 por /64, tope diario por fuente, coalescer consultas iguales |
