@@ -117,7 +117,6 @@ jobs:
             git pull --rebase
             git push
           fi
-        continue-on-error: true
 
       # Si una tienda se cae o bloquea la IP del runner, el indice anterior
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
