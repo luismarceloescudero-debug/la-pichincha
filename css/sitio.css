@@ -862,8 +862,10 @@ table.nov-tabla td small,table.nov-tabla th small{color:var(--ink-3);font-weight
 /* 3: el precio, en la franja de color; nunca se corta */
 .ocard .o-precios{order:2;background:var(--band);color:#fff;padding:8px 14px;gap:2px 10px;align-items:baseline}
 .ocard .o-precios .ahora,.ocard.n-normal .o-precios .ahora,.ocard.n-fuerte .o-precios .ahora,.ocard.n-heroe .o-precios .ahora{
-  font:800 clamp(1.2rem,6vw,1.8rem)/1.05 var(--f-tit);letter-spacing:-.035em;color:#fff;white-space:nowrap;max-width:100%}
-.ocard.n-heroe .o-precios .ahora{font-size:clamp(1.3rem,6.6vw,2.2rem)}
+  font:800 clamp(1.4rem,6.4vw,1.8rem)/1.05 var(--f-tit);letter-spacing:-.035em;color:#fff;white-space:nowrap;max-width:100%}
+/* El precio siempre pesa mas que el % (A10): fuerte y heroe suben el precio, el % queda como esta. Medido a 320/375/428 px. */
+.ocard.n-fuerte .o-precios .ahora{font-size:clamp(2rem,8.5vw,2.5rem)}
+.ocard.n-heroe .o-precios .ahora{font-size:clamp(2.3rem,10.5vw,2.8rem)}
 .ocard .o-precios .antes,.ocard.n-heroe .o-precios .antes{font:500 .8rem var(--f-tec);color:rgba(255,255,255,.88);text-decoration-thickness:1.5px}
 /* 4: ahorro, en tinte claro, con la cifra en verde */
 .ocard .o-ahorro{order:3;background:var(--lite);padding:7px 14px;font:500 .92rem var(--f-tit);color:var(--ink)}
