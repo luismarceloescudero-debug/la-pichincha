@@ -40,7 +40,7 @@ Ya hay: Sentry (errores del navegador, proyecto `la-pichincha`), `salud.json`, `
 Falta y se hace:
 - **KV del vigia** (`npx wrangler kv namespace create VIGIA_KV`, pegar el id, descomentar el binding): sin KV, el vigia repite avisos y pierde memoria entre isolates. Es una accion del dueño (1 comando).
 - `[observability] enabled = true` en `wrangler.toml` del Worker (logs de Workers, plan Free alcanza).
-- Alarma de **frescura**: si `indice.json` publicado tiene mas de 8 h, el vigia avisa (hoy el cron corre cada ~2-3 h; ver `actualizar.yml`).
+- Alarma de **frescura**: si `indice.json` publicado tiene mas de 30 h, el vigia avisa. Hoy el cron de `actualizar.yml` corre **una vez por dia** (03:23 UTC, respaldo 05:47) y GitHub lo atrasa hasta ~8 h (el 13/11 las corridas programadas arrancaron 11:07 y 13:27 UTC), asi que 8 h daria falsas alarmas. Mejor: disparar la corrida desde el Cron del Worker (`workflow_dispatch` por API, que no se atrasa) y dejar el cron de GitHub de respaldo.
 - Arreglar el error de CSP del sourcemap de Sentry (S3) para que la consola de produccion quede limpia.
 - Panel unico: `/estado/` ya existe; sumarle "ultima corrida OK", "tiendas en baja" y "backup mas reciente".
 
@@ -58,7 +58,7 @@ Falta y se hace:
 Ya existen 22 pruebas (portada, buscador, ofertas, paginas, contacto, sin conexion, diseno). Se suma:
 - Recorrido "datos feos" (busquedas largas, emojis, `<script>`, sin resultados): hoy es un script suelto; pasa a `tests/e2e/datos-feos.spec.js`, en movil y escritorio.
 - axe como prueba (`@axe-core/playwright`) en las 11 rutas: falla con cualquier violacion seria.
-- Prueba de **frescura**: la portada muestra la hora del ultimo precio y no pasa de 8 h.
+- Prueba de **frescura**: la portada muestra la hora del ultimo precio y no pasa de 30 h.
 - Prueba del **cartel de datos viejos** (D4) con un indice fixture viejo.
 - Contrato del Worker: `/buscar` con `q` vacio, largo, con emojis; `/contacto` sin `espera`; origen no permitido.
 
@@ -104,7 +104,7 @@ Unico gasto unico previsto: **Google Play USD 25** (bloqueado, ver seccion 11).
 | F0 (1 dia) | Proteger `main` (S1); Telegram solo si indexar OK (D5); borrar log de aviso (W9) | `gh api .../protection` responde 200 y exige `Tests`; un push directo a main es rechazado | Claude, con OK del dueño para el ruleset |
 | F1 (2-3 dias) | Compuerta de publicacion (D1-D4) + tope de borrado (D3) + tests | Con un indice fixture donde una tienda cae 70 %, el workflow **no publica** y avisa; test automatico que lo prueba | Claude |
 | F2 (2 dias) | Pipeline: errores tragados D6-D14, escrituras atomicas D11/D16 | 0 `except` que devuelvan vacio sin contar; tests de cada uno | Claude |
-| F3 (1 dia) | KV del vigia + observability + alarma de frescura | El vigia avisa una vez (no repite) y detecta un indice de >8 h simulado | Dueño (1 comando KV) + Claude |
+| F3 (1 dia) | KV del vigia + observability + alarma de frescura | El vigia avisa una vez (no repite) y detecta un indice de >30 h simulado | Dueño (1 comando KV) + Claude |
 | F4 (3 dias) | Cloudflare delante + cache + purga + CSP con hashes | `curl -I` muestra HSTS y cache largo de `indice.json`; Lighthouse sin errores de CSP | Dueño (DNS) + Claude |
 | F5 (2 dias) | Worker: rate limit nativo, Turnstile, `workers_dev=false` | Prueba de contrato: 6to mensaje en 10 min rechazado aunque cambie de isolate | Claude |
 | F6 (2 dias) | Backups a R2 + prueba de restauracion | Restauracion a carpeta limpia da los mismos conteos (diferencia < 1 %) | Claude + dueño (crear bucket) |
