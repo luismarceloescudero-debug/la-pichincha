@@ -1,6 +1,6 @@
 # Plan definitivo de escalado — La Pichincha
 
-Fecha: 13/11/2026. Se apoya en `docs/auditoria-2026-11-13.md` (los IDs S1, D1, W1... son de ahi) y reemplaza como "orden de ejecucion" al plan v4 (`docs/plan-v4-tiendas-de-apps.md`), que sigue vigente para el detalle de la app Android.
+Fecha: 13/11/2026. Version 2 (integra la segunda tanda de skills). Se apoya en `docs/auditoria-2026-11-13.md` (los IDs S1, D1, W1... son de ahi) y reemplaza como "orden de ejecucion" al plan v4 (`docs/plan-v4-tiendas-de-apps.md`), que sigue vigente para el detalle de la app Android.
 
 Objetivo en una frase: que el sitio **no pueda publicar datos malos sin que alguien se entere, no se caiga si se cae una pieza, y aguante 10 veces mas visitas** sin gastar plata antes de tiempo.
 
@@ -8,7 +8,7 @@ Objetivo en una frase: que el sitio **no pueda publicar datos malos sin que algu
 
 - Sitio estatico en GitHub Pages (`pichinchadeldia.com.ar`), 200 URLs en el sitemap, todas 200. Tests: JS 818/818, Python 744 OK. Lighthouse movil en `/`: Accesibilidad 100, Buenas practicas 100, SEO 100. axe: 0 violaciones en 22 combinaciones.
 - Los datos se arman en GitHub Actions (`actualizar.yml`, cron), el indice (`indice.json`, 6,7 MB / 1,35 MB comprimido) se publica con el sitio. Un Worker de Cloudflare hace de "afuera" (buscar en eBay/AliExpress/Amazon/Tiendamia, contacto por correo, vigia).
-- LCP movil lento-emulado: 1,98 s en `/` y 1,91 s en `/?q=`; 98 % es "render delay". CLS 0.
+- LCP movil lento-emulado: 1,98 s en `/` y 1,91 s en `/?q=` (98 % render delay, CLS 0), **pero mide solo el cascaron**: hay 28 scripts sincronos y el indice se pide a ~7,8 s (N-CAL1); la espera real es de ~10 s en un celular lento.
 - Lo grave: `main` sin proteccion (S1) y **cinco formas de publicar datos malos en silencio** (D1-D5).
 
 ## 1. Arquitectura
@@ -74,6 +74,7 @@ Orden por riesgo (IDs de la auditoria):
 ## 7. Rendimiento
 
 Meta: Lighthouse movil >= 95 en `/` y `/?q=`; LCP <= 2,0 s con CPU 4x y Fast 4G (hoy 1,98 / 1,91 s).
+0. **N-CAL1 primero**: `defer` en los 28 scripts de `index.html` y `preload` del indice; es el cambio de mayor retorno y el mas barato. Medir antes y despues con el CLI de Lighthouse (rendimiento).
 1. Portada con HTML ya armado (generar_portada.js ya pre-renderiza; confirmar que el LCP sea ese bloque y no el que espera el indice).
 2. Indice partido (portada + por categoria) y carga diferida del completo.
 3. Cache largo en Cloudflare con purga al publicar.
@@ -108,7 +109,7 @@ Unico gasto unico previsto: **Google Play USD 25** (bloqueado, ver seccion 11).
 | F4 (3 dias) | Cloudflare delante + cache + purga + CSP con hashes | `curl -I` muestra HSTS y cache largo de `indice.json`; Lighthouse sin errores de CSP | Dueño (DNS) + Claude |
 | F5 (2 dias) | Worker: rate limit nativo, Turnstile, `workers_dev=false` | Prueba de contrato: 6to mensaje en 10 min rechazado aunque cambie de isolate | Claude |
 | F6 (2 dias) | Backups a R2 + prueba de restauracion | Restauracion a carpeta limpia da los mismos conteos (diferencia < 1 %) | Claude + dueño (crear bucket) |
-| F7 (3 dias) | Rendimiento: indice partido, portada | Lighthouse movil rendimiento mediana >= 95 en `/` y `/?q=` | Claude |
+| F7 (3 dias) | Rendimiento: N-CAL1 (`defer` + preload), indice partido, portada | Lighthouse movil rendimiento mediana >= 95 en `/` y `/?q=` | Claude |
 | F8 (semana de calma) | Estabilizacion: nada nuevo, solo corregir | CI verde 14 dias seguidos; 0 hallazgos altos; issues del repo privado #1-#9 cerrados o explicados | Todos |
 
 Regla: una fase se cierra con su PR mergeado, sus tests y su fila en `docs/mapa.md`.
@@ -160,6 +161,10 @@ Cuando se cumpla, Claude avisa: "criterio de Play cumplido" con los 7 numeros.
   - "Location of data processing": **Red global de Cloudflare (Workers); sin servidores propios**. Ademas, el Worker no guarda datos de AliExpress: solo reenvia el resultado de la busqueda y lo cachea unos segundos en memoria.
 - Antes de reenviar: confirmar que lo que dice el formulario coincide con el codigo (`worker/src/fuentes/aliexpress.js` no persiste nada; el cache es en memoria del isolate).
 - Si vuelve a rechazarse: pedir el motivo exacto por el canal de soporte de AliExpress Open Platform y anotarlo aca. No bloquea ninguna fase del plan: AliExpress es una fuente opcional.
+
+## 12b. SEO y diseno (de las skills, orden sugerido)
+
+1. N-SEO1 y N-SEO2: miga visible con enlace al hub (un cambio en `pie()` resuelve ambos). 2. N-SEO3: colapsar los 13 pares casi iguales. 3. N-UX1, N-UX2 y N-UX3: tres arreglos de CSS/JS de bajo riesgo. 4. N-TIPO1, N-DS1 y N-A11Y1: escala tipografica, tokens y toques de 44 px (un PR de diseno aparte). 5. N-SEO4: hubs por rubro, cuando haya trafico.
 
 ## 13. Pendientes en vivo (13/11)
 
