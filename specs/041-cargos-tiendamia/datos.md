@@ -148,6 +148,23 @@ sueltas no pasan; la ficha no lo avisa. Se cambió por un hub USB-C de Anker de 
 Pares útiles para separar efectos: el Moto G 2025 y el AeroClip 2 tienen casi el mismo precio y distinto peso (0,40 y
 0,05 kg); el monitor es barato y pesado; el SSD es caro y liviano.
 
+## Servicios en dolares: lo que dicen los 23 carritos (13/11/2026)
+
+Revision hecha con la base completa. **Candidata, no regla** (la regla de este archivo sigue: no se estima sin carrito hasta
+explicar todos los casos).
+
+- Los servicios parecen cobrarse en dolares: **≈ US$ 24 por kilo** (44.439 / 1.852,2 = 23,99) con un **minimo de ≈ US$ 3,6**
+  (6.661 / 1.852,2). Dan ese AR$/kg (con una diferencia de hasta 4 %, por redondeo de peso), con el dolar de su tanda, el Moto G (2 u.), el Galaxy A16, el hub Anker, la G305, el
+  Highwings, el monitor Samsung y el MSI, y pagan el minimo los cuatro de 0,1 kg o menos.
+- El resto paga **mas** que ese piso (OnePlus 11, Razer, Logitech G413, Chromebook, Vivobook, GMKtec): coincide con la
+  hipotesis del peso volumetrico (caja grande y liviana). **Con el peso de la ficha el estimado es un piso, no un total.**
+- **COMPUTADORAS**: Acer y Beelink pagan 10,67 % (parece IVA reducido de 10,5 %); los otros cuatro, entre 23 % y 33 %, sin
+  patron claro con el precio. Sigue sin regla.
+
+Consecuencia para la carga: ya no hacen falta mas carritos de celulares, componentes, cables, auriculares ni videojuegos
+(envios, IVA y servicios minimos ya cierran). **Los que si faltan: computadoras (notebook, mini PC, all-in-one) y cajas
+grandes livianas** (para confirmar el volumetrico). Para cargarlos mas rapido: `docs/copiar-detalle.md`.
+
 ## Qué se busca con los datos
 
 - **Envío** contra `weight` (¿por kilo?, ¿mínimo?, ¿tramos?) y contra la categoría aduanera.
