@@ -110,6 +110,12 @@ con "datos feos" en la busqueda: 60 repeticiones de una palabra con enie y tilde
 - JS 818/818 verde (4,4 s); Python 744 OK, 3 salteados (22 s) (traspaso).
 - E2E Playwright local (`bash tests/e2e/armar-sitio.sh` + `npx playwright test --workers=1`, 13/11): **primera vuelta 14 de 22, segunda 22 de 22**; los 8 que fallaron la primera vez pasan sueltos y en la repeticion. T1 (Media): **hay pruebas intermitentes** (arranque en frio del servidor o del navegador); coincide con los issues #5/#6 del repo privado. Arreglo: `retries: 1` ya esta en CI; sumar espera explicita a que el servidor responda antes de abrir el navegador y guardar el trace de los fallos como artefacto.
 - T2 (Baja): en local, cada pagina registra un error de consola `Connecting to 'https://fonts.googleapis.com/...'` (CSP `connect-src`); en produccion la portada con `?q=` salio sin errores de consola el 13/11. Revisar si el CSS de la fuente se pide por `fetch` en alguna ruta.
+
+## ZAP en local (13/11, Docker, solo contra el sitio armado en `localhost`)
+
+`zap-baseline.py` (pasivo) de `ghcr.io/zaproxy/zaproxy:stable` contra `tests/e2e/armar-sitio.sh` servido en local. Nunca contra produccion ni terceros.
+12 alertas: 7 medias (CSP sin fallback, comodin, `unsafe-inline` en script y estilo, sin cabecera anti-clickjacking, SRI faltante, sin token anti-CSRF), 2 bajas, 3 informativas.
+**Son las mismas familias del analisis del 19/10** (`docs/seguridad-zap.md`): CSP por `<meta>` y cabeceras que GitHub Pages no deja poner (S2, y se resuelven con Cloudflare delante, fase F4). Unica diferencia: "sin token anti-CSRF" en el formulario de contacto: no aplica, porque el formulario no usa cookies ni sesion; el freno real es W1/W2 (limites y Turnstile). Ninguna alerta nueva exige arreglo propio.
 
 ## Costos
 Se completa en `docs/plan-definitivo.md`, seccion 8.
