@@ -74,6 +74,7 @@ Lo bien hecho: los fallbacks a `previo` ante 0 productos (`indexar.py:1082-1106`
 - Ultimas corridas de `actualizar.yml` (schedule y push): en verde; una `cancelled` el 12/11 19:57 (pushes solapados, esperable). `Tests` de PR del 13/11: verde.
 - Issues abiertos en `la-pichincha-correo` (#1-#9). Accionables: #5/#6/#7 (Lighthouse, e2e y enlaces en PRs del 11-12/11), #3 y #2 (FullH4rd y Katech en 0), #8 (Smartphones y PCs sin ofertas), #4 (404 de Search Console vs sitemap actual 200/200: probable dato viejo), #9 (permisos de la GitHub App).
 - S1: `main` sin proteccion.
+- C1 (Media): `actualizar.yml:14-15` programa una corrida **diaria** (03:23 y 05:47 UTC) y GitHub la atrasa: el 13/11 las corridas `schedule` arrancaron 11:07 y 13:27 UTC (7-8 h tarde). Los precios del dia pueden publicarse a media manana. Arreglo: disparar `workflow_dispatch` desde el Cron del Worker (cada 5 min, no se atrasa) y dejar el cron de GitHub de respaldo; el vigia mide frescura contra 30 h.
 - Docker Desktop: no levanta el motor (`npipe dockerDesktopLinuxEngine` inexistente); se intento abrirlo el 13/11, ver resultado en `docs/prueba-de-skills.md` (Strix).
 
 ## Rendimiento (medido con Chrome DevTools, movil emulado, CPU 4x + Fast 4G, cache ignorada)
