@@ -293,7 +293,11 @@
     if (!EQUIPOS_LINEA.has(t.categoria)) return "";
     const pal = t.titulo.toLowerCase().split(" ").filter(Boolean);
     if (pal.length < 2) return "";
-    const serie = t.categoria === "smartphone" ? pal.slice(1, 3).map(w => w.replace(/\d+/g, "")).filter(Boolean).join(" ") : pal[1].replace(/\d+/g, "");
+    /* En celulares la serie es la primera palabra con letras despues de la marca y de la submarca («Redmi», «Galaxy», «Poco», «Moto»):
+       «Xiaomi Redmi Note 14» y «Xiaomi Note 14» (otra tienda) son la misma linea; «Galaxy A56» y «Galaxy S25», no. */
+    const SUBMARCA = new Set(["redmi", "poco", "galaxy", "moto", "iphone", "pixel"]);
+    const letras = w => w.replace(/\d+/g, "");
+    const serie = t.categoria === "smartphone" ? (pal.slice(1).filter(w => !SUBMARCA.has(w)).map(letras).find(Boolean) || "") : letras(pal[1]);
     return serie ? t.categoria + "|" + pal[0] + "|" + serie : "";
   }
   /* Una por linea: gana la primera de la lista (ya viene ordenada por mejor). */
