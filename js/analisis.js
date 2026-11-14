@@ -207,7 +207,15 @@
     ].filter(Boolean);
   }
 
-  const api = { analizarConsulta, partesExclusion, precioPorTienda, tablaTiendasHtml };
+  /* «+$122.138 que la A» / «−$263.861 que la A» / «igual que la A»: cuanto cambia una opcion contra la primera (Comparativa en el
+     celular, js/consulta.js). Sin precio de referencia no dice nada. */
+  function diferenciaTexto(precio, ref, letra, pesos) {
+    if (!(ref > 0) || !(precio > 0)) return "";
+    const d = Math.round(precio - ref);
+    return d === 0 ? `igual que la ${letra}` : `${d > 0 ? "+" : "−"}${pesos(Math.abs(d))} que la ${letra}`;
+  }
+
+  const api = { analizarConsulta, partesExclusion, precioPorTienda, tablaTiendasHtml, diferenciaTexto };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Analisis = api;
 })(this);

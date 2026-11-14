@@ -140,7 +140,7 @@ function cardGrande(p, i, picks) {
   const pct = bajo || bajoMed, pctTxt = bajo ? (f[6] > f[1] ? "bajó en 30 días" : "OFF publicado") : "bajo la mediana";
   const corte = ti.titulo.indexOf(" "), marca = corte < 0 ? ti.titulo : ti.titulo.slice(0, corte), resto = corte < 0 ? "" : ti.titulo.slice(corte);
   const chips = (ti.chips.length ? ti.chips : Object.values(specsDe(f[0]))).slice(0, 4);
-  const dif = i === 0 ? p.rol : Carrusel.diferencia(f[1], picks[0].m.f[1], LETRAS[0], pesos);
+  const dif = i === 0 ? p.rol : Analisis.diferenciaTexto(f[1], picks[0].m.f[1], LETRAS[0], pesos);
   const antes = f[5] && f[5] > f[1] ? `<s class="car-antes">${pesos(f[5])}</s>` : "";
   const plus = Buscador.plusDe(f[8]);
   const specs = Object.entries(specsDe(f[0]));
@@ -174,7 +174,7 @@ function cardGrande(p, i, picks) {
 
 function vistaComparativaCarrusel() {
   const A = ANALISIS, picks = A.picks;
-  setTimeout(() => { const c = document.querySelector("[data-car]"); if (c) Carrusel.armar(c, { esc, pesos }); }, 0);
+  setTimeout(() => cargarCarrusel().then(C => { const c = document.querySelector("[data-car]"); if (c) C.armar(c, { esc, pesos }); }).catch(() => {}), 0);
   const nav = [["tarjetas", "Tarjetas"], ["diferencias", "Diferencias"], ["tiendas", "Tiendas"], ["seguidos", "Seguidos"]];
   return `<div class="panel car-panel" data-car data-seccion="tarjetas" role="region" aria-roledescription="carrusel" aria-label="Comparativa: ${esc(CONSULTA)}">
     <header class="car-cab">
@@ -201,8 +201,15 @@ function vistaComparativaCarrusel() {
   </div>`;
 }
 
+/* El comportamiento del carrusel no esta en index.html: se baja la primera vez que se muestra (no suma un script sincrono a la
+   portada, que ya esta al borde del umbral de rendimiento de la CI). El service worker lo precarga. */
+let CARRUSEL = null;
+const cargarCarrusel = () => CARRUSEL || (CARRUSEL = typeof Carrusel !== "undefined" ? Promise.resolve(Carrusel)
+  : new Promise((ok, no) => { const s = document.createElement("script"); s.src = "js/carrusel.js"; s.onload = () => ok(Carrusel); s.onerror = no; document.head.appendChild(s); }));
+const esMovil = () => { try { return !!(matchMedia && matchMedia("(max-width: 700px) and (pointer: coarse)").matches); } catch (e) { return false; } };
+
 function vistaComparativaDin() {
-  if (Carrusel.esMovil() && ANALISIS.picks.length) return vistaComparativaCarrusel();
+  if (esMovil() && ANALISIS.picks.length) return vistaComparativaCarrusel();
   return vistaComparativaGrilla();
 }
 

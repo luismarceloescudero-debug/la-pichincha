@@ -1,10 +1,10 @@
 /* Comparativa en el celular: una tarjeta grande por pantalla (14/11, pedido del dueño; maqueta en docs/plan-comparativa-tarjetas.md).
    Este archivo tiene dos partes:
-   1. Logica pura, sin DOM (se prueba en Node): leer un gesto, moverse entre tarjetas, el diferencial contra la anterior y la
-      lista de Seguidos (se guarda solo en este celular, en localStorage; no hay cuenta ni avisos).
+   1. Logica pura, sin DOM (se prueba en Node): leer un gesto, moverse entre tarjetas y la lista de Seguidos (se guarda solo en este celular, en localStorage; no hay cuenta ni avisos).
    2. Comportamiento (solo navegador): el desplazamiento lateral lo hace el propio navegador (scroll-snap, sin librerias);
       aca se suma deslizar hacia arriba para abrir la ficha, mantener apretado para seguir (con vibracion corta), las etiquetas
-      flotantes para cambiar de seccion y el teclado. Todo gesto tiene tambien su boton: ninguno es la unica via. */
+      flotantes para cambiar de seccion y el teclado. Todo gesto tiene tambien su boton: ninguno es la unica via.
+   Se carga bajo demanda (js/consulta.js) solo cuando se muestra el carrusel: no suma un script a la portada. */
 (function (raiz) {
   "use strict";
 
@@ -12,7 +12,6 @@
   const MAX_SEGUIDOS = 50;
   const UMBRAL = { lateral: 50, vertical: 60, quieto: 10, mantener: 550 };
   const SECCIONES = ["tarjetas", "diferencias", "tiendas", "seguidos"];
-  const MOVIL = "(max-width: 700px) and (pointer: coarse)";
 
   /* --- Logica pura --- */
 
@@ -31,13 +30,6 @@
     return Math.min(Math.max(0, i + paso), Math.max(0, n - 1));
   }
   const indiceDe = (scrollLeft, ancho) => ancho > 0 ? Math.round(scrollLeft / ancho) : 0;
-
-  /* «+$122.138 que la A» / «−$263.861 que la A» / «igual que la A»; la primera no se compara con nadie. */
-  function diferencia(precio, ref, letra, pesos) {
-    if (!(ref > 0) || !(precio > 0)) return "";
-    const d = Math.round(precio - ref);
-    return d === 0 ? `igual que la ${letra}` : `${d > 0 ? "+" : "−"}${pesos(Math.abs(d))} que la ${letra}`;
-  }
 
   /* Seguidos: un arreglo de {id, nombre, tienda, precio, url, fecha}. `almacen` es localStorage o algo igual; si falla
      (modo privado, cuota) la lista queda en memoria y la app sigue andando. */
@@ -63,8 +55,6 @@
     return { lista: nueva, siguiendo: i < 0 };
   }
   const sigue = (id, almacen) => leerSeguidos(almacen).some(x => x.id === id);
-
-  const esMovil = () => { try { return !!(raiz.matchMedia && raiz.matchMedia(MOVIL).matches); } catch (e) { return false; } };
 
   /* --- Comportamiento (solo navegador) --- */
 
@@ -178,7 +168,7 @@
     return () => { clearTimeout(esperando); };
   }
 
-  const api = { gesto, mover, indiceDe, diferencia, leerSeguidos, guardarSeguidos, alternarSeguido, sigue, esMovil, armar, UMBRAL, SECCIONES, CLAVE, MOVIL };
+  const api = { gesto, mover, indiceDe, leerSeguidos, guardarSeguidos, alternarSeguido, sigue, armar, UMBRAL, SECCIONES, CLAVE };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Carrusel = api;
 })(this);

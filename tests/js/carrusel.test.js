@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const Car = require("../../js/carrusel.js");
+const An = require("../../js/analisis.js");
 
 const pesos = n => "$" + Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
 const almacen = () => { const d = {}; return { getItem: k => (k in d ? d[k] : null), setItem: (k, v) => { d[k] = String(v); }, d }; };
@@ -33,10 +34,10 @@ test("mover: no da la vuelta, la primera y la ultima son bordes", () => {
 });
 
 test("diferencia contra la primera opcion", () => {
-  assert.equal(Car.diferencia(2284999, 2162861, "A", pesos), "+$122.138 que la A");
-  assert.equal(Car.diferencia(1899000, 2162861, "A", pesos), "−$263.861 que la A");
-  assert.equal(Car.diferencia(100, 100, "A", pesos), "igual que la A");
-  assert.equal(Car.diferencia(100, 0, "A", pesos), "");
+  assert.equal(An.diferenciaTexto(2284999, 2162861, "A", pesos), "+$122.138 que la A");
+  assert.equal(An.diferenciaTexto(1899000, 2162861, "A", pesos), "−$263.861 que la A");
+  assert.equal(An.diferenciaTexto(100, 100, "A", pesos), "igual que la A");
+  assert.equal(An.diferenciaTexto(100, 0, "A", pesos), "");
 });
 
 test("seguidos: se siguen y se dejan de seguir, y quedan guardados", () => {
@@ -61,8 +62,4 @@ test("seguidos: un almacen roto o con basura no rompe la app", () => {
   assert.deepEqual(Car.leerSeguidos(basura), []);
   basura.setItem(Car.CLAVE, JSON.stringify([{ id: 5 }, null, { id: "ok", nombre: "ok" }]));
   assert.deepEqual(Car.leerSeguidos(basura).map(x => x.id), ["ok"]);
-});
-
-test("esMovil: sin matchMedia (Node, navegadores viejos) es falso", () => {
-  assert.equal(Car.esMovil(), false);
 });
