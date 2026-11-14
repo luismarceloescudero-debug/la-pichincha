@@ -17,6 +17,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 const T = require("./js/titulo.js");
+const O = require("./js/ofertas.js");
 
 const ANCHO = 1200, ALTO = 630;
 const PISO_SUPER = 20;   // como en /hoy/ y el Reel: con menos, «La mejor del día»
@@ -29,7 +30,7 @@ const miles = n => Math.round(n).toLocaleString("es-AR").replace(/,/g, ".");
 const version = texto => crypto.createHash("sha1").update(texto).digest("hex").slice(0, 10);
 
 /* La super oferta: la de mayor descuento (la primera si empatan). */
-const mejorDe = ofertas => ofertas.reduce((m, o, i) => (m < 0 || (+o.descuento || 0) > (+ofertas[m].descuento || 0) ? i : m), -1);
+const mejorDe = O.mejorDelDia;   // 14/11: por ahorro real y categoria, como en /hoy/ (js/ofertas.js)
 
 /* El nombre como en /hoy/: tipo (rosa) si hace falta, marca (celeste) y modelo. Con un ofertas.json viejo, desde el nombre. */
 function nombre(o) {

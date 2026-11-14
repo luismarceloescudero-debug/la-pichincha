@@ -80,6 +80,18 @@ class Mensaje(unittest.TestCase):
         self.assertIn("<blockquote>", resto)
         self.assertIn("⚡ <b>−20%</b>", resto)
 
+    def test_la_destacada_es_la_de_mayor_ahorro_real_y_no_la_de_mayor_porcentaje(self):
+        # 14/11: un mousepad con -27 % (ahorra $2.955) no le gana a una notebook con -17 % (ahorra $442.995). Espejo de js/ofertas.js.
+        datos = {**OFERTAS, "ofertas": [
+            {"nombre": "Mousepad Fantech Vigil", "precio": 7990, "antes": 10945, "descuento": 27, "comercio": "Venex",
+             "url": "https://t.test/pad", "tipo": "propia", "categoria": "Periférico"},
+            {"nombre": "Notebook Acer TravelMate P2 16", "precio": 2162861, "antes": 2605856, "descuento": 17, "comercio": "OnCity",
+             "url": "https://t.test/nb", "tipo": "propia", "categoria": "Notebook"}]}
+        heroe = telegram.mensaje(datos).split(telegram.BARRA)[1]
+        self.assertIn("TravelMate", heroe)
+        self.assertNotIn("Mousepad", heroe)
+        self.assertIn("LA MEJOR DEL DÍA", heroe)    # 17 % no llega al piso de 20: no se llama «Súper oferta»
+
     def test_sin_ofertas_el_mensaje_sale_igual_con_el_enlace_al_sitio(self):
         # Decision del dueno (04/11): que haya o no rebajas reales, la publicacion sale.
         texto = telegram.mensaje({**OFERTAS, "ofertas": []})
