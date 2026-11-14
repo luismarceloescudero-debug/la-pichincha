@@ -131,7 +131,82 @@ function seccionPrecioPorTienda(picks) {
     + Analisis.tablaTiendasHtml(p.porTienda, { ...h, titulo: `${p.rolCorto}: ${p.m.f[0]}` })).join("");
 }
 
+/* --- Comparativa en el celular: una tarjeta grande por pantalla (js/carrusel.js, 14/11) ---
+   Mismas opciones y mismos datos que la grilla: solo cambia como se muestran. */
+function cardGrande(p, i, picks) {
+  const f = p.m.f, t = IDX.tiendas[f[3]] || { nombre: f[3], color: "fh" }, ti = Titulo.de(f[0]);
+  const bajo = f[6] > f[1] ? Math.round((1 - f[1] / f[6]) * 100) : f[5] > f[1] ? Math.round((1 - f[1] / f[5]) * 100) : 0;
+  const bajoMed = !bajo && ANALISIS.med > f[1] ? Math.round((1 - f[1] / ANALISIS.med) * 100) : 0;
+  const pct = bajo || bajoMed, pctTxt = bajo ? (f[6] > f[1] ? "bajó en 30 días" : "OFF publicado") : "bajo la mediana";
+  const corte = ti.titulo.indexOf(" "), marca = corte < 0 ? ti.titulo : ti.titulo.slice(0, corte), resto = corte < 0 ? "" : ti.titulo.slice(corte);
+  const chips = (ti.chips.length ? ti.chips : Object.values(specsDe(f[0]))).slice(0, 4);
+  const dif = i === 0 ? p.rol : Carrusel.diferencia(f[1], picks[0].m.f[1], LETRAS[0], pesos);
+  const antes = f[5] && f[5] > f[1] ? `<s class="car-antes">${pesos(f[5])}</s>` : "";
+  const plus = Buscador.plusDe(f[8]);
+  const specs = Object.entries(specsDe(f[0]));
+  const porTienda = p.porTienda ? Analisis.tablaTiendasHtml(p.porTienda, { esc, pesos, titulo: `${p.rolCorto}: ${f[0]}`,
+    enlace: (g, texto, etiqueta) => `<a href="${hrefTienda(g[2])}" target="_blank" rel="${relTienda(g[2])}" aria-label="${esc(etiqueta)}">${texto}</a>` }) : "";
+  return `<li class="car-card c-${t.color}${i === 0 ? " mejor" : ""}" data-car-card data-id="${esc(f[2])}" data-nombre="${esc(f[0].slice(0, 90))}" data-tienda="${esc(comercioDe(f))}"
+      data-precio="${f[1]}" data-url="${hrefTienda(f[2])}" tabindex="0" role="group" aria-roledescription="tarjeta" aria-label="${LETRAS[i]}: ${esc(p.rol)} de ${picks.length}">
+    <p class="car-cinta"><b>${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</p>
+    <div class="car-fila1">
+      ${pct ? `<p class="car-pct"><span class="sig">−</span><span class="num">${pct}</span><span class="por">%</span><small>${pctTxt}</small></p>` : `<p class="car-pct sin"></p>`}
+      <div class="car-mini" aria-hidden="true">${Titulo.svg(ti.tipo, "ico")}</div>
+    </div>
+    <h3 class="car-tit"><span class="car-marca">${esc(marca)}</span>${esc(resto)}</h3>
+    <div class="car-chips">${chipOjo(viejoDe(f))}${chips.map(c => `<span class="car-chip${Titulo.premium(c) ? " pr" : ""}">${Titulo.premium(c) ? "✦ " : ""}${esc(c)}</span>`).join("")}</div>
+    <p class="car-precio"><span class="sig">$</span>${pesos(f[1]).replace("$", "")}</p>
+    <p class="car-sub">${antes}<span class="car-en">en <b class="car-tienda">${esc(comercioDe(f))}</b></span> ${selloAfiliado(f[2])}</p>
+    <p class="car-dif">${esc(dif)}</p>
+    <div class="car-botones">
+      <button type="button" class="car-btn" data-car-seguir aria-pressed="false"><span data-car-corazon aria-hidden="true">♡</span> <span data-car-seguir-txt>Seguir</span></button>
+      <button type="button" class="car-btn" data-car-ficha>↑ Ficha</button>
+      <a class="car-btn car-abrir" href="${hrefTienda(f[2])}" target="_blank" rel="${relTienda(f[2])}">Abrir ${icono("fuera")}</a>
+    </div>
+    <div data-car-ficha-datos hidden>
+      <h3>${esc(f[0])}</h3>
+      <p class="car-razon">${esc(p.razon)}</p>${plus.length ? `<p class="plus">＋ ${plus.join(" · ")}</p>` : ""}
+      ${specs.length ? `<dl class="car-specs">${specs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}
+      ${porTienda}
+    </div>
+  </li>`;
+}
+
+function vistaComparativaCarrusel() {
+  const A = ANALISIS, picks = A.picks;
+  setTimeout(() => { const c = document.querySelector("[data-car]"); if (c) Carrusel.armar(c, { esc, pesos }); }, 0);
+  const nav = [["tarjetas", "Tarjetas"], ["diferencias", "Diferencias"], ["tiendas", "Tiendas"], ["seguidos", "Seguidos"]];
+  return `<div class="panel car-panel" data-car data-seccion="tarjetas" role="region" aria-roledescription="carrusel" aria-label="Comparativa: ${esc(CONSULTA)}">
+    <header class="car-cab">
+      <div><p class="car-kicker">Comparativa</p><h2 class="car-h">${esc(CONSULTA)}</h2></div>
+      <div class="car-estado"><span class="car-seg" data-car-seguidos aria-label="Productos que seguís">♡ 0</span> <span class="car-pos" data-car-pos aria-live="polite">1 / ${picks.length}</span></div>
+    </header>
+    <div class="car-vista" data-car-vista="tarjetas">
+      <ol class="car-pista" data-car-pista tabindex="-1" aria-label="Opciones, deslizá hacia los costados">${picks.map((p, i) => cardGrande(p, i, picks)).join("")}</ol>
+      <div class="car-puntos">${picks.map((p, i) => `<button type="button" class="car-punto" data-car-punto="${i}" aria-label="Ir a la opción ${LETRAS[i]}"></button>`).join("")}</div>
+      <p class="car-ayuda">← deslizá · ↑ ficha · mantené = seguir</p>
+    </div>
+    <div class="car-vista car-largo" data-car-vista="diferencias" hidden>
+      <div class="panel-head"><h2>${icono("chip")} En qué se diferencian</h2></div>${barraAcciones("comparativa")}${tablaPicks(picks)}${franja(picks)}</div>
+    <div class="car-vista car-largo" data-car-vista="tiendas" hidden>
+      <div class="panel-head"><h2>${icono("store")} Precio por tienda</h2></div>${seccionPrecioPorTienda(picks)}${seccionComercios()}</div>
+    <div class="car-vista car-largo" data-car-vista="seguidos" hidden>
+      <div class="panel-head"><h2>${icono("trofeo")} Seguidos</h2><p class="sub">Se guardan solo en este celular. No hay avisos de baja: el precio es el de cuando los seguiste.</p></div>
+      <ul class="car-seg-lista" data-car-lista-seguidos></ul></div>
+    <nav class="car-flota" aria-label="Secciones de la comparativa">${nav.map(([id, eti]) => `<button type="button" data-car-ir="${id}" aria-pressed="${id === "tarjetas"}">${eti}</button>`).join("")}</nav>
+    <div class="car-aviso" data-car-aviso role="status" aria-live="polite"></div>
+    <div class="car-ficha" data-car-hoja role="dialog" aria-modal="true" aria-label="Ficha de la opción" hidden>
+      <div class="car-ficha-caja"><button type="button" class="car-cerrar" data-car-cerrar>Cerrar ✕</button><div data-car-ficha-cuerpo></div></div>
+    </div>
+  </div>`;
+}
+
 function vistaComparativaDin() {
+  if (Carrusel.esMovil() && ANALISIS.picks.length) return vistaComparativaCarrusel();
+  return vistaComparativaGrilla();
+}
+
+function vistaComparativaGrilla() {
   const A = ANALISIS;
   setTimeout(pintarTira, 0);
   return `<div class="panel"><div class="ultimas" id="ultimas">${tiraHtml(true)}</div>${bannerConsulta()}
