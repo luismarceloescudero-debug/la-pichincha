@@ -28,7 +28,7 @@
 "mpn": "LNQ100X256G-RNNNG"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/46464-disco-solido-ssd-240gb-msi-s270.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/47414-disco-solido-ssd-960gb-adata-su630.html": {
@@ -44,7 +44,7 @@
 "mpn": "ALEG-710-1TCS"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/47441-disco-solido-ssd-480gb-msi-s270.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/47951-disco-solido-ssd-m2-pci-e-1tb-western-digital-wd-sn350-green.html": {
@@ -108,7 +108,7 @@
 "mpn": "SDCS3/256GB"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50371-disco-solido-ssd-m2-pci-e-512gb-hiksemi-wave.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50372-disco-solido-ssd-480gb-hiksemi-wave.html": {
@@ -132,7 +132,7 @@
 "mpn": "SDCS3/128GB"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50656-disco-solido-ssd-m2-pci-e-128gb-hiksemi-wave.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50739-disco-solido-ssd-480gb-kingston-dc600m.html": {
@@ -148,11 +148,11 @@
 "mpn": "ASU650SS-256GT-R"
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50917-disco-solido-ssd-240gb-hiksemi-wave.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50921-disco-solido-ssd-120gb-hiksemi-wave.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50991-disco-solido-ssd-2tb-hiksemi-wave.html": {
@@ -855,6 +855,10 @@
 "dia": "2026-11-12",
 "mpn": "CMK32GX5M2D6000Z38"
 },
+"https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-32gb2x16gb-6000mhz-rgb-cl38.html": {
+"dia": "2026-11-14",
+"mpn": "CMH32GX5M2D6000Z38"
+},
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-corsair-vengeance-ddr5-16gb-5600mhz-black-cl40.html": {
 "dia": "2026-11-12",
 "mpn": "CMK16GX5M1B5600C40"
@@ -928,11 +932,11 @@
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-ddr3-4gb-1600mhz.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-ddr3-8gb-1600mhz.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-ddr4-16gb-3200mhz-armor-white.html": {
@@ -948,7 +952,7 @@
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-ddr4-8gb-3200mhz.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-hiksemi-future-ddr4-16gb-3200mhz-rgb.html": {
@@ -1040,7 +1044,7 @@
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-16gb-6000mhz-blanco-cl30.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-16gb-6000mhz-cl30.html": {
@@ -1048,7 +1052,7 @@
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-fit-v-ddr5-32gb-kit-2x16gb-6000mhz-cl30.html": {
-"dia": "2026-10-15",
+"dia": "2026-11-14",
 "mpn": null
 },
 "https://www.venex.com.ar/componentes-de-pc/memorias-ram/desktop/memoria-ram-klevv-urbane-v-ddr5-32gb-2x16gb-6000mhzwhite-rgb-cl30.html": {
