@@ -261,6 +261,45 @@
       vistos.add(k); if (fi) vistos.add(fi); porPrecio.set(p, [...mismos, w]); return true;
     }); };
 
+  /* Pichinchas del dia (14/11, pedido del dueño): la tarjeta grande no es la del % mas alto, que premiaba un mousepad de $7.990
+     (−27 %) sobre una notebook que ahorra cien veces mas. El puntaje es el ahorro en pesos, con el peso de su categoria
+     (un periferico barato puede estar en la lista pero no encabezarla) y un bono para la gama alta. El % solo desempata. */
+  const PESO_CATEGORIA = { smartphone: 1, notebook: 1, pc: 1, monitor: 1, componente: 0.7, periferico: 0.3, otro: 0.25 };
+  const BONO_NIVEL = { alta: 1.25, media: 1 };
+  const categoriaDeEtiqueta = e => Object.keys(C.ETIQUETA).find(k => C.ETIQUETA[k] === e);
+  /* Acepta una oferta de `destacadas` ({f, ahorro, categoria, nivel}) o una de ofertas.json ({precio, antes, categoria con su
+     etiqueta, nivel opcional}). Sin ahorro calculable, 0. */
+  function puntaje(o) {
+    const precio = o.precio ?? (o.f ? o.f[1] : 0);
+    const ahorro = o.ahorro ?? (o.antes > precio ? o.antes - precio : 0);
+    const cat = PESO_CATEGORIA[o.categoria] !== undefined ? o.categoria : categoriaDeEtiqueta(o.categoria);
+    return Math.max(0, ahorro) * (PESO_CATEGORIA[cat] ?? PESO_CATEGORIA.otro) * (BONO_NIVEL[o.nivel] || 1);
+  }
+  /* La mejor del dia: el indice de la de mayor puntaje; a igual puntaje, la de mayor descuento; despues la primera. */
+  const porcentaje = o => o.off ?? (+o.descuento || 0) / 100;
+  const mejorDelDia = lista => lista.reduce((m, o, i) => {
+    if (m < 0) return i;
+    const a = puntaje(o), b = puntaje(lista[m]);
+    return a > b || (a === b && porcentaje(o) > porcentaje(lista[m])) ? i : m;
+  }, -1);
+
+  /* La linea de un producto (misma serie, otro modelo): «Acer TravelMate P2 14» y «P2 16» son la misma linea y compiten entre si;
+     en un resumen ocupan un solo lugar, el de la mejor. Solo en equipos (celulares, notebooks, PCs y monitores): en componentes y
+     perifericos dos modelos de una serie si son productos distintos. Marca + la serie; en celulares, la serie sin el numero
+     («Redmi Note 14» y «Redmi Note 14 Pro»; «Galaxy A56» y «Galaxy A36», pero no «Galaxy S25»). */
+  const EQUIPOS_LINEA = new Set(["smartphone", "notebook", "pc", "monitor"]);
+  function linea(f) {
+    const t = T.de(f[0]);
+    if (!EQUIPOS_LINEA.has(t.categoria)) return "";
+    const pal = t.titulo.toLowerCase().split(" ").filter(Boolean);
+    if (pal.length < 2) return "";
+    const serie = t.categoria === "smartphone" ? pal.slice(1, 3).map(w => w.replace(/\d+/g, "")).filter(Boolean).join(" ") : pal[1].replace(/\d+/g, "");
+    return serie ? t.categoria + "|" + pal[0] + "|" + serie : "";
+  }
+  /* Una por linea: gana la primera de la lista (ya viene ordenada por mejor). */
+  const unaPorLinea = lista => { const vistas = new Set();
+    return lista.filter(o => { const k = linea(o.f); if (!k) return true; if (vistas.has(k)) return false; vistas.add(k); return true; }); };
+
   function destacadas(idx, max = 20) {
     const { propias, publicadas, seguimiento, cruces, vigentes, contra, notas, gama, contraModelo } = calcularOfertas(idx);
     const rango = { alta: 2, media: 1 };
@@ -275,7 +314,7 @@
     const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),
       ...publicadas.map(f => nuevo(f, f[5], "publicada")), ...seguimiento.map(f => nuevo(f, f[6], "seguimiento"))].filter(o => esUrl(o.f[2]));
     // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.
-    const unicas = unico([...todas].sort(por));
+    const unicas = unaPorLinea(unico([...todas].sort(por)));
     const grupos = new Map(C.ORDEN.map(c => [c, unicas.filter(o => o.categoria === c)]));
     const elegidas = new Set(), puestos = new Map(C.ORDEN.map(c => [c, 0]));
     // Cada categoria avanza por su propia lista: "otro" no tiene lugar reservado, pero cuando entra lo hace con su mejor oferta.
@@ -316,7 +355,7 @@
   }
 
   const api = { PISO_OFERTA, DESCUENTO_MAX, BAJA_MIN_PESOS, DESCUENTO: C.DESCUENTO,
-                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, LOTE_MIN, familia, ficha, esInternacional, mismaConfiguracion };
+                referencia: C.referencia, aspectosDe: C.aspectosDe, esMercadoLibre, pisoDeGama: C.evaluar, textoContra, textoContraModelo, textoCruceGen, MIN_TIENDAS_MODELO, DESCUENTO_MODELO_MAX, DISPERSION_MODELO, calcularOfertas, codificar, decodificar, destacadas, unico, puntaje, mejorDelDia, linea, unaPorLinea, PESO_CATEGORIA, enSeguimiento, DESCUENTO_SEGUIMIENTO_MAX, LOTE_MIN, familia, ficha, esInternacional, mismaConfiguracion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Ofertas = api;
 })(this);

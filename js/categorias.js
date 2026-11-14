@@ -34,7 +34,7 @@
   };
 
   /* Cuantos lugares reserva cada categoria en un resumen: reservado, y tope antes de repartir lo que sobra. */
-  const CUPO = { reservado: 2, tope: 3 };
+  const CUPO = { reservado: 3, tope: 3 };   // 14/11: tres lugares por categoria principal (pedido del dueño)
 
   const MIN = {
     monitor: { hz: 144, pulgadas: 24, altaHz: 240 },

@@ -60,6 +60,17 @@ def pesos(n):
 
 # Abre y cierra la oferta destacada, el resto va en citas (jerarquia, spec 055). Con los colores del Reel v4 (spec 059).
 BARRA = "🟪🟨🟦🟪🟨🟦🟪🟨"
+# La mejor del dia (14/11): por ahorro real y categoria, no por el % mas alto (un mousepad de $7.990 con -27 % le ganaba a una
+# notebook). Espejo de js/ofertas.js (puntaje y mejorDelDia): si cambia uno, cambia el otro; lo cubre tests/test_publicar_telegram.py.
+PESO_CATEGORIA = {"Smartphone": 1, "Notebook": 1, "PC completa": 1, "Monitor": 1, "Componente": 0.7, "Periférico": 0.3, "Otro": 0.25}
+BONO_NIVEL = {"alta": 1.25, "media": 1}
+
+
+def _puntaje(o):
+    ahorro = max(0, (o.get("antes") or 0) - (o.get("precio") or 0))
+    return ahorro * PESO_CATEGORIA.get(o.get("categoria"), 0.25) * BONO_NIVEL.get(o.get("nivel"), 1)
+
+
 PISO_SUPER = 20   # como en /hoy/ y el Reel: con 20 % o mas es «Súper oferta»; un dia flojo, «La mejor del día»
 
 
@@ -130,7 +141,7 @@ def mensaje(datos):
     cabeza = f"<b>Pichinchas del día</b> · precios del {fecha}\n"
     pie = (f"\nMás en <a href=\"{html.escape(datos.get('sitio', ''), quote=True)}\">La Pichincha</a>. "
            "Verificá en la tienda antes de comprar.")
-    mejor = max(range(len(ofertas)), key=lambda i: (ofertas[i].get("descuento") or 0, -i))
+    mejor = max(range(len(ofertas)), key=lambda i: (_puntaje(ofertas[i]), ofertas[i].get("descuento") or 0, -i))
     bloques = [_heroe(ofertas[mejor])] + [_compacta(o) for i, o in enumerate(ofertas) if i != mejor]
     while bloques and len(cabeza + "\n".join(bloques) + "\n" + pie) > LIMITE:
         if len(bloques) == 1:

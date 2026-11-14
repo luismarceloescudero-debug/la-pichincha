@@ -673,3 +673,37 @@ test("lote (056): un cambio de lista que deja el producto mas barato que en otra
   assert.deepEqual([...r.contraModelo.keys()].map(f => f[3]), ["zz"]);   // contra el mismo modelo en otras tiendas, si
   assert.ok(O.destacadas({ productos: [...lote, ...otras] }, 10).some(o => o.tipo === "modelo" && o.f[3] === "zz"));
 });
+
+/* ---- Pichinchas del dia (14/11): ahorro real y una por linea ---- */
+test("mejorDelDia: una notebook que ahorra mucho gana a un mousepad con mas porcentaje", () => {
+  const lista = [
+    { nombre: "Mousepad Fantech Vigil", precio: 7990, antes: 10945, descuento: 27, categoria: "Periférico" },
+    { nombre: "Notebook Acer TravelMate P2 16", precio: 2162861, antes: 2605856, descuento: 17, categoria: "Notebook" }];
+  assert.equal(O.mejorDelDia(lista), 1);
+  assert.ok(O.puntaje(lista[1]) > 100 * O.puntaje(lista[0]));
+});
+
+test("mejorDelDia: la gama alta pesa mas, y a igual puntaje gana el mayor descuento", () => {
+  assert.ok(O.puntaje({ precio: 80, antes: 100, categoria: "Monitor", nivel: "alta" }) > O.puntaje({ precio: 80, antes: 100, categoria: "Monitor", nivel: "media" }));
+  const igual = [{ precio: 90, antes: 100, descuento: 10, categoria: "Notebook" }, { precio: 45, antes: 55, descuento: 18, categoria: "Notebook" }];
+  assert.equal(O.mejorDelDia(igual), 1);
+  assert.equal(O.mejorDelDia([]), -1);
+  assert.equal(O.puntaje({ precio: 100, categoria: "Notebook" }), 0);        // sin precio de antes no hay ahorro que contar
+});
+
+test("destacadas: dos modelos de la misma linea ocupan un solo lugar, el de la mejor oferta", () => {
+  const idx = { productos: [
+    fila("Notebook Acer TravelMate P2 16 Core 7 150U 16GB 512GB", 2162861, { antes: 2605856 }),
+    fila("Notebook Acer TravelMate P2 14 Core i5 16GB 512GB", 2379364, { antes: 2670000 }),
+    fila("Notebook Lenovo ThinkPad E14 G6 Ryzen 7 16GB 512GB", 2284999, { antes: 2499000 })] };
+  const nombres = O.destacadas(idx, 10).map(o => o.f[0]);
+  assert.equal(nombres.filter(n => /TravelMate/.test(n)).length, 1);
+  assert.ok(nombres.some(n => /ThinkPad/.test(n)), "otra marca sigue entrando");
+  assert.ok(nombres.some(n => /P2 16/.test(n)), "queda la de mayor descuento de la linea");
+});
+
+test("linea: celulares por serie sin numero, y componentes y perifericos no se agrupan", () => {
+  assert.equal(O.linea(["Celular Xiaomi Redmi Note 14 6/128GB"]), O.linea(["Celular Xiaomi Redmi Note 14 Pro 8/256GB"]));
+  assert.notEqual(O.linea(["Smartphone Samsung Galaxy A56 8/256"]), O.linea(["Smartphone Samsung Galaxy S25 12/256"]));
+  assert.equal(O.linea(["Mousepad Fantech Vigil MP356 M 350x300x4mm"]), "");
+});

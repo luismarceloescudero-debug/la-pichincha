@@ -90,7 +90,7 @@ ${items.join("\n")}${items.length ? "\n" : ""}  </channel>
 /* La super oferta (spec 059, como en el Reel v4): la de mayor descuento, la primera si empatan. Con 20 % o mas se
    llama «Súper oferta» (el piso de los heroes de la pestaña Ofertas, spec 055); un dia flojo es «La mejor del día». */
 const PISO_SUPER = 20;
-const mejorDe = ofertas => ofertas.reduce((m, o, i) => (m < 0 || o.off > ofertas[m].off ? i : m), -1);
+const mejorDe = O.mejorDelDia;   // 14/11: por ahorro real y categoria, no por el % mas alto (js/ofertas.js)
 
 /* El nombre en el lenguaje del Reel: el tipo adelante si el titulo tiene pocas palabras (rosa), la marca (celeste) y el
    modelo; el nombre completo de la tienda queda en el title. */
@@ -319,6 +319,7 @@ function listaParaCanal(idx, max = 10) {
       : o.tipo === "seguimiento" ? { contra: "desde que lo seguimos, hace pocos días" }
       : !o.off ? { sinRebaja: true } : {}),      // a precio de siempre: el mensaje muestra el producto sin inventar un −0 %
     comercio: comercioDeOferta(o, idx), url: o.f[2], tipo: o.tipo, categoria: C.ETIQUETA[o.categoria],
+    ...(o.nivel ? { nivel: o.nivel } : {}),
     tienda: o.f[3],
     // la foto de la tienda para el Reel (spec 045) y la imagen de /hoy/ (spec 059): solo una direccion https sin comillas ni espacios
     ...(/^https:\/\/[^\s"'()<>\\]+$/.test(o.f[7] || "") ? { imagen: o.f[7] } : {}),

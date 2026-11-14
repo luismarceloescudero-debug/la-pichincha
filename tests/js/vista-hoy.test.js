@@ -10,15 +10,29 @@ const DATOS = { generado: "2026-11-04T10:56-03:00", sitio: "https://ejemplo.test
   oferta("Auriculares <b>Raros</b>", 1000, 2000, 50),
 ] };
 
-test("la súper oferta es la de mayor descuento, con su tipo, chips premium, el precio y el de antes tachado", () => {
+test("la súper oferta es la de mayor ahorro real, no la de mayor porcentaje (14/11)", () => {
+  const datos = { ...DATOS, ofertas: [
+    oferta("Celular Motorola G Max 8/256GB", 749999, 1100000, 32, { categoria: "Smartphone" }),
+    oferta("Teclado Mecanico VSG Alnilam Blanco RGB", 72990, 150887, 52, { categoria: "Periférico" })] };
+  const tarjeta = V.paginaVista(datos).split('<div class="der">')[0];
+  assert.match(tarjeta, /★ SÚPER OFERTA ★/);
+  assert.match(tarjeta, /<span class="num">32<\/span>/);
+  assert.doesNotMatch(tarjeta, /ALNILAM/);
+});
+
+test("la súper oferta lleva su tipo, chips premium, el precio, el de antes tachado y la foto", () => {
   const html = V.paginaVista(DATOS);
   const tarjeta = html.split('<div class="der">')[0];
-  assert.match(tarjeta, /★ SÚPER OFERTA ★/);
-  assert.match(tarjeta, /<span class="tipo">Teclado<\/span> <span class="marca">VSG<\/span> ALNILAM/);
-  assert.match(tarjeta, /<span class="num">52<\/span>/);
-  assert.match(tarjeta, /<span class="pr">✦ Mecánico<\/span>/);
-  assert.match(tarjeta, /<span class="sig">\$<\/span>72\.990<\/span><s>\$150\.887<\/s>/);
-  assert.match(tarjeta, /<img src="https:\/\/img\.test\/teclado\.jpg"/);
+  assert.match(tarjeta, /★ LA MEJOR DEL DÍA ★/);                  // el celular ahorra más ($150.000) y no llega a 20 %
+  assert.match(tarjeta, /<span class="num">17<\/span>/);
+  const solo = V.paginaVista({ ...DATOS, ofertas: [DATOS.ofertas[1], DATOS.ofertas[2]] });
+  const t2 = solo.split('<div class="der">')[0];
+  assert.match(t2, /★ SÚPER OFERTA ★/);
+  assert.match(t2, /<span class="tipo">Teclado<\/span> <span class="marca">VSG<\/span> ALNILAM/);
+  assert.match(t2, /<span class="num">52<\/span>/);
+  assert.match(t2, /<span class="pr">✦ Mecánico<\/span>/);
+  assert.match(t2, /<span class="sig">\$<\/span>72\.990<\/span><s>\$150\.887<\/s>/);
+  assert.match(t2, /<img src="https:\/\/img\.test\/teclado\.jpg"/);
   assert.match(html, /HOY 04\/11/);
   assert.match(html, /ejemplo\.test\/hoy/);
   assert.doesNotMatch(html, /<b>Raros<\/b>/);                     // texto de terceros escapado

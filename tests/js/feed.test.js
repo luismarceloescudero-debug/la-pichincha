@@ -64,7 +64,7 @@ test("el feed trae como mucho 20 entradas", () => {
 test("la lista para el canal trae lo justo, sin nada de terceros sin escapar", () => {
   const lista = F.listaParaCanal(IDX, 10);
   assert.deepEqual(lista[0], { nombre: "SSD Kingston 1TB", titulo: "KINGSTON", prefijo: "Disco", chips: ["1 TB"], icono: "disco", emoji: "💽", precio: 90000, antes: 120000, descuento: 25,
-    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente", tienda: "cg" });
+    comercio: "CompraGamer", url: "https://t.test/SSD%20Kingston%201TB", tipo: "propia", categoria: "Componente", nivel: "media", tienda: "cg" });
   assert.equal(lista.length, 2);
   assert.equal(F.listaParaCanal(IDX, 1).length, 1);
 });
@@ -292,22 +292,31 @@ test("la lista para el canal lleva la imagen https de la tienda y descarta una r
 });
 
 // ---- /hoy/ con el lenguaje del Reel v4 (spec 059) ----
-test("/hoy/: la de mayor descuento va como súper oferta, con su tipo adelante, chips y el precio de antes tachado", () => {
-  const idx = { ...IDX, productos: [fila("Monitor Samsung Odyssey G8 27 4K OLED 240Hz", 900000, { antes: 1000000 }),
+test("/hoy/: la súper oferta es la de mayor ahorro real, con su tipo adelante, chips y el precio de antes tachado", () => {
+  // 14/11: el teclado tiene el mayor % (−52 %) pero ahorra $77.897 en un periférico; el monitor ahorra $400.000 y gana.
+  const idx = { ...IDX, productos: [fila("Monitor Samsung Odyssey G8 27 4K OLED 240Hz", 900000, { antes: 1300000 }),
     fila("Teclado Mecanico VSG Alnilam Blanco RGB", 72990, { antes: 150887 }), ...IDX.productos] };
   const html = F.renderHoy(idx, { baseUrl: BASE });
   const sup = html.match(/<article class="h-super">[\s\S]*?<\/article>/)[0];
   assert.match(sup, /★<\/span> Súper oferta <span/);
-  assert.match(sup, /<span class="h-tipo">Teclado<\/span> <span class="h-marca">VSG<\/span> ALNILAM/);
-  assert.match(sup, /<span class="sig">−<\/span><span class="num">52<\/span><span class="por">%<\/span>/);
-  assert.match(sup, /<span class="h-chip pr"><span aria-hidden="true">✦ <\/span>Mecánico<\/span>/);   // premium
-  assert.match(sup, /<span class="h-chip">RGB<\/span>/);
-  assert.match(sup, /<span class="sig">\$<\/span>72\.990<\/span><span class="h-antes"><s>\$150\.887<\/s>/);
+  assert.match(sup, /<span class="h-tipo">Monitor<\/span> <span class="h-marca">SAMSUNG<\/span> ODYSSEY/);
+  assert.match(sup, /<span class="sig">−<\/span><span class="num">31<\/span><span class="por">%<\/span>/);
+  assert.match(sup, /<span class="h-antes"><s>\$1\.300\.000<\/s>/);
   assert.match(sup, /en <b>CompraGamer<\/b>/);
   assert.match(sup, /aria-hidden="true"/);                       // el icono grande no repite el tipo al lector de pantalla
   const lista = html.match(/<ol class="h-lista">[\s\S]*?<\/ol>/)[0];
-  assert.doesNotMatch(lista, /ALNILAM/);                         // la súper oferta no se repite en las tarjetas
-  assert.match(lista, /ODYSSEY/);
+  assert.doesNotMatch(lista, /ODYSSEY/);                         // la súper oferta no se repite en las tarjetas
+  assert.match(lista, /ALNILAM/);                                // el teclado sigue en la lista, con su porcentaje
+});
+
+test("/hoy/: sin otra cosa que destacar, el teclado va como súper oferta con sus chips premium y el precio de antes tachado", () => {
+  const idx = { ...IDX, productos: [fila("Teclado Mecanico VSG Alnilam Blanco RGB", 72990, { antes: 150887 }), ...IDX.productos] };
+  const sup = F.renderHoy(idx, { baseUrl: BASE }).match(/<article class="h-super">[\s\S]*?<\/article>/)[0];
+  assert.match(sup, /<span class="h-tipo">Teclado<\/span> <span class="h-marca">VSG<\/span> ALNILAM/);
+  assert.match(sup, /<span class="num">52<\/span>/);
+  assert.match(sup, /<span class="h-chip pr"><span aria-hidden="true">✦ <\/span>Mecánico<\/span>/);   // premium
+  assert.match(sup, /<span class="h-chip">RGB<\/span>/);
+  assert.match(sup, /<span class="sig">\$<\/span>72\.990<\/span><span class="h-antes"><s>\$150\.887<\/s>/);
 });
 
 test("/hoy/: un dia flojo (menos de 20 %) no tiene súper oferta sino «La mejor del día»", () => {
