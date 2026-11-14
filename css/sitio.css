@@ -1160,3 +1160,91 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
 .anima .en-vista .tit-chip.pr::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.8) 50%,transparent 65%) no-repeat;background-size:60% 100%;
   animation:av-brillo 1s ease-out both;animation-delay:calc(.8s + var(--k,0) * 90ms)}
+
+/* ---- Comparativa en el celular: una tarjeta grande por pantalla (14/11, js/carrusel.js) ----
+   Solo existe cuando la pantalla es chica y tactil; en escritorio sigue la grilla. Hereda los colores del cartel de /hoy/
+   (violeta, precio ambar, signo y tachado rosa, celeste) con los tokens --n-*. El tamaño se mide contra la propia tarjeta
+   (container query), asi entra en el alto visible tanto en un celular chico como en uno grande, sin scroll adentro. */
+.car-panel{--car-reserva:15.8rem;scroll-margin-top:5.8rem;position:relative;padding:0;background:none;border:0;box-shadow:none}
+.car-cab{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:0 2px 10px}
+.car-kicker{font:700 .8rem/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--n-precio);margin:0 0 4px}
+.car-h{font-size:1.25rem;line-height:1.1;margin:0;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+.car-estado{display:flex;gap:12px;align-items:baseline;font:700 1rem/1 var(--font-mono);white-space:nowrap}
+.car-seg{color:var(--n-rosa)}.car-pos{color:var(--n-celeste)}
+.car-vista{position:relative}
+.car-vista[hidden]{display:none}
+.car-pista{display:flex;gap:12px;list-style:none;margin:0;padding:0;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.car-pista::-webkit-scrollbar{display:none}
+.car-card{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;container-type:size;
+  height:calc(100dvh - var(--car-reserva));min-height:24rem;max-height:46rem;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+  display:flex;flex-direction:column;justify-content:space-between;gap:1.2cqh;padding:2.4cqh 5.5cqw 2.6cqh;overflow:hidden;
+  border:3px solid var(--n-rosa);border-radius:28px;background:linear-gradient(180deg,var(--n-tarjeta),var(--n-tarjeta2));
+  box-shadow:0 0 26px -6px var(--n-brillo);outline-offset:3px}
+.car-card.sigue{border-color:var(--n-precio)}
+.car-cinta{margin:0;font:700 clamp(.78rem,4.1cqw,1rem)/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--n-celeste);
+  display:flex;align-items:center;gap:8px}
+.car-cinta b{display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;border-radius:8px;background:var(--n-rosa);color:var(--n-sobre)}
+.car-fila1{display:flex;justify-content:space-between;align-items:center;gap:3cqw}
+.car-pct{margin:0;font-family:var(--font-sans);font-weight:800;line-height:.9;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 .06em}
+.car-pct .sig{color:var(--n-rosa);font-size:min(12cqw,7.5cqh)}.car-pct .num{color:var(--n-precio);font-size:min(24cqw,15cqh);letter-spacing:-.04em}.car-pct .por{color:var(--n-celeste);font-size:min(12cqw,7.5cqh)}
+.car-pct small{flex-basis:100%;font:600 clamp(.72rem,3.4cqw,.9rem)/1.2 var(--font-mono);color:var(--n-lila);letter-spacing:.04em;text-transform:uppercase;margin-top:.3em}
+.car-pct.sin{min-height:1px}
+.car-mini{flex:none;width:24cqw;aspect-ratio:1;border-radius:22%;background:#fff;color:#3d1260;display:grid;place-items:center;padding:3cqw}
+.car-mini svg{width:100%;height:100%}
+.car-tit{margin:0;font-size:clamp(1.35rem,min(9.5cqw,6.2cqh),2.7rem);line-height:1.05;text-transform:uppercase;font-weight:800;letter-spacing:-.01em;color:var(--ink);
+  overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.car-marca{color:var(--n-celeste)}
+.car-chips{display:flex;flex-wrap:wrap;gap:6px;max-height:7.2em;overflow:hidden}
+.car-chip{font:700 clamp(.82rem,4.2cqw,1.05rem)/1 var(--font-sans);color:var(--n-celeste);border:2px solid var(--n-celeste);border-radius:999px;padding:.4em .85em;max-width:100%;overflow-wrap:anywhere}
+.car-chip.pr{background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste));border-color:transparent;color:var(--n-sobre)}
+.car-precio{margin:0;font:800 clamp(2.1rem,min(17.5cqw,11.5cqh),5rem)/1 var(--font-sans);letter-spacing:-.045em;color:var(--n-precio);font-variant-numeric:tabular-nums}
+.car-precio .sig{color:var(--n-rosa)}
+.car-sub{margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;font-size:clamp(.9rem,4.4cqw,1.15rem);color:var(--ink-2)}
+.car-antes{font-family:var(--font-mono);color:var(--n-rosa)}
+.car-tienda{display:inline-block;background:var(--n-celeste);color:var(--n-sobre);border-radius:999px;padding:.12em .75em;font-weight:700}
+.car-dif{margin:0;font:600 clamp(.78rem,3.8cqw,1rem)/1.25 var(--font-mono);color:var(--n-lila)}
+.car-botones{display:flex;gap:8px}
+.car-btn{flex:1 1 0;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;border:2px solid var(--n-borde-control);
+  background:transparent;color:var(--ink);font:700 clamp(.85rem,4.2cqw,1.05rem)/1 var(--font-sans);text-decoration:none;cursor:pointer;touch-action:manipulation}
+.car-btn[aria-pressed="true"]{border-color:var(--n-rosa);color:var(--n-rosa);background:var(--n-brillo)}
+.car-abrir{flex:1.4 1 0;background:var(--n-precio);border-color:var(--n-precio);color:var(--n-sobre)}
+.car-btn:focus-visible,.car-flota button:focus-visible,.car-punto:focus-visible,.car-card:focus-visible{outline:3px solid var(--n-celeste)}
+.car-puntos{display:flex;justify-content:center;gap:6px;margin:6px 0 0}
+.car-punto{width:44px;height:28px;border:0;background:none;cursor:pointer;position:relative;touch-action:manipulation}
+.car-punto::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:5px;transform:translate(-50%,-50%);background:var(--line);transition:width .2s var(--curva),background .2s}
+.car-punto.on::after{width:26px;background:var(--n-celeste)}
+.car-ayuda{margin:2px 0 0;text-align:center;font:500 .82rem/1.2 var(--font-mono);color:var(--ink-3)}
+.car-largo{max-height:calc(100dvh - var(--car-reserva) + 2rem);overflow-y:auto;overscroll-behavior:contain;padding:0 2px 12px}
+.car-flota{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:4px;justify-content:space-between;margin:10px auto 0;
+  max-width:36rem;padding:6px;border-radius:999px;background:color-mix(in srgb,var(--n-tarjeta) 94%,transparent);border:2px solid var(--line);
+  backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.car-flota button{flex:1 1 0;min-height:48px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:700 .9rem/1 var(--font-sans);cursor:pointer;touch-action:manipulation}
+.car-flota button[aria-pressed="true"]{background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste));color:var(--n-sobre)}
+.car-aviso{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:30;max-width:90vw;padding:.7em 1.1em;border-radius:999px;
+  background:var(--n-precio);color:var(--n-sobre);font:700 .95rem/1.2 var(--font-sans);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s var(--curva)}
+.car-aviso.ver{opacity:1;transform:translate(-50%,0)}
+.car-ficha{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;background:rgba(18,0,24,.6);opacity:0;transition:opacity .2s}
+.car-ficha[hidden]{display:none}
+.car-ficha.abierta{opacity:1}
+.car-ficha-caja{width:100%;max-height:82dvh;overflow-y:auto;box-sizing:border-box;padding:14px 18px calc(22px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;
+  background:var(--surface-2);border-top:4px solid var(--n-celeste);transform:translateY(30%);transition:transform .22s var(--curva)}
+.car-ficha.abierta .car-ficha-caja{transform:none}
+.car-cerrar{display:block;margin:0 0 8px auto;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid var(--n-borde-control);background:transparent;color:var(--ink);font:700 .95rem var(--font-sans);cursor:pointer}
+.car-razon{color:var(--ink-2)}
+.car-specs{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:.95rem}.car-specs dt{color:var(--ink-3)}.car-specs dd{margin:0}
+.car-seg-lista{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.car-seg-item{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 14px;border:2px solid var(--line);border-radius:16px;background:var(--surface)}
+.car-seg-nom{font-weight:700;grid-column:1/-1}.car-seg-det{font:500 .85rem var(--font-mono);color:var(--ink-3)}
+.car-seg-ir,.car-seg-quitar{min-height:44px;display:inline-flex;align-items:center;font-weight:700;color:var(--accent);background:none;border:0;cursor:pointer;text-decoration:none;font-size:.95rem}
+.car-seg-quitar{color:var(--bad)}
+.car-vacio{color:var(--ink-2);padding:8px 2px}
+@media (prefers-reduced-motion:reduce){.car-pista{scroll-behavior:auto}.car-ficha,.car-ficha-caja,.car-aviso,.car-punto::after{transition:none}}
+
+/* Celulares de poco alto: se saca lo accesorio antes de que algo se corte (los botones nunca) */
+@container (max-height:430px){
+  .car-dif{display:none}
+  .car-chips{max-height:2.6em}
+  .car-mini{width:19cqw}
+  .car-tit{-webkit-line-clamp:2}
+}
