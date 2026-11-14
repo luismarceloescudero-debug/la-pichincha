@@ -705,5 +705,6 @@ test("destacadas: dos modelos de la misma linea ocupan un solo lugar, el de la m
 test("linea: celulares por serie sin numero, y componentes y perifericos no se agrupan", () => {
   assert.equal(O.linea(["Celular Xiaomi Redmi Note 14 6/128GB"]), O.linea(["Celular Xiaomi Redmi Note 14 Pro 8/256GB"]));
   assert.notEqual(O.linea(["Smartphone Samsung Galaxy A56 8/256"]), O.linea(["Smartphone Samsung Galaxy S25 12/256"]));
+  assert.equal(O.linea(["Xiaomi Redmi Note 14 6.67\" Lime Green 6Gb / 128"]), O.linea(["Celular Xiaomi Note 14 4G 128GB 6GB RAM Lime Green"]), "la misma linea con otro nombre en otra tienda");
   assert.equal(O.linea(["Mousepad Fantech Vigil MP356 M 350x300x4mm"]), "");
 });
