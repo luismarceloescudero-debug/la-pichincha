@@ -314,7 +314,7 @@
         cruce: cruces.has(f), vigente: vigentes.has(f), contra: contra.get(f), nota: notas.get(f), internacional: esInternacional(f) }; };
     const ORDEN_TIPO = { propia: 0, seguimiento: 0, modelo: 1, publicada: 2 };
     const por = (a, b) => a.internacional - b.internacional || ORDEN_TIPO[a.tipo] - ORDEN_TIPO[b.tipo]
-      || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.off - a.off || b.ahorro - a.ahorro || (a.f[2] < b.f[2] ? -1 : 1);
+      || (rango[b.nivel] || 0) - (rango[a.nivel] || 0) || b.ahorro - a.ahorro || b.off - a.off || (a.f[2] < b.f[2] ? -1 : 1);   // 15/11: dentro de una categoria manda el ahorro en pesos, no el %
     const todas = [...propias.map(f => nuevo(f, f[6], "propia")), ...[...contraModelo].map(([f, c]) => nuevo(f, c.mediana, "modelo", c)),
       ...publicadas.map(f => nuevo(f, f[5], "publicada")), ...seguimiento.map(f => nuevo(f, f[6], "seguimiento"))].filter(o => esUrl(o.f[2]));
     // Global, no por categoria: el mismo codigo puede caer en dos categorias si los titulos se leen distinto.

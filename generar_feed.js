@@ -20,7 +20,7 @@ const G = require("./generar_paginas.js");
 const SITIO = require("./sitio.json");
 const BASE_URL = SITIO.base_url;
 const MAX_FEED = 20;
-const MAX_HOY = 10, EN_TARJETA = 5;
+const MAX_HOY = 18, EN_TARJETA = 5;   // 18 = tres lugares por categoria principal (15/11)
 /* Plan v4, seccion 8: en estas fechas /hoy/ suma un bloque con lo que bajo de verdad contra el piso de 30 dias.
    Para el Hot Sale (mayo 2027) se agrega otra fila. Las fechas son del dia del indice (YYYY-MM-DD, ambas incluidas). */
 const ESPECIALES = [{ desde: "2026-11-20", hasta: "2026-12-01", nombre: "Black Friday" }];
@@ -348,7 +348,7 @@ function main(argv) {
   }
   fs.mkdirSync(salida, { recursive: true });
   fs.writeFileSync(path.join(salida, "ofertas.xml"), renderFeed(idx, { baseUrl }), "utf8");
-  const lista = listaParaCanal(idx, 10);
+  const lista = listaParaCanal(idx, MAX_HOY);
   fs.writeFileSync(path.join(salida, "ofertas.json"),
     JSON.stringify({ generado: idx.generado, sitio: baseUrl.replace(/\/$/, "") + "/", ofertas: lista }), "utf8");
   fs.mkdirSync(path.join(salida, "hoy"), { recursive: true });
