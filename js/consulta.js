@@ -206,7 +206,7 @@ function vistaComparativaCarrusel() {
 let CARRUSEL = null;
 const cargarCarrusel = () => CARRUSEL || (CARRUSEL = typeof Carrusel !== "undefined" ? Promise.resolve(Carrusel)
   : new Promise((ok, no) => { const s = document.createElement("script"); s.src = "js/carrusel.js"; s.onload = () => ok(Carrusel); s.onerror = no; document.head.appendChild(s); }));
-const esMovil = () => { try { return !!(matchMedia && matchMedia("(max-width: 700px) and (pointer: coarse)").matches); } catch (e) { return false; } };
+const esMovil = () => { try { return !!(matchMedia && matchMedia("(max-width: 700px)").matches); } catch (e) { return false; } };
 
 function vistaComparativaDin() {
   if (esMovil() && ANALISIS.picks.length) return vistaComparativaCarrusel();
