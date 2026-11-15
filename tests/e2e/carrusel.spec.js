@@ -37,3 +37,17 @@ test("las etiquetas flotantes cambian de seccion y la ficha se abre y se cierra 
   await page.keyboard.press("Escape");
   await expect(page.locator("[data-car-hoja]")).toBeHidden();
 });
+
+for (const [w, h] of [[320, 568], [360, 640], [430, 932], [768, 1024], [844, 390]]) {
+  test(`se adapta a ${w}x${h}: carrusel, tarjeta sin recortar y barra flotante dentro de la pantalla`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto("/?q=rtx%205060#comparativa");
+    await expect(page.locator("[data-car-card]").first()).toBeVisible();
+    const r = await page.evaluate(() => {
+      const c = document.querySelector("[data-car-card]");
+      const f = document.querySelector(".car-flota").getBoundingClientRect();
+      return { recortada: c.scrollHeight > c.clientHeight, flotaDentro: f.bottom <= innerHeight + 1 && f.right <= innerWidth, hscroll: document.documentElement.scrollWidth > innerWidth };
+    });
+    expect(r).toEqual({ recortada: false, flotaDentro: true, hscroll: false });
+  });
+}
