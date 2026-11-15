@@ -1162,7 +1162,7 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
   animation:av-brillo 1s ease-out both;animation-delay:calc(.8s + var(--k,0) * 90ms)}
 
 /* ---- Comparativa en el celular: una tarjeta grande por pantalla (14/11, js/carrusel.js) ----
-   Solo existe cuando la pantalla es chica y tactil; en escritorio sigue la grilla. Hereda los colores del cartel de /hoy/
+   Existe en pantallas chicas (hasta 820 px de ancho, o apaisadas de poco alto); en escritorio sigue la grilla. Hereda los colores del cartel de /hoy/
    (violeta, precio ambar, signo y tachado rosa, celeste) con los tokens --n-*. El tamaño se mide contra la propia tarjeta
    (container query), asi entra en el alto visible tanto en un celular chico como en uno grande, sin scroll adentro. */
 .car-panel{--car-reserva:15.8rem;scroll-margin-top:5.8rem;position:relative;padding:0;background:none;border:0;box-shadow:none}
@@ -1173,11 +1173,12 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
 .car-seg{color:var(--n-rosa)}.car-pos{color:var(--n-celeste)}
 .car-vista{position:relative}
 .car-vista[hidden]{display:none}
+.car-vista{max-width:34rem;margin-inline:auto}
 .car-pista{display:flex;gap:12px;list-style:none;margin:0;padding:0;overflow-x:auto;overscroll-behavior-x:contain;
   scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .car-pista::-webkit-scrollbar{display:none}
 .car-card{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;container-type:size;
-  height:calc(100dvh - var(--car-reserva));min-height:24rem;max-height:46rem;touch-action:pan-x;user-select:none;-webkit-user-select:none;
+  height:calc(100dvh - var(--car-reserva));min-height:17rem;max-height:46rem;touch-action:pan-x;user-select:none;-webkit-user-select:none;
   display:flex;flex-direction:column;justify-content:space-between;gap:1.2cqh;padding:2.4cqh 5.5cqw 2.6cqh;overflow:hidden;
   border:3px solid var(--n-rosa);border-radius:28px;background:linear-gradient(180deg,var(--n-tarjeta),var(--n-tarjeta2));
   box-shadow:0 0 26px -6px var(--n-brillo);outline-offset:3px}
@@ -1221,6 +1222,9 @@ table.nov-tabla th a .tit-chips{margin-top:6px}
   backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .car-flota button{flex:1 1 0;min-height:48px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:700 .9rem/1 var(--font-sans);cursor:pointer;touch-action:manipulation}
 .car-flota button[aria-pressed="true"]{background:linear-gradient(90deg,var(--n-rosa),var(--n-celeste));color:var(--n-sobre)}
+@media (max-width:359px){.car-flota button{font-size:.78rem;min-height:44px}.car-flota{padding:4px}}
+@media (max-height:500px){.car-card{min-height:23rem}}
+@media (max-height:600px){.car-panel{--car-reserva:13.5rem}.car-cab{margin-bottom:6px}}
 .car-aviso{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:30;max-width:90vw;padding:.7em 1.1em;border-radius:999px;
   background:var(--n-precio);color:var(--n-sobre);font:700 .95rem/1.2 var(--font-sans);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s var(--curva)}
 .car-aviso.ver{opacity:1;transform:translate(-50%,0)}
