@@ -193,7 +193,7 @@ jobs:
           if [ -f indice.json ]; then
             command -v google-chrome >/dev/null || echo "::warning::No hay Chrome: solo se revisa el HTML de cada publicacion"
             echo '[]' > descartadas.json
-            for ronda in 1 2 3; do
+            for _ in 1 2 3; do
               node generar_feed.js --indice indice.json --descartadas descartadas.json --candidatas candidatas.json --max 40
               rc=0
               python verificar_ofertas.py candidatas.json --descartadas descartadas.json --telemetria telemetria.json || rc=$?
@@ -289,7 +289,7 @@ jobs:
         run: |
           if [ -f indice.json ] && [ -f _sitio/ofertas.json ]; then
             echo '[]' > descartadas.json
-            for ronda in 1 2 3; do
+            for _ in 1 2 3; do
               rc=0
               python verificar_ofertas.py _sitio/ofertas.json --descartadas descartadas.json --telemetria telemetria.json || rc=$?
               [ "$rc" -eq 3 ] || break
@@ -320,6 +320,7 @@ jobs:
         run: |
           args=""
           if [ "$EVENTO" != "push" ] && [ -f telemetria.json ]; then args="--telemetria telemetria.json"; fi
+          # shellcheck disable=SC2086 # $args se parte en palabras a proposito
           python fiabilidad.py $args --historial historial --salida _sitio/fiabilidad.json
 
       - name: Guardar la fiabilidad por comercio en el historial
@@ -401,6 +402,7 @@ jobs:
           args=""
           if [ "$INDEXAR" = "success" ] || [ "$INDEXAR" = "failure" ]; then args="--salud salud.json --indexado $INDEXAR"; fi
           if [ "$ALARMA" = "true" ] && [ "$EVENTO" != "push" ]; then args="$args --alarma alarma.md"; fi
+          # shellcheck disable=SC2086 # $args se parte en palabras a proposito
           if [ -n "$args" ]; then python avisar_dueno.py $args; else echo "Nada que avisar al dueno"; fi
 
       # Opcional: sin los secretos TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID no hace nada. Un mensaje por indice: la
