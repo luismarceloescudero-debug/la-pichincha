@@ -292,8 +292,7 @@ class Catalogos(unittest.TestCase):
         return cfg
 
     def test_un_403_en_el_primer_listado_es_un_bloqueo_y_no_cero_productos(self):
-        # 17/11: FullH4rd contesta 403 «Your request was blocked.» (una regla del firewall de Cloudflare, no el desafio)
-        # a la IP del runner. indexar_listados se lo tragaba: «0 productos», reintento de 60 s y 52 pedidos bloqueados.
+        # 17/11: FullH4rd contesta 403 a la IP del runner (una regla de su firewall de Cloudflare, no el desafio). indexar_listados se lo tragaba: «0 productos», reintento de 60 s y 52 pedidos bloqueados.
         cfg = self._tienda_terminos(["a", "b", "c"])
         bajar = mock.Mock(side_effect=self._http(403))
         with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \

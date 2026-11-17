@@ -145,7 +145,7 @@ o que dejen pasar al indexador. Lo que se midió el 24/10:
 
 | Tienda | Qué pasa | Desde cuándo |
 |---|---|---|
-| FullH4rd | 0 productos en GitHub; su sitio da 403 también desde el entorno de trabajo | 8/10 (issue #6) |
+| FullH4rd | 0 productos en GitHub. **17/11:** desde la PC vuelve a andar (1.554 productos con foto), pero al runner de GitHub le contesta 403 (una regla de su firewall de Cloudflare contra esa IP, sin desafío). Pedirles un feed (como Katech) o que dejen pasar al indexador | 8/10 (issue #6) |
 | Katech | **Resuelto el 04/11:** respondió la carta con su feed oficial (`https://katech.com.ar/feed/productos/`, 2.094 productos). El índice lo lee desde entonces; el primer índice con Katech sale en la próxima corrida | antes: siempre (issue #55) |
 | Compra Cierta | 0 productos (traía 27); desde el entorno de trabajo el dominio ni resuelve | 20/10 (issue #96) |
 | Loquieroacá | 403 en «Afuera» | siempre |

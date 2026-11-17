@@ -797,8 +797,11 @@ tienda cambia su plantilla (llega el issue de `salud-fuente`):
     python -m unittest tests.test_indexar tests.test_actualizar
 
 El test que falla dice que regex de `tiendas.json` hay que corregir. FullH4rd
-todavia no tiene HTML guardado: el 2026-10-08 respondia con un desafio de
-Cloudflare y se cubre con HTML escrito a mano.
+tiene HTML guardado desde el 17/11 (desde la PC volvio a contestar). En el runner
+de GitHub sigue dando 403 (sin desafio: una regla del firewall de Cloudflare de
+la tienda, como la que desde la PC contesta «Your request was blocked.» a un
+User-Agent pelado): es la IP del runner y no se esquiva; el indice usa
+los precios anteriores con su fecha vieja y el aviso dice «bloqueo».
 
 ## Contacto
 
