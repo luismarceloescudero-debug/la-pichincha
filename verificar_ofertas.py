@@ -60,6 +60,7 @@ HILOS = 4
 RENDER_TIMEOUT = 45     # segundos por pagina abierta en Chrome
 RENDER_ESPERA_MS = 9000   # tiempo virtual que se le da a la pagina para armarse
 PRESUPUESTO = 600       # segundos en total para los renderizados; pasado eso queda lo que dijo la revision estatica
+SIN_RENDER = "estatica (sin renderizar)"   # etapa cuando Chrome no armo la pagina: no es lo mismo que haberla visto
 NAVEGADORES = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome")
 
 # Frases propias de una publicacion caida. Nada generico: "no esta disponible" a secas aparece en paginas que
@@ -213,22 +214,34 @@ def navegador():
     return os.environ.get("CHROME_BIN") or None
 
 
-def renderizar(url, ua=UA):
-    """El DOM de la pagina ya armada por el navegador (con su JavaScript), o None si no se pudo abrir.
-    ua=None deja el que trae el navegador."""
+def abrir(url, ua=UA):
+    """(DOM de la pagina ya armada por el navegador, None) o (None, por que no se pudo). ua=None deja el que trae el
+    navegador. El motivo sirve para el registro: una revision que no llego a renderizar no puede pasar por una que si."""
     exe = navegador()
-    if not exe or not re.match(r"https?://", url or "", re.I):
-        return None
+    if not exe:
+        return None, "no hay Chrome"
+    if not re.match(r"https?://", url or "", re.I):
+        return None, "enlace no http(s)"
     cmd = [exe, "--headless=new", "--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--hide-scrollbars",
            f"--virtual-time-budget={RENDER_ESPERA_MS}", "--lang=es-AR", "--dump-dom", url]
     if ua:
         cmd.insert(-2, f"--user-agent={ua}")
     try:
         r = subprocess.run(cmd, capture_output=True, timeout=RENDER_TIMEOUT, check=False)
-    except (subprocess.TimeoutExpired, OSError):
-        return None
+    except subprocess.TimeoutExpired:
+        return None, f"Chrome no termino en {RENDER_TIMEOUT} s"
+    except OSError as e:
+        return None, f"Chrome no arranco ({type(e).__name__})"
     texto = r.stdout.decode("utf-8", "replace") if r.stdout else ""
-    return texto or None
+    if texto:
+        return texto, None
+    error = (r.stderr or b"").decode("utf-8", "replace").strip().splitlines()
+    return None, f"Chrome salio con {r.returncode} sin DOM" + (f": {error[-1][:160]}" if error else "")
+
+
+def renderizar(url, ua=UA):
+    """El DOM de la pagina ya armada por el navegador (con su JavaScript), o None si no se pudo abrir."""
+    return abrir(url, ua)[0]
 
 
 def revisar(url, desde=None, precio=None, tienda=None):
@@ -252,8 +265,15 @@ def revisar(url, desde=None, precio=None, tienda=None):
         return previo, "estatica"
     if desde is not None and time.time() - desde > PRESUPUESTO:
         return previo, "estatica"       # se acabo el tiempo para abrir navegadores: queda lo que se sabia
-    dom = renderizar(url)
-    if dom is None or MURO.search(dom[:20000]):
+    dom, fallo = abrir(url)
+    if dom is None and fallo != "no hay Chrome":
+        dom, fallo = abrir(url)         # un Chrome que se cae una vez (CI cargada) suele andar en el segundo intento
+    if dom is None:
+        # Chrome no llego a armar la pagina: queda lo que dijo la estatica, pero dicho (hueco D18 / T3).
+        if fallo != "no hay Chrome":
+            print(f"::warning::Sin renderizar ({fallo}): queda la revision estatica para {url}")
+        return previo, SIN_RENDER
+    if MURO.search(dom[:20000]):
         return previo, "estatica"
     # El navegador solo puede sumar una caida. Que muestre una pagina sin cartel no prueba que sea la publicacion:
     # a los servidores de GitHub Mercado Libre les devuelve la misma pagina generica para todos los avisos.
@@ -385,8 +405,10 @@ def resumen(urls, juicios, etapas):
     lineas = [f"  {host}: {c['viva']} en pie, {c['caida']} caída(s), {c['dudosa']} sin confirmar"
               for host, c in sorted(por.items())]
     renderizadas = sum(1 for u in urls if etapas[u] == "renderizada")
+    sin_render = sum(1 for u in urls if etapas[u] == SIN_RENDER)
     lineas.append(f"  abiertas en navegador: {renderizadas} de {len(urls)}"
-                  + ("" if navegador() else " (no hay Chrome: solo revisión estática)"))
+                  + ("" if navegador() else " (no hay Chrome: solo revisión estática)")
+                  + (f"; {sin_render} sin renderizar (Chrome no armó la página)" if sin_render and navegador() else ""))
     return "\n".join(lineas)
 
 
