@@ -130,7 +130,12 @@ def mandar(texto, entorno=None):
         return 0
     r = publicar_telegram.pedir(token, "sendMessage", {"chat_id": chat, "text": texto, "parse_mode": "HTML",
                                                        "disable_web_page_preview": True})
-    print("Aviso al dueno mandado por Telegram" if r is not None else "El aviso al dueno no salio (ver la advertencia)")
+    if r is not None:
+        print("Aviso al dueno mandado por Telegram")
+    else:
+        # W9: el motivo en la misma linea, no "ver la advertencia" (la advertencia puede quedar lejos en el log).
+        motivo = publicar_telegram.ULTIMO_MOTIVO or "Telegram no devolvio un motivo"
+        print(f"::warning::El aviso al dueno no salio: {motivo}")
     return 0
 
 
