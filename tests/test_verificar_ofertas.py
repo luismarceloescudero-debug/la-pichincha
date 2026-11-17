@@ -98,8 +98,10 @@ class Muro(unittest.TestCase):
 class Revisar(unittest.TestCase):
     """Las dos revisiones juntas: alcanza con que una marque la publicacion como caida."""
 
-    def revisar(self, estatica, dom):
-        with mock.patch.object(v, "estatica", return_value=estatica), mock.patch.object(v, "renderizar", return_value=dom):
+    def revisar(self, estatica, dom, fallo="Chrome salio con 1 sin DOM"):
+        with mock.patch.object(v, "estatica", return_value=estatica), \
+                mock.patch.object(v, "abrir", return_value=(dom, None if dom is not None else fallo)), \
+                redirect_stdout(io.StringIO()):
             return v.revisar("https://t.test/a")
 
     def test_el_cartel_que_arma_el_javascript_solo_lo_ve_la_revision_renderizada(self):
@@ -108,16 +110,47 @@ class Revisar(unittest.TestCase):
                          ("caida", "renderizada"))
 
     def test_si_la_estatica_ya_dice_caida_no_se_abre_el_navegador(self):
-        with mock.patch.object(v, "estatica", return_value="caida"), mock.patch.object(v, "renderizar") as abrir:
+        with mock.patch.object(v, "estatica", return_value="caida"), mock.patch.object(v, "abrir") as abrir:
             self.assertEqual(v.revisar("https://t.test/a"), ("caida", "estatica"))
             abrir.assert_not_called()
 
     def test_en_pie_en_las_dos(self):
         self.assertEqual(self.revisar("viva", "<h1>Notebook</h1><button>Comprar</button>"), ("viva", "renderizada"))
 
-    def test_sin_navegador_queda_lo_que_dijo_la_estatica(self):
-        self.assertEqual(self.revisar("viva", None), ("viva", "estatica"))
-        self.assertEqual(self.revisar("dudosa", None), ("dudosa", "estatica"))
+    def test_sin_navegador_queda_lo_que_dijo_la_estatica_pero_dicho(self):
+        # T3 / D18: si Chrome no armo la pagina, la etapa lo dice; no pasa por una revision estatica comun.
+        self.assertEqual(self.revisar("viva", None), ("viva", v.SIN_RENDER))
+        self.assertEqual(self.revisar("dudosa", None), ("dudosa", v.SIN_RENDER))
+        self.assertEqual(self.revisar("viva", None, fallo="no hay Chrome"), ("viva", v.SIN_RENDER))
+
+    def test_un_chrome_que_falla_se_reintenta_una_vez_y_avisa(self):
+        fallo = (None, "Chrome salio con 1 sin DOM")
+        with mock.patch.object(v, "estatica", return_value="viva"), \
+                mock.patch.object(v, "abrir", side_effect=[fallo, fallo]) as abrir, \
+                redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(v.revisar("https://t.test/a"), ("viva", v.SIN_RENDER))
+        self.assertEqual(abrir.call_count, 2)
+        self.assertIn("::warning::Sin renderizar (Chrome salio con 1 sin DOM)", salida.getvalue())
+
+    def test_si_el_segundo_intento_arma_la_pagina_vale_lo_renderizado(self):
+        with mock.patch.object(v, "estatica", return_value="viva"), \
+                mock.patch.object(v, "abrir", side_effect=[(None, "Chrome no termino en 45 s"),
+                                                           ("<div>Este producto no está disponible.</div>", None)]):
+            self.assertEqual(v.revisar("https://t.test/a"), ("caida", "renderizada"))
+
+    def test_sin_chrome_instalado_no_se_reintenta_ni_se_avisa_por_enlace(self):
+        with mock.patch.object(v, "estatica", return_value="viva"), \
+                mock.patch.object(v, "abrir", return_value=(None, "no hay Chrome")) as abrir, \
+                redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(v.revisar("https://t.test/a"), ("viva", v.SIN_RENDER))
+        self.assertEqual(abrir.call_count, 1)
+        self.assertEqual(salida.getvalue(), "")
+
+    def test_el_resumen_cuenta_las_que_quedaron_sin_renderizar(self):
+        urls = ["https://t.test/a", "https://t.test/b"]
+        with mock.patch.object(v, "navegador", return_value="/usr/bin/chrome"):
+            texto = v.resumen(urls, {u: "viva" for u in urls}, {urls[0]: "renderizada", urls[1]: v.SIN_RENDER})
+        self.assertIn("abiertas en navegador: 1 de 2; 1 sin renderizar", texto)
 
     def test_una_pagina_de_captcha_no_prueba_nada(self):
         self.assertEqual(self.revisar("viva", "<title>Captcha</title> Este producto no está disponible"), ("viva", "estatica"))
@@ -127,7 +160,7 @@ class Revisar(unittest.TestCase):
         self.assertEqual(self.revisar("dudosa", "<h1>Mercado Libre</h1>"), ("dudosa", "renderizada"))
 
     def test_pasado_el_presupuesto_no_se_abren_mas_navegadores(self):
-        with mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar") as abrir:
+        with mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "abrir") as abrir:
             self.assertEqual(v.revisar("https://t.test/a", desde=0), ("viva", "estatica"))   # desde=0: hace muchisimo
             abrir.assert_not_called()
 
@@ -148,6 +181,19 @@ class Navegador(unittest.TestCase):
         with mock.patch.object(v, "navegador", return_value="/usr/bin/chrome"), mock.patch.object(v.subprocess, "run") as correr:
             self.assertIsNone(v.renderizar("file:///etc/passwd"))
             correr.assert_not_called()
+
+    def test_abrir_dice_por_que_no_hubo_dom(self):
+        with mock.patch.object(v, "navegador", return_value=None):
+            self.assertEqual(v.abrir("https://t.test/a"), (None, "no hay Chrome"))
+        with mock.patch.object(v, "navegador", return_value="/usr/bin/chrome"):
+            with mock.patch.object(v.subprocess, "run", side_effect=v.subprocess.TimeoutExpired("chrome", 1)):
+                self.assertEqual(v.abrir("https://t.test/a"), (None, f"Chrome no termino en {v.RENDER_TIMEOUT} s"))
+            vacio = v.subprocess.CompletedProcess([], 1, stdout=b"", stderr=b"linea\nERROR: sin memoria compartida")
+            with mock.patch.object(v.subprocess, "run", return_value=vacio):
+                self.assertEqual(v.abrir("https://t.test/a"), (None, "Chrome salio con 1 sin DOM: ERROR: sin memoria compartida"))
+            lleno = v.subprocess.CompletedProcess([], 0, stdout=b"<html>ok</html>", stderr=b"")
+            with mock.patch.object(v.subprocess, "run", return_value=lleno):
+                self.assertEqual(v.abrir("https://t.test/a"), ("<html>ok</html>", None))
 
 
 @unittest.skipUnless(v.navegador(), "no hay Chrome en este entorno")
@@ -184,12 +230,22 @@ class ConChromeReal(unittest.TestCase):
     def tearDownClass(cls):
         cls.servidor.shutdown()
 
+    def revisar(self, ruta):
+        """revisar() contra el servidor local. Si Chrome no llego a armar la pagina (ni en el reintento), revisar lo
+        dice con la etapa SIN_RENDER: es un problema del entorno (Chrome caido en la CI), no del veredicto, y el test
+        lo distingue con un skip que nombra el motivo en vez de fallar con ('viva', 'estatica') (T3)."""
+        with redirect_stdout(io.StringIO()) as salida:
+            r = v.revisar(self.base + ruta)
+        if r[1] == v.SIN_RENDER:
+            self.skipTest("Chrome no armo la pagina en este entorno: " + salida.getvalue().strip())
+        return r
+
     def test_el_cartel_armado_por_javascript_se_detecta_solo_en_el_navegador(self):
         self.assertEqual(v.estatica(self.base + "/caida"), "viva")
-        self.assertEqual(v.revisar(self.base + "/caida"), ("caida", "renderizada"))
+        self.assertEqual(self.revisar("/caida"), ("caida", "renderizada"))
 
     def test_una_pagina_en_pie_sigue_en_pie(self):
-        self.assertEqual(v.revisar(self.base + "/viva")[0], "viva")
+        self.assertEqual(self.revisar("/viva"), ("viva", "renderizada"))
 
     def test_un_404_se_detecta_sin_abrir_el_navegador(self):
         self.assertEqual(v.revisar(self.base + "/no-existe"), ("caida", "estatica"))
@@ -514,10 +570,10 @@ class Despacho(unittest.TestCase):
         with mock.patch.object(v, "revisar_ml", return_value=None), \
                 mock.patch.object(v, "revisar_woo", return_value=("viva", "api de la tienda")) as woo_, \
                 mock.patch.object(v, "revisar_agregador", return_value=("viva", "precio confirmado en la tienda")) as agr, \
-                mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar", return_value=None):
+                mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "abrir", return_value=(None, "no hay Chrome")):
             self.assertEqual(v.revisar(MAXTECNO, precio=274116, tienda="maxtecno"), ("viva", "api de la tienda"))
             self.assertEqual(v.revisar(FRAVEGA, precio=1833999, tienda="comparaya"), ("viva", "precio confirmado en la tienda"))
-            self.assertEqual(v.revisar("https://compragamer.com/producto/x", precio=1, tienda="compragamer"), ("viva", "estatica"))
+            self.assertEqual(v.revisar("https://compragamer.com/producto/x", precio=1, tienda="compragamer"), ("viva", v.SIN_RENDER))
         self.assertEqual(woo_.call_args[0][2], "https://maxtecno.com.ar")
         agr.assert_called_once_with(FRAVEGA, 1833999)
 
@@ -586,8 +642,8 @@ class Vtex(unittest.TestCase):
         api.assert_called_once_with(ONCITY, 239999)
         estatica.assert_not_called()
         # si la API no responde, queda la verificacion de siempre de una tienda directa
-        with mock.patch.object(v, "revisar_ml", return_value=None), mock.patch.object(v, "revisar_vtex", return_value=None),                 mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "renderizar", return_value=None):
-            self.assertEqual(v.revisar(ONCITY, precio=239999, tienda="oncity"), ("viva", "estatica"))
+        with mock.patch.object(v, "revisar_ml", return_value=None), mock.patch.object(v, "revisar_vtex", return_value=None),                 mock.patch.object(v, "estatica", return_value="viva"), mock.patch.object(v, "abrir", return_value=(None, "no hay Chrome")):
+            self.assertEqual(v.revisar(ONCITY, precio=239999, tienda="oncity"), ("viva", v.SIN_RENDER))
 
     def test_el_agregador_prueba_primero_la_api_de_vtex(self):
         with mock.patch.object(v, "revisar_ml", return_value=None), \
