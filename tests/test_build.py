@@ -35,7 +35,7 @@ class ArmarArtifact(unittest.TestCase):
         html = ('<!doctype html>\n<html lang="es">\n<head>\n<!-- solo-web -->\n<meta charset="utf-8">\n'
                 '<!-- /solo-web -->\n<title>T</title>\n<!-- solo-web -->\n<script id="gc" data-goatcounter="x"></script>\n'
                 '<!-- /solo-web -->\n<style>a{}</style>\n</head>\n<body>\n<header>h</header>\n'
-                '<div class="wrap">hola</div>\n<script src="js/uno.js"></script>\n'
+                '<div class="wrap">hola</div>\n<script defer src="js/uno.js"></script>\n'
                 '<script>\nconst A = 1;\n</script>\n</body>\n</html>\n')
         copia = actualizar.armar_artifact(html, {"js/uno.js": "var UNO = 1;\n"}.__getitem__)
         self.assertTrue(copia.startswith("<title>T</title>"))
@@ -125,7 +125,7 @@ class Construir(unittest.TestCase):
         self.assertTrue(pagina.lower().startswith("<!doctype html>"))
         self.assertIn("<!-- solo-web -->", pagina)
         self.assertTrue(copia.startswith("<title>"))
-        for resto in ('<script src="js/', "solo-web", "data-goatcounter", "og:image", "</head>"):
+        for resto in ('src="js/', "solo-web", "data-goatcounter", "og:image", "</head>"):
             self.assertNotIn(resto, copia)
 
     def test_verificado_va_al_html_y_no_a_los_datos(self):

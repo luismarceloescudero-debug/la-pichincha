@@ -8,11 +8,20 @@ const SUGERIDAS = ["ddr4 16gb", "ssd 1tb", "rtx 4060", "ryzen 5", "monitor 27", 
    fase 3); si no, las de siempre. Se pide al pintar: BUSCADAS lo define el bloque de datos, que carga despues de este script. */
 const sugeridas = () => (typeof BUSCADAS !== "undefined" && Array.isArray(BUSCADAS) && BUSCADAS.length ? BUSCADAS : SUGERIDAS);
 
+/* Con ?q=, #buscar u #ofertas en la URL, index.html ya largo el pedido al empezar a leer la pagina (INDICE_TEMPRANO, N-CAL1):
+   se usa ese, una sola vez, y no se pide dos veces. Si fallo, o si hay que forzar, se pide como siempre. */
+function pedirIndice(forzar) {
+  const temprano = typeof window === "object" && window && window.INDICE_TEMPRANO;
+  if (temprano) window.INDICE_TEMPRANO = null;
+  // no-cache revalida; reload ignora la copia local y trae la del servidor.
+  const pedir = () => fetch("indice.json", { cache: forzar ? "reload" : "no-cache" });
+  return temprano && !forzar ? temprano.catch(pedir) : pedir();
+}
+
 function asegurarIndice(forzar) {
   if (IDX && !forzar) return Promise.resolve(IDX);
   if (pidiendo && !forzar) return pidiendo;
-  // no-cache revalida; reload ignora la copia local y trae la del servidor.
-  pidiendo = fetch("indice.json", { cache: forzar ? "reload" : "no-cache" })
+  pidiendo = pedirIndice(forzar)
     .then(r => r.json())
     .then(j => {
       IDX = j;

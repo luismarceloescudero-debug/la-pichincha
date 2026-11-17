@@ -288,7 +288,7 @@ FINAL = "/* === FIN DATOS === */"
 
 SOLO_WEB = re.compile(r"[ \t]*<!-- solo-web -->.*?<!-- /solo-web -->[ \t]*\n?", re.S)
 ESQUELETO = re.compile(r"^[ \t]*(?:<!doctype html>|</?(?:html|head|body)\b[^>]*>)[ \t]*\n?", re.I | re.M)
-JS_SRC = re.compile(r'<script src="(js/[\w.-]+\.js)"></script>')
+JS_SRC = re.compile(r'<script (?:defer )?src="(js/[\w.-]+\.js)"></script>')
 CSS_LINK = re.compile(r'<link rel="stylesheet" href="(css/[\w.-]+\.css)">')
 
 

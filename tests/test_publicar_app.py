@@ -166,7 +166,7 @@ class AvisoDeSinConexionEnElSitio(unittest.TestCase):
         self.assertIn('<div id="sin-red" class="sin-red" role="status" hidden></div>', self.sin_scripts)
 
     def test_carga_app_js_y_la_inicia_solo_si_la_pagina_esta_suelta(self):
-        self.assertIn('<script src="js/app.js"></script>', self.html)
+        self.assertIn('<script defer src="js/app.js"></script>', self.html)
         arranque = (RAIZ / "js" / "arranque.js").read_text(encoding="utf-8")
         self.assertRegex(arranque, r"SUELTA \? App\.iniciar\(window, document,")   # no dentro del visor del artifact
 
@@ -186,17 +186,30 @@ class IndexPartido(unittest.TestCase):
     def setUp(self):
         import re
         self.html = (RAIZ / "index.html").read_text(encoding="utf-8")
-        self.scripts = re.findall(r'<script src="(js/[\w.-]+\.js)"></script>', self.html)
+        self.scripts = re.findall(r'<script defer src="(js/[\w.-]+\.js)"></script>', self.html)
 
-    def test_el_unico_script_inline_son_los_datos(self):
+    def test_los_unicos_scripts_inline_son_los_datos_y_el_indice_temprano(self):
         import re
         inline = [s for s in re.findall(r"<script>(.*?)</script>", self.html, flags=re.S)]
-        self.assertEqual(len(inline), 1)
-        self.assertIn("const DATOS = ", inline[0])
-        self.assertLess(len(inline[0].split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
+        self.assertEqual(len(inline), 2)
+        temprano, datos = inline
+        self.assertIn("window.INDICE_TEMPRANO=", temprano)
+        self.assertLess(len(temprano), 600, "una linea, no logica")
+        self.assertIn("const DATOS = ", datos)
+        self.assertLess(len(datos.split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
+
+    def test_el_indice_temprano_solo_va_en_la_web(self):
+        solo_web = self.html.split("<!-- solo-web -->")[1].split("<!-- /solo-web -->")[0]
+        self.assertIn("INDICE_TEMPRANO", solo_web)
+
+    def test_ningun_modulo_frena_la_lectura_de_la_pagina(self):
+        import re
+        # N-CAL1: todos con defer (conservan el orden y corren despues de los datos, antes de DOMContentLoaded).
+        self.assertEqual(re.findall(r'<script src="js/', self.html), [])
+        self.assertGreaterEqual(len(self.scripts), 28)
 
     def test_los_datos_van_antes_que_los_modulos_que_los_usan(self):
-        self.assertLess(self.html.index("const DATOS = "), self.html.index('<script src="js/base.js">'))
+        self.assertLess(self.html.index("const DATOS = "), self.html.index('<script defer src="js/base.js">'))
 
     def test_cada_modulo_existe_y_el_service_worker_lo_guarda(self):
         sw = (RAIZ / "sw.js").read_text(encoding="utf-8")

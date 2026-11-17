@@ -21,9 +21,9 @@ const FINAL = "/* === FIN DATOS === */";
 const TABLIST = '<div class="tablist" role="tablist" id="tablist"></div>';
 const VISTA = '<div id="vista" role="tabpanel" aria-labelledby="tab-comparativa"></div>';
 const SELLO = /(<p class="meta" id="sello">)[^<]*(<\/p>)/;
-// Los scripts de la pagina, en orden: los de js/ y el bloque de datos. Analitica y JSON-LD llevan
+// Los scripts de la pagina, en orden: los de js/ (con defer) y el bloque de datos. Analitica y JSON-LD llevan
 // atributos y quedan afuera.
-const SCRIPT = /<script(?: src="(js\/[\w.-]+\.js)")?>([\s\S]*?)<\/script>/g;
+const SCRIPT = /<script(?: defer src="(js\/[\w.-]+\.js)")?>([\s\S]*?)<\/script>/g;
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 

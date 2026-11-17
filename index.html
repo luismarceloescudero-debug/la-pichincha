@@ -6,9 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="sentry-dsn" content="https://4e48193c3e50b39fb9df104d95724293@o4512379199488000.ingest.us.sentry.io/4512379450490880">
-<script src="js/errores.js"></script>
+<script defer src="js/errores.js"></script>
 <meta name="afuera-url" content="https://pichincha-afuera.mescudero-remitos-internos.workers.dev">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at https://cdnjs.cloudflare.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pichincha-afuera.mescudero-remitos-internos.workers.dev https://dolarapi.com https://mescudero.goatcounter.com https://o4512379199488000.ingest.us.sentry.io; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<script>/* Indice temprano (N-CAL1): si la URL ya abre Buscar u Ofertas, el indice se pide al empezar a leer la pagina, sin esperar los scripts (defer); asegurarIndice usa este pedido una sola vez. */(function(l){var q=(new URLSearchParams(l.search).get("q")||"").trim(),h=l.hash.slice(1);if(q.length>1||h==="buscar"||h==="ofertas")try{var p=fetch("indice.json",{cache:"no-cache"});p.catch(function(){});window.INDICE_TEMPRANO=p}catch(e){}})(location);</script>
 <!-- /solo-web -->
 <title>La Pichincha · comparador de precios de hardware en Argentina</title>
 <!-- solo-web -->
@@ -106,21 +107,21 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}@media (prefers-
   <!-- /solo-web -->
 </main>
 
-<script src="js/buscador.js"></script>
-<script src="js/pagina.js"></script>
-<script src="js/analisis.js"></script>
-<script src="js/categorias.js"></script>
-<script src="js/especificaciones.js"></script>
-<script src="js/titulo.js"></script>
-<script src="js/novedades.js"></script>
-<script src="js/ofertas.js"></script>
-<script src="js/premium.js"></script>
-<script src="js/modos.js"></script>
-<script src="js/serie-precios.js"></script>
-<script src="js/importar.js"></script>
-<script src="js/monedas.js"></script>
-<script src="js/afuera.js"></script>
-<script src="js/app.js"></script>
+<script defer src="js/buscador.js"></script>
+<script defer src="js/pagina.js"></script>
+<script defer src="js/analisis.js"></script>
+<script defer src="js/categorias.js"></script>
+<script defer src="js/especificaciones.js"></script>
+<script defer src="js/titulo.js"></script>
+<script defer src="js/novedades.js"></script>
+<script defer src="js/ofertas.js"></script>
+<script defer src="js/premium.js"></script>
+<script defer src="js/modos.js"></script>
+<script defer src="js/serie-precios.js"></script>
+<script defer src="js/importar.js"></script>
+<script defer src="js/monedas.js"></script>
+<script defer src="js/afuera.js"></script>
+<script defer src="js/app.js"></script>
 <script>
 /* === DATOS: generado por actualizar.py, no editar a mano === */
 const DATOS = {
@@ -871,17 +872,17 @@ const DATOS = {
 };
 /* === FIN DATOS === */
 </script>
-<script src="js/base.js"></script>
-<script src="js/vistas.js"></script>
-<script src="js/indice-ofertas.js"></script>
-<script src="js/historial.js"></script>
-<script src="js/busqueda.js"></script>
-<script src="js/exportar.js"></script>
-<script src="js/consulta.js"></script>
-<script src="js/medicion.js"></script>
-<script src="js/vista-historial.js"></script>
-<script src="js/vista-afuera.js"></script>
-<script src="js/arranque.js"></script>
-<script src="js/al-ver.js"></script>
+<script defer src="js/base.js"></script>
+<script defer src="js/vistas.js"></script>
+<script defer src="js/indice-ofertas.js"></script>
+<script defer src="js/historial.js"></script>
+<script defer src="js/busqueda.js"></script>
+<script defer src="js/exportar.js"></script>
+<script defer src="js/consulta.js"></script>
+<script defer src="js/medicion.js"></script>
+<script defer src="js/vista-historial.js"></script>
+<script defer src="js/vista-afuera.js"></script>
+<script defer src="js/arranque.js"></script>
+<script defer src="js/al-ver.js"></script>
 </body>
 </html>
