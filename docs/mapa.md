@@ -96,6 +96,8 @@ Puntos que no se ven en el codigo Python ni JS:
 - **`tests.yml` corre dos veces**: en cada PR y como primer job de cada publicacion (L37). Su job
   `lighthouse` arma un `_sitio` propio con el indice publicado y los mismos generadores; su job `e2e` (spec 051)
   arma otro con el indice de prueba de `tests/fixtures/e2e/` (`tests/e2e/armar-sitio.sh`) y corre Playwright.
+  Su job `tests` empieza con `actionlint` (version fija y suma verificada) sobre todos los workflows; un workflow
+  invalido corta ahi. `tests/test_workflows.py` falla ademas con una clave repetida en un mismo mapa YAML (F0).
 
 ## 2. Que archivo es dueño de que
 

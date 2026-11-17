@@ -64,7 +64,7 @@ Regla: una fase es **uno o varios PR chicos**; se cierra con sus tests, su fila 
 
 ### F0. Destrabar la publicacion y el freno de Telegram (hoy, horas)
 
-- **Que cambia**: (a) sacar el `continue-on-error` repetido (C2): **hecho**, PR 274 mergeado y la publicacion volvio a correr. (b) Que un workflow invalido no pueda entrar: paso con `actionlint` en `tests.yml`. (c) D5: el paso "Publicar las pichinchas del dia en Telegram" suma `steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'`. (d) W9: `avisar_dueno.py:125-126` imprime solo "aviso no enviado". (c) y (d): **hecho** (el paso de Telegram mira `steps.indexar.outcome` y `steps.guardia.outputs.alarma`; el aviso que no sale dice el motivo con `publicar_telegram.ULTIMO_MOTIVO`).
+- **Que cambia**: (a) sacar el `continue-on-error` repetido (C2): **hecho**, PR 274 mergeado y la publicacion volvio a correr. (b) Que un workflow invalido no pueda entrar: paso con `actionlint` en `tests.yml`: **hecho** (actionlint 1.7.12 con suma verificada y `tests/test_workflows.py`). (c) D5: el paso "Publicar las pichinchas del dia en Telegram" suma `steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'`. (d) W9: `avisar_dueno.py:125-126` imprime solo "aviso no enviado". (c) y (d): **hecho** (el paso de Telegram mira `steps.indexar.outcome` y `steps.guardia.outputs.alarma`; el aviso que no sale dice el motivo con `publicar_telegram.ULTIMO_MOTIVO`).
 - **Archivos**: `.github/workflows/actualizar.yml`, `.github/workflows/tests.yml`, `avisar_dueno.py`.
 - **Test**: `tests/test_canal.py` (ya lee el paso de Telegram) afirma la condicion nueva; un test que carga los 6 workflows y falla con una clave repetida; `tests/test_avisos_y_arreglos.py` para W9.
 - **Terminado cuando**: la corrida por push posterior al merge muestra sus jobs y termina en verde; `actionlint` falla en una rama de prueba con la clave repetida.
@@ -265,7 +265,7 @@ Otros: Black Friday 20/11, reel (espera el OK), AAIP antes de juntar correos, `I
 | # | PR | Fase | Toca |
 |---|---|---|---|
 | 1 | Clave repetida del workflow (**hecho**, PR 274) | F0 | `actualizar.yml` |
-| 2 | `actionlint` + test de claves repetidas | F0 | `tests.yml`, `tests/` |
+| 2 | `actionlint` + test de claves repetidas (**hecho**) | F0 | `tests.yml`, `tests/` |
 | 3 | Telegram no sale con alarma ni con indexado fallido (D5) + W9 (**hecho**) | F0 | `actualizar.yml`, `avisar_dueno.py` |
 | 4 | `defer` + indice temprano con `?q=` (**hecho**, PR 291, antes 288: cargador despues de pintar) | F1 | `index.html`, `js/indice-ofertas.js` |
 | 5 | N-T1 y T3: `page.clock`, sin `retries`, y espera firme en el test con Chrome real (**hecho**: Chrome que no renderiza se reintenta y queda como etapa `estatica (sin renderizar)`) | F1 | `tests/e2e/`, `playwright.config.js`, `tests/test_verificar_ofertas.py` |

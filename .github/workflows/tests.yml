@@ -15,6 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Un workflow invalido no entra (F0, docs/plan-definitivo.md): el 13/11 un continue-on-error repetido dejo
+      # actualizar.yml sin correr y fallaron 4 publicaciones. Version fija y suma verificada; usa el shellcheck del
+      # runner para los run:. tests/test_workflows.py cubre ademas las claves repetidas sin herramientas externas.
+      - name: Revisar los workflows con actionlint
+        env:
+          VERSION: "1.7.12"
+          SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          archivo="actionlint_${VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --retry 3 -o "$archivo" "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/${archivo}"
+          echo "${SHA256}  ${archivo}" | sha256sum -c -
+          tar -xzf "$archivo" actionlint
+          ./actionlint -color
+
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
@@ -156,7 +170,7 @@ jobs:
           node .github/lighthouse.js lh-*.json > lighthouse.txt || falla=1
           cat lighthouse.txt
           { echo '### Lighthouse movil'; echo '```'; cat lighthouse.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          exit ${falla:-0}
+          exit "${falla:-0}"
 
       # Los informes completos, para diagnosticar una medicion del runner sin repetirla.
       - name: Guardar los informes de Lighthouse
