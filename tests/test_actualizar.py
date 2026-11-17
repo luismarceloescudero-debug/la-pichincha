@@ -49,11 +49,11 @@ class Sinteticos(unittest.TestCase):
 
 
 class Reales(unittest.TestCase):
-    """Paginas de producto guardadas. FullH4rd falta por el desafio de
-    Cloudflare (ver test_indexar.TarjetasReales)."""
+    """Paginas de producto guardadas. FullH4rd se sumo el 17/11 (ver test_indexar.TarjetasReales)."""
 
     def test_paginas_guardadas(self):
-        casos = {"gamingcity": actualizar.precio_meta, "mexx": actualizar.precio_itemprop}
+        casos = {"gamingcity": actualizar.precio_meta, "mexx": actualizar.precio_itemprop,
+                 "fullh4rd": actualizar.precio_og}
         for clave, extractor in casos.items():
             with self.subTest(clave):
                 html = leer(clave, "producto.html")
