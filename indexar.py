@@ -287,6 +287,17 @@ def indexar_listados(tienda, max_paginas):
         while paginas < min(max_paginas, TOPE_PAGINAS):
             try:
                 html = bajar(cfg["pagina"].format(listado=listado, n=n))
+            except urllib.error.HTTPError as e:
+                if e.code not in BLOQUEOS:
+                    break                            # un 404 o un 500 de una pagina corta solo ese listado
+                # 403/429/503: la tienda dijo que no (17/11: FullH4rd contesta «Your request was blocked.» a la IP
+                # del runner). No se insiste con el resto de los listados (principio III). Sin nada leido, sube como
+                # error: el aviso dice «bloqueo» y no «0 productos», y relevar() no lo reintenta.
+                if not items:
+                    raise
+                print("  " + AMAR + "! la tienda bloqueo los listados (HTTP " + str(e.code) + "): me quedo con "
+                      + str(len(items)) + " productos" + FIN)
+                return items
             except (urllib.error.URLError, OSError):
                 break
             nuevos = [t for t in tarjetas(html, cfg) if t["url"] not in vistos]
