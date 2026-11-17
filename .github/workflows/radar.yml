@@ -1,0 +1,60 @@
+# Radar de cobertura (docs/radar-cobertura.md): busca terminos de hardware en Tavily, los compara con el indice
+# publicado y deja un informe como artefacto. No es una fuente de precios: no commitea, no toca el indice ni publica.
+# Tope por corrida: 60 creditos de Tavily (plan gratis 1.000/mes) y 10 de Firecrawl (plan gratis 1.000/mes).
+name: Radar de cobertura
+
+on:
+  schedule:
+    - cron: "0 11 * * 1"  # lunes 08:00 de Argentina, antes de la corrida diaria de las 12:00 UTC
+  workflow_dispatch:
+    inputs:
+      tope_creditos:
+        description: "Creditos de Tavily como maximo"
+        default: "60"
+      tope_firecrawl:
+        description: "Creditos de Firecrawl como maximo"
+        default: "10"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Bajar el indice publicado
+        run: |
+          base=$(python -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
+          curl -fsSL "$base/indice.json" -o indice.json
+
+      # Sin TAVILY_API_KEY el script sale con 1 y la corrida falla a la vista; sin FIRECRAWL_API_KEY solo se saltea
+      # la confirmacion de las candidatas.
+      - name: Correr el radar
+        env:
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          TOPE_CREDITOS: ${{ inputs.tope_creditos || '60' }}
+          TOPE_FIRECRAWL: ${{ inputs.tope_firecrawl || '10' }}
+        run: |
+          python radar.py --indice indice.json --salida radar \
+            --tope-creditos "$TOPE_CREDITOS" --tope-firecrawl "$TOPE_FIRECRAWL"
+          cat radar/radar.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: radar-cobertura
+          path: radar/
+          if-no-files-found: ignore
+          retention-days: 30
