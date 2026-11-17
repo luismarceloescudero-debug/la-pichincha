@@ -1,0 +1,29 @@
+{
+ "_nota": "Respuesta de Tavily recortada a url y title (sin el texto), armada con resultados reales de la prueba del 17/11/2026. Para tests/test_radar.py.",
+ "usage": {"credits": 1},
+ "results": [
+  {"url": "https://www.mexx.com.ar/productos-rubro/placas-de-video/49637-placa-de-video-geforce-rtx-5060-8gb-msi-gaming-oc.html", "title": "Placa De Video GeForce RTX 5060 8Gb Msi Gaming Oc"},
+  {"url": "https://www.mexx.com.ar/productos-rubro/placas-de-video/48882-placa-de-video-geforce-rtx-5070-12gb-msi-gaming-trio.html", "title": "Mexx | PLACA DE VIDEO GEFORCE RTX 5070 12GB MSI GAMING"},
+  {"url": "https://www.mexx.com.ar/productos-rubro/monitores?all=1", "title": "Monitores"},
+  {"url": "https://fullh4rd.com.ar/prod/30374/placa-de-video-geforce-rtx-5070-12gb-msi-shadow-2x-oc", "title": "PLACA DE VIDEO GeForce RTX 5070 12GB MSI SHADOW 2X"},
+  {"url": "https://fullh4rd.com.ar/pcarmada", "title": "PC Armadas"},
+  {"url": "https://www.maximus.com.ar/Productos/Placas-De-Video/Placas-de-Video-Nvidia/maximus.aspx?%2FCAT=48%2FSCAT%3D39", "title": "Placas de Video Nvidia"},
+  {"url": "https://www.maximus.com.ar/Producto/Micro-AMD-Ryzen-7-9800X3D-52-Ghz-AM5/ITEM=15683/maximus.aspx", "title": "Micro AMD Ryzen 7 9800X3D 5.2 Ghz AM5"},
+  {"url": "https://listado.mercadolibre.com.ar/rtx-5070", "title": "Rtx 5070 | MercadoLibre"},
+  {"url": "https://logg.com.ar/ProductDetail/RTX-5070-12G-GAMING-TRIO-OC", "title": "Placa de Video MSI GeForce RTX 5070"},
+  {"url": "https://logg.com.ar/Products?categoryName=PCArmada", "title": "PC Armada"},
+  {"url": "https://710tech.com.ar/placas-de-video/nuevo/rtx-5060-ti-palit-dual-8gb-gddr7-nueva-177608.html", "title": "Rtx 5060 Ti Palit Dual 8gb Gddr7 (nueva)"},
+  {"url": "https://www.ethergaming.com.ar/productos/pc-armada-ryzen-7-5700-rtx-5070-32gb-ram-nvme-500gb-af8al", "title": "PC Gamer Armada Ryzen 7 5700 + RTX 5070"},
+  {"url": "https://notebookspro.ar/mejores-notebooks-ryzen-7-en-argentina", "title": "Mejores Notebooks Ryzen 7 en Argentina"},
+  {"url": "https://notebookspro.ar/categoria-producto/menu/intel-i7-ultra-7-amd-ryzen-7", "title": "Intel i7 - Ultra 7/Amd Ryzen 7 archivos"},
+  {"url": "https://ipoint.com.ar/5-iphone", "title": "iPhone"},
+  {"url": "https://soloprecio.com.ar/precio/monitor-240hz", "title": "Precio de Monitor 240Hz hoy"},
+  {"url": "https://www.youtube.com/watch?v=iNBEF9L9Cwo", "title": "RTX 5070 Review"},
+  {"url": "https://www.reddit.com/r/ArgamingConsultas/comments/1b7r7p6/monitor_gaming_oled", "title": "Monitor gaming oled"},
+  {"url": "https://www.infobae.com/tecno/2025/05/06/cuanto-cuesta-comprar-un-iphone-16-en-argentina", "title": "Cuanto cuesta un iPhone 16"},
+  {"url": "https://www.gamingcity.com.ar/monitores--prod--32", "title": "Monitores - Gaming City"},
+  {"url": "https://tienda.claro.com.ar/pdp/equipos/motorola-edge-60-5g", "title": "Motorola Edge 60 5G"},
+  {"url": "https://tienda.claro.com.ar/plp/celulares-samsung", "title": "Celulares Samsung Galaxy"},
+  {"url": "https://www.motorola.com.ar/motorola-edge-60/p", "title": "Motorola Edge 60"}
+ ]
+}
