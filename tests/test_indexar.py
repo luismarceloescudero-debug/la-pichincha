@@ -162,19 +162,19 @@ class TarjetasSinteticas(unittest.TestCase):
 class TarjetasReales(unittest.TestCase):
     """El HTML guardado de cada tienda con la configuracion real de tiendas.json.
 
-    FullH4rd no esta: el 2026-10-08 respondia con un desafio de Cloudflare a
-    la IP desde donde se capturo, y queda cubierta solo con HTML sintetico.
-    Cuando `python tests/capturar.py fullh4rd` funcione, se suma aca."""
+    FullH4rd se sumo el 17/11: desde la PC vuelve a contestar (el 08/10 daba el desafio de Cloudflare)."""
 
     PATRONES = {"gamingcity": r"^[a-z0-9-]+--det--\d+$",
                 "mexx": r"^https://www\.mexx\.com\.ar/productos-rubro/.+\.html$",
                 "venex": r"^https://www\.venex\.com\.ar/.+\.html$",
-                "maximus": r"^https://www\.maximus\.com\.ar/Producto/.+/ITEM=\d+/maximus\.aspx$"}
+                "maximus": r"^https://www\.maximus\.com\.ar/Producto/.+/ITEM=\d+/maximus\.aspx$",
+                "fullh4rd": r"^/prod/\d+/[a-z0-9-]+$"}
     # Vacia cuando la tienda no tiene foto: Gaming City muestra img-no-disponible.jpg.
     FOTOS = {"gamingcity": r"^(https://www\.gamingcity\.com\.ar/thumb/imagen_\d+_\d+x\d+\.jpg)?$",
              "mexx": r"^(https://mexx-img-2019\.s3\.amazonaws\.com/tumb_\d+_\d+\.\w+(\?\w+)?)?$",
              "venex": r"^(products_images/thumb/[\w.]+)?$",
-             "maximus": r"^(https://www\.maximus\.com\.ar/Temp/App_WebSite/App_PictureFiles/Items/[\w.%-]+)?$"}
+             "maximus": r"^(https://www\.maximus\.com\.ar/Temp/App_WebSite/App_PictureFiles/Items/[\w.%-]+)?$",
+             "fullh4rd": r"^(/img/productos/\d+/[\w.-]+\.(jpg|jpeg|png|webp))?$"}
 
     def test_listados_guardados(self):
         for clave, patron in self.PATRONES.items():
@@ -278,6 +278,60 @@ class Catalogos(unittest.TestCase):
                 redirect_stdout(io.StringIO()):
             items = indexar.indexar_listados(cfg, 2)
         self.assertEqual(items[0]["imagen"], "https://www.gamingcity.com.ar/thumb/imagen_1_400x400.jpg")
+
+
+    @staticmethod
+    def _http(codigo, url="https://fh.test/buscar?q=x&pag=1"):
+        return urllib.error.HTTPError(url, codigo, "Forbidden", {"Server": "cloudflare", "Content-Type": "text/plain"},
+                                      io.BytesIO(b"Your request was blocked."))
+
+    def _tienda_terminos(self, terminos):
+        cfg = json.loads(json.dumps(TIENDAS["fullh4rd"]))
+        cfg["catalogo"]["origen"] = {"tipo": "terminos", "plantilla": "https://fh.test/buscar?q={termino}",
+                                     "terminos": terminos}
+        return cfg
+
+    def test_un_403_en_el_primer_listado_es_un_bloqueo_y_no_cero_productos(self):
+        # 17/11: FullH4rd contesta 403 «Your request was blocked.» (una regla del firewall de Cloudflare, no el desafio)
+        # a la IP del runner. indexar_listados se lo tragaba: «0 productos», reintento de 60 s y 52 pedidos bloqueados.
+        cfg = self._tienda_terminos(["a", "b", "c"])
+        bajar = mock.Mock(side_effect=self._http(403))
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()), self.assertRaises(urllib.error.HTTPError) as caso:
+            indexar.indexar_listados(cfg, 2)
+        self.assertEqual(caso.exception.code, 403)
+        self.assertEqual(bajar.call_count, 1)                 # no se insiste con los otros terminos
+        self.assertEqual(indexar.motivo_de(caso.exception), "bloqueo")
+
+    def test_el_bloqueo_no_se_reintenta(self):
+        cfg = self._tienda_terminos(["a"])
+        dormir = mock.Mock()
+        with mock.patch.object(indexar, "bajar", side_effect=self._http(403)), \
+                mock.patch.object(indexar.time, "sleep"), redirect_stdout(io.StringIO()):
+            items, error, reintentada = indexar.relevar(lambda: indexar.indexar_listados(cfg, 2), espera=60,
+                                                        dormir=dormir)
+        self.assertEqual((items, reintentada), ([], False))
+        self.assertEqual(indexar.motivo_de(error), "bloqueo")
+        dormir.assert_not_called()
+
+    def test_un_bloqueo_a_mitad_de_camino_corta_y_se_queda_con_lo_leido(self):
+        cfg = self._tienda_terminos(["a", "b", "c"])
+        html = leer("fullh4rd", "listado.html")
+        bajar = mock.Mock(side_effect=[html, self._http(429)])
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_listados(cfg, 3)
+        self.assertEqual(len(items), 4)
+        self.assertEqual(bajar.call_count, 2)                 # ni la pagina siguiente ni los terminos b y c
+
+    def test_un_404_de_una_pagina_sigue_cortando_solo_ese_listado(self):
+        cfg = self._tienda_terminos(["a", "b"])
+        html = leer("fullh4rd", "listado.html")
+        bajar = mock.Mock(side_effect=[self._http(404), html, ""])
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_listados(cfg, 3)
+        self.assertEqual(len(items), 4)
 
 
 class Woocommerce(unittest.TestCase):
@@ -422,7 +476,8 @@ class Woocommerce(unittest.TestCase):
     def test_el_sku_con_prefijo_de_mayorista_del_json_real(self):
         # GoldenTech publica "IC_RE305" (TP-Link RE305); Katech, codigos internos ("CM5012") que no son part number
         for clave, esperado in (("goldentech", "RE305"), ("katech", None)):
-            with self.subTest(clave), mock.patch.object(indexar, "bajar", side_effect=[leer(clave, "store-api.json"), "[]"]),                     mock.patch.object(indexar.time, "sleep"):
+            with self.subTest(clave), mock.patch.object(indexar, "bajar", side_effect=[leer(clave, "store-api.json"), "[]"]), \
+                mock.patch.object(indexar.time, "sleep"):
                 items = indexar.indexar_woocommerce(TIENDAS[clave], indexar.TOPE_PAGINAS)
             skus = {it["sku_tienda"] for it in items}
             self.assertIn(esperado, skus) if esperado else self.assertEqual(skus, {None})
