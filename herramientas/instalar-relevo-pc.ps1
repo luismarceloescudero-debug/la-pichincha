@@ -2,9 +2,9 @@
 #   powershell -NoProfile -ExecutionPolicy Bypass -File herramientas\instalar-relevo-pc.ps1
 #   ... -Hora 05:30          otra hora
 #   ... -Desinstalar
-# La tarea NO corre desde tu checkout: usa un clon propio de main en %USERPROFILE%\.la-pichincha\relevo-codigo (se crea
-# aca la primera vez y relevo-pc.ps1 lo pone al dia con pull --ff-only antes de cada corrida). Asi no depende de que tu
-# carpeta este en main ni al dia, y nunca la toca. No va en AppData: Claude de escritorio (MSIX) ve AppData\Local
+# La tarea NO corre desde tu checkout: usa un clon propio en %USERPROFILE%\.la-pichincha\relevo-codigo (se crea aca la
+# primera vez) fijo en el ultimo tag relevo-pc-vN; relevo-pc.ps1 vuelve a mirar el tag antes de cada corrida. Un commit
+# en main no se ejecuta en la PC hasta que alguien mueve el tag a mano (spec 067). Nunca toca tu carpeta. No va en AppData: Claude de escritorio (MSIX) ve AppData\Local
 # virtualizado y la tarea no encontraria el script (0x8007010B, 18/11).
 # Diaria a las 05:30 (antes de la publicacion programada de la manana) y al iniciar sesion; si la PC estaba apagada a
 # esa hora corre apenas puede (StartWhenAvailable). Solo con red. El script no repite si ya hay un relevo de menos de 12 h.
@@ -34,11 +34,15 @@ foreach ($campo in 'user.name', 'user.email') {
     $valor = (& git -C $origen config $campo)
     if ($valor) { & git -C $clon config $campo $valor }
 }
+# El clon queda en el ultimo tag relevo-pc-vN (el codigo revisado), no en la punta de main.
+cmd /c ('git -C "' + $clon + '" fetch --quiet --force --depth 1 origin "+refs/tags/relevo-pc-v*:refs/tags/relevo-pc-v*" 2>&1')
+$tag = (& git -C $clon tag -l 'relevo-pc-v*' --sort=-v:refname | Select-Object -First 1)
+if (-not $tag) { throw "no hay tag relevo-pc-v* en ${remoto}: la tarea no correria (spec 067)" }
+cmd /c ('git -C "' + $clon + '" checkout --quiet --force --detach "' + $tag + '" 2>&1')
+if ($LASTEXITCODE -ne 0) { throw "no se pudo pasar el clon a $tag" }
 $script = Join-Path $clon 'herramientas\relevo-pc.ps1'
-if (-not (Test-Path $script)) {
-    & git -C $clon pull --quiet --ff-only
-    if (-not (Test-Path $script)) { throw "el clon $clon no tiene herramientas\relevo-pc.ps1" }
-}
+if (-not (Test-Path $script)) { throw "el clon $clon no tiene herramientas\relevo-pc.ps1" }
+Write-Output "Codigo del relevo: $tag"
 $usuario = "$env:USERDOMAIN\$env:USERNAME"
 
 $accion = New-ScheduledTaskAction -Execute 'powershell.exe' `

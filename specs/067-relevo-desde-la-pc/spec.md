@@ -44,9 +44,16 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    iniciar sesión, solo con red, `StartWhenAvailable` (si la PC estaba apagada, corre apenas puede). Ejecuta
    `herramientas/relevo-pc.ps1` (log en `%USERPROFILE%\.la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene
    relevos de las dos tiendas de menos de 12 h (`--saltar-si-menos-de 12`; `-Forzar` lo saltea).
-   La tarea corre desde un **clon propio de `main`** en `%USERPROFILE%\.la-pichincha\relevo-codigo` (lo crea el
-   instalador; `relevo-pc.ps1` le hace `pull --ff-only` antes de cada corrida): no depende de que el checkout del dueño
-   esté en `main` ni al día, y nunca lo toca. Todo va en `%USERPROFILE%\.la-pichincha` y no en AppData: Claude de
+   La tarea corre desde un **clon propio** en `%USERPROFILE%\.la-pichincha\relevo-codigo` (lo crea el instalador): no
+   depende de que el checkout del dueño esté en `main` ni al día, y nunca lo toca.
+   **Corre solo el código de un tag** (auditoría 18/11, A1): antes de cada corrida `relevo-pc.ps1` baja los tags
+   `relevo-pc-v*` y hace `git checkout --detach` del último por versión (`--sort=-v:refname`). Un commit cualquiera en
+   `main` **no** se ejecuta en la PC. Sin tag, no corre y lo anota en el log (código 4).
+   **Para actualizar el código del relevo**, el dueño (o una sesión de Claude Code con su orden explícita, nunca la CI
+   ni un bot) revisa el diff desde el tag vigente (`git diff relevo-pc-vN main -- relevo_pc.py indexar.py herramientas/`)
+   y crea el tag siguiente sobre ese commit revisado:
+   `git tag relevo-pc-vN+1 <sha>; git push origin relevo-pc-vN+1` (o mueve el vigente:
+   `git tag -f relevo-pc-vN <sha>; git push --force origin relevo-pc-vN`). La próxima corrida de la tarea lo toma. Todo va en `%USERPROFILE%\.la-pichincha` y no en AppData: Claude de
    escritorio es una app MSIX y ve `AppData\Local` virtualizado; la tarea no encontraba el script (0x8007010B).
 6. **Ritmo educado** (18/11): FullH4rd cortó con 403 un relevo a las 08:39 (12 productos) tres minutos después de otro
    (108), y un pedido suelto dio 200 enseguida: es su límite de ritmo, no la IP. `tiendas.json` admite `"pausa_s"` por
