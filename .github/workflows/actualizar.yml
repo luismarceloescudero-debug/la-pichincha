@@ -378,7 +378,14 @@ jobs:
           # «PCs completas: sin ofertas». Se deja anotado para no confundirlo con un indice medido en esta corrida.
           reuso=""; if [ "$REUSADO" = "true" ]; then reuso="--reusado"; fi
           node guardia.js --indice indice.json --salida _sitio/guardia.json --previa guardia-previa.json --ofertas _sitio/ofertas.json --alarma alarma.md --resumen "$GITHUB_STEP_SUMMARY" $reuso || rc=$?
-          if [ "$rc" -eq 3 ]; then echo "alarma=true" >> "$GITHUB_OUTPUT"; fi
+          # Auditoria 17/11 (punto 6): cualquier codigo distinto de 0 es alarma, no solo el 3. Si guardia.js revienta (1),
+          # el indice no se midio y el canal no puede salir a ciegas; el issue y el aviso al dueno dicen que fallo.
+          if [ "$rc" -ne 0 ]; then
+            echo "alarma=true" >> "$GITHUB_OUTPUT"
+            if [ "$rc" -ne 3 ]; then
+              printf '### Guardia del índice\n\nguardia.js terminó con el código %s: el índice no se pudo medir y el mensaje de Telegram no sale.\n' "$rc" > alarma.md
+            fi
+          fi
 
       - name: Avisar la alarma de la guardia
         if: steps.guardia.outputs.alarma == 'true' && github.event_name != 'push'
@@ -425,7 +432,7 @@ jobs:
         if: >-
           (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
           && steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'
-          && needs.decidir.outputs.telegram != 'false'
+          && steps.guardia.outcome == 'success' && needs.decidir.outputs.telegram != 'false'
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
