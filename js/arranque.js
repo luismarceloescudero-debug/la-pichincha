@@ -61,8 +61,7 @@ function arrancar() {
   if (!P.length) { $("#vista").innerHTML = '<p class="sub">No hay datos cargados todavía. Corré <code>python actualizar.py --build</code>.</p>'; return; }
   // La portada publicada ya trae las pestañas y la comparativa, escritas por generar_portada.js.
   if (!$("#tablist").children.length) $("#tablist").innerHTML = pestanasHtml("");
-  // Solo si cambio: reescribir el mismo texto que trajo el pre-render lo vuelve a pintar y, con los scripts en defer, el
-  // sello pasaba a ser un LCP nuevo al final de la carga (CI del PR 288: LCP 2,7 -> 4,4 s).
+  // Solo si cambio: reescribir el mismo texto que trajo el pre-render (generar_portada.js) lo vuelve a pintar sin motivo.
   const sello = selloTexto();
   if ($("#sello").textContent !== sello) $("#sello").textContent = sello;
   $("#nota").innerHTML = `Precios con IVA tomados de cada tienda del índice, con el precio de transferencia o depósito
