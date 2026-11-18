@@ -88,8 +88,12 @@ jobs:
       - name: Armar el sitio con el indice de prueba
         run: bash tests/e2e/armar-sitio.sh
 
+      # Reintentos segun el evento (tests/e2e/reintentos.js): 0 en un PR, 1 cuando lo llama la publicacion (workflow_call
+      # hereda el evento del llamador). Se deja escrito en el log para comprobarlo en cada corrida.
       - name: Correr las pruebas
-        run: npx playwright test
+        run: |
+          echo "Evento: $GITHUB_EVENT_NAME, reintentos: $(node -p "require('./tests/e2e/reintentos.js').reintentos(process.env.GITHUB_EVENT_NAME)")"
+          npx playwright test
 
       # El reporte HTML y, de las pruebas que fallan, capturas y trazas (test-results).
       - name: Guardar el reporte y las capturas
