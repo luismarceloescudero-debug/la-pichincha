@@ -659,6 +659,16 @@ class Robots(unittest.TestCase):
         self.assertFalse(indexar.robots_permite("User-agent: *\nDisallow: /\n", "/x", agente="FirecrawlAgent"),
                          "sin grupo propio vale el de cualquiera")
 
+    def test_permisos_y_crawl_delay_leen_los_mismos_grupos(self):
+        # Auditoria 18/11: robots.txt se leia con dos parsers distintos. Un Crawl-delay cierra el grupo de `*` para los dos.
+        texto = "User-Agent: *\nCrawl-delay: 5\nUser-agent: FirecrawlAgent\nDisallow: /\n"
+        self.assertEqual(indexar.grupos_robots(texto), [({"*"}, [("crawl-delay", "5")]),
+                                                        ({"firecrawlagent"}, [("disallow", "/")])])
+        self.assertEqual(indexar.crawl_delay(texto), 5)
+        self.assertTrue(indexar.robots_permite(texto, "/x"), "el Disallow es solo de FirecrawlAgent")
+        self.assertFalse(indexar.robots_permite(texto, "/x", agente="firecrawlagent"))
+        self.assertEqual(indexar.crawl_delay("USER-AGENT: *\nCRAWL-DELAY: 3\n"), 3)
+
 
 class Vtex(unittest.TestCase):
     """Tiendas VTEX por su API publica de catalogo: una sola lectura para todas (OnCity, Naldo, Pardo...)."""
