@@ -67,7 +67,8 @@ let FILTROS = Buscador.filtrosVacios();
 const numeroDe = txt => { const n = parseInt(String(txt).replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : null; };
 
 function filtrosHtml() {
-  const tiendas = Object.entries((IDX || {}).tiendas || {}).map(([k, t]) =>
+  // spec 066: una tienda en pausa no tiene precios publicados, no tiene sentido filtrar por ella
+  const tiendas = Object.entries((IDX || {}).tiendas || {}).filter(([, t]) => t.estado !== "pausa").map(([k, t]) =>
     `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${FILTROS.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
   return `<div class="of-fila" role="group" aria-label="Tienda"><span class="of-et" aria-hidden="true">Tienda</span>${tiendas || '<span class="sub">cargando…</span>'}</div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
@@ -185,7 +186,7 @@ function pintarResultados(q) {
   if (!IDX || !caja) return;
   limpiarConsulta();          // si no hay resultados, no queda una consulta vieja gobernando las pestañas
   if (!q.trim()) {
-    const viejas = Object.values(IDX.tiendas).filter(t => Pagina.precioDel(t.relevado, IDX.generado));
+    const viejas = Object.values(IDX.tiendas).filter(t => t.estado !== "pausa" && Pagina.precioDel(t.relevado, IDX.generado));
     est.textContent = `${IDX.productos.length.toLocaleString("es-AR")} productos indexados en ${Object.keys(IDX.tiendas).length} fuentes · actualizado ${Pagina.cuando(IDX.generado)}`
       + (viejas.length ? ` · sin relevar hoy: ${viejas.map(t => `${t.nombre} (${Pagina.precioDel(t.relevado, IDX.generado)})`).join(", ")}` : "");
     caja.innerHTML = "";
