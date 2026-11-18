@@ -196,6 +196,25 @@ class Navegador(unittest.TestCase):
                 self.assertEqual(v.abrir("https://t.test/a"), ("<html>ok</html>", None))
 
 
+class SinRenderEnLaCI(unittest.TestCase):
+    """Auditoria 17/11, punto 7: ConChromeReal salteaba ante cualquier SIN_RENDER, y asi un Chrome que sale sin DOM (un
+    error real) pasaba en verde. En la CI solo se saltea un Chrome que no termino a tiempo (runner cargado)."""
+
+    def test_fuera_de_la_ci_cualquier_sin_render_se_saltea(self):
+        self.assertTrue(saltear_sin_render("::warning::Sin renderizar (Chrome salio con 1 sin DOM): queda ...", en_ci=False))
+        self.assertTrue(saltear_sin_render("", en_ci=False))
+
+    def test_en_la_ci_solo_se_saltea_el_chrome_que_no_termino_a_tiempo(self):
+        self.assertTrue(saltear_sin_render("::warning::Sin renderizar (Chrome no termino en 45 s): queda ...", en_ci=True))
+        self.assertFalse(saltear_sin_render("::warning::Sin renderizar (Chrome salio con 1 sin DOM: boom): queda ...", en_ci=True))
+        self.assertFalse(saltear_sin_render("", en_ci=True))   # sin Chrome en la CI: el entorno esta roto, falla
+
+
+def saltear_sin_render(salida, en_ci):
+    """Si un SIN_RENDER se saltea (True) o hace fallar el test (False). Fuera de la CI la PC puede no tener Chrome."""
+    return not en_ci or "Chrome no termino en" in salida
+
+
 @unittest.skipUnless(v.navegador(), "no hay Chrome en este entorno")
 class ConChromeReal(unittest.TestCase):
     """Una pagina que arma el cartel con JavaScript, como Mercado Libre: la revision estatica la ve en pie y la
@@ -233,11 +252,15 @@ class ConChromeReal(unittest.TestCase):
     def revisar(self, ruta):
         """revisar() contra el servidor local. Si Chrome no llego a armar la pagina (ni en el reintento), revisar lo
         dice con la etapa SIN_RENDER: es un problema del entorno (Chrome caido en la CI), no del veredicto, y el test
-        lo distingue con un skip que nombra el motivo en vez de fallar con ('viva', 'estatica') (T3)."""
+        lo distingue con un skip que nombra el motivo en vez de fallar con ('viva', 'estatica') (T3). En la CI solo si
+        Chrome no termino a tiempo: si salio sin DOM, es un error y el test falla (auditoria 17/11, punto 7)."""
         with redirect_stdout(io.StringIO()) as salida:
             r = v.revisar(self.base + ruta)
         if r[1] == v.SIN_RENDER:
-            self.skipTest("Chrome no armo la pagina en este entorno: " + salida.getvalue().strip())
+            motivo = salida.getvalue().strip()
+            if not saltear_sin_render(motivo, en_ci=bool(os.environ.get("CI"))):
+                self.fail("Chrome no armo la pagina en la CI: " + (motivo or "sin motivo"))
+            self.skipTest("Chrome no armo la pagina en este entorno: " + motivo)
         return r
 
     def test_el_cartel_armado_por_javascript_se_detecta_solo_en_el_navegador(self):
