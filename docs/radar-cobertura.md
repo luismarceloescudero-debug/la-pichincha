@@ -53,3 +53,11 @@ radar falla a la vista; sin `FIRECRAWL_API_KEY` solo se saltea la confirmacion. 
 `gh secret set TAVILY_API_KEY` o `gh secret set FIRECRAWL_API_KEY` (decision del dueño).
 
 En local: `TAVILY_API_KEY=... python radar.py --indice indice.json --salida radar`.
+
+## Pulso diario
+
+`radar_pulso.py` (job `pulso` del mismo workflow, todos los dias 12:00 UTC) consulta `GET /usage` de Tavily y
+`GET /v2/team/credit-usage` de Firecrawl, que **no gastan creditos**. Si una clave falta, da 401/403 o el servicio no
+contesta tras un reintento, la corrida queda en rojo (GitHub avisa por mail) en vez de enterarnos el lunes. Deja los
+creditos usados y restantes en el resumen y una `::warning::` si quedan menos de 100. A mano, solo el pulso:
+`gh workflow run radar.yml -f solo_pulso=true` (sin ese input corre el radar completo y gasta creditos).
