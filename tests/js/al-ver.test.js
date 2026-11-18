@@ -39,7 +39,7 @@ test("con «reducir movimiento» o sin IntersectionObserver no anima: todo queda
 
 test("la portada y /hoy/ cargan el script, y el service worker lo guarda", () => {
   const raiz = path.join(__dirname, "..", "..");
-  assert.match(fs.readFileSync(path.join(raiz, "index.html"), "utf8"), /<script defer src="js\/al-ver\.js"><\/script>/);
+  assert.ok(require("../../generar_portada.js").modulos(fs.readFileSync(path.join(raiz, "index.html"), "utf8")).includes("js/al-ver.js"));
   assert.match(fs.readFileSync(path.join(raiz, "generar_feed.js"), "utf8"), /<script src="\.\.\/js\/al-ver\.js"><\/script>/);
   assert.ok(require("../../sw.js").CASCARA.includes("js/al-ver.js"));
 });

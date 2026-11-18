@@ -21,9 +21,23 @@ const FINAL = "/* === FIN DATOS === */";
 const TABLIST = '<div class="tablist" role="tablist" id="tablist"></div>';
 const VISTA = '<div id="vista" role="tabpanel" aria-labelledby="tab-comparativa"></div>';
 const SELLO = /(<p class="meta" id="sello">)[^<]*(<\/p>)/;
-// Los scripts de la pagina, en orden: los de js/ (con defer) y el bloque de datos. Analitica y JSON-LD llevan
-// atributos y quedan afuera.
-const SCRIPT = /<script(?: defer src="(js\/[\w.-]+\.js)")?>([\s\S]*?)<\/script>/g;
+// Los scripts de la pagina, en orden: los de js/ (con defer), el bloque de datos y la lista de modulos que el cargador
+// agrega despues de pintar (`<script id="modulos">`, N-CAL1). Analitica, JSON-LD y el cargador llevan atributos y quedan afuera.
+const SCRIPT = /<script(?: defer src="(js\/[\w.-]+\.js)")?>([\s\S]*?)<\/script>|<script id="modulos" type="application\/json">([\s\S]*?)<\/script>/g;
+const MODULOS = /<script id="modulos" type="application\/json">([\s\S]*?)<\/script>/;
+
+/* Los modulos de js/ que agrega el cargador, en orden (vacia si la pagina no lo tiene). */
+const modulos = html => { const m = MODULOS.exec(html); return m ? JSON.parse(m[1]) : []; };
+
+/* Cada script en el orden en que corre en el navegador: [src, codigo] (src null si es inline). */
+function scripts(html) {
+  const lista = [];
+  for (const [, src, codigo, mods] of html.matchAll(SCRIPT)) {
+    if (mods !== undefined) JSON.parse(mods).forEach(m => lista.push([m, null]));
+    else lista.push([src, codigo]);
+  }
+  return lista;
+}
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
@@ -41,7 +55,7 @@ function contexto(html, leer, entorno = {}, { conArranque = false, suelta = true
   });
   ctx.window = ctx.self = ctx;
   ctx.top = suelta ? ctx : {};
-  for (const [, src, codigo] of html.matchAll(SCRIPT)) {
+  for (const [src, codigo] of scripts(html)) {
     if (src === "js/arranque.js") {
       if (!conArranque) continue;
       if (antesDeArrancar) antesDeArrancar(ctx);
@@ -132,6 +146,6 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { prerender, contexto, main, novedadesDe, vendidosDe, buscadasDe, INICIO, FINAL };
+module.exports = { prerender, contexto, modulos, scripts, main, novedadesDe, vendidosDe, buscadasDe, INICIO, FINAL };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

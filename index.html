@@ -107,21 +107,6 @@ body{margin:0;font:14px system-ui,sans-serif;background:#fcfcfa}@media (prefers-
   <!-- /solo-web -->
 </main>
 
-<script defer src="js/buscador.js"></script>
-<script defer src="js/pagina.js"></script>
-<script defer src="js/analisis.js"></script>
-<script defer src="js/categorias.js"></script>
-<script defer src="js/especificaciones.js"></script>
-<script defer src="js/titulo.js"></script>
-<script defer src="js/novedades.js"></script>
-<script defer src="js/ofertas.js"></script>
-<script defer src="js/premium.js"></script>
-<script defer src="js/modos.js"></script>
-<script defer src="js/serie-precios.js"></script>
-<script defer src="js/importar.js"></script>
-<script defer src="js/monedas.js"></script>
-<script defer src="js/afuera.js"></script>
-<script defer src="js/app.js"></script>
 <script>
 /* === DATOS: generado por actualizar.py, no editar a mano === */
 const DATOS = {
@@ -872,17 +857,7 @@ const DATOS = {
 };
 /* === FIN DATOS === */
 </script>
-<script defer src="js/base.js"></script>
-<script defer src="js/vistas.js"></script>
-<script defer src="js/indice-ofertas.js"></script>
-<script defer src="js/historial.js"></script>
-<script defer src="js/busqueda.js"></script>
-<script defer src="js/exportar.js"></script>
-<script defer src="js/consulta.js"></script>
-<script defer src="js/medicion.js"></script>
-<script defer src="js/vista-historial.js"></script>
-<script defer src="js/vista-afuera.js"></script>
-<script defer src="js/arranque.js"></script>
-<script defer src="js/al-ver.js"></script>
+<script id="modulos" type="application/json">["js/buscador.js", "js/pagina.js", "js/analisis.js", "js/categorias.js", "js/especificaciones.js", "js/titulo.js", "js/novedades.js", "js/ofertas.js", "js/premium.js", "js/modos.js", "js/serie-precios.js", "js/importar.js", "js/monedas.js", "js/afuera.js", "js/app.js", "js/base.js", "js/vistas.js", "js/indice-ofertas.js", "js/historial.js", "js/busqueda.js", "js/exportar.js", "js/consulta.js", "js/medicion.js", "js/vista-historial.js", "js/vista-afuera.js", "js/arranque.js", "js/al-ver.js"]</script>
+<script id="cargador">/* Los modulos de js/, en orden (async=false), recien despues de la primera pintura (N-CAL1): la portada pre-renderizada se pinta sin esperarlos. Si no hay pintura que avisar (pestana de fondo, navegador viejo), al evento load. */(function(){var hecho=false;function cargar(){if(hecho)return;hecho=true;JSON.parse(document.getElementById("modulos").textContent).forEach(function(x){var e=document.createElement("script");e.src=x;e.async=false;document.body.appendChild(e)})}function luego(){setTimeout(cargar,0)}try{new PerformanceObserver(function(l,o){if(l.getEntriesByName("first-contentful-paint").length){o.disconnect();luego()}}).observe({type:"paint",buffered:true})}catch(e){}if(document.readyState==="complete")luego();else addEventListener("load",luego,{once:true})})();</script>
 </body>
 </html>

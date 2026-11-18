@@ -46,6 +46,16 @@ class ArmarArtifact(unittest.TestCase):
                       '<div class="wrap">hola</div>', "const A = 1;"):
             self.assertIn(queda, copia)
 
+    def test_los_modulos_del_cargador_van_adentro_en_orden_y_sin_el_cargador(self):
+        html = ('<body>\n<script>\nconst A = 1;\n</script>\n'
+                '<script id="modulos" type="application/json">["js/uno.js", "js/dos.js"]</script>\n'
+                '<script id="cargador">(function(){cargar()})();</script>\n</body>\n')
+        copia = actualizar.armar_artifact(html, {"js/uno.js": "var UNO = 1;\n", "js/dos.js": "var DOS = 2;\n"}.__getitem__)
+        for resto in ("modulos", "cargador", "application/json"):
+            self.assertNotIn(resto, copia)
+        self.assertLess(copia.index("const A = 1;"), copia.index("var UNO = 1;"))
+        self.assertLess(copia.index("<script>\nvar UNO = 1;\n</script>"), copia.index("<script>\nvar DOS = 2;\n</script>"))
+
 
 class ArmarArtifactConCss(unittest.TestCase):
     def test_los_link_a_css_se_meten_adentro_como_style(self):
@@ -103,7 +113,8 @@ class Construir(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.dir)
         real = (RAIZ / "index.html").read_text(encoding="utf-8")
         (self.dir / "index.html").write_text(real, encoding="utf-8")
-        for ruta in actualizar.JS_SRC.findall(real) + actualizar.CSS_LINK.findall(real):
+        modulos = json.loads(actualizar.MODULOS.search(real).group(1))
+        for ruta in actualizar.JS_SRC.findall(real) + modulos + actualizar.CSS_LINK.findall(real):
             destino = self.dir / ruta
             destino.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(RAIZ / ruta, destino)
