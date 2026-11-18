@@ -192,3 +192,14 @@ test("una previa con alarma y sin previa_valida (formato viejo) no se usa para c
   assert.equal(G.base(ok), ok);
   assert.equal(G.base(null), null);
 });
+
+test("--reusado al final de la linea marca la medicion como reusada (es una bandera, no lleva valor)", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guardia-reusado-"));
+  const salida = path.join(dir, "guardia.json");
+  fs.writeFileSync(path.join(dir, "indice.json"), JSON.stringify(sano()));
+  G.main(["--indice", path.join(dir, "indice.json"), "--salida", salida, "--reusado"]);
+  assert.equal(JSON.parse(fs.readFileSync(salida, "utf8")).reusado, true);
+  G.main(["--indice", path.join(dir, "indice.json"), "--salida", salida]);
+  assert.equal(JSON.parse(fs.readFileSync(salida, "utf8")).reusado, undefined);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
