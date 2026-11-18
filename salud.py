@@ -126,8 +126,8 @@ def cuerpo_cambio(cambio, url):
                  "viejos dejan de publicarse y se sigue intentando a diario. Vuelve sola cuando traiga productos. "
                  "Este issue no se comenta mas hasta el proximo cambio.")
     elif a == estado_tiendas.BAJA:
-        texto = (f"**{nombre}** queda **dada de baja** sola (spec 066): el dominio no responde (DNS, certificado o "
-                 f"conexion) en {estado_tiendas.CORRIDAS_BAJA} corridas seguidas. Sale del indice publicado y del "
+        texto = (f"**{nombre}** queda **dada de baja** sola (spec 066): el dominio no existe (NXDOMAIN) o Cloudflare "
+                 f"da el origen caido (52x) en {estado_tiendas.CORRIDAS_BAJA} corridas seguidas. Sale del indice publicado y del "
                  "relevamiento diario; se sondea la portada una vez por semana y vuelve sola si revive. Se cierra.")
     else:
         texto = (f"**{nombre}** volvio a traer productos: **alta automatica** (spec 066; estaba en {cambio.get('de')}). "
