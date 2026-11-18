@@ -35,7 +35,7 @@ flowchart TD
         VO --> FI["python fiabilidad.py (historial/verificacion + _sitio/fiabilidad.json, no en push)"]
         FI --> IN["node generar_info.js (L164)"]
         IN --> GU["node guardia.js (alarma: issue 'guardia' y sin Telegram)"]
-        GU --> TG["python publicar_telegram.py (schedule o manual manda; push solo corrige el mensaje del mismo indice; sin alarma de la guardia)"]
+        GU --> TG["python publicar_telegram.py (schedule o manual manda; push solo corrige el mensaje del mismo indice; no sale con alarma de la guardia ni con el indexado fallido, D5)"]
         TG --> CB["python cobertura.py (L183)"]
         CB --> UP["upload-pages-artifact _sitio"]
         UP --> DP["job publicar: deploy-pages"]
