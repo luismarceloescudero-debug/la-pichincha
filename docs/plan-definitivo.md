@@ -260,7 +260,7 @@ Otros: Black Friday 20/11, reel (espera el OK), AAIP antes de juntar correos, `I
 | 2 | `actionlint` + test de claves repetidas | F0 | `tests.yml`, `tests/` |
 | 3 | Telegram no sale con alarma ni con indexado fallido (D5) + W9 | F0 | `actualizar.yml`, `avisar_dueno.py` |
 | 4 | `defer` + indice temprano con `?q=` | F1 | `index.html`, `js/indice-ofertas.js` |
-| 5 | N-T1 y T3: `page.clock`, sin `retries`, y espera firme en el test con Chrome real | F1 | `tests/e2e/`, `playwright.config.js`, `tests/test_verificar_ofertas.py` |
+| 5 | N-T1 y T3: `page.clock`, sin `retries`, y espera firme en el test con Chrome real (**hecho**: Chrome que no renderiza se reintenta y queda como etapa `estatica (sin renderizar)`) | F1 | `tests/e2e/`, `playwright.config.js`, `tests/test_verificar_ofertas.py` |
 | 6 a 9 | D3, D1, D2, D4 (uno cada uno) | F2 | `filtrar_indice.py`, `indexar.py`, `actualizar.yml` |
 | 10 | KV + observability + `HORA_MINIMA` | F3 | `worker/` |
 | 11 | El Worker dispara la corrida (si hay token) | F3 | `worker/` |
