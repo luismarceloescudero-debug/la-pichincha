@@ -196,6 +196,21 @@ class Ping(unittest.TestCase):
         reg["ultimo_ping"] = dia(-et.DIAS_PING_BAJA).isoformat()
         self.assertTrue(et.toca_ping(reg, HOY))
 
+    def test_un_ping_con_fecha_rota_toca_y_no_tira_el_indexado(self):
+        for roto in ("ayer", 5, ["x"]):
+            self.assertTrue(et.toca_ping(dict(et.registro_nuevo(), estado=et.BAJA, ultimo_ping=roto), HOY), roto)
+
+
+class Defensivo(unittest.TestCase):
+    def test_observar_un_registro_roto_no_tira_el_indexado(self):
+        for roto in ({"sin_productos_desde": "ayer"}, {"muertas_seguidas": "tres"}, {"estado": None},
+                     {"sin_productos_desde": 7}, [1, 2], "x"):
+            reg, _ = et.observar(roto, et.MUERTA, HOY)
+            self.assertIn(reg["estado"], (et.ACTIVA, et.PAUSA, et.BAJA), roto)
+            self.assertEqual(reg["sin_productos_desde"], HOY.isoformat(), roto)
+            reg, _ = et.observar(roto, et.OK, HOY)
+            self.assertEqual(reg["estado"], et.ACTIVA, roto)
+
 
 class Semilla(unittest.TestCase):
     def test_sale_del_ultimo_dia_con_productos_o_del_inicio_del_historial(self):
@@ -233,6 +248,22 @@ class Disco(unittest.TestCase):
         self.assertEqual(et.leer(self.dir), estados)
         datos = json.loads((self.dir / et.ARCHIVO).read_text(encoding="utf-8"))
         self.assertEqual(datos["actualizado"], HOY.isoformat())
+
+    def test_leer_normaliza_y_descarta_los_registros_rotos(self):
+        tiendas = {
+            "viejo": {"estado": et.PAUSA, "sin_productos_desde": "2026-11-01"},      # le faltan campos: se completan
+            "fecha_mala": {"estado": et.ACTIVA, "sin_productos_desde": "ayer"},
+            "lista": [1, 2],
+            "sin_estado": {"ultimo_ok": "2026-11-01"},
+            "estado_raro": {"estado": "zombi"},
+            "contador_malo": {"estado": et.ACTIVA, "muertas_seguidas": "tres"},
+            "sano": dict(et.registro_nuevo(), ultimo_ok="2026-11-10"),
+        }
+        (self.dir / et.ARCHIVO).write_text(json.dumps({"tiendas": tiendas}), encoding="utf-8")
+        leidos = et.leer(self.dir)
+        self.assertEqual(set(leidos), {"viejo", "sano"}, "los rotos se descartan y se re-siembran")
+        self.assertEqual(leidos["viejo"], dict(et.registro_nuevo(), estado=et.PAUSA, sin_productos_desde="2026-11-01"))
+        self.assertEqual(leidos["sano"]["ultimo_ok"], "2026-11-10")
 
     def test_no_es_un_csv_del_historial(self):
         import historial

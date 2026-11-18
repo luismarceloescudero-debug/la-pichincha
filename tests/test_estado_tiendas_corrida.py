@@ -204,6 +204,18 @@ class Corrida(Base):
         self.assertEqual((self.estados()["uno"]["ultima"], self.estados()["uno"]["estado"]), (et.VACIA, et.ACTIVA))
         self.assertIn("uno", self.tiendas_de(indice), "sigue listada con lo anterior y se reintenta a diario")
 
+    def test_un_registro_roto_no_tira_el_indexado_y_se_resiembra(self):
+        self.correr()
+        datos = json.loads((self.hist / et.ARCHIVO).read_text(encoding="utf-8"))
+        datos["tiendas"]["uno"] = {"estado": et.ACTIVA, "sin_productos_desde": "ayer"}
+        datos["tiendas"]["dos"] = ["no", "es", "un", "registro"]
+        (self.hist / et.ARCHIVO).write_text(json.dumps(datos), encoding="utf-8")
+        indice, _ = self.correr()
+        self.assertEqual(self.tiendas_de(indice), {"uno", "dos"})
+        for clave in ("uno", "dos"):
+            self.assertEqual((self.estados()[clave]["estado"], self.estados()[clave]["ultimo_ok"]),
+                             (et.ACTIVA, self.hoy.isoformat()), clave)
+
     def test_solo_sin_tocar_las_demas(self):
         self.correr()
         antes = self.estados()["dos"]

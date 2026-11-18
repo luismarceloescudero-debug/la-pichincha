@@ -1088,9 +1088,12 @@ def main(argv=None):
     # spec 066: estado de salud de cada tienda entre corridas (activa, pausa, baja), en la carpeta del historial. La
     # primera vez se siembra con lo que ya se sabe: el ultimo relevamiento del indice anterior o el ultimo precio del
     # historial. Una tienda en baja ni se releva (salvo el ping semanal) y una en pausa no reusa sus precios viejos.
-    estados = estado_tiendas.leer(carpeta)
-    if estados is None:
-        estados = estado_tiendas.sembrar(fuentes, ultimo_ok_de(anterior, series), serie.inicio(series), hoy)
+    rotas = set()
+    estados = estado_tiendas.leer(carpeta, rotas)
+    sembradas = set(fuentes) if estados is None else {k for k in rotas if k in fuentes}
+    if sembradas:                                # la primera vez, o un registro roto que se descarto al leer
+        estados = dict(estados or {}, **estado_tiendas.sembrar(sembradas, ultimo_ok_de(anterior, series),
+                                                               serie.inicio(series), hoy))
     cambios = []
     # Freno global: lo que habia antes de cada falla de hoy, que tiendas se midieron y cuales cayeron por red o muerte.
     previos, medidas, caidas = {}, set(), set()
