@@ -1448,7 +1448,7 @@ def main(argv=None):
         "tiendas": {k: dict({"nombre": v["nombre"], "color": v["color"],
                              "segunda": bool(v.get("segunda_opinion"))},
                             **({"relevado": relevado[k]} if relevado.get(k) else {}),
-                            **({"estado": "pausa"} if estados.get(k, {}).get("estado") == estado_tiendas.PAUSA else {}))
+                            **({"estado": estado_tiendas.PAUSA} if estados.get(k, {}).get("estado") == estado_tiendas.PAUSA else {}))
                     for k, v in fuentes.items() if k not in de_baja},
         "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31", "vendido"],
         # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
