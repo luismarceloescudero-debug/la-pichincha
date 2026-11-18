@@ -45,7 +45,8 @@ def evaluar(vivos, relevados, nombres, fecha, umbral=UMBRAL, notas=None):
                           "ahora": ahora, "estado": estado}
         nota = notas.get(clave)
         if nota:
-            fuentes[clave].update({k: nota[k] for k in ("motivo", "detalle", "reintentada") if k in nota})
+            fuentes[clave].update({k: nota[k] for k in ("motivo", "detalle", "reintentada", "via")
+                                   if k in nota})
     return {"fecha": fecha, "umbral": umbral, "fuentes": fuentes}
 
 
