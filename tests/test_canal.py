@@ -63,6 +63,14 @@ class EnLaAction(unittest.TestCase):
         condicion = paso[paso.index("if:"):paso.index("continue-on-error")]
         self.assertIn("needs.decidir.outputs.telegram != 'false'", condicion)
 
+    def test_la_fiabilidad_solo_sube_su_carpeta_y_se_rebasa_antes_del_push(self):
+        # Auditoria 17/11, punto 9: `git add -A` en `historial` subia tambien lo que una corrida manual con menos paginas no
+        # tiene que escribir (los precios del dia), y sin rebase un push concurrente lo dejaba afuera.
+        paso = YML[YML.index("- name: Guardar la fiabilidad por comercio"):YML.index("- name: Armar las paginas de estado")]
+        self.assertNotIn("git add -A", paso)
+        self.assertIn("git add verificacion/", paso)
+        self.assertLess(paso.index("git pull --rebase"), paso.index("git push"))
+
     def test_el_mensaje_anterior_se_conserva_aunque_no_se_publique(self):
         # Revision del 24/10: con alarma (paso salteado) o en un push sin nada que corregir, telegram.json desaparecia del sitio.
         paso = YML[YML.index("Conservar el mensaje de Telegram anterior"):YML.index("- name: Guardia del indice")]
