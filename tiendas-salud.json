@@ -1,0 +1,280 @@
+{
+ "actualizado": "2026-11-17",
+ "reglas": {
+  "corridas_baja": 3,
+  "dias_pausa": 14,
+  "dias_ping_baja": 7
+ },
+ "tiendas": {
+  "authogar": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "bgh": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "bringeri": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "carrefour": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "clickgaming": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "comparaya": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "compracierta": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "compragamer": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "coppel": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "dricco": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "fullh4rd": {
+   "estado": "activa",
+   "ultima": "bloqueo",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-14",
+   "sin_productos_desde": "2026-11-15",
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "gamingcity": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "goldentech": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "katech": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "lg": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "maximus": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "maxtecno": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "mercadolibre": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "mexx": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "motorola": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "naldo": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "nuevashogar": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "oncity": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "pardo": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "scphardstore": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "thegamershop": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  },
+  "venex": {
+   "estado": "activa",
+   "ultima": "ok",
+   "ultima_corrida": "2026-11-17",
+   "ultimo_ok": "2026-11-17",
+   "sin_productos_desde": null,
+   "muertas_seguidas": 0,
+   "ultimo_ping": null,
+   "cambio": null
+  }
+ }
+}
