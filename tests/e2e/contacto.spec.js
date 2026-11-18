@@ -23,6 +23,8 @@ test.describe("formulario de contacto (el envío está simulado, no sale nada)",
       // El correo ...+sin-acuse@ simula un Worker sin RESEND_API_KEY (o con Resend caido): responde acuse: false.
       await ruta.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, acuse: !/sin-acuse/.test(d.correo) }) });
     });
+    // Reloj falso (N-T1): el formulario mide la espera con Date.now(); se adelanta el reloj en vez de esperar de verdad.
+    await page.clock.install();
     await page.goto("/contacto/");
     await expect(page.locator("#campos")).toBeEnabled();
   });
@@ -46,7 +48,7 @@ test.describe("formulario de contacto (el envío está simulado, no sale nada)",
 
   async function enviarEsperando(page, correo) {
     await llenar(page, { correo, motivo: "consulta", mensaje: "Un mensaje de prueba largo" });
-    await page.waitForTimeout(3200);
+    await page.clock.fastForward(3200);
     await page.getByRole("button", { name: "Enviar mensaje" }).click();
   }
 

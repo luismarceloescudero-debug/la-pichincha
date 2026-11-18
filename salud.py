@@ -2,13 +2,18 @@
 """Salud de las fuentes: avisa con un issue cuando una tienda trae poco.
 
 Uso:
-    python salud.py salud.json          # abre o comenta issues con gh
+    python salud.py salud.json          # abre, comenta o cierra issues con gh
     python salud.py salud.json --seco   # solo muestra lo que haria
 
 indexar.py escribe salud.json con evaluar(). Una fuente esta sana si no
 fallo, trajo al menos un producto y llego al 70% de los productos vivos que
 tenia en el historial. Con la misma regla el historial decide si registra las
 bajas de esa fuente.
+
+Spec 066: un issue por tienda, sin spam diario. Se abre la primera vez que falla; mientras siga abierto no se
+comenta todos los dias. Cada cambio de estado (pausa, baja, alta, de estado_tiendas.py) deja UN comentario; la
+baja y la vuelta lo cierran. Lo que se decide sale del estado (no solo del cambio de hoy), asi una corrida manual
+que no llama a este script no deja un issue abierto de una tienda que ya volvio o ya se dio de baja.
 """
 
 import argparse
@@ -101,20 +106,102 @@ def detalle(e):
     return " ".join(str(texto).split())[:500] or "sin detalle"
 
 
-def avisar(lista, url):
+def titulo_tienda(nombre):
+    return "Fuente con pocos productos: " + nombre
+
+
+def _fecha(iso):
+    return "/".join(reversed(str(iso or "")[:10].split("-")[1:])) or "?"
+
+
+def cuerpo_cambio(cambio, url):
+    """El unico comentario que deja un cambio de estado de una tienda (spec 066)."""
+    nombre, a = cambio["nombre"], cambio["a"]
+    if a == "pausa":
+        texto = (f"**{nombre}** pasa a **en pausa** sola (spec 066): no trae productos desde el "
+                 f"{_fecha(cambio.get('sin_productos_desde'))} (ultima corrida: {cambio.get('clase')}). Sus precios "
+                 "viejos dejan de publicarse y se sigue intentando a diario. Vuelve sola cuando traiga productos. "
+                 "Este issue no se comenta mas hasta el proximo cambio.")
+    elif a == "baja":
+        texto = (f"**{nombre}** queda **dada de baja** sola (spec 066): el dominio no responde (DNS, certificado o "
+                 "conexion) en 3 corridas seguidas. Sale del indice publicado y del relevamiento diario; se sondea la "
+                 "portada una vez por semana y vuelve sola si revive. Se cierra.")
+    else:
+        texto = (f"**{nombre}** volvio a traer productos: **alta automatica** (spec 066; estaba en {cambio.get('de')}). "
+                 "Sus precios vuelven a publicarse desde esta corrida. Se cierra.")
+    if cambio.get("detalle"):
+        texto += "\n\nDetalle: " + str(cambio["detalle"])[:200]
+    return texto + "\n\nCorrida: " + url
+
+
+def acciones(informe, abiertos, url):
+    """Lo que hay que hacer en GitHub, sin tocarlo: [(verbo, titulo, numero o None, cuerpo)], verbo en crear,
+    comentar, cerrar (cerrar con numero None = crear y cerrar). `abiertos`: {titulo: numero}."""
+    if informe is None:
+        a = alertas(None)[0]
+        return [] if titulo(a) in abiertos else [("crear", titulo(a), None, cuerpo(a, url))]
+    estados = informe.get("tiendas") or {}
+    fuentes = informe.get("fuentes") or {}
+    hechos, plan = set(), []
+    for c in informe.get("cambios") or []:
+        t = titulo_tienda(c["nombre"])
+        n, texto = abiertos.get(t), cuerpo_cambio(c, url)
+        hechos.add(t)
+        if c["a"] == "pausa":
+            plan.append(("comentar", t, n, texto) if n else ("crear", t, None, texto))
+        elif c["a"] == "baja":
+            plan.append(("cerrar", t, n, texto))
+        elif n:
+            plan.append(("cerrar", t, n, texto))
+    for clave, e in estados.items():                # lo que una corrida sin este script dejo sin registrar
+        t = titulo_tienda(e.get("nombre", clave))
+        if t in hechos:
+            continue
+        if e.get("estado") == "baja" and t in abiertos:
+            hechos.add(t)
+            plan.append(("cerrar", t, abiertos[t], cuerpo_cambio(dict(e, a="baja", de="activa"), url)))
+        elif e.get("estado") == "pausa" and t not in abiertos:
+            hechos.add(t)
+            plan.append(("crear", t, None, cuerpo_cambio(dict(e, a="pausa", clase=e.get("ultima")), url)))
+    for clave, f in fuentes.items():                # volvio sobre el umbral: el issue se cierra solo
+        t = titulo_tienda(f["nombre"])
+        if f["estado"] == "ok" and t in abiertos and t not in hechos:
+            hechos.add(t)
+            plan.append(("cerrar", t, abiertos[t], f"**{f['nombre']}** volvio a traer {f['ahora']} productos "
+                         f"(contra {f['previo']} de antes): se cierra solo. Si vuelve a fallar, se abre otro.\n\n"
+                         "Corrida: " + url))
+    for a in alertas(informe):
+        t = titulo(a)
+        if estados.get(a["clave"], {}).get("estado") in ("pausa", "baja") or t in abiertos or t in hechos:
+            continue                                # ya tiene su issue: nada de un comentario por dia
+        hechos.add(t)
+        plan.append(("crear", t, None, cuerpo(a, url)))
+    return plan
+
+
+def avisar(informe, url):
     gh("label", "create", ETIQUETA, "--color", "d93f0b",
        "--description", "Una fuente de precios trajo menos de lo esperado", "--force")
     abiertos = {i["title"]: i["number"] for i in json.loads(
         gh("issue", "list", "--label", ETIQUETA, "--state", "open", "--json", "number,title",
            "--limit", "100") or "[]")}
-    for a in lista:
-        t, c = titulo(a), cuerpo(a, url)
-        if t in abiertos:
-            gh("issue", "comment", str(abiertos[t]), "--body", c)
-            print("comentado #" + str(abiertos[t]) + ": " + t)
-        else:
-            gh("issue", "create", "--title", t, "--body", c, "--label", ETIQUETA)
+    for verbo, t, n, c in acciones(informe, abiertos, url):
+        if verbo == "comentar":
+            gh("issue", "comment", str(n), "--body", c)
+            print("comentado #" + str(n) + ": " + t)
+            continue
+        if n is None:
+            salida = gh("issue", "create", "--title", t, "--body", c, "--label", ETIQUETA)
             print("abierto: " + t)
+            if verbo == "crear":
+                continue
+            n = (salida or "").strip().rsplit("/", 1)[-1]
+            if not n.isdigit():
+                print("::warning::No se pudo cerrar el issue recien abierto: " + t)
+                continue
+            c = "Cerrado solo: el estado ya quedo registrado arriba."
+        gh("issue", "close", str(n), "--comment", c)
+        print("cerrado #" + str(n) + ": " + t)
 
 
 def main(argv=None):
@@ -125,19 +212,17 @@ def main(argv=None):
 
     ruta = Path(args.ruta)
     informe = json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else None
-    lista = alertas(informe)
-    if not lista:
-        print("todas las fuentes sanas")
-        return 0
-
     url = url_corrida()
     if args.seco:
-        for a in lista:
-            print("# " + titulo(a) + "\n\n" + cuerpo(a, url) + "\n")
+        plan = acciones(informe, {}, url)
+        for verbo, t, n, c in plan:
+            print("# [" + verbo + "] " + t + "\n\n" + c + "\n")
+        if not plan:
+            print("todas las fuentes sanas")
         return 0
 
     try:
-        avisar(lista, url)
+        avisar(informe, url)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as e:
         # Un 403/429 de la API de GitHub (o un gh que no contesta) no puede dejar el sitio sin
         # publicar ese dia: se avisa en el resumen y la corrida sigue (P1).

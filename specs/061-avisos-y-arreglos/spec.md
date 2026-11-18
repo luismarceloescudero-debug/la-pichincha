@@ -51,6 +51,12 @@ de un producto da `HTTP Error 403`. Es la IP del runner: no se esquiva. Camino l
 Lo que ya existía y se mantiene: el corte a mitad de respuesta (`IncompleteRead`) se reintenta una vez en `bajar()`;
 `publicar_telegram.pedir` reintenta 3 veces una falla de red al conectar; la guardia del índice abre su issue.
 
+**Desde la spec 066 (17/11):** E1 reusa los precios anteriores solo mientras la tienda está `activa`. Con 14 días sin
+productos pasa sola a **pausa** (sus precios viejos dejan de publicarse) y con el dominio muerto 3 corridas a **baja**
+(fuera del índice; ping semanal). Vuelve sola al traer productos. El issue de cada tienda ya no se comenta a diario: un
+comentario por cambio de estado y se cierra al darla de baja o al volver. Ver
+[spec 066](../066-alta-y-baja-automatica-de-tiendas/spec.md).
+
 `salud.json` suma, por fuente con problemas, `motivo` (`cloudflare`, `bloqueo`, `red`, `sin productos`, `error`,
 `recuperada`), `detalle` y `reintentada`.
 

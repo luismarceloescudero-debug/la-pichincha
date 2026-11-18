@@ -63,6 +63,14 @@ test("primero las fuentes con problemas, despues las que estan al dia", () => {
   assert.deepEqual(orden, ["fullh4rd", "nueva", "compragamer", "comparaya"]);
 });
 
+test("spec 066: una tienda en pausa se muestra como tal aunque salud.json diga que fallo", () => {
+  const idx = { ...IDX, tiendas: { ...IDX.tiendas, fullh4rd: { ...IDX.tiendas.fullh4rd, estado: "pausa" } } };
+  const por = Object.fromEntries(I.estadoFuentes(idx, SALUD).map(f => [f.clave, f]));
+  assert.equal(por.fullh4rd.estado, "pausa");
+  assert.match(I.ETIQUETAS.pausa, /no se muestran/);
+  assert.match(I.renderEstado(idx, SALUD, { baseUrl: BASE }), /En pausa/);
+});
+
 test("la pagina /estado/ dice la hora de cada fuente en hora argentina y escapa los nombres", () => {
   const html = I.renderEstado(IDX, SALUD, { baseUrl: BASE });
   assert.match(html, /<title>Estado de las fuentes \| La Pichincha<\/title>/);

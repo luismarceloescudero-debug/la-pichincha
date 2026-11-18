@@ -195,6 +195,19 @@ class AvisoAlDueno(unittest.TestCase):
         self.assertIn("Rara &lt;b&gt;", lineas[3])
         self.assertIn("KeyError", lineas[3])
 
+    def test_spec_066_avisa_el_cambio_una_vez_y_calla_lo_que_ya_esta_en_pausa(self):
+        lineas = avisar_dueno.lineas_salud({
+            "fuentes": {"katech": {"nombre": "Katech", "estado": "fallo", "ahora": 0, "previo": 0, "motivo": "bloqueo"},
+                        "fh": {"nombre": "FullH4rd", "estado": "fallo", "ahora": 0, "previo": 0, "motivo": "bloqueo"}},
+            "tiendas": {"katech": {"nombre": "Katech", "estado": "pausa"}, "fh": {"nombre": "FullH4rd", "estado": "pausa"}},
+            "cambios": [{"clave": "fh", "nombre": "FullH4rd", "de": "activa", "a": "pausa", "clase": "bloqueo"},
+                        {"clave": "cc", "nombre": "Compra Cierta", "de": "activa", "a": "baja", "clase": "muerta"},
+                        {"clave": "lg", "nombre": "LG", "de": "pausa", "a": "activa", "clase": "ok"}]})
+        self.assertEqual(len(lineas), 3, "Katech ya estaba en pausa: no se repite cada dia")
+        self.assertIn("FullH4rd: en pausa", lineas[0])
+        self.assertIn("Compra Cierta: dada de baja", lineas[1])
+        self.assertIn("LG: volvio", lineas[2])
+
     def test_sin_salud_avisa_que_el_indexado_no_termino(self):
         self.assertIn("no termino", avisar_dueno.lineas_salud(None, "failure")[0])
         self.assertEqual(avisar_dueno.lineas_salud(None, "skipped"), [])
