@@ -85,6 +85,7 @@ class Acciones(unittest.TestCase):
         cambio = {"nombre": "C", "a": salud.estado_tiendas.BAJA, "de": salud.estado_tiendas.ACTIVA}
         with mock.patch.object(salud.estado_tiendas, "CORRIDAS_BAJA", 5):
             self.assertIn("en 5 corridas seguidas", salud.cuerpo_cambio(cambio, self.URL))
+        self.assertIn("NXDOMAIN", salud.cuerpo_cambio(cambio, self.URL))
 
     def test_baja_ya_registrada_con_el_issue_abierto_se_cierra(self):
         inf = self.informe({}, {"c": "baja"})
