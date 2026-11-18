@@ -43,7 +43,11 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
 5. **Tarea programada** «La Pichincha relevo PC» (`herramientas/instalar-relevo-pc.ps1`): diaria a las **05:30** y al
    iniciar sesión, solo con red, `StartWhenAvailable` (si la PC estaba apagada, corre apenas puede). Ejecuta
    `herramientas/relevo-pc.ps1` (log en `%USERPROFILE%\.la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene
-   relevos de las dos tiendas de menos de 12 h (`--saltar-si-menos-de 12`; `-Forzar` lo saltea).
+   relevos de las dos tiendas de menos de 12 h (`--saltar-si-menos-de 12`; `-Forzar` lo saltea; `-SinPublicar` es la
+   prueba: releva sin subir y deja `relevo-pc/` en `%TEMP%\relevo-pc-prueba`).
+   **Escribir el log nunca frena el relevo** (18/11: un `tail -f` abierto hacía fallar `Add-Content` y la tarea no
+   relevaba): se abre compartido (`FileShare.ReadWrite`, con reintento corto) y, si aun así no se puede, sigue en
+   `relevo-pc-<fecha-hora>.log` de la misma carpeta.
    La tarea corre desde un **clon propio** en `%USERPROFILE%\.la-pichincha\relevo-codigo` (lo crea el instalador): no
    depende de que el checkout del dueño esté en `main` ni al día, y nunca lo toca.
    **Corre solo el código de un tag** (auditoría 18/11, A1): antes de cada corrida `relevo-pc.ps1` baja los tags
