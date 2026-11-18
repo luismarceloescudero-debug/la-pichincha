@@ -34,6 +34,7 @@ import estado_tiendas
 import historial
 import mercadolibre
 import modelo
+import relevo_pc
 import salud
 import serie
 
@@ -1042,6 +1043,26 @@ def ultimo_ok_de(anterior, series):
     return ultimo
 
 
+def leer_catalogo(fuente, max_paginas):
+    """Los productos de una fuente segun su catalogo.tipo, con el extractor que le toca. Lo usan main() y relevo_pc.py
+    (spec 067): la PC lee con los mismos extractores, el mismo User-Agent y el mismo ritmo que el runner."""
+    tipo = fuente["catalogo"]["tipo"]
+    if tipo == "json":
+        return indexar_json(fuente)
+    if tipo == "api":
+        return indexar_api(fuente, max_paginas)
+    if tipo == "woocommerce":
+        return indexar_woocommerce(fuente, max_paginas)
+    if tipo == "vtex":
+        return indexar_vtex(fuente, max_paginas)
+    if tipo == "feed":
+        return indexar_feed(fuente)
+    if tipo == "mercadolibre":
+        return [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
+                for it in mercadolibre.indexar(fuente, max_paginas)]
+    return indexar_listados(fuente, max_paginas)
+
+
 def observar_falla(fuente, motivo, error, observar):
     """Clasifica una fuente que no trajo productos (spec 066) con `observar(clase, caida)` y devuelve su estado. Si no
     fue un bloqueo, SIEMPRE se confirma con un ping a la portada: muerta solo si el ping da NXDOMAIN o 52x (aunque el
@@ -1129,7 +1150,8 @@ def main(argv=None):
     vivos = historial.vivos_por_tienda(estado)
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
-    por_confirmar, notas = [], {}                # notas: por que fallo cada fuente y si se reintento (spec 061)
+    por_confirmar, notas = [], {}
+    por_pc = {}                                  # spec 067: {tienda: relevado} de las servidas por el relevo de la PC                # notas: por que fallo cada fuente y si se reintento (spec 061)
     # spec 066: estado de salud de cada tienda entre corridas (activa, pausa, baja), en la carpeta del historial. La
     # primera vez se siembra con lo que ya se sabe: el ultimo relevamiento del indice anterior o el ultimo precio del
     # historial. Una tienda en baja ni se releva (salvo el ping semanal) y una en pausa no reusa sus precios viejos.
@@ -1188,25 +1210,28 @@ def main(argv=None):
                 continue
             print("  " + VERDE + "dada de baja pero responde: se releva entera" + FIN)
 
-        def leer(fuente=fuente, tipo=tipo):
-            if tipo == "json":
-                return indexar_json(fuente)
-            if tipo == "api":
-                return indexar_api(fuente, args.max_paginas)
-            if tipo == "woocommerce":
-                return indexar_woocommerce(fuente, args.max_paginas)
-            if tipo == "vtex":
-                return indexar_vtex(fuente, args.max_paginas)
-            if tipo == "feed":
-                return indexar_feed(fuente)
-            if tipo == "mercadolibre":
-                return [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
-                        for it in mercadolibre.indexar(fuente, args.max_paginas)]
-            return indexar_listados(fuente, args.max_paginas)
+        def leer(fuente=fuente):
+            return leer_catalogo(fuente, args.max_paginas)
 
         # spec 061: reintento unico ante 0 productos o un corte de red; un bloqueo no se reintenta. Si sigue sin productos,
         # se usan los de la corrida anterior con su fecha de relevado vieja (principio II: /estado/ y el sitio la muestran).
         items, error, reintentada = relevar(leer)
+        # spec 067: una tienda que bloquea la IP del runner se lee desde la PC del dueno y el resultado llega por la rama
+        # `historial` (relevo-pc/<tienda>.json). Si el relevo directo da bloqueo o 0 y el de la PC tiene menos de 36 h, se
+        # usan esos productos con su fecha real; uno mas viejo no se publica (sigue el camino de siempre).
+        if fuente.get("relevo") == relevo_pc.VIA and (error is not None or not any(url_valida(it.get("url"))
+                                                                                   for it in items)):
+            pc = relevo_pc.leer_vigente(carpeta, clave, datetime.now(AR))
+            directo = motivo_de(error) if error is not None else "0 productos"
+            if pc:
+                print("  " + AMAR + "! directo: " + directo + "; uso el relevo de la PC del " + pc["relevado"]
+                      + " (" + str(pc["cantidad"]) + " productos)" + FIN)
+                notas[clave] = {"motivo": "relevo pc", "via": relevo_pc.VIA, "reintentada": reintentada,
+                                "detalle": "directo: " + directo + "; relevo de la PC del " + pc["relevado"]}
+                items, error = pc["productos"], None
+                por_pc[clave] = pc["relevado"]
+            else:
+                print("  " + GRIS + "sin relevo de la PC de menos de " + str(relevo_pc.VIGENCIA_HORAS) + " h" + FIN)
         if error is not None:
             motivo = motivo_de(error)
             print("  " + ROJO + FALLA + " " + type(error).__name__ + ": " + str(error)[:70] + FIN)
@@ -1260,7 +1285,7 @@ def main(argv=None):
         if puestos:
             print("  " + VERDE + OK + FIN + " lo mas vendido " + PUNTO + " " + str(len(puestos)) + " puestos")
         rebaja_real = bool(fuente.get("lista_es_oferta"))
-        if reintentada:
+        if reintentada and clave not in por_pc:
             notas[clave] = {"motivo": "recuperada", "detalle": "anduvo en el reintento", "reintentada": True}
         relevados[clave] = len(items)
         frescas.add(clave)
@@ -1292,7 +1317,8 @@ def main(argv=None):
             # 33% a 58% de productos que seguiamos hacia 2 o 3 dias).
             if not rebaja_real or not lista or lista <= it["precio"] or not piso or it["precio"] > piso:
                 lista = 0
-            actuales[(clave, it["url"])] = it["precio"]
+            if clave not in por_pc or por_pc[clave][:10] == hoy.isoformat():
+                actuales[(clave, it["url"])] = it["precio"]   # un relevo de la PC de ayer no se anota como precio de hoy
             desde = serie.desde_cuando(eventos, hoy, it["precio"])
             # Sin historial, lo unico que se sabe es el precio de la foto de ayer: cuenta como baja en seguimiento si los dos
             # precios son del mismo orden (una caja de RGB de $8.000 «ayer $5.000» no dice nada) y se cuenta como «ayer $X».
@@ -1355,6 +1381,7 @@ def main(argv=None):
         escribir_fichas(carpeta, fichas)
     generado = datetime.now(AR).isoformat(timespec="minutes")
     relevado.update(dict.fromkeys(frescas, generado))
+    relevado.update(por_pc)                      # lo que vino de la PC lleva la hora en que se leyo, no la de ahora
     informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado, notas=notas)
     estados = {k: r for k, r in estados.items() if k in fuentes}
     estado_tiendas.escribir(carpeta, estados, hoy)
@@ -1363,7 +1390,8 @@ def main(argv=None):
     informe["cambios"] = cambios
     informe["freno"] = freno
     de_baja = {k for k, r in estados.items() if r["estado"] == estado_tiendas.BAJA}
-    sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
+    sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"
+             and (k not in por_pc or por_pc[k][:10] == generado[:10])}   # sin precios de hoy no se anotan bajas
     filas = historial.cambios(estado, actuales, sanas, generado[:10])
     ruta_csv = historial.escribir(carpeta, generado[:10], filas)
     archivos.escribir_atomico(SALUD, json.dumps(informe, ensure_ascii=False, indent=1))
