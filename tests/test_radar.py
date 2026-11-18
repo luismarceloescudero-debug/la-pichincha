@@ -10,9 +10,33 @@ from unittest import mock
 
 import radar
 
+import socket
+
 FIX = Path(__file__).parent / "fixtures" / "radar"
 TAVILY = json.loads((FIX / "tavily.json").read_text(encoding="utf-8"))
 FICHA = (FIX / "ficha-jsonld.html").read_text(encoding="utf-8")
+
+PUBLICA = "93.184.216.34"
+IPS = {"privada.ar": "10.0.0.5", "metadatos.ar": "169.254.169.254", "loop.ar": "::1", "lan.ar": "192.168.1.10"}
+
+
+def resolver(host, *a, **k):
+    """getaddrinfo sin red: los hosts de IPS dan su IP; "nx.ar" no existe; el resto, una IP publica."""
+    if host == "nx.ar":
+        raise socket.gaierror(-2, "Name or service not known")
+    ip = IPS.get(host, host if host[0].isdigit() or ":" in host else PUBLICA)
+    return [(socket.AF_INET6 if ":" in ip else socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, 443))]
+
+
+_sin_dns = mock.patch("socket.getaddrinfo", resolver)
+
+
+def setUpModule():
+    _sin_dns.start()   # ningun test de este archivo resuelve DNS de verdad (url_publica, B2)
+
+
+def tearDownModule():
+    _sin_dns.stop()
 
 INDICE = {"generado": "2026-11-17T09:58-03:00", "productos": [
     ["Placa De Video GeForce RTX 5060 8Gb Msi Gaming Oc", 1,
@@ -184,6 +208,23 @@ class Firecrawl(unittest.TestCase):
         self.assertEqual(usados, 6, "un error de red contra Firecrawl cuenta igual (pudo haber cobrado)")
         self.assertNotIn("https://b.ar/producto/x", pedidos)
         self.assertEqual(len(esperas), 5)
+
+    def test_url_publica_solo_https_a_ip_publica(self):
+        self.assertTrue(radar.url_publica("https://tienda.com.ar/p/1"))
+        for url in ("http://tienda.com.ar/p/1", "ftp://tienda.com.ar/x", "https://localhost/x",
+                    "https://algo.localhost/x", "https://127.0.0.1/x", "https://[::1]/x", "https://privada.ar/x",
+                    "https://metadatos.ar/latest", "https://loop.ar/x", "https://lan.ar/x", "https://nx.ar/x",
+                    "https:///sin-host", "no es una url", "https://tienda.com.ar:99999/x"):
+            self.assertFalse(radar.url_publica(url), url)
+
+    def test_no_pide_robots_a_una_candidata_interna(self):
+        pedidos = []
+        cands = self.cand("privada.ar", "metadatos.ar") + [
+            {"dominio": "h.ar", "ejemplos": [{"url": "http://h.ar/producto/x"}]}]
+        get = lambda url, timeout=20: pedidos.append(url) or ""
+        self.assertEqual(radar.confirmar(cands, "k", post=lambda *a, **k: {}, get=get, dormir=lambda s: 0), 0)
+        self.assertEqual(pedidos, [])
+        self.assertEqual({c.get("firecrawl") for c in cands}, {"url-no-publica"})
 
     def test_tope_de_firecrawl(self):
         post = lambda *a, **k: {"data": {"rawHtml": FICHA}}
