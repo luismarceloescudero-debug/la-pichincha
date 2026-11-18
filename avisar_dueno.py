@@ -78,6 +78,11 @@ def lineas_salud(informe, indexado="success"):
             return ["🔴 <b>El indexado de precios no termino</b>. El sitio salio con el indice anterior."]
         return []
     salida = []
+    freno = informe.get("freno") or {}
+    if freno.get("activo"):          # spec 066: muchas caidas a la vez son el runner o un bug, no las tiendas
+        salida.append(f"🧯 <b>Freno global</b>: {freno.get('caidas', '?')} de {freno.get('relevadas', '?')} tiendas "
+                      "cayeron por la red o muertas. Esta corrida no suma dias de pausa ni corridas de baja; "
+                      "si se repite, mirar el runner.")
     # spec 066: un cambio de estado se avisa una vez; una tienda en pausa o de baja no se repite cada dia
     for c in informe.get("cambios") or []:
         nombre = html.escape(str(c.get("nombre", "?")))

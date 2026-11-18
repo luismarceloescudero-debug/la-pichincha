@@ -998,12 +998,16 @@ def ultimo_ok_de(anterior, series):
 
 
 def observar_falla(fuente, motivo, error, observar):
-    """Clasifica una fuente que no trajo productos (spec 066) con `observar(clase)` y devuelve su estado. Si no fue un
-    bloqueo, un ping a la portada dice si la tienda esta muerta (DNS, certificado, conexion) o solo vino vacia."""
-    muerta = estado_tiendas.es_muerta(error)
-    if not muerta and motivo not in ("bloqueo", "cloudflare"):
-        muerta = estado_tiendas.sondear(bajar, fuente.get("base"))
-    return observar(estado_tiendas.clasificar(0, motivo, muerta))
+    """Clasifica una fuente que no trajo productos (spec 066) con `observar(clase, caida)` y devuelve su estado. Si no
+    fue un bloqueo, SIEMPRE se confirma con un ping a la portada: muerta solo si el ping da NXDOMAIN o 52x (aunque el
+    catalogo haya dado el mismo error, se puede haber caido el DNS del runner un momento). `caida` dice si fue por la
+    red o por muerte, lo que mide el freno global."""
+    if motivo in ("bloqueo", "cloudflare"):
+        return observar(estado_tiendas.BLOQUEO, False)
+    ping = estado_tiendas.sondeo(bajar, fuente.get("base"))
+    muerta = ping == estado_tiendas.MUERTA
+    red = not muerta and (estado_tiendas.es_red(error) or ping == estado_tiendas.RED)
+    return observar(estado_tiendas.clasificar(0, motivo, muerta), muerta or red)
 
 
 def main(argv=None):
@@ -1088,8 +1092,15 @@ def main(argv=None):
     if estados is None:
         estados = estado_tiendas.sembrar(fuentes, ultimo_ok_de(anterior, series), serie.inicio(series), hoy)
     cambios = []
+    # Freno global: lo que habia antes de cada falla de hoy, que tiendas se midieron y cuales cayeron por red o muerte.
+    previos, medidas, caidas = {}, set(), set()
 
-    def observar(clave, clase, detalle=""):
+    def observar(clave, clase, detalle="", caida=False):
+        medidas.add(clave)
+        if caida:
+            caidas.add(clave)
+        if clase != estado_tiendas.OK and clave not in previos:
+            previos[clave] = dict(estados.get(clave) or estado_tiendas.registro_nuevo())
         estados[clave], cambio = estado_tiendas.observar(estados.get(clave), clase, hoy, detalle)
         if cambio:
             cambios.append(dict(cambio, clave=clave, nombre=fuentes[clave]["nombre"]))
@@ -1113,9 +1124,16 @@ def main(argv=None):
                 print("  " + GRIS + "dada de baja: se sondea una vez por semana" + FIN)
                 resumen[clave] = (0, "dada de baja")
                 continue
+            ping = estado_tiendas.sondeo(bajar, fuente.get("base"))
+            if ping == estado_tiendas.RED:           # no se pudo saber (puede ser el runner): se reintenta manana
+                medidas.add(clave)
+                caidas.add(clave)
+                print("  " + GRIS + "dada de baja: el ping no llego (red), se reintenta manana" + FIN)
+                resumen[clave] = (0, "dada de baja, ping sin respuesta")
+                continue
             estados[clave] = dict(registro, ultimo_ping=hoy.isoformat())
-            if estado_tiendas.sondear(bajar, fuente.get("base")):
-                observar(clave, estado_tiendas.MUERTA, "sigue sin responder")
+            if ping == estado_tiendas.MUERTA:
+                observar(clave, estado_tiendas.MUERTA, "sigue sin responder", caida=True)
                 print("  " + GRIS + "dada de baja: sigue sin responder" + FIN)
                 resumen[clave] = (0, "dada de baja, sigue muerta")
                 continue
@@ -1145,7 +1163,8 @@ def main(argv=None):
             print("  " + ROJO + FALLA + " " + type(error).__name__ + ": " + str(error)[:70] + FIN)
             notas[clave] = {"motivo": motivo, "detalle": (type(error).__name__ + ": " + str(error))[:160],
                             "reintentada": reintentada}
-            if observar_falla(fuente, motivo, error, lambda c, d=notas[clave]["detalle"], k=clave: observar(k, c, d)) \
+            if observar_falla(fuente, motivo, error,
+                              lambda c, r, d=notas[clave]["detalle"], k=clave: observar(k, c, d, r)) \
                     != estado_tiendas.ACTIVA:
                 resumen[clave] = (0, "fallo (" + motivo + "), " + estados[clave]["estado"] + ": no se publica")
             elif clave in previo:
@@ -1168,7 +1187,8 @@ def main(argv=None):
             notas[clave] = {"motivo": "sin productos", "reintentada": reintentada,
                             "detalle": "0 productos" + (", tambien en el reintento" if reintentada else "")}
             if observar_falla(fuente, "sin productos", None,
-                              lambda c, d=notas[clave]["detalle"], k=clave: observar(k, c, d)) != estado_tiendas.ACTIVA:
+                              lambda c, r, d=notas[clave]["detalle"], k=clave: observar(k, c, d, r)) \
+                    != estado_tiendas.ACTIVA:
                 resumen[clave] = (0, "sin productos, " + estados[clave]["estado"] + ": no se publica")
             elif clave in previo:
                 salida.extend(previo[clave])
@@ -1255,6 +1275,23 @@ def main(argv=None):
         resumen[clave] = (len(items), format(time.time() - t0, ".0f") + "s")
         print("  " + VERDE + OK + FIN + " " + str(len(items)) + " productos")
 
+    # Freno global (spec 066): con 30 % o mas de las tiendas medidas caidas por red o muerte, el problema es el runner o
+    # un bug, no ellas. La corrida no suma contadores: cada tienda que fallo vuelve a su registro de antes, sin cambios
+    # de estado, y si hoy se la saco del indice por un pase a pausa que no cuenta, entra con lo anterior.
+    freno = {"activo": estado_tiendas.frenar(len(medidas), len(caidas)), "relevadas": len(medidas),
+             "caidas": len(caidas), "proporcion": round(len(caidas) / len(medidas), 2) if medidas else 0}
+    if freno["activo"]:
+        print("\n" + AMAR + "! freno global: " + str(len(caidas)) + " de " + str(len(medidas))
+              + " tiendas cayeron por la red o muertas. Esta corrida no suma contadores de pausa ni de baja." + FIN)
+        for clave, antes in previos.items():
+            provisional = estados[clave]["estado"]
+            estados[clave] = antes
+            if (provisional != estado_tiendas.ACTIVA and antes["estado"] == estado_tiendas.ACTIVA
+                    and clave in previo and clave not in frescas):
+                salida.extend(previo[clave])
+                resumen[clave] = (len(previo[clave]), "fallo, freno global: uso el anterior")
+        cambios = [c for c in cambios if c["clave"] not in previos]
+
     # Antes de confirmar codigos: la copia del agregador no cuenta como "otra tienda" que nombra el mismo codigo.
     antes_de_sacar = len(salida)
     salida = sin_repetir_agregador(salida, {k for k, v in fuentes.items() if v.get("segunda_opinion")})
@@ -1275,6 +1312,7 @@ def main(argv=None):
     informe["tiendas"] = {k: {"nombre": fuentes[k]["nombre"], "estado": r["estado"], "ultima": r["ultima"],
                               "sin_productos_desde": r["sin_productos_desde"]} for k, r in estados.items()}
     informe["cambios"] = cambios
+    informe["freno"] = freno
     de_baja = {k for k, r in estados.items() if r["estado"] == estado_tiendas.BAJA}
     sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
     filas = historial.cambios(estado, actuales, sanas, generado[:10])

@@ -208,6 +208,13 @@ class AvisoAlDueno(unittest.TestCase):
         self.assertIn("Compra Cierta: dada de baja", lineas[1])
         self.assertIn("LG: volvio", lineas[2])
 
+    def test_spec_066_avisa_el_freno_global(self):
+        lineas = avisar_dueno.lineas_salud({"fuentes": {}, "freno": {"activo": True, "relevadas": 40, "caidas": 30}})
+        self.assertEqual(len(lineas), 1)
+        self.assertIn("Freno global", lineas[0])
+        self.assertIn("30 de 40", lineas[0])
+        self.assertEqual(avisar_dueno.lineas_salud({"fuentes": {}, "freno": {"activo": False}}), [])
+
     def test_sin_salud_avisa_que_el_indexado_no_termino(self):
         self.assertIn("no termino", avisar_dueno.lineas_salud(None, "failure")[0])
         self.assertEqual(avisar_dueno.lineas_salud(None, "skipped"), [])

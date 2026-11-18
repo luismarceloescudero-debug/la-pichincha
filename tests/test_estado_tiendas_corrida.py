@@ -27,7 +27,7 @@ def fuente(clave):
                          "campos": {"id": "id", "nombre": "nombre", "precio": "precio", "lista": "lista"}}}
 
 
-class Corrida(unittest.TestCase):
+class Base(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.dir)
@@ -50,11 +50,15 @@ class Corrida(unittest.TestCase):
         clave = u.split("//")[1].split(".")[0]
         modo = self.modo[clave]
         if modo == "muerta":
-            raise urllib.error.URLError(socket.gaierror(-2, "Name or service not known"))
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_NONAME, "Name or service not known"))
+        if modo == "dns_temporal":
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_AGAIN, "Temporary failure in name resolution"))
+        if modo == "catalogo_muerto" and u.endswith("/cat"):     # el catalogo dice NXDOMAIN pero la portada contesta
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_NONAME, "Name or service not known"))
         if modo == "bloqueo":
             raise urllib.error.HTTPError(u, 403, "Forbidden", {}, None)
         if u.endswith("/cat"):
-            base = 1 if clave == "uno" else 101
+            base = 1 + 100 * sorted(self.modo).index(clave)
             return json.dumps([] if modo == "vacia" else
                               [{"id": base + i, "nombre": f"Producto {base + i}", "precio": 1000} for i in range(2)])
         return "<html>portada</html>"
@@ -82,6 +86,8 @@ class Corrida(unittest.TestCase):
     def tiendas_de(self, indice):
         return {f[3] for f in indice["productos"]}
 
+
+class Corrida(Base):
     def test_el_estado_se_guarda_en_la_carpeta_del_historial(self):
         self.correr()
         self.assertEqual({k: r["estado"] for k, r in self.estados().items()}, {"uno": et.ACTIVA, "dos": et.ACTIVA})
@@ -179,6 +185,25 @@ class Corrida(unittest.TestCase):
         self.assertIn("https://uno.test", self.pedidos)
         self.assertEqual(self.estados()["uno"]["ultima"], et.VACIA)
 
+    def test_la_muerte_se_confirma_siempre_con_el_ping(self):
+        self.correr()
+        self.modo["uno"] = "catalogo_muerto"
+        for _ in range(4):
+            self.pasar_dias()
+            self.correr()
+        self.assertIn("https://uno.test", self.pedidos, "una fuente json tambien se sondea")
+        self.assertEqual((self.estados()["uno"]["ultima"], self.estados()["uno"]["muertas_seguidas"]), (et.VACIA, 0))
+        self.assertEqual(self.estados()["uno"]["estado"], et.ACTIVA)
+
+    def test_dns_temporal_del_runner_es_vacia_y_no_da_de_baja(self):
+        self.correr()
+        self.modo["uno"] = "dns_temporal"
+        for _ in range(4):
+            self.pasar_dias()
+            indice, _ = self.correr()
+        self.assertEqual((self.estados()["uno"]["ultima"], self.estados()["uno"]["estado"]), (et.VACIA, et.ACTIVA))
+        self.assertIn("uno", self.tiendas_de(indice), "sigue listada con lo anterior y se reintenta a diario")
+
     def test_solo_sin_tocar_las_demas(self):
         self.correr()
         antes = self.estados()["dos"]
@@ -187,6 +212,46 @@ class Corrida(unittest.TestCase):
             indexar.main(["--historial", str(self.hist), "--solo", "uno"])
         self.assertEqual(self.estados()["dos"]["ultima_corrida"], (self.hoy - timedelta(days=1)).isoformat())
         self.assertEqual(self.estados()["dos"]["estado"], antes["estado"])
+
+
+class FrenoGlobal(Base):
+    """Si >= 30 % de las tiendas relevadas cae por red o muerte, la corrida no suma contadores (el runner, no ellas)."""
+
+    def setUp(self):
+        super().setUp()
+        claves = ["uno", "dos", "tres", "cuatro", "cinco", "seis"]
+        (self.dir / "tiendas.json").write_text(json.dumps({k: fuente(k) for k in claves}), encoding="utf-8")
+        self.modo = dict.fromkeys(claves, "ok")
+
+    def test_caida_del_runner_no_da_de_baja_a_nadie(self):
+        self.correr()
+        antes = self.estados()
+        for k in self.modo:
+            self.modo[k] = "muerta"
+        for _ in range(et.CORRIDAS_BAJA + 1):
+            self.pasar_dias()
+            indice, salud = self.correr()
+            self.assertTrue(salud["freno"]["activo"])
+            self.assertEqual(salud["cambios"], [])
+            self.assertEqual(self.tiendas_de(indice), set(self.modo), "todas siguen con lo anterior")
+        for k, r in self.estados().items():
+            self.assertEqual((r["estado"], r["muertas_seguidas"], r["sin_productos_desde"]),
+                             (et.ACTIVA, 0, antes[k]["sin_productos_desde"]), k)
+
+    def test_dos_de_seis_es_freno_y_una_de_seis_no(self):
+        self.correr()
+        self.modo["uno"] = "muerta"
+        self.pasar_dias()
+        _, salud = self.correr()
+        self.assertFalse(salud["freno"]["activo"])
+        self.assertEqual(self.estados()["uno"]["muertas_seguidas"], 1)
+        self.modo["dos"] = "dns_temporal"
+        self.pasar_dias()
+        _, salud = self.correr()
+        self.assertTrue(salud["freno"]["activo"], "2 de 6 (33 %) caidas por la red o muertas")
+        self.assertEqual((salud["freno"]["relevadas"], salud["freno"]["caidas"]), (6, 2))
+        self.assertEqual(self.estados()["uno"]["muertas_seguidas"], 1, "la corrida frenada no suma")
+        self.assertEqual(self.estados()["tres"]["ultima"], et.OK, "lo que anduvo si se anota")
 
 
 if __name__ == "__main__":

@@ -36,17 +36,24 @@ class Clasificar(unittest.TestCase):
 
 
 class EsMuerta(unittest.TestCase):
+    """Muerta SOLO con NXDOMAIN (el dominio no existe) o con el origen caido detras de Cloudflare (521/522/523/530).
+    Un DNS temporal (EAI_AGAIN), un tiempo agotado, una conexion rechazada o un certificado malo son la red: VACIA."""
+
     def test_dns_que_no_resuelve(self):
-        e = urllib.error.URLError(socket.gaierror(-2, "Name or service not known"))
+        e = urllib.error.URLError(socket.gaierror(socket.EAI_NONAME, "Name or service not known"))
         self.assertTrue(et.es_muerta(e))
 
-    def test_certificado_invalido(self):
-        e = urllib.error.URLError(ssl.SSLCertVerificationError(1, "certificate verify failed"))
-        self.assertTrue(et.es_muerta(e))
+    def test_dns_temporal_del_runner_no_es_muerte(self):
+        e = urllib.error.URLError(socket.gaierror(socket.EAI_AGAIN, "Temporary failure in name resolution"))
+        self.assertFalse(et.es_muerta(e))
+        self.assertTrue(et.es_red(e))
 
-    def test_conexion_rechazada_o_sin_respuesta_al_conectar(self):
-        self.assertTrue(et.es_muerta(urllib.error.URLError(ConnectionRefusedError(111, "refused"))))
-        self.assertTrue(et.es_muerta(urllib.error.URLError(TimeoutError("timed out"))))
+    def test_certificado_conexion_y_tiempo_son_la_red(self):
+        for causa in (ssl.SSLCertVerificationError(1, "certificate verify failed"),
+                      ConnectionRefusedError(111, "refused"), TimeoutError("timed out")):
+            e = urllib.error.URLError(causa)
+            self.assertFalse(et.es_muerta(e), causa)
+            self.assertTrue(et.es_red(e), causa)
 
     def test_origen_caido_detras_de_cloudflare(self):
         for codigo in (521, 522, 523, 530):
@@ -55,7 +62,7 @@ class EsMuerta(unittest.TestCase):
     def test_envuelto_por_un_lector(self):
         try:
             try:
-                raise urllib.error.URLError(socket.gaierror(-2, "x"))
+                raise urllib.error.URLError(socket.gaierror(socket.EAI_NONAME, "x"))
             except urllib.error.URLError as e:
                 raise RuntimeError("no se pudo leer") from e
         except RuntimeError as e:
@@ -64,21 +71,48 @@ class EsMuerta(unittest.TestCase):
     def test_lo_que_no_es_muerte(self):
         self.assertFalse(et.es_muerta(urllib.error.HTTPError("https://x.test", 403, "x", {}, None)))
         self.assertFalse(et.es_muerta(urllib.error.HTTPError("https://x.test", 404, "x", {}, None)))
-        self.assertFalse(et.es_muerta(TimeoutError("lectura lenta")))     # contesto y se corto: es la red
+        self.assertFalse(et.es_muerta(TimeoutError("lectura lenta")))
         self.assertFalse(et.es_muerta(OSError("sin conexion")))
         self.assertFalse(et.es_muerta(None))
 
+    def test_es_red(self):
+        self.assertTrue(et.es_red(OSError("sin conexion")))
+        self.assertFalse(et.es_red(urllib.error.HTTPError("https://x.test", 500, "x", {}, None)), "contesto: no es red")
+        self.assertFalse(et.es_red(ValueError("json roto")))
+        self.assertFalse(et.es_red(None))
+
     def test_sondear(self):
         def caida(url):
-            raise urllib.error.URLError(socket.gaierror(-2, "x"))
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_NONAME, "x"))
+
+        def dns_temporal(url):
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_AGAIN, "x"))
 
         def bloquea(url):
             raise urllib.error.HTTPError(url, 403, "x", {}, None)
 
         self.assertTrue(et.sondear(caida, "https://x.test"))
+        self.assertFalse(et.sondear(dns_temporal, "https://x.test"), "un DNS temporal no confirma la muerte")
         self.assertFalse(et.sondear(bloquea, "https://x.test"), "un 403 es una tienda viva que no nos quiere")
         self.assertFalse(et.sondear(lambda u: "<html>", "https://x.test"))
         self.assertFalse(et.sondear(caida, ""), "sin base no se sondea")
+
+    def test_sondeo_dice_por_que(self):
+        def dns_temporal(url):
+            raise urllib.error.URLError(socket.gaierror(socket.EAI_AGAIN, "x"))
+        self.assertEqual(et.sondeo(dns_temporal, "https://x.test"), et.RED)
+        self.assertEqual(et.sondeo(lambda u: "", "https://x.test"), et.VIVA)
+        self.assertIsNone(et.sondeo(dns_temporal, ""))
+
+
+class Freno(unittest.TestCase):
+    def test_treinta_por_ciento_caidas_frena(self):
+        self.assertTrue(et.frenar(relevadas=10, caidas=3))
+        self.assertFalse(et.frenar(relevadas=10, caidas=2))
+
+    def test_pocas_tiendas_no_frenan(self):
+        self.assertFalse(et.frenar(relevadas=1, caidas=1), "una corrida --solo no es una caida del runner")
+        self.assertFalse(et.frenar(relevadas=0, caidas=0))
 
 
 class Observar(unittest.TestCase):
