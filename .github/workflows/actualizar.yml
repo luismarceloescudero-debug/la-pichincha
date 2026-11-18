@@ -46,7 +46,7 @@ jobs:
       correr: ${{ steps.hoy.outputs.correr }}
       telegram: ${{ steps.hoy.outputs.telegram }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           sparse-checkout: sitio.json
           sparse-checkout-cone-mode: false
@@ -84,21 +84,21 @@ jobs:
     # Una corrida completa tarda ~55 min (29-31/10); sin tope, una que se cuelga ocupa el runner 6 h.
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # El historial vive en su propia rama y no en la cache de Actions, que
       # GitHub puede desalojar.
       - name: Traer el historial de precios
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: historial
           path: historial
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "22"
 
@@ -133,7 +133,7 @@ jobs:
       # si cambia el formato del indice o se suma una tienda, no hay cache que
       # reusar y el paso siguiente rearma el indice solo.
       - name: Recuperar el indice anterior
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: indice.json
           key: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-${{ github.run_id }}
@@ -460,7 +460,7 @@ jobs:
       - name: Adelgazar el indice del sitio
         run: node adelgazar_indice.js --indice indice.json --salida _sitio || echo "::warning::No se adelgazo el indice"
 
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: _sitio
           include-hidden-files: true   # spec 046: /.well-known/security.txt (por defecto deja afuera lo que empieza con punto)
@@ -473,12 +473,12 @@ jobs:
       url: ${{ steps.desplegar.outputs.page_url }}
     steps:
       - id: desplegar
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
 
       # spec 059: el mensaje de Telegram salio antes del despliegue, con la vista previa del inicio del sitio (el /hoy/
       # publicado era el de la corrida anterior). Ya publicado el nuevo, se edita ese mismo mensaje (mismo texto) para que
       # muestre arriba y en grande la imagen de /hoy/ de este indice. Solo si el mensaje es de este indice y la imagen existe.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         with:
           sparse-checkout: |
@@ -508,7 +508,7 @@ jobs:
     if: failure()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           sparse-checkout: |
             avisar_dueno.py
