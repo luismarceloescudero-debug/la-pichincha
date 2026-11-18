@@ -145,8 +145,8 @@ o que dejen pasar al indexador. Lo que se midió el 24/10:
 
 | Tienda | Qué pasa | Desde cuándo |
 |---|---|---|
-| FullH4rd | 0 productos en GitHub. **17/11:** desde la PC vuelve a andar (1.554 productos con foto), pero al runner de GitHub le contesta 403 (una regla de su firewall de Cloudflare contra esa IP, sin desafío). Pedirles un feed (como Katech) o que dejen pasar al indexador | 8/10 (issue #6) |
-| Katech | **Resuelto el 04/11:** respondió la carta con su feed oficial (`https://katech.com.ar/feed/productos/`, 2.094 productos). El índice lo lee desde entonces; el primer índice con Katech sale en la próxima corrida | antes: siempre (issue #55) |
+| FullH4rd | **18/11: via PC.** Al runner de GitHub le contesta 403 (regla de su Cloudflare contra esa IP); desde la PC anda (1.554 productos). Se releva todos los dias desde tu PC con la tarea «La Pichincha relevo PC» (05:30 y al iniciar sesion; spec 067) y el indice usa ese relevo si tiene menos de 36 h. Solo hace falta que la PC este prendida con tu sesion algun momento del dia. El pedido de que dejen pasar al indexador (correo del 17/11) sigue en pie | 8/10 (issue #6) |
+| Katech | Feed oficial desde el 04/11 (`https://katech.com.ar/feed/productos/`), pero su Cloudflare da 403 a la IP del runner. **18/11: via PC**, igual que FullH4rd (spec 067): la tarea de tu PC lee el feed (2.044 productos) y lo sube a la rama `historial` | antes: siempre (issue #55) |
 | Compra Cierta | 0 productos (traía 27); desde el entorno de trabajo el dominio ni resuelve | 20/10 (issue #96) |
 | Loquieroacá | 403 en «Afuera» | siempre |
 
