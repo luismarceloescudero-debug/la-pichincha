@@ -78,6 +78,7 @@ Regla: una fase es **uno o varios PR chicos**; se cierra con sus tests, su fila 
 - **Test**: suite e2e completa (22 pruebas) y `tests/js/generador.test.js`; una prueba e2e nueva: en `/?q=ssd` el pedido de `indice.json` sale antes de `DOMContentLoaded`.
 - **Terminado cuando** (medido antes y despues con `.github/lighthouse-corrida.sh`, mediana de 3): FCP de la portada baja al menos 0,5 s; en `/?q=ssd%201tb` el indice se pide antes de los 2 s (hoy ~7,8 s); rendimiento de la portada >= 90 en 3 corridas seguidas de la CI; 0 errores de consola.
 - **Rollback**: revert. Si el LCP no mejora, no es fracaso (ya paso el 31/10): se mide lo de arriba.
+- **Medido el 17/11** (local, indice publicado, mediana de 3 con Lighthouse 12.8.2 movil): FCP portada 5,18 -> 3,45 s y `/?q=ram#buscar` 5,27 -> 3,61 s; LCP igual (5,6-5,7 s), TBT portada 7 -> 188 ms. Con red y CPU reales limitadas (DevTools, Slow 4G + CPU x4, HTTP/1.1, mediana de 5): `indice.json` se pide a los 0,23 s (antes 10,2 s) y llega a los 36,2 s (antes 43,4 s), DOMContentLoaded 10,8 -> 5,1 s, pero el FCP sube 3,3 -> 4,1 s porque los 28 scripts bajan en paralelo con `css/sitio.css` y le comen ancho de banda (sin prioridades en HTTP/1.1; en el sitio publicado, con HTTP/2, el CSS va primero). El DATOS inline no llama a nada de `js/` (confirmado). La prueba "el indice sale antes de DOMContentLoaded" quedo en `tests/js/indice-temprano.test.js` (los e2e los toca la fila 5).
 
 ### F2. Compuerta de publicacion: D1 a D4 (2 a 3 dias, 4 PR)
 
@@ -259,7 +260,7 @@ Otros: Black Friday 20/11, reel (espera el OK), AAIP antes de juntar correos, `I
 | 1 | Clave repetida del workflow (**hecho**, PR 274) | F0 | `actualizar.yml` |
 | 2 | `actionlint` + test de claves repetidas | F0 | `tests.yml`, `tests/` |
 | 3 | Telegram no sale con alarma ni con indexado fallido (D5) + W9 | F0 | `actualizar.yml`, `avisar_dueno.py` |
-| 4 | `defer` + indice temprano con `?q=` | F1 | `index.html`, `js/indice-ofertas.js` |
+| 4 | `defer` + indice temprano con `?q=` (**hecho**, rama `perf/defer-indice-temprano`) | F1 | `index.html`, `js/indice-ofertas.js` |
 | 5 | N-T1 y T3: `page.clock`, sin `retries`, y espera firme en el test con Chrome real | F1 | `tests/e2e/`, `playwright.config.js`, `tests/test_verificar_ofertas.py` |
 | 6 a 9 | D3, D1, D2, D4 (uno cada uno) | F2 | `filtrar_indice.py`, `indexar.py`, `actualizar.yml` |
 | 10 | KV + observability + `HORA_MINIMA` | F3 | `worker/` |
