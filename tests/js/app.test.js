@@ -76,6 +76,13 @@ test("registra el service worker despues de cargar, no antes", async () => {
   assert.deepEqual(registros, ["sw.js"]);
 });
 
+test("si el modulo llega con la pagina ya cargada (cargador de N-CAL1), registra el service worker igual", async () => {
+  const { escuchas, registros } = entorno({ listo: "complete" });
+  await esperar();
+  assert.deepEqual(registros, ["sw.js"]);
+  assert.equal(escuchas.load, undefined, "no espera un load que ya paso");
+});
+
 test("sin soporte de service worker no hay errores ni aviso", async () => {
   const { escuchas, aviso } = entorno({ serviceWorker: false });
   assert.doesNotThrow(() => escuchas.load());

@@ -99,12 +99,12 @@ class Sentry(unittest.TestCase):
     def test_index_y_las_paginas_generadas_llevan_el_dsn_y_el_script(self):
         html = (RAIZ / "index.html").read_text(encoding="utf-8")
         self.assertEqual(re.findall(r'<meta name="sentry-dsn" content="([^"]*)">', html), [SITIO["sentry_dsn"]])
-        self.assertIn('<script src="js/errores.js"></script>', html)
-        self.assertLess(html.index("js/errores.js"), html.index('src="js/buscador.js"'), "va antes que el resto")
+        self.assertIn('<script defer src="js/errores.js"></script>', html)
+        self.assertLess(html.index("js/errores.js"), html.index('"js/buscador.js"'), "va antes que el resto")
         js = 'process.stdout.write(require("./generar_paginas.js").cabeza({titulo:"t",descripcion:"d",canonica:"c",baseUrl:"b",rel:"../"}))'
         salida = subprocess.run(["node", "-e", js], cwd=RAIZ, capture_output=True, text=True, check=True, encoding="utf-8")
         self.assertIn(f'<meta name="sentry-dsn" content="{SITIO["sentry_dsn"]}">', salida.stdout)
-        self.assertIn('<script src="../js/errores.js"></script>', salida.stdout)
+        self.assertIn('<script defer src="../js/errores.js"></script>', salida.stdout)
 
 
 class Icono(unittest.TestCase):

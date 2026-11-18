@@ -81,11 +81,14 @@
     if (documento.readyState === "loading") documento.addEventListener("DOMContentLoaded", alLeerLaPagina);
     else alLeerLaPagina();
 
-    ventana.addEventListener("load", () => {
+    const alCargar = () => {
       const sw = ventana.navigator && ventana.navigator.serviceWorker;
       if (sw) Promise.resolve(sw.register(opc.sw)).catch(() => {});
       if (enModoApp()) medirApertura();
-    });
+    };
+    // Los modulos los agrega el cargador de index.html despues de pintar (N-CAL1): el load puede haber pasado ya.
+    if (documento.readyState === "complete") alCargar();
+    else ventana.addEventListener("load", alCargar);
     ventana.addEventListener("offline", mostrarAviso);
     ventana.addEventListener("online", comprobar);
     ventana.addEventListener("appinstalled", () => {

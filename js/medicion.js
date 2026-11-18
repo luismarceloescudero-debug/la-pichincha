@@ -8,7 +8,8 @@ function vaciarCola() {
   while (COLA_GC.length) { try { gc.count(COLA_GC.shift()); } catch (e) { /* no frena la pagina */ } }
 }
 function medir(ev) { if (ev) { COLA_GC.push(ev); vaciarCola(); } }
-(() => { const s = document.getElementById("gc"); if (s) s.addEventListener("load", vaciarCola); })();
+// GoatCounter puede haber cargado antes que este modulo (el cargador de index.html lo agrega despues de pintar).
+(() => { const s = document.getElementById("gc"); if (s) s.addEventListener("load", vaciarCola); vaciarCola(); })();
 
 /* Una busqueda cuenta cuando se asienta, no por cada tecla. */
 let ULTIMO_MEDIDO = "";
