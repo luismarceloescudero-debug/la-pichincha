@@ -145,3 +145,50 @@ test("repetidas: la misma notebook con el procesador escrito distinto en dos tie
                              { nombre: "Notebook HP 250 15.6″ Core 5 120U 32GB 512GB" }]);
   assert.equal(pares.length, 1);
 });
+
+// ---- La corrida de respaldo no compara contra una medicion con alarma (auditoria 17/11, punto 1) ----
+// Si la corrida de las 00:23 da alarma, su guardia.json se publica igual; la de las 02:47 lo bajaba como --previa (ya con 0
+// en el rubro), la comparacion no saltaba y salia Telegram con el indice malo.
+test("una previa con alarma no sirve de comparacion: se usa la ultima medicion sin alarma (previa_valida)", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guardia-"));
+  const indice = path.join(dir, "indice.json");
+  const g = n => path.join(dir, `guardia${n}.json`), leer = r => JSON.parse(fs.readFileSync(r, "utf8"));
+  const muchas = () => Array.from({ length: 12 }, (_, i) => fila(`SSD Marca${i} Modelo${i} 1TB NVMe`, 90000, { antes: 130000 + i * 2000 }));
+  const bueno = () => ({ ...sano(), productos: [...sano().productos, ...muchas()] });
+  const malo = () => { const idx = bueno(); idx.productos[1][5] = 0; return idx; };   // el monitor pierde su rebaja
+  const correr = (idx, salida, previa) => {
+    fs.writeFileSync(indice, JSON.stringify(idx));
+    const args = ["--indice", indice, "--salida", salida];
+    if (previa) args.push("--previa", previa);
+    return G.main(args);
+  };
+  const log = console.log; console.log = () => {};
+  try {
+    assert.equal(correr(bueno(), g(1)), 0);
+    assert.equal(leer(g(1)).alarma, false);
+    assert.equal(leer(g(1)).previa_valida, undefined, "sin alarma no hace falta arrastrar otra medicion");
+
+    assert.equal(correr(malo(), g(2), g(1)), 3);                     // la de las 00:23: Monitores sin ofertas
+    const segunda = leer(g(2));
+    assert.equal(segunda.alarma, true);
+    assert.equal(segunda.previa_valida.categorias.monitor.ofertas, 1);
+
+    assert.equal(correr(malo(), g(3), g(2)), 3, "el respaldo compara contra la medicion buena, no contra la de la alarma");
+    const tercera = leer(g(3));
+    assert.equal(tercera.previa_valida.categorias.monitor.ofertas, 1);
+    assert.equal(tercera.previa_valida.previa_valida, undefined, "no se anida: viaja una sola medicion valida");
+    assert.equal(tercera.previa_valida.generado, leer(g(1)).generado);
+
+    assert.equal(correr(bueno(), g(4), g(3)), 0);                     // vuelve a estar bien
+    assert.equal(leer(g(4)).alarma, false);
+  } finally { console.log = log; fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("una previa con alarma y sin previa_valida (formato viejo) no se usa para comparar", () => {
+  const previa = { ...G.medir(sano()), alarma: true };
+  previa.categorias.monitor.ofertas = 0;
+  assert.equal(G.base(previa), null);
+  const ok = G.medir(sano());
+  assert.equal(G.base(ok), ok);
+  assert.equal(G.base(null), null);
+});
