@@ -13,7 +13,7 @@ User-Agent. El runner (indexar.py) usa el archivo solo si su propio relevo de es
 de VIGENCIA_HORAS: precios mas viejos no se publican.
 
 Para publicar usa un clon superficial de la rama `historial` en una carpeta de trabajo fuera del repo
-(%LOCALAPPDATA%\\la-pichincha\\relevo-historial): nunca toca el checkout del dueno. pull --rebase antes de escribir y
+(%USERPROFILE%\\.la-pichincha\\relevo-historial): nunca toca el checkout del dueno. pull --rebase antes de escribir y
 antes de reintentar el push; nunca --force.
 """
 
@@ -193,8 +193,9 @@ def reciente(carpeta, claves, ahora, horas):
 
 
 def trabajo_por_defecto():
-    base = os.environ.get("LOCALAPPDATA") or str(Path.home() / ".local" / "share")
-    return Path(base) / "la-pichincha" / "relevo-historial"
+    """En la carpeta del usuario y no en AppData: una app empaquetada (MSIX, como Claude de escritorio) ve AppData
+    virtualizado y la tarea programada no veria lo mismo."""
+    return Path.home() / ".la-pichincha" / "relevo-historial"
 
 
 def main(argv=None):

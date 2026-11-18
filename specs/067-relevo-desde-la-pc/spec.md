@@ -18,7 +18,7 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    `{"tienda", "nombre", "via": "pc", "relevado": "AAAA-MM-DDTHH:MM-03:00", "cantidad", "productos": [...]}`, un
    producto por línea (diff chico). Una tienda que falla o trae 0 no se escribe: queda el archivo anterior con su fecha.
 3. **Publicación** (`--publicar`): clon superficial de la rama `historial` en
-   `%LOCALAPPDATA%\la-pichincha\relevo-historial` (fuera del repo; nunca toca el checkout del dueño), `pull --rebase`
+   `%USERPROFILE%\.la-pichincha\relevo-historial` (fuera del repo; nunca toca el checkout del dueño), `pull --rebase`
    antes de escribir, commit «Relevo desde la PC del AAAA-MM-DD: fullh4rd N, katech M» y push; si el push choca con el
    del runner, `pull --rebase` y reintenta (3 veces). Nunca `--force`. Usa las credenciales de git de la PC.
 4. **`indexar.py`** (en el runner): para una tienda con `relevo: pc`, primero intenta el relevo directo. Si da error
@@ -35,11 +35,12 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
      reuso E1 mientras esté activa, pausa a los 14 días).
 5. **Tarea programada** «La Pichincha relevo PC» (`herramientas/instalar-relevo-pc.ps1`): diaria a las **05:30** y al
    iniciar sesión, solo con red, `StartWhenAvailable` (si la PC estaba apagada, corre apenas puede). Ejecuta
-   `herramientas/relevo-pc.ps1` (log en `%LOCALAPPDATA%\la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene
+   `herramientas/relevo-pc.ps1` (log en `%USERPROFILE%\.la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene
    relevos de las dos tiendas de menos de 12 h (`--saltar-si-menos-de 12`; `-Forzar` lo saltea).
-   La tarea corre desde un **clon propio de `main`** en `%LOCALAPPDATA%\la-pichincha\relevo-codigo` (lo crea el
+   La tarea corre desde un **clon propio de `main`** en `%USERPROFILE%\.la-pichincha\relevo-codigo` (lo crea el
    instalador; `relevo-pc.ps1` le hace `pull --ff-only` antes de cada corrida): no depende de que el checkout del dueño
-   esté en `main` ni al día, y nunca lo toca.
+   esté en `main` ni al día, y nunca lo toca. Todo va en `%USERPROFILE%\.la-pichincha` y no en AppData: Claude de
+   escritorio es una app MSIX y ve `AppData\Local` virtualizado; la tarea no encontraba el script (0x8007010B).
 
 La corrida programada de la mañana (03:23 y 05:47 UTC en el cron; GitHub la arranca de hecho entre las 09 y las 12 de
 Argentina) encuentra el relevo de las 05:30 con pocas horas. Las corridas de los push del día también (< 36 h).
