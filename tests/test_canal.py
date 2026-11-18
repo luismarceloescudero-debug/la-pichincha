@@ -40,6 +40,18 @@ class EnLaAction(unittest.TestCase):
         self.assertIn('echo "alarma=true" >> "$GITHUB_OUTPUT"', guardia)
         self.assertNotIn("se mandó igual", YML)
 
+    def test_si_la_guardia_revienta_tambien_es_alarma_y_telegram_no_sale(self):
+        # Auditoria 17/11, punto 6: con `|| rc=$?` solo el 3 marcaba alarma; si guardia.js salia con 1 (un error suyo) el
+        # canal se publicaba sin medir el indice. Cualquier codigo distinto de 0 es alarma, con su texto para el issue.
+        guardia = YML[YML.index("id: guardia"):YML.index("- name: Avisar la alarma de la guardia")]
+        self.assertIn('if [ "$rc" -ne 0 ]; then', guardia)
+        self.assertNotIn('if [ "$rc" -eq 3 ]; then echo "alarma=true"', guardia)
+        self.assertIn("> alarma.md", guardia)                 # el issue y el aviso al dueno tienen que decir que fallo
+        # Y si el paso entero falla antes de escribir la salida, tampoco sale.
+        paso = YML[YML.index("- name: Publicar las pichinchas"):YML.index("upload-pages-artifact")]
+        condicion = paso[paso.index("if:"):paso.index("continue-on-error")]
+        self.assertIn("steps.guardia.outcome == 'success'", condicion)
+
     def test_el_respaldo_no_manda_telegram_si_la_guardia_de_hoy_dio_alarma(self):
         # Auditoria 17/11, punto 1: la corrida de las 00:23 da alarma y no manda Telegram; la de las 02:47 rearma el indice
         # (el sitio puede salir de nuevo) pero el canal de ese dia no se publica: lo decide el dueno mirando el issue.
