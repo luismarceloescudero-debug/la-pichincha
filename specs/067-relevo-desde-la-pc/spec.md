@@ -41,6 +41,13 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    instalador; `relevo-pc.ps1` le hace `pull --ff-only` antes de cada corrida): no depende de que el checkout del dueño
    esté en `main` ni al día, y nunca lo toca. Todo va en `%USERPROFILE%\.la-pichincha` y no en AppData: Claude de
    escritorio es una app MSIX y ve `AppData\Local` virtualizado; la tarea no encontraba el script (0x8007010B).
+6. **Ritmo educado** (18/11): FullH4rd cortó con 403 un relevo a las 08:39 (12 productos) tres minutos después de otro
+   (108), y un pedido suelto dio 200 enseguida: es su límite de ritmo, no la IP. `tiendas.json` admite `"pausa_s"` por
+   tienda (segundos entre pedidos de listados, también entre listados; por defecto `PAUSA` = 0,35 s) y se usa el mayor
+   entre ese valor y el `Crawl-delay` de su `robots.txt` (el relevo de la PC lo lee; hoy FullH4rd no trae). FullH4rd:
+   `"pausa_s": 8`. Medido: 24 pedidos a ~1 por segundo dieron todos 200, así que el umbral no quedó claro y se tomó el
+   valor prudente. Desde la PC, el primer 403 espera `ESPERA_403_PC` (120 s) y reintenta esa página **una** vez; si
+   vuelve el 403 se corta como siempre. En el runner el 403 es de IP y se corta sin esperar.
 
 La corrida programada de la mañana (03:23 y 05:47 UTC en el cron; GitHub la arranca de hecho entre las 09 y las 12 de
 Argentina) encuentra el relevo de las 05:30 con pocas horas. Las corridas de los push del día también (< 36 h).

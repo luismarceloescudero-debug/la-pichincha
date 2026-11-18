@@ -100,6 +100,7 @@
     "activa": true,
     "base": "https://fullh4rd.com.ar",
     "relevo": "pc",
+    "pausa_s": 8,
     "catalogo": {
       "tipo": "listados",
       "origen": {
