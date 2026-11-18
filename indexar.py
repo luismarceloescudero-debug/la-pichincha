@@ -55,6 +55,9 @@ PAUSA_FICHA = 4       # segundos entre fichas de producto: son paginas pesadas, 
 REINTENTO_DIAS = 30   # una ficha que no trajo codigo se vuelve a mirar pasado este tiempo
 PODA_DIAS = 60        # lo guardado de un aviso que ya no se publica se descarta pasado este tiempo
 BLOQUEOS = (403, 429, 503)   # un bloqueo no se esquiva: se corta y se retoma otro dia (principio III)
+ESPERA_429 = 10              # segundos ante un 429 sin Retry-After (o con uno ilegible), antes del unico reintento
+TOPE_RETRY_AFTER = 60        # un Retry-After mas largo no se espera entero: se espera esto y, si persiste, se sigue
+LISTADOS_429_SEGUIDOS = 3    # listados seguidos que terminan en 429 despues del reintento: la tienda no nos quiere hoy
 FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
 MAX_BAJA_FOTO = 2     # sin historial, una foto del doble de precio ya no es el mismo producto (cambio de variante)
 TOPE_VENDIDOS = 100   # puestos del orden «mas vendidos» de cada tienda que se guardan: mas abajo ya no dice nada (spec 019)
@@ -277,22 +280,46 @@ def tarjetas(html, cfg):
     return salida
 
 
+def espera_429(error):
+    """Los segundos a esperar ante un 429: su Retry-After (en segundos) con tope TOPE_RETRY_AFTER, o ESPERA_429."""
+    try:
+        valor = (error.headers or {}).get("Retry-After")
+        segundos = int(str(valor).strip()) if valor is not None else ESPERA_429
+    except (ValueError, AttributeError, TypeError):
+        segundos = ESPERA_429                    # una fecha HTTP o basura: lo de siempre
+    return max(0, min(segundos, TOPE_RETRY_AFTER))
+
+
 def indexar_listados(tienda, max_paginas):
     cfg = tienda["catalogo"]
     vistos, items = set(), []
     fuentes = listados(tienda)
     print("  " + str(len(fuentes)) + " listados")
+    ultimo_429, seguidos_429 = None, 0
     for i, listado in enumerate(fuentes, 1):
         n = cfg.get("desde", 1)
         paginas = 0
+        reintentado = False
         while paginas < min(max_paginas, TOPE_PAGINAS):
             try:
                 html = bajar(cfg["pagina"].format(listado=listado, n=n))
             except urllib.error.HTTPError as e:
                 if e.code not in BLOQUEOS:
                     break                            # un 404 o un 500 de una pagina corta solo ese listado
-                # 403/429/503: la tienda dijo que no (17/11: FullH4rd contesta «Your request was blocked.» a la IP
-                # del runner). No se insiste con el resto de los listados (principio III). Sin nada leido, sube como
+                if e.code == 429:
+                    # Un 429 es «mas despacio», no «no»: se respeta su Retry-After (con tope) y se reintenta una vez esa
+                    # pagina; si persiste se deja ese listado y se sigue con los demas. Cortar toda la tienda por un 429
+                    # transitorio en el listado 3 de 40 publicaba un catalogo parcial.
+                    if not reintentado:
+                        reintentado = True
+                        time.sleep(espera_429(e))
+                        continue
+                    ultimo_429 = e
+                    seguidos_429 += 1
+                    print("  " + AMAR + "! HTTP 429 persistente: dejo el listado " + str(i) + FIN)
+                    break
+                # 403/503: la tienda dijo que no (17/11: FullH4rd contesta «Your request was blocked.» a la IP del
+                # runner). No se insiste con el resto de los listados (principio III). Sin nada leido, sube como
                 # error: el aviso dice «bloqueo» y no «0 productos», y relevar() no lo reintenta.
                 if not items:
                     raise
@@ -301,6 +328,7 @@ def indexar_listados(tienda, max_paginas):
                 return items
             except (urllib.error.URLError, OSError):
                 break
+            seguidos_429 = 0
             nuevos = [t for t in tarjetas(html, cfg) if t["url"] not in vistos]
             if not nuevos:
                 break
@@ -316,6 +344,15 @@ def indexar_listados(tienda, max_paginas):
         if i % 20 == 0 or i == len(fuentes):
             print("    " + str(i) + "/" + str(len(fuentes)) + " listados " + PUNTO
                   + " " + str(len(items)) + " productos")
+        if seguidos_429 >= LISTADOS_429_SEGUIDOS:
+            # Varios listados seguidos con 429 aun despues de esperar: la tienda no nos quiere hoy (principio III).
+            if not items:
+                raise ultimo_429
+            print("  " + AMAR + "! " + str(seguidos_429) + " listados seguidos con HTTP 429: me quedo con "
+                  + str(len(items)) + " productos" + FIN)
+            return items
+    if not items and ultimo_429 is not None:
+        raise ultimo_429                         # sin nada leido y con 429: es un bloqueo, no «0 productos»
     return items
 
 

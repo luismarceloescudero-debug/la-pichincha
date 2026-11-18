@@ -314,14 +314,76 @@ class Catalogos(unittest.TestCase):
         dormir.assert_not_called()
 
     def test_un_bloqueo_a_mitad_de_camino_corta_y_se_queda_con_lo_leido(self):
-        cfg = self._tienda_terminos(["a", "b", "c"])
-        html = leer("fullh4rd", "listado.html")
-        bajar = mock.Mock(side_effect=[html, self._http(429)])
-        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+        for codigo in (403, 503):
+            cfg = self._tienda_terminos(["a", "b", "c"])
+            html = leer("fullh4rd", "listado.html")
+            bajar = mock.Mock(side_effect=[html, self._http(codigo)])
+            with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                    redirect_stdout(io.StringIO()):
+                items = indexar.indexar_listados(cfg, 3)
+            self.assertEqual(len(items), 4)
+            self.assertEqual(bajar.call_count, 2, codigo)     # ni la pagina siguiente ni los terminos b y c
+
+    def _por_termino(self, respuestas):
+        """bajar() que contesta segun el termino: una lista de respuestas (texto o error) que se van consumiendo."""
+        pedidos = []
+
+        def bajar(u):
+            termino = u.split("q=")[1].split("&")[0]
+            pedidos.append(termino)
+            r = respuestas[termino].pop(0) if respuestas[termino] else ""
+            if isinstance(r, Exception):
+                raise r
+            return r
+        return bajar, pedidos
+
+    @staticmethod
+    def _429(espera=None):
+        return urllib.error.HTTPError("https://fh.test/x", 429, "Too Many Requests",
+                                      {"Retry-After": espera} if espera is not None else {}, io.BytesIO(b""))
+
+    def test_un_429_respeta_retry_after_y_sigue_en_el_mismo_listado(self):
+        cfg = self._tienda_terminos(["a", "b"])
+        bajar, pedidos = self._por_termino({"a": [self._429("5"), leer("fullh4rd", "listado.html")], "b": []})
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
                 redirect_stdout(io.StringIO()):
             items = indexar.indexar_listados(cfg, 3)
         self.assertEqual(len(items), 4)
-        self.assertEqual(bajar.call_count, 2)                 # ni la pagina siguiente ni los terminos b y c
+        dormir.assert_any_call(5)
+        self.assertIn("b", pedidos)
+
+    def test_un_429_que_persiste_corta_ese_listado_y_sigue_con_los_demas(self):
+        # Un 429 transitorio en el listado 3 de 40 cortaba toda la tienda y se publicaba un catalogo parcial.
+        cfg = self._tienda_terminos(["a", "b", "c"])
+        bajar, pedidos = self._por_termino({"a": [leer("fullh4rd", "listado.html")],
+                                            "b": [self._429("3600"), self._429("3600")],
+                                            "c": [leer("fullh4rd", "listado.html").replace("/prod/", "/prod/9")]})
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_listados(cfg, 3)
+        self.assertIn("c", pedidos, "el 429 del listado b no corta la tienda")
+        self.assertEqual(pedidos.count("b"), 2, "un solo reintento")
+        self.assertGreater(len(items), 4)
+        self.assertNotIn(mock.call(3600), dormir.call_args_list, "Retry-After con tope")
+        dormir.assert_any_call(indexar.TOPE_RETRY_AFTER)
+
+    def test_sin_retry_after_espera_lo_de_siempre(self):
+        cfg = self._tienda_terminos(["a"])
+        bajar, _ = self._por_termino({"a": [self._429(), leer("fullh4rd", "listado.html")]})
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
+                redirect_stdout(io.StringIO()):
+            indexar.indexar_listados(cfg, 3)
+        dormir.assert_any_call(indexar.ESPERA_429)
+
+    def test_429_en_todos_los_listados_es_un_bloqueo(self):
+        cfg = self._tienda_terminos(["a", "b", "c", "d", "e"])
+        bajar, pedidos = self._por_termino({k: [self._429("1")] * 2 for k in "abcde"})
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()), self.assertRaises(urllib.error.HTTPError) as caso:
+            indexar.indexar_listados(cfg, 3)
+        self.assertEqual(caso.exception.code, 429)
+        self.assertEqual(indexar.motivo_de(caso.exception), "bloqueo")
+        self.assertEqual(len(set(pedidos)), indexar.LISTADOS_429_SEGUIDOS, "tras varios listados seguidos con 429 se corta")
 
     def test_un_404_de_una_pagina_sigue_cortando_solo_ese_listado(self):
         cfg = self._tienda_terminos(["a", "b"])
