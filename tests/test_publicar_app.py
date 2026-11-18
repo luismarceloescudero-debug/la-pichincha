@@ -166,7 +166,7 @@ class AvisoDeSinConexionEnElSitio(unittest.TestCase):
         self.assertIn('<div id="sin-red" class="sin-red" role="status" hidden></div>', self.sin_scripts)
 
     def test_carga_app_js_y_la_inicia_solo_si_la_pagina_esta_suelta(self):
-        self.assertIn('<script src="js/app.js"></script>', self.html)
+        self.assertIn('"js/app.js"', self.html.split('<script id="modulos" type="application/json">')[1].split("</script>")[0])
         arranque = (RAIZ / "js" / "arranque.js").read_text(encoding="utf-8")
         self.assertRegex(arranque, r"SUELTA \? App\.iniciar\(window, document,")   # no dentro del visor del artifact
 
@@ -186,17 +186,44 @@ class IndexPartido(unittest.TestCase):
     def setUp(self):
         import re
         self.html = (RAIZ / "index.html").read_text(encoding="utf-8")
-        self.scripts = re.findall(r'<script src="(js/[\w.-]+\.js)"></script>', self.html)
+        import json
+        # N-CAL1: errores.js con defer en el <head>; el resto, en la lista que el cargador agrega despues de pintar.
+        self.lista = json.loads(re.search(r'<script id="modulos" type="application/json">(.*?)</script>', self.html, re.S).group(1))
+        self.scripts = re.findall(r'<script defer src="(js/[\w.-]+\.js)"></script>', self.html) + self.lista
 
-    def test_el_unico_script_inline_son_los_datos(self):
+    def test_los_unicos_scripts_inline_son_los_datos_y_el_indice_temprano(self):
         import re
         inline = [s for s in re.findall(r"<script>(.*?)</script>", self.html, flags=re.S)]
-        self.assertEqual(len(inline), 1)
-        self.assertIn("const DATOS = ", inline[0])
-        self.assertLess(len(inline[0].split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
+        self.assertEqual(len(inline), 2)
+        temprano, datos = inline
+        self.assertIn("window.INDICE_TEMPRANO=", temprano)
+        self.assertLess(len(temprano), 600, "una linea, no logica")
+        self.assertIn("const DATOS = ", datos)
+        self.assertLess(len(datos.split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
+
+    def test_el_indice_temprano_solo_va_en_la_web(self):
+        solo_web = self.html.split("<!-- solo-web -->")[1].split("<!-- /solo-web -->")[0]
+        self.assertIn("INDICE_TEMPRANO", solo_web)
+
+    def test_ningun_modulo_frena_la_primera_pintura(self):
+        import re
+        # N-CAL1: ninguna etiqueta sincrona; solo errores.js va con defer y los demas los agrega el cargador despues de pintar.
+        self.assertEqual(re.findall(r'<script src="js/', self.html), [])
+        self.assertEqual(re.findall(r'<script defer src="(js/[\w.-]+\.js)"></script>', self.html), ["js/errores.js"])
+        self.assertGreaterEqual(len(self.scripts), 28)
+        self.assertEqual(len(set(self.lista)), len(self.lista), "sin repetidos")
+        self.assertEqual(self.lista[-2:], ["js/arranque.js", "js/al-ver.js"], "arranque al final, como antes")
+
+    def test_el_cargador_conserva_el_orden_y_espera_la_primera_pintura(self):
+        import re
+        cargador = re.search(r'<script id="cargador">(.*?)</script>', self.html, re.S).group(1)
+        self.assertIn("e.async=false", cargador)
+        self.assertIn('"first-contentful-paint"', cargador)
+        self.assertIn('addEventListener("load"', cargador, "si no hay pintura que avisar, al load")
+        self.assertLess(self.html.index('<script id="modulos"'), self.html.index('<script id="cargador">'))
 
     def test_los_datos_van_antes_que_los_modulos_que_los_usan(self):
-        self.assertLess(self.html.index("const DATOS = "), self.html.index('<script src="js/base.js">'))
+        self.assertLess(self.html.index("const DATOS = "), self.html.index('<script id="modulos"'))
 
     def test_cada_modulo_existe_y_el_service_worker_lo_guarda(self):
         sw = (RAIZ / "sw.js").read_text(encoding="utf-8")

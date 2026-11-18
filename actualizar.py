@@ -288,8 +288,11 @@ FINAL = "/* === FIN DATOS === */"
 
 SOLO_WEB = re.compile(r"[ \t]*<!-- solo-web -->.*?<!-- /solo-web -->[ \t]*\n?", re.S)
 ESQUELETO = re.compile(r"^[ \t]*(?:<!doctype html>|</?(?:html|head|body)\b[^>]*>)[ \t]*\n?", re.I | re.M)
-JS_SRC = re.compile(r'<script src="(js/[\w.-]+\.js)"></script>')
+JS_SRC = re.compile(r'<script (?:defer )?src="(js/[\w.-]+\.js)"></script>')
 CSS_LINK = re.compile(r'<link rel="stylesheet" href="(css/[\w.-]+\.css)">')
+# El cargador de index.html (N-CAL1) agrega los modulos despues de pintar; en el artifact van adentro, en ese orden.
+MODULOS = re.compile(r'<script id="modulos" type="application/json">(.*?)</script>', re.S)
+CARGADOR = re.compile(r'[ \t]*<script id="cargador">.*?</script>[ \t]*\r?\n?', re.S)
 
 
 def armar_artifact(html, leer):
@@ -300,6 +303,9 @@ def armar_artifact(html, leer):
     html = ESQUELETO.sub("", html)
     html = CSS_LINK.sub(lambda m: "<style>\n" + leer(m.group(1)).rstrip("\n") + "\n</style>", html)
     html = JS_SRC.sub(lambda m: "<script>\n" + leer(m.group(1)).rstrip("\n") + "\n</script>", html)
+    html = CARGADOR.sub("", html)
+    html = MODULOS.sub(lambda m: "\n".join("<script>\n" + leer(r).rstrip("\n") + "\n</script>"
+                                           for r in json.loads(m.group(1))), html)
     return html.lstrip()
 
 
