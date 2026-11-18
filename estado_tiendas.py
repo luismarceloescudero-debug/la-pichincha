@@ -7,8 +7,9 @@ roto. Y si revive, vuelve sola. Cada corrida del indexador clasifica lo que traj
     ok       trajo productos
     vacia    0 productos sin bloqueo (tambien un error de lectura o un corte de red que no se recupero)
     bloqueo  la tienda dijo que no: 403/429/503 o el desafio de Cloudflare (no se esquiva, principio III)
-    muerta   el dominio no existe (DNS), no contesta al conectar, rechaza la conexion, tiene el certificado
-             invalido o Cloudflare dice que el origen esta caido (521/522/523/530)
+    muerta   el dominio no existe (NXDOMAIN) o Cloudflare dice que el origen esta caido (521/522/523/530), y el ping a
+             la portada lo CONFIRMA. Un DNS temporal (EAI_AGAIN), un tiempo agotado, una conexion rechazada o un
+             certificado invalido son la red (puede ser el runner): cuentan como vacia, nunca como muerta.
 
 y con eso decide el estado, con reglas fijas:
 
@@ -17,6 +18,9 @@ y con eso decide el estado, con reglas fijas:
     sin productos (vacia, bloqueo o muerta) DIAS_PAUSA dias seguidos  -> pausa: sus precios viejos no se publican
         y se sigue intentando a diario.
     vuelve a traer productos  -> activa (alta) en la misma corrida.
+
+Freno global: si en una corrida FRENO_PROPORCION (30 %) o mas de las tiendas relevadas caen por la red o por muerte,
+el problema es del runner o de un bug, no de las tiendas: esa corrida no suma contadores (ver `frenar`).
 
 El estado vive en la carpeta del historial (rama `historial`, junto a fichas.json), que es donde el indexador ya
 persiste lo que tiene que sobrevivir entre corridas; el paso «Guardar el historial de precios» lo commitea.
@@ -36,8 +40,12 @@ CORRIDAS_BAJA = 3          # corridas seguidas (dias distintos) con el dominio m
 DIAS_PAUSA = 14            # dias seguidos sin productos (vacia, bloqueo o muerta) para poner en pausa
 DIAS_PING_BAJA = 7         # una tienda dada de baja se sondea una vez por semana
 MUERTE_HTTP = (521, 522, 523, 530)   # Cloudflare: el servidor de origen esta caido o el dominio ya no apunta a nada
+FRENO_PROPORCION = 0.30    # caidas por red o muerte sobre relevadas que frenan los contadores de toda la corrida
+FRENO_MINIMO = 5           # con menos tiendas relevadas (una corrida --solo) no hay freno: no se distingue el runner
+EAI_AGAIN = getattr(socket, "EAI_AGAIN", -3)   # DNS temporal: el resolvedor no contesto, el dominio puede existir
 
 OK, VACIA, BLOQUEO, MUERTA = "ok", "vacia", "bloqueo", "muerta"
+RED, VIVA = "red", "viva"   # lo que dice un sondeo ademas de MUERTA
 ACTIVA, PAUSA, BAJA = "activa", "pausa", "baja"
 
 
@@ -61,27 +69,47 @@ def _cadena(error):
 
 
 def es_muerta(error):
-    """True si el error dice que la tienda no existe o no contesta (y no que contesto que no)."""
+    """True solo si el error dice que la tienda NO EXISTE: NXDOMAIN (un gaierror que no es EAI_AGAIN) o Cloudflare con el
+    origen caido (521/522/523/530). Lo demas (tiempo agotado, conexion rechazada, certificado) puede ser el runner."""
     for e in _cadena(error):
         if isinstance(e, urllib.error.HTTPError):
             return e.code in MUERTE_HTTP
-        if isinstance(e, (socket.gaierror, ssl.SSLCertVerificationError, ConnectionRefusedError)):
-            return True
-    # Un tiempo agotado al CONECTAR viene envuelto en URLError; uno al leer (ya contesto) viene suelto y es la red.
-    return any(isinstance(e, urllib.error.URLError) and not isinstance(e, urllib.error.HTTPError)
-               and isinstance(e.reason, (TimeoutError, socket.timeout)) for e in _cadena(error))
+        if isinstance(e, socket.gaierror):
+            return e.errno != EAI_AGAIN
+    return False
 
 
-def sondear(pedir, base):
-    """Ping barato: pide la portada con `pedir(url)`. True si la tienda esta muerta; cualquier respuesta (un 403
-    tambien) es una tienda viva."""
-    if not base:
+def es_red(error):
+    """True si el error es de la red (corte, tiempo, DNS temporal, conexion, certificado) y no una respuesta."""
+    cadena = _cadena(error)
+    if any(isinstance(e, urllib.error.HTTPError) for e in cadena):
         return False
+    return any(isinstance(e, (OSError, TimeoutError)) for e in cadena)
+
+
+def sondeo(pedir, base):
+    """Ping barato a la portada con `pedir(url)`: MUERTA (NXDOMAIN o 52x), RED (no se pudo saber) o VIVA (cualquier
+    respuesta, un 403 tambien). None si la fuente no tiene portada."""
+    if not base:
+        return None
     try:
         pedir(base)
     except Exception as e:
-        return es_muerta(e)
-    return False
+        if es_muerta(e):
+            return MUERTA
+        return RED if es_red(e) else VIVA
+    return VIVA
+
+
+def sondear(pedir, base):
+    """True si el ping confirma que la tienda esta muerta."""
+    return sondeo(pedir, base) == MUERTA
+
+
+def frenar(relevadas, caidas):
+    """True si las caidas por red o muerte de una corrida son tantas que el problema es del runner (o un bug): esa
+    corrida no suma contadores. Con pocas tiendas relevadas no se frena."""
+    return relevadas >= FRENO_MINIMO and caidas >= FRENO_PROPORCION * relevadas
 
 
 def clasificar(productos, motivo, muerta):
