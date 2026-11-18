@@ -37,6 +37,9 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    iniciar sesión, solo con red, `StartWhenAvailable` (si la PC estaba apagada, corre apenas puede). Ejecuta
    `herramientas/relevo-pc.ps1` (log en `%LOCALAPPDATA%\la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene
    relevos de las dos tiendas de menos de 12 h (`--saltar-si-menos-de 12`; `-Forzar` lo saltea).
+   La tarea corre desde un **clon propio de `main`** en `%LOCALAPPDATA%\la-pichincha\relevo-codigo` (lo crea el
+   instalador; `relevo-pc.ps1` le hace `pull --ff-only` antes de cada corrida): no depende de que el checkout del dueño
+   esté en `main` ni al día, y nunca lo toca.
 
 La corrida programada de la mañana (03:23 y 05:47 UTC en el cron; GitHub la arranca de hecho entre las 09 y las 12 de
 Argentina) encuentra el relevo de las 05:30 con pocas horas. Las corridas de los push del día también (< 36 h).

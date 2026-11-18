@@ -1,6 +1,7 @@
 # Relevo desde la PC (spec 067): lo que corre la tarea programada "La Pichincha relevo PC".
 # Releva las tiendas con "relevo": "pc" en tiendas.json (FullH4rd y Katech) y sube relevo-pc/<tienda>.json a la rama
-# historial desde un clon de trabajo en %LOCALAPPDATA%\la-pichincha\relevo-historial (nunca toca este checkout).
+# historial desde un clon de trabajo en %LOCALAPPDATA%\la-pichincha\relevo-historial. La tarea lo corre desde su propio
+# clon de main (%LOCALAPPDATA%\la-pichincha\relevo-codigo), que se pone al dia aca con pull --ff-only.
 # Sin secretos: usa las credenciales de git que ya tiene la PC.
 #
 #   powershell -NoProfile -ExecutionPolicy Bypass -File herramientas\relevo-pc.ps1            # como la tarea
@@ -36,6 +37,11 @@ if (-not $Forzar) { $argumentos += @('--saltar-si-menos-de', "$SaltarSiMenosDe")
 Add-Content -Path $log -Value "`n=== $(Get-Date -Format s) relevo desde la PC ($repo)" -Encoding utf8
 Push-Location $repo
 try {
+    # El clon propio de la tarea (instalar-relevo-pc.ps1) se pone al dia con main; si falla, se releva con lo que hay.
+    # Corrido a mano desde otro checkout (el tuyo) no hace pull: ese no se toca.
+    if ($repo -eq (Join-Path $carpeta 'relevo-codigo')) {
+        cmd /c ('git pull --quiet --ff-only >> "' + $log + '" 2>&1')
+    }
     # cmd junta stdout y stderr en el log sin que PowerShell 5.1 convierta stderr en errores.
     $linea = '"' + $python + '" ' + (($argumentos | ForEach-Object { '"' + $_ + '"' }) -join ' ') + ' >> "' + $log + '" 2>&1'
     cmd /c $linea
