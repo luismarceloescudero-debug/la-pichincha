@@ -110,7 +110,7 @@ function main(argv) {
   if (!idx) { console.log("sin indice: no hay nada que medir"); return 0; }
   const m = medir(idx);
   // Con que se midio: el indice de la cache sirve si lo rearma esta corrida; si no, el sitio ya publica otro (con sus ofertas).
-  if (arg("reusado")) m.reusado = true;
+  if (argv.includes("--reusado")) m.reusado = true; // bandera sin valor: va ultima en la linea del workflow
   if (arg("ofertas")) m.repetidas = repetidas((leer(arg("ofertas")) || {}).ofertas);
   const previa = base(arg("previa") ? leer(arg("previa")) : null);
   const lista = alarmas(m, previa);
