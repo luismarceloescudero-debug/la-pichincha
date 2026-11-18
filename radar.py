@@ -38,6 +38,7 @@ MAX_CONSULTAS = 40
 MAX_FIRECRAWL = 10
 ESPERA_FIRECRAWL = 7  # segundos: el plan gratis deja 10 scrapes por minuto
 UA = "la-pichincha-radar/1.0"
+AGENTE_FIRECRAWL = "FirecrawlAgent"  # el User-agent con el que Firecrawl pide la pagina: robots.txt puede nombrarlo
 
 # Terminos que consultas.json no tiene y que el indice si vende (celulares, la prueba del 17/11 los encontro).
 EXTRA = ["celular samsung galaxy", "iphone", "motorola moto g", "notebook ryzen 7", "pc armada"]
@@ -255,7 +256,7 @@ def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_post, get=_get, dor
         if robots is None:
             c["firecrawl"] = "sin-robots"
             continue
-        if not robots_permite(robots, p.path or "/"):
+        if not robots_permite(robots, p.path or "/", agente=AGENTE_FIRECRAWL):
             c["firecrawl"] = "robots-prohibe"
             continue
         if usados:
@@ -268,6 +269,7 @@ def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_post, get=_get, dor
             c["firecrawl"] = "bloqueada" if e.code in (403, 429) else f"error-{e.code}"
             continue
         except (urllib.error.URLError, TimeoutError, ValueError) as e:
+            usados += 1  # conservador: Firecrawl pudo haber hecho (y cobrado) el scrape aunque la respuesta no llego
             c["firecrawl"] = f"error-red: {e}"
             continue
         datos = j.get("data") or {}
@@ -314,6 +316,9 @@ def informe_md(r):
 def correr(indice, consultas, tiendas, clave_tavily, clave_firecrawl=None, tope=TOPE_CREDITOS, hoy=None,
            post=_post, get=_get, dormir=time.sleep, tope_firecrawl=MAX_FIRECRAWL):
     hoy = hoy or date.today()
+    # Los topes tienen techo: ni un input del workflow ni un argumento gastan mas que el plan gratis por corrida.
+    tope = max(0, min(tope, TOPE_CREDITOS))
+    tope_firecrawl = max(0, min(tope_firecrawl, MAX_FIRECRAWL))
     urls, doms = conocidas(indice, tiendas)
     terminos = elegir_consultas(consultas, hoy.isocalendar()[1])
     b = buscar(terminos, clave_tavily, tope, post)

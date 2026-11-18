@@ -587,22 +587,30 @@ def vendidos(tienda):
     return {}
 
 
-def robots_permite(texto, ruta):
-    """Si robots.txt deja a cualquier robot (el grupo `User-agent: *`) pedir `ruta`. Gana la regla mas larga que
-    coincide y, a igual largo, Allow; entiende `*` y `$`. Los grupos con nombre (Googlebot, ClaudeBot) no cuentan:
-    no nos presentamos con ninguno de esos nombres. Sin grupo * o sin reglas, todo permitido."""
-    reglas, agentes, en_reglas = [], set(), False
+def robots_permite(texto, ruta, agente=None):
+    """Si robots.txt deja pedir `ruta`. Con `agente` (p. ej. FirecrawlAgent, el que usa el radar), si hay un grupo
+    dirigido a ese nombre manda ese grupo, como dice el estandar; si no, el de cualquier robot (`User-agent: *`). Gana
+    la regla mas larga que coincide y, a igual largo, Allow; entiende `*` y `$`. Los demas grupos con nombre
+    (Googlebot, ClaudeBot) no cuentan: no nos presentamos con esos nombres. Sin grupo que aplique, todo permitido."""
+    propio = (agente or "").strip().lower()
+    reglas, agentes, en_reglas, hay_propio = {"*": [], "propio": []}, set(), False, False
     for linea in (texto or "").lstrip("\ufeff").splitlines():
         clave, _, valor = linea.split("#", 1)[0].partition(":")
         clave, valor = clave.strip().lower(), valor.strip()
         if clave == "user-agent":
             if en_reglas:
                 agentes, en_reglas = set(), False
-            agentes.add(valor)
+            agentes.add(valor.lower())
+            hay_propio = hay_propio or bool(propio and valor.lower() == propio)
         elif clave in ("allow", "disallow"):
             en_reglas = True
-            if "*" in agentes and valor:
-                reglas.append((clave == "allow", valor))
+            if not valor:
+                continue
+            if "*" in agentes:
+                reglas["*"].append((clave == "allow", valor))
+            if propio and propio in agentes:
+                reglas["propio"].append((clave == "allow", valor))
+    reglas = reglas["propio"] if hay_propio else reglas["*"]
     mejor = (-1, True)
     for permite, patron in reglas:
         rx = re.escape(patron).replace(r"\*", ".*")

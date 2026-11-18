@@ -593,6 +593,16 @@ class Robots(unittest.TestCase):
         self.assertTrue(indexar.robots_permite("", self.BUSQUEDA))
         self.assertTrue(indexar.robots_permite("User-agent: *\nDisallow:\n", self.BUSQUEDA))
 
+    def test_un_grupo_dirigido_al_agente_manda_sobre_el_de_cualquiera(self):
+        solo_fc = "User-agent: *\nDisallow:\n\nUser-agent: FirecrawlAgent\nDisallow: /\n"
+        self.assertFalse(indexar.robots_permite(solo_fc, "/producto/x", agente="FirecrawlAgent"))
+        self.assertFalse(indexar.robots_permite(solo_fc.lower(), "/producto/x", agente="FirecrawlAgent"))
+        self.assertTrue(indexar.robots_permite(solo_fc, "/producto/x"), "sin agente solo cuenta el grupo *")
+        deja_fc = "User-agent: *\nDisallow: /\n\nUser-agent: FirecrawlAgent\nAllow: /\n"
+        self.assertTrue(indexar.robots_permite(deja_fc, "/producto/x", agente="FirecrawlAgent"))
+        self.assertFalse(indexar.robots_permite("User-agent: *\nDisallow: /\n", "/x", agente="FirecrawlAgent"),
+                         "sin grupo propio vale el de cualquiera")
+
 
 class Vtex(unittest.TestCase):
     """Tiendas VTEX por su API publica de catalogo: una sola lectura para todas (OnCity, Naldo, Pardo...)."""
