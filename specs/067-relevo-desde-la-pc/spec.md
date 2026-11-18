@@ -67,6 +67,22 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
 La corrida programada de la mañana (03:23 y 05:47 UTC en el cron; GitHub la arranca de hecho entre las 09 y las 12 de
 Argentina) encuentra el relevo de las 05:30 con pocas horas. Las corridas de los push del día también (< 36 h).
 
+## Constitution Check
+
+**Principio III (respeto a las fuentes)**: «un bloqueo NUNCA se esquiva».
+
+- **La IP de la PC no esquiva un bloqueo.** FullH4rd y Katech no bloquean a La Pichincha: rechazan los rangos de IP
+  de centros de datos (los runners de GitHub). Desde una conexión domiciliaria, con el mismo User-Agent que se
+  presenta como La Pichincha, el mismo extractor y el mismo ritmo, contestan 200. No hay proxy, rotación, otro
+  User-Agent ni navegador: se pide lo mismo desde un lugar que la tienda acepta. Katech además nos dio su feed por
+  escrito (04/11) y FullH4rd permite `/buscar` y `/prod/` en su `robots.txt`. Si una tienda bloquea también a la PC,
+  no se insiste: falla, queda el dato anterior (con el límite de 36 h) y aplica la spec 066.
+- **El reintento tras un 403 desde la PC no esquiva un bloqueo.** El 18/11 FullH4rd cortó con 403 un relevo y un
+  pedido suelto dio 200 enseguida: es un límite de ritmo, que el principio III pide respetar con pausas. Se responde
+  bajando el ritmo (`pausa_s` 8 s, `Crawl-delay`), esperando 120 s **una sola vez** y, si vuelve el 403, la tienda
+  falla y no se publica el relevo cortado. En el runner el 403 es de IP: se corta sin esperar.
+- **«Bajo el 70 % no borra el catálogo»**: un relevo de la PC con menos del 70 % del anterior no se escribe.
+
 ## Comandos
 
 ```
@@ -84,7 +100,9 @@ Start-ScheduledTask -TaskName 'La Pichincha relevo PC'                          
 extractor común, publicación contra un repo bare local (commit en `historial`, rebase cuando el runner empujó en el
 medio, push que choca y se reintenta, sin `--force`) y la corrida de `indexar.main()` (bloqueada + relevo fresco = ok
 con su fecha y `via: pc`; relevo viejo = no se publica; relevo de ayer = sin historial; si el runner puede leer, no se
-usa el relevo).
+usa el relevo; lo anterior de más de 36 h no se reusa; un producto raro no corta la corrida). Auditoría 18/11 también:
+lista blanca por producto, relevo con menos del 70 % del anterior, y en `tests/test_indexar.py` el segundo 403 desde la
+PC que falla la tienda y `grupos_robots` como única lectura de `robots.txt`.
 
 ## Límites
 
