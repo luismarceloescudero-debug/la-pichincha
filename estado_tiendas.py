@@ -54,6 +54,28 @@ def registro_nuevo():
             "sin_productos_desde": None, "muertas_seguidas": 0, "ultimo_ping": None, "cambio": None}
 
 
+FECHAS = ("ultima_corrida", "ultimo_ok", "sin_productos_desde", "ultimo_ping", "cambio")
+
+
+def normalizar(reg):
+    """El registro completo y valido, o None si no se puede usar: no es un dict, no tiene un estado conocido, una fecha
+    no pasa fromisoformat o el contador no es un entero. Un registro viejo al que le faltan campos se completa."""
+    if not isinstance(reg, dict) or reg.get("estado") not in (ACTIVA, PAUSA, BAJA):
+        return None
+    r = dict(registro_nuevo(), **reg)
+    for campo in FECHAS:
+        if r[campo] is None:
+            continue
+        try:
+            date.fromisoformat(r[campo])
+        except (TypeError, ValueError):
+            return None
+    n = r["muertas_seguidas"]
+    if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+        return None
+    return r
+
+
 def _cadena(error):
     """El error, sus causas (raise ... from e) y el motivo de un URLError."""
     vistos, pendientes = [], [error]
@@ -126,13 +148,16 @@ def toca_ping(reg, hoy):
     if reg.get("estado") != BAJA:
         return False
     ultimo = reg.get("ultimo_ping")
-    return not ultimo or (hoy - date.fromisoformat(ultimo)).days >= DIAS_PING_BAJA
+    try:
+        return not ultimo or (hoy - date.fromisoformat(ultimo)).days >= DIAS_PING_BAJA
+    except (TypeError, ValueError):
+        return True          # una fecha rota no tira el indexado: se sondea hoy y queda una buena
 
 
 def observar(reg, clase, hoy, detalle=""):
     """Aplica lo que trajo una corrida. Devuelve (registro nuevo, cambio o None); hay cambio solo cuando cambia el
-    estado, asi cada pasaje deja un unico registro."""
-    r = dict(registro_nuevo(), **(reg or {}))
+    estado, asi cada pasaje deja un unico registro. Un registro roto arranca de cero en vez de tirar el indexado."""
+    r = normalizar(reg) or registro_nuevo()
     misma_fecha = r["ultima_corrida"] == hoy.isoformat()
     r["ultima"], r["ultima_corrida"] = clase, hoy.isoformat()
     if clase == OK:
@@ -181,14 +206,26 @@ def sembrar(claves, ultimo_ok, inicio, hoy):
     return estados
 
 
-def leer(carpeta):
-    """{clave: registro}, o None si no hay archivo o esta roto (entonces se siembra)."""
+def leer(carpeta, rotas=None):
+    """{clave: registro normalizado}, o None si no hay archivo o esta roto (entonces se siembra todo). Un registro que
+    no pasa `normalizar` se descarta y su clave se suma a `rotas` (un set), para que el indexador lo vuelva a sembrar:
+    un registro malo no puede hacer caer el indexado cada dia (y, como falla, no guardar nunca el arreglo)."""
     try:
         datos = json.loads((Path(carpeta) / ARCHIVO).read_text(encoding="utf-8"))
         tiendas = datos["tiendas"]
     except (OSError, ValueError, KeyError, TypeError):
         return None
-    return tiendas if isinstance(tiendas, dict) else None
+    if not isinstance(tiendas, dict):
+        return None
+    sanos = {}
+    for clave, reg in tiendas.items():
+        r = normalizar(reg)
+        if r is None:
+            if rotas is not None:
+                rotas.add(clave)
+        else:
+            sanos[clave] = r
+    return sanos
 
 
 def escribir(carpeta, estados, hoy):
