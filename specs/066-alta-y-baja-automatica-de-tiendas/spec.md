@@ -22,12 +22,18 @@ Cada corrida clasifica lo que trajo cada tienda relevada:
 | Clase | Cuándo |
 | --- | --- |
 | `ok` | trajo productos |
-| `vacia` | 0 productos sin bloqueo; también un error de lectura o un corte de red que no se recuperó en el reintento (E1) |
+| `vacia` | 0 productos sin bloqueo; también un error de lectura o un error de red que no se recuperó en el reintento (E1): tiempo agotado, DNS temporal (`EAI_AGAIN`), conexión rechazada, certificado inválido |
 | `bloqueo` | 403/429/503 o el desafío de Cloudflare (E3/E4): la tienda dijo que no |
-| `muerta` | el dominio no resuelve (DNS), no contesta al conectar, rechaza la conexión, tiene el certificado inválido, o Cloudflare dice que el origen está caído (521/522/523/530) |
+| `muerta` | **solo** el dominio no existe (NXDOMAIN: un `gaierror` que no es `EAI_AGAIN`) o Cloudflare dice que el origen está caído (521/522/523/530), **confirmado por el ping** |
 
-Si una tienda trae 0 y no fue un bloqueo, se pide **una vez la portada** (`base` de `tiendas.json`) para saber si está
-muerta o solo vino vacía. Cualquier respuesta HTTP (un 403 también) es una tienda viva.
+Si una tienda trae 0 y no fue un bloqueo, se pide **siempre una vez la portada** (`base` de `tiendas.json`), en todas las
+fuentes (listados, json, api, woocommerce, vtex, feed): es `muerta` solo si el ping da NXDOMAIN o 52x. Aunque el
+catálogo haya dado NXDOMAIN, si la portada contesta es `vacia` (el DNS del runner se pudo caer un momento). Cualquier
+respuesta HTTP (un 403 también) es una tienda viva. Un tiempo agotado, un DNS temporal, una conexión rechazada o un
+certificado malo pueden ser el runner y no la tienda: cuentan como `vacia`, que lleva a pausa a los 14 días (sigue
+listada con sus precios de la corrida anterior hasta entonces y se reintenta a diario), nunca a baja. Antes del 17/11
+(auditoría) todo eso contaba como `muerta` y las fuentes que no eran de listados no confirmaban con el ping: una caída
+del runner de 3 días daba de baja a todas, y volvían recién con el ping semanal.
 
 ## Reglas fijas (constantes en `estado_tiendas.py`)
 
@@ -46,6 +52,25 @@ muerta o solo vino vacía. Cualquier respuesta HTTP (un 403 también) es una tie
 - **alta**: en cuanto una tienda en pausa o baja trae productos, vuelve a `activa` en la misma corrida y sus precios
   entran como de hoy.
 - Nadie arranca en baja: la muerte se mide corrida a corrida.
+- Una tienda en baja cuyo ping semanal no llega por la red (ni NXDOMAIN ni respuesta) sigue en baja sin anotar el ping:
+  se reintenta al día siguiente.
+
+## Freno global
+
+Si en una corrida **30 % o más de las tiendas medidas** (`FRENO_PROPORCION`) cae por la red o muerta, el problema es el
+runner o un bug, no las tiendas: **esa corrida no suma contadores**. Cada tienda que falló vuelve a su registro de antes
+(ni días sin productos, ni corridas muertas, ni cambios de estado), y si en la corrida se la había sacado del índice por
+un pase a pausa que no cuenta, entra con lo de la corrida anterior. Lo que anduvo se anota igual. Con menos de
+`FRENO_MINIMO` (5) tiendas medidas (una corrida `--solo`) no hay freno. Queda en el log, en `salud.json` (`freno`:
+`activo`, `relevadas`, `caidas`, `proporcion`) y en el aviso privado al dueño («Freno global: N de M tiendas…»).
+
+## Registros rotos
+
+`leer()` normaliza cada registro: completa los campos que le falten a uno viejo y descarta el que no es un dict, no tiene
+un estado conocido, tiene una fecha que no pasa `fromisoformat` o un contador que no es entero. El indexador vuelve a
+sembrar los descartados (como la primera vez). `observar()` arranca de cero ante un registro roto y `toca_ping()` sondea
+hoy ante una fecha mala: un registro malo no puede hacer caer `indexar.py` cada día (y, como fallaba, no guardar nunca el
+arreglo).
 
 ## Un solo registro por cambio, nada de spam diario
 
@@ -72,6 +97,10 @@ productos de cada tienda es el `relevado` del índice anterior o, si es más nue
 solo anota cambios). Una tienda que no aparece en ninguno de los dos no trajo nada desde que empezó el historial y cuenta
 sin productos desde ese día.
 
+**La corrida que siembra no pasa a nadie a pausa** (`observar(..., puede_pausar=False)`): si falta el índice anterior, la
+semilla puede fechar de más los días sin productos. La semilla y los días quedan; el pase a pausa espera a una falla
+observada después de sembrar (la corrida siguiente).
+
 Efecto esperado en la primera corrida programada (medido el 17/11 contra la corrida 44080367008 y el historial):
 
 - **Compra Cierta (#96)**: el pedido decía que no existe, pero **trae productos**: desde el 05/11 es un WordPress propio
@@ -86,9 +115,11 @@ Efecto esperado en la primera corrida programada (medido el 17/11 contra la corr
 
 ## Tests
 
-- `tests/test_estado_tiendas.py`: clasificación, `es_muerta` (DNS, certificado, conexión, 52x/530; no un 403, un 404 ni
-  una lectura lenta), reglas de baja/pausa/alta, ping semanal, semilla y disco.
+- `tests/test_estado_tiendas.py`: clasificación, `es_muerta` (NXDOMAIN y 52x/530; no `EAI_AGAIN`, certificado,
+  conexión, tiempo, 403, 404), `es_red`, `sondeo`, `frenar`, reglas de baja/pausa/alta, ping semanal (también con
+  fecha rota), semilla (sin pausa en la corrida de siembra), registros rotos y disco.
 - `tests/test_estado_tiendas_corrida.py`: `indexar.main()` de punta a punta (baja a las 3 corridas, fuera del índice,
-  ping semanal, alta en la misma corrida, pausa a los 14 días sin precios viejos, un solo cambio, semilla, `--solo`).
+  ping semanal, alta en la misma corrida, pausa a los 14 días sin precios viejos, un solo cambio, semilla, `--solo`,
+  muerte confirmada siempre por el ping, DNS temporal sin baja, registro roto re-sembrado, freno global).
 - `tests/test_salud.py` (`Acciones`, cierre de #96, baja sin issue) y `tests/test_avisos_y_arreglos.py` (aviso al dueño).
 - `tests/js/info.test.js`: `/estado/` muestra la pausa.
