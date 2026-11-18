@@ -81,6 +81,27 @@ class Consultar(unittest.TestCase):
         self.assertEqual(len(llamadas), 1)
 
 
+class Pedido(unittest.TestCase):
+    def test_get_json_usa_el_envoltorio_de_radar(self):
+        import radar
+        visto = {}
+
+        class R(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+        def urlopen(req, timeout):
+            visto.update(metodo=req.get_method(), auth=req.get_header("Authorization"),
+                         ua=req.get_header("User-agent"), timeout=timeout)
+            return R(b'{"ok": 1}')
+        with mock.patch("urllib.request.urlopen", urlopen):
+            self.assertEqual(rp._get_json(rp.TAVILY_USO, "k"), {"ok": 1})
+        self.assertEqual(visto, {"metodo": "GET", "auth": "Bearer k", "ua": radar.UA, "timeout": 20})
+
+
 class Pulso(unittest.TestCase):
     def test_todo_bien_con_aviso_de_pocos_creditos(self):
         filas, avisos, errores = rp.pulso(CLAVES, get=get_ok, dormir=SIN_ESPERA)
