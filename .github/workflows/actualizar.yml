@@ -338,11 +338,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          # Solo su carpeta (auditoria 17/11, punto 9): agregando todo el arbol subia tambien lo que otro paso dejo sin commitear a
+          # proposito en `historial` (una corrida manual con menos paginas no escribe precios). Y se rebasa antes del push,
+          # como el paso del historial de precios: si otra corrida empujo a `historial` en el medio, no se pierde la fila.
+          if [ -d verificacion ]; then git add verificacion/; fi
           if git diff --cached --quiet; then
             echo "sin filas nuevas de fiabilidad"
           else
             git commit -m "Fiabilidad por comercio del $(TZ=America/Argentina/Buenos_Aires date +%F)"
+            # --autostash: lo que quedo sin commitear a proposito no traba el rebase y vuelve a quedar como estaba.
+            git pull --rebase --autostash
             git push
           fi
 
