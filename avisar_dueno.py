@@ -46,6 +46,16 @@ MOTIVOS = {
 }
 
 
+# Cambios de estado automaticos de una tienda (spec 066, estado_tiendas.py): se avisan una sola vez.
+CAMBIOS = {
+    "pausa": "⏸️ <b>{nombre}: en pausa</b>. Hace 14 dias que no trae productos: sus precios viejos dejan de mostrarse y "
+             "se sigue intentando a diario. Vuelve sola.",
+    "baja": "⛔ <b>{nombre}: dada de baja</b>. El dominio no responde hace 3 corridas: sale del indice y se sondea una "
+            "vez por semana. Vuelve sola si revive.",
+    "activa": "✅ <b>{nombre}: volvio</b>. Trajo productos otra vez: alta automatica en esta corrida.",
+}
+
+
 def url_corrida(entorno=None):
     e = os.environ if entorno is None else entorno
     if e.get("GITHUB_RUN_ID") and e.get("GITHUB_REPOSITORY"):
@@ -68,7 +78,14 @@ def lineas_salud(informe, indexado="success"):
             return ["🔴 <b>El indexado de precios no termino</b>. El sitio salio con el indice anterior."]
         return []
     salida = []
-    for f in (informe.get("fuentes") or {}).values():
+    # spec 066: un cambio de estado se avisa una vez; una tienda en pausa o de baja no se repite cada dia
+    for c in informe.get("cambios") or []:
+        nombre = html.escape(str(c.get("nombre", "?")))
+        salida.append(CAMBIOS.get(c.get("a"), CAMBIOS["activa"]).format(nombre=nombre))
+    quietas = {k for k, t in (informe.get("tiendas") or {}).items() if t.get("estado") in ("pausa", "baja")}
+    for clave, f in (informe.get("fuentes") or {}).items():
+        if clave in quietas:
+            continue
         nombre = html.escape(str(f.get("nombre", "?")))
         estado, ahora, previo = f.get("estado"), f.get("ahora", 0), f.get("previo", 0)
         if estado == "fallo":
