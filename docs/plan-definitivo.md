@@ -1,5 +1,7 @@
 # Plan definitivo de escalado — La Pichincha
 
+> **Actualizacion 18/11/2026:** el plan de accion con el estado repetido de todos los IDs y los pendientes del dia esta en `docs/auditorias/2026-11-18.md`. Este documento sigue vigente como **orden de ejecucion de las fases** (F0-F10); lo de la auditoria del 18/11 no lo reemplaza.
+
 Fecha: 13/11/2026. **Version 3 (definitiva)**. Los IDs (S1, D1, W1, N-CAL1...) son de `docs/auditoria-2026-11-13.md`. Este plan manda en el **orden de ejecucion**; `docs/plan-v4-tiendas-de-apps.md` sigue vigente para el detalle de la app Android.
 
 Objetivo en una frase: que el sitio **no pueda publicar datos malos sin que alguien se entere, no se caiga si se cae una pieza, y aguante 10 veces mas visitas**, sin gastar plata antes de tiempo.
