@@ -40,6 +40,12 @@ class Creditos(unittest.TestCase):
     def test_tavily_con_tope_de_clave(self):
         self.assertEqual(rp.creditos_tavily({**TAVILY, "key": {"usage": 40, "limit": 100}}), (150, 60))
 
+    def test_tavily_sin_plan_limit_falla(self):
+        # un 200 sin account.plan_limit no es "0 creditos": la respuesta cambio y el pulso tiene que fallar a la vista
+        for datos in ({}, {"account": {"plan_usage": 3}}, {"account": {"plan_limit": None}}):
+            with self.assertRaisesRegex(rp.FallaPulso, "plan_limit"):
+                rp.creditos_tavily(datos)
+
     def test_firecrawl(self):
         self.assertEqual(rp.creditos_firecrawl(FIRECRAWL), (940, 60))
 

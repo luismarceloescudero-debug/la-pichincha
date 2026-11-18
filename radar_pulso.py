@@ -56,8 +56,10 @@ def consultar(url, clave, get=_get_json, dormir=time.sleep, espera=10):
 def creditos_tavily(datos):
     """(usados, restantes) del plan de la cuenta; si la clave tiene tope propio, el menor de los dos."""
     cuenta = datos.get("account") or {}
+    if cuenta.get("plan_limit") is None:
+        raise FallaPulso("respuesta sin account.plan_limit")
     usados = cuenta.get("plan_usage") or 0
-    restantes = (cuenta.get("plan_limit") or 0) - usados
+    restantes = cuenta["plan_limit"] - usados
     clave = datos.get("key") or {}
     if clave.get("limit") is not None:
         restantes = min(restantes, clave["limit"] - (clave.get("usage") or 0))
