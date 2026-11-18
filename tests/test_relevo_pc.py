@@ -88,6 +88,22 @@ class Archivo(unittest.TestCase):
         self.assertEqual(list(r), ["a"])
         self.assertEqual(r["a"]["cantidad"], 1)
 
+    def test_un_relevo_mucho_mas_chico_que_el_anterior_no_lo_pisa(self):
+        # Auditoria 18/11: menos del 70 % de lo que tenia el archivo anterior no se escribe (queda el anterior).
+        self.guardar(20, [producto(i) for i in range(10)])
+        fuentes = {"pc": {"nombre": "Pc"}}
+        for n, pasa in ((6, False), (7, True)):
+            salida = io.StringIO()
+            with redirect_stdout(salida):
+                r = relevo_pc.relevar(fuentes, ["pc"], 2, leer_catalogo=lambda f, m, n=n: [producto(i) for i in range(n)],
+                                      ahora=self.ahora, anterior=self.dir)
+            self.assertEqual("pc" in r, pasa, n)
+            if not pasa:
+                self.assertIn("6 de 10", salida.getvalue())
+        with redirect_stdout(io.StringIO()):
+            r = relevo_pc.relevar(fuentes, ["pc"], 2, leer_catalogo=lambda f, m: [producto(1)], ahora=self.ahora)
+        self.assertIn("pc", r, "sin carpeta anterior no se compara")
+
     def test_main_usa_indexar_leer_catalogo(self):
         llamadas = []
         with mock.patch.object(indexar, "leer_catalogo",

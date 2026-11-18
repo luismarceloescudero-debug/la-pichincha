@@ -30,6 +30,7 @@ TIENDAS = RAIZ / "tiendas.json"
 VIA = "pc"
 CARPETA = "relevo-pc"            # dentro de la rama `historial`
 VIGENCIA_HORAS = 36              # un relevo mas viejo no se publica
+MINIMO_CONTRA_ANTERIOR = 0.7     # un relevo con menos de esta parte del anterior esta cortado: no lo pisa
 RAMA = "historial"
 AR = timezone(timedelta(hours=-3))
 INTENTOS_PUSH = 3
@@ -113,9 +114,10 @@ def leer_vigente(carpeta, clave, ahora, horas=VIGENCIA_HORAS):
     return dict(datos, productos=productos, cantidad=len(productos))
 
 
-def relevar(fuentes, claves, max_paginas, leer_catalogo=None, ahora=None):
+def relevar(fuentes, claves, max_paginas, leer_catalogo=None, ahora=None, anterior=None):
     """{clave: datos} de las tiendas que trajeron productos. Una que falla o trae 0 no se escribe: queda el archivo
-    anterior con su fecha vieja, y el runner decide por la edad."""
+    anterior con su fecha vieja, y el runner decide por la edad. Con `anterior` (la carpeta con los relevo-pc/ que hay),
+    uno con menos de MINIMO_CONTRA_ANTERIOR de los productos del archivo anterior tampoco: es un relevo cortado."""
     import indexar
     leer_catalogo = leer_catalogo or (lambda f, m: indexar.leer_catalogo(f, m, desde_pc=True))
     salida = {}
@@ -130,6 +132,11 @@ def relevar(fuentes, claves, max_paginas, leer_catalogo=None, ahora=None):
         items = [it for it in items if indexar.url_valida(it.get("url"))]
         if not items:
             print("  x no trajo ningun producto")
+            continue
+        previo = leer(anterior, clave) if anterior is not None else None
+        if previo and len(items) < MINIMO_CONTRA_ANTERIOR * len(previo["productos"]):
+            print("  x relevo cortado: " + str(len(items)) + " de " + str(len(previo["productos"]))
+                  + " del anterior (" + str(previo.get("relevado")) + "); queda el anterior")
             continue
         salida[clave] = armar(clave, fuente["nombre"], items, ahora or datetime.now(AR))
         print("  ok " + str(len(items)) + " productos")
@@ -223,7 +230,7 @@ def main(argv=None):
     max_paginas = args.max_paginas or indexar.TOPE_PAGINAS
 
     if not args.publicar:
-        relevos = relevar(fuentes, claves, max_paginas, ahora=ahora)
+        relevos = relevar(fuentes, claves, max_paginas, ahora=ahora, anterior=args.salida)
         for datos in relevos.values():
             print("  -> " + str(escribir(args.salida, datos)))
         return 0 if len(relevos) == len(claves) else 2
@@ -232,13 +239,13 @@ def main(argv=None):
     trabajo = Path(args.trabajo) if args.trabajo else trabajo_por_defecto()
     autor = (git("config", "user.name", cwd=RAIZ, chequear=False).stdout.strip() or None,
              git("config", "user.email", cwd=RAIZ, chequear=False).stdout.strip() or None)
+    preparar_clon(trabajo, remoto, autor)        # al dia antes de relevar: se compara contra el relevo anterior
     if args.saltar_si_menos_de is not None:
-        preparar_clon(trabajo, remoto, autor)
         if reciente(trabajo, claves, ahora, args.saltar_si_menos_de):
             print("Ya hay un relevo de menos de " + format(args.saltar_si_menos_de, "g") + " h de "
                   + ", ".join(claves) + ": no se repite.")
             return 0
-    relevos = relevar(fuentes, claves, max_paginas, ahora=ahora)
+    relevos = relevar(fuentes, claves, max_paginas, ahora=ahora, anterior=trabajo)
     if not relevos:
         print("Ninguna tienda trajo productos: no se publica nada.")
         return 2

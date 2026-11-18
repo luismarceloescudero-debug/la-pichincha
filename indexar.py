@@ -366,8 +366,10 @@ def indexar_listados(tienda, max_paginas, desde_pc=False):
                     continue
                 # 403/503: la tienda dijo que no (17/11: FullH4rd contesta «Your request was blocked.» a la IP del
                 # runner). No se insiste con el resto de los listados (principio III). Sin nada leido, sube como
-                # error: el aviso dice «bloqueo» y no «0 productos», y relevar() no lo reintenta.
-                if not items:
+                # error: el aviso dice «bloqueo» y no «0 productos», y relevar() no lo reintenta. Desde la PC, el 403
+                # que vuelve tras el reintento sube aunque haya algo leido: un relevo cortado (18/11: FullH4rd ~50 de
+                # ~1.500) no pisa al completo anterior en la rama `historial`.
+                if not items or (desde_pc and e.code == 403):
                     raise
                 print("  " + AMAR + "! la tienda bloqueo los listados (HTTP " + str(e.code) + "): me quedo con "
                       + str(len(items)) + " productos" + FIN)
