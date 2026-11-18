@@ -98,6 +98,12 @@ class Contraste(unittest.TestCase):
             with self.subTest(relleno=relleno):
                 self.assertGreaterEqual(round(contraste(color, RELLENOS["f-tinta"]), 2), MINIMO)
 
+    def test_el_icono_del_carrusel_se_lee_sobre_su_fondo(self):
+        # .car-mini (js/carrusel.js): tenia #fff y #3d1260 fijos en el CSS; ahora son tokens de los dos temas.
+        for tema, t in self.TEMAS.items():
+            with self.subTest(tema=tema):
+                self.assertGreaterEqual(round(contraste(t["n-mini-tinta"], t["n-mini-fondo"]), 2), MINIMO)
+
     def test_el_borde_de_un_control_se_ve_sobre_su_relleno(self):
         # Con --n-borde (1,9:1) el limite de las pastillas clicables no se veia, y el relleno tampoco alcanza
         # (--surface-2 sobre --bg da 1,1:1). Este es el que tiene que pasar 3:1.
