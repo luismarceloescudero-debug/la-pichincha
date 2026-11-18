@@ -25,9 +25,10 @@ const ETIQUETAS = {
   baja: "Trajo menos de lo habitual: puede faltar parte de su catálogo.",
   atrasada: "Sin datos nuevos: se muestran sus precios anteriores, con su fecha.",
   "sin-datos": "Todavía sin relevar.",
+  pausa: "En pausa: hace más de 14 días que no trae productos, así que sus precios viejos no se muestran. Se sigue intentando todos los días y vuelve sola.",
   ok: "Al día.",
 };
-const ORDEN = ["fallo", "sin-datos", "atrasada", "baja", "ok"];
+const ORDEN = ["fallo", "pausa", "sin-datos", "atrasada", "baja", "ok"];
 
 /* Una fila por fuente del indice. El estado medido en salud.json manda solo si es de la misma corrida
    que el indice; si no, lo dice la fecha del ultimo relevamiento. */
@@ -40,6 +41,7 @@ function estadoFuentes(idx, salud) {
     const relevado = t.relevado || (avisos[clave] ? idx.generado : null);
     let estado = !relevado ? "sin-datos" : P.precioDel(relevado, idx.generado) ? "atrasada" : "ok";
     if (medido[clave] && medido[clave].estado !== "ok") estado = medido[clave].estado;
+    if (t.estado === "pausa") estado = "pausa";     // spec 066: lo decide indexar.py; una dada de baja ni viene en el indice
     return { clave, nombre: t.nombre || clave, avisos: avisos[clave] || 0, relevado, estado, segunda: !!t.segunda };
   });
   return filas.sort((a, b) => ORDEN.indexOf(a.estado) - ORDEN.indexOf(b.estado));
