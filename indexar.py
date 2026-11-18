@@ -62,6 +62,7 @@ LISTADOS_429_SEGUIDOS = 3    # listados seguidos que terminan en 429 despues del
 FICHAS = "fichas.json"       # la cache de part numbers vive junto al historial, en su rama
 MAX_BAJA_FOTO = 2     # sin historial, una foto del doble de precio ya no es el mismo producto (cambio de variante)
 TOPE_VENDIDOS = 100   # puestos del orden «mas vendidos» de cada tienda que se guardan: mas abajo ya no dice nada (spec 019)
+ESPERA_403_PC = 120   # spec 067: desde la PC, un 403 en los listados es su limite de ritmo: se espera esto y se reintenta UNA vez
 ESPERA_REINTENTO = 60   # spec 061: una tienda que trajo 0 o se corto la red se reintenta UNA vez, pasado este tiempo
 
 for flujo in (sys.stdout, sys.stderr):
@@ -291,13 +292,49 @@ def espera_429(error):
     return max(0, min(segundos, TOPE_RETRY_AFTER))
 
 
-def indexar_listados(tienda, max_paginas):
+def crawl_delay(robots):
+    """El Crawl-delay (segundos) del grupo `User-agent: *` de un robots.txt; 0 si no trae."""
+    agentes, en_reglas, mayor = set(), False, 0.0
+    for linea in (robots or "").lstrip("﻿").splitlines():
+        clave, _, valor = linea.split("#", 1)[0].partition(":")
+        clave, valor = clave.strip().lower(), valor.strip()
+        if clave == "user-agent":
+            if en_reglas:
+                agentes, en_reglas = set(), False
+            agentes.add(valor)
+        elif clave:
+            en_reglas = True
+            if clave == "crawl-delay" and "*" in agentes:
+                try:
+                    mayor = max(mayor, float(valor))
+                except ValueError:
+                    pass
+    return mayor
+
+
+def pausa_de(tienda, robots=""):
+    """Segundos entre pedidos a una tienda de listados: su "pausa_s" de tiendas.json (o PAUSA) y, si su robots.txt pide
+    un Crawl-delay mayor, ese (spec 067)."""
+    return max(float(tienda.get("pausa_s", PAUSA)), crawl_delay(robots))
+
+
+def indexar_listados(tienda, max_paginas, desde_pc=False):
     cfg = tienda["catalogo"]
     vistos, items = set(), []
     fuentes = listados(tienda)
-    print("  " + str(len(fuentes)) + " listados")
+    robots = ""
+    if desde_pc:                                 # el relevo de la PC mira el Crawl-delay; sin robots.txt, la pausa_s
+        try:
+            robots = bajar(tienda["base"] + "/robots.txt")
+        except Exception:                        # noqa: BLE001 - sin robots legible manda la pausa configurada
+            robots = ""
+    pausa = pausa_de(tienda, robots)
+    print("  " + str(len(fuentes)) + " listados" + (", " + format(pausa, "g") + " s entre pedidos" if pausa != PAUSA else ""))
     ultimo_429, seguidos_429 = None, 0
+    esperado_403 = False
     for i, listado in enumerate(fuentes, 1):
+        if i > 1:
+            time.sleep(pausa)                    # tambien entre listados: el ultimo pedido del anterior no durmio
         n = cfg.get("desde", 1)
         paginas = 0
         reintentado = False
@@ -319,6 +356,14 @@ def indexar_listados(tienda, max_paginas):
                     seguidos_429 += 1
                     print("  " + AMAR + "! HTTP 429 persistente: dejo el listado " + str(i) + FIN)
                     break
+                if e.code == 403 and desde_pc and not esperado_403:
+                    # Spec 067: desde la PC (conexion domiciliaria) el 403 de FullH4rd es su limite de ritmo, no la IP: el
+                    # 18/11 un relevo cortado dio 200 a un pedido suelto enseguida. Se espera UNA vez y se reintenta esa
+                    # pagina; si vuelve el 403, se corta como siempre. En el runner el 403 es de IP y no se espera.
+                    esperado_403 = True
+                    print("  " + AMAR + "! HTTP 403: espero " + str(ESPERA_403_PC) + " s y reintento una vez" + FIN)
+                    time.sleep(ESPERA_403_PC)
+                    continue
                 # 403/503: la tienda dijo que no (17/11: FullH4rd contesta «Your request was blocked.» a la IP del
                 # runner). No se insiste con el resto de los listados (principio III). Sin nada leido, sube como
                 # error: el aviso dice «bloqueo» y no «0 productos», y relevar() no lo reintenta.
@@ -341,7 +386,7 @@ def indexar_listados(tienda, max_paginas):
                 items.append(t)
             n += 1
             paginas += 1
-            time.sleep(PAUSA)
+            time.sleep(pausa)
         if i % 20 == 0 or i == len(fuentes):
             print("    " + str(i) + "/" + str(len(fuentes)) + " listados " + PUNTO
                   + " " + str(len(items)) + " productos")
@@ -1043,9 +1088,10 @@ def ultimo_ok_de(anterior, series):
     return ultimo
 
 
-def leer_catalogo(fuente, max_paginas):
+def leer_catalogo(fuente, max_paginas, desde_pc=False):
     """Los productos de una fuente segun su catalogo.tipo, con el extractor que le toca. Lo usan main() y relevo_pc.py
-    (spec 067): la PC lee con los mismos extractores, el mismo User-Agent y el mismo ritmo que el runner."""
+    (spec 067): la PC lee con los mismos extractores, el mismo User-Agent y el mismo ritmo que el runner. `desde_pc`
+    (solo listados) mira el Crawl-delay de robots.txt y ante el primer 403 espera ESPERA_403_PC y reintenta una vez."""
     tipo = fuente["catalogo"]["tipo"]
     if tipo == "json":
         return indexar_json(fuente)
@@ -1060,7 +1106,7 @@ def leer_catalogo(fuente, max_paginas):
     if tipo == "mercadolibre":
         return [dict(it, nombre=nombre_enriquecido(it["nombre"], it.pop("marca", None)))
                 for it in mercadolibre.indexar(fuente, max_paginas)]
-    return indexar_listados(fuente, max_paginas)
+    return indexar_listados(fuente, max_paginas, desde_pc=desde_pc)
 
 
 def observar_falla(fuente, motivo, error, observar):

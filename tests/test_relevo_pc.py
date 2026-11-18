@@ -90,10 +90,11 @@ class Archivo(unittest.TestCase):
 
     def test_main_usa_indexar_leer_catalogo(self):
         llamadas = []
-        with mock.patch.object(indexar, "leer_catalogo", lambda f, m: llamadas.append(f["nombre"]) or [producto(1)]), \
+        with mock.patch.object(indexar, "leer_catalogo",
+                               lambda f, m, desde_pc=False: llamadas.append((f["nombre"], desde_pc)) or [producto(1)]), \
                 redirect_stdout(io.StringIO()):
             self.assertEqual(relevo_pc.main(["--salida", str(self.dir)]), 0)
-        self.assertEqual(llamadas, ["FullH4rd", "Katech"])
+        self.assertEqual(llamadas, [("FullH4rd", True), ("Katech", True)])   # desde la PC: espera y reintenta un 403
         self.assertTrue((self.dir / "relevo-pc" / "katech.json").exists())
 
     def test_reciente(self):

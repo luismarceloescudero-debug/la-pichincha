@@ -117,7 +117,7 @@ def relevar(fuentes, claves, max_paginas, leer_catalogo=None, ahora=None):
     """{clave: datos} de las tiendas que trajeron productos. Una que falla o trae 0 no se escribe: queda el archivo
     anterior con su fecha vieja, y el runner decide por la edad."""
     import indexar
-    leer_catalogo = leer_catalogo or indexar.leer_catalogo
+    leer_catalogo = leer_catalogo or (lambda f, m: indexar.leer_catalogo(f, m, desde_pc=True))
     salida = {}
     for clave in claves:
         fuente = fuentes[clave]

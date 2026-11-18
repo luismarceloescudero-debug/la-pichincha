@@ -385,6 +385,61 @@ class Catalogos(unittest.TestCase):
         self.assertEqual(indexar.motivo_de(caso.exception), "bloqueo")
         self.assertEqual(len(set(pedidos)), indexar.LISTADOS_429_SEGUIDOS, "tras varios listados seguidos con 429 se corta")
 
+    def test_la_pausa_sale_de_pausa_s_y_del_crawl_delay_mayor(self):
+        # Spec 067: FullH4rd corta por ritmo; pausa_s en tiendas.json, y si robots.txt pide mas, manda robots.txt.
+        self.assertEqual(indexar.pausa_de({}), indexar.PAUSA)
+        self.assertEqual(indexar.pausa_de(TIENDAS["fullh4rd"]), 8)
+        robots = "User-agent: Googlebot\nCrawl-delay: 30\n\nUser-agent: *\nDisallow: /cart/\nCrawl-delay: 12\n"
+        self.assertEqual(indexar.crawl_delay(robots), 12)            # el de Googlebot no nos toca
+        self.assertEqual(indexar.pausa_de({"pausa_s": 8}, robots), 12)
+        self.assertEqual(indexar.pausa_de({"pausa_s": 8}, "User-agent: *\nCrawl-delay: 2\n"), 8)
+
+    def test_duerme_la_pausa_de_la_tienda_entre_paginas_y_entre_listados(self):
+        cfg = self._tienda_terminos(["a", "b"])
+        cfg["pausa_s"] = 8
+        bajar, pedidos = self._por_termino({"a": [leer("fullh4rd", "listado.html")], "b": []})
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
+                redirect_stdout(io.StringIO()):
+            indexar.indexar_listados(cfg, 3)
+        self.assertEqual(pedidos, ["a", "a", "b"])
+        self.assertEqual(dormir.call_args_list, [mock.call(8)] * 2)   # tras la pagina 1 de a y antes de b
+
+    def test_desde_la_pc_un_403_espera_una_vez_y_reintenta_ese_listado(self):
+        cfg = self._tienda_terminos(["a", "b"])
+        html = leer("fullh4rd", "listado.html")
+        bajar = mock.Mock(side_effect=["User-agent: *\nDisallow: /cart/\n", self._http(403), html, "", ""])
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_listados(cfg, 3, desde_pc=True)
+        self.assertEqual(len(items), 4)
+        self.assertEqual(bajar.call_args_list[1], bajar.call_args_list[2])   # la misma pagina
+        self.assertEqual(bajar.call_count, 5)                                # y despues sigue con b
+        dormir.assert_any_call(indexar.ESPERA_403_PC)
+
+    def test_desde_la_pc_un_segundo_403_corta_como_siempre(self):
+        cfg = self._tienda_terminos(["a", "b", "c"])
+        html = leer("fullh4rd", "listado.html")
+        bajar = mock.Mock(side_effect=["", html, self._http(403), self._http(403)])
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep") as dormir, \
+                redirect_stdout(io.StringIO()):
+            items = indexar.indexar_listados(cfg, 3, desde_pc=True)
+        self.assertEqual(len(items), 4)
+        self.assertEqual(bajar.call_count, 4)                 # un solo reintento; ni b ni c
+        self.assertEqual(dormir.call_args_list.count(mock.call(indexar.ESPERA_403_PC)), 1)
+        bajar = mock.Mock(side_effect=["", self._http(403), self._http(403)])
+        with mock.patch.object(indexar, "bajar", bajar), mock.patch.object(indexar.time, "sleep"), \
+                redirect_stdout(io.StringIO()), self.assertRaises(urllib.error.HTTPError):
+            indexar.indexar_listados(cfg, 3, desde_pc=True)    # sin nada leido sigue siendo un bloqueo
+        self.assertEqual(bajar.call_count, 3)
+
+    def test_en_el_runner_el_403_no_espera(self):
+        cfg = self._tienda_terminos(["a"])
+        with mock.patch.object(indexar, "bajar", side_effect=self._http(403)), \
+                mock.patch.object(indexar.time, "sleep") as dormir, redirect_stdout(io.StringIO()), \
+                self.assertRaises(urllib.error.HTTPError):
+            indexar.indexar_listados(cfg, 3)
+        self.assertNotIn(mock.call(indexar.ESPERA_403_PC), dormir.call_args_list)
+
     def test_un_404_de_una_pagina_sigue_cortando_solo_ese_listado(self):
         cfg = self._tienda_terminos(["a", "b"])
         html = leer("fullh4rd", "listado.html")
