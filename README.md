@@ -43,6 +43,7 @@ FullH4rd y Venex, con specs de las webs de ADATA, Corsair y Kingston) siguen en
 | `historial.py` | Historial de precios del indice, en la rama `historial` |
 | `historial.py`, `serie.py`, `generar_series.py` | El historial (rama `historial`), los sellos de minimo y el grafico del detalle: `generar_series.py` deja `_sitio/series/NN.json`, la serie de cada aviso en 64 fragmentos que la pagina baja solo al abrir su historial |
 | `salud.py` | Abre un issue cuando una fuente trae menos del 70% de lo que traia |
+| `estado_tiendas.py` | Estado de cada tienda entre corridas (spec 066): pausa a los 14 dias sin productos, baja con el dominio muerto 3 corridas, alta sola al volver; vive en `historial/tiendas-salud.json` |
 | `radar.py`, `.github/workflows/radar.yml` | Radar de cobertura semanal con Tavily y Firecrawl: fichas de nuestras tiendas que faltan en el indice y tiendas candidatas. Solo un informe como artefacto, nunca precios ([docs/radar-cobertura.md](docs/radar-cobertura.md)) |
 | `generar_portada.js` | Pre-renderiza la portada publicada (`_sitio/index.html`): pestañas, sello y Comparativa, con las mismas funciones de `js/`; el JS no los vuelve a armar |
 | `guardia.js` | Guardia del indice: mide bajas propias y, por categoria, avisos, "sin datos" y ofertas sobre el indice real, lo compara con la `guardia.json` publicada de la corrida anterior y con una alarma (0 bajas propias con historial, una categoria que se queda sin ofertas, un salto de mas de 10 puntos en "sin datos", menos de 10 ofertas para el resumen) la corrida no manda Telegram y abre un issue `guardia` |
@@ -215,8 +216,9 @@ y en cada push a main:
 3. `indexar.py` arma el indice de busqueda, compara contra el historial y
    commitea los cambios de precio en la rama `historial`.
 4. En la corrida programada, `salud.py` abre un issue (etiqueta `salud-fuente`)
-   por cada fuente que trajo menos del 70% de lo que tenia, o comenta el que ya
-   estaba abierto.
+   por cada fuente que trajo menos del 70% de lo que tenia (uno solo: no lo comenta
+   cada dia). Cada cambio de estado automatico de la tienda (spec 066: pausa, baja,
+   alta) deja un comentario; la baja y la vuelta lo cierran.
 5. El sitio se sube como artefacto de Pages, sin tocar el repo.
 
 Si una tienda se cae o bloquea la IP del runner, el paso de indexado no voltea
@@ -458,7 +460,9 @@ Las ofertas del dia salen por dos canales, sin backend:
   por su chat PRIVADO de Telegram (secreto `TELEGRAM_CHAT_DUENO`, nunca al canal) cuando una tienda trae 0 o muy pocos
   productos, salta la guardia o falla la corrida. Los errores conocidos se arreglan solos con reglas fijas: una tienda en 0
   se reintenta una vez y si sigue en 0 quedan sus precios anteriores con su fecha; el 429 de Mercado Libre se espera; un
-  bloqueo de Cloudflare no se esquiva. El arreglo con Claude (`arreglar-con-claude.yml`, etapa 2) esta listo y apagado.
+  bloqueo de Cloudflare no se esquiva. Una tienda sin productos 14 dias queda en pausa (sus precios viejos no se
+  muestran) y una con el dominio muerto 3 corridas se da de baja sola; vuelve sola al traer productos
+  ([spec 066](specs/066-alta-y-baja-automatica-de-tiendas/spec.md)). El arreglo con Claude (`arreglar-con-claude.yml`, etapa 2) esta listo y apagado.
 - **Afiliado de Mercado Libre** ([spec 027](specs/027-afiliado-mercado-libre/spec.md)): en `/hoy/`, el RSS y
   Telegram, los links a mercadolibre.com.ar llevan el codigo de afiliado (`matt_word`, `matt_tool`;
   `Pagina.enlaceTienda`) y el rotulo «enlace de afiliado». El orden no cambia.
