@@ -144,7 +144,8 @@ class Firecrawl(unittest.TestCase):
         self.assertFalse(radar.tiene_product(None))
 
     def test_confirma_respetando_robots_y_bloqueos(self):
-        robots = {"a.ar": "User-agent: *\nDisallow:", "b.ar": "User-agent: *\nDisallow: /producto/",
+        robots = {"a.ar": "User-agent: *\nDisallow:",
+                  "b.ar": "User-agent: *\nDisallow:\nUser-agent: FirecrawlAgent\nDisallow: /producto/",
                   "c.ar": http_error(404), "d.ar": urllib.error.URLError("x"), "e.ar": "", "f.ar": "", "g.ar": "",
                   "h.ar": "", "i.ar": http_error(500)}
         scrape = {"a.ar": {"data": {"rawHtml": FICHA, "metadata": {"statusCode": 200, "creditsUsed": 1}}},
@@ -180,7 +181,7 @@ class Firecrawl(unittest.TestCase):
         self.assertEqual(estado["g.ar"], "error-500")
         self.assertTrue(estado["h.ar"].startswith("error-red"))
         self.assertEqual(estado["i.ar"], "sin-robots")
-        self.assertEqual(usados, 5)
+        self.assertEqual(usados, 6, "un error de red contra Firecrawl cuenta igual (pudo haber cobrado)")
         self.assertNotIn("https://b.ar/producto/x", pedidos)
         self.assertEqual(len(esperas), 5)
 
@@ -189,6 +190,16 @@ class Firecrawl(unittest.TestCase):
         cands = self.cand("a.ar", "b.ar", "c.ar")
         self.assertEqual(radar.confirmar(cands, "k", maximo=2, post=post, get=lambda *a, **k: "", dormir=lambda s: 0), 2)
         self.assertNotIn("firecrawl", cands[2])
+
+
+class Topes(unittest.TestCase):
+    def test_los_topes_tienen_techo(self):
+        post = lambda url, cuerpo, clave, timeout=60: (TAVILY if url == radar.TAVILY_URL else
+                                                       {"data": {"rawHtml": FICHA, "metadata": {"statusCode": 200}}})
+        r = radar.correr(INDICE, [], TIENDAS, "k", "fc", tope=5000, hoy=date(2026, 11, 23), post=post,
+                         get=lambda *a, **k: "", dormir=lambda s: 0, tope_firecrawl=900)
+        self.assertEqual(r["tope"], radar.TOPE_CREDITOS)
+        self.assertIn("(tope " + str(radar.MAX_FIRECRAWL) + ")", r["firecrawl"])
 
 
 class Corrida(unittest.TestCase):

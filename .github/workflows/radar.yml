@@ -5,7 +5,7 @@ name: Radar de cobertura
 
 on:
   schedule:
-    - cron: "0 11 * * 1"  # lunes 08:00 de Argentina, antes de la corrida diaria de las 12:00 UTC
+    - cron: "0 11 * * 1"  # lunes 08:00 de Argentina; la corrida diaria del indice es a las 03:23 UTC (00:23 AR)
   workflow_dispatch:
     inputs:
       tope_creditos:
