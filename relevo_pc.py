@@ -19,9 +19,12 @@ antes de reintentar el push; nunca --force.
 
 import argparse
 import json
+import math
 import os
+import re
 import subprocess
 import sys
+import urllib.parse
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -104,19 +107,56 @@ def vigente(relevado, ahora, horas=VIGENCIA_HORAS):
     return -1 <= edad_horas(datos, ahora) <= horas
 
 
-def leer_vigente(carpeta, clave, ahora, horas=VIGENCIA_HORAS):
-    """El relevo de la PC si tiene menos de `horas` (y no es del futuro), con solo los productos que pasarian en el
-    runner (URL valida y precio positivo). None si no hay, esta roto, es viejo o quedo vacio."""
+def _numero(valor):
+    return isinstance(valor, (int, float)) and not isinstance(valor, bool) and math.isfinite(valor)
+
+
+def producto_limpio(p, hosts):
+    """El producto rearmado con lista blanca (auditoria 18/11, M2): el archivo llega de la rama `historial` y no se le
+    cree nada. nombre str de 1 a 300; precio numero (no bool) entre 0 y 1e9; lista numero >= 0 o ausente; sellos solo
+    [a-z]; url valida con el host de la tienda (o www.); imagen valida o "". Lo demas se descarta. None si no pasa."""
     import indexar
+    if not isinstance(p, dict):
+        return None
+    nombre, precio, url = p.get("nombre"), p.get("precio"), p.get("url")
+    lista, sellos, imagen = p.get("lista"), p.get("sellos") or "", p.get("imagen") or ""
+    if not (isinstance(nombre, str) and 0 < len(nombre.strip()) and len(nombre) <= 300):
+        return None
+    if not (_numero(precio) and 0 < precio < 1e9):
+        return None
+    if lista is not None and not (_numero(lista) and lista >= 0):
+        return None
+    if not (isinstance(sellos, str) and re.fullmatch(r"[a-z]*", sellos)):
+        return None
+    if not (indexar.url_valida(url) and (urllib.parse.urlsplit(url).hostname or "") in hosts):
+        return None
+    return {"nombre": nombre, "precio": precio, "url": url, "lista": lista, "sellos": sellos,
+            "imagen": imagen if indexar.url_valida(imagen) else ""}
+
+
+def hosts_de(base):
+    """Los hosts que puede tener la URL de un producto de la tienda: el de su `base` y su variante con o sin www."""
+    host = (urllib.parse.urlsplit(base or "").hostname or "").removeprefix("www.")
+    return {host, "www." + host} if host else set()
+
+
+def leer_vigente(carpeta, clave, ahora, horas=VIGENCIA_HORAS, base=None):
+    """El relevo de la PC si tiene menos de `horas` (y no es del futuro), con cada producto rearmado por
+    producto_limpio (los que no pasan se descartan, nunca rompen la corrida). `base` es el de la tienda en
+    tiendas.json (si falta, se lee de ahi). None si no hay, esta roto, es viejo o quedo vacio."""
     datos = leer(carpeta, clave)
     if datos is None:
         return None
     edad = edad_horas(datos, ahora)
     if edad > horas or edad < -1:
         return None
-    productos = [p for p in datos["productos"]
-                 if isinstance(p, dict) and indexar.url_valida(p.get("url")) and p.get("nombre")
-                 and isinstance(p.get("precio"), (int, float)) and p["precio"] > 0]
+    if base is None:
+        try:
+            base = (json.loads(TIENDAS.read_text(encoding="utf-8")).get(clave) or {}).get("base")
+        except (OSError, ValueError, AttributeError):
+            base = None
+    hosts = hosts_de(base)
+    productos = [q for q in (producto_limpio(p, hosts) for p in datos["productos"]) if q]
     if not productos:
         return None
     return dict(datos, productos=productos, cantidad=len(productos))

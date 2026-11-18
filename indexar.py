@@ -1280,7 +1280,7 @@ def main(argv=None):
         # usan esos productos con su fecha real; uno mas viejo no se publica (sigue el camino de siempre).
         if fuente.get("relevo") == relevo_pc.VIA and (error is not None or not any(url_valida(it.get("url"))
                                                                                    for it in items)):
-            pc = relevo_pc.leer_vigente(carpeta, clave, datetime.now(AR))
+            pc = relevo_pc.leer_vigente(carpeta, clave, datetime.now(AR), base=fuente.get("base"))
             directo = motivo_de(error) if error is not None else "0 productos"
             if pc:
                 print("  " + AMAR + "! directo: " + directo + "; uso el relevo de la PC del " + pc["relevado"]

@@ -25,8 +25,11 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    del runner, `pull --rebase` y reintenta (3 veces). Nunca `--force`. Usa las credenciales de git de la PC.
 4. **`indexar.py`** (en el runner): para una tienda con `relevo: pc`, primero intenta el relevo directo. Si da error
    (bloqueo, red...) o 0 productos y `historial/relevo-pc/<tienda>.json` tiene **menos de 36 h**
-   (`relevo_pc.VIGENCIA_HORAS`), usa esos productos (`relevo_pc.leer_vigente`: solo filas con URL válida, nombre y
-   precio > 0):
+   (`relevo_pc.VIGENCIA_HORAS`), usa esos productos. El archivo llega de la rama `historial` y no se le cree nada:
+   `relevo_pc.leer_vigente` rearma cada producto con **lista blanca** (`producto_limpio`): `nombre` texto de 1 a 300;
+   `precio` número (no booleano) entre 0 y 1e9; `lista` número ≥ 0 o ausente; `sellos` solo letras `[a-z]`; `url`
+   válida y con el host del `base` de la tienda en `tiendas.json` (o su `www.`); `imagen` válida o vacía. El resto de
+   los campos se descarta y un producto que no pasa se descarta: nunca corta la corrida.
    - `indice.tiendas.<clave>.relevado` lleva la **hora real** del relevo de la PC, no la de la corrida.
    - Estado (spec 066): cuenta como `ok`; `salud.json` anota en `fuentes.<clave>` `"via": "pc"`, `"motivo": "relevo pc"`
      y el detalle («directo: bloqueo; relevo de la PC del ...»). `/estado/` no tiene hoy un lugar para la vía: muestra

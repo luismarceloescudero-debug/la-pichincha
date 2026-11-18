@@ -17,6 +17,7 @@ import indexar
 import relevo_pc
 
 RAIZ = Path(__file__).resolve().parent.parent
+BASE = "https://pc.test"                   # el `base` de la tienda de prueba en tiendas.json
 
 
 def producto(i, precio=1000):
@@ -56,25 +57,43 @@ class Archivo(unittest.TestCase):
 
     def test_vigente_hasta_36_horas(self):
         self.guardar(35)
-        self.assertEqual(relevo_pc.leer_vigente(self.dir, "pc", self.ahora)["cantidad"], 2)
+        self.assertEqual(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE)["cantidad"], 2)
         self.guardar(37)
-        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora))
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE))
 
     def test_sin_archivo_roto_o_del_futuro_no_sirve(self):
-        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora))
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE))
         (self.dir / "relevo-pc").mkdir()
         (self.dir / "relevo-pc" / "pc.json").write_text("{roto", encoding="utf-8")
-        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora))
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE))
         self.guardar(-5)
-        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora))
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE))
 
     def test_descarta_filas_que_no_pasarian(self):
         malas = [dict(producto(3), url="javascript:alert(1)"), dict(producto(4), precio=0), dict(producto(5), nombre="")]
         self.guardar(1, [producto(1)] + malas)
-        self.assertEqual([p["url"] for p in relevo_pc.leer_vigente(self.dir, "pc", self.ahora)["productos"]],
+        self.assertEqual([p["url"] for p in relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE)["productos"]],
                          ["https://pc.test/prod/1"])
         self.guardar(1, malas)
-        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora), "sin filas validas no hay relevo")
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE), "sin filas validas no hay relevo")
+
+    def test_cada_producto_se_rearma_con_lista_blanca(self):
+        # Auditoria 18/11 (M2): el archivo llega de la rama `historial`; un campo raro no puede romper la corrida.
+        bueno = dict(producto(1), lista=1500, sellos="ge", imagen="https://pc.test/f.jpg", zz="<script>", sku="x")
+        malas = [dict(producto(2), sellos=["e"]), dict(producto(3), precio=True), dict(producto(4), precio=1e9),
+                 dict(producto(5), precio="1000"), dict(producto(6), nombre="x" * 301), dict(producto(7), nombre=7),
+                 dict(producto(8), url="https://otro.test/prod/8"), dict(producto(9), url="https://pc.test.evil/p"),
+                 dict(producto(10), lista="mil"), dict(producto(11), sellos="E1"), dict(producto(12), lista=True)]
+        www = dict(producto(13), url="https://www.pc.test/prod/13", imagen="javascript:alert(1)", lista=None)
+        self.guardar(1, [bueno, www] + malas)
+        productos = relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base=BASE)["productos"]
+        self.assertEqual(productos, [
+            {"nombre": "Producto 1", "precio": 1000, "url": "https://pc.test/prod/1", "lista": 1500, "sellos": "ge",
+             "imagen": "https://pc.test/f.jpg"},
+            {"nombre": "Producto 13", "precio": 1000, "url": "https://www.pc.test/prod/13", "lista": None, "sellos": "",
+             "imagen": ""}])
+        self.assertIsNone(relevo_pc.leer_vigente(self.dir, "pc", self.ahora, base="https://otra.test"))
+        self.assertIsNone(relevo_pc.producto_limpio("no soy un dict", relevo_pc.hosts_de(BASE)))
 
     def test_relevar_usa_el_extractor_comun_y_salta_la_que_falla(self):
         fuentes = {"a": {"nombre": "A"}, "b": {"nombre": "B"}, "c": {"nombre": "C"}}
@@ -298,6 +317,14 @@ class Corrida(unittest.TestCase):
         (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
         indice, _ = self.correr()
         self.assertEqual(self.filas(indice, "pc"), [])
+        self.assertEqual(len(self.filas(indice, "uno")), 2)
+
+    def test_un_producto_raro_del_relevo_no_corta_el_indexado(self):
+        datos = relevo_pc.armar("pc", "Pc", [dict(producto(1), sellos=["x"]), dict(producto(2), precio=True),
+                                             producto(3, 2003)], self.ahora - timedelta(hours=1))
+        relevo_pc.escribir(self.hist, datos)
+        indice, _ = self.correr()
+        self.assertEqual([f[0] for f in self.filas(indice, "pc")], ["Producto 3"])
         self.assertEqual(len(self.filas(indice, "uno")), 2)
 
     def test_si_el_runner_puede_leer_no_usa_el_relevo(self):
