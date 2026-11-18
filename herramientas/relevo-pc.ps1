@@ -1,7 +1,7 @@
 # Relevo desde la PC (spec 067): lo que corre la tarea programada "La Pichincha relevo PC".
 # Releva las tiendas con "relevo": "pc" en tiendas.json (FullH4rd y Katech) y sube relevo-pc/<tienda>.json a la rama
-# historial desde un clon de trabajo en %LOCALAPPDATA%\la-pichincha\relevo-historial. La tarea lo corre desde su propio
-# clon de main (%LOCALAPPDATA%\la-pichincha\relevo-codigo), que se pone al dia aca con pull --ff-only.
+# historial desde un clon de trabajo en %USERPROFILE%\.la-pichincha\relevo-historial. La tarea lo corre desde su propio
+# clon de main (%USERPROFILE%\.la-pichincha\relevo-codigo), que se pone al dia aca con pull --ff-only.
 # Sin secretos: usa las credenciales de git que ya tiene la PC.
 #
 #   powershell -NoProfile -ExecutionPolicy Bypass -File herramientas\relevo-pc.ps1            # como la tarea
@@ -13,7 +13,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
-$carpeta = Join-Path $env:LOCALAPPDATA 'la-pichincha'
+$carpeta = Join-Path $env:USERPROFILE '.la-pichincha'
 New-Item -ItemType Directory -Force $carpeta | Out-Null
 $log = Join-Path $carpeta 'relevo-pc.log'
 
