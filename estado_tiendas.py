@@ -154,9 +154,12 @@ def toca_ping(reg, hoy):
         return True          # una fecha rota no tira el indexado: se sondea hoy y queda una buena
 
 
-def observar(reg, clase, hoy, detalle=""):
+def observar(reg, clase, hoy, detalle="", puede_pausar=True):
     """Aplica lo que trajo una corrida. Devuelve (registro nuevo, cambio o None); hay cambio solo cuando cambia el
-    estado, asi cada pasaje deja un unico registro. Un registro roto arranca de cero en vez de tirar el indexado."""
+    estado, asi cada pasaje deja un unico registro. `puede_pausar` es False en la corrida que sembro el registro: sin
+    el indice anterior la semilla puede fechar de mas los dias sin productos, asi que el pase a pausa espera a una falla
+    observada despues de sembrar (la semilla y los dias quedan; solo no cambia el estado hoy). Un registro roto
+    arranca de cero en vez de tirar el indexado."""
     r = normalizar(reg) or registro_nuevo()
     misma_fecha = r["ultima_corrida"] == hoy.isoformat()
     r["ultima"], r["ultima_corrida"] = clase, hoy.isoformat()
@@ -173,7 +176,7 @@ def observar(reg, clase, hoy, detalle=""):
         dias = (hoy - date.fromisoformat(r["sin_productos_desde"])).days
         if r["muertas_seguidas"] >= CORRIDAS_BAJA or (r["estado"] == BAJA and clase == MUERTA):
             nuevo = BAJA
-        elif dias >= DIAS_PAUSA or r["estado"] == BAJA:     # revivio el dominio sin productos: se releva, sin publicar
+        elif (dias >= DIAS_PAUSA and puede_pausar) or r["estado"] == BAJA:     # revivio el dominio sin productos: se releva, sin publicar
             nuevo = PAUSA
         else:
             nuevo = r["estado"]

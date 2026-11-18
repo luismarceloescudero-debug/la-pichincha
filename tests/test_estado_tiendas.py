@@ -226,9 +226,13 @@ class Semilla(unittest.TestCase):
         estados = et.sembrar(["c"], {}, inicio=None, hoy=HOY)
         self.assertIsNone(estados["c"]["sin_productos_desde"])
 
-    def test_una_tienda_sin_productos_hace_mas_de_catorce_dias_entra_en_pausa_en_la_primera_corrida(self):
+    def test_la_corrida_de_siembra_no_pausa_pero_la_siguiente_si(self):
+        # Sin indice anterior la semilla puede fechar mal la ultima vez con productos: hace falta una falla real
+        # observada despues de sembrar para pasar a pausa.
         estados = et.sembrar(["k"], {}, inicio=dia(-31), hoy=HOY)
-        reg, cambio = et.observar(estados["k"], et.BLOQUEO, HOY)
+        reg, cambio = et.observar(estados["k"], et.BLOQUEO, HOY, puede_pausar=False)
+        self.assertEqual((reg["estado"], cambio), (et.ACTIVA, None))
+        reg, cambio = et.observar(reg, et.BLOQUEO, dia(1))
         self.assertEqual((reg["estado"], cambio["a"]), (et.PAUSA, et.PAUSA))
 
 

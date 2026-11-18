@@ -173,7 +173,13 @@ class Corrida(Base):
         (self.dir / "indice.json").write_text(json.dumps(indice), encoding="utf-8")
         self.modo["uno"] = "vacia"
         indice, salud = self.correr()
-        self.assertEqual(self.estados()["uno"]["estado"], et.PAUSA)
+        self.assertEqual(self.estados()["uno"]["estado"], et.ACTIVA, "la corrida de siembra no pausa a nadie")
+        self.assertIn("uno", self.tiendas_de(indice))
+        self.assertEqual(self.estados()["uno"]["sin_productos_desde"],
+                         (self.hoy - timedelta(days=19)).isoformat(), "pero la semilla queda")
+        self.pasar_dias()
+        indice, salud = self.correr()
+        self.assertEqual(self.estados()["uno"]["estado"], et.PAUSA, "la falla siguiente, ya observada, si")
         self.assertNotIn("uno", self.tiendas_de(indice))
         self.assertEqual(self.estados()["dos"]["estado"], et.ACTIVA)
 
