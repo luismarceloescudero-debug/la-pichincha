@@ -9,7 +9,8 @@ module.exports = defineConfig({
   testMatch: "*.spec.js",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // Sin reintentos (N-T1): un reintento tapaba la intermitencia; si una prueba falla, se arregla la prueba.
+  retries: 0,
   timeout: 30_000,
   expect: { timeout: 7_000 },
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
