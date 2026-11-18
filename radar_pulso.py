@@ -13,17 +13,16 @@ tras un reintento. Deja los creditos usados/restantes en el resumen de la corrid
 ::warning:: si quedan menos de MINIMO creditos. Nunca imprime las claves.
 """
 
-import json
 import os
 import sys
 import time
 import urllib.error
-import urllib.request
+
+from radar import _api
 
 TAVILY_USO = "https://api.tavily.com/usage"
 FIRECRAWL_USO = "https://api.firecrawl.dev/v2/team/credit-usage"
 MINIMO = 100
-UA = "la-pichincha-radar/1.0"
 
 
 class FallaPulso(Exception):
@@ -31,9 +30,7 @@ class FallaPulso(Exception):
 
 
 def _get_json(url, clave, timeout=20):
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {clave}", "User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode("utf-8"))
+    return _api(url, None, clave, timeout)
 
 
 def consultar(url, clave, get=_get_json, dormir=time.sleep, espera=10):

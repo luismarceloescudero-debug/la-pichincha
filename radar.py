@@ -182,9 +182,13 @@ def comparar(resultados, urls, doms):
     return {"conteo": dict(cuenta), "huecos": lista_huecos, "candidatas": lista_cand}
 
 
-def _post(url, cuerpo, clave, timeout=60):
-    req = urllib.request.Request(url, data=json.dumps(cuerpo).encode(), method="POST", headers={
-        "Content-Type": "application/json", "Authorization": f"Bearer {clave}", "User-Agent": UA})
+def _api(url, cuerpo, clave, timeout=60):
+    """JSON de una API con Bearer: POST con `cuerpo`, o GET si es None (el pulso, radar_pulso.py)."""
+    cabeceras = {"Authorization": f"Bearer {clave}", "User-Agent": UA}
+    datos = None
+    if cuerpo is not None:
+        datos, cabeceras["Content-Type"] = json.dumps(cuerpo).encode(), "application/json"
+    req = urllib.request.Request(url, data=datos, headers=cabeceras)
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
@@ -195,7 +199,7 @@ def _get(url, timeout=20):
         return r.read().decode("utf-8", "replace")
 
 
-def buscar(terminos, clave, tope=TOPE_CREDITOS, post=_post):
+def buscar(terminos, clave, tope=TOPE_CREDITOS, post=_api):
     """Busca cada termino en Tavily (basica, Argentina, 10 resultados) hasta gastar `tope` creditos."""
     resultados, creditos, hechas, errores = [], 0, 0, []
     for q in terminos:
@@ -238,7 +242,7 @@ def tiene_product(html):
     return False
 
 
-def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_post, get=_get, dormir=time.sleep):
+def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_api, get=_get, dormir=time.sleep):
     """Con Firecrawl (proxy basic) mira la primera ficha de cada candidata. Devuelve los creditos usados.
     Respeta robots.txt; un 403, 429 o un desafio anti robots deja la candidata como 'bloqueada' y no se insiste."""
     usados = 0
@@ -314,7 +318,7 @@ def informe_md(r):
 
 
 def correr(indice, consultas, tiendas, clave_tavily, clave_firecrawl=None, tope=TOPE_CREDITOS, hoy=None,
-           post=_post, get=_get, dormir=time.sleep, tope_firecrawl=MAX_FIRECRAWL):
+           post=_api, get=_get, dormir=time.sleep, tope_firecrawl=MAX_FIRECRAWL):
     hoy = hoy or date.today()
     # Los topes tienen techo: ni un input del workflow ni un argumento gastan mas que el plan gratis por corrida.
     tope = max(0, min(tope, TOPE_CREDITOS))
