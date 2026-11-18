@@ -286,6 +286,20 @@ class Corrida(unittest.TestCase):
         estado = json.loads((self.hist / et.ARCHIVO).read_text(encoding="utf-8"))["tiendas"]["pc"]
         self.assertEqual(estado["ultima"], et.BLOQUEO)
 
+    def test_sin_relevo_vigente_no_se_reusa_lo_anterior_de_mas_de_36_horas(self):
+        # Auditoria 18/11: el reuso E1 no estira los precios de la PC hasta la pausa (14 dias): a las 36 h dejan de publicarse.
+        self.relevo(0.5)
+        self.correr()
+        (self.hist / "relevo-pc" / "pc.json").unlink()
+        indice, _ = self.correr()
+        self.assertEqual(len(self.filas(indice, "pc")), 3, "con menos de 36 h se reusa lo anterior")
+        viejo = json.loads((self.dir / "indice.json").read_text(encoding="utf-8"))
+        viejo["tiendas"]["pc"]["relevado"] = (self.ahora - timedelta(hours=40)).isoformat(timespec="minutes")
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+        indice, _ = self.correr()
+        self.assertEqual(self.filas(indice, "pc"), [])
+        self.assertEqual(len(self.filas(indice, "uno")), 2)
+
     def test_si_el_runner_puede_leer_no_usa_el_relevo(self):
         self.bloqueada = False
         self.relevo(0.5)

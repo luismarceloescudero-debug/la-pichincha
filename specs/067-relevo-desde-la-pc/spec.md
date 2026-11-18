@@ -33,8 +33,10 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
      la fecha del último dato, que ya es la del relevo de la PC.
    - Historial de precios: se anota solo si el relevo es **del mismo día** de la corrida; uno de ayer se publica pero no
      se registra como precio de hoy (ni bajas).
-   - Un relevo de más de 36 h (o del futuro, o roto) **no se usa**: la tienda sigue el camino de siempre (bloqueo,
-     reuso E1 mientras esté activa, pausa a los 14 días).
+   - Un relevo de más de 36 h (o del futuro, o roto) **no se usa**: la tienda cuenta como fallida (bloqueo; pausa a
+     los 14 días). El reuso E1 de lo publicado en la corrida anterior vale solo si eso tiene menos de 36 h
+     (`relevo_pc.vigente` sobre `indice.tiendas.<clave>.relevado`): **a las 36 h la tienda deja de publicarse**, no se
+     estiran precios de la PC hasta la pausa.
 5. **Tarea programada** «La Pichincha relevo PC» (`herramientas/instalar-relevo-pc.ps1`): diaria a las **05:30** y al
    iniciar sesión, solo con red, `StartWhenAvailable` (si la PC estaba apagada, corre apenas puede). Ejecuta
    `herramientas/relevo-pc.ps1` (log en `%USERPROFILE%\.la-pichincha\relevo-pc.log`), que no repite si la rama ya tiene

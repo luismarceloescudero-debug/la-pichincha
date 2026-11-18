@@ -96,6 +96,14 @@ def edad_horas(datos, ahora):
     return (ahora - _cuando(datos)).total_seconds() / 3600
 
 
+def vigente(relevado, ahora, horas=VIGENCIA_HORAS):
+    """Si una fecha de relevo (ISO) tiene menos de `horas` y no es del futuro. Sin fecha legible, no."""
+    datos = {"relevado": relevado}
+    if _cuando(datos) is None:
+        return False
+    return -1 <= edad_horas(datos, ahora) <= horas
+
+
 def leer_vigente(carpeta, clave, ahora, horas=VIGENCIA_HORAS):
     """El relevo de la PC si tiene menos de `horas` (y no es del futuro), con solo los productos que pasarian en el
     runner (URL valida y precio positivo). None si no hay, esta roto, es viejo o quedo vacio."""

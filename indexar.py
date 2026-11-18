@@ -1197,6 +1197,17 @@ def main(argv=None):
     # el dia, la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
     vivos = historial.vivos_por_tienda(estado)
 
+    def reusable(fuente, clave):
+        """Si lo de la corrida anterior se puede reusar (E1). Para una tienda con relevo desde la PC, solo si ese relevo tiene
+        menos de VIGENCIA_HORAS: a las 36 h sus precios dejan de publicarse (spec 067), no se estiran hasta la pausa."""
+        if clave not in previo:
+            return False
+        if fuente.get("relevo") != relevo_pc.VIA or relevo_pc.vigente(relevado.get(clave), datetime.now(AR)):
+            return True
+        print("  " + GRIS + "lo anterior es del " + str(relevado.get(clave)) + ": mas de " + str(relevo_pc.VIGENCIA_HORAS)
+              + " h, no se publica" + FIN)
+        return False
+
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
     por_confirmar, notas = [], {}
     por_pc = {}                                  # spec 067: {tienda: relevado} de las servidas por el relevo de la PC                # notas: por que fallo cada fuente y si se reintento (spec 061)
@@ -1289,7 +1300,7 @@ def main(argv=None):
                               lambda c, r, d=notas[clave]["detalle"], k=clave: observar(k, c, d, r)) \
                     != estado_tiendas.ACTIVA:
                 resumen[clave] = (0, "fallo (" + motivo + "), " + estados[clave]["estado"] + ": no se publica")
-            elif clave in previo:
+            elif reusable(fuente, clave):
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "fallo (" + motivo + "), uso el anterior")
             else:
@@ -1312,7 +1323,7 @@ def main(argv=None):
                               lambda c, r, d=notas[clave]["detalle"], k=clave: observar(k, c, d, r)) \
                     != estado_tiendas.ACTIVA:
                 resumen[clave] = (0, "sin productos, " + estados[clave]["estado"] + ": no se publica")
-            elif clave in previo:
+            elif reusable(fuente, clave):
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "sin productos, uso el anterior")
             else:
