@@ -129,6 +129,8 @@ def observar(reg, clase, hoy, detalle=""):
         cambio = {"de": r["estado"], "a": nuevo, "clase": clase, "detalle": detalle,
                   "sin_productos_desde": r["sin_productos_desde"]}
         r["estado"], r["cambio"] = nuevo, hoy.isoformat()
+    if r["estado"] == BAJA:
+        r["ultimo_ping"] = hoy.isoformat()       # la corrida de hoy ya vio que no responde: el proximo ping, en una semana
     return r, cambio
 
 

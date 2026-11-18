@@ -30,6 +30,7 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import estado_tiendas
 import historial
 import mercadolibre
 import modelo
@@ -979,6 +980,32 @@ def guardar_foto(carpeta, anterior):
     return leer_foto(carpeta)
 
 
+def ultimo_ok_de(anterior, series):
+    """{tienda: date} el ultimo dia con productos que se conoce de cada tienda, para sembrar el estado de la spec 066:
+    el `relevado` del indice anterior (la ultima vez que entro fresca) o, si es mas nuevo, su ultimo precio en el
+    historial (que solo anota cambios: es una cota por abajo)."""
+    ultimo = {}
+    for clave, t in ((anterior or {}).get("tiendas") or {}).items():
+        try:
+            ultimo[clave] = date.fromisoformat(str((t or {}).get("relevado") or "")[:10])
+        except ValueError:
+            pass
+    for (clave, _), eventos in series.items():
+        fechas = [f for f, precio in eventos if precio]
+        if fechas and (clave not in ultimo or max(fechas) > ultimo[clave]):
+            ultimo[clave] = max(fechas)
+    return ultimo
+
+
+def observar_falla(fuente, motivo, error, observar):
+    """Clasifica una fuente que no trajo productos (spec 066) con `observar(clase)` y devuelve su estado. Si no fue un
+    bloqueo, un ping a la portada dice si la tienda esta muerta (DNS, certificado, conexion) o solo vino vacia."""
+    muerta = estado_tiendas.es_muerta(error)
+    if not muerta and motivo not in ("bloqueo", "cloudflare"):
+        muerta = estado_tiendas.sondear(bajar, fuente.get("base"))
+    return observar(estado_tiendas.clasificar(0, motivo, muerta))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Arma el indice de busqueda.")
     ap.add_argument("--solo", metavar="FUENTE")
@@ -1054,6 +1081,21 @@ def main(argv=None):
 
     salida, resumen, relevados, actuales, frescas = [], {}, {}, {}, set()
     por_confirmar, notas = [], {}                # notas: por que fallo cada fuente y si se reintento (spec 061)
+    # spec 066: estado de salud de cada tienda entre corridas (activa, pausa, baja), en la carpeta del historial. La
+    # primera vez se siembra con lo que ya se sabe: el ultimo relevamiento del indice anterior o el ultimo precio del
+    # historial. Una tienda en baja ni se releva (salvo el ping semanal) y una en pausa no reusa sus precios viejos.
+    estados = estado_tiendas.leer(carpeta)
+    if estados is None:
+        estados = estado_tiendas.sembrar(fuentes, ultimo_ok_de(anterior, series), serie.inicio(series), hoy)
+    cambios = []
+
+    def observar(clave, clase, detalle=""):
+        estados[clave], cambio = estado_tiendas.observar(estados.get(clave), clase, hoy, detalle)
+        if cambio:
+            cambios.append(dict(cambio, clave=clave, nombre=fuentes[clave]["nombre"]))
+            print("  " + AMAR + "! estado: " + cambio["de"] + " -> " + cambio["a"] + FIN)
+        return estados[clave]["estado"]
+
     fichas = leer_fichas(carpeta)                # part numbers ya leidos de las fichas (B3-bis)
     for clave, fuente in fuentes.items():
         if (not fuente.get("activa", True) or (args.solo and clave != args.solo)
@@ -1065,6 +1107,19 @@ def main(argv=None):
         print("\n" + NEG + fuente["nombre"] + FIN)
         t0 = time.time()
         tipo = fuente["catalogo"]["tipo"]
+        registro = estados.get(clave) or estado_tiendas.registro_nuevo()
+        if registro["estado"] == estado_tiendas.BAJA and not args.solo:
+            if not estado_tiendas.toca_ping(registro, hoy):
+                print("  " + GRIS + "dada de baja: se sondea una vez por semana" + FIN)
+                resumen[clave] = (0, "dada de baja")
+                continue
+            estados[clave] = dict(registro, ultimo_ping=hoy.isoformat())
+            if estado_tiendas.sondear(bajar, fuente.get("base")):
+                observar(clave, estado_tiendas.MUERTA, "sigue sin responder")
+                print("  " + GRIS + "dada de baja: sigue sin responder" + FIN)
+                resumen[clave] = (0, "dada de baja, sigue muerta")
+                continue
+            print("  " + VERDE + "dada de baja pero responde: se releva entera" + FIN)
 
         def leer(fuente=fuente, tipo=tipo):
             if tipo == "json":
@@ -1090,7 +1145,10 @@ def main(argv=None):
             print("  " + ROJO + FALLA + " " + type(error).__name__ + ": " + str(error)[:70] + FIN)
             notas[clave] = {"motivo": motivo, "detalle": (type(error).__name__ + ": " + str(error))[:160],
                             "reintentada": reintentada}
-            if clave in previo:
+            if observar_falla(fuente, motivo, error, lambda c, d=notas[clave]["detalle"], k=clave: observar(k, c, d)) \
+                    != estado_tiendas.ACTIVA:
+                resumen[clave] = (0, "fallo (" + motivo + "), " + estados[clave]["estado"] + ": no se publica")
+            elif clave in previo:
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "fallo (" + motivo + "), uso el anterior")
             else:
@@ -1109,7 +1167,10 @@ def main(argv=None):
             print("  " + ROJO + FALLA + " no trajo ningun producto" + FIN)
             notas[clave] = {"motivo": "sin productos", "reintentada": reintentada,
                             "detalle": "0 productos" + (", tambien en el reintento" if reintentada else "")}
-            if clave in previo:
+            if observar_falla(fuente, "sin productos", None,
+                              lambda c, d=notas[clave]["detalle"], k=clave: observar(k, c, d)) != estado_tiendas.ACTIVA:
+                resumen[clave] = (0, "sin productos, " + estados[clave]["estado"] + ": no se publica")
+            elif clave in previo:
                 salida.extend(previo[clave])
                 resumen[clave] = (len(previo[clave]), "sin productos, uso el anterior")
             else:
@@ -1134,6 +1195,7 @@ def main(argv=None):
             notas[clave] = {"motivo": "recuperada", "detalle": "anduvo en el reintento", "reintentada": True}
         relevados[clave] = len(items)
         frescas.add(clave)
+        observar(clave, estado_tiendas.OK)
         bajaron = 0
         for it in items:
             # Baja propia: lo que valia segun el historial. Este dato no depende
@@ -1208,6 +1270,12 @@ def main(argv=None):
     generado = datetime.now(AR).isoformat(timespec="minutes")
     relevado.update(dict.fromkeys(frescas, generado))
     informe = salud.evaluar(vivos, relevados, {k: v["nombre"] for k, v in fuentes.items()}, generado, notas=notas)
+    estados = {k: r for k, r in estados.items() if k in fuentes}
+    estado_tiendas.escribir(carpeta, estados, hoy)
+    informe["tiendas"] = {k: {"nombre": fuentes[k]["nombre"], "estado": r["estado"], "ultima": r["ultima"],
+                              "sin_productos_desde": r["sin_productos_desde"]} for k, r in estados.items()}
+    informe["cambios"] = cambios
+    de_baja = {k for k, r in estados.items() if r["estado"] == estado_tiendas.BAJA}
     sanas = {k for k, f in informe["fuentes"].items() if f["estado"] == "ok"}
     filas = historial.cambios(estado, actuales, sanas, generado[:10])
     ruta_csv = historial.escribir(carpeta, generado[:10], filas)
@@ -1215,10 +1283,12 @@ def main(argv=None):
 
     datos = {
         "generado": generado,
+        # spec 066: una tienda dada de baja no se lista; una en pausa se lista con su estado (y sin productos)
         "tiendas": {k: dict({"nombre": v["nombre"], "color": v["color"],
                              "segunda": bool(v.get("segunda_opinion"))},
-                            **({"relevado": relevado[k]} if relevado.get(k) else {}))
-                    for k, v in fuentes.items()},
+                            **({"relevado": relevado[k]} if relevado.get(k) else {}),
+                            **({"estado": "pausa"} if estados.get(k, {}).get("estado") == estado_tiendas.PAUSA else {}))
+                    for k, v in fuentes.items() if k not in de_baja},
         "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31", "vendido"],
         # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
         "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
