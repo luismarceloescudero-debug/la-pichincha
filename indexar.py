@@ -292,18 +292,28 @@ def espera_429(error):
     return max(0, min(segundos, TOPE_RETRY_AFTER))
 
 
-def crawl_delay(robots):
-    """El Crawl-delay (segundos) del grupo `User-agent: *` de un robots.txt; 0 si no trae."""
-    agentes, en_reglas, mayor = set(), False, 0.0
-    for linea in (robots or "").lstrip("﻿").splitlines():
+def grupos_robots(texto):
+    """Los grupos de un robots.txt como [(agentes en minusculas, [(regla en minusculas, valor)])]: la unica lectura que
+    usan robots_permite y crawl_delay. Lineas `User-agent` seguidas abren un grupo; la primera regla lo cierra a nuevos
+    agentes. Sitemap es global y no cuenta como regla de ningun grupo; los comentarios y el BOM se ignoran."""
+    grupos = []
+    for linea in (texto or "").lstrip("﻿").splitlines():
         clave, _, valor = linea.split("#", 1)[0].partition(":")
         clave, valor = clave.strip().lower(), valor.strip()
         if clave == "user-agent":
-            if en_reglas:
-                agentes, en_reglas = set(), False
-            agentes.add(valor)
-        elif clave:
-            en_reglas = True
+            if not grupos or grupos[-1][1]:
+                grupos.append((set(), []))
+            grupos[-1][0].add(valor.lower())
+        elif clave and clave != "sitemap" and grupos:
+            grupos[-1][1].append((clave, valor))
+    return grupos
+
+
+def crawl_delay(robots):
+    """El Crawl-delay (segundos) del grupo `User-agent: *` de un robots.txt; 0 si no trae."""
+    mayor = 0.0
+    for agentes, reglas in grupos_robots(robots):
+        for clave, valor in reglas:
             if clave == "crawl-delay" and "*" in agentes:
                 try:
                     mayor = max(mayor, float(valor))
@@ -641,24 +651,11 @@ def robots_permite(texto, ruta, agente=None):
     la regla mas larga que coincide y, a igual largo, Allow; entiende `*` y `$`. Los demas grupos con nombre
     (Googlebot, ClaudeBot) no cuentan: no nos presentamos con esos nombres. Sin grupo que aplique, todo permitido."""
     propio = (agente or "").strip().lower()
-    reglas, agentes, en_reglas, hay_propio = {"*": [], "propio": []}, set(), False, False
-    for linea in (texto or "").lstrip("\ufeff").splitlines():
-        clave, _, valor = linea.split("#", 1)[0].partition(":")
-        clave, valor = clave.strip().lower(), valor.strip()
-        if clave == "user-agent":
-            if en_reglas:
-                agentes, en_reglas = set(), False
-            agentes.add(valor.lower())
-            hay_propio = hay_propio or bool(propio and valor.lower() == propio)
-        elif clave in ("allow", "disallow"):
-            en_reglas = True
-            if not valor:
-                continue
-            if "*" in agentes:
-                reglas["*"].append((clave == "allow", valor))
-            if propio and propio in agentes:
-                reglas["propio"].append((clave == "allow", valor))
-    reglas = reglas["propio"] if hay_propio else reglas["*"]
+    grupos = grupos_robots(texto)
+    hay_propio = bool(propio) and any(propio in agentes for agentes, _ in grupos)
+    quien = propio if hay_propio else "*"
+    reglas = [(clave == "allow", valor) for agentes, lineas in grupos if quien in agentes
+              for clave, valor in lineas if clave in ("allow", "disallow") and valor]
     mejor = (-1, True)
     for permite, patron in reglas:
         rx = re.escape(patron).replace(r"\*", ".*")
