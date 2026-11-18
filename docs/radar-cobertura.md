@@ -16,7 +16,9 @@ Un informe semanal para saber **que nos falta**, no para publicar precios. Scrip
    - **candidatas**: dominios que no relevamos y que aparecen con al menos una ficha. Un dominio que solo trae
      listados no cuenta.
 4. Con `FIRECRAWL_API_KEY`, abre la primera ficha de cada candidata con **Firecrawl** (`/v2/scrape`, `proxy: "basic"`,
-   `rawHtml`) para confirmar que trae JSON-LD `Product` (señal de que se puede relevar). Antes lee el `robots.txt`
+   `rawHtml`) para confirmar que trae JSON-LD `Product` (señal de que se puede relevar). Si la URL no es `https` o el
+   host es `localhost` o resuelve a una IP privada, loopback o link-local, queda como `url-no-publica` y no se le pide
+   nada (`radar.url_publica`, B2). Antes lee el `robots.txt`
    (`indexar.robots_permite`): si prohibe la ruta, no se pide. Un 403, 429 o un desafio anti robots queda como
    `bloqueada` y no se insiste. Nunca se usa `stealth` ni `enhanced`, ni sobre una tienda que ya relevamos.
 5. Deja `radar/radar.json` y `radar/radar.md` como artefacto `radar-cobertura` (30 dias) y el informe en el resumen

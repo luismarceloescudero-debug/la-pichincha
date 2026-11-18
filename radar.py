@@ -17,9 +17,11 @@ o un 403, queda anotada como bloqueada y no se insiste). Sin clave, ese paso se 
 """
 
 import argparse
+import ipaddress
 import json
 import os
 import re
+import socket
 import sys
 import time
 import urllib.error
@@ -242,6 +244,20 @@ def tiene_product(html):
     return False
 
 
+def url_publica(url):
+    """Si la URL es https a un host que resuelve solo a IPs publicas (B2): las URLs vienen de Tavily y no se le pide
+    nada a localhost, a una IP privada, loopback o link-local (la red interna del runner) ni a un host que no resuelve."""
+    try:
+        p = urllib.parse.urlsplit(url)
+        host, puerto = (p.hostname or "").rstrip(".").lower(), p.port or 443
+        if p.scheme != "https" or not host or host == "localhost" or host.endswith(".localhost"):
+            return False
+        ips = {i[4][0].split("%")[0] for i in socket.getaddrinfo(host, puerto, proto=socket.IPPROTO_TCP)}
+        return bool(ips) and all(ipaddress.ip_address(ip).is_global for ip in ips)
+    except (ValueError, UnicodeError, OSError):
+        return False
+
+
 def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_api, get=_get, dormir=time.sleep):
     """Con Firecrawl (proxy basic) mira la primera ficha de cada candidata. Devuelve los creditos usados.
     Respeta robots.txt; un 403, 429 o un desafio anti robots deja la candidata como 'bloqueada' y no se insiste."""
@@ -250,6 +266,9 @@ def confirmar(candidatas, clave, maximo=MAX_FIRECRAWL, post=_api, get=_get, dorm
         if usados >= maximo or not c["ejemplos"]:
             break
         url = c["ejemplos"][0]["url"]
+        if not url_publica(url):
+            c["firecrawl"] = "url-no-publica"
+            continue
         p = urllib.parse.urlsplit(url)
         try:
             robots = get(f"{p.scheme}://{p.netloc}/robots.txt")
