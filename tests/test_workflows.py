@@ -65,6 +65,16 @@ class ClavesRepetidas(unittest.TestCase):
             with self.subTest(workflow=ruta.name):
                 self.assertEqual(claves_repetidas(ruta.read_text(encoding="utf-8")), [])
 
+    def test_las_acciones_van_fijadas_por_sha_con_la_version_en_comentario(self):
+        # B3 (auditoria 11/11): una etiqueta movil (@v7) puede cambiar de codigo sin que el repo se entere
+        fijada = re.compile(r"^[\w.-]+/[\w./-]+@[0-9a-f]{40} # v\d[\w.]*$")
+        for ruta in WORKFLOWS:
+            for n, linea in enumerate(ruta.read_text(encoding="utf-8").splitlines(), 1):
+                m = re.match(r"^\s*(?:- )?uses:\s*(.+?)\s*$", linea)
+                if m and not m.group(1).startswith("./"):
+                    with self.subTest(workflow=ruta.name, linea=n):
+                        self.assertRegex(m.group(1), fijada)
+
     def test_detecta_el_continue_on_error_repetido_del_13_11(self):
         texto = (
             "jobs:\n"

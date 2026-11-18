@@ -36,7 +36,7 @@ Se leyo la linea citada de cada hallazgo. **V** = confirmado; **corregido** = el
 | N-UX3 (`--bad-soft`) | V: se usa en `css/sitio.css:455` y no esta definido | Fase de diseño |
 | N-DS1 ("`:root` 5 veces") | **Corregido**: son 13 | Fase de diseño |
 | N-CI4 (Worker sin humo ni rollback) | V: `worker.yml` hace `wrangler deploy` y nada despues | F5 |
-| N-CI5 (acciones por etiqueta) | V: las 10 acciones van por etiqueta (`@v7`); no hay `.github/dependabot.yml` | F5 |
+| N-CI5 (acciones por etiqueta) | **Corregido** (18/11): todas las acciones van fijadas por SHA con la version en comentario (`tests/test_workflows.py` lo exige); sigue sin `.github/dependabot.yml` | F5 |
 | N-T1 (`retries: 1` tapa la intermitencia) | V: `playwright.config.js:12` | F1 |
 | S1 | V en vivo: `gh api .../rules/branches/main` devuelve `deletion`, `non_fast_forward` y `required_status_checks: tests` | Cerrado. Ver C3 |
 
