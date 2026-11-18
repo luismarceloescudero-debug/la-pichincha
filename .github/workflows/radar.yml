@@ -1,11 +1,13 @@
 # Radar de cobertura (docs/radar-cobertura.md): busca terminos de hardware en Tavily, los compara con el indice
 # publicado y deja un informe como artefacto. No es una fuente de precios: no commitea, no toca el indice ni publica.
+# El job pulso (diario) solo verifica las claves con los endpoints de uso, sin gastar creditos.
 # Tope por corrida: 60 creditos de Tavily (plan gratis 1.000/mes) y 10 de Firecrawl (plan gratis 1.000/mes).
 name: Radar de cobertura
 
 on:
   schedule:
     - cron: "0 11 * * 1"  # lunes 08:00 de Argentina; la corrida diaria del indice es a las 03:23 UTC (00:23 AR)
+    - cron: "0 12 * * *"  # pulso diario 09:00 AR: solo mira si las claves andan, sin gastar creditos
   workflow_dispatch:
     inputs:
       tope_creditos:
@@ -14,6 +16,10 @@ on:
       tope_firecrawl:
         description: "Creditos de Firecrawl como maximo"
         default: "10"
+      solo_pulso:
+        description: "Correr solo el pulso (no gasta creditos)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,7 +29,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Pulso diario: consulta los endpoints de uso de Tavily y Firecrawl (no cobran creditos). Falla si una clave falta,
+  # es rechazada o el servicio no contesta; deja los creditos en el resumen y avisa si quedan menos de 100.
+  pulso:
+    if: github.event.schedule == '0 12 * * *' || (github.event_name == 'workflow_dispatch' && inputs.solo_pulso)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Pulso de Tavily y Firecrawl
+        env:
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+        run: python radar_pulso.py
+
   radar:
+    if: github.event.schedule == '0 11 * * 1' || (github.event_name == 'workflow_dispatch' && !inputs.solo_pulso)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
