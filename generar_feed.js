@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { conHashes } = require("./csp.js");
 const O = require("./js/ofertas.js");
 const C = require("./js/categorias.js");
 const P = require("./js/pagina.js");
@@ -352,7 +353,7 @@ function main(argv) {
   fs.writeFileSync(path.join(salida, "ofertas.json"),
     JSON.stringify({ generado: idx.generado, sitio: baseUrl.replace(/\/$/, "") + "/", ofertas: lista }), "utf8");
   fs.mkdirSync(path.join(salida, "hoy"), { recursive: true });
-  fs.writeFileSync(path.join(salida, "hoy", "index.html"), renderHoy(idx, { baseUrl }), "utf8");
+  fs.writeFileSync(path.join(salida, "hoy", "index.html"), conHashes(renderHoy(idx, { baseUrl })), "utf8");
   console.log(`feed de ofertas: ${Math.min(O.destacadas(idx, MAX_FEED).length, MAX_FEED)} entradas`);
   return 0;
 }

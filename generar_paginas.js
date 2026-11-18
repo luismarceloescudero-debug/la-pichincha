@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { conHashes } = require("./csp.js");
 const crypto = require("crypto");
 const B = require("./js/buscador.js");
 const A = require("./js/analisis.js");
@@ -546,12 +547,12 @@ function main(argv) {
   for (const { c, analisis } of analizadas) {
     const dir = path.join(salida, "precios", c.slug);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "index.html"), renderPagina({ ...c, relacionadas: relacionadas(entradas, c.slug) }, analisis, ctx), "utf8");
+    fs.writeFileSync(path.join(dir, "index.html"), conHashes(renderPagina({ ...c, relacionadas: relacionadas(entradas, c.slug) }, analisis, ctx)), "utf8");
     const feed = renderFeedPagina(c, analisis, ctx);
     if (feed) fs.writeFileSync(path.join(dir, FEED_ARCHIVO), feed, "utf8");
   }
   fs.mkdirSync(path.join(salida, "precios"), { recursive: true });
-  fs.writeFileSync(path.join(salida, "precios", "index.html"), renderIndice(entradas, ctx), "utf8");
+  fs.writeFileSync(path.join(salida, "precios", "index.html"), conHashes(renderIndice(entradas, ctx)), "utf8");
   const manifiesto = arg("manifiesto");                  // lo lee generar_paginas.py para el mapa del sitio
   if (manifiesto) fs.writeFileSync(manifiesto, JSON.stringify({ generado: idx.generado, paginas }), "utf8");
   console.log(`${consultas.length} paginas generadas, ${entradas.length} indexables`);

@@ -15,6 +15,7 @@
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
+const { conHashes } = require("./csp.js");
 
 const INICIO = "/* === DATOS: generado por actualizar.py, no editar a mano === */";
 const FINAL = "/* === FIN DATOS === */";
@@ -141,7 +142,8 @@ function main(argv) {
   const html = fs.readFileSync(pagina, "utf8");
   const nuevo = prerender(html, ruta => fs.readFileSync(path.join(salida, ruta), "utf8"), novedadesDe(salida, argv), buscadasDe(salida),
     vendidosDe(salida, argv));
-  fs.writeFileSync(pagina, nuevo, "utf8");
+  // Con el hash de cada script en linea en la CSP: el bloque de datos cambia en cada corrida (csp.js, auditoria B1).
+  fs.writeFileSync(pagina, conHashes(nuevo), "utf8");
   console.log(nuevo === html ? "Portada sin cambios" : "Portada pre-renderizada");
   return 0;
 }

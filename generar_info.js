@@ -12,6 +12,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { conHashes } = require("./csp.js");
 const G = require("./generar_paginas.js");
 const SITIO = require("./sitio.json");
 const P = require("./js/pagina.js");
@@ -419,12 +420,12 @@ function main(argv) {
   const baseUrl = arg("base-url", BASE_URL);
   const escribir = (dir, html) => {
     fs.mkdirSync(path.join(salida, dir), { recursive: true });
-    fs.writeFileSync(path.join(salida, dir, "index.html"), html, "utf8");
+    fs.writeFileSync(path.join(salida, dir, "index.html"), conHashes(html), "utf8");
   };
   escribir("legal", renderLegal({ baseUrl }));
   escribir("contacto", renderContacto({ baseUrl }));
   escribir("acerca", renderAcerca({ baseUrl }));
-  fs.writeFileSync(path.join(salida, "404.html"), render404({ baseUrl }), "utf8");
+  fs.writeFileSync(path.join(salida, "404.html"), conHashes(render404({ baseUrl })), "utf8");
   fs.mkdirSync(path.join(salida, ".well-known"), { recursive: true });
   fs.writeFileSync(path.join(salida, ".well-known", "security.txt"), securityTxt({ baseUrl }), "utf8");
   if (!fs.existsSync(indicePath)) { console.log("sin indice de precios: no se genera /estado/ (si /legal/, /contacto/, /acerca/, la 404 y security.txt)"); return 0; }
