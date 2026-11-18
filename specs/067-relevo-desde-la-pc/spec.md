@@ -17,6 +17,8 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
 2. **`relevo_pc.py`** (en la PC) releva solo esas y arma, por tienda, `relevo-pc/<tienda>.json`:
    `{"tienda", "nombre", "via": "pc", "relevado": "AAAA-MM-DDTHH:MM-03:00", "cantidad", "productos": [...]}`, un
    producto por línea (diff chico). Una tienda que falla o trae 0 no se escribe: queda el archivo anterior con su fecha.
+   Tampoco se escribe un relevo con menos del **70 %** de los productos del archivo anterior
+   (`MINIMO_CONTRA_ANTERIOR`): es un relevo cortado y lo dice el log («relevo cortado: N de M del anterior»).
 3. **Publicación** (`--publicar`): clon superficial de la rama `historial` en
    `%USERPROFILE%\.la-pichincha\relevo-historial` (fuera del repo; nunca toca el checkout del dueño), `pull --rebase`
    antes de escribir, commit «Relevo desde la PC del AAAA-MM-DD: fullh4rd N, katech M» y push; si el push choca con el
@@ -47,7 +49,8 @@ extractores, el mismo `UA` y la misma `PAUSA` que el runner). Si la tienda bloqu
    entre ese valor y el `Crawl-delay` de su `robots.txt` (el relevo de la PC lo lee; hoy FullH4rd no trae). FullH4rd:
    `"pausa_s": 8`. Medido: 24 pedidos a ~1 por segundo dieron todos 200, así que el umbral no quedó claro y se tomó el
    valor prudente. Desde la PC, el primer 403 espera `ESPERA_403_PC` (120 s) y reintenta esa página **una** vez; si
-   vuelve el 403 se corta como siempre. En el runner el 403 es de IP y se corta sin esperar.
+   vuelve el 403, la tienda **falla** aunque ya haya leído algo (no se publica un relevo cortado: queda el archivo
+   anterior). En el runner el 403 es de IP y se corta sin esperar.
 
 La corrida programada de la mañana (03:23 y 05:47 UTC en el cron; GitHub la arranca de hecho entre las 09 y las 12 de
 Argentina) encuentra el relevo de las 05:30 con pocas horas. Las corridas de los push del día también (< 36 h).
