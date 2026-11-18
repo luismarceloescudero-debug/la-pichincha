@@ -284,5 +284,37 @@ class AvisoAlDueno(unittest.TestCase):
         self.assertEqual(avisar_dueno.url_corrida({}), "")
 
 
+class AvisoNoEnviado(unittest.TestCase):
+    """W9: si el aviso al dueno no sale, la linea final dice por que (antes: "ver la advertencia")."""
+
+    ENTORNO = {"TELEGRAM_BOT_TOKEN": "tok-secreto", "TELEGRAM_CHAT_DUENO": "1"}
+
+    def mandar(self, error):
+        salida = io.StringIO()
+        with mock.patch("urllib.request.urlopen", side_effect=error), \
+                mock.patch.object(avisar_dueno.publicar_telegram.time, "sleep"), redirect_stdout(salida):
+            self.assertEqual(avisar_dueno.mandar("hola", self.ENTORNO), 0)
+        return salida.getvalue().splitlines()[-1]
+
+    def test_un_rechazo_dice_el_codigo_y_lo_que_contesto_telegram(self):
+        error = urllib.error.HTTPError("https://api.telegram.org/", 400, "x", email.message.Message(),
+                                       io.BytesIO(b'{"description": "Bad Request: chat not found tok-secreto"}'))
+        linea = self.mandar(error)
+        self.assertIn("El aviso al dueno no salio: Telegram lo rechazo: HTTP 400 Bad Request: chat not found", linea)
+        self.assertNotIn("tok-secreto", linea)
+        self.assertNotIn("ver la advertencia", linea)
+
+    def test_sin_red_dice_que_no_pudo_conectar(self):
+        linea = self.mandar(urllib.error.URLError("Name or service not known"))
+        self.assertIn("El aviso al dueno no salio: no se pudo conectar con Telegram", linea)
+        self.assertIn("Name or service not known", linea)
+
+    def test_si_sale_no_queda_motivo_viejo(self):
+        with mock.patch("urllib.request.urlopen", return_value=Respuesta(b'{"ok": true, "result": {}}')), \
+                redirect_stdout(io.StringIO()):
+            avisar_dueno.mandar("hola", self.ENTORNO)
+        self.assertEqual(avisar_dueno.publicar_telegram.ULTIMO_MOTIVO, "")
+
+
 if __name__ == "__main__":
     unittest.main()

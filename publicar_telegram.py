@@ -174,9 +174,15 @@ def version(datos):
     return hashlib.sha1(lista.encode("utf-8")).hexdigest()[:10]
 
 
+# Por que fallo el ultimo pedido (sin el token), para que quien llama pueda decirlo (W9). "" si salio bien.
+ULTIMO_MOTIVO = ""
+
+
 def pedir(token, metodo, campos, tolerar=""):
     """POST a la API de Telegram. Devuelve el `result` de la respuesta ({} si no se pudo leer), o None si fallo,
     con la advertencia ya impresa. `tolerar`: un rechazo que no es una falla (se avisa sin advertencia y da {})."""
+    global ULTIMO_MOTIVO
+    ULTIMO_MOTIVO = ""
     cuerpo = json.dumps(campos).encode("utf-8")
     pedido = urllib.request.Request(f"https://api.telegram.org/bot{token}/{metodo}", data=cuerpo,
                                     headers={"Content-Type": "application/json"}, method="POST")
@@ -200,6 +206,7 @@ def pedir(token, metodo, campos, tolerar=""):
             if tolerar and tolerar in motivo:
                 print(f"Telegram: {motivo}")
                 return {}
+            ULTIMO_MOTIVO = f"Telegram lo rechazo: HTTP {e.code} {motivo}".rstrip()
             print(f"::warning::Telegram rechazo el mensaje: HTTP {e.code} {motivo}".rstrip())
             return None
         except (urllib.error.URLError, OSError) as e:
@@ -210,6 +217,7 @@ def pedir(token, metodo, campos, tolerar=""):
             if por_tiempo or intento == intentos:
                 detalle = str(razon).replace(token, "***")[:200]
                 cuantos = f", {intento} intentos" if intento > 1 else ""
+                ULTIMO_MOTIVO = f"no se pudo conectar con Telegram ({type(e).__name__}: {detalle}{cuantos})"
                 print(f"::warning::No se pudo publicar en Telegram ({type(e).__name__}: {detalle}{cuantos})")
                 return None
             time.sleep(ESPERAS[intento - 1])

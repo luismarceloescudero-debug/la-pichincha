@@ -26,11 +26,19 @@ class EnLaAction(unittest.TestCase):
         self.assertIn('if [ "$EVENTO" = "push" ]; then modo="--solo-corregir"; fi', paso)
         self.assertIn("--previo telegram-previo.json --estado _sitio/telegram.json $modo", paso)
 
-    def test_una_alarma_de_la_guardia_no_frena_el_mensaje(self):
-        # Decision del dueno (04/11): que haya o no rebajas reales, la publicacion sale igual; la alarma avisa, no bloquea.
-        paso = YML[YML.index("Publicar las pichinchas"):YML.index("upload-pages-artifact")]
-        self.assertNotIn("steps.guardia.outputs.alarma", paso)
-        self.assertNotIn("alarma != 'true'", YML[YML.index("Publicar las pichinchas"):])
+    def test_no_sale_con_el_indexado_fallido_ni_con_alarma_de_la_guardia(self):
+        # D5 (F0, docs/plan-definitivo.md): guardia.js sale con 3 para que la corrida no mande Telegram, y el paso no lo
+        # miraba. Con el indexado fallido el mensaje seria del indice de ayer. El sitio se publica igual.
+        paso = YML[YML.index("- name: Publicar las pichinchas"):YML.index("upload-pages-artifact")]
+        condicion = paso[paso.index("if:"):paso.index("continue-on-error")]
+        self.assertIn("steps.indexar.outcome != 'failure'", condicion)
+        self.assertIn("steps.guardia.outputs.alarma != 'true'", condicion)
+        self.assertIn("&& steps.indexar.outcome", condicion)  # se suma a los eventos, no es una alternativa (||)
+        # Los ids existen en el mismo job y la guardia publica `alarma` en su salida.
+        self.assertIn("id: indexar", YML)
+        guardia = YML[YML.index("id: guardia"):YML.index("- name: Avisar la alarma de la guardia")]
+        self.assertIn('echo "alarma=true" >> "$GITHUB_OUTPUT"', guardia)
+        self.assertNotIn("se mandó igual", YML)
 
     def test_el_mensaje_anterior_se_conserva_aunque_no_se_publique(self):
         # Revision del 24/10: con alarma (paso salteado) o en un push sin nada que corregir, telegram.json desaparecia del sitio.
