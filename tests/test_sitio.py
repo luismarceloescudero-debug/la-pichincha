@@ -4,6 +4,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
+import actualizar
 import generar_paginas
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -44,9 +45,25 @@ class PoliticaDeContenido(unittest.TestCase):
         self.assertNotIn("unsafe-eval", csp)
 
     def test_index_html_lleva_la_politica_de_sitio_json(self):
+        """La de sitio.json mas los hashes de sus scripts en linea (auditoria B1): sin 'unsafe-inline' en script-src."""
         html = (RAIZ / "index.html").read_text(encoding="utf-8")
         metas = re.findall(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)">', html)
-        self.assertEqual(metas, [SITIO["csp"]])
+        self.assertEqual(len(metas), 1)
+        sin_hashes = re.sub(r" '(?:sha256-[^']+|unsafe-hashes)'", "", metas[0])
+        self.assertEqual(sin_hashes, SITIO["csp"])
+        self.assertEqual(actualizar.con_hashes(html), html, "index.html con hashes viejos: correr python actualizar.py --build")
+
+    def test_script_src_no_deja_correr_cualquier_script_en_linea(self):
+        script_src = re.search(r"script-src ([^;]+)", SITIO["csp"]).group(1).split()
+        self.assertNotIn("'unsafe-inline'", script_src)
+        self.assertNotIn("https://cdnjs.cloudflare.com", script_src)   # solo la ruta de ExcelJS
+
+    def test_python_y_node_calculan_los_mismos_hashes(self):
+        """actualizar.py (index.html del repo) y csp.js (la portada publicada y las demas paginas) aplican la misma regla."""
+        html = (RAIZ / "index.html").read_text(encoding="utf-8").replace(" 'unsafe-hashes'", "")
+        js = 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>process.stdout.write(require("./csp.js").conHashes(t)))'
+        salida = subprocess.run(["node", "-e", js], cwd=RAIZ, input=html, capture_output=True, text=True, check=True, encoding="utf-8")
+        self.assertEqual(salida.stdout, actualizar.con_hashes(html))
 
     def test_las_paginas_generadas_llevan_la_politica_de_sitio_json(self):
         js = 'process.stdout.write(require("./generar_paginas.js").cabeza({titulo:"t",descripcion:"d",canonica:"c",baseUrl:"b"}))'

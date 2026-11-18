@@ -13,6 +13,8 @@ dejan en una etiqueta meta o en microdatos schema.org.
 """
 
 import argparse
+import base64
+import hashlib
 import json
 import re
 import sys
@@ -295,6 +297,40 @@ MODULOS = re.compile(r'<script id="modulos" type="application/json">(.*?)</scrip
 CARGADOR = re.compile(r'[ \t]*<script id="cargador">.*?</script>[ \t]*\r?\n?', re.S)
 
 
+# CSP con los hashes de los scripts en linea (auditoria B1): la misma regla que csp.js (conHashes), que la aplica a la portada
+# publicada y a las paginas generadas. tests/test_sitio.py exige que las dos den lo mismo sobre index.html.
+CSP_META = re.compile(r'(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(">)')
+SCRIPT_EN_LINEA = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.S | re.I)
+MANEJADOR = re.compile(r'<[a-zA-Z][^>]*?\son[a-z]+="([^"]*)"')
+NO_CORRE = re.compile(r'\btype="application/(?:ld\+)?json"', re.I)
+
+
+def hash_csp(texto):
+    """'sha256-...' del texto como lo lee el navegador (todo fin de linea pasa a LF)."""
+    texto = re.sub(r"\r\n?", "\n", texto)
+    return "'sha256-" + base64.b64encode(hashlib.sha256(texto.encode("utf-8")).digest()).decode() + "'"
+
+
+def con_hashes(html):
+    """script-src sin 'unsafe-inline': un hash por script en linea que corre y 'unsafe-hashes' para los manejadores."""
+    meta = CSP_META.search(html)
+    if not meta:
+        return html
+    scripts = [hash_csp(c) for a, c in SCRIPT_EN_LINEA.findall(html)
+               if not re.search(r"\bsrc=", a, re.I) and not NO_CORRE.search(a)]
+    manejadores = [hash_csp(m) for m in MANEJADOR.findall(html)]
+    directivas = []
+    for d in meta.group(2).split(";"):
+        partes = d.strip().split()
+        if partes[0] == "script-src":
+            base = [t for t in partes if t not in ("'unsafe-inline'", "'unsafe-hashes'") and not t.startswith("'sha256-")]
+            todos = base + (["'unsafe-hashes'"] if manejadores else []) + manejadores + scripts
+            directivas.append(" ".join(dict.fromkeys(todos)))
+        else:
+            directivas.append(d.strip())
+    return CSP_META.sub(lambda m: m.group(1) + "; ".join(directivas) + m.group(3), html, count=1)
+
+
 def armar_artifact(html, leer):
     """La copia para el artifact: sin el esqueleto ni lo que solo sirve en la web
     (analitica, Open Graph), y con los scripts de js/ adentro, porque el artifact
@@ -328,7 +364,7 @@ def construir(datos, pagina=INDICE, copia=COPIA, verificado=None):
     if not patron.search(html):
         print(f"{ROJO}No encuentro el bloque de datos en {pagina.name}{FIN}")
         return False
-    html = patron.sub(lambda _: bloque, html)
+    html = con_hashes(patron.sub(lambda _: bloque, html))
     pagina.write_text(html, encoding="utf-8")
     copia.write_text(armar_artifact(html, lambda ruta: (pagina.parent / ruta).read_text(encoding="utf-8")),
                      encoding="utf-8")
