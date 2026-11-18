@@ -1141,7 +1141,8 @@ def main(argv=None):
             caidas.add(clave)
         if clase != estado_tiendas.OK and clave not in previos:
             previos[clave] = dict(estados.get(clave) or estado_tiendas.registro_nuevo())
-        estados[clave], cambio = estado_tiendas.observar(estados.get(clave), clase, hoy, detalle)
+        estados[clave], cambio = estado_tiendas.observar(estados.get(clave), clase, hoy, detalle,
+                                                         puede_pausar=clave not in sembradas)
         if cambio:
             cambios.append(dict(cambio, clave=clave, nombre=fuentes[clave]["nombre"]))
             print("  " + AMAR + "! estado: " + cambio["de"] + " -> " + cambio["a"] + FIN)
