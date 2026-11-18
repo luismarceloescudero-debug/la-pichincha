@@ -25,6 +25,7 @@ import re
 import sys
 from pathlib import Path
 
+import estado_tiendas
 import publicar_telegram
 
 for flujo in (sys.stdout, sys.stderr):   # los emojis del aviso en una consola de Windows (cp1252)
@@ -48,11 +49,11 @@ MOTIVOS = {
 
 # Cambios de estado automaticos de una tienda (spec 066, estado_tiendas.py): se avisan una sola vez.
 CAMBIOS = {
-    "pausa": "⏸️ <b>{nombre}: en pausa</b>. Hace 14 dias que no trae productos: sus precios viejos dejan de mostrarse y "
-             "se sigue intentando a diario. Vuelve sola.",
-    "baja": "⛔ <b>{nombre}: dada de baja</b>. El dominio no responde hace 3 corridas: sale del indice y se sondea una "
-            "vez por semana. Vuelve sola si revive.",
-    "activa": "✅ <b>{nombre}: volvio</b>. Trajo productos otra vez: alta automatica en esta corrida.",
+    estado_tiendas.PAUSA: f"⏸️ <b>{{nombre}}: en pausa</b>. Hace {estado_tiendas.DIAS_PAUSA} dias que no trae productos: "
+                          "sus precios viejos dejan de mostrarse y se sigue intentando a diario. Vuelve sola.",
+    estado_tiendas.BAJA: f"⛔ <b>{{nombre}}: dada de baja</b>. El dominio no responde hace {estado_tiendas.CORRIDAS_BAJA} "
+                         "corridas: sale del indice y se sondea una vez por semana. Vuelve sola si revive.",
+    estado_tiendas.ACTIVA: "✅ <b>{nombre}: volvio</b>. Trajo productos otra vez: alta automatica en esta corrida.",
 }
 
 
@@ -86,8 +87,9 @@ def lineas_salud(informe, indexado="success"):
     # spec 066: un cambio de estado se avisa una vez; una tienda en pausa o de baja no se repite cada dia
     for c in informe.get("cambios") or []:
         nombre = html.escape(str(c.get("nombre", "?")))
-        salida.append(CAMBIOS.get(c.get("a"), CAMBIOS["activa"]).format(nombre=nombre))
-    quietas = {k for k, t in (informe.get("tiendas") or {}).items() if t.get("estado") in ("pausa", "baja")}
+        salida.append(CAMBIOS.get(c.get("a"), CAMBIOS[estado_tiendas.ACTIVA]).format(nombre=nombre))
+    quietas = {k for k, t in (informe.get("tiendas") or {}).items()
+               if t.get("estado") in (estado_tiendas.PAUSA, estado_tiendas.BAJA)}
     for clave, f in (informe.get("fuentes") or {}).items():
         if clave in quietas:
             continue

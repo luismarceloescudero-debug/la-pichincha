@@ -81,6 +81,11 @@ class Acciones(unittest.TestCase):
         self.assertEqual(self.verbos(plan), [("cerrar", "C", 96)])
         self.assertIn("dada de baja", plan[0][3])
 
+    def test_los_textos_usan_los_umbrales_de_estado_tiendas(self):
+        cambio = {"nombre": "C", "a": salud.estado_tiendas.BAJA, "de": salud.estado_tiendas.ACTIVA}
+        with mock.patch.object(salud.estado_tiendas, "CORRIDAS_BAJA", 5):
+            self.assertIn("en 5 corridas seguidas", salud.cuerpo_cambio(cambio, self.URL))
+
     def test_baja_ya_registrada_con_el_issue_abierto_se_cierra(self):
         inf = self.informe({}, {"c": "baja"})
         self.assertEqual(self.verbos(salud.acciones(inf, {"Fuente con pocos productos: C": 96}, self.URL)),

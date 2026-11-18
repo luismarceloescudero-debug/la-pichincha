@@ -208,6 +208,11 @@ class AvisoAlDueno(unittest.TestCase):
         self.assertIn("Compra Cierta: dada de baja", lineas[1])
         self.assertIn("LG: volvio", lineas[2])
 
+    def test_spec_066_los_avisos_usan_los_umbrales_de_estado_tiendas(self):
+        import estado_tiendas
+        self.assertIn(f"Hace {estado_tiendas.DIAS_PAUSA} dias", avisar_dueno.CAMBIOS[estado_tiendas.PAUSA])
+        self.assertIn(f"hace {estado_tiendas.CORRIDAS_BAJA} corridas", avisar_dueno.CAMBIOS[estado_tiendas.BAJA])
+
     def test_spec_066_avisa_el_freno_global(self):
         lineas = avisar_dueno.lineas_salud({"fuentes": {}, "freno": {"activo": True, "relevadas": 40, "caidas": 30}})
         self.assertEqual(len(lineas), 1)

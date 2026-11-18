@@ -23,6 +23,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import estado_tiendas
+
 UMBRAL = 0.7
 ETIQUETA = "salud-fuente"
 SALUD = Path(__file__).resolve().parent / "salud.json"
@@ -118,15 +120,15 @@ def _fecha(iso):
 def cuerpo_cambio(cambio, url):
     """El unico comentario que deja un cambio de estado de una tienda (spec 066)."""
     nombre, a = cambio["nombre"], cambio["a"]
-    if a == "pausa":
+    if a == estado_tiendas.PAUSA:
         texto = (f"**{nombre}** pasa a **en pausa** sola (spec 066): no trae productos desde el "
                  f"{_fecha(cambio.get('sin_productos_desde'))} (ultima corrida: {cambio.get('clase')}). Sus precios "
                  "viejos dejan de publicarse y se sigue intentando a diario. Vuelve sola cuando traiga productos. "
                  "Este issue no se comenta mas hasta el proximo cambio.")
-    elif a == "baja":
+    elif a == estado_tiendas.BAJA:
         texto = (f"**{nombre}** queda **dada de baja** sola (spec 066): el dominio no responde (DNS, certificado o "
-                 "conexion) en 3 corridas seguidas. Sale del indice publicado y del relevamiento diario; se sondea la "
-                 "portada una vez por semana y vuelve sola si revive. Se cierra.")
+                 f"conexion) en {estado_tiendas.CORRIDAS_BAJA} corridas seguidas. Sale del indice publicado y del "
+                 "relevamiento diario; se sondea la portada una vez por semana y vuelve sola si revive. Se cierra.")
     else:
         texto = (f"**{nombre}** volvio a traer productos: **alta automatica** (spec 066; estaba en {cambio.get('de')}). "
                  "Sus precios vuelven a publicarse desde esta corrida. Se cierra.")
@@ -148,9 +150,9 @@ def acciones(informe, abiertos, url):
         t = titulo_tienda(c["nombre"])
         n, texto = abiertos.get(t), cuerpo_cambio(c, url)
         hechos.add(t)
-        if c["a"] == "pausa":
+        if c["a"] == estado_tiendas.PAUSA:
             plan.append(("comentar", t, n, texto) if n else ("crear", t, None, texto))
-        elif c["a"] == "baja":
+        elif c["a"] == estado_tiendas.BAJA:
             plan.append(("cerrar", t, n, texto))
         elif n:
             plan.append(("cerrar", t, n, texto))
@@ -158,12 +160,12 @@ def acciones(informe, abiertos, url):
         t = titulo_tienda(e.get("nombre", clave))
         if t in hechos:
             continue
-        if e.get("estado") == "baja" and t in abiertos:
+        if e.get("estado") == estado_tiendas.BAJA and t in abiertos:
             hechos.add(t)
-            plan.append(("cerrar", t, abiertos[t], cuerpo_cambio(dict(e, a="baja", de="activa"), url)))
-        elif e.get("estado") == "pausa" and t not in abiertos:
+            plan.append(("cerrar", t, abiertos[t], cuerpo_cambio(dict(e, a=estado_tiendas.BAJA, de=estado_tiendas.ACTIVA), url)))
+        elif e.get("estado") == estado_tiendas.PAUSA and t not in abiertos:
             hechos.add(t)
-            plan.append(("crear", t, None, cuerpo_cambio(dict(e, a="pausa", clase=e.get("ultima")), url)))
+            plan.append(("crear", t, None, cuerpo_cambio(dict(e, a=estado_tiendas.PAUSA, clase=e.get("ultima")), url)))
     for clave, f in fuentes.items():                # volvio sobre el umbral: el issue se cierra solo
         t = titulo_tienda(f["nombre"])
         if f["estado"] == "ok" and t in abiertos and t not in hechos:
@@ -173,7 +175,7 @@ def acciones(informe, abiertos, url):
                          "Corrida: " + url))
     for a in alertas(informe):
         t = titulo(a)
-        if estados.get(a["clave"], {}).get("estado") in ("pausa", "baja") or t in abiertos or t in hechos:
+        if estados.get(a["clave"], {}).get("estado") in (estado_tiendas.PAUSA, estado_tiendas.BAJA) or t in abiertos or t in hechos:
             continue                                # ya tiene su issue: nada de un comentario por dia
         hechos.add(t)
         plan.append(("crear", t, None, cuerpo(a, url)))
