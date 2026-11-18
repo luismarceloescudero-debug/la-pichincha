@@ -95,6 +95,15 @@ function leer(ruta) {
   try { return JSON.parse(fs.readFileSync(ruta, "utf8")); } catch (e) { return null; }
 }
 
+/* Contra que medicion se compara (auditoria 17/11, punto 1). Una previa con alarma no sirve: si la corrida de las 00:23 dio
+   «Monitores: sin ofertas», su guardia.json ya tiene 0 en el rubro y el respaldo no veria la caida. Se usa la ultima sin
+   alarma, que viaja en `previa_valida`; si no la hay (guardia.json de antes de este cambio), no se compara por rubro. */
+function base(previa) {
+  if (!previa) return null;
+  // Solo una medicion con alarma lleva previa_valida, y la que lleva nunca tiene otra adentro: no se anida.
+  return previa.alarma ? previa.previa_valida || null : previa;
+}
+
 function main(argv) {
   const arg = nombre => { const i = argv.indexOf("--" + nombre); return i >= 0 ? argv[i + 1] : ""; };
   const idx = leer(arg("indice") || "indice.json");
@@ -103,7 +112,12 @@ function main(argv) {
   // Con que se midio: el indice de la cache sirve si lo rearma esta corrida; si no, el sitio ya publica otro (con sus ofertas).
   if (arg("reusado")) m.reusado = true;
   if (arg("ofertas")) m.repetidas = repetidas((leer(arg("ofertas")) || {}).ofertas);
-  const lista = alarmas(m, arg("previa") ? leer(arg("previa")) : null);
+  const previa = base(arg("previa") ? leer(arg("previa")) : null);
+  const lista = alarmas(m, previa);
+  // La salida se publica aunque haya alarma: dice que la tuvo y, en ese caso, arrastra la ultima medicion sin alarma para
+  // que la corrida siguiente (el respaldo de las 02:47) no compare contra un indice que ya estaba mal.
+  m.alarma = lista.length > 0;
+  if (m.alarma && previa) m.previa_valida = previa;
   if (arg("salida")) fs.writeFileSync(arg("salida"), JSON.stringify(m), "utf8");
   const texto = "### Guardia del índice\n\n" + tabla(m) + "\n\n" +
     (lista.length ? "**Alarmas:**\n\n" + lista.map(x => "- " + x).join("\n") : "Sin alarmas.") + "\n";
@@ -114,5 +128,5 @@ function main(argv) {
   return 3;
 }
 
-module.exports = { medir, alarmas, repetidas, main, MIN_DESTACADAS };
+module.exports = { medir, alarmas, repetidas, base, main, MIN_DESTACADAS };
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

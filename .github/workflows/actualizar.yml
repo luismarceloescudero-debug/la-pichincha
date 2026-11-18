@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       correr: ${{ steps.hoy.outputs.correr }}
+      telegram: ${{ steps.hoy.outputs.telegram }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -53,17 +54,25 @@ jobs:
         env:
           EVENTO: ${{ github.event_name }}
         run: |
-          correr=true
+          correr=true; telegram=true
           if [ "$EVENTO" = "schedule" ]; then
             hoy=$(TZ=America/Argentina/Buenos_Aires date +%F)
             base=$(python3 -c 'import json;print(json.load(open("sitio.json"))["base_url"])')
             dia() { curl -fsSL "$base/$1" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("generado", ""))[:10])' || true; }
+            alarma() { curl -fsSL "$base/$1" | python3 -c 'import json,sys; print(str(json.load(sys.stdin).get("alarma") is True).lower())' || true; }
             # Hace falta el indice de hoy Y su mensaje: un push de madrugada que reindexa no manda Telegram (spec 030).
             if [ "$(dia guardia.json)" = "$hoy" ] && [ "$(dia telegram.json)" = "$hoy" ]; then
               correr=false; echo "Ya hay indice y mensaje del $hoy publicados: esta corrida programada no hace nada"
             fi
+            # Auditoria 17/11 (punto 1): si la corrida de hoy ya dio alarma en la guardia, el respaldo rearma el indice y
+            # publica el sitio como siempre (puede salir mejor: una tienda que volvio), pero NO manda Telegram ese dia: el
+            # canal no recibe un indice del dia que la guardia marco hasta que el dueno mire el issue "guardia".
+            if [ "$(dia guardia.json)" = "$hoy" ] && [ "$(alarma guardia.json)" = "true" ]; then
+              telegram=false; echo "La guardia de hoy dio alarma: esta corrida no manda Telegram"
+            fi
           fi
           echo "correr=$correr" >> "$GITHUB_OUTPUT"
+          echo "telegram=$telegram" >> "$GITHUB_OUTPUT"
 
   tests:
     uses: ./.github/workflows/tests.yml
@@ -343,7 +352,8 @@ jobs:
         run: node generar_info.js --indice indice.json --salud salud.json --fiabilidad _sitio/fiabilidad.json --salida _sitio || echo "::warning::No se armaron /estado/ ni /legal/"
 
       # Guardia del indice (guardia.js): mide sobre el indice real bajas propias y, por categoria, avisos, "sin datos" y
-      # ofertas, y lo compara con la medicion publicada de la corrida anterior. Con una alarma (18/10: 0 bajas propias
+      # ofertas, y lo compara con la medicion publicada de la corrida anterior (si esa tenia alarma, con la ultima sin
+      # alarma, que viaja en su `previa_valida`: auditoria 17/11, punto 1). Con una alarma (18/10: 0 bajas propias
       # en todo el indice) se abre o comenta un issue con la etiqueta "guardia" y el mensaje de Telegram NO sale (D5,
       # docs/plan-definitivo.md F0): el sitio se publica igual, pero el canal no recibe un indice que la guardia marco.
       # El mensaje de Telegram que ya salio viaja con el sitio (spec 030): se copia antes de la guardia para que no se
@@ -409,11 +419,13 @@ jobs:
       # 23/10: /hoy/ se arreglo a las 22:51 y el mensaje de las 22:06 siguio con la Lenovo repetida). Que mensaje
       # salio para que indice viaja con el sitio en telegram.json.
       # D5 (F0): no sale con el indexado fallido (seria el indice de ayer) ni con una alarma de la guardia. Si frena de
-      # mas, se revierte solo la segunda linea del if.
+      # mas, se revierte solo la segunda linea del if. Auditoria 17/11: tampoco sale si la guardia no termino bien (punto 6)
+      # ni en el respaldo de un dia cuya primera corrida ya dio alarma (punto 1, trabajo "decidir").
       - name: Publicar las pichinchas del dia en Telegram
         if: >-
           (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
           && steps.indexar.outcome != 'failure' && steps.guardia.outputs.alarma != 'true'
+          && needs.decidir.outputs.telegram != 'false'
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

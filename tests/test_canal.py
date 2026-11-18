@@ -40,6 +40,17 @@ class EnLaAction(unittest.TestCase):
         self.assertIn('echo "alarma=true" >> "$GITHUB_OUTPUT"', guardia)
         self.assertNotIn("se mandó igual", YML)
 
+    def test_el_respaldo_no_manda_telegram_si_la_guardia_de_hoy_dio_alarma(self):
+        # Auditoria 17/11, punto 1: la corrida de las 00:23 da alarma y no manda Telegram; la de las 02:47 rearma el indice
+        # (el sitio puede salir de nuevo) pero el canal de ese dia no se publica: lo decide el dueno mirando el issue.
+        decidir = YML[YML.index("  decidir:"):YML.index("  tests:")]
+        self.assertIn("telegram: ${{ steps.hoy.outputs.telegram }}", decidir)
+        self.assertIn("alarma guardia.json", decidir)
+        self.assertIn('echo "telegram=$telegram" >> "$GITHUB_OUTPUT"', decidir)
+        paso = YML[YML.index("- name: Publicar las pichinchas"):YML.index("upload-pages-artifact")]
+        condicion = paso[paso.index("if:"):paso.index("continue-on-error")]
+        self.assertIn("needs.decidir.outputs.telegram != 'false'", condicion)
+
     def test_el_mensaje_anterior_se_conserva_aunque_no_se_publique(self):
         # Revision del 24/10: con alarma (paso salteado) o en un push sin nada que corregir, telegram.json desaparecia del sitio.
         paso = YML[YML.index("Conservar el mensaje de Telegram anterior"):YML.index("- name: Guardia del indice")]
