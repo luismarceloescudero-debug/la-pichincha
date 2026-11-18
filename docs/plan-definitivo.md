@@ -69,6 +69,12 @@ Regla: una fase es **uno o varios PR chicos**; se cierra con sus tests, su fila 
 - **Test**: `tests/test_canal.py` (ya lee el paso de Telegram) afirma la condicion nueva; un test que carga los 6 workflows y falla con una clave repetida; `tests/test_avisos_y_arreglos.py` para W9.
 - **Terminado cuando**: la corrida por push posterior al merge muestra sus jobs y termina en verde; `actionlint` falla en una rama de prueba con la clave repetida.
 - **Rollback**: revert. El punto (c) es el unico que cambia conducta: si frena de mas, se revierte solo esa linea.
+- **Auditoria del 17/11, arreglos de la publicacion (hecho, un PR, un commit por punto)**:
+  - (1, Alta) El respaldo de las 02:47 bajaba el `guardia.json` de la corrida de las 00:23 aunque esa hubiera dado alarma, comparaba contra un rubro ya en 0 y mandaba Telegram con el indice malo. Ahora `guardia.js` escribe `alarma` en su salida y, con alarma, arrastra la ultima medicion sin alarma en `previa_valida`; la corrida siguiente compara contra esa (`base()`). Ademas `decidir` da `telegram=false` si el `guardia.json` publicado de hoy tiene alarma: el respaldo rearma el indice y publica el sitio como siempre, pero el canal de ese dia no sale hasta que el dueño mire el issue `guardia`.
+  - (2, Alta) e2e sin reintentos: un fallo al azar dejaba el dia sin publicar. `tests/e2e/reintentos.js`: 0 en `pull_request` y en la PC (N-T1 sigue valiendo para los PR), 1 cuando `tests.yml` lo llama la publicacion (dentro de `workflow_call`, `GITHUB_EVENT_NAME` es el del llamador: `schedule`, `workflow_dispatch` o `push`). El paso de Playwright escribe el evento y los reintentos en el log.
+  - (6, Media) Si `guardia.js` revienta (codigo 1) tambien es alarma, con su texto para el issue y el aviso; Telegram pide ademas `steps.guardia.outcome == 'success'`.
+  - (7, Media) `ConChromeReal`: en la CI solo se saltea un Chrome que no termino a tiempo; "salio con N sin DOM" falla.
+  - (9, Baja) "Guardar la fiabilidad" sube solo `verificacion/` (no `git add -A`) y hace `git pull --rebase --autostash` antes del push.
 
 ### F1. Carga de la portada: N-CAL1 (1 dia)
 
