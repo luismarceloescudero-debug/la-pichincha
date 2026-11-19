@@ -172,6 +172,15 @@ class Corrida(unittest.TestCase):
         nuevas = self.filas()[antes:]
         self.assertEqual(nuevas, [("uno", url(1), "700")])       # registra el precio, no las bajas
 
+    def test_una_tienda_que_cae_el_70_por_ciento_conserva_sus_productos_anteriores(self):
+        # D1: 3 de 10 (cae 70 %) publica el catalogo de la corrida anterior completo, no el recortado.
+        diez = [(i, 1000) for i in range(1, 11)]
+        self.correr(diez, [(101, 500)])
+        indice, salud = self.correr([(1, 700), (2, 1000), (3, 1000)], [(101, 500)])
+        self.assertEqual(salud["fuentes"]["uno"]["estado"], "baja")
+        precios = sorted(f[1] for f in indice["productos"] if f[3] == "uno")
+        self.assertEqual(precios, [1000] * 10)                    # los 10 anteriores, con su precio de antes
+
     def test_fuente_que_falla_cuenta_cero_y_conserva_el_indice_anterior(self):
         self.correr([(1, 1000)], [(101, 500)])
         antes = len(self.filas())
