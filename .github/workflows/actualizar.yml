@@ -131,7 +131,8 @@ jobs:
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
       # La clave incluye el hash del indexador y de la configuracion de fuentes:
       # si cambia el formato del indice o se suma una tienda, no hay cache que
-      # reusar y el paso siguiente rearma el indice solo.
+      # reusar: en una corrida programada o manual el paso siguiente rearma el
+      # indice solo; en un push el paso de abajo frena con error claro (D4).
       - name: Recuperar el indice anterior
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -139,14 +140,23 @@ jobs:
           key: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-${{ github.run_id }}
           restore-keys: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-
 
+      # D4: un push reusa el indice de la cache, no reindexa. Si la cache no trae indice
+      # previo no hay con que publicar sin dejar el buscador vacio: la corrida sale con
+      # error claro y no publica (avisar-falla le avisa al dueno). Para rearmarlo se lanza
+      # a mano: workflow_dispatch con indexar=true.
+      - name: Frenar el push sin indice previo
+        if: github.event_name == 'push' && hashFiles('indice.json') == ''
+        run: |
+          echo "::error::Este push no tiene indice previo en la cache: no se publica para no dejar el buscador vacio. Lanza la corrida a mano (workflow_dispatch, indexar=true) para rearmar el indice."
+          exit 1
+
       # Relevar los 5 catalogos son ~17 minutos. En un push a main no hace falta:
-      # alcanza con reusar el indice de la cache, salvo que no haya ninguno.
+      # alcanza con reusar el indice de la cache; si no hay, el paso de arriba ya freno.
       - name: Armar el indice de busqueda
         id: indexar
         if: |
           (github.event_name == 'schedule') ||
-          (github.event_name == 'workflow_dispatch' && inputs.indexar) ||
-          (github.event_name == 'push' && hashFiles('indice.json') == '')
+          (github.event_name == 'workflow_dispatch' && inputs.indexar)
         # El valor del formulario va por el entorno y se valida: interpolado en el comando, "12; algo" correria en el job.
         # Mercado Libre (spec 026) se lee por su API oficial con el token de aplicacion; sin los secretos esa fuente falla
         # sola y queda la de la corrida anterior.
