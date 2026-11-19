@@ -208,6 +208,7 @@ jobs:
               python verificar_ofertas.py candidatas.json --descartadas descartadas.json --telemetria telemetria.json || rc=$?
               [ "$rc" -eq 3 ] || break
             done
+            # D3: si sacar las caidas pasaria el 5% del indice o el 30% de una tienda, el filtro no toca nada y deja un ::warning::.
             python filtrar_indice.py indice.json descartadas.json
           fi
 
@@ -260,6 +261,7 @@ jobs:
         run: |
           python enlaces_rotos.py --sitio _sitio --salida rotos.json
           if [ "$(python -c 'import json;print(len(json.load(open("rotos.json"))))')" != "0" ]; then
+            # D3: si sacar los rotos pasaria el 5% del indice o el 30% de una tienda, el filtro no toca nada y deja un ::warning::.
             python filtrar_indice.py indice.json rotos.json
             cp indice.json _sitio/
             python generar_paginas.py --indice indice.json --salida _sitio --fechas-previas "$FECHAS_PREVIAS"
