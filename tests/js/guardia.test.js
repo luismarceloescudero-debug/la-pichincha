@@ -48,6 +48,16 @@ test("una categoria que tenia ofertas y queda en cero es una alarma", () => {
   assert.ok(a.some(x => /Monitores.*sin ofertas/.test(x)), a.join("\n"));
 });
 
+test("con 0 bajas propias en todo el indice no se repite cada categoria como «sin ofertas» (issue #217)", () => {
+  const previa = G.medir(sano());
+  const idx = sano();
+  idx.productos[0][6] = 0;    // sin bajas propias: la comparacion contra el historial no anduvo
+  idx.productos[1][5] = 0;    // el monitor pierde su rebaja y queda en 0 ofertas
+  const a = G.alarmas(G.medir(idx), previa);
+  assert.ok(a.some(x => /0 bajas propias/.test(x)), a.join("\n"));
+  assert.ok(!a.some(x => /sin ofertas/.test(x)), "la caida a 0 ofertas es sintoma del mismo problema, no una alarma aparte: " + a.join("\n"));
+});
+
 test("con otras reglas de oferta la corrida anterior no se compara por categoria (spec 035)", () => {
   const previa = { ...G.medir(sano()), reglas: "034" };
   const idx = sano();
