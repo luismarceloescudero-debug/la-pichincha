@@ -181,6 +181,19 @@ class Corrida(unittest.TestCase):
         precios = sorted(f[1] for f in indice["productos"] if f[3] == "uno")
         self.assertEqual(precios, [1000] * 10)                    # los 10 anteriores, con su precio de antes
 
+    def test_sin_historial_los_vivos_se_cuentan_del_indice_anterior(self):
+        # D2: sin historial, los vivos salen del indice de la corrida anterior. 10 de 1.000 cae el umbral: "baja".
+        mil = [["Producto %d" % i, 1000, url(i), "uno", "", 0, 0, "", ""] for i in range(1, 1001)]
+        viejo = {"generado": "2026-10-07T15:25-03:00",
+                 "tiendas": {"uno": {"nombre": "Uno", "color": "cg", "relevado": "2026-10-07T15:25-03:00"}},
+                 "productos": mil}
+        (self.dir / "indice.json").write_text(json.dumps(viejo), encoding="utf-8")
+        diez = [(i, 1000) for i in range(1, 11)]
+        _, salud = self.sin_historial(diez, [(101, 500)])
+        self.assertEqual(salud["fuentes"]["uno"]["estado"], "baja")
+        self.assertEqual(salud["fuentes"]["uno"]["previo"], 1000)
+        self.assertEqual(salud["fuentes"]["uno"]["ahora"], 10)
+
     def test_fuente_que_falla_cuenta_cero_y_conserva_el_indice_anterior(self):
         self.correr([(1, 1000)], [(101, 500)])
         antes = len(self.filas())
