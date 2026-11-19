@@ -1344,6 +1344,20 @@ def main(argv=None):
         if reintentada and clave not in por_pc:
             notas[clave] = {"motivo": "recuperada", "detalle": "anduvo en el reintento", "reintentada": True}
         relevados[clave] = len(items)
+        # D1: si trajo menos del umbral de los que tenia vivos en el historial, conserva el catalogo de la corrida
+        # anterior y queda "baja" en salud (una tienda que bloquea a medias no recorta su catalogo publicado). Se
+        # anotan igual los precios de hoy: el historial no registra las bajas de una tienda bajo el umbral, pero si
+        # sus cambios de precio.
+        if vivos.get(clave) and clave in previo and len(items) < salud.UMBRAL * vivos[clave]:
+            observar(clave, estado_tiendas.OK)
+            for it in items:
+                if clave not in por_pc or por_pc[clave][:10] == hoy.isoformat():
+                    actuales[(clave, it["url"])] = it["precio"]
+            salida.extend(previo[clave])
+            resumen[clave] = (len(previo[clave]), "baja, uso el anterior")
+            print("  " + AMAR + "! trajo " + str(len(items)) + " de " + str(vivos[clave])
+                  + " productos: conservo el anterior" + FIN)
+            continue
         frescas.add(clave)
         observar(clave, estado_tiendas.OK)
         bajaron = 0
