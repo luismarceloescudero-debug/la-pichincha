@@ -1193,6 +1193,11 @@ def main(argv=None):
     # La baja propia se mide contra los precios de antes de hoy (serie.piso_previo): si el indexador corre dos veces en
     # el dia, la segunda no compara contra lo que guardo la primera (18/10: 29 bajas en el historial, 0 en el indice).
     vivos = historial.vivos_por_tienda(estado)
+    if not vivos:
+        # D2: sin historial no hay de donde contar los vivos, pero el indice de la
+        # corrida anterior los tiene: si una tienda publica una fraccion de lo que
+        # tenia, salud la marca "baja" (y D1 conserva el catalogo anterior) igual.
+        vivos = {clave: len(filas) for clave, filas in previo.items()}
 
     def reusable(fuente, clave):
         """Si lo de la corrida anterior se puede reusar (E1). Para una tienda con relevo desde la PC, solo si ese relevo tiene
