@@ -62,7 +62,11 @@ const p100 = x => Math.round(x * 100) + "%";
 function alarmas(m, previa) {
   const lista = [];
   const dia = String(m.generado).slice(0, 10);
-  if (m.historial && dia && m.historial < dia && m.productos > 0 && m.bajasPropias === 0)
+  // Sin bajas propias con historial viejo la comparacion contra el historial no anduvo: lo cubre la regla de abajo
+  // («0 bajas propias»). Si ademas se dejara caer cada categoria en «sin ofertas», saldrian alarmas de mas por el mismo
+  // problema (issue #217: «PCs completas: sin ofertas hoy» con 0 bajas en todo el indice).
+  const sinBajasPropias = m.historial && dia && m.historial < dia && m.productos > 0 && m.bajasPropias === 0;
+  if (sinBajasPropias)
     lista.push(`0 bajas propias en todo el índice (${m.productos} avisos) con historial desde el ${m.historial}: ` +
                "la comparación contra el historial no está funcionando (18/10: una segunda corrida en el día las borraba).");
   for (const [a, b] of m.repetidas || [])
@@ -72,7 +76,7 @@ function alarmas(m, previa) {
   for (const c of C.ORDEN) {
     const a = m.categorias[c], b = previa && previa.categorias && previa.categorias[c];
     if (!a || !b) continue;
-    if (b.ofertas > 0 && a.ofertas === 0 && previa.reglas === m.reglas)
+    if (!sinBajasPropias && b.ofertas > 0 && a.ofertas === 0 && previa.reglas === m.reglas)
       lista.push(`${C.ETIQUETAS[c]}: sin ofertas hoy (ayer ${b.ofertas}).`);
     if (a.avisos >= MIN_AVISOS && b.avisos >= MIN_AVISOS) {
       const hoy = pct(a.sinDatos, a.avisos), antes = pct(b.sinDatos, b.avisos);
