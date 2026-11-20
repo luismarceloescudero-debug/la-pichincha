@@ -145,6 +145,14 @@ jobs:
             indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-
             indice-
 
+      # Un indice de otra version del codigo sirve solo si tiene las mismas columnas (indexar.CAMPOS):
+      # si no, se descarta y cae en D4 (push) o se rearma (corrida programada o manual).
+      - name: Descartar un indice de formato incompatible
+        if: hashFiles('indice.json') != ''
+        run: |
+          python -c "import json,sys,indexar; sys.exit(json.load(open('indice.json',encoding='utf-8')).get('campos')!=indexar.CAMPOS)" \
+            || { echo "::warning::El indice de la cache tiene otras columnas: se descarta"; rm -f indice.json; }
+
       # D4: un push reusa el indice de la cache, no reindexa. Si la cache no trae indice
       # previo no hay con que publicar sin dejar el buscador vacio: la corrida sale con
       # error claro y no publica (avisar-falla le avisa al dueno). Para rearmarlo se lanza
