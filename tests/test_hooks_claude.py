@@ -75,6 +75,39 @@ class Guardia(unittest.TestCase):
         self.assertIsNone(guardia.decidir_archivo("js/env.js"))
 
 
+class GuardiaErroresQueVuelven(unittest.TestCase):
+    """Reglas del 20/11 (docs/errores-conocidos.md): merge con checks sin verde, --watch con tuberia, .mcp.json sin version fija, workflows."""
+
+    def test_merge_con_checks_sin_verde_se_frena(self):
+        r = guardia.decidir("gh pr merge 311 --rebase", verificar=lambda n: ["pending"])
+        self.assertEqual(r[0], "deny")
+        self.assertIn("311", r[1])
+
+    def test_merge_con_todo_verde_o_sin_poder_consultar_sigue(self):
+        self.assertIsNone(guardia.decidir("gh pr merge 311 --rebase", verificar=lambda n: []))
+        self.assertIsNone(guardia.decidir("gh pr merge 311 --rebase", verificar=lambda n: None))
+
+    def test_watch_y_merge_encadenados_no_consultan(self):
+        def no_debe_llamarse(n):
+            raise AssertionError("no tenia que consultar")
+        self.assertIsNone(guardia.decidir("gh pr checks 311 --watch && gh pr merge 311 --rebase", verificar=no_debe_llamarse))
+
+    def test_watch_con_tuberia_se_frena(self):
+        self.assertEqual(guardia.decidir("gh pr checks 311 --watch | tail -5")[0], "deny")
+        self.assertIsNone(guardia.decidir("gh pr checks 311 --watch"))
+
+    def test_mcp_json_con_npx_o_latest_se_frena(self):
+        self.assertEqual(guardia.decidir_contenido(".mcp.json", '{"command": "npx", "args": ["x"]}')[0], "deny")
+        self.assertEqual(guardia.decidir_contenido("a/.mcp.json", '"@playwright/mcp@latest"')[0], "deny")
+        self.assertIsNone(guardia.decidir_contenido(".mcp.json", '"@playwright/mcp@0.0.41"'))
+        self.assertIsNone(guardia.decidir_contenido("README.md", "npx @latest"))
+
+    def test_editar_un_workflow_pide_confirmacion(self):
+        self.assertEqual(guardia.decidir_archivo(".github/workflows/actualizar.yml")[0], "ask")
+        self.assertEqual(guardia.decidir_archivo(".github\\workflows\\tests.yml")[0], "ask")
+        self.assertIsNone(guardia.decidir_archivo("docs/mapa.md"))
+
+
 class JsonRoto(unittest.TestCase):
     def test_avisa_si_el_json_quedo_invalido(self):
         import tempfile

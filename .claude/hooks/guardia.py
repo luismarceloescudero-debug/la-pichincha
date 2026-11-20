@@ -25,6 +25,7 @@ Solo stdlib.
 import json
 import os
 import re
+import subprocess
 import sys
 
 PUBLICAR = [
@@ -52,23 +53,50 @@ TRABAJO = re.compile(r"^\s*(?:cd|ls|cat|head|tail|wc|grep|rg|find|echo|printf|so
                      r"bash\s+tests/e2e/armar-sitio\.sh|gh\s+(?:run\s+(?:view|list|watch)|pr\s+(?:view|checks|list)|workflow\s+(?:view|list)))\b")
 
 
+MERGE = re.compile(r"\bgh\s+pr\s+merge\s+(\d+)")
+WATCH_Y_MERGE = re.compile(r"\bgh\s+pr\s+checks\b[^;|\n]*--watch\b[^;|\n]*&&[^;|\n]*\bgh\s+pr\s+merge\b")
+WATCH_CON_TUBERIA = re.compile(r"\bgh\s+pr\s+checks\b[^|;&\n]*--watch\b[^;&\n]*\|")
+WORKFLOW = re.compile(r"(?:^|[\\/])\.github[\\/]workflows[\\/][^\\/]+\.ya?ml$")
+MCP_JSON = re.compile(r"(?:^|[\\/])\.mcp\.json$")
+
+
+def checks_no_verdes(numero):
+    """Estados de los checks del PR que no son pass/skipping; None si no se pudo consultar (no frena)."""
+    try:
+        r = subprocess.run(["gh", "pr", "checks", numero], capture_output=True, text=True, timeout=25)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    estados = [c.split("\t")[1].strip().lower() for c in r.stdout.splitlines() if "\t" in c]
+    return [e for e in estados if e not in ("pass", "skipping")] if estados else None
+
+
 def es_trabajo(comando):
     """True si todo el comando es trabajo en la app: mirar, buscar, testear o armar el sitio local."""
     tramos = [t for t in re.split(r"&&|\|\||;|\||\n", comando or "") if t.strip()]
     return bool(tramos) and all(TRABAJO.match(t) for t in tramos)
 
 
+def decidir_contenido(ruta, texto):
+    """Para Edit/Write: ('deny', motivo) si .mcp.json llevaria npx o @latest (version sin fijar)."""
+    if MCP_JSON.search(ruta or "") and re.search(r"@latest\b|\"npx\"", texto or ""):
+        return "deny", "Bloqueado: .mcp.json con npx o @latest. Los MCP van con la version fija (uv o npm con numero)."
+    return None
+
+
 def decidir_archivo(ruta):
     """Para Edit/Write: ('ask', motivo) si el archivo es generado, o None."""
     if SECRETOS.search(ruta or ""):
         return "deny", "Bloqueado: este archivo guarda secretos (.env / .dev.vars). No se edita; pediselo al dueño."
+    if WORKFLOW.search(ruta or ""):
+        return "ask", ("Cambio de workflow: tiene que haber un test que lo cubra en tests/test_workflows.py y conviene "
+                       "correr actionlint. Confirmá si ya lo pensaste.")
     if GENERADOS.search(ruta or ""):
         return "ask", ("Este archivo se genera (npm o armar-sitio.sh), no se edita a mano. Confirmá solo si el dueño "
                        "lo pidio; si no, regeneralo con su comando.")
     return None
 
 
-def decidir(comando):
+def decidir(comando, verificar=checks_no_verdes):
     """Devuelve (decision, motivo) o None si el comando puede seguir sin preguntar."""
     if COMMIT.search(comando):
         letras = sorted(set(TILDES.findall(comando)))
@@ -78,6 +106,15 @@ def decidir(comando):
     for patron, que in DESTRUCTIVOS:
         if patron.search(comando):
             return "deny", "Bloqueado: " + que + ". Solo el dueño puede pedirlo directamente."
+    if WATCH_CON_TUBERIA.search(comando):
+        return "deny", ("Bloqueado: `gh pr checks --watch` con tuberia. El codigo de salida es el del ultimo comando y "
+                        "se puede mergear con un check pending. Correlo sin tuberia.")
+    m = MERGE.search(comando)
+    if m and not WATCH_Y_MERGE.search(comando):
+        malos = verificar(m.group(1))
+        if malos:
+            return "deny", ("Bloqueado: el PR " + m.group(1) + " tiene checks sin verde (" + ", ".join(sorted(set(malos))) +
+                            "). Esperalos con `gh pr checks " + m.group(1) + " --watch` y recien ahi mergea.")
     if es_trabajo(comando):
         return None
     for patron, que in PUBLICAR:
@@ -104,7 +141,11 @@ def main():
     except ValueError:
         return 0
     entrada = datos.get("tool_input") or {}
-    resultado = decidir(entrada["command"]) if entrada.get("command") else decidir_archivo(entrada.get("file_path"))
+    if entrada.get("command"):
+        resultado = decidir(entrada["command"])
+    else:
+        resultado = (decidir_archivo(entrada.get("file_path"))
+                     or decidir_contenido(entrada.get("file_path"), entrada.get("content") or entrada.get("new_string")))
     if resultado:
         decision, motivo = resultado
         if decision == "ask" and omitir(datos, entrada.get("command")):
