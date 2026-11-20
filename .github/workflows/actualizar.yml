@@ -129,16 +129,21 @@ jobs:
 
       # Si una tienda se cae o bloquea la IP del runner, el indice anterior
       # sigue sirviendo en lugar de publicar el sitio sin buscador.
-      # La clave incluye el hash del indexador y de la configuracion de fuentes:
-      # si cambia el formato del indice o se suma una tienda, no hay cache que
-      # reusar: en una corrida programada o manual el paso siguiente rearma el
-      # indice solo; en un push el paso de abajo frena con error claro (D4).
+      # La clave incluye el hash del indexador y de la configuracion de fuentes, asi cada
+      # version guarda su propio indice. Pero un push que toca indexar.py cambia ese hash y no
+      # encontraria nada: el 19/11 los fixes D1 y D2 dejaron sin indice a la publicacion del
+      # push siguiente (corrida 44607390849) y D4 la freno. Por eso el segundo restore-key,
+      # sin hash, trae el indice mas reciente de cualquier version: un push publica con el
+      # ultimo indice armado y la proxima corrida programada lo rearma con el codigo nuevo.
+      # D4 solo frena si de verdad no hay ningun indice en la cache.
       - name: Recuperar el indice anterior
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: indice.json
           key: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-${{ github.run_id }}
-          restore-keys: indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-
+          restore-keys: |
+            indice-${{ hashFiles('indexar.py', 'mercadolibre.py', 'tiendas.json') }}-
+            indice-
 
       # D4: un push reusa el indice de la cache, no reindexa. Si la cache no trae indice
       # previo no hay con que publicar sin dejar el buscador vacio: la corrida sale con

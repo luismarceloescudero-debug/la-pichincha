@@ -109,5 +109,19 @@ class ClavesRepetidas(unittest.TestCase):
         self.assertEqual(claves_repetidas("jobs:\n  a:\n    x: 1\n  a:\n    x: 2\n"), [(4, "a")])
 
 
+class CacheDelIndice(unittest.TestCase):
+    """19/11: D1 y D2 cambiaron indexar.py, la clave de la cache cambio de hash y el push siguiente no
+    encontro indice (D4 lo freno). El restore-key sin hash evita que un cambio del indexador deje sin
+    publicar los pushes hasta la proxima corrida programada."""
+
+    def test_la_cache_del_indice_cae_a_cualquier_version(self):
+        texto = (RAIZ / ".github" / "workflows" / "actualizar.yml").read_text(encoding="utf-8")
+        m = re.search(r"name: Recuperar el indice anterior\s.*?restore-keys:\s*\|?\s*\n((?:\s+indice-.*\n)+)", texto, re.S)
+        self.assertIsNotNone(m, "no encuentro los restore-keys del indice")
+        claves = [c.strip() for c in m.group(1).splitlines() if c.strip()]
+        self.assertIn("indice-", claves)
+        self.assertGreaterEqual(len(claves), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
