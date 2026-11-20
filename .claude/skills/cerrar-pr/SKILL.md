@@ -22,7 +22,11 @@ PR: `$ARGUMENTS` (si esta vacio, el PR abierto de la rama actual: `gh pr view --
    gh pr checks N --watch
    ```
    Si algun check falla: no mergear. Leer el log (`gh run view <id> --log-failed`), arreglar, pushear y volver a 2.
-3. **Mergear**: `gh pr merge N --rebase`.
+3. **Mergear**: `gh pr merge N --rebase`. El hook `guardia.py` frena el merge si algun check no esta en verde.
+   Si el PR arregla un error que ya paso o que cuesta un PR, antes de mergear confirmar que tiene su fila en
+   `docs/errores-conocidos.md` (skill `registrar-error`).
+   Despues del merge, **cerrar los issues que el PR resuelve** (`gh issue close N --repo luismarceloescudero-debug/la-pichincha-correo -c "Resuelto en #PR"`
+   o «ruido conocido E##»): ninguno queda abierto mas de 7 dias.
 4. **Limpiar**:
    - salir del worktree si es el directorio activo (ExitWorktree) y mandar su carpeta a la **Papelera**
      (nunca borrado permanente), despues `git worktree prune`;
