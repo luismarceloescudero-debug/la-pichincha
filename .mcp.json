@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "node",
-      "args": ["@playwright/mcp@latest", "--browser", "chromium", "--executablePath", "/opt/pw-browsers/chromium"],
-      "env": {}
-    }
-  }
-}
