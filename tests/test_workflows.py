@@ -7,6 +7,7 @@ detecta; este test lo cubre sin herramientas externas (biblioteca estandar, cons
 No es un parser YAML completo: sigue la indentacion de los mapas en bloque, los items de lista (`- clave:`) y saltea
 el contenido de los escalares en bloque (`run: |`, `run: >`). Alcanza para los workflows de este repo.
 """
+import os
 import re
 import unittest
 from pathlib import Path
@@ -121,6 +122,33 @@ class CacheDelIndice(unittest.TestCase):
         claves = [c.strip() for c in m.group(1).splitlines() if c.strip()]
         self.assertIn("indice-", claves)
         self.assertGreaterEqual(len(claves), 2)
+
+    def _paso_descartar(self):
+        texto = (RAIZ / ".github" / "workflows" / "actualizar.yml").read_text(encoding="utf-8")
+        for marca in ("Recuperar el indice anterior", "Descartar un indice de formato incompatible",
+                      "Frenar el push sin indice previo", "Armar el indice de busqueda"):
+            self.assertIn("name: " + marca, texto)
+        pos = [texto.index("name: " + m) for m in ("Recuperar el indice anterior",
+               "Descartar un indice de formato incompatible", "Frenar el push sin indice previo",
+               "Armar el indice de busqueda")]
+        self.assertEqual(pos, sorted(pos), "el orden de los pasos del indice cambio")
+        m = re.search(r"name: Descartar un indice de formato incompatible.*?run: \|\s*\r?\n\s+(python -c \"[^\r\n]*\")", texto, re.S)
+        self.assertIsNotNone(m)
+        self.assertIn("rm -f indice.json", texto)
+        return m.group(1).strip()
+
+    def test_indice_con_otras_columnas_se_descarta(self):
+        import json, subprocess, sys, tempfile
+        cmd = self._paso_descartar()
+        codigo = cmd[len("python -c \""):-1]
+        import indexar
+        casos = [(indexar.CAMPOS, 0), (indexar.CAMPOS[:-1], 1), (None, 1)]
+        for campos, esperado in casos:
+            with tempfile.TemporaryDirectory() as d:
+                datos = {} if campos is None else {"campos": campos}
+                (Path(d) / "indice.json").write_text(json.dumps(datos), encoding="utf-8")
+                r = subprocess.run([sys.executable, "-c", codigo], cwd=d, env={**os.environ, "PYTHONPATH": str(RAIZ)})
+                self.assertEqual(r.returncode, esperado, campos)
 
 
 if __name__ == "__main__":

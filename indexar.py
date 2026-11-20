@@ -72,6 +72,11 @@ for flujo in (sys.stdout, sys.stderr):
         pass
 
 
+# Columnas del indice, en orden. El workflow reusa un indice viejo de la cache solo si trae
+# exactamente estas columnas. Regla: agregar o renombrar columnas, nunca cambiarle el sentido a una.
+CAMPOS = ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31", "vendido"]
+
+
 def _soporta(t):
     try:
         t.encode(sys.stdout.encoding or "ascii")
@@ -1479,7 +1484,7 @@ def main(argv=None):
                             **({"relevado": relevado[k]} if relevado.get(k) else {}),
                             **({"estado": estado_tiendas.PAUSA} if estados.get(k, {}).get("estado") == estado_tiendas.PAUSA else {}))
                     for k, v in fuentes.items() if k not in de_baja},
-        "campos": ["nombre", "precio", "url", "tienda", "via", "lista", "antes", "imagen", "sellos", "modelo", "desde", "baja7", "baja31", "vendido"],
+        "campos": CAMPOS,
         # desde cuando se siguen los precios: "sin cambios desde" no puede ir mas atras que esta fecha
         "historial": {"inicio": (serie.inicio(series) or date.min).isoformat() if series else ""},
         "productos": salida,
