@@ -108,9 +108,11 @@ class Sentry(unittest.TestCase):
     def test_la_politica_deja_bajar_el_programa_y_mandar_los_errores(self):
         script = re.search(r"script-src ([^;]+)", SITIO["csp"]).group(1).split()
         self.assertIn("https://browser.sentry-cdn.com", script)
+        connect = re.search(r"connect-src ([^;]+)", SITIO["csp"]).group(1).split()
+        # Decision del 20/11: el CDN de Sentry NO entra en connect-src (el aviso del .map es esperado, ver _nota_sentry_mapa).
+        self.assertNotIn("https://browser.sentry-cdn.com", connect)
         if SITIO["sentry_dsn"]:
             origen = re.match(r"https://[^@]+@([^/]+)", SITIO["sentry_dsn"]).group(1)
-            connect = re.search(r"connect-src ([^;]+)", SITIO["csp"]).group(1).split()
             self.assertIn(f"https://{origen}", connect)
 
     def test_index_y_las_paginas_generadas_llevan_el_dsn_y_el_script(self):
