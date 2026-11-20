@@ -33,6 +33,18 @@ Reglas propias del proyecto. Las globales (idioma, merge de PRs, FCC, limpieza) 
 - Skills del proyecto: `/medir-indice` (reglas contra el indice publicado y contra `main`; usarla antes de un PR de
   ofertas, categorias, titulos o premium) y `/cerrar-pr N` (solo la llama el dueño o se pide: CI, rebase, limpieza).
 
+## Errores que vuelven (regla fija, 20/11)
+
+- Un error que ya paso una vez no se arregla solo en el codigo: se agrega o actualiza su fila en
+  `docs/errores-conocidos.md` con un test que falle sin el arreglo (o un hook/paso de CI si no es testeable).
+  Sin fila y sin test, el PR no se abre. `tests/test_errores_conocidos.py` verifica que cada guardia exista.
+- Antes de arreglar algo, buscá su sintoma en `docs/errores-conocidos.md`: si ya esta, la guardia fallo; se corrige
+  la guardia, no se agrega un parche al lado.
+- Falla intermitente (Lighthouse, e2e, red): a la segunda vez que aparece sin relacion con el cambio, entra como fila
+  con reintento acotado y test del reintento; nunca se borra el check.
+- Cada issue de `la-pichincha-correo` se cierra en la misma tarea con el enlace al PR o con «ruido conocido E-xx».
+  Ninguno queda abierto mas de 7 dias.
+
 ## Tests
 
 - Suite completa: `node --test "tests/js/*.test.js"`.
