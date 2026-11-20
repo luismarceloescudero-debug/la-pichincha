@@ -71,7 +71,7 @@
 ### Setup pendientes
 - [x] **guardia.py**: frena `git push --force`, push a main, `git reset --hard` y secretos en commits (#214, `cae682f`).
 - [x] **test_del_archivo.py**: valida el JSON al editar `*.json` de la raíz (#214).
-- [x] **`.mcp.json`**: Playwright con `node` a su CLI global; Stitch queda deshabilitado (#215, `c87604f`).
+- [x] **`.mcp.json`**: se borro el 20/11 (apuntaba a `@playwright/mcp@latest` y a una ruta de Linux, no funcionaba en ningun lado). Los MCP de terceros se descartaron: lo que falte se fabrica propio (ver `docs/errores-conocidos.md` y la regla 10 de `karpathy-guidelines`).
 - [ ] Skills de terceros pesadas (`speckit-*` x10, `reverse-engineer-anything`, etc.): moverlas a nivel usuario (`npx skills add ... -g`) para liberar contexto
 - [ ] Crear `.claude/agents/security-reviewer.md` limitado a `worker/src`
 
