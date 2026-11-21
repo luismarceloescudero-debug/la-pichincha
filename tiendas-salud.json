@@ -238,10 +238,10 @@
   },
   "pardo": {
    "estado": "activa",
-   "ultima": "vacia",
+   "ultima": "ok",
    "ultima_corrida": "2026-11-21",
-   "ultimo_ok": "2026-11-20",
-   "sin_productos_desde": "2026-11-21",
+   "ultimo_ok": "2026-11-21",
+   "sin_productos_desde": null,
    "muertas_seguidas": 0,
    "ultimo_ping": null,
    "cambio": null
