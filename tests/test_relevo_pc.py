@@ -38,7 +38,7 @@ class Archivo(unittest.TestCase):
 
     def test_tiendas_marcadas_en_tiendas_json(self):
         fuentes = json.loads((RAIZ / "tiendas.json").read_text(encoding="utf-8"))
-        self.assertEqual(relevo_pc.tiendas_con_relevo(fuentes), ["fullh4rd", "katech"])
+        self.assertEqual(relevo_pc.tiendas_con_relevo(fuentes), ["katech"])
 
     def test_inactiva_no_se_releva(self):
         self.assertEqual(relevo_pc.tiendas_con_relevo({"a": {"relevo": "pc", "activa": False}, "b": {"relevo": "pc"},
@@ -129,7 +129,7 @@ class Archivo(unittest.TestCase):
                                lambda f, m, desde_pc=False: llamadas.append((f["nombre"], desde_pc)) or [producto(1)]), \
                 redirect_stdout(io.StringIO()):
             self.assertEqual(relevo_pc.main(["--salida", str(self.dir)]), 0)
-        self.assertEqual(llamadas, [("FullH4rd", True), ("Katech", True)])   # desde la PC: espera y reintenta un 403
+        self.assertEqual(llamadas, [("Katech", True)])   # desde la PC: espera y reintenta un 403
         self.assertTrue((self.dir / "relevo-pc" / "katech.json").exists())
 
     def test_reciente(self):

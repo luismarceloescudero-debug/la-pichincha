@@ -97,7 +97,7 @@
   "fullh4rd": {
     "nombre": "FullH4rd",
     "color": "fh",
-    "activa": true,
+    "activa": false,
     "base": "https://fullh4rd.com.ar",
     "relevo": "pc",
     "pausa_s": 8,
@@ -152,7 +152,7 @@
   "venex": {
     "nombre": "Venex",
     "color": "vx",
-    "activa": true,
+    "activa": false,
     "base": "https://www.venex.com.ar",
     "catalogo": {
       "tipo": "listados",
@@ -275,7 +275,7 @@
   "thegamershop": {
     "nombre": "The Gamer Shop",
     "color": "tg",
-    "activa": true,
+    "activa": false,
     "base": "https://thegamershop.com.ar",
     "catalogo": {
       "tipo": "woocommerce",
