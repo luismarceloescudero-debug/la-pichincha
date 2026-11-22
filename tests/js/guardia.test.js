@@ -183,11 +183,11 @@ test("una previa con alarma no sirve de comparacion: se usa la ultima medicion s
     assert.equal(segunda.alarma, true);
     assert.equal(segunda.previa_valida.categorias.monitor.ofertas, 1);
 
-    assert.equal(correr(malo(), g(3), g(2)), 3, "el respaldo compara contra la medicion buena, no contra la de la alarma");
+    assert.equal(correr(malo(), g(3), g(2)), 0, "alarma repetida: no bloquea Telegram (issue #320); la comparacion sigue siendo contra la medicion buena");
     const tercera = leer(g(3));
-    assert.equal(tercera.previa_valida.categorias.monitor.ofertas, 1);
-    assert.equal(tercera.previa_valida.previa_valida, undefined, "no se anida: viaja una sola medicion valida");
-    assert.equal(tercera.previa_valida.generado, leer(g(1)).generado);
+    assert.equal(tercera.alarmas_repetidas, true, "marca que las alarmas ya estaban");
+    assert.equal(tercera.alarma, false, "no es alarma nueva");
+    assert.equal(tercera.previa_valida, undefined, "alarma repetida no arrastra previa_valida");
 
     assert.equal(correr(bueno(), g(4), g(3)), 0);                     // vuelve a estar bien
     assert.equal(leer(g(4)).alarma, false);
@@ -201,6 +201,36 @@ test("una previa con alarma y sin previa_valida (formato viejo) no se usa para c
   const ok = G.medir(sano());
   assert.equal(G.base(ok), ok);
   assert.equal(G.base(null), null);
+});
+
+test("alarma repetida no bloquea segunda vez: Telegram sale si las alarmas son las mismas que ayer", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "guardia-repetida-"));
+  const indice = path.join(dir, "indice.json");
+  const g = n => path.join(dir, `guardia${n}.json`), leer = r => JSON.parse(fs.readFileSync(r, "utf8"));
+  const muchas = () => Array.from({ length: 12 }, (_, i) => fila(`SSD Marca${i} Modelo${i} 1TB NVMe`, 90000, { antes: 130000 + i * 2000 }));
+  const bueno = () => ({ ...sano(), productos: [...sano().productos, ...muchas()] });
+  const malo  = () => { const idx = bueno(); idx.productos[1][5] = 0; return idx; };
+  const correr = (idx, salida, previa) => {
+    fs.writeFileSync(indice, JSON.stringify(idx));
+    const args = ["--indice", indice, "--salida", salida];
+    if (previa) args.push("--previa", previa);
+    return G.main(args);
+  };
+  const log = console.log; console.log = () => {};
+  try {
+    assert.equal(correr(bueno(), g(1)), 0);                           // corrida limpia
+    assert.equal(correr(malo(),  g(2), g(1)), 3);                     // primera vez: alarma nueva → bloquea
+    assert.ok(Array.isArray(leer(g(2)).alarmas_activas), "guarda alarmas_activas la primera vez");
+    assert.equal(leer(g(2)).alarma, true);
+    assert.equal(correr(malo(),  g(3), g(2)), 0,                      // segunda vez: misma alarma → no bloquea
+      "una alarma ya conocida no debe seguir bloqueando Telegram (issue #320)");
+    assert.equal(leer(g(3)).alarmas_repetidas, true);
+    assert.equal(leer(g(3)).alarma, false);
+    assert.equal(correr(malo(),  g(4), g(3)), 0,                      // tercera vez: sigue sin bloquear
+      "con base en alarmas_repetidas la alarma no vuelve a disparar");
+    assert.equal(correr(bueno(), g(5), g(4)), 0);                     // vuelve bien: sin alarma
+    assert.equal(leer(g(5)).alarma, false);
+  } finally { console.log = log; fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("--reusado al final de la linea marca la medicion como reusada (es una bandera, no lleva valor)", () => {

@@ -116,18 +116,24 @@ function main(argv) {
   // Con que se midio: el indice de la cache sirve si lo rearma esta corrida; si no, el sitio ya publica otro (con sus ofertas).
   if (argv.includes("--reusado")) m.reusado = true; // bandera sin valor: va ultima en la linea del workflow
   if (arg("ofertas")) m.repetidas = repetidas((leer(arg("ofertas")) || {}).ofertas);
-  const previa = base(arg("previa") ? leer(arg("previa")) : null);
+  const previaRaw = arg("previa") ? leer(arg("previa")) : null;
+  const previa = base(previaRaw);
   const lista = alarmas(m, previa);
-  // La salida se publica aunque haya alarma: dice que la tuvo y, en ese caso, arrastra la ultima medicion sin alarma para
-  // que la corrida siguiente (el respaldo de las 02:47) no compare contra un indice que ya estaba mal.
-  m.alarma = lista.length > 0;
+  // Si las alarmas de esta corrida son exactamente las mismas que las de la anterior, no es una alarma nueva: el dueño
+  // ya vio el issue (sigue abierto). Se publica Telegram igual; el issue queda abierto como señal de que sigue.
+  // Si aparece alguna alarma nueva, bloquea como siempre (issue #320: loop infinito con «PCs completas: sin ofertas»).
+  const activas = (previaRaw && previaRaw.alarmas_activas) || [];
+  const repetida = lista.length > 0 && activas.length > 0 && lista.every(a => activas.includes(a));
+  if (lista.length > 0) m.alarmas_activas = lista;
+  m.alarma = lista.length > 0 && !repetida;
   if (m.alarma && previa) m.previa_valida = previa;
+  if (repetida) m.alarmas_repetidas = true;
   if (arg("salida")) fs.writeFileSync(arg("salida"), JSON.stringify(m), "utf8");
   const texto = "### Guardia del índice\n\n" + tabla(m) + "\n\n" +
     (lista.length ? "**Alarmas:**\n\n" + lista.map(x => "- " + x).join("\n") : "Sin alarmas.") + "\n";
   console.log(texto);
   if (arg("resumen")) fs.appendFileSync(arg("resumen"), texto, "utf8");
-  if (!lista.length) return 0;
+  if (!lista.length || repetida) return 0;
   if (arg("alarma")) fs.writeFileSync(arg("alarma"), texto, "utf8");
   return 3;
 }
