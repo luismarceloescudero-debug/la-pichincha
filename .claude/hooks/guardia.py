@@ -6,7 +6,8 @@ Reglas fijas del proyecto que antes cuidaba solo la memoria del modelo:
 - Los mensajes de commit van sin tildes ni eñes (compatibilidad de consola): se frena el commit.
 - Borrar historia (`git push --force`, `git reset --hard`) o tocar archivos de secretos (`.env*`, `.dev.vars`) pide confirmacion.
 - Editar a mano un archivo generado (`package-lock.json`, lo de `_sitio/`) pide confirmacion: se regenera con npm o con
-  `tests/e2e/armar-sitio.sh`. `datos.json` y `consultas.json` NO entran: llevan datos curados a mano.
+  `tests/e2e/armar-sitio.sh`. `datos.json` y `consultas.json` (datos curados a mano) tambien piden confirmacion: un error
+  ahi rompe el sitio y la CI se entera tarde.
 
 «Omitir permisos» (04/11, pedido del dueño): si la sesion corre en ese modo (`permission_mode` = `bypassPermissions`)
 o la variable `PICHINCHA_GUARDIA=omitir` esta puesta, lo que solo pedia confirmacion (workflows, Telegram, generados)
@@ -45,6 +46,7 @@ DESTRUCTIVOS = [
 ]
 SECRETOS = re.compile(r"(?:^|[\\/])(?:\.env(?:\.[^\\/]*)?|\.dev\.vars)$")
 GENERADOS = re.compile(r"(?:^|[\\/])package-lock\.json$")
+CURADOS = re.compile(r"(?:^|[\\/])(?:datos|consultas)\.json$")
 
 # Cada tramo del comando (separado por ; && || |) empieza con algo que solo mira, busca, testea o arma en local.
 TRABAJO = re.compile(r"^\s*(?:cd|ls|cat|head|tail|wc|grep|rg|find|echo|printf|sort|uniq|less|diff|"
@@ -84,7 +86,7 @@ def decidir_contenido(ruta, texto):
 
 
 def decidir_archivo(ruta):
-    """Para Edit/Write: ('ask', motivo) si el archivo es generado, o None."""
+    """Para Edit/Write: ('ask', motivo) si el archivo es generado o curado a mano, o None."""
     if SECRETOS.search(ruta or ""):
         return "deny", "Bloqueado: este archivo guarda secretos (.env / .dev.vars). No se edita; pediselo al dueño."
     if WORKFLOW.search(ruta or ""):
@@ -93,6 +95,9 @@ def decidir_archivo(ruta):
     if GENERADOS.search(ruta or ""):
         return "ask", ("Este archivo se genera (npm o armar-sitio.sh), no se edita a mano. Confirmá solo si el dueño "
                        "lo pidio; si no, regeneralo con su comando.")
+    if CURADOS.search(ruta or ""):
+        return "ask", ("Este archivo lleva datos curados a mano (tiendas o consultas): un error aca rompe el sitio y "
+                       "la CI se entera tarde. Confirmá solo si es un cambio puntual que ya revisaste.")
     return None
 
 
