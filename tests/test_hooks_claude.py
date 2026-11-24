@@ -134,15 +134,20 @@ class GuardiaArchivos(unittest.TestCase):
         for ruta in ["package-lock.json", "/repo/package-lock.json", "C:\\repo\\package-lock.json"]:
             self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
 
-    def test_lo_curado_a_mano_no_se_frena(self):
-        for ruta in ["datos.json", "consultas.json", "js/titulo.js", "package.json", "docs/x.md", None]:
+    def test_lo_curado_a_mano_pide_confirmacion(self):
+        for ruta in ["datos.json", "consultas.json", "C:\\repo\\datos.json", "/repo/consultas.json"]:
+            self.assertEqual(guardia.decidir_archivo(ruta)[0], "ask", ruta)
+
+    def test_otros_archivos_no_se_frenan(self):
+        for ruta in ["js/titulo.js", "package.json", "docs/x.md", None]:
             self.assertIsNone(guardia.decidir_archivo(ruta), ruta)
 
     def test_main_con_file_path(self):
         codigo, salida, _ = correr(guardia, json.dumps({"tool_input": {"file_path": "package-lock.json"}}))
         self.assertEqual(codigo, 0)
         self.assertEqual(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], "ask")
-        self.assertEqual(correr(guardia, json.dumps({"tool_input": {"file_path": "datos.json"}})), (0, "", ""))
+        codigo, salida, _ = correr(guardia, json.dumps({"tool_input": {"file_path": "datos.json"}}))
+        self.assertEqual(json.loads(salida)["hookSpecificOutput"]["permissionDecision"], "ask")
 
 
 class GuardiaMain(unittest.TestCase):
