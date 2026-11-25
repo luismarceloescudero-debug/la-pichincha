@@ -699,6 +699,25 @@ test("contacto: wrangler.toml declara el binding LIMITE_CONTACTO con periodo de 
   assert.match(toml, /simple = \{ limit = \d+, period = (10|60) \}/);
 });
 
+test("/version: devuelve el commit que puso el despliegue, o sin-version si no hay; solo GET", async () => {
+  const atender = await atenderContacto();
+  const pedir = (metodo = "GET") => new Request("https://afuera.example.workers.dev/version", { method: metodo, headers: { "CF-Connecting-IP": "4.4.4.4" } });
+  const sha = "8921920a1b2c3d4e5f60718293a4b5c6d7e8f901";
+  const r = await atender(pedir(), { ...SIN_TM, VERSION: sha });
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { servicio: "pichincha-afuera", version: sha });
+  assert.equal(r.headers.get("Cache-Control"), "no-store");
+  assert.deepEqual(await (await atender(pedir(), { ...SIN_TM })).json(), { servicio: "pichincha-afuera", version: "sin-version" });
+  assert.equal((await atender(pedir(), { ...SIN_TM, VERSION: "<script>" })).status, 200);
+  assert.deepEqual(await (await atender(pedir(), { ...SIN_TM, VERSION: "<script>" })).json(), { servicio: "pichincha-afuera", version: "sin-version" }, "un valor raro no se devuelve");
+  assert.equal((await atender(pedir("POST"), { ...SIN_TM })).status, 405);
+});
+
+test("worker.yml despliega con la variable VERSION del commit", () => {
+  const yml = fs.readFileSync(path.join(__dirname, "..", "..", ".github", "workflows", "worker.yml"), "utf8");
+  assert.match(yml, /\$WRANGLER deploy --var VERSION:\$\{\{ github\.sha \}\}/);
+});
+
 test("contacto: el asunto con tildes va en RFC 2047 y el mensaje conserva sus saltos de linea", async () => {
   const envios = [], atender = await atenderContacto();
   await atender(pedidoContacto(formulario({ nombre: "Martín", motivo: "error", mensaje: "Primera línea\nsegunda línea" })), ENV_CORREO(envios));
