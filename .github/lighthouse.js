@@ -5,6 +5,8 @@
 
    Las cuatro categorias cortan la CI si bajan de 90, en todas las paginas. La portada tambien: desde que
    el build la pre-renderiza (generar_portada.js) ya no la arma el JS al abrir (ver CONSTRAINTS.md).
+   Las dos paginas del criterio 3 de Google Play (docs/plan-definitivo.md, seccion 8), la portada `/` y una busqueda
+   `/?q=...`, tienen la vara del criterio: rendimiento 95 y 100 en las otras tres.
 
    Con varias corridas de una misma pagina se evalua la mediana por rendimiento (la de abajo si son pares),
    como recomienda Lighthouse: la primera corrida del job sale con Chrome en frio y en el runner su primer
@@ -14,6 +16,14 @@
 const fs = require("fs");
 
 const BLOQUEANTES = { performance: 90, accessibility: 90, "best-practices": 90, seo: 90 };
+const CRITERIO_PLAY = { performance: 95, accessibility: 100, "best-practices": 100, seo: 100 };
+
+/* La raiz del sitio (con o sin ?q= y con cualquier #pestaña) lleva la vara del criterio de Play; el resto, la de siempre. */
+function umbralesDe(url) {
+  let ruta;
+  try { ruta = new URL(url).pathname; } catch (e) { return BLOQUEANTES; }
+  return ruta === "/" || ruta === "/index.html" ? CRITERIO_PLAY : BLOQUEANTES;
+}
 
 const puntajesDe = r => Object.fromEntries(Object.values(r.categories).map(c => [c.id, Math.round(c.score * 100)]));
 
@@ -48,7 +58,7 @@ for (const corridas of porPagina.values()) {
       console.log(`  tarea larga ${Math.round(t.duration)} ms a los ${Math.round(t.startTime)} ms: ${t.url}`);
   for (const s of (((a["layout-shifts"] || {}).details || {}).items || []))
     if (s.score > 0.01) console.log(`  salto ${s.score.toFixed(3)} en ${((s.node || {}).snippet || "").slice(0, 80)}`);
-  for (const [cat, min] of Object.entries(BLOQUEANTES)) {
+  for (const [cat, min] of Object.entries(umbralesDe(r.finalDisplayedUrl))) {
     if (puntajes[cat] < min) {
       fallas++;
       console.log(`::error::${r.finalDisplayedUrl}: ${cat} ${puntajes[cat]} < ${min}`);

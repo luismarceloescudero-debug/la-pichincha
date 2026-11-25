@@ -33,10 +33,35 @@ test("con todo en 90 o mas pasa", () => {
   assert.strictEqual(r.status, 0, r.stdout);
 });
 
-test("el rendimiento de la portada bajo 90 corta la CI, como el de cualquier pagina (A3: pre-renderizada)", () => {
-  const r = verificar(informe("http://localhost:8080/", { ...BIEN, performance: 89 }));
+test("el rendimiento de una pagina bajo 90 corta la CI (A3)", () => {
+  const r = verificar(informe("http://localhost:8080/precios/", { ...BIEN, performance: 89 }));
   assert.strictEqual(r.status, 1);
-  assert.match(r.stdout, /::error::http:\/\/localhost:8080\/: performance 89 < 90/);
+  assert.match(r.stdout, /::error::http:\/\/localhost:8080\/precios\/: performance 89 < 90/);
+});
+
+// ---- Criterio 3 de Google Play (docs/plan-definitivo.md, seccion 8): / y /?q=... con rendimiento 95 y 100 en el resto ----
+
+for (const url of ["http://localhost:8080/", "http://localhost:8080/?q=ssd+1tb#comparativa"]) {
+  test(`${url} con rendimiento 94 corta: la vara es la del criterio de Play (95)`, () => {
+    const r = verificar(informe(url, { ...BIEN, performance: 94 }));
+    assert.strictEqual(r.status, 1);
+    assert.match(r.stdout, /performance 94 < 95/);
+  });
+  test(`${url} con una categoria en 99 corta: el criterio pide 100`, () => {
+    const r = verificar(informe(url, { ...BIEN, seo: 99 }));
+    assert.strictEqual(r.status, 1);
+    assert.match(r.stdout, /seo 99 < 100/);
+  });
+}
+
+test("la busqueda del criterio en 95/100/100/100 pasa", () => {
+  const r = verificar(informe("http://localhost:8080/?q=ssd+1tb#comparativa", BIEN));
+  assert.strictEqual(r.status, 0, r.stdout);
+});
+
+test("las demas paginas siguen con 90: 94 de rendimiento en /hoy/ no corta", () => {
+  const r = verificar(informe("http://localhost:8080/hoy/", { ...BIEN, performance: 94, seo: 92 }));
+  assert.strictEqual(r.status, 0, r.stdout);
 });
 
 test("cualquier categoria bajo 90 en otra pagina corta la CI", () => {
@@ -65,10 +90,10 @@ test("con tres corridas de una pagina evalua la mediana: una corrida en frio no 
   assert.match(r.stdout, /http:\/\/localhost:8080\/: performance=95 /);
 });
 
-test("si la mediana queda bajo 90, corta", () => {
+test("si la mediana queda bajo el umbral, corta", () => {
   const r = verificar(...[70, 85, 97].map(p => informe("http://localhost:8080/", { ...BIEN, performance: p })));
   assert.strictEqual(r.status, 1);
-  assert.match(r.stdout, /performance 85 < 90/);
+  assert.match(r.stdout, /performance 85 < 95/);
 });
 
 test("la mediana se toma por pagina: cada una se evalua aparte", () => {
@@ -76,5 +101,5 @@ test("la mediana se toma por pagina: cada una se evalua aparte", () => {
     informe("http://localhost:8080/", BIEN));
   assert.strictEqual(r.status, 1);
   assert.match(r.stdout, /hoy\/: seo 80 < 90/);
-  assert.doesNotMatch(r.stdout, /8080\/: performance \d+ < 90/);
+  assert.doesNotMatch(r.stdout, /8080\/: performance \d+ < 9\d/);
 });

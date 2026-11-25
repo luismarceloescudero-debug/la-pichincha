@@ -79,8 +79,14 @@ class MedianaDeLighthouse(unittest.TestCase):
     def test_el_job_corre_tres_veces_cada_pagina_y_evalua_todas(self):
         yml = (RAIZ / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
         self.assertIn("for i in 1 2 3; do", yml)
-        self.assertIn('nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d /)', yml)
+        self.assertIn('nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d / | tr \'?%=\' \'___\')', yml)
         self.assertIn("node .github/lighthouse.js lh-*.json", yml)
+
+    def test_mide_las_dos_paginas_del_criterio_de_play(self):
+        """Criterio 3 de Google Play: la portada y una busqueda. Hasta el 25/11 la CI no media /?q= y su 36 de
+        rendimiento paso desapercibido."""
+        yml = (RAIZ / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        self.assertIn('for ruta in "" "?q=ssd%201tb" ', yml)
 
 
 if __name__ == "__main__":
