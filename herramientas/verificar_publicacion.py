@@ -74,6 +74,12 @@ def evaluar(estado, ahora=None):
         else:
             salida.append(("OK", "el sitio manda las cabeceras de seguridad (HSTS, X-Frame-Options, nosniff)"))
 
+    if estado.get("beacon") is True:
+        salida.append(("AVISO", "el HTML trae el script de Web Analytics de Cloudflare (static.cloudflareinsights.com): choca con la CSP "
+                                "y baja «buenas practicas» de Lighthouse; falta la regla no-transform (docs/cloudflare-proxy.md, E11)"))
+    elif estado.get("beacon") is False:
+        salida.append(("OK", "el HTML no trae scripts que inyecte Cloudflare"))
+
     afuera = estado.get("afuera")
     if afuera is not None:
         if afuera.get("estado") != 200:
@@ -117,6 +123,14 @@ def reunir():
             estado["cabeceras"] = [k.lower() for k in r.headers.keys()]
     except OSError:
         estado["cabeceras"] = None
+    try:
+        # Con cara de navegador: Cloudflare solo inyecta su script a los que parecen uno (E11).
+        req = urllib.request.Request(URL_SITIO, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130 Safari/537.36",
+                                                         "Accept": "text/html", "Accept-Encoding": "identity"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            estado["beacon"] = "cloudflareinsights" in r.read().decode("utf-8", "replace")
+    except OSError:
+        estado["beacon"] = None
     try:
         with open(SITIO_JSON, encoding="utf-8") as f:
             base = (json.load(f).get("afuera_url") or "").rstrip("/")

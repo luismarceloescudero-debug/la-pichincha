@@ -27,6 +27,13 @@ proxy de Cloudflare (nube naranja) solo para agregarlas. Resultado en Mozilla Ob
 2. En los 4 registros `A` del dominio y en el `CNAME www`, tocar la nube naranja para dejarla **gris** (DNS only) y guardar.
    En segundos el sitio vuelve a salir directo de GitHub Pages. Las reglas de cabeceras y de cache quedan inactivas sin dañar nada.
 
+## Regla no-transform (25/11, E11)
+
+El proxy le inyectaba al HTML el script de Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) aunque el panel mostraba Web
+Analytics apagado. La CSP lo bloqueaba (error en consola, Lighthouse «buenas practicas» 93). La **Transform Rule** «no-transform en
+el HTML» (Rules → Transform Rules → Modify Response Header) pone `Cache-Control: public, max-age=600, no-transform` en el HTML y el
+proxy deja de inyectar. Si vuelve el script: revisar que esa regla siga activa. `verificar_publicacion.py` lo avisa.
+
 ## Cuidados
 
 - No activar el proxy en `send` ni `rsend` (Resend necesita DNS puro).
