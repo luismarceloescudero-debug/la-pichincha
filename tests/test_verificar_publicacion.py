@@ -55,6 +55,14 @@ class Evaluar(unittest.TestCase):
         self.assertIn("strict-transport-security", mensajes[0])
         self.assertIn("Cloudflare", mensajes[0])
 
+    def test_el_script_de_web_analytics_de_cloudflare_en_el_html_avisa(self):
+        """25/11 (E11): el proxy inyectaba static.cloudflareinsights.com; la CSP lo bloqueaba y Lighthouse bajaba a 93."""
+        mensajes = [m for n, m in vp.evaluar({**SANO, "beacon": True}, AHORA) if n == "AVISO"]
+        self.assertEqual(len(mensajes), 1)
+        self.assertIn("no-transform", mensajes[0])
+        self.assertEqual(set(niveles({**SANO, "beacon": False})), {"OK"})
+        self.assertNotIn("AVISO", niveles({**SANO, "beacon": None}))
+
     def test_si_no_se_pudo_leer_el_sitio_no_inventa_un_aviso_de_cabeceras(self):
         self.assertNotIn("AVISO", niveles({**SANO, "cabeceras": None}))
 
