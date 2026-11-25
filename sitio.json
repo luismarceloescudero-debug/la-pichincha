@@ -3,7 +3,7 @@
   "base_url": "https://pichinchadeldia.com.ar",
   "canal_telegram": "https://t.me/pichinchasdeldia",
   "_nota_afuera": "Direccion del Worker «Afuera» (spec 022, worker/), sin barra final. Vacia hasta el primer despliegue: la pagina queda como en la spec 020. Al cargarla se repite en el meta afuera-url de index.html y se suma a connect-src de la csp (tests/test_sitio.py lo exige).",
-  "afuera_url": "https://pichincha-afuera.mescudero-remitos-internos.workers.dev",
+  "afuera_url": "https://pichincha-afuera.mescudero.workers.dev",
   "_nota_sentry": "DSN del proyecto de Sentry (spec 062, js/errores.js): la direccion publica donde la pagina deja los errores. Vacio = apagado. Va en el meta sentry-dsn de index.html y de las paginas generadas; su origen (https://oNNN.ingest.us.sentry.io) tiene que estar en connect-src de la csp (tests/test_sitio.py lo exige).",
   "_nota_sentry_mapa": "El aviso «bundle.min.js.map violates connect-src» es esperado: solo aparece con DevTools abierto o con Lighthouse corrido a mano sobre produccion (la CI mide localhost, donde el SDK no carga). No se agrega browser.sentry-cdn.com a connect-src a proposito: abriria fetch y WebSocket a todo ese CDN y el mapeo de Sentry lo hace su servidor, no el navegador. Decision del 20/11 con Opus 5.5.",
   "sentry_dsn": "https://4e48193c3e50b39fb9df104d95724293@o4512379199488000.ingest.us.sentry.io/4512379450490880",
@@ -13,5 +13,5 @@
     "huellas_sha256": []
   },
   "_nota_csp": "Politica de contenido (CSP) de todas las paginas. Va como meta porque GitHub Pages no deja poner cabeceras; index.html la repite (un test exige que coincidan). Un script, fuente o conexion de otro dominio tiene que sumarse aca o el navegador lo bloquea. script-src no lleva 'unsafe-inline': csp.js (y con_hashes de actualizar.py) le suma al escribir cada pagina el hash de cada script en linea; cdnjs va con la ruta exacta de ExcelJS (js/exportar.js).",
-  "csp": "default-src 'self'; script-src 'self' https://gc.zgo.at https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pichincha-afuera.mescudero-remitos-internos.workers.dev https://dolarapi.com https://mescudero.goatcounter.com https://o4512379199488000.ingest.us.sentry.io; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+  "csp": "default-src 'self'; script-src 'self' https://gc.zgo.at https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://pichincha-afuera.mescudero.workers.dev https://dolarapi.com https://mescudero.goatcounter.com https://o4512379199488000.ingest.us.sentry.io; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
 }
