@@ -238,3 +238,5 @@ un PR que cambia el flujo sin tocar este mapa no se mergea.
 - `guardia.py` ahora tambien pide confirmacion para `git push --force/-f`, `git reset --hard` y editar `.env*` / `.dev.vars`.
 - `aviso_cierre.py` (hook Stop) avisa si quedan archivos sin commitear. `test_del_archivo.py` avisa si un `.json` editado queda invalido.
 - `.claude/settings.json` suma `permissions`: permite tests y `git status/diff/log`, niega leer `.env*` y `.dev.vars`.
+
+| **Copias de respaldo** (25/11) | `herramientas/respaldo.ps1` (bundle del repo, repo e issues de correos, `privado/` en zip, `indice.json`; guarda 5 copias; `-Probar` restaura y corre los tests; `-Extra` copia a pendrive/Drive) | tarea semanal de Windows «Pichincha respaldo» | prueba mensual: `-Probar`, resultado en `respaldo.log` |
