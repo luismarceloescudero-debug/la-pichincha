@@ -512,6 +512,20 @@ ${cuerpo}
 
 /* Lo que dice una pagina, resumido: sus comparables (nombre, precio y enlace). Si no cambia, el mapa del sitio conserva su
    fecha anterior (generar_paginas.py); antes las 201 URLs llevaban la fecha de cada corrida y Google deja de creerle. */
+/* La porcion de una busqueda (spec 068): las filas del indice que coinciden con `q`, con la misma forma que indice.json.
+   La comparativa de /?q= se arma con ella sin bajar el indice entero: el filtro es fila por fila y el analisis solo mira
+   las filas que coinciden, asi que da lo mismo (main lo comprueba en cada build). `nombres`: normalBusq de cada fila. */
+function porcionDe(idx, q, nombres = idx.productos.map(f => B.normalBusq(f[0]))) {
+  const c = B.filtroDe(q);
+  const productos = c ? idx.productos.filter((f, i) => c(nombres[i])) : [];
+  const { productos: _todas, ...resto } = idx;
+  return { q, ...resto, productos };
+}
+const PORCION_ARCHIVO = "filas.json";
+/* Lo que ve la persona de un analisis: comparables, elegidas con su rol, totales, mediana y comercios. */
+const firmaAnalisis = a => (a ? JSON.stringify([huella(a), a.picks.map(p => [p.rol, p.m.f[2], p.m.f[1]]), a.total, a.med,
+  a.comercios.length]) : "sin analisis");
+
 function huella(analisis) {
   const filas = ((analisis && analisis.base) || []).map(m => [m.f[0], m.f[1], m.f[2]]).sort((a, b) => String(a[2]).localeCompare(String(b[2])) || a[1] - b[1]);
   return crypto.createHash("sha1").update(JSON.stringify(filas)).digest("hex").slice(0, 16);
@@ -534,6 +548,7 @@ function main(argv) {
   const datos = JSON.parse(fs.readFileSync(arg("datos", path.join(raiz, "datos.json")), "utf8"));
   const consultas = JSON.parse(fs.readFileSync(consultasPath, "utf8"));
   const ctx = crearContexto(idx, { baseUrl, marcas: datos.marcas || {} });
+  const nombres = idx.productos.map(f => B.normalBusq(f[0]));
 
   const paginas = [], entradas = [];
   // Primero el analisis de todas, para que cada pagina enlace a sus relacionadas indexables.
@@ -550,6 +565,13 @@ function main(argv) {
     fs.writeFileSync(path.join(dir, "index.html"), conHashes(renderPagina({ ...c, relacionadas: relacionadas(entradas, c.slug) }, analisis, ctx)), "utf8");
     const feed = renderFeedPagina(c, analisis, ctx);
     if (feed) fs.writeFileSync(path.join(dir, FEED_ARCHIVO), feed, "utf8");
+    // La porcion para /?q= (spec 068). Si su analisis no diera igual que el del indice entero, el build corta: una
+    // comparativa distinta segun por donde se entra seria peor que una lenta.
+    const porcion = porcionDe(idx, c.q, nombres);
+    const deLaPorcion = A.analizarConsulta(c.q, crearContexto(porcion, { baseUrl, marcas: datos.marcas || {} }));
+    if (firmaAnalisis(deLaPorcion) !== firmaAnalisis(analisis))
+      throw new Error(`la porcion de «${c.q}» no da el mismo analisis que el indice entero`);
+    fs.writeFileSync(path.join(dir, PORCION_ARCHIVO), JSON.stringify(porcion), "utf8");
   }
   fs.mkdirSync(path.join(salida, "precios"), { recursive: true });
   fs.writeFileSync(path.join(salida, "precios", "index.html"), conHashes(renderIndice(entradas, ctx)), "utf8");
@@ -559,5 +581,5 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { rotulo, huella, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, idsDelSitio, nodosDelSitio, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
+module.exports = { rotulo, huella, porcionDe, PORCION_ARCHIVO, firmaAnalisis, crearContexto, renderPagina, renderFeedPagina, renderIndice, main, esIndexable, relacionadas, esc, pesos, cabeza, idsDelSitio, nodosDelSitio, SCRIPT_MEDICION, BASE_URL, MIN_COMPARABLES, MIN_COMERCIOS, MAX_RELACIONADAS };
 if (require.main === module) process.exit(main(process.argv.slice(2)));

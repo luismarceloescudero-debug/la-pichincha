@@ -197,7 +197,9 @@ class IndexPartido(unittest.TestCase):
         self.assertEqual(len(inline), 2)
         temprano, datos = inline
         self.assertIn("window.INDICE_TEMPRANO=", temprano)
-        self.assertLess(len(temprano), 600, "una linea, no logica")
+        # 800 desde la spec 068: ademas del indice, con ?q= pide la porcion de la busqueda (el slug en una expresion).
+        self.assertLess(len(temprano), 800, "una linea, no logica")
+        self.assertIn("window.PORCION_TEMPRANA=", temprano)
         self.assertIn("const DATOS = ", datos)
         self.assertLess(len(datos.split("/* === FIN DATOS === */")[1].strip()), 1, "nada de logica despues de los datos")
 

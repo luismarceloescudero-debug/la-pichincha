@@ -18,14 +18,41 @@ function pedirIndice(forzar) {
   return temprano && !forzar ? temprano.catch(pedir) : pedir();
 }
 
+/* La porcion de una busqueda pre-armada (spec 068): las filas del indice que coinciden con `q`, con la misma forma que el indice.
+   La arma generar_paginas.js en precios/<slug>/filas.json y el build comprueba que da el mismo analisis que el indice entero.
+   Devuelve null si no hay porcion para esa busqueda (404, sin red, otra busqueda con el mismo slug): entonces se usa el indice.
+   Con ?q= index.html ya la pidio (PORCION_TEMPRANA); se usa una sola vez y solo si es de la misma busqueda. */
+function pedirPorcion(q) {
+  const s = Pagina.slug(q);
+  if (!s) return Promise.resolve(null);
+  const temprana = typeof window === "object" && window && window.PORCION_TEMPRANA;
+  if (temprana) window.PORCION_TEMPRANA = null;
+  const pedido = temprana && Pagina.slug(temprana.q) === s ? temprana.p : fetch(`precios/${s}/filas.json`, { cache: "no-cache" });
+  return pedido.then(r => (r.ok ? r.json() : null))
+    .then(j => (j && Array.isArray(j.productos) && j.tiendas && Buscador.normalBusq(j.q || "") === Buscador.normalBusq(q) ? j : null))
+    .catch(() => null);
+}
+
+/* Con la porcion, IDX queda «parcial» hasta que algo necesite el catalogo entero (Buscar, Ofertas, otra busqueda): eso pasa
+   siempre por asegurarIndice, que entonces baja el indice. Lo que mira IDX sin pasar por aca se fija en IDX.parcial. */
+function usarPorcion(j) {
+  if (IDX && !IDX.parcial) return IDX;
+  IDX = Object.assign(j, { parcial: true });
+  return IDX;
+}
+
 function asegurarIndice(forzar) {
-  if (IDX && !forzar) return Promise.resolve(IDX);
+  if (IDX && !IDX.parcial && !forzar) return Promise.resolve(IDX);
   if (pidiendo && !forzar) return pidiendo;
   pidiendo = pedirIndice(forzar)
     .then(r => r.json())
     .then(j => {
+      const deLaPorcion = IDX && IDX.parcial;
       IDX = j;
       OFERTAS = null;
+      // La comparativa armada con la porcion es la misma (spec 068): no se repinta, solo pasa a usar las filas del indice entero.
+      if (deLaPorcion && typeof CONSULTA === "string" && CONSULTA && typeof analizarConsulta === "function")
+        ANALISIS = analizarConsulta(CONSULTA) || ANALISIS;
       document.querySelectorAll(".tab[data-ir='buscar'] .n").forEach(n => { n.textContent = j.productos.length; });
       programarOfertas(j);
       return j;
@@ -49,7 +76,7 @@ function asegurarImagenes() {
    el navegador queda libre, o enseguida si las pide la pestaña Ofertas o el modo Súper Oferta (ofertasListas). Al terminar,
    la pestaña muestra su numero y la busqueda vuelve a pintarse con «otra tienda lo tiene más barato». */
 function ofertasListas() {
-  if (!OFERTAS && IDX) {
+  if (!OFERTAS && IDX && !IDX.parcial) {
     OFERTAS = calcularOfertas(IDX);
     document.querySelectorAll(".tab[data-ir='ofertas'] .n").forEach(n => { n.textContent = listaOfertas().length; });
   }

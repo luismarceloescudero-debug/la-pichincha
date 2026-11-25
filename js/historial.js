@@ -45,6 +45,7 @@ function pintarHist() {
 function fotoVivaDe(q) {
   if (!IDX) return null;
   if (CONSULTA === q && ANALISIS) { const f = ANALISIS.picks[0].m.f; return { p: f[1], n: f[0], c: comercioDe(f) }; }
+  if (IDX.parcial) return null;          // la porcion de otra busqueda no sabe el precio de esta (spec 068): queda el guardado
   IDX._h = IDX._h || {};
   if (!(q in IDX._h)) {
     const A = analizarConsulta(q);
@@ -84,7 +85,7 @@ function pintarTira() {
    Sin una consulta activa, la Comparativa termina con tu ultima busqueda y el Veredicto se escribe con ella. Sin historial,
    el Veredicto usa la primera de «Lo mas buscado» que tenga resultados. Hace falta el indice: sin el, no hay nada reciente. */
 function consultaReciente() {
-  if (!IDX) return "";
+  if (!IDX || IDX.parcial) return "";
   const buscadas = typeof BUSCADAS !== "undefined" && Array.isArray(BUSCADAS) ? BUSCADAS : [];
   return [...leerHist(), ...buscadas].find(q => hayResultados(q)) || "";
 }
@@ -102,7 +103,7 @@ function recienteHtml(q) {
 function pintarReciente() {
   const c = $("#reciente");
   if (!c) return;
-  const q = !CONSULTA && IDX ? leerHist().find(x => hayResultados(x)) : "";   // en la portada, solo lo que buscaste vos
+  const q = !CONSULTA && IDX && !IDX.parcial ? leerHist().find(x => hayResultados(x)) : "";   // en la portada, solo lo que buscaste vos
   c.innerHTML = q ? recienteHtml(q) : "";
 }
 

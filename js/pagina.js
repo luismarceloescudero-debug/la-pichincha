@@ -17,6 +17,13 @@
     return pathname + (t ? "?" + new URLSearchParams({ q: t }) : "") + (vista ? "#" + vista : "");
   }
 
+  /* La carpeta de la pagina pre-armada de una busqueda: lo mismo que slug() de generar_paginas.py ('Monitor 27" 144hz' ->
+     'monitor-27-144hz'). Sin acentos, solo letras, numeros y guiones; lo que no es ASCII se descarta. "" si no queda nada. */
+  function slug(q) {
+    return String(q || "").normalize("NFD").replace(/[^\x00-\x7f]/g, "").toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
   /* Argentina no tiene horario de verano: UTC-3 fijo (constitucion). Sin Intl.DateTimeFormat con zona
      horaria, que al abrir la portada cargaba los datos de ICU en una tarea larga. */
   const dos = n => String(n).padStart(2, "0");
@@ -146,7 +153,7 @@
     return { url: u.toString(), afiliado: true };
   }
 
-  const api = { AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
+  const api = { AMAZON_TAG, enlaceAmazon, MERCADO_LIBRE_AFILIADO, enlaceTienda, leerUrl, armarUrl, slug, cuando, fechaHora, precioDel, precioFecha, sinVerificar, cambioDe, comercioDeUrl, eventoBusqueda, eventoClic, eventoAccion };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Pagina = api;
 })(this);
