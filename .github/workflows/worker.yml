@@ -56,7 +56,7 @@ jobs:
       - name: Desplegar
         if: steps.cuenta.outputs.lista == 'si'
         working-directory: worker
-        run: $WRANGLER deploy
+        run: $WRANGLER deploy --var VERSION:${{ github.sha }}
 
       # Cada secreto se carga solo si el dueño lo creo en GitHub; los que faltan dejan esa fuente apagada.
       - name: Pasar los secretos de las APIs y del contacto

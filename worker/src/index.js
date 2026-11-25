@@ -294,15 +294,19 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
 
   return async function atender(request, env) {
     const url = new URL(request.url), origen = request.headers.get("Origin"), esContacto = url.pathname === "/contacto";
-    const esVigia = url.pathname === "/vigia";
+    const esVigia = url.pathname === "/vigia", esVersion = url.pathname === "/version";
     const h = cors(origen, esContacto);
-    if (url.pathname !== "/buscar" && url.pathname !== "/enlace" && !esContacto && !esVigia) return json({ error: "no existe" }, 404, h);
+    if (url.pathname !== "/buscar" && url.pathname !== "/enlace" && !esContacto && !esVigia && !esVersion) return json({ error: "no existe" }, 404, h);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
     if (request.method !== (esContacto ? "POST" : "GET")) return json({ error: esContacto ? "solo POST" : "solo GET" }, 405, h);
     const fecha = ahora(), ms = Date.parse(fecha), ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
     if (excedido(ip, ms)) return json({ error: "demasiadas busquedas" }, 429, { ...h, "Retry-After": "60" });
     if (esContacto) return contacto(request, env, h, fecha, ms, ip);
     if (esVigia) return vigia(env, h);
+    // 25/11: que version del codigo esta en produccion. La pone el despliegue (worker.yml: --var VERSION:<commit>); solo un
+    // texto corto, nada de secretos. Sin la variable dice "sin-version" (un despliegue a mano).
+    if (esVersion) return json({ servicio: "pichincha-afuera", version: /^[0-9a-f]{7,40}$/i.test(env && env.VERSION || "") ? env.VERSION : "sin-version" },
+                               200, { ...h, "Cache-Control": "no-store" });
     return url.pathname === "/buscar" ? buscar(url, env, h, fecha, ms) : enlace(url, env, h, fecha);
   };
 }
