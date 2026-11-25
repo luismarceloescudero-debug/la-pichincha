@@ -59,5 +59,30 @@ class Evaluar(unittest.TestCase):
         self.assertNotIn("AVISO", niveles({**SANO, "cabeceras": None}))
 
 
+class AfueraYVigia(unittest.TestCase):
+    """25/11: el subdominio de workers.dev cambio (mescudero-remitos-internos -> mescudero) y el sitio apuntaba a un host que ya no existia."""
+
+    def test_si_el_worker_no_responde_avisa_del_subdominio(self):
+        e = {**SANO, "afuera": {"url": "https://x.workers.dev", "estado": 0}}
+        mensajes = [m for n, m in vp.evaluar(e, AHORA) if n == "AVISO"]
+        self.assertEqual(len(mensajes), 1)
+        self.assertIn("workers.dev", mensajes[0])
+
+    def test_si_responde_y_el_vigia_esta_bien_todo_ok(self):
+        e = {**SANO, "afuera": {"url": "https://x.workers.dev", "estado": 200, "vigia": {"ok": True, "fallas": []}}}
+        self.assertEqual(set(niveles(e)), {"OK"})
+
+    def test_las_fallas_del_vigia_salen_como_avisos(self):
+        fallas = [{"id": "indice", "titulo": "El indice de precios", "detalle": "es del 24/11"}]
+        e = {**SANO, "afuera": {"url": "https://x.workers.dev", "estado": 200, "vigia": {"ok": False, "fallas": fallas}}}
+        mensajes = [m for n, m in vp.evaluar(e, AHORA) if n == "AVISO"]
+        self.assertEqual(len(mensajes), 1)
+        self.assertIn("El indice de precios", mensajes[0])
+
+    def test_sitio_json_apunta_al_subdominio_actual(self):
+        sitio = open(os.path.join(RAIZ, "sitio.json"), encoding="utf-8").read()
+        self.assertNotIn("mescudero-remitos-internos", sitio)
+
+
 if __name__ == "__main__":
     unittest.main()

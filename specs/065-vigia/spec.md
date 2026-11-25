@@ -72,7 +72,7 @@ precio del plan v4 (sección 3.4), que sí necesitan estado de verdad.
 ## Cómo se prueba a mano
 
 ```
-curl -s https://pichincha-afuera.mescudero-remitos-internos.workers.dev/vigia
+curl -s https://pichincha-afuera.mescudero.workers.dev/vigia
 {"cuando":"2026-11-12T12:00:00.000Z","ok":true,"fallas":[]}
 ```
 

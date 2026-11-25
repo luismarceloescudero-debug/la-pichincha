@@ -13,8 +13,10 @@ Salida: lineas `OK`, `AVISO` o `FRENO`. Codigo de salida 1 si hay algun FRENO. S
 """
 
 import json
+import os
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -24,6 +26,7 @@ REPO_CORREO = "luismarceloescudero-debug/la-pichincha-correo"
 URL_INDICE = "https://pichinchadeldia.com.ar/indice.json"
 HORAS_MAX_INDICE = 30
 URL_SITIO = "https://pichinchadeldia.com.ar/"
+SITIO_JSON = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sitio.json")
 # Las pone Cloudflare (proxy activado, ver docs/cloudflare-proxy.md); GitHub Pages solo no puede.
 CABECERAS_SEGURIDAD = ("strict-transport-security", "x-frame-options", "x-content-type-options")
 
@@ -70,6 +73,20 @@ def evaluar(estado, ahora=None):
                                     "apagado? ver docs/cloudflare-proxy.md"))
         else:
             salida.append(("OK", "el sitio manda las cabeceras de seguridad (HSTS, X-Frame-Options, nosniff)"))
+
+    afuera = estado.get("afuera")
+    if afuera is not None:
+        if afuera.get("estado") != 200:
+            salida.append(("AVISO", f"el Worker «Afuera» no responde ({afuera.get('url')}, estado {afuera.get('estado')}): "
+                                    "¿cambio el subdominio de workers.dev? sitio.json afuera_url y la CSP tienen que coincidir"))
+        else:
+            salida.append(("OK", "el Worker «Afuera» responde"))
+            vigia = afuera.get("vigia") or {}
+            if vigia.get("ok") is False:
+                for f in vigia.get("fallas") or []:
+                    salida.append(("AVISO", f"vigia: {f.get('titulo')}: {f.get('detalle')}"))
+            elif vigia.get("ok"):
+                salida.append(("OK", "el vigia no ve fallas"))
     return salida
 
 
@@ -100,6 +117,25 @@ def reunir():
             estado["cabeceras"] = [k.lower() for k in r.headers.keys()]
     except OSError:
         estado["cabeceras"] = None
+    try:
+        with open(SITIO_JSON, encoding="utf-8") as f:
+            base = (json.load(f).get("afuera_url") or "").rstrip("/")
+        if base:
+            req = urllib.request.Request(base + "/vigia", headers={"User-Agent": "verificar-publicacion"})
+            try:
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    cuerpo = r.read().decode("utf-8", "replace")
+                    estado["afuera"] = {"url": base, "estado": r.status}
+                    try:
+                        estado["afuera"]["vigia"] = json.loads(cuerpo)
+                    except ValueError:
+                        pass
+            except urllib.error.HTTPError as e:
+                estado["afuera"] = {"url": base, "estado": e.code}
+            except OSError:
+                estado["afuera"] = {"url": base, "estado": 0}
+    except (OSError, ValueError):
+        pass
     return estado
 
 
