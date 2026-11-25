@@ -147,7 +147,7 @@ function cardGrande(p, i, picks) {
   const porTienda = p.porTienda ? Analisis.tablaTiendasHtml(p.porTienda, { esc, pesos, titulo: `${p.rolCorto}: ${f[0]}`,
     enlace: (g, texto, etiqueta) => `<a href="${hrefTienda(g[2])}" target="_blank" rel="${relTienda(g[2])}" aria-label="${esc(etiqueta)}">${texto}</a>` }) : "";
   return `<li class="car-card c-${t.color}${i === 0 ? " mejor" : ""}" data-car-card data-id="${esc(f[2])}" data-nombre="${esc(f[0].slice(0, 90))}" data-tienda="${esc(comercioDe(f))}"
-      data-precio="${f[1]}" data-url="${hrefTienda(f[2])}" tabindex="0" role="group" aria-roledescription="tarjeta" aria-label="${LETRAS[i]}: ${esc(p.rol)} de ${picks.length}">
+      data-precio="${f[1]}" data-url="${hrefTienda(f[2])}" tabindex="0" aria-label="${LETRAS[i]}: ${esc(p.rol)} de ${picks.length}">
     <p class="car-cinta"><b>${LETRAS[i]}</b> ${icono(p.ico)} ${esc(p.rol)}</p>
     <div class="car-fila1">
       ${pct ? `<p class="car-pct"><span class="sig">−</span><span class="num">${pct}</span><span class="por">%</span><small>${pctTxt}</small></p>` : `<p class="car-pct sin"></p>`}
