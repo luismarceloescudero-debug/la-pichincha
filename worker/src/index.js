@@ -240,6 +240,14 @@ export function crearAtender({ fetch, cache, ahora, tiempoMaximo = 5000, crearMe
     if (espera < ESPERA_MIN_MS) return salir({ error: "Lo mandaste demasiado rápido: esperá unos segundos y probá de nuevo." }, 400);
     const v = validarContacto(c);
     if (v.error) return salir({ error: v.error, campo: v.campo || null }, 400);
+    // 25/11: tope por IP que comparten todos los isolates del centro de datos (binding opcional LIMITE_CONTACTO, Rate Limiting
+    // de Cloudflare). El Map de abajo vive en un solo isolate y se esquiva repartiendo los pedidos. Sin el binding, o si el
+    // servicio falla, no se frena a nadie: queda el tope de memoria de siempre.
+    if (env.LIMITE_CONTACTO && typeof env.LIMITE_CONTACTO.limit === "function") {
+      let permitido = true;
+      try { permitido = (await env.LIMITE_CONTACTO.limit({ key: "contacto:" + ip })).success !== false; } catch (e) { permitido = true; }
+      if (!permitido) return salir({ error: "Ya mandaste varios mensajes seguidos: esperá unos minutos y probá de nuevo." }, 429, { "Retry-After": "60" });
+    }
     if (excedido(ip, ms, contactosPorIp, TOPE_CONTACTO, VENTANA_CONTACTO_MS))
       return salir({ error: "Ya mandaste varios mensajes seguidos: esperá unos minutos y probá de nuevo." }, 429, { "Retry-After": "600" });
     const remitente = env.CONTACTO_REMITENTE, destino = env.CONTACTO_DESTINO;

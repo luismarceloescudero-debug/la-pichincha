@@ -27,5 +27,12 @@ APP_PUBLICADA = "no"                            # pasa a "si" cuando la app (Fas
 
 # Sin destination_address: el Worker manda al correo verificado de CONTACTO_DESTINO (un secreto: la direccion personal no
 # se escribe en el repo). Con destination_address solo podria mandar a esa direccion.
+# Tope global del formulario de contacto (Rate Limiting de Cloudflare, plan gratis): 3 mensajes por minuto por IP, compartido
+# por todos los isolates del centro de datos. Si el binding falta, el Worker usa solo el tope de memoria (ver contacto()).
+[[ratelimits]]
+name = "LIMITE_CONTACTO"
+namespace_id = "1001"
+simple = { limit = 3, period = 60 }
+
 [[send_email]]
 name = "CORREO"

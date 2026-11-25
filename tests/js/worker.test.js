@@ -672,6 +672,33 @@ test("contacto: un mensaje valido se manda con send_email, Reply-To de quien esc
   assert.match(cuerpo, /¿cada cuánto se actualizan los precios\?/);
 });
 
+test("contacto: con el limitador global (binding LIMITE_CONTACTO) lleno responde 429 y no manda nada", async () => {
+  const envios = [], llamadas = [], atender = await atenderContacto();
+  const env = { ...ENV_CORREO(envios), LIMITE_CONTACTO: { limit: async o => { llamadas.push(o); return { success: false }; } } };
+  const r = await atender(pedidoContacto(formulario(), { ip: "9.9.9.9" }), env);
+  assert.equal(r.status, 429);
+  assert.equal(r.headers.get("Retry-After"), "60");
+  assert.equal(envios.length, 0);
+  assert.deepEqual(llamadas, [{ key: "contacto:9.9.9.9" }], "la clave es la IP, con prefijo");
+});
+
+test("contacto: con el limitador global con lugar el mensaje sale; si el servicio falla o no existe, tambien", async () => {
+  const casos = [{ limit: async () => ({ success: true }) }, { limit: async () => { throw new Error("servicio caido"); } }, undefined];
+  for (const limitador of casos) {
+    const envios = [], atender = await atenderContacto();
+    const env = { ...ENV_CORREO(envios), ...(limitador ? { LIMITE_CONTACTO: limitador } : {}) };
+    const r = await atender(pedidoContacto(formulario()), env);
+    assert.equal(r.status, 200, String(limitador && limitador.limit));
+    assert.equal(envios.length, 1);
+  }
+});
+
+test("contacto: wrangler.toml declara el binding LIMITE_CONTACTO con periodo de 10 o 60 segundos", () => {
+  const toml = fs.readFileSync(path.join(__dirname, "..", "..", "worker", "wrangler.toml"), "utf8");
+  assert.match(toml, /\[\[ratelimits\]\]\s*\nname = "LIMITE_CONTACTO"/);
+  assert.match(toml, /simple = \{ limit = \d+, period = (10|60) \}/);
+});
+
 test("contacto: el asunto con tildes va en RFC 2047 y el mensaje conserva sus saltos de linea", async () => {
   const envios = [], atender = await atenderContacto();
   await atender(pedidoContacto(formulario({ nombre: "Martín", motivo: "error", mensaje: "Primera línea\nsegunda línea" })), ENV_CORREO(envios));
