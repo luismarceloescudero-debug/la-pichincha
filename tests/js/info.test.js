@@ -98,7 +98,9 @@ test("la pagina legal nombra la infraestructura (GitHub Pages y Cloudflare) y cu
   assert.match(html, /id="infraestructura"/);
   assert.match(html, /GitHub Pages y pasa por Cloudflare/);
   assert.match(html, /dirección IP/);
-  assert.match(html, /se borra cuando ya no hace falta para responderte/);
+  assert.match(html, /como máximo 6 meses/);
+  assert.match(html, /id="responsable"/);
+  assert.match(html, /cóndorlabs\.com\.ar, de Luis Marcelo Escudero/);
 });
 
 test("main escribe /estado/ y /legal/; sin indice escribe solo /legal/", () => {
