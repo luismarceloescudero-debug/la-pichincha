@@ -43,6 +43,21 @@ class Evaluar(unittest.TestCase):
         self.assertIn("AVISO", niveles({**SANO, "indice_modificado": AHORA - timedelta(hours=40)}))
         self.assertIn("AVISO", niveles({**SANO, "indice_modificado": None}))
 
+    def test_con_las_tres_cabeceras_de_seguridad_esta_todo_ok(self):
+        e = {**SANO, "cabeceras": ["server", "strict-transport-security", "x-frame-options", "x-content-type-options"]}
+        self.assertEqual(set(niveles(e)), {"OK"})
+
+    def test_sin_cabeceras_de_seguridad_avisa_que_puede_estar_apagado_el_proxy(self):
+        """25/11: el sitio paso a Cloudflare con proxy para tener HSTS, X-Frame-Options y nosniff (docs/cloudflare-proxy.md)."""
+        e = {**SANO, "cabeceras": ["server", "cache-control"]}
+        mensajes = [m for n, m in vp.evaluar(e, AHORA) if n == "AVISO"]
+        self.assertEqual(len(mensajes), 1)
+        self.assertIn("strict-transport-security", mensajes[0])
+        self.assertIn("Cloudflare", mensajes[0])
+
+    def test_si_no_se_pudo_leer_el_sitio_no_inventa_un_aviso_de_cabeceras(self):
+        self.assertNotIn("AVISO", niveles({**SANO, "cabeceras": None}))
+
 
 if __name__ == "__main__":
     unittest.main()

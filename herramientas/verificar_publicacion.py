@@ -23,6 +23,9 @@ REPO = "luismarceloescudero-debug/la-pichincha"
 REPO_CORREO = "luismarceloescudero-debug/la-pichincha-correo"
 URL_INDICE = "https://pichinchadeldia.com.ar/indice.json"
 HORAS_MAX_INDICE = 30
+URL_SITIO = "https://pichinchadeldia.com.ar/"
+# Las pone Cloudflare (proxy activado, ver docs/cloudflare-proxy.md); GitHub Pages solo no puede.
+CABECERAS_SEGURIDAD = ("strict-transport-security", "x-frame-options", "x-content-type-options")
 
 
 def evaluar(estado, ahora=None):
@@ -58,6 +61,15 @@ def evaluar(estado, ahora=None):
         horas = (ahora - modificado).total_seconds() / 3600
         nivel = "OK" if horas <= HORAS_MAX_INDICE else "AVISO"
         salida.append((nivel, f"el indice publicado tiene {horas:.0f} h"))
+
+    cabeceras = estado.get("cabeceras")
+    if cabeceras is not None:
+        faltan = [c for c in CABECERAS_SEGURIDAD if c not in cabeceras]
+        if faltan:
+            salida.append(("AVISO", "faltan cabeceras de seguridad (" + ", ".join(faltan) + "): ¿el proxy de Cloudflare esta "
+                                    "apagado? ver docs/cloudflare-proxy.md"))
+        else:
+            salida.append(("OK", "el sitio manda las cabeceras de seguridad (HSTS, X-Frame-Options, nosniff)"))
     return salida
 
 
@@ -82,6 +94,12 @@ def reunir():
             estado["indice_modificado"] = parsedate_to_datetime(r.headers["Last-Modified"])
     except (OSError, KeyError, TypeError, ValueError):
         estado["indice_modificado"] = None
+    try:
+        req = urllib.request.Request(URL_SITIO, method="HEAD", headers={"User-Agent": "verificar-publicacion"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            estado["cabeceras"] = [k.lower() for k in r.headers.keys()]
+    except OSError:
+        estado["cabeceras"] = None
     return estado
 
 
