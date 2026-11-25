@@ -22,6 +22,14 @@ class Slug(unittest.TestCase):
         with self.assertRaises(ValueError):
             generar_paginas.slug("¿¿??")
 
+    def test_da_lo_mismo_que_pagina_slug_de_js(self):
+        """Spec 068: el navegador arma con Pagina.slug la ruta de la porcion de /precios/<slug>/. Los mismos casos los prueba
+        tests/js/porciones.test.js contra js/pagina.js."""
+        casos = json.loads((Path(__file__).parent / "fixtures" / "slugs.json").read_text(encoding="utf-8"))
+        for consulta, esperado in casos.items():
+            with self.subTest(consulta=consulta):
+                self.assertEqual(generar_paginas.slug(consulta), esperado)
+
 
 class ConsultasAutomaticas(unittest.TestCase):
     def correr(self, stdout="[]", codigo=0):
@@ -128,6 +136,17 @@ class Generar(unittest.TestCase):
     def correr(self, indice=None):
         return generar_paginas.main(["--indice", str(indice or self.indice), "--consultas", str(self.consultas),
                                      "--salida", str(self.salida)])
+
+    def test_cada_consulta_lleva_su_porcion_con_las_filas_que_coinciden(self):
+        """Spec 068: /?q= arma la comparativa con precios/<slug>/filas.json en vez del indice entero."""
+        self.assertEqual(self.correr(), 0)
+        porcion = json.loads((self.salida / "precios" / "ddr4-16gb" / "filas.json").read_text(encoding="utf-8"))
+        self.assertEqual(porcion["q"], "ddr4 16gb")
+        self.assertEqual(len(porcion["productos"]), 6)
+        self.assertEqual(set(porcion["tiendas"]), {"cg", "mx"})
+        self.assertEqual(porcion["generado"], "2026-10-09T08:12-03:00")
+        vacia = json.loads((self.salida / "precios" / "placa-inexistente" / "filas.json").read_text(encoding="utf-8"))
+        self.assertEqual(vacia["productos"], [])
 
     def test_crea_una_pagina_por_consulta(self):
         self.assertEqual(self.correr(), 0)

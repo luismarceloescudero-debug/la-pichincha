@@ -100,6 +100,9 @@ h3{margin:0;font-size:1.02rem;letter-spacing:-.015em;text-wrap:balance}
 @media (max-width:440px){#sello{min-height:3lh}}
 /* El JS llena #vista despues de pintar: ocupa una pantalla desde el principio para que el pie no salte (CLS). */
 #vista{min-height:100vh}
+/* Con ?q= la portada pre-renderizada se reemplaza enseguida por la comparativa: no se diseña ni se pinta (spec 068; en un
+   celular eran 1,4 s de Layout, una vez por cada fuente que llegaba). #vista guarda su alto. */
+.con-q #vista[data-pre]>*{display:none}
 .ico{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 img{max-width:100%}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}

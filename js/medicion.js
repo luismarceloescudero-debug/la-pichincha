@@ -45,8 +45,15 @@ document.addEventListener("auxclick", alClicSaliente, true);
    la pestaña del link. Sin resultados va al buscador con el termino escrito. */
 async function abrirConsultaDeUrl(q, vista) {
   $("#vista").innerHTML = `<p class="sub">Armando la comparación de «${esc(q)}»…</p>`;
-  try { await asegurarIndice(); } catch (e) { return aplicar(vista); }
+  // Una busqueda pre-armada se arma con su porcion (spec 068): kilobytes en vez del indice entero. Buscar necesita el catalogo.
+  const porcion = !IDX && vista !== "buscar" && vista !== "ofertas" ? await pedirPorcion(q) : null;
+  if (porcion) usarPorcion(porcion);
+  else try { await asegurarIndice(); } catch (e) { return aplicar(vista); }
   fijarConsulta(q);
+  if (!ANALISIS && IDX && IDX.parcial) {          // no deberia pasar (el build lo comprueba): el camino de siempre
+    try { await asegurarIndice(); } catch (e) { return aplicar(vista); }
+    fijarConsulta(q);
+  }
   registrarBusqueda(q);
   // Se pinta ya y se reemplaza la entrada del historial en lugar de sumar una:
   // Atras vuelve a donde estaba la persona antes de abrir el link.

@@ -183,7 +183,7 @@ function pintarAfuera(q, mejorAca, respaldo = "") {
 
 function pintarResultados(q) {
   const caja = $("#res"), est = $("#estado");
-  if (!IDX || !caja) return;
+  if (!IDX || IDX.parcial || !caja) return;      // con la porcion de una busqueda (spec 068) se espera al indice entero
   limpiarConsulta();          // si no hay resultados, no queda una consulta vieja gobernando las pestañas
   if (!q.trim()) {
     const viejas = Object.values(IDX.tiendas).filter(t => t.estado !== "pausa" && Pagina.precioDel(t.relevado, IDX.generado));
