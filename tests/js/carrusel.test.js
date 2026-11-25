@@ -63,3 +63,13 @@ test("seguidos: un almacen roto o con basura no rompe la app", () => {
   basura.setItem(Car.CLAVE, JSON.stringify([{ id: 5 }, null, { id: "ok", nombre: "ok" }]));
   assert.deepEqual(Car.leerSeguidos(basura).map(x => x.id), ["ok"]);
 });
+
+test("las tarjetas del carrusel son <li> de una <ol> sin roles que rompan la lista (Lighthouse: aria-allowed-role y list)", () => {
+  const fsx = require("node:fs"), pathx = require("node:path");
+  const src = fsx.readFileSync(pathx.join(__dirname, "..", "..", "js", "consulta.js"), "utf8");
+  const li = src.split("\n").filter(l => l.includes('<li class="car-card'));
+  assert.ok(li.length >= 1);
+  const bloque = src.slice(src.indexOf('<li class="car-card'), src.indexOf('<p class="car-cinta"'));
+  assert.doesNotMatch(bloque, /role="group"/, "un <li> con role=group deja de ser item de lista");
+  assert.doesNotMatch(bloque, /aria-roledescription/);
+});
