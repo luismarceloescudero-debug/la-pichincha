@@ -13,7 +13,8 @@ dueño. Subirlos cuando la medicion real los supera, si.
 | Contraste (WCAG AA) | >= 4,5:1 en todo texto, tema claro y oscuro | `tests/test_contraste.py` sobre las variables de `css/sitio.css` | si |
 | Enlaces internos | ninguno roto en el sitio armado | `tests/test_integracion.py` | si |
 | Politica de contenido (CSP) | en todas las paginas, sin `unsafe-eval`, con `object-src 'none'` | `tests/test_sitio.py`, `tests/test_integracion.py` | si |
-| Lighthouse movil: rendimiento, accesibilidad, buenas practicas, SEO | >= 90 en la mediana de tres corridas | job `lighthouse` sobre /, /precios/, /hoy/, /estado/ y /legal/ | si |
+| Lighthouse movil: rendimiento, accesibilidad, buenas practicas, SEO | >= 90 en la mediana de tres corridas | job `lighthouse` sobre /precios/, /hoy/, /estado/, /legal/ y /contacto/ | si |
+| Lighthouse movil del criterio 3 de Google Play | rendimiento >= 95 y las otras tres en 100, mediana de tres corridas | job `lighthouse` sobre `/` y `/?q=ssd%201tb` (`umbralesDe` en `.github/lighthouse.js`) | si |
 | Pruebas de punta a punta | 100% en verde (Chromium: teclado, ofertas, buscar, contacto, 375/1440 px claro y oscuro, sin conexion) | job `e2e` con Playwright sobre `_sitio` y el indice de `tests/fixtures/e2e/` (spec 051) | si |
 | Portada sin saltos ni recambio de fuentes | `#sello` y `#vista` reservan su lugar, fuentes con `display=optional`, primera foto sin `lazy` | `tests/test_rendimiento.py` | si |
 | Portada pre-renderizada | el sitio publicado trae las pestañas, el sello y la Comparativa escritos, sin animacion de entrada; el JS no los vuelve a armar | `tests/js/portada.test.js`, `tests/test_integracion.py`, `tests/test_rendimiento.py` | si |

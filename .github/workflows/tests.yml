@@ -121,7 +121,7 @@ jobs:
           retention-days: 14
 
   # Lighthouse movil sobre el sitio armado con el indice publicado (CONSTRAINTS.md): las cuatro
-  # categorias cortan si la mediana de tres corridas baja de 90.
+  # categorias cortan si la mediana de tres corridas baja de 90 (95 y 100 en / y /?q=, criterio 3 de Play).
   lighthouse:
     runs-on: ubuntu-latest
     steps:
@@ -158,9 +158,11 @@ jobs:
           sleep 2
           # Si Chrome no arranca en el runner se reintenta (solo ese error: un puntaje bajo corta igual).
           # Tres corridas por pagina: el verificador evalua la mediana (la primera sale con Chrome en frio).
-          for ruta in "" precios/ hoy/ estado/ legal/ contacto/; do
+          # `/` y `?q=ssd%201tb` son las dos paginas del criterio 3 de Google Play (rendimiento 95, el resto 100).
+          for ruta in "" "?q=ssd%201tb" precios/ hoy/ estado/ legal/ contacto/; do
             for i in 1 2 3; do
-              nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d /)
+              # Sin / ni los caracteres que upload-artifact no acepta en un nombre de archivo (?).
+              nombre=$(echo "lh-${ruta:-portada}-$i" | tr -d / | tr '?%=' '___')
               bash .github/lighthouse-corrida.sh npx --yes lighthouse@12.8.2 "http://localhost:8080/$ruta" --quiet --output=json \
                 --output-path="$nombre.json" --only-categories=performance,accessibility,best-practices,seo \
                 --chrome-flags="--headless=new --no-sandbox"
