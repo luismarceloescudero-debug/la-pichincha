@@ -20,10 +20,10 @@ VIGIA_BASE = "https://pichinchadeldia.com.ar"   # se puede apuntar a otro lado (
 APP_PUBLICADA = "no"                            # pasa a "si" cuando la app (Fase 3) publique assetlinks.json
 
 # Estado del vigia (que se aviso por ultimo). Sin este binding usa la cache, que no se comparte entre centros de datos:
-# puede repetir algun aviso. Para que sea global: `npx wrangler kv namespace create VIGIA_KV`, pegar el id y descomentar.
-# [[kv_namespaces]]
-# binding = "VIGIA_KV"
-# id = "<id que devuelve el comando>"
+# puede repetir algun aviso. Creado el 25/11 (Cloudflare, namespace «VIGIA_KV»); el id no es secreto.
+[[kv_namespaces]]
+binding = "VIGIA_KV"
+id = "1325b3955caa4202b64db55f4e3aae97"
 
 # Sin destination_address: el Worker manda al correo verificado de CONTACTO_DESTINO (un secreto: la direccion personal no
 # se escribe en el repo). Con destination_address solo podria mandar a esa direccion.
