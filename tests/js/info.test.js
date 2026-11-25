@@ -93,6 +93,14 @@ test("la pagina legal cubre terminos, privacidad sin cookies y afiliados rotulad
   assert.match(html, /nunca depende de una comisión/);
 });
 
+test("la pagina legal nombra la infraestructura (GitHub Pages y Cloudflare) y cuanto dura el mensaje del formulario", () => {
+  const html = I.renderLegal({ baseUrl: BASE });
+  assert.match(html, /id="infraestructura"/);
+  assert.match(html, /GitHub Pages y pasa por Cloudflare/);
+  assert.match(html, /dirección IP/);
+  assert.match(html, /se borra cuando ya no hace falta para responderte/);
+});
+
 test("main escribe /estado/ y /legal/; sin indice escribe solo /legal/", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "info-"));
   const indice = path.join(dir, "indice.json");
