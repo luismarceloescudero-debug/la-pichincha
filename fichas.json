@@ -119,6 +119,10 @@
 "dia": "2026-11-17",
 "mpn": null
 },
+"https://www.mexx.com.ar/productos-rubro/almacenamiento/50373-disco-solido-ssd-m2-pci-e-1tb-adata-legend-860.html": {
+"dia": "2026-11-27",
+"mpn": "SLEG-860-1000GCS"
+},
 "https://www.mexx.com.ar/productos-rubro/almacenamiento/50452-disco-solido-ssd-960gb-hiksemi-wave.html": {
 "dia": "2026-11-17",
 "mpn": null
@@ -219,6 +223,10 @@
 "dia": "2026-11-17",
 "mpn": null
 },
+"https://www.mexx.com.ar/productos-rubro/almacenamiento/52991-disco-solido-ssd-m2-pci-e-1tb-xpg-rgb-s65g.html": {
+"dia": "2026-11-27",
+"mpn": "SSPECTRIXS65G-1000G-CI"
+},
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/40388-memoria-ram-ddr4-8gb-3200-mhz-kingston-fury-beast.html": {
 "dia": "2026-10-15",
 "mpn": "KF432C16BB/8"
@@ -282,6 +290,18 @@
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/47420-memoria-ram-ddr4-16gb-3200-mhz-adata-value.html": {
 "dia": "2026-10-15",
 "mpn": "AD4U320016G22-SGN"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/47423-memoria-ram-ddr4-16gb-3200-mhz-xpg-rgb-d35g-negro.html": {
+"dia": "2026-11-27",
+"mpn": "AX4U320016G16A-SBKD35G"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/47427-memoria-ram-ddr4-8gb-3200-mhz-xpg-d35g-rgb-negro.html": {
+"dia": "2026-11-27",
+"mpn": "AX4U32008G16A-SBKD35G"
+},
+"https://www.mexx.com.ar/productos-rubro/memorias-ram/47428-memoria-ram-ddr4-8gb-3200-mhz-xpg-d35g-rgb-blanco.html": {
+"dia": "2026-11-27",
+"mpn": "AX4U32008G16A-SWHD35G"
 },
 "https://www.mexx.com.ar/productos-rubro/memorias-ram/47851-memoria-ram-ddr4-32gb-3200-mhz-kingston-fury-beast-rgb.html": {
 "dia": "2026-10-22",
