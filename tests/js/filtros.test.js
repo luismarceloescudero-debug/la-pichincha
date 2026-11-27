@@ -128,3 +128,42 @@ test("filtro por sellos (envio gratis, cuotas, tienda oficial): solo lo que la f
   // un aviso de una tienda directa no publica el sello: no por eso es peor, y el filtro lo dice en la pantalla
   assert.deepStrictEqual(con(["x"]), []);
 });
+
+/* --- Borrador vs. aplicado y cartel de estado (27/11) --- */
+const nombres = { cg: "CompraGamer", mx: "Mexx" };
+const nom = k => nombres[k] || k;
+
+test("copiarFiltros no comparte listas con el original", () => {
+  const a = con({ tiendas: ["cg"], sellos: ["e"] }), b = B.copiarFiltros(a);
+  b.tiendas.push("mx"); b.sellos.push("s");
+  assert.deepStrictEqual(a.tiendas, ["cg"]);
+  assert.deepStrictEqual(a.sellos, ["e"]);
+});
+
+test("mismosFiltros ignora el orden y los separadores de «excluir», pero ve cualquier cambio real", () => {
+  assert.strictEqual(B.mismosFiltros(con({ tiendas: ["cg", "mx"] }), con({ tiendas: ["mx", "cg"] })), true);
+  assert.strictEqual(B.mismosFiltros(con({ excluir: "kit, usado" }), con({ excluir: " kit usado ," })), true);
+  assert.strictEqual(B.mismosFiltros(con(), con({ excluir: ", " })), true);
+  for (const c of [{ tiendas: ["cg"] }, { min: 1 }, { max: 1 }, { primera: true }, { sellos: ["e"] }, { excluir: "kit" }])
+    assert.strictEqual(B.mismosFiltros(con(), con(c)), false, JSON.stringify(c));
+});
+
+test("describirFiltros dice cada filtro en palabras", () => {
+  assert.strictEqual(B.describirFiltros(con(), nom), "");
+  assert.strictEqual(B.describirFiltros(con({ tiendas: ["cg"] }), nom), "Tienda: CompraGamer");
+  assert.strictEqual(B.describirFiltros(con({ tiendas: ["cg", "mx"], max: 90000 }), nom), "Tiendas: CompraGamer, Mexx · hasta $90.000");
+  assert.strictEqual(B.describirFiltros(con({ min: 1000, max: 2000 }), nom), "entre $1.000 y $2.000");
+  assert.strictEqual(B.describirFiltros(con({ min: 1000 }), nom), "desde $1.000");
+  assert.strictEqual(B.describirFiltros(con({ primera: true, sellos: ["e", "s"], excluir: "Kit, usado" }), nom),
+    "solo premium · envío gratis + cuotas sin interés · sin: kit, usado");
+});
+
+test("estadoDeFiltros: vacio sin filtros, cuenta resultados, avisa de cero y de cambios sin aplicar", () => {
+  const e = (aplicados, borrador, mostrados, total) => B.estadoDeFiltros({ aplicados, borrador, mostrados, total, nombreTienda: nom });
+  assert.strictEqual(e(con(), con(), 40, 40), "");
+  assert.strictEqual(e(con({ tiendas: ["mx"] }), con({ tiendas: ["mx"] }), 12, 40), "Filtros aplicados (Tienda: Mexx): 12 de 40 resultados.");
+  assert.strictEqual(e(con({ max: 5 }), con({ max: 5 }), 1, 1), "Filtros aplicados (hasta $5): 1 de 1 resultado.");
+  assert.strictEqual(e(con({ max: 5 }), con({ max: 5 }), 0, 40), "Filtros aplicados (hasta $5): ningún resultado (hay 40 sin filtrar).");
+  assert.match(e(con(), con({ primera: true }), 40, 40), /^Tenés cambios sin aplicar/);
+  assert.match(e(con({ tiendas: ["mx"] }), con({ tiendas: ["cg"] }), 12, 40), /12 de 40 resultados\. Tenés cambios sin aplicar/);
+});

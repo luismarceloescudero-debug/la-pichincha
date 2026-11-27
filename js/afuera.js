@@ -36,6 +36,14 @@
       + `<span class="sub chico">${esc(nombre(it.fuente))}</span>${puesto}</div></li>`;
   }
 
+  /* La frase del mejor precio de aca. `modo`: "filtros" (es el mejor de lo que dejan los filtros) u "oculto" (los filtros no
+     dejan nada de aca y el precio es el de la busqueda sin filtrar): nunca se muestra un precio que la lista no tiene sin decirlo. */
+  function mejorAcaTexto(m, esc) {
+    const dato = `<b>${pesos(m.precio)}</b> en ${esc(m.tienda)}`;
+    if (m.modo === "oculto") return `Con tus filtros no hay nada acá. Sin filtros, el mejor precio es ${dato}.`;
+    return `Mejor precio acá${m.modo === "filtros" ? " con tus filtros" : ""}: ${dato}.`;
+  }
+
   /* datos: la respuesta del Worker { consulta, fecha, fuentes: [{ id, ok, n }], items }. mejorAca: { precio, tienda } o null.
      respaldo: HTML que va cuando no hay avisos para mostrar (las busquedas armadas), o "". pegarLink: el campo de pegar un link
      (spec 040), que ya viene en el respaldo y va al pie cuando hay avisos. */
@@ -54,7 +62,7 @@
         + `${pie ? " " + pie : ""}</p></section>${respaldo}`;
     }
     return titulo
-      + (mejorAca ? `<p class="sub">Mejor precio acá: <b>${pesos(mejorAca.precio)}</b> en ${esc(mejorAca.tienda)}.</p>` : "")
+      + (mejorAca ? `<p class="sub">${mejorAcaTexto(mejorAca, esc)}</p>` : "")
       + `<ul class="afv-lista">${items.map(it => itemHtml(it, { esc })).join("")}</ul>`
       + `<p class="sub chico">${pie ? pie + " " : ""}El orden es por precio, nunca por comisión. Los precios son de cada tienda; impuestos y envío a Argentina aparte salvo que se indique.</p>${pegarLink}</section>`;
   }

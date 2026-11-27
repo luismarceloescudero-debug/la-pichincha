@@ -63,71 +63,102 @@ const avisosDe = filas => filas.reduce((n, f) => n + 1 + (OTRAS.get(f) || []).le
 /* --- Filtros de la lista (B4) -------------------------------------------
    Acotan lo que se ve: la mediana, el orden y la Comparativa se calculan con todos los avisos. Viven mientras
    la pagina esta abierta y no se guardan. La logica es pura y esta en js/buscador.js. */
+/* FILTROS es lo APLICADO (lo que usa la lista); BORRADOR es lo que la persona tilda y escribe. Pasa de uno a otro con el boton
+   «Aplicar filtros» o con Enter: asi se sabe cuando la lista se filtro de verdad. */
 let FILTROS = Buscador.filtrosVacios();
+let BORRADOR = Buscador.filtrosVacios();
+const nombreTienda = k => ((IDX || {}).tiendas || {})[k] ? IDX.tiendas[k].nombre : k;
 const numeroDe = txt => { const n = parseInt(String(txt).replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : null; };
 
 function filtrosHtml() {
   // spec 066: una tienda en pausa no tiene precios publicados, no tiene sentido filtrar por ella
   const tiendas = Object.entries((IDX || {}).tiendas || {}).filter(([, t]) => t.estado !== "pausa").map(([k, t]) =>
-    `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${FILTROS.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
+    `<button class="of-chip" data-filtro="tienda" data-valor="${esc(k)}" aria-pressed="${BORRADOR.tiendas.includes(k)}">${esc(t.nombre)}</button>`).join("");
   return `<div class="of-fila" role="group" aria-label="Tienda"><span class="of-et" aria-hidden="true">Tienda</span>${tiendas || '<span class="sub">cargando…</span>'}</div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Precio</span>
       <label class="f-campo">Desde $ <input id="f-min" type="text" inputmode="numeric" autocomplete="off" placeholder="sin mínimo…"></label>
       <label class="f-campo">Hasta $ <input id="f-max" type="text" inputmode="numeric" autocomplete="off" placeholder="sin máximo…"></label></div>
     <div class="of-fila"><span class="of-et" aria-hidden="true">Gama</span>
-      <button class="of-chip" data-filtro="primera" aria-pressed="${FILTROS.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
+      <button class="of-chip" data-filtro="primera" aria-pressed="${BORRADOR.primera}" title="Lo más premium por especificaciones y tecnología, sin mirar la marca">${icono("trofeo")} Solo premium</button></div>
     <div class="of-fila" role="group" aria-label="Sellos"><span class="of-et" aria-hidden="true">Sellos</span>
       ${[["e", "Envío gratis"], ["s", "Cuotas sin interés"], ["o", "Tienda oficial"]].map(([l, t]) =>
-        `<button class="of-chip" data-filtro="sello" data-valor="${l}" aria-pressed="${FILTROS.sellos.includes(l)}">${t}</button>`).join("")}
+        `<button class="of-chip" data-filtro="sello" data-valor="${l}" aria-pressed="${BORRADOR.sellos.includes(l)}">${t}</button>`).join("")}
       <span class="sub chico">Solo ComparaYa y sus comercios informan envío y cuotas: un aviso sin sello no quiere decir que no lo tenga.</span></div>
     <div class="of-fila"><label class="of-et" for="f-excluir">Excluir</label>
       <input id="f-excluir" class="f-texto" type="text" autocomplete="off" spellcheck="false" placeholder="palabras separadas por coma: kit, usado, simil…"></div>
-    <div class="of-fila"><button class="acc" data-filtro="quitar">Quitar filtros</button></div>`;
+    <div class="of-fila f-botones"><button class="acc f-aplicar" data-filtro="aplicar">Aplicar filtros</button>
+      <button class="acc" data-filtro="quitar">Quitar filtros</button>
+      <span class="sub chico">Tildá lo que quieras y tocá «Aplicar filtros» (o apretá Enter en un campo).</span></div>`;
 }
 
-/* Refleja FILTROS en los controles (si estan en pantalla) sin volver a armar el panel: asi no se pierde el foco. */
+/* Refleja el BORRADOR en los controles (si estan en pantalla) sin volver a armar el panel: asi no se pierde el foco. */
 function sincronizarFiltros() {
   const caja = $("#filtros");
   if (!caja) return;
-  caja.querySelectorAll('[data-filtro="tienda"]').forEach(b => b.setAttribute("aria-pressed", String(FILTROS.tiendas.includes(b.dataset.valor))));
-  [...caja.querySelectorAll('[data-filtro="sello"]')].filter(b => b.dataset.filtro === "sello").forEach(b => b.setAttribute("aria-pressed", String(FILTROS.sellos.includes(b.dataset.valor))));
+  caja.querySelectorAll('[data-filtro="tienda"]').forEach(b => b.setAttribute("aria-pressed", String(BORRADOR.tiendas.includes(b.dataset.valor))));
+  [...caja.querySelectorAll('[data-filtro="sello"]')].filter(b => b.dataset.filtro === "sello").forEach(b => b.setAttribute("aria-pressed", String(BORRADOR.sellos.includes(b.dataset.valor))));
   const pr = caja.querySelector('[data-filtro="primera"]');
-  if (pr) pr.setAttribute("aria-pressed", String(FILTROS.primera));
+  if (pr) pr.setAttribute("aria-pressed", String(BORRADOR.primera));
   const pone = (id, v) => { const c = $(id); if (c && document.activeElement !== c) c.value = v; };
   const miles = n => n == null ? "" : n.toLocaleString("es-AR");
-  pone("#f-min", miles(FILTROS.min));
-  pone("#f-max", miles(FILTROS.max));
-  pone("#f-excluir", FILTROS.excluir);
+  pone("#f-min", miles(BORRADOR.min));
+  pone("#f-max", miles(BORRADOR.max));
+  pone("#f-excluir", BORRADOR.excluir);
   const hay = Buscador.hayFiltros(FILTROS);
   caja.classList.toggle("activo", hay);
-  if (hay) caja.open = true;
+  if (hay || !Buscador.mismosFiltros(FILTROS, BORRADOR)) caja.open = true;
+  const ap = caja.querySelector('[data-filtro="aplicar"]');
+  if (ap) ap.classList.toggle("pendiente", !Buscador.mismosFiltros(FILTROS, BORRADOR));
 }
 
-function cambiarFiltro(que, valor) {
-  if (que === "tienda") {
-    const i = FILTROS.tiendas.indexOf(valor);
-    if (i >= 0) FILTROS.tiendas.splice(i, 1); else FILTROS.tiendas.push(valor);
-  } else if (que === "sello") {
-    const i = FILTROS.sellos.indexOf(valor);
-    if (i >= 0) FILTROS.sellos.splice(i, 1); else FILTROS.sellos.push(valor);
-  } else if (que === "primera") FILTROS.primera = !FILTROS.primera;
-  else if (que === "quitar") {
-    FILTROS = Buscador.filtrosVacios();
-    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // sincronizar no pisa un campo en uso
-  }
+/* El cartel de arriba de la lista: filtros puestos, cuantos resultados dejaron y si hay cambios sin aplicar. */
+function pintarEstadoFiltros(mostrados, total) {
+  const el = $("#filtros-estado");
+  if (!el) return;
+  const t = Buscador.estadoDeFiltros({ aplicados: FILTROS, borrador: BORRADOR, mostrados, total, nombreTienda });
+  el.textContent = t;
+  el.hidden = !t;
+}
+let ULTIMO_CONTEO = { mostrados: 0, total: 0 };
+
+function aplicarFiltros() {
+  FILTROS = Buscador.copiarFiltros(BORRADOR);
   sincronizarFiltros();
   pintarResultados(($("#q") || {}).value || "");
 }
 
+function cambiarFiltro(que, valor) {
+  if (que === "aplicar") return aplicarFiltros();
+  if (que === "tienda") {
+    const i = BORRADOR.tiendas.indexOf(valor);
+    if (i >= 0) BORRADOR.tiendas.splice(i, 1); else BORRADOR.tiendas.push(valor);
+  } else if (que === "sello") {
+    const i = BORRADOR.sellos.indexOf(valor);
+    if (i >= 0) BORRADOR.sellos.splice(i, 1); else BORRADOR.sellos.push(valor);
+  } else if (que === "primera") BORRADOR.primera = !BORRADOR.primera;
+  else if (que === "quitar") {
+    BORRADOR = Buscador.filtrosVacios();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // sincronizar no pisa un campo en uso
+    return aplicarFiltros();
+  }
+  sincronizarFiltros();
+  pintarEstadoFiltros(ULTIMO_CONTEO.mostrados, ULTIMO_CONTEO.total);   // avisa «cambios sin aplicar» sin tocar la lista
+}
+
 function engancharFiltros(caja) {
-  let t;
   caja.addEventListener("input", ev => {
-    if (ev.target.id === "f-min") FILTROS.min = numeroDe(ev.target.value);
-    else if (ev.target.id === "f-max") FILTROS.max = numeroDe(ev.target.value);
-    else if (ev.target.id === "f-excluir") FILTROS.excluir = ev.target.value;
+    if (ev.target.id === "f-min") BORRADOR.min = numeroDe(ev.target.value);
+    else if (ev.target.id === "f-max") BORRADOR.max = numeroDe(ev.target.value);
+    else if (ev.target.id === "f-excluir") BORRADOR.excluir = ev.target.value;
     else return;
-    clearTimeout(t);
-    t = setTimeout(() => { sincronizarFiltros(); pintarResultados(($("#q") || {}).value || ""); }, 220);
+    sincronizarFiltros();
+    pintarEstadoFiltros(ULTIMO_CONTEO.mostrados, ULTIMO_CONTEO.total);
+  });
+  // Enter en un campo del panel = aplicar (sin recargar la pagina)
+  caja.addEventListener("keydown", ev => {
+    if (ev.key !== "Enter" || !/^f-(min|max|excluir)$/.test((ev.target || {}).id || "")) return;
+    ev.preventDefault();
+    aplicarFiltros();
   });
 }
 
@@ -192,12 +223,16 @@ function pintarResultados(q) {
     caja.innerHTML = "";
     $("#puente").innerHTML = "";
     ULTIMA_BUSQUEDA = [];
+    ULTIMO_CONTEO = { mostrados: 0, total: 0 };
+    pintarEstadoFiltros(0, 0);
     pintarAfuera("", null);
     return;
   }
   const crudo = buscarTodo(q);   // se ordena sobre TODO el catalogo, no sobre los primeros 180
   if (!crudo.length) {
     est.textContent = `sin resultados para "${q}"`;
+    ULTIMO_CONTEO = { mostrados: 0, total: 0 };
+    pintarEstadoFiltros(0, 0);
     // Si la marca o el producto no estan en ninguna fuente, se dice asi y ya se arma la busqueda en cada tienda de afuera
     // (spec 020: solo enlaces, js/importar.js); el bloque trae el campo para pegar el link del que encuentre (spec 040).
     caja.innerHTML = `<p class="sub">Ninguna de las ${Object.keys(IDX.tiendas).length} tiendas del índice tiene «${esc(q)}». Si es un modelo, probá con la marca sola o con menos palabras.</p>
@@ -212,14 +247,20 @@ function pintarResultados(q) {
   // comparables, para que la mediana y el orden digan lo mismo que las pestañas.
   fijarConsulta(q);
   const A = ANALISIS;
-  pintarAfuera(q, A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null,
-    Importar.buscarAfueraHtml(q, { esc, icono }));
   const conjunto = A ? [...A.base, ...A.internacionales].map(m => m.f) : crudo;
   const med = A ? A.med : mediana(crudo.map(f => f[1]));
   // Se filtra la lista, no el analisis: la mediana de arriba sigue siendo la de todos los comparables.
   const cm = ctxModos();
   const F = Buscador.filtrarGrupos(conjunto, OTRAS, FILTROS, n => cm.premium(n).premium);
   OTRAS = F.otras;
+  ULTIMO_CONTEO = { mostrados: F.filas.length, total: conjunto.length };
+  pintarEstadoFiltros(F.filas.length, conjunto.length);
+  // «Mejor precio acá» dice la verdad sobre los filtros: el mejor de lo que dejan, o que no queda nada acá y cual es sin filtrar.
+  const mejor = A && A.picks[0] ? { precio: A.picks[0].m.f[1], tienda: comercioDe(A.picks[0].m.f) } : null;
+  const filtrando = Buscador.hayFiltros(FILTROS);
+  const barata = F.filas.length ? F.filas.reduce((m, f) => (f[1] < m[1] ? f : m)) : null;
+  pintarAfuera(q, !filtrando ? mejor : barata ? { precio: barata[1], tienda: comercioDe(barata), modo: "filtros" } : mejor && { ...mejor, modo: "oculto" },
+    Importar.buscarAfueraHtml(q, { esc, icono }));
   cm.tiendasDe = f => 1 + (OTRAS.get(f) || []).length;
   const enModo = Modos.filtrar(F.filas, ORDEN, cm, med);
   const r = Modos.ordenar(enModo, ORDEN2, cm).slice(0, 60);
@@ -233,7 +274,7 @@ function pintarResultados(q) {
   }
   if (!r.length) {
     est.textContent = `ningún aviso cumple los filtros (hay ${conjunto.length} sin filtrar)`;
-    caja.innerHTML = `<p class="sub">Probá con menos filtros. <button class="acc" data-filtro="quitar">Quitar filtros</button></p>`;
+    caja.innerHTML = `<p class="sub"><b>Con estos filtros no quedó ningún resultado</b> (${esc(Buscador.describirFiltros(FILTROS, nombreTienda))}). Hay ${conjunto.length} sin filtrar. Probá con menos filtros. <button class="acc" data-filtro="quitar">Quitar filtros</button></p>`;
     return;
   }
 
@@ -344,6 +385,7 @@ function vistaBuscar() {
     <div class="sugeridas">${sugeridas().map(x => `<button class="sug">${esc(x)}</button>`).join("")}</div>
     ${ordenesHtml()}
     <details class="filtros" id="filtros"><summary>Filtros</summary><div class="filtros-cuerpo">${filtrosHtml()}</div></details>
+    <p class="filtros-estado" id="filtros-estado" role="status" aria-live="polite" hidden></p>
     <div id="puente"></div>
     <p class="estado" id="estado">cargando índice…</p>
     ${barraAcciones("buscar")}

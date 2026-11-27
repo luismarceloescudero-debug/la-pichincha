@@ -121,3 +121,10 @@ test("Tiendamia: el envio y los servicios van en el carrito y se dice asi (no «
   assert.ok(!html.includes("US$ 0,00"));
   assert.match(html, />Tiendamia</);
 });
+
+test("«Mejor precio acá» aclara cuando viene de los filtros o cuando los filtros no dejan nada de acá", () => {
+  const mk = modo => A.afueraHtml(datos([item()]), { esc, mejorAca: { precio: 150025, tienda: "Mexx", modo } });
+  assert.match(mk("filtros"), /Mejor precio acá con tus filtros: <b>\$150\.025<\/b> en Mexx\./);
+  assert.match(mk("oculto"), /Con tus filtros no hay nada acá\. Sin filtros, el mejor precio es <b>\$150\.025<\/b> en Mexx\./);
+  assert.match(mk(undefined), /Mejor precio acá: <b>/);
+});
