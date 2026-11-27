@@ -63,15 +63,19 @@ test("un chip por tienda del indice, con aria-pressed", () => {
 test("cambiarFiltro marca y desmarca tiendas, alterna primera linea y quita todo", () => {
   const { correr } = pagina();
   correr('cambiarFiltro("tienda", "gc"); cambiarFiltro("tienda", "cg")');
-  assert.deepStrictEqual([...correr("FILTROS.tiendas")], ["gc", "cg"]);   // [...]: viene de otro contexto de vm
+  assert.deepStrictEqual([...correr("BORRADOR.tiendas")], ["gc", "cg"]);   // [...]: viene de otro contexto de vm
+  assert.deepStrictEqual([...correr("FILTROS.tiendas")], [], "tildar solo arma el borrador: no se aplica hasta el boton");
   correr('cambiarFiltro("tienda", "gc")');
-  assert.deepStrictEqual([...correr("FILTROS.tiendas")], ["cg"]);
+  assert.deepStrictEqual([...correr("BORRADOR.tiendas")], ["cg"]);
   correr('cambiarFiltro("primera")');
-  assert.strictEqual(correr("FILTROS.primera"), true);
+  assert.strictEqual(correr("BORRADOR.primera"), true);
   correr('cambiarFiltro("primera")');
-  assert.strictEqual(correr("FILTROS.primera"), false);
+  assert.strictEqual(correr("BORRADOR.primera"), false);
+  correr('cambiarFiltro("aplicar")');
+  assert.deepStrictEqual([...correr("FILTROS.tiendas")], ["cg"], "Aplicar pasa el borrador a la lista");
   correr('cambiarFiltro("primera"); cambiarFiltro("quitar")');
   assert.strictEqual(correr("Buscador.hayFiltros(FILTROS)"), false);
+  assert.strictEqual(correr("Buscador.hayFiltros(BORRADOR)"), false, "Quitar limpia las dos cosas y aplica");
 });
 
 test("los campos de precio leen cifras con puntos y los de texto, tal cual", () => {
@@ -82,17 +86,18 @@ test("los campos de precio leen cifras con puntos y los de texto, tal cual", () 
   assert.strictEqual(correr('numeroDe("abc")'), null);
 });
 
-test("al escribir en un campo se actualiza el filtro; un campo ajeno no hace nada", () => {
+test("al escribir en un campo se arma el borrador; un campo ajeno no hace nada", () => {
   const { correr } = pagina();
   const caja = elemento();
   correr("engancharFiltros").call(null, caja);
   const escribir = (id, value) => caja.oyentes.input({ target: { id, value } });
   escribir("f-min", "60.000"); escribir("f-max", "120.000"); escribir("f-excluir", "kit, usado");
-  assert.strictEqual(correr("FILTROS.min"), 60000);
-  assert.strictEqual(correr("FILTROS.max"), 120000);
-  assert.strictEqual(correr("FILTROS.excluir"), "kit, usado");
+  assert.strictEqual(correr("BORRADOR.min"), 60000);
+  assert.strictEqual(correr("BORRADOR.max"), 120000);
+  assert.strictEqual(correr("BORRADOR.excluir"), "kit, usado");
+  assert.strictEqual(correr("FILTROS.min"), null, "escribir no aplica: falta Enter o el boton");
   escribir("q", "otra cosa");
-  assert.strictEqual(correr("FILTROS.excluir"), "kit, usado");
+  assert.strictEqual(correr("BORRADOR.excluir"), "kit, usado");
 });
 
 test("sincronizarFiltros refleja el estado en los controles, con miles, y no pisa el campo en uso", () => {
@@ -101,7 +106,7 @@ test("sincronizarFiltros refleja el estado en los controles, con miles, y no pis
   const primera = elemento();
   const caja = elemento({ hijos: [chip], querySelector: s => (s === '[data-filtro="primera"]' ? primera : null) });
   els["#filtros"] = caja; els["#f-min"] = elemento(); els["#f-max"] = elemento(); els["#f-excluir"] = elemento();
-  correr('FILTROS.tiendas = ["gc"]; FILTROS.primera = true; FILTROS.min = 60000; FILTROS.excluir = "kit"; sincronizarFiltros()');
+  correr('BORRADOR.tiendas = ["gc"]; BORRADOR.primera = true; BORRADOR.min = 60000; BORRADOR.excluir = "kit"; FILTROS = Buscador.copiarFiltros(BORRADOR); sincronizarFiltros()');
   assert.strictEqual(chip.atributos["aria-pressed"], "true");
   assert.strictEqual(primera.atributos["aria-pressed"], "true");
   assert.strictEqual(els["#f-min"].value, (60000).toLocaleString("es-AR"));
@@ -110,7 +115,7 @@ test("sincronizarFiltros refleja el estado en los controles, con miles, y no pis
   assert.ok(caja.clases.has("activo") && caja.open);
   const enUso = els["#f-excluir"];
   correr("document").activeElement = enUso;
-  correr('FILTROS.excluir = "otra"; sincronizarFiltros()');
+  correr('BORRADOR.excluir = "otra"; sincronizarFiltros()');
   assert.strictEqual(enUso.value, "kit");                      // la persona esta escribiendo ahi
 });
 
@@ -236,9 +241,9 @@ test("los sellos (envio gratis, cuotas, tienda oficial) son chips del panel, se 
   for (const l of ["e", "s", "o"]) assert.ok(html.includes(`data-filtro="sello" data-valor="${l}"`), l);
   assert.match(html, /Solo ComparaYa y sus comercios informan envío y cuotas/);
   correr('cambiarFiltro("sello", "e")');
-  assert.strictEqual(JSON.stringify(correr("FILTROS.sellos")), '["e"]');
+  assert.strictEqual(JSON.stringify(correr("BORRADOR.sellos")), '["e"]');
   correr('cambiarFiltro("sello", "e")');
-  assert.strictEqual(JSON.stringify(correr("FILTROS.sellos")), "[]");
+  assert.strictEqual(JSON.stringify(correr("BORRADOR.sellos")), "[]");
 });
 
 test("una fila con el mismo modelo mas barato en otra tienda directa lo dice", () => {
@@ -313,4 +318,81 @@ test("un solo aviso afuera se dice en singular", () => {
 test("Ofertas también dice en singular la única descartada", () => {
   const fuente = require("fs").readFileSync(require("path").join(__dirname, "../../js/indice-ofertas.js"), "utf8");
   assert.match(fuente, /con descuento \$\{OFERTAS\.descartadas === 1 \? "quedó" : "quedaron"\} afuera/);
+});
+
+/* --- Filtros con boton «Aplicar» y cartel de resultados (pedido del dueno, 27/11) --- */
+
+test("el panel trae «Aplicar filtros» y el cartel de estado, para que se sepa cuando se filtro", () => {
+  const { correr } = pagina();
+  const html = correr("vistaBuscar()");
+  assert.match(html, /<button class="acc f-aplicar" data-filtro="aplicar">Aplicar filtros<\/button>/);
+  assert.match(html, /id="filtros-estado" role="status" aria-live="polite" hidden/);
+  assert.match(html, /apretá Enter en un campo/);
+});
+
+test("tildar no toca la lista: avisa que hay cambios sin aplicar; Aplicar filtra y el cartel cuenta los resultados", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('pintarResultados("ssd 1tb")');
+  const antes = els["#res"].innerHTML;
+  assert.strictEqual(els["#filtros-estado"].hidden, true, "sin filtros ni cambios pendientes no hay cartel");
+  correr('cambiarFiltro("tienda", "mx")');
+  assert.strictEqual(els["#res"].innerHTML, antes, "la lista sigue igual");
+  assert.match(els["#filtros-estado"].textContent, /Tenés cambios sin aplicar/);
+  assert.strictEqual(els["#filtros-estado"].hidden, false);
+  correr('cambiarFiltro("aplicar")');
+  assert.doesNotMatch(els["#res"].innerHTML, /Kingston/);
+  assert.match(els["#res"].innerHTML, /Hiksemi/);
+  assert.match(els["#filtros-estado"].textContent, /^Filtros aplicados \(Tienda: Mexx\): \d+ de \d+ resultados\.$/);
+});
+
+test("Enter en un campo del panel aplica; otra tecla o un campo ajeno no", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  const caja = elemento();
+  correr("engancharFiltros").call(null, caja);
+  const escribir = (id, value) => caja.oyentes.input({ target: { id, value } });
+  const tecla = (key, id) => { let freno = false; caja.oyentes.keydown({ key, target: { id }, preventDefault() { freno = true; } }); return freno; };
+  escribir("f-max", "65.000");
+  assert.strictEqual(tecla("a", "f-max"), false);
+  assert.strictEqual(tecla("Enter", "q"), false);
+  assert.strictEqual(correr("FILTROS.max"), null);
+  assert.strictEqual(tecla("Enter", "f-max"), true, "Enter no recarga la pagina");
+  assert.strictEqual(correr("FILTROS.max"), 65000);
+  assert.match(els["#filtros-estado"].textContent, /hasta \$65\.000/);
+});
+
+test("sin ningun resultado el cartel y la lista dicen que fueron los filtros, cuales, y cuantos habia sin filtrar", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('BORRADOR.min = 9999999; cambiarFiltro("aplicar")');
+  assert.match(els["#filtros-estado"].textContent, /Filtros aplicados \(desde \$9\.999\.999\): ningún resultado \(hay \d+ sin filtrar\)/);
+  assert.match(els["#res"].innerHTML, /Con estos filtros no quedó ningún resultado/);
+  assert.match(els["#res"].innerHTML, /desde \$9\.999\.999/);
+  assert.match(els["#res"].innerHTML, /data-filtro="quitar"/);
+});
+
+test("«Mejor precio acá» no muestra un precio que la lista no tiene sin decirlo", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr("var LLAMADAS = []; pintarAfuera = (q, m) => LLAMADAS.push(m)");
+  const ultima = () => correr("LLAMADAS[LLAMADAS.length - 1]");
+  correr('pintarResultados("ssd 1tb")');
+  assert.ok(ultima().precio > 0);
+  assert.strictEqual(ultima().modo, undefined, "sin filtros: el mejor de siempre");
+  correr('BORRADOR.tiendas = ["mx"]; cambiarFiltro("aplicar")');
+  assert.strictEqual(ultima().modo, "filtros");
+  assert.strictEqual(ultima().tienda, "Mexx");
+  assert.strictEqual(ultima().precio, 60000, "el mas barato de lo que dejan los filtros");
+  correr('BORRADOR.min = 9999999; cambiarFiltro("aplicar")');
+  assert.strictEqual(ultima().modo, "oculto");
+});
+
+test("Quitar filtros deja la lista completa y esconde el cartel", () => {
+  const { correr, els } = pagina();
+  els["#q"] = elemento({ value: "ssd 1tb" });
+  correr('BORRADOR.tiendas = ["mx"]; cambiarFiltro("aplicar")');
+  correr('cambiarFiltro("quitar")');
+  assert.match(els["#res"].innerHTML, /Kingston/);
+  assert.strictEqual(els["#filtros-estado"].hidden, true);
 });

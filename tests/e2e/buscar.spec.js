@@ -32,6 +32,11 @@ test("se puede filtrar por tienda y volver a quitar el filtro", async ({ page })
   const tienda = page.locator('[data-filtro="tienda"][data-valor="venex"]');
   await tienda.click();
   await expect(tienda).toHaveAttribute("aria-pressed", "true");
+  // tildar no filtra: la lista sigue igual y la pagina avisa que falta aplicar
+  await expect(page.locator("#filtros-estado")).toContainText("cambios sin aplicar");
+  expect(await page.locator("#res a.fila").count()).toBe(antes);
+  await page.locator('[data-filtro="aplicar"]').click();
+  await expect(page.locator("#filtros-estado")).toContainText("Filtros aplicados (Tienda: Venex)");
   await expect(page.locator("#estado")).toContainText("ocultos por los filtros");
   expect(await page.locator("#res a.fila").count()).toBeLessThan(antes);
   await expect(page.locator("#res a.fila .tie").first()).toHaveText("Venex");

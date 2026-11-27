@@ -440,12 +440,47 @@
     return { filas: salida, otras: nuevas, ocultas };
   }
 
+  /* Filtros tildados vs. aplicados: la pagina guarda un borrador y solo lo aplica con el boton o Enter. */
+  const copiarFiltros = f => ({ ...f, tiendas: [...(f.tiendas || [])], sellos: [...(f.sellos || [])] });
+  const clave = f => JSON.stringify([[...f.tiendas].sort(), Number.isFinite(f.min) ? f.min : null, Number.isFinite(f.max) ? f.max : null,
+    !!f.primera, [...(f.sellos || [])].sort(), palabrasExcluidas(f.excluir)]);
+  const mismosFiltros = (a, b) => clave(a) === clave(b);
+
+  /* Frase corta con lo que esta filtrando: «Tienda: Venex · hasta $90.000 · sin: kit, usado». "" si no hay filtros. */
+  function describirFiltros(f, nombreTienda = k => k) {
+    const pesos = n => "$" + Math.round(n).toLocaleString("es-AR");
+    const SELLOS = { e: "envío gratis", s: "cuotas sin interés", o: "tienda oficial" };
+    const p = [];
+    if (f.tiendas.length) p.push(`${f.tiendas.length > 1 ? "Tiendas" : "Tienda"}: ${f.tiendas.map(nombreTienda).join(", ")}`);
+    if (Number.isFinite(f.min) && Number.isFinite(f.max)) p.push(`entre ${pesos(f.min)} y ${pesos(f.max)}`);
+    else if (Number.isFinite(f.min)) p.push(`desde ${pesos(f.min)}`);
+    else if (Number.isFinite(f.max)) p.push(`hasta ${pesos(f.max)}`);
+    if (f.primera) p.push("solo premium");
+    if ((f.sellos || []).length) p.push(f.sellos.map(l => SELLOS[l] || l).join(" + "));
+    const ex = palabrasExcluidas(f.excluir);
+    if (ex.length) p.push(`sin: ${ex.join(", ")}`);
+    return p.join(" · ");
+  }
+
+  /* El cartel de los filtros: dice si estan puestos, cuantos resultados dejaron y si hay cambios sin aplicar.
+     mostrados / total cuentan productos (filas), no avisos. */
+  function estadoDeFiltros({ aplicados, borrador, mostrados, total, nombreTienda }) {
+    const hayA = hayFiltros(aplicados), pendiente = !mismosFiltros(aplicados, borrador);
+    const aviso = pendiente ? " Tenés cambios sin aplicar: tocá «Aplicar filtros» o apretá Enter." : "";
+    if (!hayA) return pendiente ? aviso.trim() : "";
+    const que = describirFiltros(aplicados, nombreTienda);
+    const res = mostrados === 0
+      ? `ningún resultado (hay ${total} sin filtrar)`
+      : `${mostrados} de ${total} ${total === 1 ? "resultado" : "resultados"}`;
+    return `Filtros aplicados (${que}): ${res}.${aviso}`;
+  }
+
   const textoConteo = (productos, avisos) => productos === avisos
     ? `${productos} resultado${productos > 1 ? "s" : ""}` : `${productos} productos en ${avisos} avisos`;
 
   const api = { RE_USADO, normal, normalBusq, esMedida, filtroDe, mediana, pisoDeGama,
                 ALIAS_MARCA, SUBMARCAS, limpiarTitulo, submarcaDe, marcaMadreDe, consultasDe, consultaDeOferta, urlClave, unaPorUrl, crearNivelMarca, armarMarcasRe, marcaDe, specsDe, motivoExclusion, esUsado, sellosDe, plusDe, categoriaDe, capacidadGB, compatibles, agruparPorModelo, textoConteo,
-                filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos };
+                filtrosVacios, palabrasExcluidas, hayFiltros, filtrarGrupos, copiarFiltros, mismosFiltros, describirFiltros, estadoDeFiltros };
   if (typeof module === "object" && module.exports) module.exports = api;
   else raiz.Buscador = api;
 })(this);
